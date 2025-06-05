@@ -1,0 +1,57 @@
+{
+  "contactPageData": {
+    "title": "Let’s Talk",
+    "description": "Reach out for inquiries, collaborations, or just to say hello. We're eager to connect!",
+    "items": [
+      {
+        "text": "Phone"
+      },
+      {
+        "text": "Email"
+      },
+      {
+        "text": "Social media"
+      },
+      {
+        "text": "Working hours"
+      }
+    ],
+    "form": {
+      "fields": [
+        {
+          "type": "text",
+          "label": "First name",
+          "placeholder": "First name"
+        },
+        {
+          "type": "text",
+          "label": "Last name",
+          "placeholder": "Last name"
+        },
+        {
+          "type": "text",
+          "label": "Phone",
+          "placeholder": "Phone"
+        },
+        {
+          "type": "email",
+          "label": "Email",
+          "placeholder": "Email",
+          "required": "Enter valid email address"
+        },
+        {
+          "type": "textarea",
+          "label": "Message",
+          "placeholder": "Message"
+        }
+      ],
+      "terms": {
+        "text": "I accept the Terms",
+        "required": "required"
+      },
+      "submitButton": {
+        "text": "Contact Us"
+      }
+    }
+  }
+}

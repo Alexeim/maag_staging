@@ -1,0 +1,18 @@
+{
+  "testimonials": [
+    {
+      "testimonial": "Throughout our collaboration, Dmitry has consistently demonstrated strong development skills using Google solutions, keen attention to detail, and an unwavering commitment to delivering high-quality results.<br/><br/>Dmitry has effectively managed the developments entrusted to him and resolved complex technical issues, resulting in an efficient solution (robustness, time savings, resource savings) for the company.<br/> I highly recommend Dmitry, who has shown professionalism, expertise, and diligence in the missions carried out within the Data&Robotic team.",
+      "author": "Fabrice Nico",
+      "authorJob": "Head of Data Product Management",
+      "authorCompany": "Veolia",
+      "authorCompanyLogo": "veolia"
+    },
+    {
+      "testimonial": "Throughout our collaboration, Dmitry has consistently demonstrated strong development skills using Google solutions, keen attention to detail, and an unwavering commitment to delivering high-quality results.<br/><br/>Dmitry has effectively managed the developments entrusted to him and resolved complex technical issues, resulting in an efficient solution (robustness, time savings, resource savings) for the company.<br/> I highly recommend Dmitry, who has shown professionalism, expertise, and diligence in the missions carried out within the Data&Robotic team.",
+      "author": "Tony Stark",
+      "authorJob": "CEO",
+      "authorCompany": "Airbus",
+      "authorCompanyLogo": "airbus"
+    }
+  ]
+}

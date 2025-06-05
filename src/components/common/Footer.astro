@@ -1,0 +1,157 @@
+---
+import lightLogo from "../../assets/logo/lightLogo.svg";
+
+import fbIcon from "../../assets/social/fb.svg";
+import xIcon from "../../assets/social/x.svg";
+import linkedinIcon from "../../assets/social/li.svg";
+import youtubeIcon from "../../assets/social/yt.svg";
+import instagramIcon from "../../assets/social/insta.svg";
+
+interface FooterProps {
+  footerData: {
+    contact: {
+      title: string;
+      items: { label: string; link: string }[];
+    };
+    site: {
+      title: string;
+      items: { label: string; link: string }[];
+    };
+    services: {
+      title: string;
+      items: { label: string; link: string }[];
+    };
+    copyright: string;
+    privacyPolicy: {
+      title: string;
+      link: string;
+    };
+    termsOfService: {
+      title: string;
+      link: string;
+    };
+    cookiePolicy: {
+      title: string;
+      link: string;
+    };
+  };
+}
+
+const { footerData } = Astro.props as FooterProps;
+---
+
+<footer
+  class="footer w-full h-auto sm:footer-horizontal bg-secondary text-neutral flex flex-col px-2 lg:px-16 py-8 lg:py-16 gap-0"
+>
+  <div
+    class="w-full flex flex-col lg:flex-row gap-4 lg:gap-16 mb-6 mt-2 lg:mt-4"
+  >
+    <div class="w-full lg:w-4/12">
+      <img
+        src={lightLogo.src}
+        alt="Wurkspaces.dev"
+        class="w-48 lg:w-76 m-auto lg:m-0"
+      />
+      <div
+        class="w-full flex flex-row items-center justify-evenly gap-1 lg:gap-4 mt-8 px-4 lg:px-0"
+      >
+        <a href="https://www.facebook.com/wurkspaces.dev" target="_blank">
+          <img src={fbIcon.src} alt="Facebook" class="lg:w-16 w-12" />
+        </a>
+        <a href="https://x.com/wurkspaces" target="_blank">
+          <img src={xIcon.src} alt="X" class="lg:w-16 w-12" />
+        </a>
+        <a href="https://www.linkedin.com/company/wurkspaces" target="_blank">
+          <img src={linkedinIcon.src} alt="LinkedIn" class="lg:w-16 w-12" />
+        </a>
+        <a href="https://www.youtube.com/@wurkspaces" target="_blank">
+          <img src={youtubeIcon.src} alt="YouTube" class="lg:w-16 w-12" />
+        </a>
+        <a href="https://www.instagram.com/wurkspaces" target="_blank">
+          <img src={instagramIcon.src} alt="Instagram" class="lg:w-16 w-12" />
+        </a>
+      </div>
+    </div>
+    <div
+      class="w-full h-auto lg:h-50 flex flex-wrap lg:flex-nowrap flex-row lg:items-start lg:justify-evenly px-2 lg:px-26 gap-0 lg:gap-16"
+    >
+      <div class="w-3/5 lg:w-full flex flex-col gap-1">
+        <div class="w-fit flex flex-col items-start">
+          <h3 class="text-white text-xl font-semibold uppercase">contact</h3>
+          <hr class="divider color-primary mt-0 mb-0" />
+        </div>
+        <ul class="flex flex-col gap-2">
+          {
+            footerData.contact.items.map(item => (
+              <li class="text-neutral text-lg">
+                <a href={item.link}>{item.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="w-2/5 lg:w-full flex flex-col gap-1">
+        <div class="w-fit flex flex-col items-start">
+          <h3 class="text-white text-xl font-semibold uppercase">site</h3>
+          <hr class="divider color-primary mt-0 mb-0" />
+        </div>
+        <ul class="flex flex-col gap-2">
+          {
+            footerData.site.items.map(item => (
+              <li class="text-neutral text-lg">
+                <a href={item.link}>{item.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="w-1/2 lg:w-full flex flex-col gap-1 mt-6 lg:mt-0">
+        <div class="w-fit flex flex-col items-start">
+          <h3 class="text-white text-xl font-semibold uppercase">services</h3>
+          <hr class="divider color-primary mt-0 mb-0" />
+        </div>
+        <ul class="flex flex-col gap-2">
+          {
+            footerData.services.items.map(item => (
+              <li class="text-neutral text-lg">
+                <a href={item.link}>{item.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+  <hr class="divider color-base-100" />
+  <div
+    class="w-full flex flex-col-reverse lg:flex-row items-center justify-between gap mb-8"
+  >
+    <div
+      class="w-full flex flex-row items-center justify-center lg:justify-between"
+    >
+      <p class="text-white text-sm lg:text-lg">{footerData.copyright}</p>
+    </div>
+    <div
+      class="w-full flex flex-row items-center lg:justify-end justify-center gap-8 mb-4 lg:mb-0"
+    >
+      <a
+        href={footerData.privacyPolicy.link}
+        class="text-white text-sm lg:text-lg underline cursor-pointer"
+      >
+        {footerData.privacyPolicy.title}
+      </a>
+      <a
+        href={footerData.termsOfService.link}
+        class="text-white text-sm lg:text-lg underline cursor-pointer"
+      >
+        {footerData.termsOfService.title}
+      </a>
+      <a
+        href={footerData.cookiePolicy.link}
+        class="text-white text-sm lg:text-lg underline cursor-pointer"
+      >
+        {footerData.cookiePolicy.title}
+      </a>
+    </div>
+  </div>
+</footer>

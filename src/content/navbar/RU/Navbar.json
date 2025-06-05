@@ -1,0 +1,36 @@
+{
+  "navbarContent": {
+    "title": "Wurkspaces.dev",
+    "logo": {
+      "light": "/assets/logo-light.png",
+      "dark": "/assets/logo-dark.png"
+    },
+    "items": [
+      {
+        "label": "Культура",
+        "path": "/"
+      },
+      {
+        "label": "Путеводитель",
+        "path": "/services"
+      },
+      {
+        "label": "Дети",
+        "path": "/services"
+      },
+      {
+        "label": "Календарь",
+        "path": "/services"
+      },
+      {
+        "label": "О проекте",
+        "path": "/services"
+      }
+    ],
+    "languages": ["EN", "FR"],
+    "button": {
+      "label": "Войти",
+      "path": "/contact"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+---
+import Navbar from "./Navbar.astro";
+
+interface HeaderProps {
+  variant?: "default" | "transparent";
+  cultureText?: string;
+  guideText?: string;
+  childrenText?: string;
+  calendarText?: string;
+  aboutText?: string;
+  languagesText?: string;
+  buttonText?: string;
+}
+const { variant, cultureText, guideText, childrenText, calendarText, aboutText, languagesText, buttonText } =
+  Astro.props as HeaderProps;
+
+console.log("Header render, variant:", variant);
+console.log("Header render, cultureText:", cultureText);
+console.log("Header render, guideText:", guideText);
+console.log("Header render, childrenText:", childrenText);
+console.log("Header render, calendarText:", calendarText);
+console.log("Header render, aboutText:", aboutText);
+console.log("Header render, languagesText:", languagesText);
+console.log("Header render, buttonText:", buttonText);
+---
+
+<Navbar variant={variant} languages={languagesText}>
+  <span slot="culture">{cultureText}</span>
+  <span slot="guide">{guideText}</span>
+  <span slot="children">{childrenText}</span>
+  <span slot="calendar">{calendarText}</span>
+  <span slot="about">{aboutText}</span>
+  <span slot="button">{buttonText}</span>
+</Navbar>

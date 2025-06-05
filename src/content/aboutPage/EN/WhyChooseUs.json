@@ -1,0 +1,31 @@
+{
+  "whyChooseUsData": [
+    {
+      "title": "Quick Deployment",
+      "icon": "ai",
+      "items": [
+        {
+          "text": "Our solutions are up and running quickly to minimize disruption. operates smoothly"
+        }
+      ]
+    },
+    {
+      "title": "Data Security and Compliance",
+      "icon": "ai",
+      "items": [
+        {
+          "text": "We prioritize your data's security with robust protection measures."
+        }
+      ]
+    },
+    {
+      "title": "Continuous Support",
+      "icon": "ai",
+      "items": [
+        {
+          "text": "Ongoing support to ensure everything"
+        }
+      ]
+    }
+  ]
+}

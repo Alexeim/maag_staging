@@ -1,0 +1,82 @@
+{
+  "smallCards": [
+    {
+      "title": "Customized Google Solutions",
+      "icon": "net",
+      "items": [
+        {
+          "text": "Enhancing existing GWS tools"
+        },
+        {
+          "text": "Building cloud-native apps"
+        },
+        {
+          "text": "Deploying internal or public add-ons"
+        },
+        {
+          "text": "Seamless Integration into users' environments"
+        }
+      ]
+    },
+    {
+      "title": "Quick Deployment and Easy User Adoption",
+      "icon": "ai",
+      "items": [
+        {
+          "text": "Integration into Google Workpsace"
+        },
+        {
+          "text": "Use of Google Cloud Resources"
+        },
+        {
+          "text": "Boilerplate solutions for complex problems such as AI chatbots and semantic search"
+        }
+      ]
+    },
+    {
+      "title": "Data Security and Post-deployment Support",
+      "icon": "folder",
+      "items": [
+        {
+          "text": "Full control over data storage and processing"
+        },
+        {
+          "text": "2-week hypercare period"
+        },
+        {
+          "text": "Ongoing support"
+        }
+      ]
+    },
+    {
+      "title": "Data Security and Post-deployment Support",
+      "icon": "folder",
+      "items": [
+        {
+          "text": "Full control over data storage and processing"
+        },
+        {
+          "text": "2-week hypercare period"
+        },
+        {
+          "text": "Ongoing support"
+        }
+      ]
+    },
+    {
+      "title": "Data Security and Post-deployment Support",
+      "icon": "folder",
+      "items": [
+        {
+          "text": "Full control over data storage and processing"
+        },
+        {
+          "text": "2-week hypercare period"
+        },
+        {
+          "text": "Ongoing support"
+        }
+      ]
+    }
+  ]
+}

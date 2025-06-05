@@ -1,0 +1,72 @@
+{
+  "footerData": {
+    "contact": {
+      "title": "Contact",
+      "items": [
+        {
+          "label": "Phone",
+          "link": "tel:+1234567890"
+        },
+        {
+          "label": "Email",
+          "link": "mailto:contact@wurkspaces.dev"
+        },
+        {
+          "label": "Work time",
+          "link": "https://maps.app.goo.gl/1234567890"
+        }
+      ]
+    },
+    "site": {
+      "title": "Site",
+      "items": [
+        {
+          "label": "About",
+          "link": "/about"
+        },
+        {
+          "label": "Services",
+          "link": "/services"
+        },
+        {
+          "label": "Services list",
+          "link": "/services-list"
+        },
+        {
+          "label": "Contact Us",
+          "link": "/contact"
+        }
+      ]
+    },
+    "services": {
+      "title": "Services",
+      "items": [
+        {
+          "label": "Google Workspace Solutions",
+          "link": "https://wurkspaces.dev/google-workspace-solutions"
+        },
+        {
+          "label": "Google Cloud Solutions",
+          "link": "https://wurkspaces.dev/google-cloud-solutions"
+        },
+        {
+          "label": "Generative AI Solutions",
+          "link": "https://wurkspaces.dev/generative-ai-solutions"
+        }
+      ]
+    },
+    "copyright": "© 2025 Wurkspaces.dev. All rights reserved.",
+    "privacyPolicy": {
+      "title": "Privacy Policy",
+      "link": "https://wurkspaces.dev/privacy-policy"
+    },
+    "termsOfService": {
+      "title": "Terms of Service",
+      "link": "https://wurkspaces.dev/terms-of-service"
+    },
+    "cookiePolicy": {
+      "title": "Cookie Policy",
+      "link": "https://wurkspaces.dev/cookie-policy"
+    }
+  }
+}

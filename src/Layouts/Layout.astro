@@ -1,0 +1,73 @@
+---
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+
+import Header from "../components/common/Header.astro";
+// import Footer from "../components/common/Footer.astro";
+import { navbarContent } from "../content/navbar/RU/Navbar.json";
+import { footerData } from "../content/footer/EN/Footer.json";
+
+interface LayoutProps {
+  title?: string;
+  useClientRouter?: boolean;
+  navbarVariant?: "default" | "transparent";
+  includePreFooterCTA?: boolean;
+}
+
+const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
+  Astro.props as LayoutProps;
+---
+
+<!doctype html>
+<html lang="en" data-theme="maag">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Wrukspaces.dev" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    {useClientRouter && <ClientRouter />}
+    <title>{title}</title>
+  </head>
+  <body>
+    <Header
+      variant={navbarVariant}
+      cultureText={navbarContent.items[0].label}
+      guideText={navbarContent.items[1].label}
+      childrenText={navbarContent.items[2].label}
+      calendarText={navbarContent.items[3].label}
+      aboutText={navbarContent.items[4].label}
+      languagesText={navbarContent.languages[0]}
+      buttonText={navbarContent.button.label}
+    />
+    <slot />
+    <!-- <Footer footerData={footerData} /> -->
+  </body>
+</html>
+<style is:global>
+  /* Focus styles for better visibility */
+  :focus-visible {
+    outline: 3px solid #4361ee;
+    outline-offset: 2px;
+  }
+
+  /* High contrast mode support */
+  @media (forced-colors: active) {
+    * {
+      forced-color-adjust: auto;
+    }
+  }
+</style>
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    font-family: "Lora", serif;
+  }
+  
+</style>

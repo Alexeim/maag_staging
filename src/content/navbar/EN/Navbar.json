@@ -1,0 +1,24 @@
+{
+  "navbarContent": {
+    "title": "Wurkspaces.dev",
+    "logo": {
+      "light": "/assets/logo-light.png",
+      "dark": "/assets/logo-dark.png"
+    },
+    "items": [
+      {
+        "label": "Home",
+        "path": "/"
+      },
+      {
+        "label": "Services",
+        "path": "/services"
+      }
+    ],
+    "languages": ["EN", "FR"],
+    "button": {
+      "label": "Contact Us",
+      "path": "/contact"
+    }
+  }
+}

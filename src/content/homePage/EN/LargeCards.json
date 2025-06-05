@@ -1,0 +1,55 @@
+{
+  "largeCards": [
+    {
+      "title": "<span class='text-primary'>Google Workspace</span><br /> Solutions",
+      "items": [
+        {
+          "text": "I generate, organize and protect your documents en masse, ensuring consistency and saving time for you team"
+        },
+        {
+          "text": "I automate your marketing and notifications so that your intenal and external clients are always up to speed"
+        },
+        {
+          "text": "I integrate your applications and APIs into Google Workspace add-ons and web apps so that your vital business data is always at your finger tips"
+        }
+      ],
+      "icon": "googleWorkspace",
+      "buttonText": "Find out more"
+    },
+    {
+      "title": "<span class='text-primary'>Google Cloud</span><br /> Solutions",
+      "items": [
+        {
+          "text": "I built cloud-native web apps so that your tools are secure, scalable and reliable."
+        },
+        {
+          "text": "I streamline BI dashboards so that you can make business decisions quickly"
+        },
+        {
+          "text": "Enhance Google Workspace add-ons with cloud databases and powerful custom APIs"
+        }
+      ],
+      "icon": "googleCloud",
+      "buttonText": "Find out more"
+    },
+    {
+      "title": "<span class='text-primary'>Generative AI</span><br /> Solutions",
+      "items": [
+        {
+          "text": "I build LLM-based chatbots that communicate with your internal knowledge base in your files and databases so that you can get instant answers to your business questions."
+        },
+        {
+          "text": "I build Natural language to SQL chatbots that allow your teams to get insights from your internal databases without coding skills or waiting for an analyst to reply to them."
+        },
+        {
+          "text": "I organize and leverage your files with AI and semantic search so that it's immediately useful for your team and clients"
+        },
+        {
+          "text": "Retrieval-Augmented Generation (RAG)"
+        }
+      ],
+      "icon": "generativeAiNet",
+      "buttonText": "Find out more"
+    }
+  ]
+}

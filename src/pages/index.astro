@@ -1,16 +1,42 @@
 ---
-
+import Layout from "../Layouts/Layout.astro";
+import eric from "../assets/common/image.jpg";
+import logoFull from "../assets/logo/logoFull.svg";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout
+  navbarVariant="transparent"
+  includePreFooterCTA={false}
+  title="Maag"
+  useClientRouter={false}
+>
+<div class="flex flex-col items-center justify-center h-screen bg-base-200 lg:relative">
+		<div class="hidden lg:block absolute top-0 left-0 w-full h-26 bg-base-100"></div>
+		<img src={logoFull.src} alt="Maag" class="w-1/2 absolute top-0 left-1/2 -translate-x-1/2 z-20 hidden lg:block" />
+		<hr class="w-full absolute top-[425px] left-0 z-10 hidden lg:block" />
+		<div class="flex flex-col items-start justify-center">
+			<div class="w-full h-10 bg-base-300 mb-4"></div>
+			<div class="lg:flex lg:flex-row flex-col items-center justify-center gap-4 hidden">
+				<div class="flex lg:flex-row flex-col items-center justify-center">
+					<div class="w-60 h-60 rounded-full">
+						<img src={eric.src} alt="Eric" class="w-full h-full object-cover rounded-full" />
+					</div>
+				</div>
+				<div class="flex lg:flex-col flex-row items-start justify-center gap-4">
+					<p class="text-error uppercase" id="interview">Интервью</p>
+					<p class="text-base-content text-2xl">Эрик Булатов:</p>
+					<p class="text-base-content text-4xl">
+						“В Парижской опере родилась новая звезда и назвали ее Серегой”
+					</p>
+				</div>
+			</div>
+			<div class="w-full h-10 bg-base-300 mt-4"></div>
+		</div>
+  </div>
+</Layout>
+
+<style>
+	#interview {
+		font-family: "Inter", sans-serif;
+	}
+</style>
