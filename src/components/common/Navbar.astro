@@ -7,9 +7,10 @@ import { Search, Instagram, Youtube } from '@lucide/astro';
 interface NavbarProps {
   variant: "default" | "transparent";
   languages: string;
+  user?: boolean;
 }
 
-const { variant, languages } = Astro.props as NavbarProps;
+const { variant, languages, user = true } = Astro.props as NavbarProps;
 const navbarClasses = variant === "default" ? "bg-base-100" : "bg-transparent";
 const positionClasses = variant === "default" ? "static" : "absolute";
 const colorClasses = variant === "default" ? "text-secondary" : "text-base-content";
@@ -20,7 +21,8 @@ const logoSrc = variant === "default" ? logo.src : logo.src;
 ---
 
 <nav
-  class={`navbar w-full ${navbarClasses} ${positionClasses} ${colorClasses} ${borderClasses} py-6 lg:px-12 z-50`}
+  x-data="{ user: false }"
+  class={`navbar w-full ${navbarClasses} ${positionClasses} ${colorClasses} ${borderClasses} py-2 lg:py-6 lg:px-4 z-50`}
 >
   <div class="navbar-start">
     <a class="cursor-pointer text-xl" href="/">
@@ -56,18 +58,52 @@ const logoSrc = variant === "default" ? logo.src : logo.src;
     </div>
   </div>
   <div class="navbar-end hidden lg:flex">
-    <ul class="menu menu-horizontal px-4">
-      <li class="flex flex-row items-center">
-        <Search class="w-12 h-12 text-base-content" />
-      </li>
-      <li class="flex flex-row items-center">
-        <Instagram class="w-12 h-12 text-base-content" />
-      </li>
-      <li class="flex flex-row items-center">
-        <Youtube class="w-12 h-12 text-base-content" />
-      </li>
-    </ul>
-    <a href="/contact" class="btn btn-error mr-12" id="enterButton"><slot name="button" /></a>
+    <div class="flex gap-2 items-center justify-center">
+      <input type="text" placeholder="Поиск" class="input input-bordered w-24 md:w-auto" />
+      <ul class="flex flex-row gap-2 items-center">
+        <li>
+          <a class="btn btn-ghost btn-circle" href="https://www.instagram.com/stories/maag_france/3648104522314175054/" target="_blank"><Instagram class="w-6 text-base-content" /></a>
+        </li>
+        <li>
+          <button class="btn btn-ghost btn-circle"><Youtube class="w-6 text-base-content" /></button>
+        </li>
+      </ul>
+      <div class="flex items-center justify-center md:w-fit lg:w-[120px]">
+        <a
+          href="#"
+          class="btn btn-error"
+          id="enterButton"
+          x-show="!user"
+          @click.prevent="user = true"
+        >
+          <slot name="button" />
+        </a>
+        <div
+          class="dropdown dropdown-end"
+          id="userDropdown"
+          x-show="user"
+        >
+          <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+            <div class="w-10 rounded-full">
+              <img
+                alt="Tailwind CSS Navbar component"
+                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+            </div>
+          </div>
+          <ul
+            tabindex="0"
+            class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+            <li>
+              <a class="justify-between">
+                Кто я?
+              </a>
+            </li>
+            <li><a>Мои записи</a></li>
+            <li><a href="#" @click.prevent="user = false">Выйти</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -76,6 +112,9 @@ const logoSrc = variant === "default" ? logo.src : logo.src;
     font-family: "Lora", serif !important;
   }
   #enterButton {
+    font-family: "Inter", sans-serif !important;
+  }
+  #userDropdown {
     font-family: "Inter", sans-serif !important;
   }
 </style>
