@@ -1,0 +1,24 @@
+---
+// placeholder page
+import Layout from "../Layouts/Layout.astro";
+
+import { Construction } from '@lucide/astro';
+
+const urlLingName = Astro.url.pathname.split('/')[1];
+---
+
+<Layout
+  navbarVariant="default"
+  includePreFooterCTA={false}
+  title="Maag"
+  useClientRouter={true}
+  >
+  <main>
+    <div class="w-full bg-base-300 py-14 px-8 flex flex-col items-center justify-center h-screen gap-4">
+      <h1 class="text-base-content/50 text-4xl font-semibold">“Я просто хочу денег, отстаньте от меня”</h1>
+      <p class="text-base-content text-2xl font-bold">{urlLingName}</p>
+      <Construction class="w-10 h-10 text-error" />
+      <p class="text-base-content text-2xl font-bold">... этой страницы пока нет, но мы усердно работаем над ней ...</p>
+    </div>
+  </main>
+</Layout>

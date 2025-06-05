@@ -6,15 +6,23 @@ import { Image } from 'astro:assets';
 ---
 
 <Layout
-  navbarVariant="transparent"
+  navbarVariant="default"
   includePreFooterCTA={false}
   title="Maag"
   useClientRouter={true}
->
-<div class="flex flex-col items-center justify-center h-screen bg-base-200 lg:relative">
-		<div class="hidden lg:block absolute top-0 left-0 w-full h-26 bg-base-100"></div>
-		<Image src={logoFull} alt="Maag" class="w-1/2 absolute top-0 left-1/2 -translate-x-1/2 z-20 hidden lg:block" />
-		<hr class="w-full absolute top-[425px] left-0 z-10 hidden lg:block" />
+  >
+  <div class="w-full bg-base-200 py-14 px-8">
+    <h3 class="text-base-content text-4xl">Культура</h3>
+    <ul class="menu menu-horizontal flex flex-row gap-2 mt-4">
+      <li>
+        <a href="/culture/articles" class="text-base-content text-base">Статьи</a>
+      </li>
+      <li>
+        <a href="/culture/videos" class="text-base-content text-base">Видео</a>
+      </li>
+    </ul>
+  </div>
+  <div class="flex flex-col items-center justify-center h-screen bg-base-200">
 		<div class="flex flex-col items-start justify-center">
 			<div class="w-full h-10 bg-base-300 mb-4"></div>
 			<div class="lg:flex lg:flex-row flex-col items-center justify-center gap-4 hidden">
