@@ -1,0 +1,18 @@
+
+import createLucideIcon from '../createLucideIcon';
+import type { AstroComponent } from '../types'
+
+/**
+ * @component @name Eraser
+ * @description Lucide SVG icon component, renders SVG Element with children.
+ *
+ * @preview ![img](data:image/svg+xml;base64,PHN2ZyAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIgogIHdpZHRoPSIyNCIKICBoZWlnaHQ9IjI0IgogIHZpZXdCb3g9IjAgMCAyNCAyNCIKICBmaWxsPSJub25lIgogIHN0cm9rZT0iIzAwMCIgc3R5bGU9ImJhY2tncm91bmQtY29sb3I6ICNmZmY7IGJvcmRlci1yYWRpdXM6IDJweCIKICBzdHJva2Utd2lkdGg9IjIiCiAgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIgogIHN0cm9rZS1saW5lam9pbj0icm91bmQiCj4KICA8cGF0aCBkPSJNMjEgMjFIOGEyIDIgMCAwIDEtMS40Mi0uNTg3bC0zLjk5NC0zLjk5OWEyIDIgMCAwIDEgMC0yLjgyOGwxMC0xMGEyIDIgMCAwIDEgMi44MjkgMGw1Ljk5OSA2YTIgMiAwIDAgMSAwIDIuODI4TDEyLjgzNCAyMSIgLz4KICA8cGF0aCBkPSJtNS4wODIgMTEuMDkgOC44MjggOC44MjgiIC8+Cjwvc3ZnPgo=) - https://lucide.dev/icons/eraser
+ * @see https://lucide.dev/guide/packages/lucide-astro - Documentation
+ *
+ * @param {import('../types').IconProps} props - Lucide icons props and any valid SVG attribute
+ * @returns {any} Astro Component
+ * 
+ */
+const Eraser = createLucideIcon('eraser', [["path",{"d":"M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21"}],["path",{"d":"m5.082 11.09 8.828 8.828"}]]) as AstroComponent;
+
+export default Eraser;

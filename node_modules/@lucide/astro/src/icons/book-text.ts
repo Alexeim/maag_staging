@@ -1,0 +1,18 @@
+
+import createLucideIcon from '../createLucideIcon';
+import type { AstroComponent } from '../types'
+
+/**
+ * @component @name BookText
+ * @description Lucide SVG icon component, renders SVG Element with children.
+ *
+ * @preview ![img](data:image/svg+xml;base64,PHN2ZyAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIgogIHdpZHRoPSIyNCIKICBoZWlnaHQ9IjI0IgogIHZpZXdCb3g9IjAgMCAyNCAyNCIKICBmaWxsPSJub25lIgogIHN0cm9rZT0iIzAwMCIgc3R5bGU9ImJhY2tncm91bmQtY29sb3I6ICNmZmY7IGJvcmRlci1yYWRpdXM6IDJweCIKICBzdHJva2Utd2lkdGg9IjIiCiAgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIgogIHN0cm9rZS1saW5lam9pbj0icm91bmQiCj4KICA8cGF0aCBkPSJNNCAxOS41di0xNUEyLjUgMi41IDAgMCAxIDYuNSAySDE5YTEgMSAwIDAgMSAxIDF2MThhMSAxIDAgMCAxLTEgMUg2LjVhMSAxIDAgMCAxIDAtNUgyMCIgLz4KICA8cGF0aCBkPSJNOCAxMWg4IiAvPgogIDxwYXRoIGQ9Ik04IDdoNiIgLz4KPC9zdmc+Cg==) - https://lucide.dev/icons/book-text
+ * @see https://lucide.dev/guide/packages/lucide-astro - Documentation
+ *
+ * @param {import('../types').IconProps} props - Lucide icons props and any valid SVG attribute
+ * @returns {any} Astro Component
+ * 
+ */
+const BookText = createLucideIcon('book-text', [["path",{"d":"M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"}],["path",{"d":"M8 11h8"}],["path",{"d":"M8 7h6"}]]) as AstroComponent;
+
+export default BookText;

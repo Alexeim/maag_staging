@@ -1,0 +1,18 @@
+
+import createLucideIcon from '../createLucideIcon';
+import type { AstroComponent } from '../types'
+
+/**
+ * @component @name SoapDispenserDroplet
+ * @description Lucide SVG icon component, renders SVG Element with children.
+ *
+ * @preview ![img](data:image/svg+xml;base64,PHN2ZyAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIgogIHdpZHRoPSIyNCIKICBoZWlnaHQ9IjI0IgogIHZpZXdCb3g9IjAgMCAyNCAyNCIKICBmaWxsPSJub25lIgogIHN0cm9rZT0iIzAwMCIgc3R5bGU9ImJhY2tncm91bmQtY29sb3I6ICNmZmY7IGJvcmRlci1yYWRpdXM6IDJweCIKICBzdHJva2Utd2lkdGg9IjIiCiAgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIgogIHN0cm9rZS1saW5lam9pbj0icm91bmQiCj4KICA8cGF0aCBkPSJNMTAuNSAydjQiIC8+CiAgPHBhdGggZD0iTTE0IDJIN2EyIDIgMCAwIDAtMiAyIiAvPgogIDxwYXRoIGQ9Ik0xOS4yOSAxNC43NkE2LjY3IDYuNjcgMCAwIDEgMTcgMTFhNi42IDYuNiAwIDAgMS0yLjI5IDMuNzZjLTEuMTUuOTItMS43MSAyLjA0LTEuNzEgMy4xOSAwIDIuMjIgMS44IDQuMDUgNCA0LjA1czQtMS44MyA0LTQuMDVjMC0xLjE2LS41Ny0yLjI2LTEuNzEtMy4xOSIgLz4KICA8cGF0aCBkPSJNOS42MDcgMjFINmEyIDIgMCAwIDEtMi0ydi03YTIgMiAwIDAgMSAyLTJoN1Y3YTEgMSAwIDAgMC0xLTFIOWExIDEgMCAwIDAtMSAxdjMiIC8+Cjwvc3ZnPgo=) - https://lucide.dev/icons/soap-dispenser-droplet
+ * @see https://lucide.dev/guide/packages/lucide-astro - Documentation
+ *
+ * @param {import('../types').IconProps} props - Lucide icons props and any valid SVG attribute
+ * @returns {any} Astro Component
+ * 
+ */
+const SoapDispenserDroplet = createLucideIcon('soap-dispenser-droplet', [["path",{"d":"M10.5 2v4"}],["path",{"d":"M14 2H7a2 2 0 0 0-2 2"}],["path",{"d":"M19.29 14.76A6.67 6.67 0 0 1 17 11a6.6 6.6 0 0 1-2.29 3.76c-1.15.92-1.71 2.04-1.71 3.19 0 2.22 1.8 4.05 4 4.05s4-1.83 4-4.05c0-1.16-.57-2.26-1.71-3.19"}],["path",{"d":"M9.607 21H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h7V7a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"}]]) as AstroComponent;
+
+export default SoapDispenserDroplet;
