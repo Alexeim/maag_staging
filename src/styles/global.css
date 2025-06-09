@@ -44,3 +44,8 @@
   --depth: 1;
   --noise: 0;
 }
+
+.text-404 {
+  font-size: 120px !important;
+  line-height: 1 !important;
+}

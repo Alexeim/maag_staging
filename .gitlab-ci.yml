@@ -1,0 +1,12 @@
+image: node:20
+
+pages:
+  script:
+    - npm install
+    - npm run build
+    - mv dist public
+  artifacts:
+    paths:
+      - public
+  only:
+    - main

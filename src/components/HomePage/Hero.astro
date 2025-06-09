@@ -1,38 +1,13 @@
 ---
-import image from "../../assets/common/laptopSemiclosed.jpg";
+import logoFull from "../../assets/logo/logoFull.svg";
+import { Image } from 'astro:assets';
 ---
 
-<section
-  class="w-full min-w-0 flex-shrink-0 overflow-hidden h-full flex flex-col-reverse lg:flex-row"
->
-  <div
-    class="w-full lg:w-1/2 lg:min-h-[900px] bg-secondary flex flex-col justify-center items-start px-4 lg:px-24 py-8 lg:py-0 relative"
-  >
-    <div
-      class="w-full lg:max-w-[700px] h-96 flex flex-col gap-4 justify-center items-start mt-0 mb-12 lg:mb-0"
-    >
-      <h1 class="text-white font-semibold text-3xl lg:text-5xl leading-normal">
-        <slot name="mainText" />
-      </h1>
-      <p class="text-white text-lg"><slot name="subText" /></p>
-      <button class="btn btn-primary">
-        <slot name="buttonText" />
-      </button>
-    </div>
-    <div
-      class="w-40 h-40 hidden lg:block absolute bottom-0 right-0 z-10 border border-neutral/20"
-    >
-      <div
-        class="w-40 h-40 hidden lg:block absolute bottom-5 right-5 z-20 border border-neutral/20"
-      >
-      </div>
-    </div>
-  </div>
-  <div class="w-full lg:w-1/2">
-    <img
-      src={image.src}
-      alt="img"
-      class="w-full h-auto lg:min-h-[900px] object-cover"
-    />
-  </div>
-</section>
+<div class="flex flex-col items-center justify-center h-[400px] bg-base-200 lg:relative">
+		<div class="hidden lg:block absolute top-0 left-0 w-full h-26 bg-base-100"></div>
+		<Image src={logoFull} alt="Maag" class="h-[623px] absolute top-0 left-1/2 -translate-x-1/2 z-20 hidden lg:block" />
+		<hr class="w-11/12 absolute top-[387px] z-10 hidden lg:block" />
+		<div class="flex flex-col items-start justify-center">
+			<div class="w-full h-10 bg-base-300 mb-4"></div>
+		</div>
+</div>
