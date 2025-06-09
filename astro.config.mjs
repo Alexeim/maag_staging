@@ -7,7 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 // https://astro.build/config
 export default defineConfig({
   integrations: [alpinejs()],
-  base: "/maag_staging/",
+  base: process.env.ASTRO_BASE_PATH || "/",
   vite: {
     plugins: [tailwindcss()],
   },
