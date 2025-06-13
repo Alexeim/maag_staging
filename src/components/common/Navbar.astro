@@ -1,8 +1,7 @@
 ---
 import logo from "../../assets/logo/logo.svg";
 
-import { Search, Instagram, Youtube } from '@lucide/astro';
-
+import { Search, Instagram, Youtube } from "@lucide/astro";
 
 interface NavbarProps {
   variant: "default" | "transparent";
@@ -13,9 +12,9 @@ interface NavbarProps {
 const { variant, languages, user = true } = Astro.props as NavbarProps;
 const navbarClasses = variant === "default" ? "bg-base-100" : "bg-transparent";
 const positionClasses = variant === "default" ? "static" : "absolute";
-const colorClasses = variant === "default" ? "text-base-content" : "text-base-content";
-const borderClasses =
-  variant === "default" ? "border-none" : "border-none";
+const colorClasses =
+  variant === "default" ? "text-base-content" : "text-base-content";
+const borderClasses = variant === "default" ? "border-none" : "border-none";
 
 const logoSrc = variant === "default" ? logo.src : logo.src;
 ---
@@ -31,13 +30,37 @@ const logoSrc = variant === "default" ? logo.src : logo.src;
   </div>
   <div class="navbar-center hidden lg:flex">
     <ul
-      class={`menu menu-horizontal px-1 ${colorClasses} font-semibold text-lg`}
+      class={`menu menu-horizontal px-1 ${colorClasses} font-semibold text-[16px]`}
     >
-      <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]"><a href="/culture"><slot name="culture" /></a> <span class="text-base text-base-content/20">|</span></li>
-      <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]"><a href="/building"><slot name="guide" /></a> <span class="text-base text-base-content/20">|</span></li>
-      <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]"><a href="/building"><slot name="children" /></a> <span class="text-base text-base-content/20">|</span></li>
-      <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]"><a href="/building"><slot name="calendar" /></a> <span class="text-base text-base-content/20">|</span></li>
-      <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]"><a href="/building"><slot name="about" /></a></li>
+      <li
+        class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+      >
+        <a href="/culture"><slot name="culture" /></a>
+        <span class="text-base text-base-content/20">|</span>
+      </li>
+      <li
+        class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+      >
+        <a href="/building"><slot name="guide" /></a>
+        <span class="text-base text-base-content/20">|</span>
+      </li>
+      <li
+        class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+      >
+        <a href="/building"><slot name="children" /></a>
+        <span class="text-base text-base-content/20">|</span>
+      </li>
+      <li
+        class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+      >
+        <a href="/building"><slot name="calendar" /></a>
+        <span class="text-base text-base-content/20">|</span>
+      </li>
+      <li
+        class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+      >
+        <a href="/building"><slot name="about" /></a>
+      </li>
     </ul>
   </div>
   <div class="navbar-end">
@@ -59,13 +82,23 @@ const logoSrc = variant === "default" ? logo.src : logo.src;
   </div>
   <div class="navbar-end hidden lg:flex">
     <div class="flex gap-2 items-center justify-center">
-      <input type="text" placeholder="Поиск" class="input input-bordered w-24 md:w-auto" />
+      <input
+        type="text"
+        placeholder="Поиск"
+        class="input input-bordered w-24 md:w-auto"
+      />
       <ul class="flex flex-row gap-2 items-center">
         <li>
-          <a class="btn btn-ghost btn-circle" href="https://www.instagram.com/stories/maag_france/3648104522314175054/" target="_blank"><Instagram class="w-6 text-base-content" /></a>
+          <a
+            class="btn btn-ghost btn-circle"
+            href="https://www.instagram.com/stories/maag_france/3648104522314175054/"
+            target="_blank"><Instagram class="w-6 text-base-content" /></a
+          >
         </li>
         <li>
-          <button class="btn btn-ghost btn-circle"><Youtube class="w-6 text-base-content" /></button>
+          <button class="btn btn-ghost btn-circle"
+            ><Youtube class="w-6 text-base-content" /></button
+          >
         </li>
       </ul>
       <div class="flex items-center justify-center md:w-fit lg:w-[120px]">
@@ -78,25 +111,25 @@ const logoSrc = variant === "default" ? logo.src : logo.src;
         >
           <slot name="button" />
         </a>
-        <div
-          class="dropdown dropdown-end"
-          id="userDropdown"
-          x-show="user"
-        >
-          <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+        <div class="dropdown dropdown-end" id="userDropdown" x-show="user">
+          <div
+            tabindex="0"
+            role="button"
+            class="btn btn-ghost btn-circle avatar"
+          >
             <div class="w-10 rounded-full">
               <img
                 alt="Tailwind CSS Navbar component"
-                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+              />
             </div>
           </div>
           <ul
             tabindex="0"
-            class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+            class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+          >
             <li>
-              <a class="justify-between">
-                Кто я?
-              </a>
+              <a class="justify-between"> Кто я? </a>
             </li>
             <li><a>Мои записи</a></li>
             <li><a href="#" @click.prevent="user = false">Выйти</a></li>
