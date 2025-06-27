@@ -1,13 +1,14 @@
 ---
-import logoFull from "../../assets/logo/logoFull.svg";
-import { Image } from 'astro:assets';
+import logoFull from "../../assets/logo/Vector.png";
+import { Image } from "astro:assets";
 ---
 
-<div class="flex flex-col items-center justify-center h-[400px] bg-base-200 lg:relative">
-		<div class="hidden lg:block absolute top-0 left-0 w-full h-26 bg-base-100"></div>
-		<Image src={logoFull} alt="Maag" class="h-[623px] absolute top-0 left-1/2 -translate-x-1/2 z-20 hidden lg:block" />
-		<hr class="w-11/12 absolute top-[387px] z-10 hidden lg:block" />
-		<div class="flex flex-col items-start justify-center">
-			<div class="w-full h-10 bg-base-300 mb-4"></div>
-		</div>
+<div
+  class="relative w-full h-[300px] lg:h-[500px] bg-base-200 flex items-center justify-center"
+>
+  <div
+    class="absolute top-14 lg:top-0 left-1/2 -translate-x-1/2 z-[99] mt-12 lg:mt-20"
+  >
+    <Image src={logoFull} alt="Maag" class="h-auto w-auto" />
+  </div>
 </div>

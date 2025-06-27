@@ -26,13 +26,16 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content="Wrukspaces.dev" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap"
+      rel="stylesheet"
+    />
     {useClientRouter && <ClientRouter />}
     <title>{title}</title>
   </head>
-  <body>
+  <body class="bg-base-200">
     <Header
       variant={navbarVariant}
       cultureText={navbarContent.items[0].label}
@@ -49,8 +52,16 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
 </html>
 <style is:global>
   /* Focus styles for better visibility */
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    font-family: "Lora", serif;
+  }
+
   :focus-visible {
-    outline: 3px solid #94B794;
+    outline: 3px solid #94b794;
     outline-offset: 2px;
   }
 
@@ -60,14 +71,7 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
       forced-color-adjust: auto;
     }
   }
-</style>
-<style>
-  html,
-  body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    font-family: "Lora", serif;
+  .tag {
+    font-family: "Inter", sans-serif;
   }
-  
 </style>

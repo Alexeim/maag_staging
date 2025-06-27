@@ -2,7 +2,7 @@
 import Layout from "../Layouts/Layout.astro";
 import eric from "../assets/common/image.jpg";
 import logoFull from "../assets/logo/logoFull.svg";
-import { Image } from 'astro:assets';
+import { Image } from "astro:assets";
 ---
 
 <Layout
@@ -10,12 +10,14 @@ import { Image } from 'astro:assets';
   includePreFooterCTA={false}
   title="Maag"
   useClientRouter={true}
-  >
+>
   <div class="w-full bg-base-200 py-14 px-8">
     <h3 class="text-base-content text-4xl">Культура</h3>
     <ul class="menu menu-horizontal flex flex-row gap-2 mt-4">
       <li>
-        <a href="/culture/articles" class="text-base-content text-base">Статьи</a>
+        <a href="/culture/articles" class="text-base-content text-base"
+          >Статьи</a
+        >
       </li>
       <li>
         <a href="/culture/videos" class="text-base-content text-base">Видео</a>
@@ -23,29 +25,35 @@ import { Image } from 'astro:assets';
     </ul>
   </div>
   <div class="flex flex-col items-center justify-center h-screen bg-base-200">
-		<div class="flex flex-col items-start justify-center">
-			<div class="w-full h-10 bg-base-300 mb-4"></div>
-			<div class="lg:flex lg:flex-row flex-col items-center justify-center gap-4 hidden">
-				<div class="flex lg:flex-row flex-col items-center justify-center">
-					<div class="w-60 h-60 rounded-full">
-						<Image src={eric} alt="Eric" class="w-full h-full object-cover rounded-full" />
-					</div>
-				</div>
-				<div class="flex lg:flex-col flex-row items-start justify-center gap-4">
-					<p class="text-error uppercase" id="interview">Интервью</p>
-					<p class="text-base-content text-2xl">Эрик Булатов:</p>
-					<p class="text-base-content text-4xl">
-						“В Парижской опере родилась новая звезда и назвали ее Серегой”
-					</p>
-				</div>
-			</div>
-			<div class="w-full h-10 bg-base-300 mt-4"></div>
-		</div>
+    <div class="flex flex-col items-start justify-center">
+      <div class="w-full h-10 bg-base-300 mb-4"></div>
+      <div
+        class="lg:flex lg:flex-row flex-col items-center justify-center gap-4 hidden border-2 border-red-500"
+      >
+        <div class="flex lg:flex-row flex-col items-center justify-center">
+          <div class="w-60 h-60 rounded-full">
+            <Image
+              src={eric}
+              alt="Eric"
+              class="w-full h-full object-cover rounded-full"
+            />
+          </div>
+        </div>
+        <div class="flex lg:flex-col flex-row items-start justify-center gap-4">
+          <p class="text-error uppercase" id="interview">Интервью</p>
+          <p class="text-base-content text-2xl">Эрик Булатов:</p>
+          <p class="text-base-content text-4xl">
+            “В Парижской опере родилась новая звезда и назвали ее Серегой”
+          </p>
+        </div>
+      </div>
+      <div class="w-full h-10 bg-base-300 mt-4"></div>
+    </div>
   </div>
 </Layout>
 
 <style>
-	#interview {
-		font-family: "Inter", sans-serif;
-	}
+  #interview {
+    font-family: "Inter", sans-serif;
+  }
 </style>

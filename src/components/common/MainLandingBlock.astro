@@ -1,0 +1,162 @@
+---
+import { Image } from "astro:assets";
+import maagLogo from "../../assets/logo/maaglogo.svg";
+---
+
+<section class="mx-auto px-4 lg:px-12 bg-base-200 mb-0">
+  <div class="flex flex-col lg:flex-row gap-8">
+    {/* News Column - THINNER */}
+    <aside class="flex-[2] lg:pr-4">
+      <h2 class="text-sm font-normal mb-6 uppercase tracking-[0.3em]">
+        Новости
+      </h2>
+      <div class="space-y-6">
+        <div class="flex items-start gap-4">
+          <img
+            src="https://placehold.co/80x80"
+            alt="News 1"
+            class="w-20 h-20 object-cover flex-shrink-0"
+          />
+          <div class="flex-1">
+            <span class="text-error uppercase tag">Балет</span>
+            <h3 class="text-base font-bold mt-1 leading-tight">
+              В Парижской опере родилась новая звезда.
+            </h3>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <img
+            src="https://placehold.co/80x80"
+            alt="News 2"
+            class="w-20 h-20 object-cover flex-shrink-0"
+          />
+          <div class="flex-1">
+            <span class="text-error uppercase tag">Балет</span>
+            <h3 class="text-base font-bold mt-1 leading-tight">
+              В Парижской опере родилась новая звезда.
+            </h3>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <img
+            src="https://placehold.co/80x80"
+            alt="News 3"
+            class="w-20 h-20 object-cover flex-shrink-0"
+          />
+          <div class="flex-1">
+            <span class="text-error uppercase tag">Балет</span>
+            <h3 class="text-base font-bold mt-1 leading-tight">
+              В Парижской опере родилась новая звезда.
+            </h3>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <img
+            src="https://placehold.co/80x80"
+            alt="News 4"
+            class="w-20 h-20 object-cover flex-shrink-0"
+          />
+          <div class="flex-1">
+            <span class="text-error uppercase tag">Балет</span>
+            <h3 class="text-base font-bold mt-1 leading-tight">
+              В Парижской опере родилась новая звезда.
+            </h3>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <img
+            src="https://placehold.co/80x80"
+            alt="News 5"
+            class="w-20 h-20 object-cover flex-shrink-0"
+          />
+          <div class="flex-1">
+            <span class="text-error uppercase tag">Балет</span>
+            <h3 class="text-base font-bold mt-1 leading-tight">
+              В Парижской опере родилась новая звезда.
+            </h3>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    {/* Vertical Divider 1 */}
+    <div
+      class="hidden lg:block w-px bg-gray-300 flex-shrink-0 pointer-events-none"
+    >
+    </div>
+
+    {/* Main Column - WIDER */}
+    <article class="flex-[7] lg:px-4 z-[999]">
+      <h2 class="text-sm font-normal mb-6 uppercase tracking-[0.3em]">
+        Главное
+      </h2>
+      <div class="bg-white">
+        <img
+          src="https://placehold.co/1200x600"
+          alt="Main article"
+          class="w-full h-[600px] object-cover"
+        />
+        <div class="p-6">
+          <p class="text-error uppercase mb-3 tag">Балет</p>
+          <h2 class="text-5xl leading-tight">
+            В Парижской опере родилась новая звезда <Image
+              src={maagLogo}
+              alt="MAAG"
+              class="w-10 h-10 inline-block align-middle"
+            />
+          </h2>
+        </div>
+      </div>
+    </article>
+
+    {/* Vertical Divider 2 */}
+    <div
+      class="hidden lg:block w-px bg-gray-300 flex-shrink-0 pointer-events-none"
+    >
+    </div>
+
+    {/* Calendar Column */}
+    <aside class="flex-[3] lg:pl-4">
+      <h2 class="text-sm font-normal mb-6 uppercase tracking-[0.3em]">
+        Календарь
+      </h2>
+      <div class="bg-white">
+        <div class="p-6 flex items-baseline gap-3">
+          <p class="text-5xl font-bold">30</p>
+          <p class="text-sm font-semibold uppercase">Сентября</p>
+        </div>
+        <img
+          src="https://placehold.co/400x300"
+          alt="Event"
+          class="w-full h-[240px] object-cover"
+        />
+        <div class="p-6">
+          <p class="text-error uppercase text-xs mb-3 tag">Выставка</p>
+          <h2 class="text-lg leading-tight mb-4">
+            Огюст Роден и его бабы. Сплетни, интриги, расследования.
+          </h2>
+          <div class="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-map-pin"
+              ><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"
+              ></path><circle cx="12" cy="10" r="3"></circle></svg
+            >
+            <p class="text-sm text-gray-600">Место</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <div class="mx-auto w-full py-8">
+    <hr class="mx-auto w-full border-t-2 border-neutral" />
+  </div>
+</section>
