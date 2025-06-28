@@ -1,6 +1,9 @@
 ---
 import { Image } from "astro:assets";
 import maagLogo from "../../assets/logo/maaglogo.svg";
+import picture1 from "../../assets/images/main.jpeg";
+import picture2 from "../../assets/images/cal.jpeg";
+import picture3 from "../../assets/images/news.jpeg";
 ---
 
 <section class="mx-auto px-4 lg:px-12 bg-base-200 mb-0">
@@ -13,7 +16,7 @@ import maagLogo from "../../assets/logo/maaglogo.svg";
       <div class="space-y-6">
         <div class="flex items-start gap-4">
           <img
-            src="https://placehold.co/80x80"
+            src={picture3.src}
             alt="News 1"
             class="w-20 h-20 object-cover flex-shrink-0"
           />
@@ -26,7 +29,7 @@ import maagLogo from "../../assets/logo/maaglogo.svg";
         </div>
         <div class="flex items-start gap-4">
           <img
-            src="https://placehold.co/80x80"
+            src={picture3.src}
             alt="News 2"
             class="w-20 h-20 object-cover flex-shrink-0"
           />
@@ -39,7 +42,7 @@ import maagLogo from "../../assets/logo/maaglogo.svg";
         </div>
         <div class="flex items-start gap-4">
           <img
-            src="https://placehold.co/80x80"
+            src={picture3.src}
             alt="News 3"
             class="w-20 h-20 object-cover flex-shrink-0"
           />
@@ -52,7 +55,7 @@ import maagLogo from "../../assets/logo/maaglogo.svg";
         </div>
         <div class="flex items-start gap-4">
           <img
-            src="https://placehold.co/80x80"
+            src={picture3.src}
             alt="News 4"
             class="w-20 h-20 object-cover flex-shrink-0"
           />
@@ -65,7 +68,7 @@ import maagLogo from "../../assets/logo/maaglogo.svg";
         </div>
         <div class="flex items-start gap-4">
           <img
-            src="https://placehold.co/80x80"
+            src={picture3.src}
             alt="News 5"
             class="w-20 h-20 object-cover flex-shrink-0"
           />
@@ -92,7 +95,7 @@ import maagLogo from "../../assets/logo/maaglogo.svg";
       </h2>
       <div class="bg-white">
         <img
-          src="https://placehold.co/1200x600"
+          src={picture1.src}
           alt="Main article"
           class="w-full h-[600px] object-cover"
         />
@@ -130,7 +133,7 @@ import maagLogo from "../../assets/logo/maaglogo.svg";
           <p class="text-sm font-semibold uppercase">Сентября</p>
         </div>
         <img
-          src="https://placehold.co/400x300"
+          src={picture2.src}
           alt="Event"
           class="w-full h-[240px] object-cover"
         />
