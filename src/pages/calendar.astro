@@ -1,0 +1,67 @@
+---
+import Layout from "../Layouts/Layout.astro";
+import EventCard from "../components/calendar/EventCard.astro";
+import FilterButtons from "../components/calendar/FilterButtons.astro";
+import CalendarWidget from "../components/calendar/CalendarWidget.astro";
+import EventList from "../components/calendar/EventList.astro";
+import baletImage from "../assets/images/calendar/balet.png";
+import theatreShowImage from "../assets/images/calendar/theatre-show.png";
+import smallEventImage from "../assets/images/calendar/small-event.png";
+
+const imagePaths = {
+  theatreShowSrc: theatreShowImage.src,
+  smallEventSrc: smallEventImage.src,
+};
+---
+
+<Layout
+  navbarVariant="default"
+  includePreFooterCTA={false}
+  title="Календарь - Maag"
+  useClientRouter={true}
+>
+  <main
+    class="bg-base-100 px-4 sm:px-6 lg:px-20 py-12"
+    x-data={`calendar(${JSON.stringify(imagePaths)})`}
+  >
+    <div class="space-y-20">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <EventCard
+          tag="Выставка"
+          date="10-15 Сентября"
+          title="Огюст Роден и его бабы. Сплетни, интриги, расследования."
+          location="Место"
+          image={baletImage}
+          class="lg:col-span-2"
+        />
+        <div class="grid grid-rows-2 gap-10">
+          <EventCard
+            tag="Выставка"
+            date="10-15 Сентября"
+            title="Огюст Роден и его бабы. Сплетни, интриги, расследования."
+            location="Место"
+            image={baletImage}
+          />
+          <EventCard
+            tag="Выставка"
+            date="10-15 Сентября"
+            title="Огюст Роден и его бабы. Сплетни, интриги, расследования."
+            location="Место"
+            image={baletImage}
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-16">
+        <aside class="col-span-4 space-y-8">
+          <h2 class="text-lg font-serif uppercase tracking-widest">Расписание</h2>
+          <CalendarWidget />
+          <FilterButtons />
+        </aside>
+        <section class="col-span-8">
+          <EventList />
+        </section>
+      </div>
+    </div>
+  </main>
+</Layout>

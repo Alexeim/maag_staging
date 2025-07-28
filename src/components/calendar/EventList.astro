@@ -1,0 +1,99 @@
+---
+import locationIcon from "../../assets/images/calendar/location.svg?raw";
+import timeIcon from "../../assets/images/calendar/time.svg?raw";
+import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
+---
+
+<div class="space-y-24">
+  <!-- Main Event List -->
+  <div class="space-y-16">
+    <h2
+      class="text-2xl font-semibold"
+      x-text="selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' })"
+    >
+    </h2>
+    <div class="pl-44 space-y-10">
+      <template x-if="filteredEvents.length === 0">
+        <p class="text-neutral">На эту дату событий не найдено.</p>
+      </template>
+      <template x-for="event in filteredEvents" :key="event.id">
+        <!-- Inlined EventListItem -->
+        <div class="flex gap-10">
+          <div class="w-[463px] flex-shrink-0">
+            <img
+              :src="theatreShowSrc"
+              alt="Event Image"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <div class="flex flex-col gap-5">
+            <div>
+              <span
+                class="text-sm uppercase tracking-widest font-medium text-accent"
+                x-text="event.tag"
+              ></span>
+              <h3
+                class="font-serif text-2xl mt-2 leading-tight"
+                x-text="event.title"
+              ></h3>
+              <p
+                class="font-serif text-lg mt-4 text-neutral"
+                x-text="event.description"
+              ></p>
+            </div>
+            <div class="text-lg font-semibold">
+              <div class="flex items-center gap-4 py-2 border-b border-gray-300">
+                <span set:html={locationIcon}></span>
+                <span x-text="event.location"></span>
+              </div>
+              <div class="flex items-center gap-4 py-2 border-b border-gray-300">
+                <span set:html={timeIcon}></span>
+                <span x-text="event.time"></span>
+              </div>
+              <div class="flex items-center gap-4 py-2 border-b border-gray-300">
+                <span set:html={calendarIcon}></span>
+                <span x-text="event.date"></span>
+              </div>
+            </div>
+            <div class="mt-auto">
+              <a href="#" class="btn btn-primary" x-text="event.buttonText"></a>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Other events -->
+  <div class="space-y-8">
+    <h3 class="text-xl font-serif">Еще в этот день</h3>
+    <div class="flex gap-10 overflow-x-auto pb-4">
+      <template x-for="(event, index) in smallEvents" :key="index">
+        <!-- Inlined SmallEventCard -->
+        <div
+          class="bg-white rounded-2xl shadow-lg overflow-hidden w-[249px] flex-shrink-0"
+        >
+          <img
+            :src="smallEventSrc"
+            alt="Event Image"
+            class="w-full h-[165px] object-cover"
+          />
+          <div class="p-2">
+            <span
+              class="text-xs uppercase tracking-widest font-medium text-accent"
+              x-text="event.tag"
+            ></span>
+            <h3
+              class="font-serif text-base mt-1 leading-tight"
+              x-text="event.title"
+            ></h3>
+            <div class="flex items-center mt-2 text-xs text-neutral">
+              <span set:html={locationIcon}></span>
+              <span class="ml-2" x-text="event.location"></span>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>

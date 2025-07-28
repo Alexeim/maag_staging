@@ -1,0 +1,53 @@
+---
+// This component is now controlled by Alpine.js from the parent page
+---
+
+<div class="bg-white p-8 rounded-lg">
+  <div class="flex justify-between items-center mb-5">
+    <button
+      @click="changeMonth(-1)"
+      class="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center"
+    >
+      <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 13L1 7L7 1" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <h3
+      class="font-semibold text-2xl text-base-content capitalize"
+      x-text="`${monthName} ${year}`"
+    >
+    </h3>
+    <button
+      @click="changeMonth(1)"
+      class="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center"
+    >
+      <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 13L7 7L1 1" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+  <div class="grid grid-cols-7 text-center text-neutral my-4">
+    <div>Пн</div>
+    <div>Вт</div>
+    <div>Ср</div>
+    <div>Чт</div>
+    <div>Пт</div>
+    <div>Сб</div>
+    <div>Вс</div>
+  </div>
+  <div class="grid grid-cols-7 text-center gap-y-2">
+    <template x-for="i in firstDayOfMonth">
+      <div></div>
+    </template>
+    <template x-for="day in daysInMonth">
+      <div class="relative">
+        <button
+          @click="selectDate(day)"
+          :class="{
+            'bg-accent text-accent-content': isSameDay(selectedDate, new Date(Date.UTC(year, currentDate.getUTCMonth(), day))),
+            'hover:bg-gray-200': !isSameDay(selectedDate, new Date(Date.UTC(year, currentDate.getUTCMonth(), day)))
+          }"
+          class="w-12 h-12 flex items-center justify-center mx-auto rounded-full transition-colors"
+          x-text="day"
+        ></button>
+        <div x-show="hasEvent(day)" class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-accent rounded-full"></div>
+      </div>
+    </template>
+  </div>
+</div>

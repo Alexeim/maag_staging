@@ -1,0 +1,41 @@
+---
+import { Image } from "astro:assets";
+import locationIcon from "../../assets/images/calendar/location.svg?raw";
+
+interface Props {
+  tag: string;
+  date: string;
+  title: string;
+  location: string;
+  image: ImageMetadata;
+  class?: string;
+}
+
+const { tag, date, title, location, image, class: className } = Astro.props;
+---
+
+<div class:list={["relative text-white rounded-lg overflow-hidden", className]}>
+  <Image
+    src={image}
+    alt={title}
+    class="absolute inset-0 w-full h-full object-cover"
+  />
+  <div
+    class="relative z-10 p-8 flex flex-col justify-end h-full bg-gradient-to-t from-black/70 via-black/40 to-transparent"
+  >
+    <div>
+      <span
+        class="text-xs uppercase tracking-widest font-medium text-brand-red"
+        >{tag}</span
+      >
+      <p class="font-serif text-base mt-1">{date}</p>
+      <h3 class="font-serif text-4xl font-bold mt-2 leading-tight">
+        {title}
+      </h3>
+      <div class="flex items-center mt-4 text-base">
+        <Fragment set:html={locationIcon} />
+        <span class="ml-2">{location}</span>
+      </div>
+    </div>
+  </div>
+</div>

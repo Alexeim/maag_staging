@@ -1,0 +1,148 @@
+---
+import Layout from "../Layouts/Layout.astro";
+import { Image } from "astro:assets";
+import articleImage from "../assets/images/par.jpeg";
+import relatedImage from "../assets/images/news.jpeg";
+---
+
+<Layout
+  navbarVariant="default"
+  includePreFooterCTA={false}
+  title="Статья - Maag"
+  useClientRouter={true}
+>
+  <main class="bg-brand-beige">
+    <div class="max-w-[1511px] mx-auto py-24">
+      <!-- Hero Section -->
+      <div class="flex flex-col items-center gap-[100px]">
+        <!-- Article Header -->
+        <div class="flex flex-col gap-8">
+          <!-- Title and Category -->
+          <div class="w-[825px] flex flex-col items-end gap-2">
+            <p
+              class="text-xs font-medium uppercase tracking-[0.25em] text-[#D92F1C]"
+            >
+              БАЛЕТ
+            </p>
+            <h1 class="text-[44px] leading-[1.28] font-serif text-black w-full">
+              В Парижской опере родилась новая звезда
+            </h1>
+          </div>
+
+          <!-- Author -->
+          <div class="w-[825px] flex items-center gap-[17px]">
+            <div class="w-[42px] h-[42px] bg-[#D9D9D9] rounded-full"></div>
+            <span class="text-base font-medium font-serif text-black"
+              >Мария Сидельникова</span
+            >
+          </div>
+
+          <!-- Action buttons -->
+          <div class="w-[825px] flex gap-4">
+            <button
+              class="flex items-center gap-4 px-4 py-2 h-10 border border-[#C7C7C7] rounded-2xl hover:bg-gray-50"
+            >
+              <svg width="18" height="20" viewBox="0 0 18 20" fill="none">
+                <path
+                  d="M15 7L9 1L3 7M9 1V13"
+                  stroke="currentColor"
+                  stroke-width="2"></path>
+              </svg>
+              <span class="text-sm text-[#666666]">Поделиться</span>
+            </button>
+
+            <button
+              class="flex items-center gap-2 px-4 py-2 h-10 border border-[#C7C7C7] rounded-2xl hover:bg-gray-50"
+            >
+              <span class="text-base font-bold text-black">10</span>
+              <span class="text-sm text-[#666666]">Минут читать</span>
+            </button>
+
+            <button
+              class="flex items-center justify-center gap-4 px-4 py-2 h-10 border border-[#C7C7C7] rounded-2xl hover:bg-gray-50"
+            >
+              <svg width="14" height="18" viewBox="0 0 14 18" fill="none">
+                <path
+                  d="M1 1V17L7 13L13 17V1H1Z"
+                  stroke="currentColor"
+                  stroke-width="1"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Article Image -->
+        <div class="flex flex-col items-center gap-[13px] w-full">
+          <Image
+            src={articleImage}
+            alt="Главное изображение статьи"
+            class="w-full h-[849px] object-cover"
+          />
+          <p class="w-[826px] text-base leading-[1.6] text-[#4E4E4E]">
+            Caption: Первая в Италии крупная музейная выставка Трейси Эмин (р.
+            1960), пожалуй, самой знаменитой и самой скандальной британской
+            современной художницы.
+          </p>
+          <hr class="w-[826px] border-t border-[#C7C7C7]" />
+        </div>
+      </div>
+
+      <!-- Article Content -->
+      <div class="max-w-[826px] mx-auto mb-24 mt-24">
+        <article class="space-y-10">
+          <!-- Opening paragraph with large P -->
+          <div class="flex gap-10">
+            <div class="w-[187px] flex-shrink-0">
+              <span
+                class="text-[159px] leading-[1.6] font-['Great_Vibes'] text-brand-beige"
+                >П</span
+              >
+            </div>
+            <div class="flex-1">
+              <p
+                class="text-lg leading-[1.6] text-black text-justify font-serif"
+              >
+                ервая в Италии крупная музейная выставка Трейси Эмин (р. 1960),
+                пожалуй, самой знаменитой и самой скандальной британской
+                современной художницы. Шесть десятков работ вовлекают зрителя в
+                телесные и душевные переживания Эмин, которая откровенно говорит
+                о сексуальных связях, аборте, недавно пережитом раке. Шесть
+                десятков работ вовлекают зрителя в телесные и душевные
+                переживания Эмин, которая откровенно говорит о сексуальных
+                связях, аборте, недавно пережитом раке.
+              </p>
+            </div>
+          </div>
+
+          <!-- Subheader and content -->
+          <div class="space-y-2">
+            <h2 class="text-base font-semibold text-black">Подзаголовок</h2>
+            <p class="text-lg leading-[1.6] text-black text-justify font-serif">
+              Выставка представляет собой глубокое погружение в творческий мир
+              художницы, где каждая работа раскрывает новые грани её
+              многогранного таланта. Посетители могут увидеть как ранние работы,
+              так и последние произведения, созданные после серьёзного
+              заболевания.
+            </p>
+          </div>
+
+          <!-- Additional content -->
+          <div class="space-y-6">
+            <p class="text-lg leading-[1.6] text-black text-justify font-serif">
+              Искусство Трейси Эмин всегда было автобиографичным. Она не
+              скрывает свои переживания, наоборот, выставляет их напоказ,
+              превращая личную боль в универсальное послание о человеческой
+              уязвимости и силе духа.
+            </p>
+
+            <p class="text-lg leading-[1.6] text-black text-justify font-serif">
+              Экспозиция продлится до конца года и обещает стать одним из самых
+              обсуждаемых культурных событий сезона. Музей ожидает рекордного
+              количества посетителей.
+            </p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </main>
+</Layout>

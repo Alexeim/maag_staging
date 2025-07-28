@@ -3,7 +3,7 @@ import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
 
 import Header from "../components/common/Header.astro";
-// import Footer from "../components/common/Footer.astro";
+import Footer from "../components/common/Footer.astro";
 import { navbarContent } from "../content/navbar/RU/Navbar.json";
 import { footerData } from "../content/footer/EN/Footer.json";
 
@@ -47,7 +47,10 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
       buttonText={navbarContent.button.label}
     />
     <slot />
-    <!-- <Footer footerData={footerData} /> -->
+    <Footer />
+    <script>
+      import "../alpine.ts";
+    </script>
   </body>
 </html>
 <style is:global>
