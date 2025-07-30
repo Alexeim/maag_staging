@@ -9,33 +9,40 @@ interface Props {
   location: string;
   image: ImageMetadata;
   class?: string;
+  textSize?: "med" | "lg";
 }
 
-const { tag, date, title, location, image, class: className } = Astro.props;
+const {
+  tag,
+  date,
+  title,
+  location,
+  image,
+  class: className,
+  textSize = "lg",
+} = Astro.props;
 ---
 
-<div class:list={["relative text-white rounded-lg overflow-hidden", className]}>
-  <Image
-    src={image}
-    alt={title}
-    class="absolute inset-0 w-full h-full object-cover"
-  />
-  <div
-    class="relative z-10 p-8 flex flex-col justify-end h-full bg-gradient-to-t from-black/70 via-black/40 to-transparent"
-  >
-    <div>
-      <span
-        class="text-xs uppercase tracking-widest font-medium text-brand-red"
-        >{tag}</span
-      >
-      <p class="font-serif text-base mt-1">{date}</p>
-      <h3 class="font-serif text-4xl font-bold mt-2 leading-tight">
-        {title}
-      </h3>
-      <div class="flex items-center mt-4 text-base">
-        <Fragment set:html={locationIcon} />
-        <span class="ml-2">{location}</span>
-      </div>
+<div
+  class:list={[
+    "text-white overflow-hidden p-8 flex flex-col justify-end h-96 bg-gradient-to-t from-black/70 via-black/40 to-transparent",
+    className,
+  ]}
+  style={`background-image: url(${image.src}); background-size: cover; background-position: center;`}
+>
+  <div>
+    <span class="text-xs uppercase tracking-widest font-medium text-error tag"
+      >{tag}</span
+    >
+    <p class="font-serif text-base mt-1">{date}</p>
+    <h3
+      class={`font-serif ${textSize === "lg" ? "text-4xl" : "text-2xl"} mt-2 leading-tight`}
+    >
+      {title}
+    </h3>
+    <div class="flex items-center mt-4 text-base">
+      <Fragment set:html={locationIcon} />
+      <span class="ml-2">{location}</span>
     </div>
   </div>
 </div>

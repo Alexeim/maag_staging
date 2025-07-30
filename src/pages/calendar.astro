@@ -21,47 +21,61 @@ const imagePaths = {
   useClientRouter={true}
 >
   <main
-    class="bg-base-100 px-4 sm:px-6 lg:px-20 py-12"
+    class="bg-base-200 px-4 sm:px-6 lg:px-20 py-12"
     x-data={`calendar(${JSON.stringify(imagePaths)})`}
   >
-    <div class="space-y-20">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <EventCard
-          tag="Выставка"
-          date="10-15 Сентября"
-          title="Огюст Роден и его бабы. Сплетни, интриги, расследования."
-          location="Место"
-          image={baletImage}
-          class="lg:col-span-2"
-        />
-        <div class="grid grid-rows-2 gap-10">
+    <div>
+      <div>
+        <h1
+          class="text-4xl font-serif uppercase tracking-widest text-black mb-18"
+        >
+          К А Л Е Н Д А Р Ь
+        </h1>
+        <div class="p-8">
           <EventCard
             tag="Выставка"
             date="10-15 Сентября"
             title="Огюст Роден и его бабы. Сплетни, интриги, расследования."
             location="Место"
             image={baletImage}
+            class="h-[70vh]"
           />
-          <EventCard
-            tag="Выставка"
-            date="10-15 Сентября"
-            title="Огюст Роден и его бабы. Сплетни, интриги, расследования."
-            location="Место"
-            image={baletImage}
-          />
+          <div class="flex flex-col md:flex-row mt-6">
+            <EventCard
+              tag="Выставка"
+              date="10-15 Сентября"
+              title="Огюст Роден и его бабы. Сплетни, интриги, расследования."
+              location="Место"
+              image={baletImage}
+              class="mb-6 md:mb-0 md:mr-6"
+              textSize="med"
+            />
+            <EventCard
+              tag="Выставка"
+              date="10-15 Сентября"
+              title="Огюст Роден и его бабы. Сплетни, интриги, расследования."
+              location="Место"
+              image={baletImage}
+              textSize="med"
+            />
+          </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-12 gap-16">
-        <aside class="col-span-4 space-y-8">
-          <h2 class="text-lg font-serif uppercase tracking-widest">Расписание</h2>
-          <CalendarWidget />
-          <FilterButtons />
-        </aside>
-        <section class="col-span-8">
-          <EventList />
-        </section>
+      <div class="flex flex-col lg:flex-row mt-16">
+        <div class="w-full mb-16 lg:mb-0 lg:mr-16">
+          <h2 class="text-lg font-serif uppercase tracking-widest mb-8">
+            Расписание
+          </h2>
+          <div class="w-full flex flex-row gap-4 mb-18">
+            <CalendarWidget />
+            <FilterButtons />
+          </div>
+        </div>
       </div>
     </div>
+    <section class="w-full">
+      <EventList />
+    </section>
   </main>
 </Layout>

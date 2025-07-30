@@ -11,7 +11,7 @@ interface NavbarProps {
 
 const { variant, languages, user = true } = Astro.props as NavbarProps;
 const navbarClasses = variant === "default" ? "bg-base-100" : "bg-transparent";
-const positionClasses = "absolute";
+const positionClasses = variant === "default" ? "relative" : "absolute";
 const colorClasses = "text-base-content";
 const borderClasses = "border-none";
 
