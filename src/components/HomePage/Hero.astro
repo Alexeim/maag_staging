@@ -3,12 +3,13 @@ import logoFull from "../../assets/logo/logoFull.svg";
 import { Image } from "astro:assets";
 ---
 
-<div
-  class="flex flex-col items-center justify-center h-[400px] bg-base-200 lg:relative"
->
+<section class="relative">
+  <div class="h-[400px] bg-base-200">
+    <!-- This div is only for background and height -->
+  </div>
   <Image
     src={logoFull}
     alt="Maag"
-    class="absolute -top-14 left-1/2 -translate-x-1/2 z-50 hidden lg:block h-[713px] w-full"
+    class="absolute -top-14 left-1/2 -translate-x-1/2 z-50 hidden lg:block h-[713px] w-full pointer-events-none"
   />
-</div>
+</section>

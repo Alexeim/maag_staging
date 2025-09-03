@@ -3,7 +3,9 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "concurrently --kill-others-on-fail -p \"[{name}]\" -n \"FRONT,BACK\" -c \"black.bgMagenta.bold,blue.bgCyan.bold\" \"npm:dev:frontend\" \"npm:dev:backend\"",
+    "dev:frontend": "astro dev",
+    "dev:backend": "npm run dev --prefix server",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
@@ -22,6 +24,7 @@
     "tailwindcss": "^4.1.8"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "gh-pages": "^6.3.0"
   }
 }
