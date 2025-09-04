@@ -1,6 +1,6 @@
 ---
 import logo from "../../assets/logo/logo.svg";
-import { Instagram, Youtube, X } from "@lucide/astro";
+import { Search, Instagram, Youtube, X } from "@lucide/astro";
 import { Image } from "astro:assets";
 import searchIcon from "../../assets/icons/search-mobile.svg";
 import burgerIcon from "../../assets/icons/burger-mobile.svg";
@@ -16,7 +16,7 @@ const {
   variant,
   languages,
   user = true,
-  showLogoInNav = true, // Default to true
+  showLogoInNav = true,
 } = Astro.props as NavbarProps;
 
 const navbarClasses = variant === "default" ? "bg-base-100" : "bg-transparent";
@@ -27,11 +27,20 @@ const borderClasses = "border-none";
 const logoSrc = logo.src;
 ---
 
-<header x-data="{ open: false }" class="relative">
+<div x-data="{ open: false }">
   <nav
-    class={`navbar w-full ${navbarClasses} ${positionClasses} ${colorClasses} ${borderClasses} py-2 lg:py-6 px-4 lg:px-12 z-50`}
+    class:list={[
+      "navbar w-full",
+      navbarClasses,
+      positionClasses,
+      colorClasses,
+      borderClasses,
+      "py-2 lg:py-6 px-4 lg:px-12 z-50",
+    ]}
   >
-    <div class="navbar-start">
+    <div
+      class="navbar-start flex flex-row items-center justify-start lg:justify-center gap-18"
+    >
       {
         showLogoInNav && (
           <a class="cursor-pointer text-xl" href="/">
@@ -39,32 +48,57 @@ const logoSrc = logo.src;
           </a>
         )
       }
+      <div class="hidden lg:flex ml-4">
+        <ul
+          class={`menu menu-horizontal px-1 ${colorClasses} font-semibold text-[16px]`}
+        >
+          <li
+            class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+          >
+            <a href="/culture">Культура</a>
+            <span
+              class="text-base text-base-content/20 pointer-events-none select-none"
+              >|</span
+            >
+          </li>
+          <li
+            class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+          >
+            <a href="/building">Париж</a>
+            <span
+              class="text-base text-base-content/20 pointer-events-none select-none"
+              >|</span
+            >
+          </li>
+          <li
+            class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+          >
+            <a href="/building">Дети</a>
+            <span
+              class="text-base text-base-content/20 pointer-events-none select-none"
+              >|</span
+            >
+          </li>
+          <li
+            class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+          >
+            <a href="/calendar">Календарь</a>
+            <span
+              class="text-base text-base-content/20 pointer-events-none select-none"
+              >|</span
+            >
+          </li>
+          <li
+            class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+          >
+            <a href="/building">О проекте</a>
+          </li>
+        </ul>
+      </div>
     </div>
 
-    <div class="navbar-center hidden lg:flex">
-      <ul
-        class={`menu menu-horizontal px-1 ${colorClasses} font-semibold text-[16px]`}
-      >
-        <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]">
-          <a href="/culture">Культура</a>
-          <span class="text-base text-base-content/20 pointer-events-none select-none">|</span>
-        </li>
-        <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]">
-          <a href="/building">Париж</a>
-          <span class="text-base text-base-content/20 pointer-events-none select-none">|</span>
-        </li>
-        <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]">
-          <a href="/building">Дети</a>
-          <span class="text-base text-base-content/20 pointer-events-none select-none">|</span>
-        </li>
-        <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]">
-          <a href="/calendar">Календарь</a>
-          <span class="text-base text-base-content/20 pointer-events-none select-none">|</span>
-        </li>
-        <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]">
-          <a href="/building">О проекте</a>
-        </li>
-      </ul>
+    <div class="navbar-center">
+      {/* This div is intentionally left empty to push start and end apart */}
     </div>
 
     <div class="navbar-end">
@@ -78,7 +112,11 @@ const logoSrc = logo.src;
         <button class="btn btn-ghost btn-circle">
           <Youtube class="h-5 w-5" />
         </button>
-        <a href="#" class="btn bg-base-300 text-base-content rounded-lg" id="enterButton">Войти</a>
+        <a
+          href="#"
+          class="btn bg-base-300 text-base-content rounded-lg"
+          id="enterButton">Войти</a
+        >
       </div>
 
       <div class="flex items-center lg:hidden">
@@ -86,7 +124,12 @@ const logoSrc = logo.src;
           <Image src={searchIcon} alt="Search" class="h-5 w-5" />
         </button>
         <button @click="open = !open" class="btn btn-ghost btn-circle">
-          <Image x-show="!open" src={burgerIcon} alt="Open menu" class="h-4 w-5" />
+          <Image
+            x-show="!open"
+            src={burgerIcon}
+            alt="Open menu"
+            class="h-4 w-5"
+          />
           <X x-show="open" class="h-6 w-6" />
         </button>
       </div>
@@ -97,10 +140,11 @@ const logoSrc = logo.src;
   <div
     x-show="open"
     x-transition
-    class="lg:hidden absolute top-full left-0 w-full bg-base-100 shadow-lg z-40"
+    class="lg:hidden fixed top-0 left-0 w-full h-full bg-base-100 shadow-lg z-[51]"
     @click.away="open = false"
+    style="display: none;"
   >
-    <ul class="menu p-4">
+    <ul class="menu p-4 pt-24 text-left">
       <li><a href="/culture" class="py-3 text-lg">Культура</a></li>
       <li><a href="/building" class="py-3 text-lg">Париж</a></li>
       <li><a href="/building" class="py-3 text-lg">Дети</a></li>
@@ -111,7 +155,7 @@ const logoSrc = logo.src;
       </li>
     </ul>
   </div>
-</header>
+</div>
 
 <style>
   nav {

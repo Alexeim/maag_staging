@@ -12,16 +12,10 @@ interface LayoutProps {
   useClientRouter?: boolean;
   navbarVariant?: "default" | "transparent";
   includePreFooterCTA?: boolean;
-  showLogoInNav?: boolean;
 }
 
-const {
-  title,
-  useClientRouter,
-  navbarVariant,
-  includePreFooterCTA,
-  showLogoInNav,
-} = Astro.props as LayoutProps;
+const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
+  Astro.props as LayoutProps;
 ---
 
 <!doctype html>
@@ -35,7 +29,7 @@ const {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Great+Vibes&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap"
       rel="stylesheet"
     />
     {useClientRouter && <ClientRouter />}
@@ -51,7 +45,6 @@ const {
       aboutText={navbarContent.items[4].label}
       languagesText={navbarContent.languages[0]}
       buttonText={navbarContent.button.label}
-      showLogoInNav={showLogoInNav}
     />
     <slot />
     <Footer />
