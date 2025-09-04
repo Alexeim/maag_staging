@@ -39,18 +39,22 @@ const logoSrc = logo.src;
     ]}
   >
     <div
-      class="navbar-start flex flex-row items-center justify-start lg:justify-center gap-18"
+      class="navbar-start flex flex-row items-center justify-start gap-4 lg:gap-8"
     >
       {
         showLogoInNav && (
-          <a class="cursor-pointer text-xl" href="/">
-            <img src={logoSrc} alt="Maag logo" class="w-20 lg:w-16" />
+          <a class="cursor-pointer text-xl flex-shrink-0" href="/">
+            <img
+              src={logoSrc}
+              alt="Maag logo"
+              class="w-20 lg:w-16 flex-shrink-0"
+            />
           </a>
         )
       }
-      <div class="hidden lg:flex ml-4">
+      <div class="hidden lg:flex ml-4 flex-shrink-0">
         <ul
-          class={`menu menu-horizontal px-1 ${colorClasses} font-semibold text-[16px]`}
+          class={`menu menu-horizontal px-1 ${colorClasses} font-semibold text-[16px] whitespace-nowrap`}
         >
           <li
             class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
@@ -101,8 +105,10 @@ const logoSrc = logo.src;
       {/* This div is intentionally left empty to push start and end apart */}
     </div>
 
-    <div class="navbar-end">
-      <div class="hidden lg:flex gap-2 items-center justify-center">
+    <div class="navbar-end flex-shrink-0">
+      <div
+        class="hidden lg:flex gap-2 items-center justify-center flex-shrink-0 whitespace-nowrap"
+      >
         <button class="btn btn-ghost btn-circle">
           <Image src={searchIcon} alt="Search" class="h-5 w-5" />
         </button>
@@ -119,7 +125,7 @@ const logoSrc = logo.src;
         >
       </div>
 
-      <div class="flex items-center lg:hidden">
+      <div class="flex items-center lg:hidden flex-shrink-0 gap-2">
         <button class="btn btn-ghost btn-circle">
           <Image src={searchIcon} alt="Search" class="h-5 w-5" />
         </button>
@@ -160,8 +166,56 @@ const logoSrc = logo.src;
 <style>
   nav {
     font-family: "Lora", serif !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
   }
+
+  .navbar-start {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .navbar-center {
+    flex: 1 !important;
+    flex-shrink: 1 !important;
+  }
+
+  .navbar-end {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .menu-horizontal {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+  }
+
   #enterButton {
     font-family: "Inter", sans-serif !important;
+    flex-shrink: 0 !important;
+  }
+
+  .navbar-end > div {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .btn {
+    flex-shrink: 0 !important;
+  }
+
+  /* Force menu items to stay in line */
+  .menu-horizontal > li {
+    display: flex !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
   }
 </style>
