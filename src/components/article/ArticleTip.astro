@@ -4,7 +4,7 @@ import locationIcon from "../../assets/icons/location.svg";
 import type { ImageMetadata } from "astro";
 
 interface Tip {
-  image: ImageMetadata; // Expects the image object
+  image: ImageMetadata;
   date: string;
   location: string;
   time: string;
@@ -19,15 +19,15 @@ interface Props {
 const { tip } = Astro.props;
 ---
 
-<div class="flex gap-8">
+<div class="flex flex-col lg:flex-row gap-4 lg:gap-8">
   <Image
     src={tip.image}
     alt="Tip image"
-    class="w-[216px] h-[224px] object-cover"
+    class="w-full lg:w-[216px] h-auto lg:h-[224px] object-cover flex-shrink-0"
   />
   <div class="flex flex-col gap-2 flex-1">
     <div class="flex flex-col gap-2">
-      <h4 class="text-2xl font-serif text-base-content">{tip.date}</h4>
+      <h4 class="text-xl lg:text-2xl font-serif text-base-content">{tip.date}</h4>
       <hr class="border-base-300" />
     </div>
     <div class="flex flex-col gap-2">
@@ -46,6 +46,6 @@ const { tip } = Astro.props;
       >
     </div>
     <hr class="border-base-300" />
-    <p class="text-lg text-base-content font-serif">{tip.description}</p>
+    <p class="text-base lg:text-lg text-base-content font-serif">{tip.description}</p>
   </div>
 </div>

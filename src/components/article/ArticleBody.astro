@@ -1,5 +1,6 @@
 ---
-// src/components/article/ArticleBody.astro
+import type { ImageMetadata } from "astro";
+
 interface Section {
   type: "subheading" | "paragraph" | "quote";
   content: string;
@@ -15,16 +16,15 @@ const { opening, sections } = Astro.props;
 
 <div class="max-w-[826px] mx-auto">
   <article class="space-y-10">
-    <!-- Opening paragraph with decorative P -->
-    <div class="flex gap-10">
-      <div class="w-[187px] flex-shrink-0">
+    <div class="flex gap-4 lg:gap-10">
+      <div class="hidden lg:block w-[187px] flex-shrink-0">
         <span class="text-[159px] leading-[1.6] font-['Great_Vibes'] text-base-300"
           >П</span
         >
       </div>
       <div class="flex-1">
         <p class="text-lg leading-[1.6] text-base-content text-justify font-serif">
-          {opening}
+          <span class="lg:hidden">П</span>{opening}
         </p>
       </div>
     </div>
@@ -46,7 +46,7 @@ const { opening, sections } = Astro.props;
             );
           case "quote":
             return (
-              <p class="text-[38px] leading-[1.4] text-base-content font-serif">
+              <p class="text-2xl lg:text-[38px] leading-tight lg:leading-[1.4] text-base-content font-serif">
                 {section.content}
               </p>
             );

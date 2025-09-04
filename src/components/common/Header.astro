@@ -10,21 +10,26 @@ interface HeaderProps {
   aboutText?: string;
   languagesText?: string;
   buttonText?: string;
+  showLogoInNav?: boolean;
 }
-const { variant, cultureText, guideText, childrenText, calendarText, aboutText, languagesText, buttonText } =
-  Astro.props as HeaderProps;
-
-console.log("Header render, variant:", variant);
-console.log("Header render, cultureText:", cultureText);
-console.log("Header render, guideText:", guideText);
-console.log("Header render, childrenText:", childrenText);
-console.log("Header render, calendarText:", calendarText);
-console.log("Header render, aboutText:", aboutText);
-console.log("Header render, languagesText:", languagesText);
-console.log("Header render, buttonText:", buttonText);
+const {
+  variant,
+  cultureText,
+  guideText,
+  childrenText,
+  calendarText,
+  aboutText,
+  languagesText,
+  buttonText,
+  showLogoInNav,
+} = Astro.props as HeaderProps;
 ---
 
-<Navbar variant={variant} languages={languagesText}>
+<Navbar
+  variant={variant}
+  languages={languagesText}
+  showLogoInNav={showLogoInNav}
+>
   <span slot="culture">{cultureText}</span>
   <span slot="guide">{guideText}</span>
   <span slot="children">{childrenText}</span>

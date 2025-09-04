@@ -1,5 +1,6 @@
 ---
-// src/components/article/ArticleHeader.astro
+import type { ImageMetadata } from "astro";
+
 interface Props {
   category: string;
   title: string;
@@ -8,15 +9,16 @@ interface Props {
 const { category, title } = Astro.props;
 ---
 
-<div class="flex flex-col gap-8 max-w-[825px] w-full">
-  <!-- Category and Title -->
+<div class="flex flex-col gap-8 w-full">
   <div class="flex flex-col items-end gap-2">
     <p
       class="text-xs font-medium uppercase tracking-[0.25em] text-error font-['Inter']"
     >
       {category}
     </p>
-    <h1 class="text-[44px] leading-[1.28] font-serif text-base-content w-full">
+    <h1
+      class="text-3xl lg:text-[44px] leading-tight lg:leading-[1.28] font-serif text-base-content w-full"
+    >
       {title}
     </h1>
   </div>

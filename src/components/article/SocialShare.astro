@@ -1,5 +1,4 @@
 ---
-// src/components/article/SocialShare.astro
 import { Image } from "astro:assets";
 import shareIcon from "../../assets/icons/share.svg";
 import bookmarkIcon from "../../assets/icons/bookmark.svg";
@@ -10,7 +9,7 @@ interface Props {
 const { readTime } = Astro.props;
 ---
 
-<div class="flex gap-4">
+<div class="flex flex-wrap gap-4">
   <button
     class="flex items-center gap-4 px-4 py-2 h-10 border border-base-300 rounded-2xl hover:bg-base-300 transition-colors"
   >

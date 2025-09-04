@@ -1,5 +1,4 @@
 ---
-// src/components/article/EventDetails.astro
 import { Image } from "astro:assets";
 import mapPinIcon from "../../assets/icons/map-pin.svg";
 import { Calendar } from "@lucide/astro";
@@ -14,11 +13,9 @@ const { address, dates } = Astro.props;
 <div class="max-w-[826px] mx-auto mt-[100px] space-y-8">
   <hr class="w-full border-t border-base-300" />
 
-  <div class="space-y-20">
-    <!-- Address and Map -->
-    <div class="flex gap-8 items-start">
+  <div class="space-y-8">
+    <div class="flex flex-col lg:flex-row gap-8 items-start">
       <div class="flex-1 space-y-8">
-        <!-- Address Info -->
         <div class="space-y-8">
           <div class="space-y-2">
             <h3 class="text-base font-semibold text-base-content font-['Inter']">
@@ -37,7 +34,6 @@ const { address, dates } = Astro.props;
           </button>
         </div>
 
-        <!-- Date Info -->
         <div class="space-y-8">
           <div class="space-y-2">
             <h3 class="text-base font-semibold text-base-content font-['Inter']">
@@ -57,8 +53,7 @@ const { address, dates } = Astro.props;
         </div>
       </div>
 
-      <!-- Map placeholder -->
-      <div class="flex-1">
+      <div class="flex-1 w-full">
         <div
           class="w-full h-64 bg-base-300 rounded-lg flex items-center justify-center"
         >

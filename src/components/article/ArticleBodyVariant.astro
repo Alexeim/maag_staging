@@ -1,9 +1,9 @@
 ---
-// src/components/article/ArticleBodyVariant.astro
 import ArticleTip from "./ArticleTip.astro";
+import type { ImageMetadata } from "astro";
 
 interface Tip {
-  image: string;
+  image: ImageMetadata;
   date: string;
   location: string;
   time: string;
@@ -21,15 +21,15 @@ const { opening, mainContent, tips } = Astro.props;
 ---
 
 <div class="max-w-[826px] mx-auto">
-  <article class="space-y-10">
-    <p class="text-2xl leading-[1.6] text-base-content text-justify font-serif">
+  <article class="space-y-8 lg:space-y-10">
+    <p class="text-xl lg:text-2xl leading-relaxed lg:leading-[1.6] text-base-content text-justify font-serif">
       {opening}
     </p>
-    <p class="text-lg leading-[1.6] text-base-content text-justify font-serif">
+    <p class="text-base lg:text-lg leading-relaxed lg:leading-[1.6] text-base-content text-justify font-serif">
       {mainContent}
     </p>
 
-    <div class="space-y-10">
+    <div class="space-y-8 lg:space-y-10">
       {tips.map((tip) => <ArticleTip tip={tip} />)}
     </div>
   </article>

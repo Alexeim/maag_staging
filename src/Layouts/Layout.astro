@@ -12,10 +12,16 @@ interface LayoutProps {
   useClientRouter?: boolean;
   navbarVariant?: "default" | "transparent";
   includePreFooterCTA?: boolean;
+  showLogoInNav?: boolean;
 }
 
-const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
-  Astro.props as LayoutProps;
+const {
+  title,
+  useClientRouter,
+  navbarVariant,
+  includePreFooterCTA,
+  showLogoInNav,
+} = Astro.props as LayoutProps;
 ---
 
 <!doctype html>
@@ -45,6 +51,7 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
       aboutText={navbarContent.items[4].label}
       languagesText={navbarContent.languages[0]}
       buttonText={navbarContent.button.label}
+      showLogoInNav={showLogoInNav}
     />
     <slot />
     <Footer />
