@@ -1,7 +1,9 @@
 ---
 import logo from "../../assets/logo/logo.svg";
-
-import { Search, Instagram, Youtube } from "@lucide/astro";
+import { Instagram, Youtube, X } from "@lucide/astro";
+import { Image } from "astro:assets";
+import searchIcon from "../../assets/icons/search-mobile.svg";
+import burgerIcon from "../../assets/icons/burger-mobile.svg";
 
 interface NavbarProps {
   variant: "default" | "transparent";
@@ -18,107 +20,101 @@ const borderClasses = "border-none";
 const logoSrc = logo.src;
 ---
 
-<nav
-  x-data="{ user: false }"
-  class={`navbar w-full ${navbarClasses} ${positionClasses} ${colorClasses} ${borderClasses} py-2 lg:py-6 lg:px-4 z-50`}
->
-  <div class="navbar-start">
-    <a class="cursor-pointer text-xl" href="/">
-      <img src={logoSrc} alt="Wurkspaces.dev logo" class="w-20 lg:w-16" />
-    </a>
-  </div>
-  <div class="navbar-center hidden lg:flex">
-    <ul
-      class={`menu menu-horizontal px-1 ${colorClasses} font-semibold text-[16px]`}
-    >
-      <li
-        class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+<header x-data="{ open: false }" class="relative">
+  <nav
+    class={`navbar w-full ${navbarClasses} ${positionClasses} ${colorClasses} ${borderClasses} py-2 lg:py-6 px-4 lg:px-12 z-50`}
+  >
+    <!-- Logo (Desktop only) -->
+    <div class="navbar-start hidden lg:flex">
+      <a class="cursor-pointer text-xl" href="/">
+        <img src={logoSrc} alt="Maag logo" class="w-16" />
+      </a>
+    </div>
+
+    <!-- Mobile Spacer -->
+    <div class="navbar-start lg:hidden"></div>
+
+    <!-- Desktop: Centered Menu -->
+    <div class="navbar-center hidden lg:flex">
+      <ul
+        class={`menu menu-horizontal px-1 ${colorClasses} font-semibold text-[16px]`}
       >
-        <a href="/culture">Культура</a>
-        <span
-          class="text-base text-base-content/20 pointer-events-none select-none"
-          >|</span
-        >
-      </li>
-      <li
-        class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
-      >
-        <a href="/building">Париж</a>
-        <span
-          class="text-base text-base-content/20 pointer-events-none select-none"
-          >|</span
-        >
-      </li>
-      <li
-        class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
-      >
-        <a href="/building">Дети</a>
-        <span
-          class="text-base text-base-content/20 pointer-events-none select-none"
-          >|</span
-        >
-      </li>
-      <li
-        class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
-      >
-        <a href="/calendar">Календарь</a>
-        <span
-          class="text-base text-base-content/20 pointer-events-none select-none"
-          >|</span
-        >
-      </li>
-      <li
-        class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
-      >
-        <a href="/building">О проекте</a>
+        <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]">
+          <a href="/culture">Культура</a>
+          <span class="text-base text-base-content/20 pointer-events-none select-none">|</span>
+        </li>
+        <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]">
+          <a href="/building">Париж</a>
+          <span class="text-base text-base-content/20 pointer-events-none select-none">|</span>
+        </li>
+        <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]">
+          <a href="/building">Дети</a>
+          <span class="text-base text-base-content/20 pointer-events-none select-none">|</span>
+        </li>
+        <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]">
+          <a href="/calendar">Календарь</a>
+          <span class="text-base text-base-content/20 pointer-events-none select-none">|</span>
+        </li>
+        <li class="flex flex-row items-center uppercase font-light tracking-[0.2em]">
+          <a href="/building">О проекте</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Right side icons (Mobile and Desktop) -->
+    <div class="navbar-end">
+      <!-- Desktop Icons -->
+      <div class="hidden lg:flex gap-2 items-center justify-center">
+        <button class="btn btn-ghost btn-circle">
+          <Image src={searchIcon} alt="Search" class="h-5 w-5" />
+        </button>
+        <button class="btn btn-ghost btn-circle">
+          <Instagram class="h-5 w-5" />
+        </button>
+        <button class="btn btn-ghost btn-circle">
+          <Youtube class="h-5 w-5" />
+        </button>
+        <a href="#" class="btn bg-base-300 text-base-content rounded-lg" id="enterButton">Войти</a>
+      </div>
+
+      <!-- Mobile Icons -->
+      <div class="flex items-center lg:hidden">
+        <button class="btn btn-ghost btn-circle">
+          <Image src={searchIcon} alt="Search" class="h-5 w-5" />
+        </button>
+        <button @click="open = !open" class="btn btn-ghost btn-circle">
+          <Image x-show="!open" src={burgerIcon} alt="Open menu" class="h-4 w-5" />
+          <X x-show="open" class="h-6 w-6" />
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu Panel -->
+  <div
+    x-show="open"
+    x-transition
+    class="lg:hidden absolute top-full left-0 w-full bg-base-100 shadow-lg z-40"
+    @click.away="open = false"
+  >
+    <ul class="menu p-4">
+      <li><a href="/culture" class="py-3 text-lg">Культура</a></li>
+      <li><a href="/building" class="py-3 text-lg">Париж</a></li>
+      <li><a href="/building" class="py-3 text-lg">Дети</a></li>
+      <li><a href="/calendar" class="py-3 text-lg">Календарь</a></li>
+      <li><a href="/building" class="py-3 text-lg">О проекте</a></li>
+      <li class="pt-4 mt-4 border-t border-base-300">
+        <a href="#" class="btn bg-base-300 text-base-content w-full">Войти</a>
       </li>
     </ul>
   </div>
-  <div class="navbar-end">
-    <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-5 w-5"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 6h16M4 12h8m-8 6h16"></path>
-      </svg>
-    </div>
-  </div>
-  <div class="navbar-end hidden lg:flex">
-    <div class="flex gap-2 items-center justify-center">
-      <button class="btn btn-ghost btn-circle">
-        <Search class="h-5 w-5" />
-      </button>
-      <button class="btn btn-ghost btn-circle">
-        <Instagram class="h-5 w-5" />
-      </button>
-      <button class="btn btn-ghost btn-circle">
-        <Youtube class="h-5 w-5" />
-      </button>
-      <a
-        href="#"
-        class="btn bg-base-300 text-base-content rounded-lg"
-        id="enterButton">Войти</a
-      >
-    </div>
-  </div>
-</nav>
+</header>
 
 <style>
   nav {
     font-family: "Lora", serif !important;
   }
   #enterButton {
-    font-family: "Inter", sans-serif !important;
-  }
-  #userDropdown {
     font-family: "Inter", sans-serif !important;
   }
 </style>

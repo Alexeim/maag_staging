@@ -5,7 +5,9 @@
 <footer class="bg-base-300 text-base-content">
   <div class="mx-auto px-4 lg:px-12 py-12">
     {/* Main Footer Content */}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8 text-center sm:text-left"
+    >
       {/* About Section */}
       <div>
         <h3 class="text-lg font-normal mb-4 uppercase tracking-wide">О нас</h3>
@@ -120,7 +122,7 @@
           </p>
 
           {/* Social Media */}
-          <div class="flex gap-4 mt-4">
+          <div class="flex gap-4 mt-4 justify-center sm:justify-start">
             <a
               href="https://instagram.com"
               target="_blank"
@@ -178,11 +180,13 @@
     <hr class="border-base-content/20 mb-6" />
 
     {/* Bottom Footer */}
-    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+    <div
+      class="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left"
+    >
       <div class="text-sm text-base-content/70">
         &copy; 2025 MAAG France. Все права защищены.
       </div>
-      <div class="flex gap-6 text-sm">
+      <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 text-sm">
         <a href="/privacy" class="hover:text-accent transition-colors"
           >Политика конфиденциальности</a
         >
