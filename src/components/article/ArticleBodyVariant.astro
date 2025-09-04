@@ -1,0 +1,36 @@
+---
+// src/components/article/ArticleBodyVariant.astro
+import ArticleTip from "./ArticleTip.astro";
+
+interface Tip {
+  image: string;
+  date: string;
+  location: string;
+  time: string;
+  action: string;
+  description: string;
+}
+
+interface Props {
+  opening: string;
+  mainContent: string;
+  tips: Tip[];
+}
+
+const { opening, mainContent, tips } = Astro.props;
+---
+
+<div class="max-w-[826px] mx-auto">
+  <article class="space-y-10">
+    <p class="text-2xl leading-[1.6] text-base-content text-justify font-serif">
+      {opening}
+    </p>
+    <p class="text-lg leading-[1.6] text-base-content text-justify font-serif">
+      {mainContent}
+    </p>
+
+    <div class="space-y-10">
+      {tips.map((tip) => <ArticleTip tip={tip} />)}
+    </div>
+  </article>
+</div>

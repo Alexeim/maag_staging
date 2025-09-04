@@ -1,0 +1,19 @@
+---
+// src/components/article/ArticleAuthor.astro
+interface Props {
+  name: string;
+  avatarUrl: string;
+}
+const { name, avatarUrl } = Astro.props;
+---
+
+<div class="flex items-center gap-[17px]">
+  <img
+    src={avatarUrl}
+    alt={`Аватар ${name}`}
+    class="w-[42px] h-[42px] bg-neutral rounded-full object-cover"
+  />
+  <span class="text-base font-medium font-serif text-base-content"
+    >{name}</span
+  >
+</div>

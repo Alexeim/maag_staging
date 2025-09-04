@@ -1,0 +1,49 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface Article {
+  image: ImageMetadata; // Expects the image object
+  category: string;
+  title: string;
+  heightClass: string;
+}
+
+interface Props {
+  articles: Article[];
+}
+
+const { articles } = Astro.props;
+---
+
+<div class="max-w-[826px] mx-auto mt-[100px] space-y-8">
+  <hr class="w-full border-t border-base-300" />
+
+  <div class="space-y-8">
+    <h2 class="text-base uppercase tracking-[0.46em] text-base-content font-serif">
+      Похожие статьи
+    </h2>
+
+    <div class="grid grid-cols-2 lg-grid-cols-4 gap-10">
+      {
+        articles.map((article) => (
+          <div class="space-y-9">
+            <Image
+              src={article.image}
+              alt={`Обложка статьи ${article.title}`}
+              class:list={["w-full object-cover", article.heightClass]}
+            />
+            <div class="space-y-2">
+              <p class="text-xs font-medium uppercase tracking-[0.25em] text-error font-['Inter']">
+                {article.category}
+              </p>
+              <h3 class="text-2xl leading-[1.28] text-base-content font-serif">
+                {article.title}
+              </h3>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</div>

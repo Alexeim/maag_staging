@@ -1,0 +1,51 @@
+---
+import { Image } from "astro:assets";
+import locationIcon from "../../assets/icons/location.svg";
+import type { ImageMetadata } from "astro";
+
+interface Tip {
+  image: ImageMetadata; // Expects the image object
+  date: string;
+  location: string;
+  time: string;
+  action: string;
+  description: string;
+}
+
+interface Props {
+  tip: Tip;
+}
+
+const { tip } = Astro.props;
+---
+
+<div class="flex gap-8">
+  <Image
+    src={tip.image}
+    alt="Tip image"
+    class="w-[216px] h-[224px] object-cover"
+  />
+  <div class="flex flex-col gap-2 flex-1">
+    <div class="flex flex-col gap-2">
+      <h4 class="text-2xl font-serif text-base-content">{tip.date}</h4>
+      <hr class="border-base-300" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7">
+          <Image src={locationIcon} alt="Location icon" />
+        </div>
+        <span class="font-semibold text-neutral">{tip.location}</span>
+      </div>
+      <hr class="border-base-300" />
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="font-semibold text-neutral">{tip.time}</span>
+      <span class="font-extrabold text-sm text-base-content"
+        >{tip.action}</span
+      >
+    </div>
+    <hr class="border-base-300" />
+    <p class="text-lg text-base-content font-serif">{tip.description}</p>
+  </div>
+</div>

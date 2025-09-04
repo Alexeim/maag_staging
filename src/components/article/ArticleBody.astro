@@ -1,0 +1,59 @@
+---
+// src/components/article/ArticleBody.astro
+interface Section {
+  type: "subheading" | "paragraph" | "quote";
+  content: string;
+}
+
+interface Props {
+  opening: string;
+  sections: Section[];
+}
+
+const { opening, sections } = Astro.props;
+---
+
+<div class="max-w-[826px] mx-auto">
+  <article class="space-y-10">
+    <!-- Opening paragraph with decorative P -->
+    <div class="flex gap-10">
+      <div class="w-[187px] flex-shrink-0">
+        <span class="text-[159px] leading-[1.6] font-['Great_Vibes'] text-base-300"
+          >П</span
+        >
+      </div>
+      <div class="flex-1">
+        <p class="text-lg leading-[1.6] text-base-content text-justify font-serif">
+          {opening}
+        </p>
+      </div>
+    </div>
+
+    {
+      sections.map((section) => {
+        switch (section.type) {
+          case "subheading":
+            return (
+              <h2 class="text-base font-semibold text-base-content font-['Inter']">
+                {section.content}
+              </h2>
+            );
+          case "paragraph":
+            return (
+              <p class="text-lg leading-[1.6] text-base-content text-justify font-serif">
+                {section.content}
+              </p>
+            );
+          case "quote":
+            return (
+              <p class="text-[38px] leading-[1.4] text-base-content font-serif">
+                {section.content}
+              </p>
+            );
+          default:
+            return null;
+        }
+      })
+    }
+  </article>
+</div>

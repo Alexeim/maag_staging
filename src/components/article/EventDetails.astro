@@ -1,0 +1,72 @@
+---
+// src/components/article/EventDetails.astro
+import { Image } from "astro:assets";
+import mapPinIcon from "../../assets/icons/map-pin.svg";
+import { Calendar } from "@lucide/astro";
+
+interface Props {
+  address: string;
+  dates: string;
+}
+const { address, dates } = Astro.props;
+---
+
+<div class="max-w-[826px] mx-auto mt-[100px] space-y-8">
+  <hr class="w-full border-t border-base-300" />
+
+  <div class="space-y-20">
+    <!-- Address and Map -->
+    <div class="flex gap-8 items-start">
+      <div class="flex-1 space-y-8">
+        <!-- Address Info -->
+        <div class="space-y-8">
+          <div class="space-y-2">
+            <h3 class="text-base font-semibold text-base-content font-['Inter']">
+              Адрес
+            </h3>
+            <p class="text-lg text-base-content font-serif">{address}</p>
+          </div>
+
+          <button
+            class="flex items-center gap-4 px-4 py-2 h-10 bg-base-300 rounded-2xl hover:bg-neutral transition-colors"
+          >
+            <Image src={mapPinIcon} alt="Map Pin Icon" class="w-4 h-5" />
+            <span class="text-sm text-neutral-content font-['Inter']"
+              >Открыть в Google maps</span
+            >
+          </button>
+        </div>
+
+        <!-- Date Info -->
+        <div class="space-y-8">
+          <div class="space-y-2">
+            <h3 class="text-base font-semibold text-base-content font-['Inter']">
+              Даты
+            </h3>
+            <p class="text-lg text-base-content font-serif">{dates}</p>
+          </div>
+
+          <button
+            class="flex items-center gap-4 px-4 py-2 h-10 bg-base-300 rounded-2xl hover:bg-neutral transition-colors"
+          >
+            <Calendar class="w-4 h-5" />
+            <span class="text-sm text-neutral-content font-['Inter']"
+              >Добавить в календарь</span
+            >
+          </button>
+        </div>
+      </div>
+
+      <!-- Map placeholder -->
+      <div class="flex-1">
+        <div
+          class="w-full h-64 bg-base-300 rounded-lg flex items-center justify-center"
+        >
+          <span class="text-neutral-content font-['Inter']"
+            >🌎 Map: Paris, France</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

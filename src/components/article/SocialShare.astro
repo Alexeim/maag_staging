@@ -1,0 +1,33 @@
+---
+// src/components/article/SocialShare.astro
+import { Image } from "astro:assets";
+import shareIcon from "../../assets/icons/share.svg";
+import bookmarkIcon from "../../assets/icons/bookmark.svg";
+
+interface Props {
+  readTime: number;
+}
+const { readTime } = Astro.props;
+---
+
+<div class="flex gap-4">
+  <button
+    class="flex items-center gap-4 px-4 py-2 h-10 border border-base-300 rounded-2xl hover:bg-base-300 transition-colors"
+  >
+    <Image src={shareIcon} alt="Share Icon" class="w-[18px] h-[20px]" />
+    <span class="text-sm text-neutral font-['Inter']">Поделиться</span>
+  </button>
+
+  <button
+    class="flex items-center gap-2 px-4 py-2 h-10 border border-base-300 rounded-2xl hover:bg-base-300 transition-colors"
+  >
+    <span class="text-base font-bold text-base-content">{readTime}</span>
+    <span class="text-sm text-neutral font-['Inter']">Минут читать</span>
+  </button>
+
+  <button
+    class="flex items-center justify-center px-4 py-2 h-10 border border-base-300 rounded-2xl hover:bg-base-300 transition-colors"
+  >
+    <Image src={bookmarkIcon} alt="Bookmark Icon" class="w-[14px] h-[18px]" />
+  </button>
+</div>

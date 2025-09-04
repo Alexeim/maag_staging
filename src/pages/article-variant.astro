@@ -4,9 +4,8 @@ import ArticleHeader from "../components/article/ArticleHeader.astro";
 import ArticleAuthor from "../components/article/ArticleAuthor.astro";
 import SocialShare from "../components/article/SocialShare.astro";
 import ArticleImage from "../components/article/ArticleImage.astro";
-import ArticleBody from "../components/article/ArticleBody.astro";
+import ArticleBodyVariant from "../components/article/ArticleBodyVariant.astro";
 import RecentArticles from "../components/article/RecentArticles.astro";
-import EventDetails from "../components/article/EventDetails.astro";
 import articleData from "../content/articlePage/RU/Article.json";
 
 // Import all article images at once!
@@ -17,7 +16,8 @@ const images = import.meta.glob<{ default: ImageMetadata }>(
 
 // Prepare data with resolved image modules
 const mainImageModule =
-  images[`/src/assets/images/article_content/${articleData.mainImage.src}`]?.default;
+  images[`/src/assets/images/article_content/${articleData.mainImage.src}`]
+    ?.default;
 
 const relatedArticlesWithImages = await Promise.all(
   articleData.relatedArticles.map(async (article) => {
@@ -26,12 +26,20 @@ const relatedArticlesWithImages = await Promise.all(
     return { ...article, image: imageModule };
   })
 );
+
+const tipsWithImages = await Promise.all(
+  articleData.bodyVariant.tips.map(async (tip) => {
+    const imageModule =
+      images[`/src/assets/images/article_content/${tip.image}`]?.default;
+    return { ...tip, image: imageModule };
+  })
+);
 ---
 
 <Layout
   navbarVariant="default"
   includePreFooterCTA={false}
-  title={`${articleData.header.title} - Maag`}
+  title={`${articleData.header.title} (Вариант) - Maag`}
   useClientRouter={true}
 >
   <main class="bg-base-200 min-h-screen">
@@ -63,13 +71,10 @@ const relatedArticlesWithImages = await Promise.all(
 
       <!-- Article Content -->
       <div class="max-w-[1400px] mx-auto px-14 pb-[100px]">
-        <ArticleBody
-          opening={articleData.bodyDefault.opening}
-          sections={articleData.bodyDefault.sections}
-        />
-        <EventDetails
-          address={articleData.eventDetails.address}
-          dates={articleData.eventDetails.dates}
+        <ArticleBodyVariant
+          opening={articleData.bodyVariant.opening}
+          mainContent={articleData.bodyVariant.mainContent}
+          tips={tipsWithImages}
         />
         <RecentArticles articles={relatedArticlesWithImages} />
       </div>
