@@ -11,8 +11,16 @@ interface HeaderProps {
   languagesText?: string;
   buttonText?: string;
 }
-const { variant, cultureText, guideText, childrenText, calendarText, aboutText, languagesText, buttonText } =
-  Astro.props as HeaderProps;
+const {
+  variant,
+  cultureText,
+  guideText,
+  childrenText,
+  calendarText,
+  aboutText,
+  languagesText,
+  buttonText,
+} = Astro.props as HeaderProps;
 
 console.log("Header render, variant:", variant);
 console.log("Header render, cultureText:", cultureText);

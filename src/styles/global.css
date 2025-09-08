@@ -1,24 +1,25 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@theme {
+  --color-base-100: oklch(1 0 0); /* #FFFFFF - Чистый белый для карточек */
+  --color-base-200: oklch(0.97 0.01 80); /* #FAF7F2 - Основной фон страницы */
+  --color-base-300: oklch(0.88 0 0); /* #D9D9D9 - Фон подвала и аватаров */
+  --color-base-content: oklch(0 0 0); /* #000000 - Основной текст */
 
-@plugin "daisyui/theme" {
-  name: "maag";
-  default: true; /* set as default */
-  prefersdark: false; /* set as default dark mode (prefers-color-scheme:dark) */
-  color-scheme: light; /* color of browser-provided UI */
+  --color-primary: oklch(0.85 0.05 85); /* #DDCEB5 - Кнопка "Войти" */
+  --color-primary-content: oklch(0 0 0);
 
-  --color-base-100: oklch(1 0 0);
-  --color-base-200: oklch(0.9771 0.0074 80.72);
-  --color-base-300: oklch(0.8979 0.0253 81.12);
-  --color-base-content: oklch(0 0 0);
-  --color-primary: oklch(55% 0.3 240);
-  --color-primary-content: oklch(98% 0.01 240);
+  --color-accent: oklch(0.55 0.2 25); /* #D92F1C - Красный акцентный */
+  --color-accent-content: oklch(1 0 0);
+
+  --color-neutral-100: oklch(0.88 0 0); /* #D9D9D9 */
+  --color-neutral-200: oklch(0.82 0 0); /* #C7C7C7 */
+  --color-neutral-300: oklch(0.65 0 0); /* #9B9B9B */
+  --color-neutral-400: oklch(0.45 0 0); /* #666666 */
+  --color-neutral-500: oklch(0.35 0 0); /* #4E4E4E */
+  --color-neutral-content: oklch(1 0 0);
+
   --color-secondary: oklch(70% 0.25 200);
   --color-secondary-content: oklch(98% 0.01 200);
-  --color-accent: oklch(0.566 0.1829 142.68);
-  --color-accent-content: oklch(0 0 0);
-  --color-neutral: oklch(50% 0.05 240);
-  --color-neutral-content: oklch(98% 0.01 240);
   --color-info: oklch(70% 0.2 220);
   --color-info-content: oklch(98% 0.01 220);
   --color-success: oklch(0.7439 0.0625 144.91);
@@ -48,4 +49,41 @@
 .text-404 {
   font-size: 120px !important;
   line-height: 1 !important;
+}
+
+.font-inter {
+  font-family: "Inter", sans-serif;
+}
+
+/* Mobile Menu Styles */
+.mobile-menu-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 51; /* Ensure it's on top */
+}
+
+body.menu-open {
+  overflow: hidden;
+}
+
+body.menu-open .mobile-menu-panel {
+  transform: translateX(0);
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+  * {
+    forced-color-adjust: auto;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  }
 }

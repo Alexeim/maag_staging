@@ -19,7 +19,6 @@
     "@types/alpinejs": "^3.13.11",
     "alpinejs": "^3.14.9",
     "astro": "^5.8.2",
-    "daisyui": "^5.0.43",
     "lucide-astro": "^0.532.0",
     "tailwindcss": "^4.1.8"
   },

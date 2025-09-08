@@ -29,7 +29,7 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
           <div class="flex flex-col gap-5">
             <div>
               <span
-                class="text-sm uppercase tracking-widest font-medium text-error tag"
+                class="text-sm uppercase tracking-widest font-medium text-error font-inter"
                 x-text="event.tag"></span>
               <h3
                 class="font-serif text-2xl mt-2 leading-tight"
@@ -44,20 +44,20 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
             </div>
             <div class="text-lg font-semibold">
               <div
-                class="flex items-center gap-4 py-2 border-b border-gray-300 tag"
+                class="flex items-center gap-4 py-2 border-b border-gray-300 font-inter"
               >
                 <span set:html={locationIcon} />
                 <span class="text-neutral text-sm" x-text="event.location"
                 ></span>
               </div>
               <div
-                class="flex items-center gap-4 py-2 border-b border-gray-300 tag"
+                class="flex items-center gap-4 py-2 border-b border-gray-300 font-inter"
               >
                 <span set:html={timeIcon} />
                 <span class="text-neutral text-sm" x-text="event.time"></span>
               </div>
               <div
-                class="flex items-center gap-4 py-2 border-b border-gray-300 tag"
+                class="flex items-center gap-4 py-2 border-b border-gray-300 font-inter"
               >
                 <span set:html={calendarIcon} />
                 <span class="text-neutral text-sm" x-text="event.date"></span>

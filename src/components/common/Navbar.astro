@@ -27,195 +27,147 @@ const borderClasses = "border-none";
 const logoSrc = logo.src;
 ---
 
-<div x-data="{ open: false }">
+<div x-data="{ isOpen: false }">
   <nav
     class:list={[
-      "navbar w-full",
+      "w-full z-50",
       navbarClasses,
       positionClasses,
       colorClasses,
       borderClasses,
-      "py-2 lg:py-6 px-4 lg:px-12 z-50",
+      "h-[90px] px-[57px] flex items-center justify-between bg-base-100",
     ]}
   >
-    <div
-      class="navbar-start flex flex-row items-center justify-start gap-4 lg:gap-8"
-    >
+    <div class="flex items-center gap-12">
       {
         showLogoInNav && (
-          <a class="cursor-pointer text-xl flex-shrink-0" href="/">
-            <img
-              src={logoSrc}
-              alt="Maag logo"
-              class="w-20 lg:w-16 flex-shrink-0"
-            />
+          <a class="cursor-pointer" href="/">
+            <img src={logoSrc} alt="Maag logo" class="w-16" />
           </a>
         )
       }
-      <div class="hidden lg:flex ml-4 flex-shrink-0">
-        <ul
-          class={`menu menu-horizontal px-1 ${colorClasses} font-semibold text-[16px] whitespace-nowrap`}
-        >
+      <div class="hidden lg:flex">
+        <ul class="flex items-center text-black">
           <li
-            class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+            class="relative group font-lora uppercase tracking-[.46em] text-[16px] font-normal"
           >
-            <a href="/culture">Культура</a>
-            <span
-              class="text-base text-base-content/20 pointer-events-none select-none"
-              >|</span
+            <a
+              href="/culture"
+              class="transition-all duration-300 group-hover:text-shadow"
+              >Культура</a
             >
-          </li>
-          <li
-            class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
-          >
-            <a href="/building">Париж</a>
             <span
-              class="text-base text-base-content/20 pointer-events-none select-none"
-              >|</span
-            >
+              class="absolute -bottom-2 left-0 w-full h-0.5 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
+            ></span>
           </li>
+          <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
           <li
-            class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+            class="relative group font-lora uppercase tracking-[.46em] text-[16px] font-normal"
           >
-            <a href="/building">Дети</a>
+            <a
+              href="/building"
+              class="transition-all duration-300 group-hover:text-shadow"
+              >Париж</a
+            >
             <span
-              class="text-base text-base-content/20 pointer-events-none select-none"
-              >|</span
-            >
+              class="absolute -bottom-2 left-0 w-full h-0.5 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
+            ></span>
           </li>
+          <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
           <li
-            class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+            class="relative group font-lora uppercase tracking-[.46em] text-[16px] font-normal"
           >
-            <a href="/calendar">Календарь</a>
+            <a
+              href="/building"
+              class="transition-all duration-300 group-hover:text-shadow"
+              >Дети</a
+            >
             <span
-              class="text-base text-base-content/20 pointer-events-none select-none"
-              >|</span
-            >
+              class="absolute -bottom-2 left-0 w-full h-0.5 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
+            ></span>
           </li>
+          <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
           <li
-            class="flex flex-row items-center uppercase font-light tracking-[0.2em]"
+            class="relative group font-lora uppercase tracking-[.46em] text-[16px] font-normal"
           >
-            <a href="/building">О проекте</a>
+            <a
+              href="/calendar"
+              class="transition-all duration-300 group-hover:text-shadow"
+              >Календарь</a
+            >
+            <span
+              class="absolute -bottom-2 left-0 w-full h-0.5 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
+            ></span>
+          </li>
+          <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
+          <li
+            class="relative group font-lora uppercase tracking-[.46em] text-[16px] font-normal"
+          >
+            <a
+              href="/building"
+              class="transition-all duration-300 group-hover:text-shadow"
+              >О проекте</a
+            >
+            <span
+              class="absolute -bottom-2 left-0 w-full h-0.5 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
+            ></span>
           </li>
         </ul>
       </div>
     </div>
 
-    <div class="navbar-center">
-      {/* This div is intentionally left empty to push start and end apart */}
+    <div class="hidden lg:flex items-center gap-[19px]">
+      <button class="p-2">
+        <Image src={searchIcon} alt="Search" class="h-5 w-5" />
+      </button>
+      <button class="p-2">
+        <Instagram class="h-6 w-6" />
+      </button>
+      <button class="p-2">
+        <Youtube class="h-7 w-7" />
+      </button>
+      <a
+        href="#"
+        class="bg-primary text-primary-content rounded-[9px] px-4 py-1.5 font-inter text-[14px] whitespace-nowrap"
+        id="enterButton">Войти</a
+      >
     </div>
 
-    <div class="navbar-end flex-shrink-0">
-      <div
-        class="hidden lg:flex gap-2 items-center justify-center flex-shrink-0 whitespace-nowrap"
-      >
-        <button class="btn btn-ghost btn-circle">
-          <Image src={searchIcon} alt="Search" class="h-5 w-5" />
-        </button>
-        <button class="btn btn-ghost btn-circle">
-          <Instagram class="h-5 w-5" />
-        </button>
-        <button class="btn btn-ghost btn-circle">
-          <Youtube class="h-5 w-5" />
-        </button>
-        <a
-          href="#"
-          class="btn bg-base-300 text-base-content rounded-lg"
-          id="enterButton">Войти</a
-        >
-      </div>
-
-      <div class="flex items-center lg:hidden flex-shrink-0 gap-2">
-        <button class="btn btn-ghost btn-circle">
-          <Image src={searchIcon} alt="Search" class="h-5 w-5" />
-        </button>
-        <button @click="open = !open" class="btn btn-ghost btn-circle">
-          <Image
-            x-show="!open"
-            src={burgerIcon}
-            alt="Open menu"
-            class="h-4 w-5"
-          />
-          <X x-show="open" class="h-6 w-6" />
-        </button>
-      </div>
+    <div class="flex items-center lg:hidden">
+      <button class="p-2">
+        <Image src={searchIcon} alt="Search" class="h-5 w-5" />
+      </button>
+      <button @click="isOpen = !isOpen" class="p-2">
+        <Image
+          x-show="!isOpen"
+          src={burgerIcon}
+          alt="Open menu"
+          class="h-4 w-5"
+        />
+        <X x-show="isOpen" class="h-6 w-6" />
+      </button>
     </div>
   </nav>
 
   <!-- Mobile Menu Panel -->
   <div
-    x-show="open"
+    x-show="isOpen"
     x-transition
-    class="lg:hidden fixed top-0 left-0 w-full h-full bg-base-100 shadow-lg z-[51]"
-    @click.away="open = false"
-    style="display: none;"
+    class="lg:hidden bg-white shadow-lg absolute w-full"
   >
-    <ul class="menu p-4 pt-24 text-left">
-      <li><a href="/culture" class="py-3 text-lg">Культура</a></li>
-      <li><a href="/building" class="py-3 text-lg">Париж</a></li>
-      <li><a href="/building" class="py-3 text-lg">Дети</a></li>
-      <li><a href="/calendar" class="py-3 text-lg">Календарь</a></li>
-      <li><a href="/building" class="py-3 text-lg">О проекте</a></li>
-      <li class="pt-4 mt-4 border-t border-base-300">
-        <a href="#" class="btn bg-base-300 text-base-content w-full">Войти</a>
+    <ul class="p-4 pt-24 text-left flex flex-col items-center">
+      <li class="py-3 text-lg"><a href="/culture">Культура</a></li>
+      <li class="py-3 text-lg"><a href="/building">Париж</a></li>
+      <li class="py-3 text-lg"><a href="/building">Дети</a></li>
+      <li class="py-3 text-lg"><a href="/calendar">Календарь</a></li>
+      <li class="py-3 text-lg"><a href="/building">О проекте</a></li>
+      <li class="pt-4 mt-4 w-full">
+        <a
+          href="#"
+          class="block text-center bg-gray-200 text-black w-full py-2 rounded-lg"
+          >Войти</a
+        >
       </li>
     </ul>
   </div>
 </div>
-
-<style>
-  nav {
-    font-family: "Lora", serif !important;
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-  }
-
-  .navbar-start {
-    flex-shrink: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-  }
-
-  .navbar-center {
-    flex: 1 !important;
-    flex-shrink: 1 !important;
-  }
-
-  .navbar-end {
-    flex-shrink: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-  }
-
-  .menu-horizontal {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-  }
-
-  #enterButton {
-    font-family: "Inter", sans-serif !important;
-    flex-shrink: 0 !important;
-  }
-
-  .navbar-end > div {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    flex-shrink: 0 !important;
-  }
-
-  .btn {
-    flex-shrink: 0 !important;
-  }
-
-  /* Force menu items to stay in line */
-  .menu-horizontal > li {
-    display: flex !important;
-    flex-shrink: 0 !important;
-    white-space: nowrap !important;
-  }
-</style>

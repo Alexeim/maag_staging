@@ -1,4 +1,11 @@
 document.addEventListener("alpine:init", () => {
+  Alpine.store("navbar", {
+    isOpen: false,
+    toggle() {
+      this.isOpen = !this.isOpen;
+    },
+  });
+
   Alpine.data("calendar", (initialData) => ({
     // Image Paths are now passed directly
     theatreShowSrc: initialData.theatreShowSrc || "",

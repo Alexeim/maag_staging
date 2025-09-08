@@ -13,9 +13,9 @@ const { src, alt, caption } = Astro.props;
 <div class="flex flex-col items-center gap-[13px] w-full max-w-[1400px]">
   <Image src={src} alt={alt} class="w-full h-auto lg:h-[849px] object-cover" />
   <div class="max-w-[826px] w-full">
-    <p class="text-base leading-[1.6] text-neutral font-['Inter']">
+    <p class="text-base leading-[1.6] text-neutral-500 font-['Inter']">
       {caption}
     </p>
-    <hr class="w-full border-t border-base-300 mt-[13px]" />
+    <hr class="w-full border-t border-neutral-200 mt-[13px]" />
   </div>
 </div>
