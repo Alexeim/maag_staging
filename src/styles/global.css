@@ -1,4 +1,8 @@
 @import "tailwindcss";
+
+[x-cloak] {
+  display: none !important;
+}
 @theme {
   --color-base-100: oklch(1 0 0); /* #FFFFFF - Чистый белый для карточек */
   --color-base-200: oklch(0.97 0.01 80); /* #FAF7F2 - Основной фон страницы */

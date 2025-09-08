@@ -27,95 +27,59 @@ const borderClasses = "border-none";
 const logoSrc = logo.src;
 ---
 
-<div x-data="{ isOpen: false }">
+<div x-data="{}">
   <nav
     class:list={[
-      "w-full z-50",
+      "w-full z-30",
       navbarClasses,
       positionClasses,
       colorClasses,
       borderClasses,
-      "h-[90px] px-[57px] flex items-center justify-between bg-base-100",
+      "h-[80px] lg:h-[90px] px-4 lg:px-[57px] flex items-center justify-between",
     ]}
   >
+    <!-- Left Side -->
     <div class="flex items-center gap-12">
       {
         showLogoInNav && (
           <a class="cursor-pointer" href="/">
-            <img src={logoSrc} alt="Maag logo" class="w-16" />
+            <img src={logoSrc} alt="Maag logo" class="w-12 lg:w-16" />
           </a>
         )
       }
+      <!-- Desktop Menu -->
       <div class="hidden lg:flex">
-        <ul class="flex items-center text-black">
-          <li
-            class="relative group font-lora uppercase tracking-[.46em] text-[16px] font-normal"
-          >
-            <a
-              href="/culture"
-              class="transition-all duration-300 group-hover:text-shadow"
-              >Культура</a
-            >
-            <span
-              class="absolute -bottom-2 left-0 w-full h-0.5 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
-            ></span>
+        <ul class="flex items-center text-base-content">
+          <li class="relative group font-lora uppercase tracking-[.46em] text-base font-normal">
+            <a href="/culture" class="transition-all duration-300 group-hover:text-shadow">Культура</a>
+            <span class="absolute -bottom-2 left-0 w-full h-0.5 bg-base-content scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"></span>
           </li>
           <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
-          <li
-            class="relative group font-lora uppercase tracking-[.46em] text-[16px] font-normal"
-          >
-            <a
-              href="/building"
-              class="transition-all duration-300 group-hover:text-shadow"
-              >Париж</a
-            >
-            <span
-              class="absolute -bottom-2 left-0 w-full h-0.5 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
-            ></span>
+          <li class="relative group font-lora uppercase tracking-[.46em] text-base font-normal">
+            <a href="/building" class="transition-all duration-300 group-hover:text-shadow">Париж</a>
+            <span class="absolute -bottom-2 left-0 w-full h-0.5 bg-base-content scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"></span>
           </li>
           <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
-          <li
-            class="relative group font-lora uppercase tracking-[.46em] text-[16px] font-normal"
-          >
-            <a
-              href="/building"
-              class="transition-all duration-300 group-hover:text-shadow"
-              >Дети</a
-            >
-            <span
-              class="absolute -bottom-2 left-0 w-full h-0.5 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
-            ></span>
+          <li class="relative group font-lora uppercase tracking-[.46em] text-base font-normal">
+            <a href="/building" class="transition-all duration-300 group-hover:text-shadow">Дети</a>
+            <span class="absolute -bottom-2 left-0 w-full h-0.5 bg-base-content scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"></span>
           </li>
           <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
-          <li
-            class="relative group font-lora uppercase tracking-[.46em] text-[16px] font-normal"
-          >
-            <a
-              href="/calendar"
-              class="transition-all duration-300 group-hover:text-shadow"
-              >Календарь</a
-            >
-            <span
-              class="absolute -bottom-2 left-0 w-full h-0.5 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
-            ></span>
+          <li class="relative group font-lora uppercase tracking-[.46em] text-base font-normal">
+            <a href="/calendar" class="transition-all duration-300 group-hover:text-shadow">Календарь</a>
+            <span class="absolute -bottom-2 left-0 w-full h-0.5 bg-base-content scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"></span>
           </li>
           <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
-          <li
-            class="relative group font-lora uppercase tracking-[.46em] text-[16px] font-normal"
-          >
-            <a
-              href="/building"
-              class="transition-all duration-300 group-hover:text-shadow"
-              >О проекте</a
-            >
-            <span
-              class="absolute -bottom-2 left-0 w-full h-0.5 bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
-            ></span>
+          <li class="relative group font-lora uppercase tracking-[.46em] text-base font-normal">
+            <a href="/building" class="transition-all duration-300 group-hover:text-shadow">О проекте</a>
+            <span class="absolute -bottom-2 left-0 w-full h-0.5 bg-base-content scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"></span>
           </li>
         </ul>
       </div>
     </div>
 
+    <!-- Right Side -->
+    <!-- Desktop Icons -->
     <div class="hidden lg:flex items-center gap-[19px]">
       <button class="p-2">
         <Image src={searchIcon} alt="Search" class="h-5 w-5" />
@@ -126,48 +90,48 @@ const logoSrc = logo.src;
       <button class="p-2">
         <Youtube class="h-7 w-7" />
       </button>
-      <a
-        href="#"
-        class="bg-primary text-primary-content rounded-[9px] px-4 py-1.5 font-inter text-[14px] whitespace-nowrap"
-        id="enterButton">Войти</a
-      >
+      <a href="#" class="bg-primary text-primary-content rounded-[9px] px-4 py-1.5 font-inter text-[14px] whitespace-nowrap" id="enterButton">Войти</a>
     </div>
 
-    <div class="flex items-center lg:hidden">
+    <!-- Mobile Icons -->
+    <div class="flex items-center gap-4 lg:hidden">
       <button class="p-2">
         <Image src={searchIcon} alt="Search" class="h-5 w-5" />
       </button>
-      <button @click="isOpen = !isOpen" class="p-2">
-        <Image
-          x-show="!isOpen"
-          src={burgerIcon}
-          alt="Open menu"
-          class="h-4 w-5"
-        />
-        <X x-show="isOpen" class="h-6 w-6" />
+      <button @click="$store.navbar.toggle()" class="p-2 z-50">
+        <span x-show="!$store.navbar.isOpen">
+          <Image src={burgerIcon} alt="Open menu" class="h-4 w-5" />
+        </span>
+        <span x-show="$store.navbar.isOpen">
+          <X class="h-6 w-6" />
+        </span>
       </button>
     </div>
   </nav>
 
-  <!-- Mobile Menu Panel -->
-  <div
-    x-show="isOpen"
-    x-transition
-    class="lg:hidden bg-white shadow-lg absolute w-full"
-  >
-    <ul class="p-4 pt-24 text-left flex flex-col items-center">
-      <li class="py-3 text-lg"><a href="/culture">Культура</a></li>
-      <li class="py-3 text-lg"><a href="/building">Париж</a></li>
-      <li class="py-3 text-lg"><a href="/building">Дети</a></li>
-      <li class="py-3 text-lg"><a href="/calendar">Календарь</a></li>
-      <li class="py-3 text-lg"><a href="/building">О проекте</a></li>
-      <li class="pt-4 mt-4 w-full">
-        <a
-          href="#"
-          class="block text-center bg-gray-200 text-black w-full py-2 rounded-lg"
-          >Войти</a
-        >
-      </li>
+  <!-- Mobile Menu -->
+  <!-- Overlay -->
+  <div x-show="$store.navbar.isOpen" x-cloak @click="$store.navbar.close()" class="fixed inset-0 bg-black/30 z-[998] lg:hidden" x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+
+  <!-- Panel -->
+  <div x-show="$store.navbar.isOpen" x-cloak class="fixed top-0 right-0 w-[235px] h-screen bg-base-100 z-[999] lg:hidden flex flex-col justify-between p-8" x-transition:enter="transform transition ease-in-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
+    <!-- Links -->
+    <ul class="flex flex-col gap-4 text-base-content">
+      <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/culture">Культура</a></li>
+      <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/building">Париж</a></li>
+      <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/building">Дети</a></li>
+      <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/calendar">Календарь</a></li>
+      <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/building">О проекте</a></li>
     </ul>
+
+    <!-- Bottom Section -->
+    <div class="flex flex-col gap-7">
+      <a href="#" class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-inter text-[14px] w-full">Войти</a>
+      <div class="flex items-center justify-center gap-5">
+        <a href="#"><Instagram class="h-6 w-6" /></a>
+        <a href="#"><Youtube class="h-7 w-7" /></a>
+        <a href="#"><X class="h-6 w-6" /></a>
+      </div>
+    </div>
   </div>
 </div>

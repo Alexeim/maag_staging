@@ -6,7 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [alpinejs()],
+  integrations: [alpinejs({ entrypoint: '/src/alpine-entrypoint.ts' })],
   base: process.env.ASTRO_BASE_PATH || "/",
   vite: {
     plugins: [tailwindcss()],

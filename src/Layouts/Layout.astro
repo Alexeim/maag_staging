@@ -34,10 +34,10 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
     />
     {useClientRouter && <ClientRouter />}
     <title>{title}</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script is:inline src="/src/alpine.ts"></script>
   </head>
-  <body x-data :class="{ 'menu-open': $store.navbar.isOpen }" class="bg-base-200">
+  <body class="bg-base-200">
+    
+
     <Header
       variant={navbarVariant}
       cultureText={navbarContent.items[0].label}
