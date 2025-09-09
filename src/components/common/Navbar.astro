@@ -4,7 +4,6 @@ import { Search, Instagram, Youtube, X } from "@lucide/astro";
 import { Image } from "astro:assets";
 import searchIcon from "../../assets/icons/search-mobile.svg";
 import burgerIcon from "../../assets/icons/burger-mobile.svg";
-import Button from "./Button.astro";
 
 interface NavbarProps {
   variant: "default" | "transparent";
@@ -60,7 +59,7 @@ const logoSrc = logo.src;
           >
             <a
               href="/culture"
-              class="transition-all duration-300 group-hover:text-shadow"
+              class="transition-all duration-300 group-hover:text-shadow-lg"
               >Культура</a
             >
             <span
@@ -73,7 +72,7 @@ const logoSrc = logo.src;
           >
             <a
               href="/building"
-              class="transition-all duration-300 group-hover:text-shadow"
+              class="transition-all duration-300 group-hover:text-shadow-lg"
               >Париж</a
             >
             <span
@@ -86,7 +85,7 @@ const logoSrc = logo.src;
           >
             <a
               href="/building"
-              class="transition-all duration-300 group-hover:text-shadow"
+              class="transition-all duration-300 group-hover:text-shadow-lg"
               >Дети</a
             >
             <span
@@ -99,7 +98,7 @@ const logoSrc = logo.src;
           >
             <a
               href="/calendar"
-              class="transition-all duration-300 group-hover:text-shadow"
+              class="transition-all duration-300 group-hover:text-shadow-lg"
               >Календарь</a
             >
             <span
@@ -112,7 +111,7 @@ const logoSrc = logo.src;
           >
             <a
               href="/building"
-              class="transition-all duration-300 group-hover:text-shadow"
+              class="transition-all duration-300 group-hover:text-shadow-lg"
               >О проекте</a
             >
             <span
@@ -134,7 +133,11 @@ const logoSrc = logo.src;
       <button class="p-2">
         <Youtube class="h-7 w-7" />
       </button>
-      <Button variant="primary" href="#" size="sm">Войти</Button>
+      <a
+        href="#"
+        class="bg-primary text-primary-content rounded-[9px] px-4 py-1.5 font-inter text-[14px] whitespace-nowrap"
+        id="enterButton">Войти</a
+      >
     </div>
 
     <!-- Mobile Icons -->
