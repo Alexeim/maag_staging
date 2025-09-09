@@ -75,15 +75,16 @@ import picture3 from "../../assets/images/article_content/news.jpeg";
     </div>
 
     {/* Main Column - WIDER */}
-    <article class="flex-[7] lg:px-4 order-first lg:order-none">
+    <article class="flex-[7] lg:px-4 order-first lg:order-none relative">
       <h2 class="text-sm font-normal mb-6 uppercase tracking-[0.3em]">
         Главное
       </h2>
-      <div class="bg-base-200 z-50">
+      <a href="/article" class="block bg-base-200 z-50">
         <Image
           src={picture1}
           alt="Main article"
-          class="w-full h-auto lg:h-[600px] object-cover"
+          class="w-full h-auto lg:h-[600px] object-cover relative lg:z-40"
+          transition:name="main-article-image"
         />
         <div class="p-4 lg:p-6">
           <p class="text-error uppercase mb-3 font-inter">Балет</p>
@@ -95,7 +96,7 @@ import picture3 from "../../assets/images/article_content/news.jpeg";
             />
           </h2>
         </div>
-      </div>
+      </a>
     </article>
 
     {/* Vertical Divider 2 */}
