@@ -1,0 +1,37 @@
+---
+// File: packages/shared-components/molecules/ModalHeader/ModalHeader.astro
+//
+// A "dumb" molecule for displaying a consistent modal header.
+//
+// Props:
+// - `title` (string, required): The text to display as the modal's title.
+//
+// Slots:
+// - None.
+import { X } from "lucide-astro";
+
+interface Props {
+  title: string;
+  class?: string;
+}
+
+const { title, class: className } = Astro.props;
+---
+
+<div class:list={["flex items-start justify-between pb-4", className]}>
+  <h3 class="font-bold text-lg text-base-content">{title}</h3>
+  {
+    /* 
+    This form provides a native, JS-free way to close the parent <dialog>.
+    The button is styled to be a small, circular ghost button positioned at the top right.
+  */
+  }
+  <form method="dialog">
+    <button
+      class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+      aria-label="close"
+    >
+      <X class="h-6 w-6" />
+    </button>
+  </form>
+</div>

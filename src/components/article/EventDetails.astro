@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import mapPinIcon from "../../assets/icons/map-pin.svg";
 import { Calendar } from "@lucide/astro";
+import Button from "../common/Button.astro";
 
 interface Props {
   address: string;
@@ -24,14 +25,12 @@ const { address, dates } = Astro.props;
             <p class="text-lg text-base-content font-serif">{address}</p>
           </div>
 
-          <button
-            class="flex items-center gap-4 px-4 py-2 h-10 bg-base-300 rounded-2xl hover:bg-neutral transition-colors"
-          >
+          <Button variant="primary">
             <Image src={mapPinIcon} alt="Map Pin Icon" class="w-4 h-5" />
-            <span class="text-sm text-neutral-content font-['Inter']"
+            <span class="text-sm font-['Inter']"
               >Открыть в Google maps</span
             >
-          </button>
+          </Button>
         </div>
 
         <div class="space-y-8">
@@ -42,14 +41,12 @@ const { address, dates } = Astro.props;
             <p class="text-lg text-base-content font-serif">{dates}</p>
           </div>
 
-          <button
-            class="flex items-center gap-4 px-4 py-2 h-10 bg-base-300 rounded-2xl hover:bg-neutral transition-colors"
-          >
+          <Button variant="primary">
             <Calendar class="w-4 h-5" />
-            <span class="text-sm text-neutral-content font-['Inter']"
+            <span class="text-sm font-['Inter']"
               >Добавить в календарь</span
             >
-          </button>
+          </Button>
         </div>
       </div>
 

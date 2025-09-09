@@ -1,0 +1,74 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+/**
+ * @component Input (Molecule)
+ * @description
+ * A self-sufficient, reliable input molecule. It follows the same robust pattern
+ * as Select and RangeSelector to ensure stability in Astro's View Transitions environment.
+ *
+ * It manages its own internal state and dispatches a `value-changed` event
+ * to notify the parent of any changes.
+ *
+ * @param {object} props - Component props
+ * @param {string} props.name - The name of the input, used for form submission and event payload.
+ * @param {string | number} props.value - The initial value of the input.
+ * @param {string} [props.label] - An optional label to display above the input.
+ *
+ * @event value-changed - Dispatched whenever the internal value changes.
+ * @property {object} detail - The event payload.
+ * @property {string} detail.name - The `name` of the input that changed.
+ * @property {string} detail.value - The new `value` of the input.
+ */
+interface Props extends HTMLAttributes<"input"> {
+  label?: string;
+  value: string | number;
+  name: string;
+  class?: string;
+  inputClass?: string;
+}
+
+const {
+  label,
+  name,
+  value,
+  type = "text",
+  placeholder,
+  disabled = false,
+  required = false,
+  class: className,
+  inputClass,
+  ...rest
+} = Astro.props;
+---
+
+<div
+  class:list={["form-control w-full", className]}
+  x-data=`{
+    internalValue: ${JSON.stringify(value)},
+    init() {
+      this.$watch('internalValue', (newValue) => {
+        this.$dispatch('value-changed', { name: '${name}', value: newValue });
+      })
+    }
+  }`
+>
+  {
+    label && (
+      <label for={name} class="label">
+        <span class="label-text">{label}</span>
+      </label>
+    )
+  }
+  <input
+    {...rest}
+    type={type}
+    id={name}
+    name={name}
+    placeholder={placeholder}
+    disabled={disabled}
+    required={required}
+    class:list={["input input-bordered w-full", inputClass]}
+    x-model="internalValue"
+  />
+</div>

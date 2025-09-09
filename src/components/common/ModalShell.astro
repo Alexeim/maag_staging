@@ -1,0 +1,30 @@
+---
+// File: packages/shared-components/atoms/ModalShell/ModalShell.astro
+//
+// This is a "dumb" presentational component.
+// It's a basic wrapper around the HTML <dialog> element, styled with DaisyUI classes.
+//
+// Props:
+// - It accepts all standard HTML attributes via Astro.props and passes them
+//   directly to the <dialog> element. This allows the parent component to
+//   add `id`, `class`, `x-ref`, and event listeners like `@close`.
+//
+// Slots:
+// - `default`: For the main content of the modal, which will be placed inside the `modal-box`.
+---
+
+<dialog {...Astro.props} class:list={["modal", Astro.props.class]}>
+  <div class="modal-box relative rounded-xl">
+    {/* The main content of the modal, passed from the parent, goes here. */}
+    <slot />
+  </div>
+  {
+    /* 
+    This form with a button allows the dialog to be closed by clicking the backdrop.
+    It's a standard HTML pattern for dialogs.
+  */
+  }
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

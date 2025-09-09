@@ -1,0 +1,103 @@
+---
+// File: packages/shared-components/molecules/alert/Alert.astro
+// Version: 14.1 - The Final, SYNTAX-CORRECTED, Store-Driven Pattern
+
+import type { HTMLAttributes } from "astro/types";
+import { X } from "lucide-astro";
+import Button from "../../atoms/button/Button.astro";
+
+export interface Props extends HTMLAttributes<"div"> {
+  storeName: string;
+}
+
+const { storeName, ...rest } = Astro.props;
+---
+
+<div
+  x-show={`$store.${storeName}.isOpen`}
+  x-transition
+  x-cloak
+  role="alert"
+  class="alert fixed top-28 right-10 z-50 max-w-lg"
+  :class=`{
+    'alert-info': $store.${storeName}.type === 'info',
+    'alert-success': $store.${storeName}.type === 'success',
+    'alert-warning': $store.${storeName}.type === 'warning',
+    'alert-error': $store.${storeName}.type === 'error'
+  }`
+  {...rest}
+>
+  <!-- Icons are shown/hidden based on the store's type property -->
+  <div x-show={`$store.${storeName}.type === 'info'`}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      class="h-6 w-6 shrink-0 stroke-current"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+  </div>
+  <div x-show={`$store.${storeName}.type === 'success'`}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-6 w-6 shrink-0 stroke-current"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+  </div>
+  <div x-show={`$store.${storeName}.type === 'warning'`}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-6 w-6 shrink-0 stroke-current"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+      ></path>
+    </svg>
+  </div>
+  <div x-show={`$store.${storeName}.type === 'error'`}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-6 w-6 shrink-0 stroke-current"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+      ></path>
+    </svg>
+  </div>
+
+  <div class="flex-grow">
+    <span x-text={`$store.${storeName}.message`}></span>
+  </div>
+
+  <Button
+    variant="ghost"
+    size="sm"
+    class="btn-circle"
+    @click={`$store.${storeName}.clear()`}
+    aria-label="Close alert"
+  >
+    <X class="h-6 w-6" />
+  </Button>
+</div>

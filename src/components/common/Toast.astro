@@ -1,0 +1,32 @@
+---
+// File: packages/shared-components/molecules/toast/Toast.astro
+// Version: 1.0 - Blueprint 3 (Store-Connected)
+
+import type { HTMLAttributes } from "astro/types";
+
+export interface Props extends HTMLAttributes<"div"> {
+  storeName: string;
+}
+
+const { storeName, ...rest } = Astro.props;
+---
+
+<div
+  class="toast"
+  x-show={`$store.${storeName}.isOpen`}
+  x-transition
+  x-cloak
+  {...rest}
+>
+  <div
+    class="alert"
+    :class=`{
+      'alert-info': $store.${storeName}.type === 'info',
+      'alert-success': $store.${storeName}.type === 'success',
+      'alert-warning': $store.${storeName}.type === 'warning',
+      'alert-error': $store.${storeName}.type === 'error'
+    }`
+  >
+    <span x-text={`$store.${storeName}.message`}></span>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+---
+// File: packages/shared-components/molecules/ModalFooter/ModalFooter.astro
+//
+// A "dumb" molecule for the action area of a modal.
+// It applies the DaisyUI `modal-action` class for correct styling and alignment.
+//
+// Props:
+// - `class` (string, optional): Allows passing additional CSS classes.
+//
+// Slots:
+// - `default`: Expects one or more buttons or actions to be passed from the parent.
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={["modal-action flex flex-row justify-center pt-4", className]}>
+  <slot />
+</div>

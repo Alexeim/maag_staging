@@ -1,0 +1,76 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+/**
+ * @component Textarea (Molecule)
+ * @description
+ * A self-sufficient, reliable textarea molecule. It follows the same robust pattern
+ * as the new Input and Select components to ensure stability in Astro's View Transitions environment.
+ *
+ * It manages its own internal state and dispatches a `value-changed` event
+ * to notify the parent of any changes.
+ *
+ * @param {object} props - Component props
+ * @param {string} props.name - The name of the textarea, used for form submission and event payload.
+ * @param {string} props.value - The initial value of the textarea.
+ * @param {string} [props.label] - An optional label to display above the textarea.
+ * @param {number} [props.rows=4] - The number of visible text lines.
+ *
+ * @event value-changed - Dispatched whenever the internal value changes.
+ * @property {object} detail - The event payload.
+ * @property {string} detail.name - The `name` of the textarea that changed.
+ * @property {string} detail.value - The new `value` of the textarea.
+ */
+interface Props extends HTMLAttributes<"textarea"> {
+  label?: string;
+  value: string;
+  name: string;
+  rows?: number;
+  class?: string;
+  textareaClass?: string;
+}
+
+const {
+  label,
+  name,
+  value,
+  placeholder,
+  disabled = false,
+  required = false,
+  rows = 4,
+  class: className,
+  textareaClass,
+  ...rest
+} = Astro.props;
+---
+
+<div
+  class:list={["form-control w-full", className]}
+  x-data=`{
+    internalValue: ${JSON.stringify(value)},
+    init() {
+      this.$watch('internalValue', (newValue) => {
+        this.$dispatch('value-changed', { name: '${name}', value: newValue });
+      })
+    }
+  }`
+>
+  {
+    label && (
+      <label for={name} class="label">
+        <span class="label-text">{label}</span>
+      </label>
+    )
+  }
+  <textarea
+    {...rest}
+    id={name}
+    name={name}
+    placeholder={placeholder}
+    disabled={disabled}
+    required={required}
+    rows={rows}
+    class:list={["textarea textarea-bordered w-full", textareaClass]}
+    x-model="internalValue">{value}</textarea
+  >
+</div>

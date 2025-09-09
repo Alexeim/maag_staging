@@ -1,0 +1,99 @@
+---
+// File: packages/shared-components/atoms/button/Button.astro
+// Version: 2.0
+//
+// A "dumb" presentational component that is 100% compliant with the "State Down, Events Up" architecture.
+// It does not manage its own click logic. Event handling should be done by the parent component
+// using the standard `@click` directive.
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"button" | "a"> {
+  href?: string;
+  variant?:
+    | "default"
+    | "primary"
+    | "secondary"
+    | "outline"
+    | "ghost"
+    | "error"
+    | "errorOutline"
+    | "success"
+    | "accent";
+  size?: "sm" | "md" | "lg";
+  block?: boolean;
+  disabled?: boolean;
+}
+
+const {
+  href,
+  variant = "default",
+  size = "md",
+  class: className,
+  block = false,
+  disabled = false,
+  ...rest
+} = Astro.props;
+
+const variants = {
+  default: "btn-neutral",
+  primary: "btn-primary",
+  secondary: "btn-secondary",
+  outline: "btn-outline btn-primary",
+  ghost: "btn-ghost",
+  error: "btn-error",
+  errorOutline: "btn-outline btn-error",
+  success: "btn-success",
+  accent: "btn-accent"
+};
+
+const sizes = {
+  sm: "btn-sm",
+  md: "",
+  lg: "btn-lg"
+};
+
+const classes = [
+  "btn",
+  variants[variant],
+  sizes[size],
+  block && "btn-block",
+  disabled && "btn-disabled",
+  className
+]
+  .filter(Boolean)
+  .join(" ");
+
+const Tag = href ? "a" : "button";
+---
+
+{variant === 'primary' ? (
+  <Tag
+    href={disabled ? undefined : href}
+    class:list={[
+      "btn-primary",
+      sizes[size],
+      block && "btn-block",
+      disabled && "btn-disabled",
+      className
+    ]}
+    aria-disabled={disabled ? "true" : undefined}
+    tabindex={disabled ? "-1" : undefined}
+    {...rest}
+  >
+    <span class="btn-primary-shadow"></span>
+    <span class="btn-primary-edge"></span>
+    <span class="btn-primary-front">
+      <slot />
+    </span>
+  </Tag>
+) : (
+  <Tag
+    href={disabled ? undefined : href}
+    class={classes}
+    aria-disabled={disabled ? "true" : undefined}
+    tabindex={disabled ? "-1" : undefined}
+    {...rest}
+  >
+    <slot />
+  </Tag>
+)}

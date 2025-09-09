@@ -1,0 +1,36 @@
+---
+// File: packages/shared-components/organisms/ConfirmationModal/ConfirmationModal.astro
+//
+// A "dumb" organism that composes a standard confirmation modal.
+// It combines ModalShell, ModalHeader, and ModalFooter into a common layout.
+// It remains "dumb" by delegating all state and actions to the parent.
+//
+// Props:
+// - `title` (string, required): The title for the ModalHeader.
+// - All other attributes (id, class, x-ref, :is-open, @close) are passed
+//   to the underlying ModalShell.
+//
+// Slots:
+// - `default`: The main content/body of the modal.
+// - `actions`: The buttons to be placed in the ModalFooter.
+import ModalShell from "../../atoms/modal-shell/ModalShell.astro";
+import ModalHeader from "../../molecules/modal-header/ModalHeader.astro";
+import ModalFooter from "../../molecules/modal-footer/ModalFooter.astro";
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"dialog"> {
+  title: string;
+}
+
+const { title, ...rest } = Astro.props;
+---
+
+<ModalShell {...rest}>
+  <ModalHeader title={title} />
+  <div class="py-4">
+    <slot />
+  </div>
+  <ModalFooter>
+    <slot name="actions" />
+  </ModalFooter>
+</ModalShell>

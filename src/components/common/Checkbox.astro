@@ -1,0 +1,61 @@
+---
+/**
+ * @component Checkbox (Molecule - Final & Bulletproof)
+ * @description
+ * The final, bulletproof version of the checkbox. It follows the proven-to-work
+ * pattern, generates DaisyUI-compliant color modifiers, and enforces the
+ * correct shape to override theme defaults.
+ *
+ * @param {object} props - Component props
+ * @param {string} props.name - The `name` attribute for the checkbox input.
+ * @param {boolean} props.checked - The initial checked state of the checkbox.
+ * @param {string} [props.label] - An optional label to display next to the checkbox.
+ * @param {'primary' | 'secondary' | 'accent'} [props.variant='primary'] - The color variant of the checkbox.
+ *
+ * @event value-changed - Dispatched whenever the checked state changes.
+ */
+interface Props {
+  label?: string;
+  name: string;
+  checked: boolean;
+  variant?: "primary" | "secondary" | "accent";
+  class?: string;
+}
+
+const {
+  label,
+  name,
+  checked,
+  variant = "primary",
+  class: className
+} = Astro.props;
+
+const variantClasses = {
+  primary: "checkbox-primary",
+  secondary: "checkbox-secondary",
+  accent: "checkbox-accent"
+};
+---
+
+<div
+  class:list={["form-control", className]}
+  x-data=`{
+    isChecked: null,
+    init() {
+      this.isChecked = ${JSON.stringify(checked)};
+      this.$watch('isChecked', (newValue) => {
+        this.$dispatch('value-changed', { name: '${name}', value: newValue });
+      })
+    }
+  }`
+>
+  <label class="label cursor-pointer justify-start gap-4 text-gray-500">
+    <input
+      type="checkbox"
+      name={name}
+      class:list={["checkbox", "rounded-md", variantClasses[variant]]}
+      x-model="isChecked"
+    />
+    {label && <span class="label-text">{label}</span>}
+  </label>
+</div>
