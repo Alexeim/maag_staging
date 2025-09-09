@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
+import { Instagram, Youtube, X } from "@lucide/astro";
 
 import Header from "../components/common/Header.astro";
 import Footer from "../components/common/Footer.astro";
@@ -35,7 +36,7 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
     {useClientRouter && <ClientRouter />}
     <title>{title}</title>
   </head>
-  <body class="bg-base-200">
+  <body class="bg-base-200" x-data>
     
 
     <Header
@@ -50,5 +51,38 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
     />
     <slot />
     <Footer />
+
+    <!-- Mobile Menu -->
+    <!-- Overlay -->
+    <div x-show="$store.navbar.isOpen" x-cloak @click="$store.navbar.close()" class="fixed inset-0 bg-black/30 z-[998] lg:hidden" x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+
+    <!-- Panel -->
+    <div x-show="$store.navbar.isOpen" x-cloak class="fixed top-0 right-0 w-[235px] h-screen bg-base-100 z-[999] lg:hidden flex flex-col justify-between p-8" x-transition:enter="transform transition ease-in-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
+      <!-- Links -->
+      <ul class="flex flex-col gap-4 text-base-content">
+        <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/culture">Культура</a></li>
+        <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/building">Париж</a></li>
+        <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/building">Дети</a></li>
+        <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/calendar">Календарь</a></li>
+        <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/building">О проекте</a></li>
+      </ul>
+
+      <!-- Bottom Section -->
+      <div class="flex flex-col gap-7">
+        <a href="#" class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-inter text-[14px] w-full">Войти</a>
+        <div class="flex items-center justify-center gap-5">
+          <a href="#"><Instagram class="h-6 w-6" /></a>
+          <a href="#"><Youtube class="h-7 w-7" /></a>
+          <a href="#"><X class="h-6 w-6" /></a>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.addEventListener('astro:after-swap', () => {
+        if (window.Alpine && window.Alpine.store('navbar')) {
+          window.Alpine.store('navbar').close();
+        }
+      });
+    </script>
   </body>
 </html>

@@ -1,5 +1,6 @@
 ---
 import logoFull from "../../assets/logo/logoFull.svg";
+import logoMobile from "../../assets/logo/logo-mobile.svg";
 import { Image } from "astro:assets";
 ---
 
@@ -10,6 +11,11 @@ import { Image } from "astro:assets";
   <Image
     src={logoFull}
     alt="Maag"
-    class="absolute -top-14 left-1/2 -translate-x-1/2 hidden lg:block lg:z-50 h-[613px] w-full pointer-events-none"
+    class="absolute -top-14 left-1/2 -translate-x-1/2 block lg:hidden lg:z-30 h-[513px] w-11/12 pointer-events-none"
+  />
+  <Image
+    src={logoMobile}
+    alt="Maag"
+    class="absolute -top-14 left-1/2 -translate-x-1/2 hidden lg:block lg:z-30 h-[613px] w-full pointer-events-none"
   />
 </section>
