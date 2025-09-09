@@ -178,3 +178,10 @@ body.menu-open .mobile-menu-panel {
   outline: none;
 }
 
+/* Size modifiers for the 3D button */
+.btn-primary.sm .btn-primary-front {
+  padding: 6px 16px;
+  font-size: 14px;
+}
+
+

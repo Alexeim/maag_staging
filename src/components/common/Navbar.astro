@@ -4,6 +4,7 @@ import { Search, Instagram, Youtube, X } from "@lucide/astro";
 import { Image } from "astro:assets";
 import searchIcon from "../../assets/icons/search-mobile.svg";
 import burgerIcon from "../../assets/icons/burger-mobile.svg";
+import Button from "./Button.astro";
 
 interface NavbarProps {
   variant: "default" | "transparent";
@@ -133,11 +134,7 @@ const logoSrc = logo.src;
       <button class="p-2">
         <Youtube class="h-7 w-7" />
       </button>
-      <a
-        href="#"
-        class="bg-primary text-primary-content rounded-[9px] px-4 py-1.5 font-inter text-[14px] whitespace-nowrap"
-        id="enterButton">Войти</a
-      >
+      <Button variant="primary" href="#" class="sm">Войти</Button>
     </div>
 
     <!-- Mobile Icons -->
