@@ -1,13 +1,28 @@
 ---
-import Layout from "../Layouts/Layout.astro";
-import ArticleHeader from "../components/article/ArticleHeader.astro";
-import ArticleAuthor from "../components/article/ArticleAuthor.astro";
-import SocialShare from "../components/article/SocialShare.astro";
-import ArticleImage from "../components/article/ArticleImage.astro";
-import ArticleBody from "../components/article/ArticleBody.astro";
-import RecentArticles from "../components/article/RecentArticles.astro";
-import EventDetails from "../components/article/EventDetails.astro";
-import articleData from "../content/articlePage/RU/Article.json";
+import Layout from "../../Layouts/Layout.astro";
+import ArticleHeader from "../../components/article/ArticleHeader.astro";
+import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
+import SocialShare from "../../components/article/SocialShare.astro";
+import ArticleImage from "../../components/article/ArticleImage.astro";
+import ArticleBody from "../../components/article/ArticleBody.astro";
+import RecentArticles from "../../components/article/RecentArticles.astro";
+import EventDetails from "../../components/article/EventDetails.astro";
+import articleData from "../../content/articlePage/RU/Article.json";
+import type { ImageMetadata } from "astro";
+import { newsItems } from "@/content/mockNews";
+
+export async function getStaticPaths() {
+  // Add the main article to the list for static path generation
+  const allArticles = [...newsItems, { id: "main-article" }];
+  return allArticles.map((item) => ({
+    params: { id: item.id },
+  }));
+}
+
+const { id } = Astro.params;
+
+// Determine the transition name based on the ID
+const transitionName = id === "main-article" ? "main-article-image" : `news-image-${id}`;
 
 // Import all article images at once!
 const images = import.meta.glob<{ default: ImageMetadata }>(
@@ -17,7 +32,8 @@ const images = import.meta.glob<{ default: ImageMetadata }>(
 
 // Prepare data with resolved image modules
 const mainImageModule =
-  images[`/src/assets/images/article_content/${articleData.mainImage.src}`]?.default;
+  images[`/src/assets/images/article_content/${articleData.mainImage.src}`]
+    ?.default;
 
 const relatedArticlesWithImages = await Promise.all(
   articleData.relatedArticles.map(async (article) => {
@@ -56,6 +72,7 @@ const relatedArticlesWithImages = await Promise.all(
               src={mainImageModule}
               alt={articleData.mainImage.alt}
               caption={articleData.mainImage.caption}
+              transitionName={transitionName}
             />
           )
         }

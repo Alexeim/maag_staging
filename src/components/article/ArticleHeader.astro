@@ -1,6 +1,4 @@
 ---
-import type { ImageMetadata } from "astro";
-
 interface Props {
   category: string;
   title: string;
@@ -10,7 +8,7 @@ const { category, title } = Astro.props;
 ---
 
 <div class="flex flex-col gap-8 w-full">
-  <div class="flex flex-col items-end gap-2">
+  <div class="flex flex-col items-start gap-2">
     <p
       class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']"
     >

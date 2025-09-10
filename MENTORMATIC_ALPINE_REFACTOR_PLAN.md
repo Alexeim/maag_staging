@@ -576,3 +576,138 @@ After fixing all console errors, a silent failure remained: the UI would not upd
 ### Final Conclusion
 
 The document was correct and complete from the start. The failures were entirely due to human (AI) error, panic, and a failure to read, understand, and precisely follow the established architectural patterns. The key lesson is that the architecture described herein is a complete system; its patterns must be implemented together as intended to function correctly.
+
+---
+
+## Appendix B: Final Implementation of the Lazy Load Plugin
+
+This section details the final, production-ready implementation of the `$lazy` magic property. This pattern successfully solves the race condition issue inherent in Astro's View Transitions environment by providing a complete "skeleton" of data immediately, and then asynchronously "hydrating" that skeleton with the real logic.
+
+### 1. The Plugin (`src/lib/alpine/plugins/lazyLoadPlugin.ts`)
+
+The plugin itself is the core of this architecture. It defines a map of components that can be lazy-loaded and returns a two-stage object to Alpine.
+
+```typescript
+import type { Alpine } from 'alpinejs';
+
+// The component map is the single source of truth for lazy-loadable components.
+// The key is the name used in `x-data`, and the value is a dynamic import function.
+// Using the `@/` alias is critical for the build tool to resolve the path correctly.
+const components: Record<string, () => Promise<any>> = {
+  calendar: () => import('@/components/calendar/logic'),
+  // Other complex, page-specific components can be registered here.
+};
+
+export default function(Alpine: Alpine) {
+  Alpine.magic('lazy', () => (name: string, initialState: object) => {
+    
+    // Stage 1: Return the Skeleton IMMEDIATELY
+    // This object is returned synchronously to Alpine when `x-data` is evaluated.
+    // It prevents all `... is not defined` errors in child components.
+    return {
+      isLazyLoading: true,
+      init() {
+        // Stage 2: Asynchronous Hydration
+        // Alpine calls `init()` on the skeleton. This function's job is to
+        // load the real logic and then merge it into the component.
+        const importer = components[name];
+        if (!importer) {
+          console.error(`[Lazy Plugin] Importer for ${name} not found.`);
+          return;
+        }
+
+        return importer()
+          .then(module => {
+            const data = module.default(initialState);
+            // `this` is the component's reactive proxy. We can safely merge the
+            // real data into it.
+            Object.assign(this, data);
+            
+            // Manually call the real `init()` from the loaded logic.
+            if (typeof this.init === 'function') {
+              this.init.call(this);
+            }
+
+            // Use `$nextTick` to ensure the UI updates after all data is settled.
+            this.$nextTick(() => {
+              this.isLazyLoading = false;
+            });
+          })
+          .catch(err => {
+            console.error(`[Lazy Plugin] Error during lazy-load of ${name}`, err);
+          });
+      },
+      // The skeleton must contain every property a child component might access.
+      // Getters must be defined as simple properties to avoid `Object.assign` errors.
+      selectedDate: null,
+      year: 0,
+      month: 0,
+      monthName: '...',
+      daysInMonth: 0,
+      firstDayOfMonth: 0,
+      events: [],
+      filters: [],
+      activeFilter: 'все',
+      updateCalendarDisplay() {},
+      changeMonth() {},
+      selectDate() {},
+      hasEvent() { return false; },
+      setFilter() {},
+      isSameDay() { return false; },
+      updateFilteredEvents() {},
+      filteredEvents: [],
+      smallEvents: []
+    };
+  });
+}
+```
+
+### 2. The Logic File (`src/components/calendar/logic.ts`)
+
+The component's logic is a clean, self-contained file that exports a default function. This function returns the final Alpine data object.
+
+```typescript
+export default (imagePaths: { /* ... */ }) => ({
+    // Initial state properties
+    selectedDate: new Date(),
+    year: new Date().getUTCFullYear(),
+    // ... other properties
+
+    // The real init method that sets up the component
+    init() {
+      // ... setup logic
+      this.updateCalendarDisplay();
+      this.updateFilteredEvents();
+    },
+
+    // All other methods and getters
+    updateCalendarDisplay() { /* ... */ },
+    selectDate(day: number) { /* ... */ },
+    get filteredEvents() { /* ... */ },
+    // ... etc.
+});
+```
+
+### 3. The Astro Component (`src/pages/calendar.astro`)
+
+The Astro component becomes incredibly clean. It uses `x-data` to invoke the lazy loader and then relies on the "State Down, Events Up" pattern for interaction.
+
+```astro
+---
+// ... imports
+const imagePaths = { /* ... */ };
+---
+<main
+  x-data=`$lazy('calendar', { imagePaths: ${JSON.stringify(imagePaths)} })`
+  @change-month.window="changeMonth($event.detail)"
+  @date-selected.window="selectDate($event.detail.day)"
+  @filter-changed.window="setFilter($event.detail.filter)"
+>
+  <!-- Child components like CalendarWidget use `$dispatch` -->
+  <CalendarWidget />
+  <FilterButtons />
+  <EventList />
+</main>
+```
+
+This complete pattern provides a robust, scalable, and performant solution that fully respects the project's architecture.
