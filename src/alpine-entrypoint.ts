@@ -1,17 +1,10 @@
 import type { Alpine } from 'alpinejs';
+import { navbarStore } from '@/stores/navbarStore';
+import lazyLoadPlugin from '@/lib/alpine/plugins/lazyLoadPlugin';
 
 export default (Alpine: Alpine) => {
   console.log('Alpine entrypoint loaded!');
-  Alpine.store('navbar', {
-    isOpen: false,
-    open() {
-      this.isOpen = true;
-    },
-    close() {
-      this.isOpen = false;
-    },
-    toggle() {
-      this.isOpen = !this.isOpen;
-    }
-  });
+  
+  Alpine.plugin(lazyLoadPlugin);
+  Alpine.store('navbar', navbarStore);
 };

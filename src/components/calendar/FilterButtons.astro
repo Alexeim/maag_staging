@@ -3,33 +3,37 @@
 ---
 
 <div class="bg-white p-4 flex flex-col gap-4 font-inter">
-  <button
-    @click="setFilter('все')"
-    :class="{'btn-base-300': activeFilter === 'все', 'bg-gray-100': activeFilter !== 'все'}"
-    class="btn btn-sm rounded-full flex items-center gap-2 mb-4 w-36"
-  >
-    <svg
-      width="10"
-      height="9"
-      viewBox="0 0 10 9"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      ><path
-        d="M9 1.5H1M7.6 4.5H2.4M6 7.5H4"
-        stroke="currentColor"
-        stroke-linecap="round"></path></svg
+  <div x-show="isLazyLoading" class="text-center">...</div>
+
+  <div x-show="!isLazyLoading">
+    <button
+      @click="$dispatch('filter-changed', { filter: 'все' })"
+      :class="{'btn-base-300': activeFilter === 'все', 'bg-gray-100': activeFilter !== 'все'}"
+      class="btn btn-sm rounded-full flex items-center gap-2 mb-4 w-36 cursor-pointer px-2 py-1"
     >
-    <span x-text="`${events.length} событий`"></span>
-  </button>
-  <div class="flex flex-row flex-wrap gap-4">
-    <template x-for="filter in filters">
-      <button
-        @click="setFilter(filter)"
-        :class="{'btn-base-300': activeFilter === filter, 'bg-gray-100': activeFilter !== filter}"
-        class="btn btn-sm rounded-full capitalize"
-        x-text="filter"
+      <svg
+        width="10"
+        height="9"
+        viewBox="0 0 10 9"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        ><path
+          d="M9 1.5H1M7.6 4.5H2.4M6 7.5H4"
+          stroke="currentColor"
+          stroke-linecap="round"></path></svg
       >
-      </button>
-    </template>
+      <span x-text="`${events.length} событий`"></span>
+    </button>
+    <div class="flex flex-row flex-wrap gap-4">
+      <template x-for="filter in filters">
+        <button
+          @click="$dispatch('filter-changed', { filter })"
+          :class="{'btn-base-300': activeFilter === filter, 'bg-gray-100': activeFilter !== filter}"
+          class="btn btn-sm rounded-full capitalize px-2 py-1 cursor-pointer"
+          x-text="filter"
+        >
+        </button>
+      </template>
+    </div>
   </div>
 </div>

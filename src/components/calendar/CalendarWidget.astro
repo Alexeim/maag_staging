@@ -3,78 +3,82 @@
 ---
 
 <div class="bg-white p-8 w-full max-w-md">
-  <div class="flex justify-between items-center mb-5">
-    <button
-      @click="changeMonth(-1)"
-      class="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center cursor-pointer"
-    >
-      <svg
-        width="8"
-        height="14"
-        viewBox="0 0 8 14"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        ><path
-          d="M7 13L1 7L7 1"
-          stroke="black"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"></path></svg
+  <div x-show="isLazyLoading" class="text-center">Загрузка...</div>
+
+  <div x-show="!isLazyLoading">
+    <div class="flex justify-between items-center mb-5">
+      <button
+        @click="$dispatch('change-month', -1)"
+        class="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center cursor-pointer"
       >
-    </button>
-    <h3
-      class="font-semibold text-2xl text-base-content capitalize font-inter"
-      x-text="`${monthName} ${year}`"
-    >
-    </h3>
-    <button
-      @click="changeMonth(1)"
-      class="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center cursor-pointer"
-    >
-      <svg
-        width="8"
-        height="14"
-        viewBox="0 0 8 14"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        ><path
-          d="M1 13L7 7L1 1"
-          stroke="black"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"></path></svg
-      >
-    </button>
-  </div>
-  <div class="grid grid-cols-7 text-center text-neutral my-4 font-inter">
-    <div>Пн</div>
-    <div>Вт</div>
-    <div>Ср</div>
-    <div>Чт</div>
-    <div>Пт</div>
-    <div>Сб</div>
-    <div>Вс</div>
-  </div>
-  <div class="grid grid-cols-7 text-center gap-y-2">
-    <template x-for="i in firstDayOfMonth">
-      <div></div>
-    </template>
-    <template x-for="day in daysInMonth">
-      <div class="relative">
-        <button
-          @click="selectDate(day)"
-          :class="{
-            'bg-error text-error-content': isSameDay(selectedDate, new Date(Date.UTC(year, currentDate.getUTCMonth(), day))),
-            'hover:bg-gray-200': !isSameDay(selectedDate, new Date(Date.UTC(year, currentDate.getUTCMonth(), day)))
-          }"
-          class="w-12 h-12 flex items-center justify-center mx-auto rounded-full transition-colors cursor-pointer"
-          x-text="day"></button>
-        <div
-          x-show="hasEvent(day)"
-          class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-error rounded-full"
+        <svg
+          width="8"
+          height="14"
+          viewBox="0 0 8 14"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          ><path
+            d="M7 13L1 7L7 1"
+            stroke="black"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path></svg
         >
+      </button>
+      <h3
+        class="font-semibold text-2xl text-base-content capitalize font-inter"
+        x-text="`${monthName} ${year}`"
+      >
+      </h3>
+      <button
+        @click="$dispatch('change-month', 1)"
+        class="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center cursor-pointer"
+      >
+        <svg
+          width="8"
+          height="14"
+          viewBox="0 0 8 14"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          ><path
+            d="M1 13L7 7L1 1"
+            stroke="black"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path></svg
+        >
+      </button>
+    </div>
+    <div class="grid grid-cols-7 text-center text-neutral my-4 font-inter">
+      <div>Пн</div>
+      <div>Вт</div>
+      <div>Ср</div>
+      <div>Чт</div>
+      <div>Пт</div>
+      <div>Сб</div>
+      <div>Вс</div>
+    </div>
+    <div class="grid grid-cols-7 text-center gap-y-2">
+      <template x-for="i in firstDayOfMonth">
+        <div></div>
+      </template>
+      <template x-for="day in daysInMonth">
+        <div class="relative">
+          <button
+            @click="$dispatch('date-selected', { day })"
+            :class="{
+              'bg-error text-error-content': isSameDay(selectedDate, new Date(Date.UTC(year, month, day))),
+              'hover:bg-gray-200': !isSameDay(selectedDate, new Date(Date.UTC(year, month, day)))
+            }"
+            class="w-12 h-12 flex items-center justify-center mx-auto rounded-full transition-colors cursor-pointer"
+            x-text="day"></button>
+          <div
+            x-show="hasEvent(day)"
+            class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-error rounded-full"
+          >
+          </div>
         </div>
-      </div>
-    </template>
+      </template>
+    </div>
   </div>
 </div>

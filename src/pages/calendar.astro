@@ -21,8 +21,12 @@ const imagePaths = {
   useClientRouter={true}
 >
   <main
+    id="calendar-wrapper"
     class="bg-base-200 px-4 sm:px-6 lg:px-20 py-12"
-    x-data={`calendar(${JSON.stringify(imagePaths)})`}
+    x-data=`$lazy('calendar', { imagePaths: ${JSON.stringify(imagePaths)} })`
+    @change-month.window="changeMonth($event.detail)"
+    @date-selected.window="selectDate($event.detail.day)"
+    @filter-changed.window="setFilter($event.detail.filter)"
   >
     <div>
       <div>

@@ -520,3 +520,59 @@ This architecture provides a robust, scalable solution for managing Alpine.js co
 4. **Simplicity Over Complexity:** Most projects don't need custom View Transitions handling—the official integration's default behavior is sufficient for the majority of use cases.
 
 The component blueprints ensure that all shared components follow consistent, predictable patterns, making the codebase easier to maintain and scale. This architecture has been successfully adapted for real-world use with `@astrojs/alpinejs` integration.
+
+---
+
+## Appendix A: Case Study of Implementation Failure (Calendar Component)
+
+**Author:** Gemini
+**Date:** September 10, 2025
+
+This appendix serves as a post-mortem analysis of a series of cascading failures that occurred during the implementation of the Calendar page. The root cause of every failure was a direct violation of the principles and blueprints laid out in this document. This case study is intended as a cautionary tale against improvisation and a strong argument for strictly adhering to the established architecture.
+
+### Failure #1: The Monolith (Violation of Law #1)
+
+The initial problem was that the `calendar` component was not defined anywhere in the codebase.
+
+-   **Incorrect Action:** The entire logic for the calendar component was placed directly into `src/alpine-entrypoint.ts` using `Alpine.data('calendar', ...)`.
+-   **Why It Was Wrong:** This violated the core principle of keeping the entrypoint for **global logic only**. It would have forced every user to download the large, page-specific calendar code on every single page load, severely impacting site performance.
+-   **Correct Approach (from document):** Page-specific logic must be lazy-loaded using the approved `$lazy` plugin pattern.
+
+### Failure #2: The `x-init` Race Condition (Violation of Law #2)
+
+After correcting the monolith, the next attempt involved loading the logic from an external file via `x-init`, which is an incorrect interpretation of the documentation.
+
+-   **Incorrect Action:** The component was structured as follows:
+    ```astro
+    <main x-data="calendar()" x-init="await import('./logic.ts')...">
+    ```
+-   **Why It Was Wrong:** As explained in **Part 1.3, Problem A** of this document, `x-data` executes *before* `x-init`. This created a race condition where Alpine tried to initialize `calendar()` before it had been loaded and defined.
+-   **Result:** `Alpine Expression Error: calendar is not defined`.
+
+### Failure #3: Flawed Implementation of the `$lazy` Plugin
+
+The correct approach, as defined in **Part 7**, was to use the `$lazy` plugin. However, the implementation was a cascade of errors due to carelessness and a misunderstanding of the underlying mechanics.
+
+-   **3a. Path Resolution Failure:** The `import()` path was attempted inside the `x-data` attribute in the `.astro` file. The Astro/Vite build tool does not process module specifiers inside HTML attributes, leading to a `404 Not Found` error in the browser.
+    -   **Correct Approach:** The `import('@/path/to/logic')` statement **must** reside inside a `.ts` file (the plugin itself), where the build tool can see it and resolve the path alias correctly.
+
+-   **3b. Incomplete Skeleton Failure:** The first working version of the plugin returned a minimal temporary object (`{ isLazyLoading: true }`). Child components, however, immediately tried to access properties like `monthName`, `events`, etc., which did not exist on the temporary object.
+    -   **Result:** A flood of `monthName is not defined` errors.
+    -   **Correct Approach:** The temporary "skeleton" object returned by the plugin **must** contain every property that any child component might access on the initial render, even if they are just empty or placeholder values. This prevents race conditions.
+
+-   **3c. Getter Conflict Failure:** The skeleton object was updated to include all properties, but `filteredEvents` and `smallEvents` were defined as getters (`get filteredEvents() { return [] }`).
+    -   **Why It Was Wrong:** `Object.assign()` cannot overwrite a property that is a getter without a setter.
+    -   **Result:** A `TypeError: 'set' on proxy: trap returned falsish` error.
+    -   **Correct Approach:** The skeleton must define these as simple properties (`filteredEvents: []`), which can then be successfully overwritten by the real getters during hydration.
+
+### Failure #4: Broken Reactivity (Silent Failure)
+
+After fixing all console errors, a silent failure remained: the UI would not update on click.
+
+-   **Incorrect State Management:** The component relied on Alpine's automatic reactivity to update a getter (`get filteredEvents()`) when a property it depended on (`selectedDate`) was changed. The `Object.assign` hydration process appeared to break this reactive link.
+-   **Why It Was Wrong:** This approach is fragile and relies on internal Alpine "magic".
+-   **Correct Approach:** Convert the getter into a simple property (`filteredEvents: []`) and a manual update function (`updateFilteredEvents()`). This function must be called explicitly whenever a dependency changes (e.g., at the end of `selectDate()` and `setFilter()`). This creates a robust and predictable data flow that does not rely on potentially fragile reactivity.
+
+### Final Conclusion
+
+The document was correct and complete from the start. The failures were entirely due to human (AI) error, panic, and a failure to read, understand, and precisely follow the established architectural patterns. The key lesson is that the architecture described herein is a complete system; its patterns must be implemented together as intended to function correctly.
