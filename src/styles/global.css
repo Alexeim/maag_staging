@@ -59,6 +59,10 @@
   font-family: "Inter", sans-serif;
 }
 
+.font-lora {
+  font-family: "Lora", serif;
+}
+
 /* Mobile Menu Styles */
 .mobile-menu-panel {
   position: fixed;
@@ -86,15 +90,17 @@ body.menu-open .mobile-menu-panel {
   }
 }
 
-
-
 /* 3D Button Styles */
 .btn-primary {
   --background: var(--color-primary);
   --text: var(--color-primary-content);
-  --shadow-color: oklch(from var(--color-primary) calc(l - 0.2) c h); /* Darker shade for shadow */
-  --edge-color: oklch(from var(--color-primary) calc(l - 0.1) c h); /* Slightly darker for edge */
-  
+  --shadow-color: oklch(
+    from var(--color-primary) calc(l - 0.2) c h
+  ); /* Darker shade for shadow */
+  --edge-color: oklch(
+    from var(--color-primary) calc(l - 0.1) c h
+  ); /* Slightly darker for edge */
+
   position: relative;
   border: none;
   background: transparent;
@@ -115,7 +121,7 @@ body.menu-open .mobile-menu-panel {
   background: hsl(0deg 0% 0% / 0.25);
   will-change: transform;
   transform: translateY(2px);
-  transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
+  transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
 }
 
 .btn-primary-edge {
@@ -137,17 +143,17 @@ body.menu-open .mobile-menu-panel {
 .btn-primary-front {
   display: block;
   position: relative;
-  padding: 6px 16px;      /* Old button's padding */
-  border-radius: 9px;     /* Old button's radius */
-  font-size: 14px;        /* Old button's font size */
+  padding: 6px 16px; /* Old button's padding */
+  border-radius: 9px; /* Old button's radius */
+  font-size: 14px; /* Old button's font size */
   font-family: "Inter", sans-serif; /* Old button's font */
-  white-space: nowrap;    /* Old button's whitespace */
+  white-space: nowrap; /* Old button's whitespace */
   font-weight: 600;
   color: var(--text);
   background: var(--background);
   will-change: transform;
   transform: translateY(-4px);
-  transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
+  transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
 }
 
 .btn-primary:hover {
@@ -156,7 +162,7 @@ body.menu-open .mobile-menu-panel {
 
 .btn-primary:hover .btn-primary-front {
   transform: translateY(-6px);
-  transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
+  transition: transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
 }
 
 .btn-primary:active .btn-primary-front {
@@ -166,7 +172,7 @@ body.menu-open .mobile-menu-panel {
 
 .btn-primary:hover .btn-primary-shadow {
   transform: translateY(4px);
-  transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
+  transition: transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
 }
 
 .btn-primary:active .btn-primary-shadow {
@@ -183,5 +189,3 @@ body.menu-open .mobile-menu-panel {
   padding: 6px 16px;
   font-size: 14px;
 }
-
-
