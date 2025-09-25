@@ -63,6 +63,10 @@
   font-family: "Lora", serif;
 }
 
+.font-old-standard {
+  font-family: "Old Standard TT", serif;
+}
+
 /* Mobile Menu Styles */
 .mobile-menu-panel {
   position: fixed;

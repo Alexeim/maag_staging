@@ -30,7 +30,7 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap"
       rel="stylesheet"
     />
     {useClientRouter && <ClientRouter />}
@@ -60,11 +60,11 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
     <div x-show="$store.navbar.isOpen" x-cloak class="fixed top-0 right-0 w-[235px] h-screen bg-base-100 z-[999] lg:hidden flex flex-col justify-between p-8" x-transition:enter="transform transition ease-in-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
       <!-- Links -->
       <ul class="flex flex-col gap-4 text-base-content">
-        <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/culture">Культура</a></li>
-        <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/building">Париж</a></li>
-        <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/building">Дети</a></li>
-        <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/calendar">Календарь</a></li>
-        <li class="font-lora uppercase tracking-[.46em] text-base font-normal"><a href="/building">О проекте</a></li>
+        <li class="font-old-standard uppercase tracking-[.46em] text-base font-normal"><a href="/culture">Культура</a></li>
+        <li class="font-old-standard uppercase tracking-[.46em] text-base font-normal"><a href="/building">Париж</a></li>
+        <li class="font-old-standard uppercase tracking-[.46em] text-base font-normal"><a href="/building">Дети</a></li>
+        <li class="font-old-standard uppercase tracking-[.46em] text-base font-normal"><a href="/calendar">Календарь</a></li>
+        <li class="font-old-standard uppercase tracking-[.46em] text-base font-normal"><a href="/building">О проекте</a></li>
       </ul>
 
       <!-- Bottom Section -->

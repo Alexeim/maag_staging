@@ -5,13 +5,30 @@ import picture1 from "../../assets/images/main.jpeg";
 import picture2 from "../../assets/images/cal.jpeg";
 import { newsItems } from "@/content/mockNews";
 import newsImage from "../../assets/images/article_content/news.jpeg";
+
+let latestArticle: any = null;
+try {
+  const response = await fetch('http://localhost:3000/api/articles');
+  if (response.ok) {
+    const articles = await response.json();
+    if (articles.length > 0) {
+      latestArticle = articles[0];
+    }
+  }
+} catch (error) {
+  console.error("Failed to fetch latest article:", error);
+}
+
+// TODO: Add breakpoint for 1260px
 ---
 
 <section class="mx-auto px-4 lg:px-12 bg-base-200 mb-0">
   <div class="flex flex-col lg:flex-row gap-8 lg:gap-4">
     {/* News Column - THINNER */}
-    <aside class="flex-[2] lg:pr-4">
-      <h2 class="text-sm font-normal mb-6 uppercase tracking-[0.3em]">
+    <aside class="lg:w-1/5">
+      <h2
+        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
+      >
         Новости
       </h2>
       <div
@@ -19,7 +36,7 @@ import newsImage from "../../assets/images/article_content/news.jpeg";
       >
         {
           newsItems.map((item) => (
-            <div class="flex-shrink-0 w-3/4 sm:w-1/2 md:w-1/3 lg:w-full">
+            <div class="flex-shrink-0 sm:w-1/2 md:w-1/3 lg:w-full">
               <div class="flex items-start gap-4">
                 <a href={`/article/${item.id}`} class="block bg-base-200 z-50">
                   <Image
@@ -30,14 +47,14 @@ import newsImage from "../../assets/images/article_content/news.jpeg";
                   />
                 </a>
                 <div class="flex-1">
-                  <span class="text-error uppercase font-inter">
+                  {/* <span class="text-error uppercase tracking-[.46em] font-inter text-sm">
                     {item.category}
                   </span>
                   <a
                     href={`/article/${item.id}`}
                     class="block bg-base-200 z-50"
-                  >
-                    <h3 class="text-base font-bold mt-1 leading-tight">
+                  > */}
+                    <h3 class="text-base font-bold font-old-standard mt-1 leading-tight">
                       {item.title}
                     </h3>
                   </a>
@@ -57,29 +74,61 @@ import newsImage from "../../assets/images/article_content/news.jpeg";
 
     {/* Main Column - WIDER */}
     <article class="flex-[7] lg:px-4 order-first lg:order-none relative">
-      <h2 class="text-sm font-normal mb-6 uppercase tracking-[0.3em]">
+      <h2
+        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
+      >
         Главное
       </h2>
-      <a href="/article/main-article" class="block bg-base-200 z-50">
-        <Image
-          src={picture1}
-          alt="Main article"
-          class="w-full h-auto lg:h-[600px] object-cover relative lg:z-40"
-          transition:name="main-article-image"
-        />
-      </a>
-      <div class="p-4 lg:p-6">
-        <p class="text-error uppercase mb-3 font-inter">Балет</p>
-        <a href="/article/main-article" class="block bg-base-200 z-50">
-          <h2 class="text-3xl lg:text-5xl leading-tight font-lora">
-            В Парижской опере родилась новая звезда <Image
-              src={maagLogo}
-              alt="MAAG"
-              class="w-8 h-8 lg:w-10 lg:h-10 inline-block align-middle"
+      {latestArticle ? (
+        <div>
+          <a href={`/article/${latestArticle.id}`} class="block bg-base-200 z-50">
+            <img
+              src={latestArticle.imageUrl}
+              alt={latestArticle.title}
+              class="w-full h-auto lg:h-[600px] object-cover relative lg:z-40"
+              transition:name={`main-article-image-${latestArticle.id}`}
             />
-          </h2>
-        </a>
-      </div>
+          </a>
+          <div class="p-4 lg:p-6">
+            <a href={`/article/${latestArticle.id}`} class="block bg-base-200 z-50">
+              <h2 class="text-3xl lg:text-5xl leading-tight font-thin font-old-standard">
+                {latestArticle.title} <Image
+                  src={maagLogo}
+                  alt="MAAG"
+                  class="w-8 h-8 lg:w-10 lg:h-10 inline-block align-middle"
+                />
+              </h2>
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <a href="/article/main-article" class="block bg-base-200 z-50">
+            <Image
+              src={picture1}
+              alt="Main article"
+              class="w-full h-auto lg:h-[600px] object-cover relative lg:z-40"
+              transition:name="main-article-image"
+            />
+          </a>
+          <div class="p-4 lg:p-6">
+            <p
+              class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]"
+            >
+              Балет
+            </p>
+            <a href="/article/main-article" class="block bg-base-200 z-50">
+              <h2 class="text-3xl lg:text-5xl leading-tight font-thin font-old-standard">
+                В Парижской опере родилась новая звезда <Image
+                  src={maagLogo}
+                  alt="MAAG"
+                  class="w-8 h-8 lg:w-10 lg:h-10 inline-block align-middle"
+                />
+              </h2>
+            </a>
+          </div>
+        </div>
+      )}
     </article>
 
     {/* Vertical Divider 2 */}
@@ -89,18 +138,26 @@ import newsImage from "../../assets/images/article_content/news.jpeg";
     </div>
 
     {/* Calendar Column */}
-    <aside class="flex-[3] lg:pl-4">
-      <h2 class="text-sm font-normal mb-6 uppercase tracking-[0.3em]">
+    <aside class="lg:w-1/4">
+      <h2
+        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
+      >
         Календарь
       </h2>
-      <div class="bg-white">
-        <div class="p-4 lg:p-6 flex items-center gap-3">
+      <div class="bg-white rounded-xl shadow-lg">
+        <div class="p-4 lg:p-2 flex items-center gap-3">
           <div
-            class="flex flex-col items-center gap-1 rounded-3xl bg-base-200 p-3"
+            class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3"
           >
-            <p class="text-2xl lg:text-3xl font-bold">30</p>
+            <p
+              class="text-2xl lg:text-2xl text-black/50 font-thin font-old-standard"
+            >
+              30
+            </p>
           </div>
-          <p class="text-sm font-semibold uppercase">Сентября</p>
+          <p class="text-[12px] font-inter uppercase tracking-[0.15em]">
+            Сентября
+          </p>
         </div>
         <Image
           src={picture2}
@@ -108,8 +165,12 @@ import newsImage from "../../assets/images/article_content/news.jpeg";
           class="w-full h-auto lg:h-[240px] object-cover"
         />
         <div class="p-4 lg:p-6">
-          <p class="text-error uppercase text-xs mb-3 font-inter">Выставка</p>
-          <h2 class="text-base lg:text-lg leading-tight mb-4">
+          <p
+            class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]"
+          >
+            Выставка
+          </p>
+          <h2 class="text-base lg:text-lg leading-tight font-old-standard mb-4">
             Огюст Роден и его бабы. Сплетни, интриги, расследования.
           </h2>
           <div class="flex items-center gap-2">

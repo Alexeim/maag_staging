@@ -1,0 +1,130 @@
+---
+// Account data section component for profile page
+---
+
+<div class="space-y-8">
+  <!-- Section Header -->
+  <div class="space-y-6">
+    <div class="w-full h-px bg-neutral-200"></div>
+    <h2
+      class="text-base font-lora font-normal uppercase tracking-[0.46em] text-base-content"
+    >
+      Данные аккаунта
+    </h2>
+  </div>
+
+  <!-- Account Form -->
+  <div class="space-y-10 w-full max-w-lg" x-data="profileForm()">
+    <!-- Email Field -->
+    <div class="space-y-4">
+      <div class="space-y-4">
+        <label
+          class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+        >
+          email
+        </label>
+        <div class="bg-base-100 border border-neutral-200 rounded-lg p-2">
+          <input
+            type="email"
+            value="blabla@gmail.com"
+            readonly
+            class="w-full bg-transparent text-xs font-inter text-neutral-400 outline-none"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Field -->
+    <div class="space-y-4">
+      <div class="space-y-4">
+        <label
+          class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+        >
+          Пароль
+        </label>
+        <div class="flex items-center gap-2">
+          <div
+            class="bg-base-100 border border-neutral-200 rounded-lg p-2 flex-1"
+          >
+            <input
+              type="password"
+              value="**********"
+              readonly
+              class="w-full bg-transparent text-xs font-inter text-neutral-400 outline-none"
+            />
+          </div>
+          <button class="btn-primary">
+            <span class="btn-primary-shadow"></span>
+            <span class="btn-primary-edge"></span>
+            <span class="btn-primary-front">Поменять пароль</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Name Field -->
+    <div class="space-y-4">
+      <div class="space-y-4">
+        <label
+          class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+        >
+          Имя
+        </label>
+        <div class="bg-base-100 border border-neutral-200 rounded-lg p-2">
+          <input
+            type="text"
+            value="Сергей Петрович"
+            x-model="formData.name"
+            class="w-full bg-transparent text-xs font-inter text-neutral-400 outline-none"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="space-y-4">
+      <button
+        class="w-full bg-primary text-primary-content rounded-2xl py-2 px-4 text-sm font-inter font-normal hover:bg-primary/90 transition-colors"
+        @click="saveChanges()"
+      >
+        Сохранить изменения
+      </button>
+
+      <button
+        class="w-full border border-error text-error rounded-2xl py-2 px-4 text-sm font-inter font-normal hover:bg-error/5 transition-colors"
+        @click="deleteAccount()"
+      >
+        Удалить аккаунт
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function profileForm() {
+    return {
+      formData: {
+        name: "Сергей Петрович",
+        email: "blabla@gmail.com",
+      },
+
+      saveChanges() {
+        // Handle save changes
+        console.log("Saving changes:", this.formData);
+        // Add toast notification or other feedback
+      },
+
+      deleteAccount() {
+        // Handle account deletion
+        if (
+          confirm(
+            "Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить."
+          )
+        ) {
+          console.log("Deleting account");
+          // Add actual deletion logic
+        }
+      },
+    };
+  }
+</script>

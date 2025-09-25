@@ -1,0 +1,103 @@
+---
+import Layout from "@/Layouts/Layout.astro";
+import Button from "@/components/common/Button.astro";
+---
+
+<Layout title="Create New Article" navbarVariant="default" includePreFooterCTA={false} useClientRouter={true}>
+  <main class="bg-base-200 min-h-screen pt-[150px] pb-[100px]">
+    <div class="max-w-[825px] mx-auto" x-data="$lazy('articleCreator')">
+      <h1 class="text-4xl font-bold mb-8">Create New Article</h1>
+
+      <!-- Title and Image URL Inputs -->
+      <div class="mb-6 p-4 border border-gray-200 rounded-md bg-white">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Article Title</label>
+        <!-- Editing State for Title -->
+        <template x-if="isEditingTitle">
+          <div>
+            <input type="text" x-model="editingTitleText" class="w-full p-2 border border-gray-300 rounded-md">
+            <div class="flex justify-end gap-4 mt-2">
+              <Button variant="secondary" size="sm" @click="cancelEditTitle()">Cancel</Button>
+              <Button variant="primary" size="sm" @click="saveTitle()">Save</Button>
+            </div>
+          </div>
+        </template>
+        <!-- Display State for Title -->
+        <template x-if="!isEditingTitle">
+          <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold" x-text="article.title || 'Enter article title...'"></h2>
+            <Button variant="outline" size="sm" @click="editTitle()">Edit</Button>
+          </div>
+        </template>
+      </div>
+
+      <div class="mb-6 p-4 border border-gray-200 rounded-md bg-white">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Cover Image URL</label>
+        <!-- Editing State for Image URL -->
+        <template x-if="isEditingImageUrl">
+          <div>
+            <input type="text" x-model="editingImageUrlText" class="w-full p-2 border border-gray-300 rounded-md">
+            <div class="flex justify-end gap-4 mt-2">
+              <Button variant="secondary" size="sm" @click="cancelEditImageUrl()">Cancel</Button>
+              <Button variant="primary" size="sm" @click="saveImageUrl()">Save</Button>
+            </div>
+          </div>
+        </template>
+        <!-- Display State for Image URL -->
+        <template x-if="!isEditingImageUrl">
+          <div class="flex justify-between items-center">
+            <p class="truncate" x-text="article.imageUrl || 'https://example.com/image.jpg'"></p>
+            <Button variant="outline" size="sm" @click="editImageUrl()">Edit</Button>
+          </div>
+        </template>
+      </div>
+
+      <!-- Article Content Section -->
+      <div>
+        <h2 class="text-2xl font-bold mb-4">Article Content</h2>
+        
+        <!-- Render existing paragraphs -->
+        <template x-for="(paragraph, index) in article.paragraphs" :key="index">
+          <div class="mb-4 p-4 border border-gray-200 rounded-md bg-white">
+            <!-- Editing State -->
+            <template x-if="editingIndex === index">
+              <div>
+                <textarea x-model="editingText" class="w-full p-2 border border-gray-300 rounded-md" rows="6"></textarea>
+                <div class="flex justify-end gap-4 mt-2">
+                  <Button variant="secondary" @click="cancelEdit()">Cancel</Button>
+                  <Button variant="primary" @click="updateParagraph()">Update Paragraph</Button>
+                </div>
+              </div>
+            </template>
+            <!-- Display State -->
+            <template x-if="editingIndex !== index">
+              <div class="flex justify-between items-start">
+                <p x-text="paragraph" class="flex-grow pr-4"></p>
+                <Button variant="outline" size="sm" @click="editParagraph(index)">Edit</Button>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <!-- Textarea for new paragraph (only shown when not editing) -->
+        <div x-show="showTextarea && editingIndex === null" class="mb-4">
+          <textarea x-model="newParagraph" class="w-full p-2 border border-gray-300 rounded-md" rows="6" placeholder="Paste your new paragraph text here..."></textarea>
+          <div class="flex justify-end gap-4 mt-2">
+            <Button variant="secondary" @click="cancelParagraph()">Cancel</Button>
+            <Button variant="primary" @click="addNewParagraph()">Save Paragraph</Button>
+          </div>
+        </div>
+
+        <!-- Add Paragraph Button (only shown when not adding and not editing) -->
+        <div x-show="!showTextarea && editingIndex === null">
+          <Button variant="primary" @click="addParagraph()">Add Paragraph</Button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-8 flex justify-end gap-4">
+        <Button variant="secondary" @click="previewArticle()">Preview</Button>
+        <Button variant="primary" @click="saveArticle()">Save Article</Button>
+      </div>
+    </div>
+  </main>
+</Layout>

@@ -7,89 +7,151 @@ import ArticleImage from "../../components/article/ArticleImage.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import RecentArticles from "../../components/article/RecentArticles.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
-import articleData from "../../content/articlePage/RU/Article.json";
+import staticArticleData from "../../content/articlePage/RU/Article.json";
 import type { ImageMetadata } from "astro";
 import { newsItems } from "@/content/mockNews";
 
-export async function getStaticPaths() {
-  // Add the main article to the list for static path generation
-  const allArticles = [...newsItems, { id: "main-article" }];
-  return allArticles.map((item) => ({
-    params: { id: item.id },
-  }));
-}
-
 const { id } = Astro.params;
 
-// Determine the transition name based on the ID
-const transitionName = id === "main-article" ? "main-article-image" : `news-image-${id}`;
+let articleData: any;
+let error: string | null = null;
 
-// Import all article images at once!
+if (id === 'main-article') {
+  articleData = staticArticleData;
+} else {
+  try {
+    const response = await fetch(`http://localhost:3000/api/articles/${id}`);
+    if (response.ok) {
+      articleData = await response.json();
+    } else {
+      error = `Article not found. Status: ${response.status}`;
+    }
+  } catch (e: any) {
+    console.error(e);
+    error = `Error fetching article: ${e.message}`;
+  }
+}
+
+// This is for the static "main-article" image
 const images = import.meta.glob<{ default: ImageMetadata }>(
   "/src/assets/images/article_content/*.{jpeg,jpg,png,gif}",
   { eager: true }
 );
+const mainImageModule = id === 'main-article' 
+  ? images[`/src/assets/images/article_content/${staticArticleData.mainImage.src}`]?.default
+  : null;
 
-// Prepare data with resolved image modules
-const mainImageModule =
-  images[`/src/assets/images/article_content/${articleData.mainImage.src}`]
-    ?.default;
-
+// This is for the related articles, which are still static for now
 const relatedArticlesWithImages = await Promise.all(
-  articleData.relatedArticles.map(async (article) => {
+  staticArticleData.relatedArticles.map(async (article) => {
     const imageModule =
       images[`/src/assets/images/article_content/${article.image}`]?.default;
     return { ...article, image: imageModule };
   })
 );
+
+// Normalize data for the template
+const displayArticle = {
+  title: articleData?.header?.title || articleData?.title || 'Article',
+  category: articleData?.header?.category || 'Category',
+  authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : staticArticleData.author.name,
+  authorAvatar: articleData?.author?.avatarUrl || staticArticleData.author.avatarUrl,
+  readTime: articleData?.meta?.readTime || '5 min read',
+  imageUrl: articleData?.imageUrl, // For dynamic articles
+  imageAlt: articleData?.mainImage?.alt || 'Article image',
+  imageCaption: articleData?.mainImage?.caption || '',
+  // For static article
+  bodyOpening: articleData?.bodyDefault?.opening,
+  bodySections: articleData?.bodyDefault?.sections,
+};
+
+// Prepare props for ArticleBody for dynamic articles
+let dynamicOpening = "";
+let dynamicSections: { type: 'paragraph'; content: string }[] = [];
+
+if (id !== 'main-article' && articleData && articleData.content) {
+  const paragraphs = articleData.content
+    .filter(block => block.type === 'paragraph')
+    .map(block => block.text);
+  
+  if (paragraphs.length > 0) {
+    dynamicOpening = paragraphs[0];
+  }
+  if (paragraphs.length > 1) {
+    dynamicSections = paragraphs.slice(1).map(p => ({ type: 'paragraph', content: p }));
+  }
+}
 ---
 
 <Layout
   navbarVariant="default"
   includePreFooterCTA={false}
-  title={`${articleData.header.title} - Maag`}
+  title={`${displayArticle.title} - Maag`}
   useClientRouter={true}
 >
   <main class="bg-base-200 min-h-screen">
     <div class="max-w-[1512px] mx-auto">
-      <!-- Article Header Section -->
-      <div class="pt-[150px] pb-[100px] flex flex-col items-center gap-[100px]">
-        <div class="flex flex-col gap-8 max-w-[825px] w-full">
-          <ArticleHeader
-            category={articleData.header.category}
-            title={articleData.header.title}
-          />
-          <ArticleAuthor
-            name={articleData.author.name}
-            avatarUrl={articleData.author.avatarUrl}
-          />
-          <SocialShare readTime={articleData.meta.readTime} />
-        </div>
+      {error && <div class="text-red-500 text-center pt-40">{error}</div>}
+      {!error && articleData && (
+        <>
+          <!-- Article Header Section -->
+          <div class="pt-[150px] pb-[100px] flex flex-col items-center gap-[100px]">
+            <div class="flex flex-col gap-8 max-w-[825px] w-full">
+              <ArticleHeader
+                category={displayArticle.category}
+                title={displayArticle.title}
+              />
+              <ArticleAuthor
+                name={displayArticle.authorName}
+                avatarUrl={displayArticle.authorAvatar}
+              />
+              <SocialShare readTime={displayArticle.readTime} />
+            </div>
 
-        {
-          mainImageModule && (
-            <ArticleImage
-              src={mainImageModule}
-              alt={articleData.mainImage.alt}
-              caption={articleData.mainImage.caption}
-              transitionName={transitionName}
-            />
-          )
-        }
-      </div>
+            {id === 'main-article' && mainImageModule && (
+              <ArticleImage
+                src={mainImageModule}
+                alt={displayArticle.imageAlt}
+                caption={displayArticle.imageCaption}
+                transitionName="main-article-image"
+              />
+            )}
+            {id !== 'main-article' && displayArticle.imageUrl && (
+               <img 
+                  src={displayArticle.imageUrl} 
+                  alt={displayArticle.imageAlt} 
+                  class="w-full h-auto max-w-[1200px] rounded-lg shadow-lg"
+                  transition:name={`main-article-image-${id}`}
+                />
+            )}
+          </div>
 
-      <!-- Article Content -->
-      <div class="max-w-[1400px] mx-auto px-14 pb-[100px]">
-        <ArticleBody
-          opening={articleData.bodyDefault.opening}
-          sections={articleData.bodyDefault.sections}
-        />
-        <EventDetails
-          address={articleData.eventDetails.address}
-          dates={articleData.eventDetails.dates}
-        />
-        <RecentArticles articles={relatedArticlesWithImages} />
-      </div>
+          <!-- Article Content -->
+          <div class="max-w-[1400px] mx-auto px-14 pb-[100px]">
+            {id === 'main-article' ? (
+              <ArticleBody
+                opening={displayArticle.bodyOpening}
+                sections={displayArticle.bodySections}
+              />
+            ) : (
+              <ArticleBody
+                opening={dynamicOpening}
+                sections={dynamicSections}
+              />
+            )}
+            
+            {/* Conditionally render EventDetails only if the data exists */}
+            {(articleData?.eventDetails) && (
+              <EventDetails
+                address={articleData.eventDetails.address}
+                dates={articleData.eventDetails.dates}
+              />
+            )}
+            
+            <RecentArticles articles={relatedArticlesWithImages} />
+          </div>
+        </>
+      )}
     </div>
   </main>
 </Layout>

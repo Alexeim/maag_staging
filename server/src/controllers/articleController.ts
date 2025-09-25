@@ -5,7 +5,9 @@ import { getDb } from '../services/firebase';
 export interface Article {
   id?: string;
   title: string;
-  content: string;
+  authorId: string;
+  content: any[]; // Array of content blocks (e.g., { type: 'paragraph', text: '...' })
+  imageUrl?: string; // Optional image URL
   createdAt: Date;
 }
 
@@ -18,15 +20,17 @@ const articlesCollection = db.collection('articles');
  */
 export const createArticle = async (req: Request, res: Response) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, imageUrl, authorId } = req.body;
 
-    if (!title || !content) {
-      return res.status(400).json({ message: 'Title and content are required' });
+    if (!title || !content || !authorId) {
+      return res.status(400).json({ message: 'Title, content, and authorId are required' });
     }
 
     const newArticle: Omit<Article, 'id'> = {
       title,
+      authorId,
       content,
+      imageUrl,
       createdAt: new Date(),
     };
 
@@ -72,13 +76,30 @@ export const getArticles = async (req: Request, res: Response) => {
 export const getArticleById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const doc = await articlesCollection.doc(id).get();
+        const articleDoc = await articlesCollection.doc(id).get();
 
-        if (!doc.exists) {
+        if (!articleDoc.exists) {
             return res.status(404).json({ message: 'Article not found' });
         }
 
-        res.status(200).json({ id: doc.id, ...doc.data() });
+        const articleData = articleDoc.data() as Article;
+
+        // Fetch author details
+        let authorData = null;
+        if (articleData.authorId) {
+            const userDoc = await db.collection('authors').doc(articleData.authorId).get();
+            if (userDoc.exists) {
+                authorData = userDoc.data();
+            }
+        }
+
+        const articleWithAuthor = {
+            id: articleDoc.id,
+            ...articleData,
+            author: authorData // Add author data to the response
+        };
+
+        res.status(200).json(articleWithAuthor);
     } catch (error) {
         console.error('Error getting article by id:', error);
         res.status(500).json({ message: 'Server error while getting article' });

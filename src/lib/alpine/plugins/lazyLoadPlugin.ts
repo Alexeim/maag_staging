@@ -2,6 +2,7 @@ import type { Alpine } from 'alpinejs';
 
 const components: Record<string, () => Promise<any>> = {
   calendar: () => import('@/components/calendar/logic'),
+  articleCreator: () => import('@/components/article/creatorLogic'),
 };
 
 export default function(Alpine: Alpine) {
@@ -33,6 +34,7 @@ export default function(Alpine: Alpine) {
           });
       },
       // Provide a full skeleton to prevent errors
+      // --- Calendar properties ---
       selectedDate: null,
       year: 0,
       month: 0,
@@ -49,9 +51,34 @@ export default function(Alpine: Alpine) {
       setFilter() {},
       isSameDay() { return false; },
       updateFilteredEvents() {},
-      // Define as simple properties, not getters
       filteredEvents: [],
-      smallEvents: []
+      smallEvents: [],
+      // --- Article Creator properties ---
+      article: { title: '', imageUrl: '', paragraphs: [] },
+      newParagraph: '',
+      showTextarea: false,
+      isPreview: false,
+      editingIndex: null,
+      editingText: '',
+      isEditingTitle: false,
+      editingTitleText: '',
+      isEditingImageUrl: false,
+      editingImageUrlText: '',
+      addParagraph() {},
+      addNewParagraph() {},
+      cancelParagraph() {},
+      editParagraph() {},
+      updateParagraph() {},
+      cancelEdit() {},
+      editTitle() {},
+      saveTitle() {},
+      cancelEditTitle() {},
+      editImageUrl() {},
+      saveImageUrl() {},
+      cancelEditImageUrl() {},
+      previewArticle() {},
+      returnToEdit() {},
+      saveArticle() {},
     };
   });
 }
