@@ -1,10 +1,13 @@
 ---
 import "../styles/global.css";
-import { ClientRouter } from "astro:transitions";
+import { ViewTransitions } from "astro:transitions";
 import { Instagram, Youtube, X } from "@lucide/astro";
 
 import Header from "../components/common/Header.astro";
 import Footer from "../components/common/Footer.astro";
+import AuthModal from "../components/auth/AuthModal.astro";
+import Toast from "../components/common/Toast.astro";
+import ConfirmationModal from "../components/common/ConfirmationModal.astro";
 import { navbarContent } from "../content/navbar/RU/Navbar.json";
 import { footerData } from "../content/footer/EN/Footer.json";
 
@@ -15,8 +18,12 @@ interface LayoutProps {
   includePreFooterCTA?: boolean;
 }
 
-const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
-  Astro.props as LayoutProps;
+const {
+  title = "Maag",
+  useClientRouter = false,
+  navbarVariant = "default",
+  includePreFooterCTA = true,
+} = Astro.props as LayoutProps;
 ---
 
 <!doctype html>
@@ -33,12 +40,10 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap"
       rel="stylesheet"
     />
-    {useClientRouter && <ClientRouter />}
+    <ViewTransitions />
     <title>{title}</title>
   </head>
   <body class="bg-base-200" x-data>
-    
-
     <Header
       variant={navbarVariant}
       cultureText={navbarContent.items[0].label}
@@ -68,8 +73,25 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
       </ul>
 
       <!-- Bottom Section -->
-      <div class="flex flex-col gap-7">
-        <a href="#" class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-inter text-[14px] w-full">Войти</a>
+      <div class="flex flex-col gap-7" x-data>
+        <!-- Loading State -->
+        <template x-if="$store.auth.isLoading">
+          <button class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-inter text-[14px] w-full" disabled>...</button>
+        </template>
+        <!-- Logged Out State -->
+        <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
+          <button @click.prevent="$store.auth.openAuthModal(); $store.navbar.close()" class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-inter text-[14px] w-full">Войти</button>
+        </template>
+        <!-- Logged In State -->
+        <template x-if="!$store.auth.isLoading && $store.auth.isLoggedIn">
+          <div class="flex flex-col items-center gap-4 w-full">
+            <a href="/profile" class="flex items-center justify-center w-12 h-12 bg-primary text-primary-content rounded-full font-bold text-xl hover:drop-shadow-lg transition-shadow">
+              <div x-text="$store.auth.initials"></div>
+            </a>
+            <button @click.prevent="signOut(auth); $store.navbar.close()" class="bg-transparent text-base-content/70 hover:text-base-content text-center font-inter text-[14px] w-full">Выйти</button>
+          </div>
+        </template>
+
         <div class="flex items-center justify-center gap-5">
           <a href="#"><Instagram class="h-6 w-6" /></a>
           <a href="#"><Youtube class="h-7 w-7" /></a>
@@ -77,7 +99,21 @@ const { title, useClientRouter, navbarVariant, includePreFooterCTA } =
         </div>
       </div>
     </div>
+
+    <!-- Global Modals and Toasts -->
+    <AuthModal />
+    <Toast />
+    <ConfirmationModal />
+
     <script>
+      import { signOut } from 'firebase/auth';
+      import { auth } from '@/lib/firebase/client';
+      
+      // Make functions available to Alpine
+      window.signOut = signOut;
+      window.auth = auth;
+
+      // Close mobile menu on page navigation
       document.addEventListener('astro:after-swap', () => {
         if (window.Alpine && window.Alpine.store('navbar')) {
           window.Alpine.store('navbar').close();

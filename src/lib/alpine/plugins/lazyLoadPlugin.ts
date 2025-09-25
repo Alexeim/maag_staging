@@ -3,6 +3,8 @@ import type { Alpine } from 'alpinejs';
 const components: Record<string, () => Promise<any>> = {
   calendar: () => import('@/components/calendar/logic'),
   articleCreator: () => import('@/components/article/creatorLogic'),
+  authModal: () => import('@/components/auth/authLogic'),
+  profile: () => import('@/components/profile/profileLogic'),
 };
 
 export default function(Alpine: Alpine) {
@@ -79,6 +81,17 @@ export default function(Alpine: Alpine) {
       previewArticle() {},
       returnToEdit() {},
       saveArticle() {},
+      // --- Auth Modal properties ---
+      formType: 'login',
+      formData: { email: '', password: '', confirmPassword: '', firstName: '', lastName: '' },
+      error: '',
+      isLoading: false,
+      switchTo() {},
+      handleSubmit() {},
+      // --- Profile Page properties ---
+      form: { firstName: '', lastName: '' },
+      saveChanges() {},
+      deleteAccount() {},
     };
   });
 }

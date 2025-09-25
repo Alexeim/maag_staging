@@ -1,32 +1,18 @@
----
-// File: packages/shared-components/molecules/toast/Toast.astro
-// Version: 1.0 - Blueprint 3 (Store-Connected)
-
-import type { HTMLAttributes } from "astro/types";
-
-export interface Props extends HTMLAttributes<"div"> {
-  storeName: string;
-}
-
-const { storeName, ...rest } = Astro.props;
----
-
 <div
-  class="toast"
-  x-show={`$store.${storeName}.isOpen`}
-  x-transition
-  x-cloak
-  {...rest}
+  x-data
+  x-show="$store.ui.toast.show"
+  x-transition:enter="transition ease-out duration-300"
+  x-transition:enter-start="opacity-0 transform translate-y-2"
+  x-transition:enter-end="opacity-100 transform translate-y-0"
+  x-transition:leave="transition ease-in duration-300"
+  x-transition:leave-start="opacity-100 transform translate-y-0"
+  x-transition:leave-end="opacity-0 transform translate-y-2"
+  class="fixed bottom-5 right-5 z-[1000] p-4 rounded-md shadow-lg text-white"
+  :class="{
+    'bg-success': $store.ui.toast.type === 'success',
+    'bg-error': $store.ui.toast.type === 'error'
+  }"
+  style="display: none;"
+  x-text="$store.ui.toast.message"
 >
-  <div
-    class="alert"
-    :class=`{
-      'alert-info': $store.${storeName}.type === 'info',
-      'alert-success': $store.${storeName}.type === 'success',
-      'alert-warning': $store.${storeName}.type === 'warning',
-      'alert-error': $store.${storeName}.type === 'error'
-    }`
-  >
-    <span x-text={`$store.${storeName}.message`}></span>
-  </div>
 </div>

@@ -122,16 +122,16 @@ export default function articleCreatorLogic(initialState = {}) {
 
         if (response.ok) {
           const result = await response.json();
-          alert("Article saved successfully with ID: " + result.id);
-          localStorage.removeItem("articlePreview");
+          window.Alpine.store('ui').showToast('Article saved successfully!');
+          localStorage.removeItem('articlePreview');
           window.location.href = `/article/${result.id}`;
         } else {
           const errorData = await response.json();
-          alert(`Error saving article: ${errorData.message}`);
+          window.Alpine.store('ui').showToast(`Error saving article: ${errorData.message}`, 'error');
         }
       } catch (error) {
-        console.error("Failed to save article:", error);
-        alert("An error occurred while saving the article.");
+        console.error('Failed to save article:', error);
+        window.Alpine.store('ui').showToast('An error occurred while saving the article.', 'error');
       }
     },
 

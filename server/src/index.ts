@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { getAuth } from './services/firebase'; // Import the GETTER function
 import articleRoutes from './routes/articleRoutes'; // Import article routes
+import userRoutes from './routes/userRoutes'; // Import user routes
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,6 +16,9 @@ app.get('/api', (req, res) => {
 
 // Use the article routes
 app.use('/api/articles', articleRoutes);
+
+// Use the user routes
+app.use('/api/users', userRoutes);
 
 // Test route to verify Firebase connection
 app.get('/api/test-firebase', async (req, res) => {

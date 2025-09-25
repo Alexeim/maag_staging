@@ -99,24 +99,44 @@ const logoSrc = logo.src;
       <button class="p-2">
         <Youtube class="h-7 w-7" />
       </button>
-      <Button variant="primary" href="#" class="sm">Войти</Button>
+            <div class="flex items-center gap-4" x-data>
+              <!-- Loading State -->
+              <template x-if="$store.auth.isLoading">
+                <button class="btn btn-outline btn-primary" disabled>...</button>
+              </template>
+              <!-- Logged Out State -->
+              <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
+                <button @click.prevent="$store.auth.openAuthModal()" class="btn btn-outline btn-primary">
+                  Войти
+                </button>
+              </template>
+              <!-- Logged In State -->
+              <template x-if="!$store.auth.isLoading && $store.auth.isLoggedIn">
+                <div class="flex items-center gap-4">
+                  <a href="/profile" class="flex items-center justify-center w-10 h-10 bg-primary text-primary-content rounded-full font-bold text-lg hover:drop-shadow-lg transition-shadow">
+                    <div x-text="$store.auth.initials"></div>
+                  </a>
+                  <button @click.prevent="signOut(auth)" class="btn btn-outline btn-primary">
+                    Выйти
+                  </button>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+</nav>
 
-    <!-- Mobile Icons -->
-    <div class="flex items-center gap-4 lg:hidden">
-      <button class="p-2">
-        <Image src={searchIcon} alt="Search" class="h-5 w-5" />
-      </button>
-      <button @click="$store.navbar.toggle()" class="p-2 z-50">
-        <span x-show="!$store.navbar.isOpen">
-          <Image src={burgerIcon} alt="Open menu" class="h-4 w-5" />
-        </span>
-        <span x-show="$store.navbar.isOpen">
-          <X class="h-6 w-6" />
-        </span>
-      </button>
-    </div>
-  </nav>
+<script>
+  import { signOut } from 'firebase/auth';
+  import { auth } from '@/lib/firebase/client';
+
+  // Make functions available to Alpine
+  window.signOut = signOut;
+  window.auth = auth;
+</script>
 </header>
 
 <style>
