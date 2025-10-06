@@ -1,4 +1,14 @@
 import { PUBLIC_API_BASE_URL } from "../../lib/utils/constants";
+import { app } from "../../lib/firebase/client";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+
+const storage = getStorage(app);
+
 export default function articleCreatorLogic(initialState = {}) {
   return {
     article: {
@@ -12,8 +22,10 @@ export default function articleCreatorLogic(initialState = {}) {
     editingText: "", // To hold the text of the paragraph being edited
     isEditingTitle: false,
     editingTitleText: "",
-    isEditingImageUrl: false,
-    editingImageUrlText: "",
+    
+    // New state for image uploading
+    uploading: false,
+    uploadProgress: 0,
 
     // For Preview Page and Create Page state restoration
     init() {
@@ -50,17 +62,37 @@ export default function articleCreatorLogic(initialState = {}) {
       this.isEditingTitle = false;
     },
 
-    // --- Image URL editing methods ---
-    editImageUrl() {
-      this.isEditingImageUrl = true;
-      this.editingImageUrlText = this.article.imageUrl;
-    },
-    saveImageUrl() {
-      this.article.imageUrl = this.editingImageUrlText;
-      this.isEditingImageUrl = false;
-    },
-    cancelEditImageUrl() {
-      this.isEditingImageUrl = false;
+    // --- New Image Upload Method ---
+    handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.uploading = true;
+      this.uploadProgress = 0;
+
+      const storageRef = ref(storage, `articles/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          this.uploadProgress = progress;
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          window.Alpine.store('ui').showToast(`Upload failed: ${error.message}`, 'error');
+          this.uploading = false;
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            this.article.imageUrl = downloadURL;
+            this.uploading = false;
+            window.Alpine.store('ui').showToast('Image uploaded successfully!');
+          });
+        }
+      );
     },
 
     // For Create Page
@@ -104,6 +136,12 @@ export default function articleCreatorLogic(initialState = {}) {
 
     // Common save function
     async saveArticle() {
+      // Ensure image is uploaded before saving
+      if (!this.article.imageUrl) {
+        window.Alpine.store('ui').showToast('Please upload a cover image before saving.', 'error');
+        return;
+      }
+
       try {
         const response = await fetch(`${PUBLIC_API_BASE_URL}/api/articles`, {
           method: "POST",

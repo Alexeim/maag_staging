@@ -3,57 +3,64 @@ import Layout from "@/Layouts/Layout.astro";
 import Button from "@/components/common/Button.astro";
 ---
 
-<Layout title="Create New Article" navbarVariant="default" includePreFooterCTA={false} useClientRouter={true}>
+<Layout title="Создать новую статью" navbarVariant="default" includePreFooterCTA={false} useClientRouter={true}>
   <main class="bg-base-200 min-h-screen pt-[150px] pb-[100px]">
     <div class="max-w-[825px] mx-auto" x-data="$lazy('articleCreator')">
-      <h1 class="text-4xl font-bold mb-8">Create New Article</h1>
+      <h1 class="text-4xl font-bold mb-8">Создать новую статью</h1>
 
       <!-- Title and Image URL Inputs -->
       <div class="mb-6 p-4 border border-gray-200 rounded-md bg-white">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Article Title</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Заголовок статьи</label>
         <!-- Editing State for Title -->
         <template x-if="isEditingTitle">
           <div>
             <input type="text" x-model="editingTitleText" class="w-full p-2 border border-gray-300 rounded-md">
             <div class="flex justify-end gap-4 mt-2">
-              <Button variant="secondary" size="sm" @click="cancelEditTitle()">Cancel</Button>
-              <Button variant="primary" size="sm" @click="saveTitle()">Save</Button>
+              <Button variant="secondary" size="sm" @click="cancelEditTitle()">Отмена</Button>
+              <Button variant="primary" size="sm" @click="saveTitle()">Сохранить</Button>
             </div>
           </div>
         </template>
         <!-- Display State for Title -->
         <template x-if="!isEditingTitle">
           <div class="flex justify-between items-center">
-            <h2 class="text-2xl font-bold" x-text="article.title || 'Enter article title...'"></h2>
-            <Button variant="outline" size="sm" @click="editTitle()">Edit</Button>
+            <h2 class="text-2xl font-bold" x-text="article.title || 'Введите заголовок статьи...'"></h2>
+            <Button variant="outline" size="sm" @click="editTitle()">Редактировать</Button>
           </div>
         </template>
       </div>
 
       <div class="mb-6 p-4 border border-gray-200 rounded-md bg-white">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Cover Image URL</label>
-        <!-- Editing State for Image URL -->
-        <template x-if="isEditingImageUrl">
-          <div>
-            <input type="text" x-model="editingImageUrlText" class="w-full p-2 border border-gray-300 rounded-md">
-            <div class="flex justify-end gap-4 mt-2">
-              <Button variant="secondary" size="sm" @click="cancelEditImageUrl()">Cancel</Button>
-              <Button variant="primary" size="sm" @click="saveImageUrl()">Save</Button>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Обложка статьи</label>
+        
+        <!-- Custom File Upload -->
+        <div class="flex items-center" x-data="{ fileName: '' }">
+          <label for="file-upload" class="cursor-pointer py-2 px-4 rounded-full border-0 text-sm font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100">
+            Выберите файл
+          </label>
+          <input id="file-upload" type="file" class="hidden" 
+                 @change="handleImageUpload($event); fileName = $event.target.files.length > 0 ? $event.target.files[0].name : ''" 
+                 accept="image/png, image/jpeg, image/webp">
+          <span x-text="fileName ? fileName : (article.imageUrl ? 'Изображение загружено' : 'Файл не выбран')" class="ml-4 text-sm text-gray-500"></span>
+        </div>
+
+        <!-- Upload Status and Preview -->
+        <div x-show="uploading" class="mt-4">
+            <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-blue-600 h-2.5 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
             </div>
-          </div>
-        </template>
-        <!-- Display State for Image URL -->
-        <template x-if="!isEditingImageUrl">
-          <div class="flex justify-between items-center">
-            <p class="truncate" x-text="article.imageUrl || 'https://example.com/image.jpg'"></p>
-            <Button variant="outline" size="sm" @click="editImageUrl()">Edit</Button>
-          </div>
-        </template>
+        </div>
+
+        <div x-show="article.imageUrl && !uploading" class="mt-4">
+            <p class="text-sm text-green-600">Изображение успешно загружено!</p>
+            <img :src="article.imageUrl" alt="Предпросмотр изображения" class="mt-2 rounded-md max-h-60" />
+        </div>
       </div>
 
       <!-- Article Content Section -->
       <div>
-        <h2 class="text-2xl font-bold mb-4">Article Content</h2>
+        <h2 class="text-2xl font-bold mb-4">Содержание статьи</h2>
         
         <!-- Render existing paragraphs -->
         <template x-for="(paragraph, index) in article.paragraphs" :key="index">
@@ -63,8 +70,8 @@ import Button from "@/components/common/Button.astro";
               <div>
                 <textarea x-model="editingText" class="w-full p-2 border border-gray-300 rounded-md" rows="6"></textarea>
                 <div class="flex justify-end gap-4 mt-2">
-                  <Button variant="secondary" @click="cancelEdit()">Cancel</Button>
-                  <Button variant="primary" @click="updateParagraph()">Update Paragraph</Button>
+                  <Button variant="secondary" @click="cancelEdit()">Отмена</Button>
+                  <Button variant="primary" @click="updateParagraph()">Обновить параграф</Button>
                 </div>
               </div>
             </template>
@@ -72,7 +79,7 @@ import Button from "@/components/common/Button.astro";
             <template x-if="editingIndex !== index">
               <div class="flex justify-between items-start">
                 <p x-text="paragraph" class="flex-grow pr-4"></p>
-                <Button variant="outline" size="sm" @click="editParagraph(index)">Edit</Button>
+                <Button variant="outline" size="sm" @click="editParagraph(index)">Редактировать</Button>
               </div>
             </template>
           </div>
@@ -80,23 +87,23 @@ import Button from "@/components/common/Button.astro";
 
         <!-- Textarea for new paragraph (only shown when not editing) -->
         <div x-show="showTextarea && editingIndex === null" class="mb-4">
-          <textarea x-model="newParagraph" class="w-full p-2 border border-gray-300 rounded-md" rows="6" placeholder="Paste your new paragraph text here..."></textarea>
+          <textarea x-model="newParagraph" class="w-full p-2 border border-gray-300 rounded-md" rows="6" placeholder="Вставьте текст нового параграфа сюда..."></textarea>
           <div class="flex justify-end gap-4 mt-2">
-            <Button variant="secondary" @click="cancelParagraph()">Cancel</Button>
-            <Button variant="primary" @click="addNewParagraph()">Save Paragraph</Button>
+            <Button variant="secondary" @click="cancelParagraph()">Отмена</Button>
+            <Button variant="primary" @click="addNewParagraph()">Сохранить параграф</Button>
           </div>
         </div>
 
         <!-- Add Paragraph Button (only shown when not adding and not editing) -->
         <div x-show="!showTextarea && editingIndex === null">
-          <Button variant="primary" @click="addParagraph()">Add Paragraph</Button>
+          <Button variant="primary" @click="addParagraph()">Добавить параграф</Button>
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="mt-8 flex justify-end gap-4">
-        <Button variant="secondary" @click="previewArticle()">Preview</Button>
-        <Button variant="primary" @click="saveArticle()">Save Article</Button>
+        <Button variant="secondary" @click="previewArticle()">Предпросмотр</Button>
+        <Button variant="primary" @click="saveArticle()">Сохранить статью</Button>
       </div>
     </div>
   </main>

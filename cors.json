@@ -1,0 +1,11 @@
+[
+  {
+    "origin": [
+      "http://localhost:8080",
+      "https://maag-frontend-953634001415.europe-west9.run.app"
+    ],
+    "method": ["GET", "POST", "PUT", "OPTIONS"],
+    "responseHeader": ["Content-Type", "Authorization"],
+    "maxAgeSeconds": 3600
+  }
+]
