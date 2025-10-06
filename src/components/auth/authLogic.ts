@@ -1,4 +1,5 @@
 import { auth } from '@/lib/firebase/client';
+import { PUBLIC_API_BASE_URL } from "../../lib/utils/constants";
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
@@ -69,7 +70,7 @@ export default function authModalLogic() {
           });
 
           // Create user document in our Firestore database via our backend
-          const response = await fetch('http://localhost:3000/api/users', {
+          const response = await fetch(`${PUBLIC_API_BASE_URL}/api/users`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

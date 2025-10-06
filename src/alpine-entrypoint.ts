@@ -1,4 +1,5 @@
 import type { Alpine } from 'alpinejs';
+import { PUBLIC_API_BASE_URL } from "./lib/utils/constants";
 import { navbarStore } from '@/stores/navbarStore';
 import { authStore } from '@/stores/authStore';
 import { uiStore } from '@/stores/uiStore';
@@ -19,7 +20,7 @@ export default (Alpine: Alpine) => {
     if (user) {
       // User is signed in, fetch their profile from our backend
       try {
-        const response = await fetch(`http://localhost:3000/api/users/${user.uid}`);
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/api/users/${user.uid}`);
         if (response.ok) {
           const profileData = await response.json();
           Alpine.store('auth').setUser(user, profileData);

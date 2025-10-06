@@ -43,6 +43,6 @@ app.get('/api/test-firebase', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+app.listen(Number(port), '0.0.0.0', () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });

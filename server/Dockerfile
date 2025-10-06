@@ -1,20 +1,39 @@
-# 1. Используем официальный образ Node.js версии 20
-FROM node:20-slim
+# Этап 1: "Мастерская" для сборки проекта
+# Мы даем этому этапу имя "builder", чтобы потом на него сослаться
+FROM node:20 AS builder
 
-# 2. Устанавливаем рабочую директорию внутри контейнера
+# Устанавливаем рабочую директорию
 WORKDIR /usr/src/app
 
-# 3. Копируем package.json и package-lock.json
+# Копируем package.json и устанавливаем ВСЕ зависимости (включая dev)
 COPY package*.json ./
+RUN npm ci
 
-# 4. Устанавливаем только production-зависимости
-RUN npm ci --only=production
-
-# 5. Копируем исходный код TypeScript
+# Копируем весь остальной код
 COPY . .
 
-# 6. Компилируем TypeScript в JavaScript
+# Собираем проект (компилируем TS в JS)
 RUN npm run build
 
-# 7. Указываем команду для запуска приложения
+# Оставляем только production-зависимости для чистоты
+RUN npm prune --production
+
+# --- На этом этапе у нас есть готовые папки 'dist' и 'node_modules' ---
+
+
+# Этап 2: "Чистовик" для запуска приложения
+FROM node:20-slim
+
+# Устанавливаем рабочую директорию
+WORKDIR /usr/src/app
+
+# Копируем package.json (он нужен для npm start)
+COPY package*.json ./
+
+# !!! МАГИЯ !!!
+# Копируем готовые артефакты из "Мастерской" (этапа "builder")
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+
+# Указываем команду для запуска готового JS кода
 CMD [ "npm", "start" ]

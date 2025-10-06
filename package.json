@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@astrojs/alpinejs": "^0.4.8",
+    "@astrojs/node": "^9.4.4",
     "@lucide/astro": "^0.513.0",
     "@tailwindcss/vite": "^4.1.8",
     "@types/alpinejs": "^3.13.11",

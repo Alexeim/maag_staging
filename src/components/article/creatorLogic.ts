@@ -1,3 +1,4 @@
+import { PUBLIC_API_BASE_URL } from "../../lib/utils/constants";
 export default function articleCreatorLogic(initialState = {}) {
   return {
     article: {
@@ -104,7 +105,7 @@ export default function articleCreatorLogic(initialState = {}) {
     // Common save function
     async saveArticle() {
       try {
-        const response = await fetch("http://localhost:3000/api/articles", {
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/api/articles`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

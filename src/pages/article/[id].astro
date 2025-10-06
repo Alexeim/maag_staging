@@ -7,55 +7,33 @@ import ArticleImage from "../../components/article/ArticleImage.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import RecentArticles from "../../components/article/RecentArticles.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
-import staticArticleData from "../../content/articlePage/RU/Article.json";
 import type { ImageMetadata } from "astro";
 import { newsItems } from "@/content/mockNews";
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
 const { id } = Astro.params;
 
 let articleData: any;
 let error: string | null = null;
 
-if (id === 'main-article') {
-  articleData = staticArticleData;
-} else {
-  try {
-    const response = await fetch(`http://localhost:3000/api/articles/${id}`);
-    if (response.ok) {
-      articleData = await response.json();
-    } else {
-      error = `Article not found. Status: ${response.status}`;
-    }
-  } catch (e: any) {
-    console.error(e);
-    error = `Error fetching article: ${e.message}`;
+try {
+  const response = await fetch(`${PUBLIC_API_BASE_URL}/api/articles/${id}`);
+  if (response.ok) {
+    articleData = await response.json();
+  } else {
+    error = `Article not found. Status: ${response.status}`;
   }
+} catch (e: any) {
+  console.error(e);
+  error = `Error fetching article: ${e.message}`;
 }
-
-// This is for the static "main-article" image
-const images = import.meta.glob<{ default: ImageMetadata }>(
-  "/src/assets/images/article_content/*.{jpeg,jpg,png,gif}",
-  { eager: true }
-);
-const mainImageModule = id === 'main-article' 
-  ? images[`/src/assets/images/article_content/${staticArticleData.mainImage.src}`]?.default
-  : null;
-
-// This is for the related articles, which are still static for now
-const relatedArticlesWithImages = await Promise.all(
-  staticArticleData.relatedArticles.map(async (article) => {
-    const imageModule =
-      images[`/src/assets/images/article_content/${article.image}`]?.default;
-    return { ...article, image: imageModule };
-  })
-);
 
 // Normalize data for the template
 const displayArticle = {
   title: articleData?.header?.title || articleData?.title || 'Article',
   category: articleData?.header?.category || 'Category',
-  authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : staticArticleData.author.name,
-  authorAvatar: articleData?.author?.avatarUrl || staticArticleData.author.avatarUrl,
+  authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : 'Author',
+  authorAvatar: articleData?.author?.avatarUrl,
   readTime: articleData?.meta?.readTime || '5 min read',
   imageUrl: articleData?.imageUrl, // For dynamic articles
   imageAlt: articleData?.mainImage?.alt || 'Article image',
@@ -108,14 +86,6 @@ if (id !== 'main-article' && articleData && articleData.content) {
               <SocialShare readTime={displayArticle.readTime} />
             </div>
 
-            {id === 'main-article' && mainImageModule && (
-              <ArticleImage
-                src={mainImageModule}
-                alt={displayArticle.imageAlt}
-                caption={displayArticle.imageCaption}
-                transitionName="main-article-image"
-              />
-            )}
             {id !== 'main-article' && displayArticle.imageUrl && (
                <img 
                   src={displayArticle.imageUrl} 
@@ -148,7 +118,7 @@ if (id !== 'main-article' && articleData && articleData.content) {
               />
             )}
             
-            <RecentArticles articles={relatedArticlesWithImages} />
+            {/* RecentArticles component removed as per user instruction to remove all static logic */}
           </div>
         </>
       )}

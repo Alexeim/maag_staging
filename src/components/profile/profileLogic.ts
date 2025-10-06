@@ -1,3 +1,4 @@
+import { PUBLIC_API_BASE_URL } from "../../lib/utils/constants";
 export default function profileLogic() {
   return {
     form: {
@@ -27,7 +28,7 @@ export default function profileLogic() {
       }
 
       try {
-        const response = await fetch(`http://localhost:3000/api/users/${uid}`, {
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/api/users/${uid}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(this.form),

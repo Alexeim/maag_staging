@@ -1,0 +1,9 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+  - 'build'
+  - '--tag=gcr.io/maag-60419/maag-frontend:latest'
+  - '--build-arg=PUBLIC_API_BASE_URL=https://maag-api-953634001415.europe-west9.run.app'
+  - '.'
+images:
+- 'gcr.io/maag-60419/maag-frontend:latest'
