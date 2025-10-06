@@ -2,13 +2,13 @@ import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDV1lOP_YvFhENApXmw--oSo0HOifEVSa4",
-  authDomain: "maag-60419.firebaseapp.com",
-  projectId: "maag-60419",
-  storageBucket: "maag-60419.appspot.com",
-  messagingSenderId: "953634001415",
-  appId: "1:953634001415:web:c78efc5296109e0757d0a2",
-  measurementId: "G-6S16MLZJ8F"
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID,
+  measurementId: import.meta.env.PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

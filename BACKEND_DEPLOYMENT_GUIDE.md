@@ -1,42 +1,36 @@
-# Backend Deployment Guide: MAAG API on Google Cloud Run
+# Backend Deployment Guide: Express API on Google Cloud Run
 
-This document summarizes the final, successful steps taken to deploy the Express.js backend for the MAAG project to Google Cloud Run.
+This document provides a complete, step-by-step guide to the final, successful deployment process for the MAAG backend API. It explains the core concepts, the architecture, and the automated workflow.
 
-## 1. Final Service URL
+## 1. Core Principles & Technologies
 
-The deployed backend is live and accessible at the following URL:
+The backend deployment is designed for security, efficiency, and reliability.
 
-**https://maag-api-953634001415.europe-west9.run.app**
+- **Platform:** Google Cloud Run.
+- **Containerization:** A multi-stage `Dockerfile` to produce a small and secure production image.
+- **Build Service:** Google Cloud Build for automated, cloud-native builds.
+- **Secret Management:** Google Secret Manager for securely handling the Firebase Admin SDK key. This is the most critical part of the backend's security model.
 
-## 2. Core Principles & Technologies Used
+### Key Architectural Difference: Run-Time vs. Build-Time Secrets
 
-- **Platform:** Google Cloud Run (for running the container).
-- **Containerization:** Docker (for packaging the application).
-- **Build Service:** Google Cloud Build (for building the Docker image in the cloud).
-- **Secret Management:** Google Secret Manager (for securely storing the Firebase service account key).
-- **Deployment Method:** Manual deployment via the `gcloud` CLI.
+It is vital to understand why the backend and frontend handle secrets differently.
 
-## 3. Step-by-Step Deployment Process
+- **Frontend (Build-Time):** The frontend needs its Firebase keys available in the browser. Therefore, the keys are injected during the `npm run build` process and "baked into" the public JavaScript files. We use `--build-arg` for this.
 
-This was the final, correct sequence of actions.
+- **Backend (Run-Time):** The backend is a secure server environment. We **never** want to bake secrets into the Docker image. Instead, the image is generic, and we securely mount the secret into the running container using Cloud Run's integration with Secret Manager. The Node.js process only gains access to the key *after* it has started, reading it from the environment (`process.env`). This is significantly more secure.
 
-### Step 1: Code Preparation (`server/src/index.ts`)
+---
 
-The main server file was modified to listen on `0.0.0.0`, which is a requirement for Cloud Run to correctly route traffic to the container.
+## 2. The Final, Correct Deployment Workflow
 
-**Change:**
-```diff
-- app.listen(port, () => {
-+ app.listen(Number(port), '0.0.0.0', () => {
-```
+This process is fully automated with a deploy script. Here is a breakdown of each component.
 
-### Step 2: Dockerfile Configuration (`server/Dockerfile`)
+### Part 1: The Container Recipe (`server/Dockerfile`)
 
-A multi-stage `Dockerfile` was created to build a clean, optimized, and secure production image. This process ensures that development tools and source code are not included in the final container.
+The backend uses an optimized, multi-stage `Dockerfile` to create a minimal and secure production image.
 
-**Final `server/Dockerfile`:**
 ```dockerfile
-# Stage 1: The "builder" stage to compile the project
+# Stage 1: The "builder" stage to compile TypeScript
 FROM node:20 AS builder
 WORKDIR /usr/src/app
 COPY package*.json ./
@@ -45,52 +39,65 @@ COPY . .
 RUN npm run build
 RUN npm prune --production
 
-# Stage 2: The final, clean stage for running the application
+# ---
+
+# Stage 2: The final "runner" stage
 FROM node:20-slim
 WORKDIR /usr/src/app
+# Copy ONLY the necessary built files from the builder
 COPY package*.json ./
-COPY --from=builder /usr/src/app/dist ./
-dist
+COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 CMD [ "npm", "start" ]
 ```
+This process ensures that no source code (`.ts` files) or development tools are included in the final image, only the compiled JavaScript (`dist`) and production dependencies.
 
-### Step 3: Building the Docker Image
+### Part 2: Secure Key Storage (Google Secret Manager)
 
-The Docker image was built in the cloud using Google Cloud Build.
+The Firebase Admin SDK JSON key is a highly sensitive credential. It is stored in Google Secret Manager, not in the code or the Docker image.
 
-**Command:**
+**How it works:**
+1.  A secret named `FIREBASE_CONFIG_JSON` was created in Secret Manager.
+2.  The content of the `firebase-key.json` file was added as a version to this secret.
+3.  The Cloud Run service account was granted IAM permission to access this specific secret.
+
+### Part 3: The Code (`server/src/services/firebase.ts`)
+
+The application code is written to read the secret from a runtime environment variable.
+
+```typescript
+// This code runs when the server starts in the Cloud Run container
+const firebaseConfigJson = process.env.FIREBASE_CONFIG_JSON;
+if (!firebaseConfigJson) {
+  throw new Error("The FIREBASE_CONFIG_JSON environment variable is not set.");
+}
+const serviceAccount = JSON.parse(firebaseConfigJson);
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+```
+Cloud Run securely provides the `FIREBASE_CONFIG_JSON` variable by fetching it from Secret Manager and injecting it into the running container's environment.
+
+### Part 4: Automation (`deploy.sh` & `package.json`)
+
+To make deployment simple and repeatable, the entire process is wrapped in a script.
+
+**A. `server/deploy.sh`:**
+This script contains the two `gcloud` commands needed to build and deploy the backend.
+
+```bash
+#!/bin/bash
+set -e # Exit immediately if a command fails
+
+# 1. Build the image using Cloud Build (submitting the server directory)
+```
+
 ```bash
 gcloud builds submit --tag gcr.io/maag-60419/maag-api ./server
+
+# 2. Deploy the new image to Cloud Run, securely connecting the secret
 ```
 
-### Step 4: Securely Storing the Firebase Key
-
-The Firebase service account JSON key was stored securely using Google Secret Manager.
-
-**Commands:**
-```bash
-# 1. Create a secret to hold the key
-gcloud secrets create FIREBASE_CONFIG_JSON --replication-policy="automatic"
-
-# 2. Add the key content as a new version of the secret
-gcloud secrets versions add FIREBASE_CONFIG_JSON --data-file="path/to/your/firebase-key.json"
-```
-
-### Step 5: Granting Permissions
-
-The Cloud Run service needs permission to access the key from Secret Manager. This was granted via an IAM policy binding.
-
-**Command:**
-```bash
-gcloud projects add-iam-policy-binding maag-60419 --member="serviceAccount:953634001415-compute@developer.gserviceaccount.com" --role="roles/secretmanager.secretAccessor"
-```
-
-### Step 6: Deploying to Cloud Run
-
-The final deployment command launched the service, connecting it to the securely stored secret.
-
-**Command:**
 ```bash
 gcloud run deploy maag-api \
   --image gcr.io/maag-60419/maag-api \
@@ -99,18 +106,41 @@ gcloud run deploy maag-api \
   --allow-unauthenticated \
   --set-secrets="FIREBASE_CONFIG_JSON=FIREBASE_CONFIG_JSON:latest"
 ```
+The `--set-secrets` flag is the magic that connects our running container to Secret Manager.
 
-## 4. How to Test the Live API
+**B. `server/package.json`:**
+A simple `npm` script is added to execute the deploy script.
 
-You can test the deployed API using `curl`.
+```json
+"scripts": {
+  "deploy:prod": "bash deploy.sh"
+}
+```
+
+---
+
+## 4. How to Verify the Deployment
+
+After a successful deployment, you can perform a quick "smoke test" to ensure the API is live and responding correctly using `curl`.
 
 **Test the root endpoint:**
 ```bash
 curl https://maag-api-953634001415.europe-west9.run.app/api
 ```
-**Expected Output:** `Hello from the MAAG API!`
+*Expected Output: `Hello from the MAAG API!`*
 
 **Test the articles endpoint:**
 ```bash
 curl https://maag-api-953634001415.europe-west9.run.app/api/articles
+```
+*This should return a JSON array of articles from your Firestore database.*
+
+---
+
+## 5. How to Deploy
+
+With this system, deploying a new version of the backend is a single command, run from the **root of the project**:
+
+```bash
+npm run deploy:prod --prefix server
 ```

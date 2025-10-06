@@ -6,9 +6,11 @@ import picture2 from "../../assets/images/cal.jpeg";
 import { newsItems } from "@/content/mockNews";
 import newsImage from "../../assets/images/article_content/news.jpeg";
 
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+
 let latestArticle: any = null;
 try {
-  const response = await fetch('http://localhost:3000/api/articles');
+  const response = await fetch(`${PUBLIC_API_BASE_URL}/api/articles`);
   if (response.ok) {
     const articles = await response.json();
     if (articles.length > 0) {

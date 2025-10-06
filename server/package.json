@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test:firebase": "ts-node src/test-firebase-direct.ts"
+    "test:firebase": "ts-node src/test-firebase-direct.ts",
+    "deploy:prod": "bash deploy.sh"
   },
   "keywords": [],
   "author": "",
