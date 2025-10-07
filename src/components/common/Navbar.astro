@@ -99,45 +99,50 @@ const logoSrc = logo.src;
       <button class="p-2">
         <Youtube class="h-7 w-7" />
       </button>
-            <div class="flex items-center gap-4" x-data>
-              <!-- Loading State -->
-              <template x-if="$store.auth.isLoading">
-                <button class="btn btn-outline btn-primary" disabled>...</button>
-              </template>
-              <!-- Logged Out State -->
-              <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
-                <button @click.prevent="$store.auth.openAuthModal()" class="btn btn-outline btn-primary">
-                  Войти
-                </button>
-              </template>
-              <!-- Logged In State -->
-              <template x-if="!$store.auth.isLoading && $store.auth.isLoggedIn">
-                <div class="flex items-center gap-4">
-                  <a href="/profile" class="flex items-center justify-center w-10 h-10 bg-primary text-primary-content rounded-full font-bold text-lg hover:drop-shadow-lg transition-shadow">
-                    <div x-text="$store.auth.initials"></div>
-                  </a>
-                  <button @click.prevent="signOut(auth)" class="btn btn-outline btn-primary">
-                    Выйти
-                  </button>
-                </div>
-              </template>
-            </div>
+      <div class="flex items-center gap-4" x-data>
+        <!-- Loading State -->
+        <template x-if="$store.auth.isLoading">
+          <button class="btn btn-outline btn-primary" disabled>...</button>
+        </template>
+        <!-- Logged Out State -->
+        <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
+          <button
+            @click.prevent="$store.auth.openAuthModal()"
+            class="border border-primary bg-primary text-primary-content rounded-[9px] py-1.5 px-4 text-center font-inter text-[14px] w-full cursor-pointer hover:bg-primary/80 transition-colors"
+          >
+            Войти
+          </button>
+        </template>
+        <!-- Logged In State -->
+        <template x-if="!$store.auth.isLoading && $store.auth.isLoggedIn">
+          <div class="flex items-center gap-4">
+            <a
+              href="/profile"
+              class="flex items-center justify-center w-10 h-10 bg-primary text-primary-content rounded-full font-bold text-lg hover:drop-shadow-lg transition-shadow"
+            >
+              <div x-text="$store.auth.initials"></div>
+            </a>
+            <button
+              @click.prevent="signOut(auth)"
+              class="btn btn-outline btn-primary"
+            >
+              Выйти
+            </button>
           </div>
-        </div>
+        </template>
       </div>
     </div>
-  </div>
-</nav>
+  </nav>
+</header>
 
 <script>
-  import { signOut } from 'firebase/auth';
-  import { auth } from '@/lib/firebase/client';
+  import { signOut } from "firebase/auth";
+  import { auth } from "@/lib/firebase/client";
 
   // Make functions available to Alpine
   window.signOut = signOut;
   window.auth = auth;
 </script>
-</header>
 
 <style>
   .nav-item {
