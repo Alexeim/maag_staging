@@ -1,27 +1,27 @@
 ---
 import { Image } from "astro:assets";
 import maagLogo from "../../assets/logo/maaglogo.svg";
-import picture1 from "../../assets/images/main.jpeg";
 import picture2 from "../../assets/images/cal.jpeg";
-import { newsItems } from "@/content/mockNews";
-import newsImage from "../../assets/images/article_content/news.jpeg";
-
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
-let latestArticle: any = null;
+let mainArticle: any = null;
+let newsArticles: any[] = [];
+
 try {
   const response = await fetch(`${PUBLIC_API_BASE_URL}/api/articles`);
   if (response.ok) {
     const articles = await response.json();
-    if (articles.length > 0) {
-      latestArticle = articles[0];
-    }
+    
+    // Filter for the main article (latest that is NOT news)
+    mainArticle = articles.find((article: any) => article.category !== 'Новости') || null;
+
+    // Filter for news articles
+    newsArticles = articles.filter((article: any) => article.category === 'Новости');
+
   }
 } catch (error) {
-  console.error("Failed to fetch latest article:", error);
+  console.error("Failed to fetch articles:", error);
 }
-
-// TODO: Add breakpoint for 1260px
 ---
 
 <section class="mx-auto px-4 lg:px-12 bg-base-200 mb-0">
@@ -37,29 +37,25 @@ try {
         class="flex space-x-6 overflow-x-auto lg:flex-col lg:space-x-0 lg:space-y-6"
       >
         {
-          newsItems.map((item) => (
+          newsArticles.map((newsItem) => (
             <div class="flex-shrink-0 sm:w-1/2 md:w-1/3 lg:w-full">
               <div class="flex items-start gap-4">
-                <a href={`/article/${item.id}`} class="block bg-base-200 z-50">
+                <a href={`/article/${newsItem.id}`} class="block bg-base-200 z-50">
                   <Image
-                    src={item.image}
-                    alt={`News image for ${item.title}`}
+                    src={newsItem.imageUrl}
+                    alt={`News image for ${newsItem.title}`}
                     class="w-20 h-20 object-cover flex-shrink-0"
-                    transition:name={`news-image-${item.id}`}
+                    width={80}
+                    height={80}
+                    transition:name={`main-article-image-${newsItem.id}`}
                   />
                 </a>
                 <div class="flex-1">
-                  {/* <span class="text-error uppercase tracking-[.46em] font-inter text-sm">
-                    {item.category}
-                  </span>
-                  <a
-                    href={`/article/${item.id}`}
-                    class="block bg-base-200 z-50"
-                  > */}
-                    <h3 class="text-base font-bold font-old-standard mt-1 leading-tight">
-                      {item.title}
-                    </h3>
-                  </a>
+                    <a href={`/article/${newsItem.id}`} class="block bg-base-200 z-50">
+                      <h3 class="text-base font-bold font-old-standard mt-1 leading-tight">
+                        {newsItem.title}
+                      </h3>
+                    </a>
                 </div>
               </div>
             </div>
@@ -81,25 +77,25 @@ try {
       >
         Главное
       </h2>
-      {latestArticle ? (
+      {mainArticle ? (
         <div>
-          <a href={`/article/${latestArticle.id}`} class="block bg-base-200 z-50">
+          <a href={`/article/${mainArticle.id}`} class="block bg-base-200 z-50">
             <img
-              src={latestArticle.imageUrl}
-              alt={latestArticle.title}
+              src={mainArticle.imageUrl}
+              alt={mainArticle.title}
               class="w-full h-auto lg:h-[600px] object-cover relative lg:z-40"
-              transition:name={`main-article-image-${latestArticle.id}`}
+              transition:name={`main-article-image-${mainArticle.id}`}
             />
           </a>
           <div class="p-4 lg:p-6">
-            {latestArticle.category && (
+            {mainArticle.category && (
               <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
-                {latestArticle.category}
+                {mainArticle.category}
               </p>
             )}
-            <a href={`/article/${latestArticle.id}`} class="block bg-base-200 z-50">
+            <a href={`/article/${mainArticle.id}`} class="block bg-base-200 z-50">
               <h2 class="text-3xl lg:text-5xl leading-tight font-thin font-old-standard">
-                {latestArticle.title} <Image
+                {mainArticle.title} <Image
                   src={maagLogo}
                   alt="MAAG"
                   class="w-8 h-8 lg:w-10 lg:h-10 inline-block align-middle"
@@ -110,29 +106,8 @@ try {
         </div>
       ) : (
         <div>
-          <a href="/article/main-article" class="block bg-base-200 z-50">
-            <Image
-              src={picture1}
-              alt="Main article"
-              class="w-full h-auto lg:h-[600px] object-cover relative lg:z-40"
-              transition:name="main-article-image"
-            />
-          </a>
           <div class="p-4 lg:p-6">
-            <p
-              class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]"
-            >
-              Балет
-            </p>
-            <a href="/article/main-article" class="block bg-base-200 z-50">
-              <h2 class="text-3xl lg:text-5xl leading-tight font-thin font-old-standard">
-                В Парижской опере родилась новая звезда <Image
-                  src={maagLogo}
-                  alt="MAAG"
-                  class="w-8 h-8 lg:w-10 lg:h-10 inline-block align-middle"
-                />
-              </h2>
-            </a>
+            <p>Главных статей для отображения нет.</p>
           </div>
         </div>
       )}
