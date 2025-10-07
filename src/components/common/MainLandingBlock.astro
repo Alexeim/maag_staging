@@ -92,6 +92,11 @@ try {
             />
           </a>
           <div class="p-4 lg:p-6">
+            {latestArticle.category && (
+              <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
+                {latestArticle.category}
+              </p>
+            )}
             <a href={`/article/${latestArticle.id}`} class="block bg-base-200 z-50">
               <h2 class="text-3xl lg:text-5xl leading-tight font-thin font-old-standard">
                 {latestArticle.title} <Image
