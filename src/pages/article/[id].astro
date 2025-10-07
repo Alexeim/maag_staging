@@ -31,34 +31,15 @@ try {
 // Normalize data for the template
 const displayArticle = {
   title: articleData?.header?.title || articleData?.title || 'Article',
-  category: articleData?.header?.category || 'Category',
+  category: articleData?.category || 'Category',
   authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : 'Author',
   authorAvatar: articleData?.author?.avatarUrl,
   readTime: articleData?.meta?.readTime || '5 min read',
   imageUrl: articleData?.imageUrl, // For dynamic articles
+  imageCaption: articleData?.imageCaption || '', // <-- Get the caption
   imageAlt: articleData?.mainImage?.alt || 'Article image',
-  imageCaption: articleData?.mainImage?.caption || '',
-  // For static article
-  bodyOpening: articleData?.bodyDefault?.opening,
-  bodySections: articleData?.bodyDefault?.sections,
+  contentBlocks: articleData?.content || [],
 };
-
-// Prepare props for ArticleBody for dynamic articles
-let dynamicOpening = "";
-let dynamicSections: { type: 'paragraph'; content: string }[] = [];
-
-if (id !== 'main-article' && articleData && articleData.content) {
-  const paragraphs = articleData.content
-    .filter(block => block.type === 'paragraph')
-    .map(block => block.text);
-  
-  if (paragraphs.length > 0) {
-    dynamicOpening = paragraphs[0];
-  }
-  if (paragraphs.length > 1) {
-    dynamicSections = paragraphs.slice(1).map(p => ({ type: 'paragraph', content: p }));
-  }
-}
 ---
 
 <Layout
@@ -87,28 +68,23 @@ if (id !== 'main-article' && articleData && articleData.content) {
             </div>
 
             {id !== 'main-article' && displayArticle.imageUrl && (
-               <img 
-                  src={displayArticle.imageUrl} 
-                  alt={displayArticle.imageAlt} 
-                  class="w-full h-auto max-w-[1200px] rounded-lg shadow-lg"
-                  transition:name={`main-article-image-${id}`}
-                />
+              <figure class="w-full max-w-[1200px]">
+                <img 
+                    src={displayArticle.imageUrl} 
+                    alt={displayArticle.imageAlt} 
+                    class="w-full h-auto rounded-lg shadow-lg"
+                    transition:name={`main-article-image-${id}`}
+                  />
+                {displayArticle.imageCaption && (
+                  <figcaption class="text-center text-sm text-gray-500 mt-2">{displayArticle.imageCaption}</figcaption>
+                )}
+              </figure>
             )}
           </div>
 
           <!-- Article Content -->
           <div class="max-w-[1400px] mx-auto px-14 pb-[100px]">
-            {id === 'main-article' ? (
-              <ArticleBody
-                opening={displayArticle.bodyOpening}
-                sections={displayArticle.bodySections}
-              />
-            ) : (
-              <ArticleBody
-                opening={dynamicOpening}
-                sections={dynamicSections}
-              />
-            )}
+            <ArticleBody contentBlocks={displayArticle.contentBlocks} />
             
             {/* Conditionally render EventDetails only if the data exists */}
             {(articleData?.eventDetails) && (

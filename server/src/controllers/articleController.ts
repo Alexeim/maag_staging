@@ -7,7 +7,9 @@ export interface Article {
   title: string;
   authorId: string;
   content: any[]; // Array of content blocks (e.g., { type: 'paragraph', text: '...' })
-  imageUrl?: string; // Optional image URL
+  imageUrl?: string;
+  imageCaption?: string;
+  category?: string; // <-- Added category
   createdAt: Date;
 }
 
@@ -20,7 +22,8 @@ const articlesCollection = db.collection('articles');
  */
 export const createArticle = async (req: Request, res: Response) => {
   try {
-    const { title, content, imageUrl, authorId } = req.body;
+    // --- UPDATED: Added imageCaption and category ---
+    const { title, content, imageUrl, imageCaption, authorId, category } = req.body;
 
     if (!title || !content || !authorId) {
       return res.status(400).json({ message: 'Title, content, and authorId are required' });
@@ -31,6 +34,8 @@ export const createArticle = async (req: Request, res: Response) => {
       authorId,
       content,
       imageUrl,
+      imageCaption,
+      category, // <-- Added category
       createdAt: new Date(),
     };
 

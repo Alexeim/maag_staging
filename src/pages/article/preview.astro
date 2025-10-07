@@ -24,7 +24,13 @@ import articleData from "@/content/articlePage/RU/Article.json"; // for author, 
       <!-- Article Header Section -->
       <div class="pt-[150px] pb-[100px] flex flex-col items-center gap-[100px]">
         <div class="flex flex-col gap-8 max-w-[825px] w-full">
-          <ArticleHeader category="Preview Category" :title="article.title" />
+          <div>
+            <p 
+              class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter'] mb-2" 
+              x-text="article.category || 'Category'">
+            </p>
+            <ArticleHeader :title="article.title" />
+          </div>
           <ArticleAuthor
             name={articleData.author.name}
             avatarUrl={articleData.author.avatarUrl}
@@ -33,20 +39,43 @@ import articleData from "@/content/articlePage/RU/Article.json"; // for author, 
         </div>
 
         <template x-if="article.imageUrl">
-          <img
-            :src="article.imageUrl"
-            alt="Article Image Preview"
-            class="w-full h-auto max-w-[1200px] rounded-lg shadow-lg"
-          />
+          <figure class="w-full max-w-[1200px]">
+            <img
+              :src="article.imageUrl"
+              alt="Article Image Preview"
+              class="w-full h-auto rounded-lg shadow-lg"
+            />
+            <figcaption x-show="article.imageCaption" x-text="article.imageCaption" class="text-center text-sm text-gray-500 mt-2"></figcaption>
+          </figure>
         </template>
       </div>
 
       <!-- Article Content -->
       <div class="max-w-[1400px] mx-auto px-14 pb-[100px]">
-        <!-- This is a simplified body for preview -->
+        <!-- Article Body - Renders blocks based on their type -->
         <div class="prose lg:prose-xl max-w-[825px] mx-auto">
-          <template x-for="paragraph in article.paragraphs">
-            <p x-text="paragraph"></p>
+          <template x-for="block in article.contentBlocks" :key="block.type + Math.random()">
+            <div>
+              <!-- Paragraphs & Headers -->
+              <p :class="{
+                'text-lg': block.type === 'paragraph',
+                'text-xl first-letter:text-4xl first-letter:font-bold': block.type === 'first-paragraph',
+                'text-4xl font-bold': block.type === 'h1',
+                'text-3xl font-bold': block.type === 'h2',
+                'text-2xl font-bold': block.type === 'h3',
+                'text-2xl italic border-l-4 pl-4 my-4': block.type === 'quote'
+              }" x-text="block.text" x-show="block.text"></p>
+
+              <!-- Image -->
+              <template x-if="block.type === 'image'">
+                <figure>
+                  <img :src="block.url" alt="Содержимое статьи" class="rounded-md w-full">
+                  <figcaption class="text-center text-sm text-gray-500 mt-2" x-text="block.caption"></figcaption>
+                </figure>
+              </template>
+              
+              <!-- Add other block types here as needed -->
+            </div>
           </template>
         </div>
       </div>

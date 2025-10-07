@@ -9,47 +9,59 @@ import {
 
 const storage = getStorage(app);
 
+// Helper to create a new block object
+const createBlock = (type, data) => ({ type, ...data });
+
 export default function articleCreatorLogic(initialState = {}) {
   return {
     article: {
       title: "",
       imageUrl: "",
-      paragraphs: [],
+      imageCaption: "", // <-- Added caption for the main image
+      // --- REFACTORED: from 'paragraphs' to 'contentBlocks' ---
+      contentBlocks: [], 
+      tags: [],
+      category: "", // <-- Added category
     },
-    newParagraph: "",
-    showTextarea: false,
-    editingIndex: null, // To track which paragraph is being edited
-    editingText: "", // To hold the text of the paragraph being edited
+
+    // --- State for managing the block creation UI ---
+    showBlockOptions: false,
+    
+    // --- State for editing a specific block ---
+    editingIndex: null,
+    editingBlock: null, // Will hold a copy of the block being edited
+
     isEditingTitle: false,
     editingTitleText: "",
     
-    // New state for image uploading
+    // --- State for editing the main image caption ---
+    isEditingCaption: false,
+    editingCaptionText: "",
+
     uploading: false,
     uploadProgress: 0,
 
-    // For Preview Page and Create Page state restoration
     init() {
-      // On the preview page, always load from storage
+      // The `isPreview` flag is passed from the page component
       if (this.isPreview) {
+        // On the preview page, always load from storage, replacing the initial object
         const previewData = localStorage.getItem("articlePreview");
         if (previewData) {
           this.article = JSON.parse(previewData);
-        } else {
-          this.article.title = "No preview data found.";
-          this.article.paragraphs = [
-            'Please go back to the creation page and click "Preview" again.',
-          ];
         }
       } else {
-        // On the create page, load if a draft exists
+        // On the create page, merge if a draft exists to preserve the initial structure
         const draftData = localStorage.getItem("articlePreview");
         if (draftData) {
-          Object.assign(this.article, JSON.parse(draftData));
+          const parsedData = JSON.parse(draftData);
+          // Ensure contentBlocks is always an array, even in older drafts
+          parsedData.contentBlocks = parsedData.contentBlocks || [];
+          Object.assign(this.article, parsedData);
         }
       }
     },
 
-    // --- Title editing methods ---
+    // --- Title editing methods (unchanged) ---
     editTitle() {
       this.isEditingTitle = true;
       this.editingTitleText = this.article.title;
@@ -62,8 +74,21 @@ export default function articleCreatorLogic(initialState = {}) {
       this.isEditingTitle = false;
     },
 
-    // --- New Image Upload Method ---
-    handleImageUpload(event) {
+    // --- Caption editing methods ---
+    editCaption() {
+      this.isEditingCaption = true;
+      this.editingCaptionText = this.article.imageCaption;
+    },
+    saveCaption() {
+      this.article.imageCaption = this.editingCaptionText;
+      this.isEditingCaption = false;
+    },
+    cancelEditCaption() {
+      this.isEditingCaption = false;
+    },
+
+    // --- Image Upload Method ---
+    handleImageUpload(event, isCover = true, blockIndex = null) {
       const file = event.target.files[0];
       if (!file) return;
 
@@ -75,11 +100,7 @@ export default function articleCreatorLogic(initialState = {}) {
 
       uploadTask.on(
         "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          this.uploadProgress = progress;
-        },
+        (snapshot) => { this.uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100; },
         (error) => {
           console.error("Upload failed:", error);
           window.Alpine.store('ui').showToast(`Upload failed: ${error.message}`, 'error');
@@ -87,7 +108,12 @@ export default function articleCreatorLogic(initialState = {}) {
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            this.article.imageUrl = downloadURL;
+            if (isCover) {
+              this.article.imageUrl = downloadURL;
+            } else if (blockIndex !== null && this.editingBlock && this.editingBlock.type === 'image') {
+              // Update the URL for the specific image block being edited
+              this.editingBlock.url = downloadURL;
+            }
             this.uploading = false;
             window.Alpine.store('ui').showToast('Image uploaded successfully!');
           });
@@ -95,38 +121,68 @@ export default function articleCreatorLogic(initialState = {}) {
       );
     },
 
-    // For Create Page
-    addParagraph() {
-      this.showTextarea = true;
+    // --- REFACTORED: Block management methods ---
+    
+    // Opens the menu to select a new block type
+    openBlockSelector() {
+        this.showBlockOptions = true;
     },
-    addNewParagraph() {
-      if (this.newParagraph.trim() !== "") {
-        this.article.paragraphs.push(this.newParagraph.trim());
-        this.newParagraph = "";
-        this.showTextarea = false;
-      }
+
+    // Adds a new block of a specific type and opens it for editing
+    addBlock(type) {
+        let newBlockData = {};
+        // Set default data based on block type
+        switch (type) {
+            case 'paragraph':
+            case 'first-paragraph':
+            case 'h2':
+            case 'h3':
+            case 'quote':
+                newBlockData = { text: '' };
+                break;
+            case 'image':
+                newBlockData = { url: '', caption: '' };
+                break;
+            // Add other cases here
+            default:
+                break;
+        }
+        
+        const newBlock = createBlock(type, newBlockData);
+        this.article.contentBlocks.push(newBlock);
+        this.showBlockOptions = false;
+        
+        // Immediately open the new block for editing
+        this.editBlock(this.article.contentBlocks.length - 1);
     },
-    cancelParagraph() {
-      this.newParagraph = "";
-      this.showTextarea = false;
-    },
-    editParagraph(index) {
+
+    // Opens a block for editing
+    editBlock(index) {
       this.editingIndex = index;
-      this.editingText = this.article.paragraphs[index];
+      // Create a deep copy to avoid modifying the original until save
+      this.editingBlock = JSON.parse(JSON.stringify(this.article.contentBlocks[index]));
     },
-    updateParagraph() {
+
+    // Saves the changes to the block
+    updateBlock() {
       if (this.editingIndex !== null) {
-        this.article.paragraphs[this.editingIndex] = this.editingText.trim();
+        // You might want to add validation here
+        this.article.contentBlocks[this.editingIndex] = this.editingBlock;
         this.cancelEdit();
       }
     },
+
+    // Cancels the editing of a block
     cancelEdit() {
       this.editingIndex = null;
-      this.editingText = "";
+      this.editingBlock = null;
     },
-    previewArticle() {
-      localStorage.setItem("articlePreview", JSON.stringify(this.article));
-      window.location.href = "/article/preview";
+
+    // Deletes a block
+    deleteBlock(index) {
+        if (confirm('Are you sure you want to delete this block?')) {
+            this.article.contentBlocks.splice(index, 1);
+        }
     },
 
     // For Preview Page
@@ -134,9 +190,13 @@ export default function articleCreatorLogic(initialState = {}) {
       window.location.href = "/article/create";
     },
 
-    // Common save function
+    // --- Preview and Save methods ---
+    previewArticle() {
+      localStorage.setItem("articlePreview", JSON.stringify(this.article));
+      window.location.href = "/article/preview";
+    },
+
     async saveArticle() {
-      // Ensure image is uploaded before saving
       if (!this.article.imageUrl) {
         window.Alpine.store('ui').showToast('Please upload a cover image before saving.', 'error');
         return;
@@ -145,17 +205,16 @@ export default function articleCreatorLogic(initialState = {}) {
       try {
         const response = await fetch(`${PUBLIC_API_BASE_URL}/api/articles`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             title: this.article.title,
             imageUrl: this.article.imageUrl,
-            authorId: "HxpjsagLQxlUb2oCiM6h", // Using a test ID as planned
-            content: this.article.paragraphs.map((p) => ({
-              type: "paragraph",
-              text: p,
-            })),
+            imageCaption: this.article.imageCaption, // <-- Added caption
+            authorId: "HxpjsagLQxlUb2oCiM6h", // Test ID
+            // --- REFACTORED: Send contentBlocks directly ---
+            content: this.article.contentBlocks,
+            tags: this.article.tags,
+            category: this.article.category // <-- Added category
           }),
         });
 
