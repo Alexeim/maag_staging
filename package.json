@@ -10,8 +10,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "predeploy": "npm run build && touch dist/.nojekyll",
-    "deploy": "gh-pages -d dist",
-    "deploy:prod": "bash deploy.sh"
+    "deploy:front": "bash deploy.sh",
+    "deploy:back": "cd server && bash deploy.sh"
   },
   "dependencies": {
     "@astrojs/alpinejs": "^0.4.8",
