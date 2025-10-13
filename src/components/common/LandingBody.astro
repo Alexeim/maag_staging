@@ -4,19 +4,16 @@ import { Image } from "astro:assets";
 import NetlenkaCard from "./NetlenkaCard.astro";
 import ArticleCard from "./ArticleCard.astro";
 
-import eric from "../../assets/common/image.jpg";
 import picture1 from "../../assets/images/culture.jpg";
-import picture2 from "../../assets/images/cal.jpeg";
-import picture3 from "../../assets/images/article_content/par.jpeg";
 ---
 
 <section class="w-full px-4 lg:px-8 bg-base-200 mt-0 pb-12 overflow-hidden">
-  <div class="flex flex-col lg:flex-row min-h-[200px] gap-8">
+  <div class="flex flex-col-reverse lg:flex-row min-h-[200px] gap-8 mb-0 lg:mb-6">
     <div class="w-full lg:w-9/12 flex flex-col">
-      <div class="pl-4 pr-0">
+      <div class="pl-0 lg:pl-4 pr-0">
         <h2 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard">Culture</h2>
         <div class="w-full flex flex-col gap-8">
-          <div class="w-full bg-white flex flex-col lg:flex-row lg:gap-8 items-start justify-start min-h-[100px] max-h-[500px]">
+          <div class="w-full bg-white flex flex-col gap-6 lg:flex-row lg:gap-8 items-start justify-start min-h-[100px]">
 
             <div class="w-full lg:w-3/5 h-auto lg:h-[400px] overflow-hidden">
               <Image
@@ -26,20 +23,20 @@ import picture3 from "../../assets/images/article_content/par.jpeg";
                 loading="eager"
               />
             </div>
-            <div class="w-full lg:w-2/5 pt-4">
+            <div class="w-full lg:w-2/5 pt-4 px-4 lg:px-0">
               <p class="text-red-700">Balet</p>
               <h4 class="text-2xl">hoasfhjasd</h4>
             </div>
           </div>
 
-          <div id="culture-articles-box" class="w-full flex flex-col lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px] max-h-[500px]">
+          <div id="culture-articles-box" class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 lg:px-4 min-h-[100px]">
 
-            <ArticleCard/>
-            <ArticleCard/>
-            <ArticleCard/>
+            <ArticleCard isNetlenka={false}/>
+            <ArticleCard isNetlenka={false}/>
+            <ArticleCard isNetlenka={false}/>
           </div>
 
-          <div id="interview-box" class="w-full bg-white flex flex-col lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px] max-h-[500px]">
+          <div id="interview-box" class="w-full bg-white flex flex-col gap-6 lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px]">
 
             <div class="w-[200px] h-[200px] rounded-full overflow-hidden">
               <Image
@@ -52,7 +49,7 @@ import picture3 from "../../assets/images/article_content/par.jpeg";
             <div class="w-full lg:w-fit">
               <p class="text-red-700">Balet</p>
               <h4>hoasfhjasd:</h4>
-              <p class="text-3xl">"kafjlsakdjfkadjsflkasdjfkjasdkfljas"</p>
+              <p class="text-3xl text-wrap break-words">"kafjlsakdjfkadjsflkasdjfkjasdkfljas"</p>
             </div>
           </div>
         </div>
@@ -60,10 +57,10 @@ import picture3 from "../../assets/images/article_content/par.jpeg";
       <div class="flex flex-row">
       </div>
     </div>
-    <div class="w-full lg:w-3/12 px-4 border-l border-gray-300">
+    <div class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0">
       <div id="netlenka-container">
         <h3 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard">Netleka</h3>
-        <div class="flex flex-col gap-6">
+        <div class="flex gap-6 overflow-x-auto lg:flex-col lg:gap-6 lg:overflow-visible pb-2">
           <NetlenkaCard/>
           <NetlenkaCard/>
           <NetlenkaCard/>
@@ -77,7 +74,7 @@ import picture3 from "../../assets/images/article_content/par.jpeg";
   <div class="w-full flex flex-col px-4 min-h-[200px]">
     <h2 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard">Paris</h2>
     <div class="w-full flex flex-col gap-8">
-      <div class="w-full bg-white flex flex-col lg:flex-row-reverse lg:gap-8 items-start justify-start min-h-[100px] max-h-[600px]">
+      <div class="w-full bg-white flex flex-col gap-6 lg:flex-row-reverse lg:gap-8 items-start justify-start min-h-[100px]">
 
         <div class="w-full lg:w-3/5 h-auto lg:h-[470px] overflow-hidden">
           <Image
@@ -87,18 +84,18 @@ import picture3 from "../../assets/images/article_content/par.jpeg";
             loading="eager"
           />
         </div>
-        <div class="w-full lg:w-2/5 pt-4 pl-4">
+        <div class="w-full lg:w-2/5 pt-4 px-4 lg:pl-4">
           <p class="text-red-700">Balet</p>
           <h4 class="text-2xl">hoasfhjasd</h4>
         </div>
       </div>
 
-      <div id="culture-articles-box" class="w-full flex flex-col lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px] max-h-[500px]">
+      <div id="culture-articles-box" class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 lg:px-4 min-h-[100px]">
         <ArticleCard isNetlenka={false}/>
         <ArticleCard isNetlenka={false}/>
         <ArticleCard isNetlenka={false}/>
       </div>
-      <div id="culture-articles-box" class="w-full flex flex-col lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px] max-h-[500px]">
+      <div id="culture-articles-box" class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 lg:px-4 min-h-[100px]">
         <ArticleCard isNetlenka={false}/>
         <ArticleCard isNetlenka={false}/>
         <ArticleCard isNetlenka={false}/>
