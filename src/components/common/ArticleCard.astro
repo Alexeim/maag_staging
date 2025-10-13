@@ -2,17 +2,27 @@
 import { Image } from "astro:assets";
 
 import picture1 from "../../assets/images/culture.jpg";
+import { boolean } from "astro:schema";
+
+interface ArticleCardProps {
+  isNetlenka?: boolean
+}
+
+const {isNetlenka = true} = Astro.props as ArticleCardProps
+
+const heightClassContainer = isNetlenka ? "max-h-[300px]" : "max-h-[370px]"
+const pictureHeightClass = isNetlenka ? "max-h-[200px]" : "max-h-[270px]"
 
 const text = "lalal"
 ---
 
 
-<div class="w-full flex flex-col gap-2 max-h-[300px] border border-red-200">
-  <div class="border-amber-300">
+<div class:list={["w-full flex flex-col gap-2", heightClassContainer]}>
+  <div>
     <Image
       src={picture1}
       alt="Culture image"
-      class="w-full max-h-[200px] object-cover object-center"
+      class:list={["w-full object-cover object-center", pictureHeightClass]}
       loading="eager"
     />
   </div>
