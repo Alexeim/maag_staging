@@ -34,8 +34,8 @@ const { contentBlocks } = Astro.props;
           return <h3 class="text-2xl font-bold">{block.text}</h3>;
         case 'quote':
           return (
-            <blockquote class="text-2xl italic border-l-4 pl-4 my-4">
-              {block.text}
+            <blockquote class="text-2xl italic pl-4 my-4">
+              "{block.text}"
             </blockquote>
           );
         case 'image':

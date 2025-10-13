@@ -24,10 +24,10 @@ try {
 }
 ---
 
-<section class="mx-auto px-4 lg:px-12 bg-base-200 mb-0">
-  <div class="flex flex-col lg:flex-row gap-8 lg:gap-4">
+<section class="w-full max-h-[790px] px-4 lg:px-8 bg-base-200 mb-0 border border-red-500">
+  <div class="flex flex-col lg:flex-row gap-4 lg:gap-4 border border-yellow-500">
     {/* News Column - THINNER */}
-    <aside class="lg:w-1/5">
+    <aside class="w-full max-h-[780px] overflow-y-scroll lg:w-3/12 px-4 border-r border-gray-300">
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
       >
@@ -50,9 +50,9 @@ try {
                     transition:name={`main-article-image-${newsItem.id}`}
                   />
                 </a>
-                <div class="flex-1">
+                <div class="flex-1 max-w-40">
                     <a href={`/article/${newsItem.id}`} class="block bg-base-200 z-50">
-                      <h3 class="text-base font-bold font-old-standard mt-1 leading-tight">
+                      <h3 class="text-base font-bold font-old-standard mt-1 leading-tight truncate">
                         {newsItem.title}
                       </h3>
                     </a>
@@ -64,14 +64,9 @@ try {
       </div>
     </aside>
 
-    {/* Vertical Divider 1 */}
-    <div
-      class="hidden lg:block w-px bg-gray-300 flex-shrink-0 pointer-events-none"
-    >
-    </div>
 
     {/* Main Column - WIDER */}
-    <article class="flex-[7] lg:px-4 order-first lg:order-none relative">
+    <article class="w-full lg:w-6/12 lg:px-4 order-first lg:order-none relative">
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
       >
@@ -113,14 +108,8 @@ try {
       )}
     </article>
 
-    {/* Vertical Divider 2 */}
-    <div
-      class="hidden lg:block w-px bg-gray-300 flex-shrink-0 pointer-events-none"
-    >
-    </div>
-
     {/* Calendar Column */}
-    <aside class="lg:w-1/4">
+    <aside class="w-full lg:w-3/12 px-4 border-l border-gray-300">
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
       >
@@ -175,8 +164,5 @@ try {
         </div>
       </div>
     </aside>
-  </div>
-  <div class="mx-auto w-full py-8">
-    <hr class="mx-auto w-full border-t-2 border-neutral" />
   </div>
 </section>
