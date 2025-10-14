@@ -2,23 +2,20 @@
 import { Image } from "astro:assets";
 import maagLogo from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
-import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+import { articlesApi } from "@/lib/api/api";
 
 let mainArticle: any = null;
 let newsArticles: any[] = [];
 
 try {
-  const response = await fetch(`${PUBLIC_API_BASE_URL}/api/articles`);
-  if (response.ok) {
-    const articles = await response.json();
-    
-    // Filter for the main article (latest that is NOT news)
-    mainArticle = articles.find((article: any) => article.category !== 'Новости') || null;
+  const articles = await articlesApi.list();
 
-    // Filter for news articles
-    newsArticles = articles.filter((article: any) => article.category === 'Новости');
+  // Filter for the main article (latest that is NOT news)
+  mainArticle =
+    articles.find((article) => article.category !== "Новости") || null;
 
-  }
+  // Filter for news articles
+  newsArticles = articles.filter((article) => article.category === "Новости");
 } catch (error) {
   console.error("Failed to fetch articles:", error);
 }

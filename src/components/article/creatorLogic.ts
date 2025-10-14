@@ -1,4 +1,4 @@
-import { PUBLIC_API_BASE_URL } from "../../lib/utils/constants";
+import { articlesApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
   getStorage,
@@ -203,33 +203,22 @@ export default function articleCreatorLogic(initialState = {}) {
       }
 
       try {
-        const response = await fetch(`${PUBLIC_API_BASE_URL}/api/articles`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: this.article.title,
-            imageUrl: this.article.imageUrl,
-            imageCaption: this.article.imageCaption, // <-- Added caption
-            authorId: "HxpjsagLQxlUb2oCiM6h", // Test ID
-            // --- REFACTORED: Send contentBlocks directly ---
-            content: this.article.contentBlocks,
-            tags: this.article.tags,
-            category: this.article.category // <-- Added category
-          }),
+        const result = await articlesApi.create({
+          title: this.article.title,
+          imageUrl: this.article.imageUrl,
+          imageCaption: this.article.imageCaption,
+          authorId: "HxpjsagLQxlUb2oCiM6h",
+          content: this.article.contentBlocks,
+          category: this.article.category,
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          window.Alpine.store('ui').showToast('Article saved successfully!');
-          localStorage.removeItem('articlePreview');
-          window.location.href = `/article/${result.id}`;
-        } else {
-          const errorData = await response.json();
-          window.Alpine.store('ui').showToast(`Error saving article: ${errorData.message}`, 'error');
-        }
+        window.Alpine.store('ui').showToast('Article saved successfully!');
+        localStorage.removeItem('articlePreview');
+        window.location.href = `/article/${result.id}`;
       } catch (error) {
         console.error('Failed to save article:', error);
-        window.Alpine.store('ui').showToast('An error occurred while saving the article.', 'error');
+        const message = error instanceof Error ? error.message : 'An error occurred while saving the article.';
+        window.Alpine.store('ui').showToast(message, 'error');
       }
     },
 

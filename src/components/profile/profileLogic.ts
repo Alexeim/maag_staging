@@ -1,4 +1,4 @@
-import { PUBLIC_API_BASE_URL } from "../../lib/utils/constants";
+import { usersApi } from "@/lib/api/api";
 export default function profileLogic() {
   return {
     form: {
@@ -28,20 +28,9 @@ export default function profileLogic() {
       }
 
       try {
-        const response = await fetch(`${PUBLIC_API_BASE_URL}/api/users/${uid}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.form),
-        });
-
-        if (response.ok) {
-          const updatedProfile = await response.json();
-          // Update the global store with the new data
-          window.Alpine.store('auth').setUser(window.Alpine.store('auth').user, updatedProfile);
-          window.Alpine.store('ui').showToast('Profile updated successfully!');
-        } else {
-          window.Alpine.store('ui').showToast('Error saving changes.', 'error');
-        }
+        const updatedProfile = await usersApi.update(uid, this.form);
+        window.Alpine.store('auth').setUser(window.Alpine.store('auth').user, updatedProfile);
+        window.Alpine.store('ui').showToast('Profile updated successfully!');
       } catch (error) {
         console.error('Failed to save changes:', error);
         window.Alpine.store('ui').showToast('An error occurred.', 'error');

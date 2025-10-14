@@ -9,7 +9,7 @@ import RecentArticles from "../../components/article/RecentArticles.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
 import type { ImageMetadata } from "astro";
 import { newsItems } from "@/content/mockNews";
-import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+import { ApiError, articlesApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
 
@@ -17,15 +17,17 @@ let articleData: any;
 let error: string | null = null;
 
 try {
-  const response = await fetch(`${PUBLIC_API_BASE_URL}/api/articles/${id}`);
-  if (response.ok) {
-    articleData = await response.json();
-  } else {
-    error = `Article not found. Status: ${response.status}`;
-  }
+  articleData = await articlesApi.getById(id);
 } catch (e: any) {
   console.error(e);
-  error = `Error fetching article: ${e.message}`;
+  if (e instanceof ApiError) {
+    error =
+      e.status === 404
+        ? "Article not found."
+        : `Error fetching article: ${e.message}`;
+  } else {
+    error = `Error fetching article: ${e.message}`;
+  }
 }
 
 // Normalize data for the template

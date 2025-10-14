@@ -1,5 +1,5 @@
 import { auth } from '@/lib/firebase/client';
-import { PUBLIC_API_BASE_URL } from "../../lib/utils/constants";
+import { usersApi } from "@/lib/api/api";
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
@@ -70,22 +70,11 @@ export default function authModalLogic() {
           });
 
           // Create user document in our Firestore database via our backend
-          const response = await fetch(`${PUBLIC_API_BASE_URL}/api/users`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              uid: user.uid,
-              firstName: this.formData.firstName,
-              lastName: this.formData.lastName,
-            }),
+          await usersApi.create({
+            uid: user.uid,
+            firstName: this.formData.firstName,
+            lastName: this.formData.lastName,
           });
-
-          if (!response.ok) {
-            console.error('Failed to create user profile in database.');
-            this.error = 'Could not create user profile.';
-            this.isLoading = false;
-            return;
-          }
 
           window.Alpine.store('ui').showToast('Signup successful! Please log in.');
           window.Alpine.store('auth').switchTo('login');
