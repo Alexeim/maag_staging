@@ -15,18 +15,18 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
         x-text="selectedDate ? selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' }) : ''"
       >
       </h2>
-      <div class="pl-44 space-y-10">
+      <div class="space-y-10 lg:pl-44">
         <template x-if="filteredEvents.length === 0">
           <p class="text-neutral">На эту дату событий не найдено.</p>
         </template>
         <template x-for="event in filteredEvents" :key="event.id">
           <!-- Inlined EventListItem -->
-          <div class="flex gap-10">
-            <div class="w-[463px] flex-shrink-0">
+          <div class="flex flex-col lg:flex-row gap-6 lg:gap-10">
+            <div class="w-full lg:w-[463px] flex-shrink-0">
               <img
-                :src="event.image"
+                x-bind:src="event.image"
                 alt="Event Image"
-                class="w-full h-full object-cover"
+                class="w-full h-64 lg:h-full object-cover"
               />
             </div>
             <div class="flex flex-col gap-5">
@@ -88,7 +88,7 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
             class="bg-white rounded-2xl shadow-lg overflow-hidden w-[249px] flex-shrink-0"
           >
             <img
-              :src="event.image"
+              x-bind:src="event.image"
               alt="Event Image"
               class="w-full h-[165px] object-cover"
             />
