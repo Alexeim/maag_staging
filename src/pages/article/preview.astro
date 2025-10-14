@@ -27,7 +27,7 @@ import articleData from "@/content/articlePage/RU/Article.json"; // for author, 
           <div>
             <p 
               class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter'] mb-2" 
-              x-text="article.category || 'Category'">
+              x-text="getCategoryLabel(article.category)">
             </p>
             <ArticleHeader :title="article.title" />
           </div>

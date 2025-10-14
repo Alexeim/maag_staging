@@ -4,6 +4,34 @@ import maagLogo from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
 import { articlesApi } from "@/lib/api/api";
 
+const CATEGORY_LABELS: Record<string, string> = {
+  culture: "Культура",
+  paris: "Париж",
+  news: "Новости",
+  hotContent: "Самое Читаемое",
+};
+
+const normalizeCategory = (value?: string) => {
+  if (!value) {
+    return value;
+  }
+  const entry = Object.entries(CATEGORY_LABELS).find(
+    ([, label]) => label === value,
+  );
+  return entry ? entry[0] : value;
+};
+
+const getCategoryLabel = (value?: string) => {
+  const normalized = normalizeCategory(value);
+  if (normalized && CATEGORY_LABELS[normalized]) {
+    return CATEGORY_LABELS[normalized];
+  }
+  return value ?? "";
+};
+
+const isNewsCategory = (value?: string) =>
+  normalizeCategory(value) === "news";
+
 let mainArticle: any = null;
 let newsArticles: any[] = [];
 
@@ -12,10 +40,10 @@ try {
 
   // Filter for the main article (latest that is NOT news)
   mainArticle =
-    articles.find((article) => article.category !== "Новости") || null;
+    articles.find((article) => !isNewsCategory(article.category)) || null;
 
   // Filter for news articles
-  newsArticles = articles.filter((article) => article.category === "Новости");
+  newsArticles = articles.filter((article) => isNewsCategory(article.category));
 } catch (error) {
   console.error("Failed to fetch articles:", error);
 }
@@ -82,7 +110,7 @@ try {
           <div class="p-4 lg:p-6">
             {mainArticle.category && (
               <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
-                {mainArticle.category}
+                {getCategoryLabel(mainArticle.category)}
               </p>
             )}
             <a href={`/article/${mainArticle.id}`} class="block bg-base-200 z-50">

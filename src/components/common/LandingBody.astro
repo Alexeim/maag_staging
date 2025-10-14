@@ -13,19 +13,52 @@ interface LandingBodyProps {
 
 const {isLanding = true} = Astro.props as LandingBodyProps
 
-const CULTURE_CATEGORY = "Культура";
+const CATEGORY_LABELS: Record<string, string> = {
+  culture: "Культура",
+  paris: "Париж",
+  news: "Новости",
+  hotContent: "Самое Читаемое",
+};
+
+const CULTURE_CATEGORY_KEY = "culture";
+const CULTURE_CATEGORY_LABEL = CATEGORY_LABELS[CULTURE_CATEGORY_KEY];
+const HOT_CONTENT_CATEGORY_KEY = "hotContent";
+
+const normalizeCategory = (value?: string) => {
+  if (!value) {
+    return value;
+  }
+  const entry = Object.entries(CATEGORY_LABELS).find(
+    ([, label]) => label === value,
+  );
+  return entry ? entry[0] : value;
+};
+
+const getCategoryLabel = (value?: string) => {
+  const normalized = normalizeCategory(value);
+  if (normalized && CATEGORY_LABELS[normalized]) {
+    return CATEGORY_LABELS[normalized];
+  }
+  return value ?? CULTURE_CATEGORY_LABEL;
+};
 
 let cultureArticles: any[] = [];
 let cultureHero: any = null;
 let cultureCardArticles: any[] = [];
+let hotContentArticles: any[] = [];
 
 try {
   const articles = await articlesApi.list();
   cultureArticles = articles.filter(
-    (article) => article.category === CULTURE_CATEGORY
+    (article) => normalizeCategory(article.category) === CULTURE_CATEGORY_KEY
   );
   cultureHero = cultureArticles[0] ?? null;
   cultureCardArticles = cultureArticles.slice(1, 4);
+  hotContentArticles = articles
+    .filter(
+      (article) => normalizeCategory(article.category) === HOT_CONTENT_CATEGORY_KEY,
+    )
+    .slice(0, 6);
 } catch (error) {
   console.error("Failed to fetch culture articles:", error);
 }
@@ -61,7 +94,7 @@ try {
                 </div>
                 <div class="w-full lg:w-2/5 pt-4 px-4 lg:px-0">
                   <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
-                    {cultureHero.category ?? CULTURE_CATEGORY}
+                    {getCategoryLabel(cultureHero.category)}
                   </p>
                   <a href={`/article/${cultureHero.id}`} class="block">
                     <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-old-standard text-wrap break-words hover:underline">
@@ -97,7 +130,7 @@ try {
                   key={article.id}
                   isNetlenka={false}
                   title={article.title}
-                  category={article.category ?? CULTURE_CATEGORY}
+                  category={getCategoryLabel(article.category)}
                   imageUrl={article.imageUrl}
                   href={`/article/${article.id}`}
                 />
@@ -134,11 +167,26 @@ try {
     </div>
     <div class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0">
       <div id="netlenka-container">
-        <h3 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard">Netleka</h3>
+        <h3 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard">
+          {CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY]}
+        </h3>
         <div class="flex gap-6 overflow-x-auto lg:flex-col lg:gap-6 lg:overflow-visible pb-2">
-          <NetlenkaCard/>
-          <NetlenkaCard/>
-          <NetlenkaCard/>
+          {hotContentArticles.length > 0
+            ? hotContentArticles.map((article) => (
+                <NetlenkaCard
+                  key={article.id}
+                  title={article.title}
+                  category={getCategoryLabel(article.category)}
+                  imageUrl={article.imageUrl}
+                  href={`/article/${article.id}`}
+                />
+              ))
+            : (
+              <NetlenkaCard
+                title="Скоро появится материал"
+                category={CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY]}
+              />
+            )}
         </div>
       </div>
     </div>

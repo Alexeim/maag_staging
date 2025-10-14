@@ -13,6 +13,13 @@ import { ApiError, articlesApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
 
+const CATEGORY_LABELS: Record<string, string> = {
+  culture: "Культура",
+  paris: "Париж",
+  news: "Новости",
+  hotContent: "Самое Читаемое",
+};
+
 let articleData: any;
 let error: string | null = null;
 
@@ -31,9 +38,14 @@ try {
 }
 
 // Normalize data for the template
+const rawCategory =
+  articleData?.category ?? articleData?.header?.category ?? null;
+
 const displayArticle = {
   title: articleData?.header?.title || articleData?.title || 'Article',
-  category: articleData?.category || 'Category',
+  category: rawCategory
+    ? CATEGORY_LABELS[rawCategory] || rawCategory
+    : 'Category',
   authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : 'Author',
   authorAvatar: articleData?.author?.avatarUrl,
   readTime: articleData?.meta?.readTime || '5 min read',

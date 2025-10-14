@@ -1,0 +1,24 @@
+{
+  "cultureTags": [
+    {
+      "title": "театр",
+      "value": "theatre"
+    },
+    {
+      "title": "выставки",
+      "value": "exhibitions"
+    },
+    {
+      "title": "книги",
+      "value": "books"
+    },
+    {
+      "title": "арт-рынок",
+      "value": "artMarket"
+    },
+    {
+      "title": "дети",
+      "value": "kids"
+    }
+  ]
+}

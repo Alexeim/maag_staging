@@ -1,0 +1,64 @@
+{
+  "parisDistricts": [
+    {
+      "districtNumber": "I"
+    },
+    {
+      "districtNumber": "II"
+    },
+    {
+      "districtNumber": "III"
+    },
+    {
+      "districtNumber": "IV"
+    },
+    {
+      "districtNumber": "V"
+    },
+    {
+      "districtNumber": "VI"
+    },
+    {
+      "districtNumber": "VII"
+    },
+    {
+      "districtNumber": "VIII"
+    },
+    {
+      "districtNumber": "IX"
+    },
+    {
+      "districtNumber": "X"
+    },
+    {
+      "districtNumber": "XI"
+    },
+    {
+      "districtNumber": "XII"
+    },
+    {
+      "districtNumber": "XIII"
+    },
+    {
+      "districtNumber": "XIV"
+    },
+    {
+      "districtNumber": "XV"
+    },
+    {
+      "districtNumber": "XVI"
+    },
+    {
+      "districtNumber": "XVII"
+    },
+    {
+      "districtNumber": "XVIII"
+    },
+    {
+      "districtNumber": "XIX"
+    },
+    {
+      "districtNumber": "XX"
+    }
+  ]
+}
