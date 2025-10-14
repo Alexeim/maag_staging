@@ -10,8 +10,8 @@ interface ArticleCardProps {
 
 const {isNetlenka = true} = Astro.props as ArticleCardProps
 
-const heightClassContainer = isNetlenka ? "max-h-[300px]" : "max-h-[370px]"
-const pictureHeightClass = isNetlenka ? "max-h-[200px]" : "max-h-[270px]"
+const heightClassContainer = isNetlenka ? "lg:max-h-[300px]" : "lg:max-h-[370px]"
+const pictureHeightClass = isNetlenka ? "lg:max-h-[200px]" : "lg:max-h-[270px]"
 
 const text = "lalal"
 ---
