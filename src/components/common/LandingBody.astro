@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import { articlesApi } from "@/lib/api/api";
 
 import NetlenkaCard from "./NetlenkaCard.astro";
 import ArticleCard from "./ArticleCard.astro";
@@ -11,6 +12,23 @@ interface LandingBodyProps {
 }
 
 const {isLanding = true} = Astro.props as LandingBodyProps
+
+const CULTURE_CATEGORY = "Культура";
+
+let cultureArticles: any[] = [];
+let cultureHero: any = null;
+let cultureCardArticles: any[] = [];
+
+try {
+  const articles = await articlesApi.list();
+  cultureArticles = articles.filter(
+    (article) => article.category === CULTURE_CATEGORY
+  );
+  cultureHero = cultureArticles[0] ?? null;
+  cultureCardArticles = cultureArticles.slice(1, 4);
+} catch (error) {
+  console.error("Failed to fetch culture articles:", error);
+}
 ---
 
 <section class="w-full px-4 lg:px-8 bg-base-200 mt-0 pb-12 overflow-hidden">
@@ -20,26 +38,77 @@ const {isLanding = true} = Astro.props as LandingBodyProps
         <h2 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard">Culture</h2>
         <div class="w-full flex flex-col gap-8">
           <div class="w-full bg-white flex flex-col gap-6 lg:flex-row lg:gap-8 items-start justify-start min-h-[100px]">
-
-            <div class="w-full lg:w-3/5 h-auto lg:h-[400px] overflow-hidden">
-              <Image
-                src={picture1}
-                alt="Culture image"
-                class="w-full h-auto lg:h-[400px] object-cover object-center"
-                loading="eager"
-              />
-            </div>
-            <div class="w-full lg:w-2/5 pt-4 px-4 lg:px-0">
-              <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">Balet</p>
-              <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-old-standard text-wrap break-words">hoasfhjasd</h4>
-            </div>
+            {cultureHero ? (
+              <>
+                <div class="w-full lg:w-3/5 h-auto lg:h-[400px] overflow-hidden">
+                  {cultureHero.imageUrl ? (
+                    <a href={`/article/${cultureHero.id}`} class="block w-full h-full">
+                      <img
+                        src={cultureHero.imageUrl}
+                        alt={cultureHero.title}
+                        class="w-full h-full object-cover object-center"
+                        loading="lazy"
+                      />
+                    </a>
+                  ) : (
+                    <Image
+                      src={picture1}
+                      alt="Culture image"
+                      class="w-full h-auto lg:h-[400px] object-cover object-center"
+                      loading="eager"
+                    />
+                  )}
+                </div>
+                <div class="w-full lg:w-2/5 pt-4 px-4 lg:px-0">
+                  <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
+                    {cultureHero.category ?? CULTURE_CATEGORY}
+                  </p>
+                  <a href={`/article/${cultureHero.id}`} class="block">
+                    <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-old-standard text-wrap break-words hover:underline">
+                      {cultureHero.title}
+                    </h4>
+                  </a>
+                </div>
+              </>
+            ) : (
+              <>
+                <div class="w-full lg:w-3/5 h-auto lg:h-[400px] overflow-hidden">
+                  <Image
+                    src={picture1}
+                    alt="Culture image"
+                    class="w-full h-auto lg:h-[400px] object-cover object-center"
+                    loading="eager"
+                  />
+                </div>
+                <div class="w-full lg:w-2/5 pt-4 px-4 lg:px-0">
+                  <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">Балет</p>
+                  <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-old-standard text-wrap break-words">
+                    Нет статей в категории
+                  </h4>
+                </div>
+              </>
+            )}
           </div>
 
           <div id="culture-articles-box" class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 lg:px-4 min-h-[100px]">
-
-            <ArticleCard isNetlenka={false}/>
-            <ArticleCard isNetlenka={false}/>
-            <ArticleCard isNetlenka={false}/>
+            {cultureCardArticles.length > 0 ? (
+              cultureCardArticles.map((article) => (
+                <ArticleCard
+                  key={article.id}
+                  isNetlenka={false}
+                  title={article.title}
+                  category={article.category ?? CULTURE_CATEGORY}
+                  imageUrl={article.imageUrl}
+                  href={`/article/${article.id}`}
+                />
+              ))
+            ) : (
+              <>
+                <ArticleCard isNetlenka={false} />
+                <ArticleCard isNetlenka={false} />
+                <ArticleCard isNetlenka={false} />
+              </>
+            )}
           </div>
 
           <div id="interview-box" class="w-full bg-white flex flex-col gap-6 lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px]">

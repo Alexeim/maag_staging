@@ -2,31 +2,54 @@
 import { Image } from "astro:assets";
 
 import picture1 from "../../assets/images/culture.jpg";
-import { boolean } from "astro:schema";
 
 interface ArticleCardProps {
-  isNetlenka?: boolean
+  isNetlenka?: boolean;
+  title?: string;
+  category?: string;
+  imageUrl?: string;
+  href?: string;
 }
 
-const {isNetlenka = true} = Astro.props as ArticleCardProps
+const {
+  isNetlenka = true,
+  title = "Без названия",
+  category = "Культура",
+  imageUrl,
+  href = "#",
+} = Astro.props as ArticleCardProps;
 
-const heightClassContainer = isNetlenka ? "lg:max-h-[300px]" : "lg:max-h-[370px]"
-const pictureHeightClass = isNetlenka ? "lg:max-h-[200px]" : "lg:max-h-[270px]"
-
-const text = "lalal"
+const heightClassContainer = isNetlenka ? "lg:max-h-[300px]" : "lg:max-h-[370px]";
+const pictureHeightClass = isNetlenka ? "lg:max-h-[200px]" : "lg:max-h-[270px]";
+const displayImage = imageUrl || picture1.src;
 ---
 
 
 <div class:list={["w-full flex flex-col gap-2", heightClassContainer]}>
-  <div>
-    <Image
-      src={picture1}
-      alt="Culture image"
-      class:list={["w-full object-cover object-center", pictureHeightClass]}
-      loading="eager"
-    />
+  <div class="w-full overflow-hidden">
+    {imageUrl ? (
+      <img
+        src={displayImage}
+        alt={title}
+        class:list={["w-full object-cover object-center", pictureHeightClass]}
+        loading="lazy"
+      />
+    ) : (
+      <Image
+        src={picture1}
+        alt="Culture image"
+        class:list={["w-full object-cover object-center", pictureHeightClass]}
+        loading="eager"
+      />
+    )}
   </div>
-  <p class="text-error uppercase mb-3 font-inter text-xs tracking-[.46em]">klajsdfksadjfl</p>
-  <h3 class="text-lg leading-tight font-old-standard mb-4">kjfdkjfdkf</h3>
+  <p class="text-error uppercase mb-3 font-inter text-xs tracking-[.46em]">
+    {category}
+  </p>
+  <a href={href} class="block">
+    <h3 class="text-lg leading-tight font-old-standard mb-4 hover:underline">
+      {title}
+    </h3>
+  </a>
 
 </div>
