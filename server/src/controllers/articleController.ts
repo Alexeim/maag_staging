@@ -10,6 +10,9 @@ export interface Article {
   imageUrl?: string;
   imageCaption?: string;
   category?: string; // <-- Added category
+  tags?: string[];
+  techTags?: string[];
+  isHotContent?: boolean;
   createdAt: Date;
 }
 
@@ -23,11 +26,31 @@ const articlesCollection = db.collection('articles');
 export const createArticle = async (req: Request, res: Response) => {
   try {
     // --- UPDATED: Added imageCaption and category ---
-    const { title, content, imageUrl, imageCaption, authorId, category } = req.body;
+    const {
+      title,
+      content,
+      imageUrl,
+      imageCaption,
+      authorId,
+      category,
+      tags = [],
+      techTags = [],
+      isHotContent = false,
+    } = req.body;
 
     if (!title || !content || !authorId) {
       return res.status(400).json({ message: 'Title, content, and authorId are required' });
     }
+
+    const normalizedTags = Array.isArray(tags)
+      ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
+      : [];
+    const normalizedTechTags = Array.isArray(techTags)
+      ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
+      : [];
+    const legacyHotContent =
+      typeof category === 'string' && category.trim() === 'hotContent';
+    const persistedCategory = legacyHotContent ? '' : category;
 
     const newArticle: Omit<Article, 'id'> = {
       title,
@@ -35,7 +58,10 @@ export const createArticle = async (req: Request, res: Response) => {
       content,
       imageUrl,
       imageCaption,
-      category, // <-- Added category
+      category: persistedCategory, // <-- Added category
+      tags: normalizedTags,
+      techTags: normalizedTechTags,
+      isHotContent: Boolean(isHotContent) || legacyHotContent,
       createdAt: new Date(),
     };
 

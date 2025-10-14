@@ -29,8 +29,34 @@ const getCategoryLabel = (value?: string) => {
   return value ?? "";
 };
 
+const getPrimaryTag = (article: any) => {
+  const rawTags = Array.isArray(article?.tags)
+    ? article.tags
+    : typeof article?.tags === "string"
+      ? [article.tags]
+      : [];
+
+  const firstTag = rawTags.find(
+    (tag) => typeof tag === "string" && tag.trim().length > 0,
+  );
+
+  if (firstTag) {
+    return firstTag.trim();
+  }
+
+  if (article?.isHotContent) {
+    return CATEGORY_LABELS.hotContent;
+  }
+
+  return getCategoryLabel(article?.category);
+};
+
 const isNewsCategory = (value?: string) =>
   normalizeCategory(value) === "news";
+
+const isHotContentArticle = (article: any) =>
+  Boolean(article?.isHotContent) ||
+  normalizeCategory(article?.category) === "hotContent";
 
 let mainArticle: any = null;
 let newsArticles: any[] = [];
@@ -40,7 +66,11 @@ try {
 
   // Filter for the main article (latest that is NOT news)
   mainArticle =
-    articles.find((article) => !isNewsCategory(article.category)) || null;
+    articles.find(
+      (article) =>
+        !isNewsCategory(article.category) &&
+        !isHotContentArticle(article),
+    ) || null;
 
   // Filter for news articles
   newsArticles = articles.filter((article) => isNewsCategory(article.category));
@@ -110,11 +140,11 @@ try {
           <div class="p-4 lg:p-6">
             {mainArticle.category && (
               <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
-                {getCategoryLabel(mainArticle.category)}
+                {getPrimaryTag(mainArticle)}
               </p>
             )}
             <a href={`/article/${mainArticle.id}`} class="block bg-base-200 z-50">
-              <h2 class="text-3xl lg:text-5xl leading-tight font-thin font-old-standard">
+              <h2 class="max-w-[600px] text-3xl lg:text-5xl leading-tight font-thin font-old-standard truncate">
                 {mainArticle.title} <Image
                   src={maagLogo}
                   alt="MAAG"

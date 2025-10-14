@@ -1,73 +1,96 @@
 {
   "parisTags": [
     {
-      "title": "маршрут"
+      "title": "маршрут",
+      "value": "route"
     },
     {
-      "title": "адрес"
+      "title": "адрес",
+      "value": "address"
     },
     {
-      "title": "записная книжка"
+      "title": "записная книжка",
+      "value": "notebook"
     },
     {
-      "title": "I"
+      "title": "I",
+      "value": "district-1"
     },
     {
-      "title": "II"
+      "title": "II",
+      "value": "district-2"
     },
     {
-      "title": "III"
+      "title": "III",
+      "value": "district-3"
     },
     {
-      "title": "IV"
+      "title": "IV",
+      "value": "district-4"
     },
     {
-      "title": "V"
+      "title": "V",
+      "value": "district-5"
     },
     {
-      "title": "VI"
+      "title": "VI",
+      "value": "district-6"
     },
     {
-      "title": "VII"
+      "title": "VII",
+      "value": "district-7"
     },
     {
-      "title": "VIII"
+      "title": "VIII",
+      "value": "district-8"
     },
     {
-      "title": "IX"
+      "title": "IX",
+      "value": "district-9"
     },
     {
-      "title": "X"
+      "title": "X",
+      "value": "district-10"
     },
     {
-      "title": "XI"
+      "title": "XI",
+      "value": "district-11"
     },
     {
-      "title": "XII"
+      "title": "XII",
+      "value": "district-12"
     },
     {
-      "title": "XIII"
+      "title": "XIII",
+      "value": "district-13"
     },
     {
-      "title": "XIV"
+      "title": "XIV",
+      "value": "district-14"
     },
     {
-      "title": "XV"
+      "title": "XV",
+      "value": "district-15"
     },
     {
-      "title": "XVI"
+      "title": "XVI",
+      "value": "district-16"
     },
     {
-      "title": "XVII"
+      "title": "XVII",
+      "value": "district-17"
     },
     {
-      "title": "XVIII"
+      "title": "XVIII",
+      "value": "district-18"
     },
     {
-      "title": "XIX"
+      "title": "XIX",
+      "value": "district-19"
     },
     {
-      "title": "XX"
+      "title": "XX",
+      "value": "district-20"
     }
   ]
 }

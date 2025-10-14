@@ -114,6 +114,7 @@ export default function articleCreatorLogic(initialState = {}) {
       tags: [],
       techTags: [],
       category: "", // <-- Added category
+      isHotContent: false,
     },
 
     // --- State for managing the block creation UI ---
@@ -236,7 +237,15 @@ export default function articleCreatorLogic(initialState = {}) {
         const previewData = localStorage.getItem("articlePreview");
         if (previewData) {
           const parsedData = JSON.parse(previewData);
-          parsedData.category = normalizeCategory(parsedData.category);
+          const normalizedCategory = normalizeCategory(parsedData.category);
+          const isHotContentLegacy =
+            Boolean(parsedData.isHotContent) ||
+            normalizedCategory === "hotContent";
+          parsedData.category =
+            isHotContentLegacy && normalizedCategory === "hotContent"
+              ? ""
+              : normalizedCategory;
+          parsedData.isHotContent = isHotContentLegacy;
           parsedData.tags = normalizeTags(parsedData.tags, parsedData.category);
           parsedData.techTags = normalizeTechTags(
             parsedData.techTags ?? parsedData.customTags,
@@ -250,7 +259,15 @@ export default function articleCreatorLogic(initialState = {}) {
           const parsedData = JSON.parse(draftData);
           // Ensure contentBlocks is always an array, even in older drafts
           parsedData.contentBlocks = parsedData.contentBlocks || [];
-          parsedData.category = normalizeCategory(parsedData.category);
+          const normalizedCategory = normalizeCategory(parsedData.category);
+          const isHotContentLegacy =
+            Boolean(parsedData.isHotContent) ||
+            normalizedCategory === "hotContent";
+          parsedData.category =
+            isHotContentLegacy && normalizedCategory === "hotContent"
+              ? ""
+              : normalizedCategory;
+          parsedData.isHotContent = isHotContentLegacy;
           parsedData.tags = normalizeTags(parsedData.tags, parsedData.category);
           parsedData.techTags = normalizeTechTags(
             parsedData.techTags ?? parsedData.customTags,
@@ -260,6 +277,7 @@ export default function articleCreatorLogic(initialState = {}) {
       }
       this.article.tags = this.article.tags ?? [];
       this.article.techTags = this.article.techTags ?? [];
+      this.article.isHotContent = Boolean(this.article.isHotContent);
     },
 
     // --- Title editing methods (unchanged) ---
@@ -410,8 +428,17 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     async saveArticle() {
-      this.article.category = normalizeCategory(this.article.category) || "";
+      const normalizedCategory = normalizeCategory(this.article.category) || "";
+      const isHotContentFlag =
+        Boolean(this.article.isHotContent) ||
+        normalizedCategory === "hotContent";
+      this.article.isHotContent = isHotContentFlag;
+      this.article.category =
+        isHotContentFlag && normalizedCategory === "hotContent"
+          ? ""
+          : normalizedCategory;
       this.article.tags = normalizeTags(this.article.tags, this.article.category);
+      this.article.techTags = normalizeTechTags(this.article.techTags);
 
       if (!this.article.category) {
         window.Alpine.store("ui").showToast(
@@ -444,6 +471,8 @@ export default function articleCreatorLogic(initialState = {}) {
       }
 
       try {
+        const tagsForDb = this.article.tags.map((tag) => this.getTagLabel(tag));
+
         const result = await articlesApi.create({
           title: this.article.title,
           imageUrl: this.article.imageUrl,
@@ -451,8 +480,9 @@ export default function articleCreatorLogic(initialState = {}) {
           authorId: "HxpjsagLQxlUb2oCiM6h",
           content: this.article.contentBlocks,
           category: this.article.category,
-          tags: this.article.tags,
+          tags: tagsForDb,
           techTags: this.article.techTags,
+          isHotContent: this.article.isHotContent,
         });
 
         window.Alpine.store("ui").showToast("Статья успешно создана! Молодец!");

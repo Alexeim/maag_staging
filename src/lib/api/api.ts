@@ -121,6 +121,9 @@ export interface ArticlePayload {
   imageUrl?: string;
   imageCaption?: string;
   category?: string;
+  tags?: string[];
+  techTags?: string[];
+  isHotContent?: boolean;
 }
 
 export interface ArticleResponse extends ArticlePayload {
@@ -183,4 +186,3 @@ export const usersApi = {
     });
   },
 };
-

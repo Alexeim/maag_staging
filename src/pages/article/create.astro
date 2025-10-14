@@ -2,10 +2,12 @@
 import Layout from "@/Layouts/Layout.astro";
 import Button from "@/components/common/Button.astro";
 import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
 
 const articleCreatorState = JSON.stringify({
   categoryTags: {
     culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
   },
 });
 ---
@@ -50,8 +52,20 @@ const articleCreatorState = JSON.stringify({
           <option value="culture">Культура</option>
           <option value="paris">Париж</option>
           <option value="news">Новости</option>
-          <option value="hotContent">Самое Читаемое</option>
         </select>
+
+        <!-- Hot Content Flag -->
+        <div class="mt-4 flex items-center gap-2">
+          <input
+            id="hot-content-flag"
+            type="checkbox"
+            class="checkbox checkbox-primary"
+            x-model="article.isHotContent"
+          />
+          <label for="hot-content-flag" class="text-sm text-gray-700">
+            Отметить как «Самое читаемое»
+          </label>
+        </div>
 
         <!-- Tags -->
         <div class="mt-4">

@@ -42,6 +42,32 @@ const getCategoryLabel = (value?: string) => {
   return value ?? CULTURE_CATEGORY_LABEL;
 };
 
+const getPrimaryTag = (article: any) => {
+  const rawTags = Array.isArray(article?.tags)
+    ? article.tags
+    : typeof article?.tags === "string"
+      ? [article.tags]
+      : [];
+
+  const firstTag = rawTags.find(
+    (tag) => typeof tag === "string" && tag.trim().length > 0,
+  );
+
+  if (firstTag) {
+    return firstTag.trim();
+  }
+
+  if (article?.isHotContent) {
+    return CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY];
+  }
+
+  return getCategoryLabel(article?.category);
+};
+
+const isHotContentArticle = (article: any) =>
+  Boolean(article?.isHotContent) ||
+  normalizeCategory(article?.category) === HOT_CONTENT_CATEGORY_KEY;
+
 let cultureArticles: any[] = [];
 let cultureHero: any = null;
 let cultureCardArticles: any[] = [];
@@ -55,9 +81,7 @@ try {
   cultureHero = cultureArticles[0] ?? null;
   cultureCardArticles = cultureArticles.slice(1, 4);
   hotContentArticles = articles
-    .filter(
-      (article) => normalizeCategory(article.category) === HOT_CONTENT_CATEGORY_KEY,
-    )
+    .filter((article) => isHotContentArticle(article))
     .slice(0, 6);
 } catch (error) {
   console.error("Failed to fetch culture articles:", error);
@@ -94,7 +118,7 @@ try {
                 </div>
                 <div class="w-full lg:w-2/5 pt-4 px-4 lg:px-0">
                   <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
-                    {getCategoryLabel(cultureHero.category)}
+                    {getPrimaryTag(cultureHero)}
                   </p>
                   <a href={`/article/${cultureHero.id}`} class="block">
                     <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-old-standard text-wrap break-words hover:underline">
@@ -130,7 +154,7 @@ try {
                   key={article.id}
                   isNetlenka={false}
                   title={article.title}
-                  category={getCategoryLabel(article.category)}
+                  category={getPrimaryTag(article)}
                   imageUrl={article.imageUrl}
                   href={`/article/${article.id}`}
                 />
