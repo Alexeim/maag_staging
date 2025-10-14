@@ -62,7 +62,7 @@ const {
     <div x-show="$store.navbar.isOpen" x-cloak @click="$store.navbar.close()" class="fixed inset-0 bg-black/30 z-[998] lg:hidden" x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
 
     <!-- Panel -->
-    <div x-show="$store.navbar.isOpen" x-cloak class="fixed top-0 right-0 w-[235px] h-screen bg-base-100 z-[999] lg:hidden flex flex-col justify-between p-8" x-transition:enter="transform transition ease-in-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
+    <div id="mobile-menu" x-show="$store.navbar.isOpen" x-cloak class="fixed top-0 right-0 w-[235px] h-screen bg-base-100 z-[999] lg:hidden flex flex-col justify-between p-8" x-transition:enter="transform transition ease-in-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
       <!-- Links -->
       <ul class="flex flex-col gap-4 text-base-content">
         <li class="font-old-standard uppercase tracking-[.46em] text-base font-normal"><a href="/culture">Культура</a></li>

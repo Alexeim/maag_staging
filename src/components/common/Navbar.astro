@@ -88,6 +88,22 @@ const logoSrc = logo.src;
       </div>
     </div>
 
+    <!-- Mobile Controls -->
+    <div class="flex items-center gap-4 lg:hidden">
+      <button type="button" class="p-2">
+        <Image src={searchIcon} alt="Search" class="h-5 w-5" />
+      </button>
+      <button
+        type="button"
+        class="p-2"
+        @click="$store.navbar.toggle()"
+        aria-controls="mobile-menu"
+        x-bind:aria-expanded="$store.navbar.isOpen"
+      >
+        <Image src={burgerIcon} alt="Toggle navigation" class="h-5 w-5" />
+      </button>
+    </div>
+
     <!-- Right Side -->
     <div class="hidden lg:flex items-center gap-[19px]">
       <button class="p-2">
