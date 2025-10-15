@@ -88,24 +88,30 @@ const articles = articlesRaw.map((article) => {
           Управляй опубликованными и черновыми материалами.
         </p>
       </div>
-      <a href="/dashboard/article/create" class="btn btn-primary">
-        Создать статью
-      </a>
     </div>
 
     {articles.length > 0 ? (
-      <div class="overflow-x-auto">
-        <table class="table">
-          <thead>
-            <tr class="text-xs uppercase text-base-content/60">
-              <th scope="col">Заголовок</th>
-              <th scope="col">Категория / тег</th>
-              <th scope="col" class="hidden md:table-cell">Создана</th>
-              <th scope="col" class="text-right">Действия</th>
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left rtl:text-right text-base-content">
+          <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+            <tr>
+              <th scope="col" class="px-6 py-3">
+                Заголовок
+              </th>
+              <th scope="col" class="px-6 py-3">
+                Категория / теги
+              </th>
+              <th scope="col" class="px-6 py-3 hidden md:table-cell">
+                Создана
+              </th>
+              <th scope="col" class="px-6 py-3">
+                <span class="sr-only">Действия</span>
+              </th>
             </tr>
           </thead>
           <tbody>
-            {articles.map((article) => {
+            {articles.map((article, index) => {
+              const isLast = index === articles.length - 1;
               const categoryLabel = article.isHotContent
                 ? "Самое Читаемое"
                 : article.category || "—";
@@ -113,28 +119,35 @@ const articles = articlesRaw.map((article) => {
                 ? article.tags.join(", ")
                 : "—";
               return (
-                <tr class="hover">
-                  <td class="max-w-sm">
-                    <div class="font-semibold truncate" title={article.title}>{article.title}</div>
+                <tr
+                  class:list={[
+                    "bg-base-100 hover:bg-base-200/50",
+                    !isLast && "border-b border-base-300",
+                  ]}
+                >
+                  <th scope="row" class="px-6 py-4 font-medium text-base-content whitespace-nowrap">
+                    <div class="font-semibold truncate max-w-xs" title={article.title}>{article.title}</div>
                     <div class="text-xs text-base-content/60 mt-1 truncate" title={article.id}>ID: {article.id}</div>
-                  </td>
-                  <td class="align-middle">
+                  </th>
+                  <td class="px-6 py-4">
                     <div class="flex flex-col gap-1">
-                      <span class="badge badge-outline w-fit">{categoryLabel}</span>
+                      <span class="font-semibold">{categoryLabel}</span>
                       <span class="text-xs text-base-content/70">
-                        Теги: {tagsLabel}
+                        {tagsLabel}
                       </span>
                     </div>
                   </td>
-                  <td class="hidden md:table-cell align-middle text-sm text-base-content/70">{article.createdAtFormatted}</td>
-                  <td class="align-middle text-right">
-                    <div class="flex justify-end gap-2">
-                      <a href={`/dashboard/article/${article.id}/edit`} class="btn btn-sm btn-outline">
+                  <td class="px-6 py-4 hidden md:table-cell">
+                    {article.createdAtFormatted}
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex justify-end gap-4">
+                      <a href={`/dashboard/article/${article.id}/edit`} class="font-medium text-primary hover:underline">
                         Редактировать
                       </a>
                       <button
                         type="button"
-                        class="btn btn-sm btn-error text-error-content"
+                        class="font-medium text-error hover:underline"
                         @click={`handleDeleteClick('${article.id}', '${article.title.replace(/'/g, "\\'")}')`}
                       >
                         Удалить
