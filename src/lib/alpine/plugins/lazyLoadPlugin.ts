@@ -7,6 +7,7 @@ const components: Record<string, () => Promise<any>> = {
   profile: () => import('@/components/profile/profileLogic'),
   calendar: () => import('@/components/calendar/logic'),
   articleCreator: () => import('@/components/article/creatorLogic'),
+  eventCreator: () => import('@/components/article/eventCreatorLogic'),
   authModal: () => import('@/components/auth/authLogic'),
 };
 
@@ -117,6 +118,13 @@ export default function(Alpine: Alpine) {
       previewArticle() {},
       returnToEdit() {},
       saveArticle() {},
+      // --- Event Creator defaults ---
+      eventId: null,
+      eventForm: { startDate: '', endDate: '', category: '', isOnLanding: false },
+      setStartDate() {},
+      setEndDate() {},
+      setCategory() {},
+      saveEvent() {},
       // --- Auth Modal properties ---
       formType: 'login',
       formData: { email: '', password: '', confirmPassword: '', firstName: '', lastName: '' },

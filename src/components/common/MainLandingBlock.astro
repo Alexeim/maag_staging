@@ -2,7 +2,7 @@
 import { Image } from "astro:assets";
 import maagLogo from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
-import { articlesApi } from "@/lib/api/api";
+import { articlesApi, eventsApi } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -60,6 +60,7 @@ const isHotContentArticle = (article: any) =>
 
 let mainArticle: any = null;
 let newsArticles: any[] = [];
+let landingEvent: any = null;
 
 try {
   const articles = await articlesApi.list();
@@ -76,6 +77,77 @@ try {
   newsArticles = articles.filter((article) => isNewsCategory(article.category));
 } catch (error) {
   console.error("Failed to fetch articles:", error);
+}
+
+const eventCategoryLabels: Record<string, string> = {
+  exhibition: "Выставка",
+  concert: "Концерт",
+  performance: "Спектакль",
+};
+
+const toDate = (value: unknown): Date | null => {
+  if (!value) {
+    return null;
+  }
+  if (value instanceof Date) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "object") {
+    const maybeSeconds =
+      (value as { seconds?: number; _seconds?: number }).seconds ??
+      (value as { seconds?: number; _seconds?: number })._seconds;
+    if (typeof maybeSeconds === "number") {
+      return new Date(maybeSeconds * 1000);
+    }
+    if (typeof (value as { toDate?: () => Date }).toDate === "function") {
+      const parsed = (value as { toDate: () => Date }).toDate();
+      return parsed instanceof Date && !Number.isNaN(parsed.getTime()) ? parsed : null;
+    }
+  }
+  return null;
+};
+
+const formatEventDate = (value: unknown) => {
+  const date = toDate(value);
+  if (!date) {
+    return null;
+  }
+  return {
+    day: date.getDate().toString().padStart(2, "0"),
+    month: date.toLocaleDateString("ru-RU", { month: "long" }),
+  };
+};
+
+const pickPinnedEvent = (events: any[]) => {
+  const pinned = events.find((event) => Boolean(event?.isOnLanding));
+  if (!pinned) {
+    return null;
+  }
+  const startDate = toDate(pinned.startDate);
+  if (!startDate) {
+    return null;
+  }
+  const endDate = toDate(pinned.endDate);
+  return {
+    ...pinned,
+    startDate,
+    endDate,
+  };
+};
+
+try {
+  const events = await eventsApi.list();
+  landingEvent = pickPinnedEvent(events);
+} catch (error) {
+  console.error("Failed to fetch events for landing:", error);
 }
 ---
 
@@ -170,54 +242,89 @@ try {
       >
         Календарь
       </h2>
-      <div class="bg-white rounded-xl shadow-lg">
-        <div class="p-4 lg:p-2 flex items-center gap-3">
-          <div
-            class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3"
-          >
-            <p
-              class="text-2xl lg:text-2xl text-black/50 font-thin font-old-standard"
-            >
-              30
+      {landingEvent ? (
+        <a href={`/events/${landingEvent.id}`} class="block bg-white rounded-xl shadow-lg overflow-hidden">
+          <div class="p-4 lg:p-2 flex items-center gap-3">
+            <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
+              <p class="text-2xl lg:text-2xl text-black/60 font-thin font-old-standard">
+                {formatEventDate(landingEvent.startDate)?.day || "--"}
+              </p>
+            </div>
+            <p class="text-[12px] font-inter uppercase tracking-[0.15em]">
+              {(formatEventDate(landingEvent.startDate)?.month || "").toUpperCase() || "Дата"}
             </p>
           </div>
-          <p class="text-[12px] font-inter uppercase tracking-[0.15em]">
-            Сентября
-          </p>
-        </div>
-        <Image
-          src={picture2}
-          alt="Event"
-          class="w-full h-auto lg:h-[240px] object-cover"
-        />
-        <div class="p-4 lg:p-6">
-          <p
-            class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]"
-          >
-            Выставка
-          </p>
-          <h2 class="text-base lg:text-lg leading-tight font-old-standard mb-4">
-            Огюст Роден и его бабы. Сплетни, интриги, расследования.
-          </h2>
-          <div class="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-map-pin"
-              ><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"
-              ></path><circle cx="12" cy="10" r="3"></circle></svg
-            >
-            <p class="text-sm text-gray-600">Место</p>
+          {landingEvent.imageUrl ? (
+            <img
+              src={landingEvent.imageUrl}
+              alt={landingEvent.title}
+              class="w-full h-auto lg:h-[240px] object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <Image
+              src={picture2}
+              alt="Event"
+              class="w-full h-auto lg:h-[240px] object-cover"
+            />
+          )}
+          <div class="p-4 lg:p-6">
+            <p class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]">
+              {eventCategoryLabels[landingEvent.category] || "Событие"}
+            </p>
+            <h2 class="text-base lg:text-lg leading-tight font-old-standard mb-4">
+              {landingEvent.title}
+            </h2>
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-calendar"
+              >
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                <line x1="16" x2="16" y1="2" y2="6"></line>
+                <line x1="8" x2="8" y1="2" y2="6"></line>
+                <line x1="3" x2="21" y1="10" y2="10"></line>
+              </svg>
+              <p class="text-sm text-gray-600">
+                {landingEvent.endDate && landingEvent.endDate.getTime() !== landingEvent.startDate.getTime()
+                  ? `${landingEvent.startDate.toLocaleDateString("ru-RU")} – ${landingEvent.endDate.toLocaleDateString("ru-RU")}`
+                  : landingEvent.startDate.toLocaleDateString("ru-RU")}
+              </p>
+            </div>
+          </div>
+        </a>
+      ) : (
+        <div class="bg-white rounded-xl shadow-lg">
+          <div class="p-4 lg:p-2 flex items-center gap-3">
+            <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
+              <p class="text-2xl lg:text-2xl text-black/50 font-thin font-old-standard">--</p>
+            </div>
+            <p class="text-[12px] font-inter uppercase tracking-[0.15em]">Скоро</p>
+          </div>
+          <Image
+            src={picture2}
+            alt="Event placeholder"
+            class="w-full h-auto lg:h-[240px] object-cover"
+          />
+          <div class="p-4 lg:p-6">
+            <p class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]">
+              Событие
+            </p>
+            <h2 class="text-base lg:text-lg leading-tight font-old-standard mb-4">
+              Скоро появится событие
+            </h2>
+            <p class="text-sm text-gray-600">Следи за обновлениями</p>
           </div>
         </div>
-      </div>
+      )}
     </aside>
   </div>
 </section>

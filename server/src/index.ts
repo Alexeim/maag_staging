@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { getAuth } from './services/firebase'; // Import the GETTER function
 import articleRoutes from './routes/articleRoutes'; // Import article routes
+import eventRoutes from './routes/eventRoutes'; // Import event routes
 import userRoutes from './routes/userRoutes'; // Import user routes
 
 const app = express();
@@ -16,6 +17,9 @@ app.get('/api', (req, res) => {
 
 // Use the article routes
 app.use('/api/articles', articleRoutes);
+
+// Use the event routes
+app.use('/api/events', eventRoutes);
 
 // Use the user routes
 app.use('/api/users', userRoutes);

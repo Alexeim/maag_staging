@@ -1,0 +1,24 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import EventComposer from "@/components/dashboard/EventComposer.astro";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+
+const eventCreatorState = JSON.stringify({
+  categoryTags: {
+    culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
+  },
+  isEditMode: false,
+  onSaveRedirect: "/dashboard",
+});
+---
+
+<DashboardLayout title="Создать событие" active="create-event">
+  <EventComposer
+    heading="Создать новое событие"
+    submitLabel="Сохранить событие"
+    eventCreatorState={eventCreatorState}
+    cancelHref="/dashboard"
+  />
+</DashboardLayout>

@@ -1,0 +1,142 @@
+---
+import Layout from "../../Layouts/Layout.astro";
+import ArticleHeader from "../../components/article/ArticleHeader.astro";
+import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
+import SocialShare from "../../components/article/SocialShare.astro";
+import ArticleBody from "../../components/article/ArticleBody.astro";
+import EventDetails from "../../components/article/EventDetails.astro";
+import { ApiError, eventsApi } from "@/lib/api/api";
+
+const { id } = Astro.params;
+
+const CATEGORY_LABELS: Record<string, string> = {
+  exhibition: "Выставка",
+  concert: "Концерт",
+  performance: "Спектакль",
+};
+
+const toDate = (value: unknown): Date | null => {
+  if (!value) {
+    return null;
+  }
+  if (value instanceof Date) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "object") {
+    const maybeSeconds =
+      (value as { _seconds?: number; seconds?: number })._seconds ??
+      (value as { _seconds?: number; seconds?: number }).seconds;
+    if (typeof maybeSeconds === "number") {
+      return new Date(maybeSeconds * 1000);
+    }
+  }
+  return null;
+};
+
+const formatDateRange = (start: Date | null, end: Date | null): string | null => {
+  if (!start) {
+    return null;
+  }
+  const format = (date: Date) =>
+    date.toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+  if (!end || start.getTime() === end.getTime()) {
+    return format(start);
+  }
+
+  return `${format(start)} — ${format(end)}`;
+};
+
+let eventData: any;
+let error: string | null = null;
+
+try {
+  eventData = await eventsApi.getById(id);
+} catch (e: any) {
+  console.error(e);
+  if (e instanceof ApiError) {
+    error =
+      e.status === 404
+        ? "Event not found."
+        : `Error fetching event: ${e.message}`;
+  } else {
+    error = `Error fetching event: ${e.message}`;
+  }
+}
+
+const startDate = toDate(eventData?.startDate);
+const endDate = toDate(eventData?.endDate);
+
+const displayEvent = {
+  title: eventData?.title || "Event",
+  category: eventData?.category ? CATEGORY_LABELS[eventData.category] || eventData.category : "Категория",
+  authorName: "Organizers",
+  authorAvatar: undefined,
+  readTime: "—",
+  imageUrl: eventData?.imageUrl,
+  imageCaption: eventData?.imageCaption || "",
+  imageAlt: eventData?.mainImage?.alt || "Event image",
+  contentBlocks: eventData?.content || [],
+  datesLabel: formatDateRange(startDate, endDate),
+};
+---
+
+<Layout
+  navbarVariant="default"
+  includePreFooterCTA={false}
+  title={`${displayEvent.title} - Maag`}
+  useClientRouter={true}
+>
+  <main class="bg-base-200 min-h-screen">
+    <div class="max-w-[1512px] mx-auto">
+      {error && <div class="text-red-500 text-center pt-40">{error}</div>}
+      {!error && eventData && (
+        <>
+          <div class="pt-[150px] pb-[100px] flex flex-col items-center gap-[100px]">
+            <div class="flex flex-col gap-8 max-w-[825px] w-full">
+              <ArticleHeader
+                category={displayEvent.category}
+                title={displayEvent.title}
+              />
+              <ArticleAuthor
+                name={displayEvent.authorName}
+                avatarUrl={displayEvent.authorAvatar}
+              />
+              <SocialShare readTime={displayEvent.readTime} />
+            </div>
+
+            {displayEvent.imageUrl && (
+              <figure class="w-full max-w-[1200px]">
+                <img
+                  src={displayEvent.imageUrl}
+                  alt={displayEvent.imageAlt}
+                  class="w-full h-auto rounded-lg shadow-lg"
+                  transition:name={`event-image-${id}`}
+                />
+                {displayEvent.imageCaption && (
+                  <figcaption class="text-center text-sm text-gray-500 mt-2">{displayEvent.imageCaption}</figcaption>
+                )}
+              </figure>
+            )}
+          </div>
+
+          <div class="max-w-[1400px] mx-auto px-14 pb-[100px]">
+            <ArticleBody contentBlocks={displayEvent.contentBlocks} />
+
+            {displayEvent.datesLabel && (
+              <EventDetails address="—" dates={displayEvent.datesLabel} />
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  </main>
+</Layout>

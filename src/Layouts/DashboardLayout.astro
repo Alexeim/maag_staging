@@ -11,6 +11,7 @@ interface Props {
 const navItems = [
   { href: "/dashboard", label: "Статьи", id: "articles" },
   { href: "/dashboard/article/create", label: "Создать статью", id: "create-article" },
+  { href: "/dashboard/event/create", label: "Создать событие", id: "create-event" },
 ];
 
 const { title = "MAAG Dashboard", active = "articles" } = Astro.props as Props;

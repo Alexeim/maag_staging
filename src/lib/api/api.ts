@@ -132,6 +132,26 @@ export interface ArticleResponse extends ArticlePayload {
   author?: unknown;
 }
 
+export interface EventPayload {
+  title: string;
+  authorId: string;
+  content: unknown[];
+  imageUrl?: string;
+  imageCaption?: string;
+  category: 'exhibition' | 'concert' | 'performance';
+  tags: string[];
+  techTags: string[];
+  startDate: string | Date;
+  endDate?: string | Date | null;
+  isOnLanding: boolean;
+}
+
+export interface EventResponse extends EventPayload {
+  id: string;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
+}
+
 export interface UserProfilePayload {
   uid: string;
   firstName: string;
@@ -169,6 +189,35 @@ export const articlesApi = {
   },
   delete(id: string, token?: string) {
     return request<void>(`/api/articles/${id}`, {
+      method: "DELETE",
+      token,
+    });
+  },
+};
+
+export const eventsApi = {
+  list(token?: string) {
+    return request<EventResponse[]>("/api/events", { token });
+  },
+  create(payload: EventPayload, token?: string) {
+    return request<EventResponse>("/api/events", {
+      method: "POST",
+      body: payload,
+      token,
+    });
+  },
+  getById(id: string, token?: string) {
+    return request<EventResponse>(`/api/events/${id}`, { token });
+  },
+  update(id: string, payload: EventPayload, token?: string) {
+    return request<EventResponse>(`/api/events/${id}`, {
+      method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+  delete(id: string, token?: string) {
+    return request<void>(`/api/events/${id}`, {
       method: "DELETE",
       token,
     });

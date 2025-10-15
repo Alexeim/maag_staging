@@ -1,0 +1,341 @@
+---
+import Button from "@/components/common/Button.astro";
+
+interface Props {
+  heading: string;
+  submitLabel: string;
+  eventCreatorState: string;
+  cancelHref?: string;
+}
+
+const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as Props;
+---
+
+<div class="max-w-4xl mx-auto" x-data={`$lazy('eventCreator', ${eventCreatorState})`}>
+  <h1 class="text-3xl font-bold mb-6">{heading}</h1>
+
+  <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
+    <h2 class="text-xl font-semibold mb-4">Основная информация</h2>
+
+    <label class="block text-sm font-medium text-base-content mb-2">Заголовок события</label>
+    <template x-if="isEditingTitle">
+      <div>
+        <input
+          type="text"
+          x-model="editingTitleText"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        />
+        <div class="flex justify-end gap-3 mt-3">
+          <Button variant="secondary" size="sm" @click="cancelEditTitle()">Отмена</Button>
+          <Button variant="primary" size="sm" @click="saveTitle()">Сохранить</Button>
+        </div>
+      </div>
+    </template>
+    <template x-if="!isEditingTitle">
+      <div class="flex justify-between items-center border border-base-300 rounded-lg px-4 py-3">
+        <h3 class="text-lg font-semibold" x-text="article.title || 'Введите заголовок...'"></h3>
+        <Button variant="outline" size="sm" @click="editTitle()">Редактировать</Button>
+      </div>
+    </template>
+
+    <hr class="my-6" />
+
+    <label class="block text-sm font-medium text-base-content mb-2">Категория</label>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <template x-for="(label, value) in categoryLabels" :key="value">
+        <button
+          type="button"
+          class="px-4 py-2 rounded-lg border text-sm transition"
+          :class="eventForm.category === value ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+          @click="setCategory(value)"
+        >
+          <span x-text="label"></span>
+        </button>
+      </template>
+    </div>
+
+    <div class="mt-4 flex items-center gap-3">
+      <input
+        id="landing-flag"
+        type="checkbox"
+        x-model="eventForm.isOnLanding"
+        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2"
+      />
+      <label for="landing-flag" class="text-sm font-medium text-base-content">
+        Показать событие в блоке «Календарь» на главной
+      </label>
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <label class="block text-sm font-medium text-base-content mb-2">Дата начала</label>
+        <input
+          type="date"
+          x-model="eventForm.startDate"
+          @change="setStartDate($event.target.value)"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-base-content mb-2">Дата окончания</label>
+        <input
+          type="date"
+          x-model="eventForm.endDate"
+          @change="setEndDate($event.target.value)"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+          placeholder="Оставь пустым, если событие на один день"
+        />
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <label class="block text-sm font-medium text-base-content mb-3">Теги</label>
+
+      <template x-if="getAvailableTags().length > 0">
+        <div class="flex flex-wrap gap-2">
+          <template x-for="tag in getAvailableTags()" :key="tag.value">
+            <button
+              type="button"
+              class="px-4 py-2 rounded-full border text-sm transition"
+              :class="isTagSelected(tag.value) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+              @click="toggleTag(tag.value)"
+            >
+              <span x-text="tag.title"></span>
+            </button>
+          </template>
+        </div>
+      </template>
+
+      <template x-if="getAvailableTags().length === 0">
+        <p class="text-sm text-base-content/70">
+          Выбери категорию, тогда покажем готовые теги.
+        </p>
+      </template>
+
+      <div class="mt-4 flex flex-col gap-2">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            x-model="newTagInput"
+            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+            placeholder="Добавь тег латиницей"
+          />
+          <Button variant="outline" size="sm" type="button" @click="addCustomTag()">Добавить тег</Button>
+        </div>
+        <p class="text-xs text-base-content/60">
+          Сохраняем в базу как техтег латиницей, иначе потом не поймём.
+        </p>
+      </div>
+
+      <div class="mt-3 flex flex-col gap-3">
+        <template x-if="article.tags.length > 0">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Категорийные теги</p>
+            <div class="flex flex-wrap gap-2 mt-1">
+              <template x-for="tag in article.tags" :key="tag">
+                <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
+                  <span x-text="getTagLabel(tag)"></span>
+                  <button
+                    type="button"
+                    class="text-base-content/60 hover:text-base-content"
+                    @click="removeTag(tag)"
+                  >
+                    ×
+                  </button>
+                </span>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <template x-if="article.techTags.length > 0">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Техтеги</p>
+            <div class="flex flex-wrap gap-2 mt-1">
+              <template x-for="tag in article.techTags" :key="`tech-${tag}`">
+                <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
+                  <span x-text="tag"></span>
+                  <button
+                    type="button"
+                    class="text-base-content/60 hover:text-base-content"
+                    @click="removeTechTag(tag)"
+                  >
+                    ×
+                  </button>
+                </span>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <hr class="my-6" />
+
+    <label class="block text-sm font-medium text-base-content mb-2">Обложка события</label>
+    <div class="flex items-center" x-data="{ fileName: '' }">
+      <label for="file-upload" class="btn btn-outline btn-sm">
+        Загрузить файл
+      </label>
+      <input
+        id="file-upload"
+        type="file"
+        class="hidden"
+        @change="handleImageUpload($event, true, null); fileName = $event.target.files[0]?.name || ''"
+        accept="image/png, image/jpeg, image/webp"
+      />
+      <span
+        x-text="fileName ? fileName : (article.imageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+        class="ml-4 text-sm text-base-content/70"
+      ></span>
+    </div>
+    <div x-show="uploading" class="mt-4">
+      <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
+      <div class="w-full bg-base-200 rounded-full h-2">
+        <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+      </div>
+    </div>
+    <div x-show="article.imageUrl && !uploading" class="mt-4 space-y-4">
+      <p class="text-sm text-success">Главная фотка на месте, можно продолжать.</p>
+      <img :src="article.imageUrl" alt="Предпросмотр обложки" class="rounded-md max-h-60 w-full object-cover" />
+      <div>
+        <label class="block text-sm font-medium text-base-content mb-2">Подпись к изображению</label>
+        <template x-if="isEditingCaption">
+          <div>
+            <input
+              type="text"
+              x-model="editingCaptionText"
+              class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+              placeholder="Введите подпись..."
+            />
+            <div class="flex justify-end gap-3 mt-3">
+              <Button variant="secondary" size="sm" @click="cancelEditCaption()">Отмена</Button>
+              <Button variant="primary" size="sm" @click="saveCaption()">Сохранить</Button>
+            </div>
+          </div>
+        </template>
+        <template x-if="!isEditingCaption">
+          <div class="flex justify-between items-center border border-base-300 rounded-lg px-4 py-3">
+            <p class="text-base-content" x-text="article.imageCaption || 'Подпись отсутствует...'"></p>
+            <Button variant="outline" size="sm" @click="editCaption()">Редактировать</Button>
+          </div>
+        </template>
+      </div>
+    </div>
+  </section>
+
+  <section class="p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
+    <h2 class="text-xl font-semibold mb-4">Контент события</h2>
+    <div class="space-y-4">
+      <template x-for="(block, index) in article.contentBlocks" :key="index">
+        <div class="p-4 border border-base-300 rounded-lg bg-base-100 relative group">
+          <template x-if="editingIndex === index">
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold capitalize" x-text="editingBlock.type.replace('-', ' ')"></h3>
+
+              <template x-if="['paragraph', 'first-paragraph', 'h1', 'h2', 'h3', 'quote'].includes(editingBlock.type)">
+                <textarea x-model="editingBlock.text" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" rows="5"></textarea>
+              </template>
+
+              <template x-if="editingBlock.type === 'image'">
+                <div x-data="{ blockFileName: '' }" class="space-y-3">
+                  <label class="block text-sm font-medium">Изображение</label>
+                  <div class="flex items-center gap-3">
+                    <label :for="'block-image-upload-' + index" class="btn btn-outline btn-sm">
+                      Загрузить изображение
+                    </label>
+                    <input
+                      :id="'block-image-upload-' + index"
+                      type="file"
+                      class="hidden"
+                      @change="handleImageUpload($event, false, index); blockFileName = $event.target.files[0]?.name || ''"
+                      accept="image/png, image/jpeg, image/webp"
+                    />
+                    <span
+                      x-text="blockFileName || (editingBlock.url ? 'Изображение загружено' : 'Файл не выбран')"
+                      class="text-sm text-base-content/70"
+                    ></span>
+                  </div>
+                  <div x-show="uploading && editingIndex === index">
+                    <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
+                    <div class="w-full bg-base-200 rounded-full h-2">
+                      <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                    </div>
+                  </div>
+                  <img x-show="editingBlock.url && !uploading" :src="editingBlock.url" alt="Предпросмотр блока" class="rounded-md max-h-48" />
+                  <label class="block text-sm font-medium mt-2">Подпись к изображению</label>
+                  <input
+                    type="text"
+                    x-model="editingBlock.caption"
+                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    placeholder="Введите подпись..."
+                  />
+                </div>
+              </template>
+
+              <div class="flex justify-end gap-3">
+                <Button variant="secondary" @click="cancelEdit()">Отмена</Button>
+                <Button variant="primary" @click="updateBlock()">Сохранить блок</Button>
+              </div>
+            </div>
+          </template>
+
+          <template x-if="editingIndex !== index">
+            <div class="space-y-3">
+              <p
+                :class="{
+                  'text-base': block.type === 'paragraph',
+                  'text-lg first-letter:text-4xl first-letter:font-bold': block.type === 'first-paragraph',
+                  'text-3xl font-bold': block.type === 'h1',
+                  'text-2xl font-semibold': block.type === 'h2',
+                  'text-xl font-semibold': block.type === 'h3',
+                  'text-lg italic border-l-4 pl-4 my-4 border-base-300': block.type === 'quote'
+                }"
+                x-text="block.text"
+              ></p>
+
+              <template x-if="block.type === 'image'">
+                <figure>
+                  <img :src="block.url" alt="Содержимое события" class="rounded-md w-full object-cover" />
+                  <figcaption class="text-center text-sm text-base-content/60 mt-2" x-text="block.caption"></figcaption>
+                </figure>
+              </template>
+
+              <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                <Button variant="outline" size="sm" @click="editBlock(index)">Редактировать</Button>
+                <Button variant="danger" size="sm" @click="deleteBlock(index)">Удалить</Button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <div class="mt-6">
+      <template x-if="showBlockOptions">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 border border-base-300 rounded-lg bg-base-100">
+          <button @click="addBlock('paragraph')" class="btn btn-outline btn-sm justify-start">Обычный абзац</button>
+          <button @click="addBlock('first-paragraph')" class="btn btn-outline btn-sm justify-start">Абзац с буквицей</button>
+          <button @click="addBlock('h2')" class="btn btn-outline btn-sm justify-start">Подзаголовок H2</button>
+          <button @click="addBlock('h3')" class="btn btn-outline btn-sm justify-start">Подзаголовок H3</button>
+          <button @click="addBlock('quote')" class="btn btn-outline btn-sm justify-start">Цитата</button>
+          <button @click="addBlock('image')" class="btn btn-outline btn-sm justify-start">Картинка</button>
+        </div>
+      </template>
+
+      <div x-show="!showBlockOptions" class="text-center">
+        <Button variant="primary" @click="openBlockSelector()">+ Добавить блок</Button>
+      </div>
+    </div>
+  </section>
+
+  <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex gap-2"></div>
+    <div class="flex justify-end gap-3">
+      {cancelHref && (
+        <a href={cancelHref} class="btn btn-outline">Отмена</a>
+      )}
+      <Button variant="primary" @click="saveEvent()">{submitLabel}</Button>
+    </div>
+  </div>
+</div>
