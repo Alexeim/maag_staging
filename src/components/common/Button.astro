@@ -1,99 +1,50 @@
 ---
-// File: packages/shared-components/atoms/button/Button.astro
-// Version: 2.0
-//
-// A "dumb" presentational component that is 100% compliant with the "State Down, Events Up" architecture.
-// It does not manage its own click logic. Event handling should be done by the parent component
-// using the standard `@click` directive.
-import type { HTMLAttributes } from "astro/types";
-
-interface Props extends HTMLAttributes<"button" | "a"> {
+interface Props {
+  variant?: 'primary' | 'secondary' | 'outline' | 'error' | 'ghost' | 'accent' | 'success';
+  size?: 'sm' | 'md' | 'lg';
   href?: string;
-  variant?:
-    | "default"
-    | "primary"
-    | "secondary"
-    | "outline"
-    | "ghost"
-    | "error"
-    | "errorOutline"
-    | "success"
-    | "accent";
-  size?: "sm" | "md" | "lg";
-  block?: boolean;
-  disabled?: boolean;
+  class?: string;
+  [x: string]: any; // for Alpine attributes like @click
 }
 
-const {
-  href,
-  variant = "default",
-  size = "md",
+const { 
+  variant = 'primary', 
+  size = 'md', 
+  href, 
   class: className,
-  block = false,
-  disabled = false,
   ...rest
 } = Astro.props;
 
-const variants = {
-  default: "btn-neutral",
-  primary: "btn-primary",
-  secondary: "btn-secondary",
-  outline: "text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 cursor-pointer",
-  ghost: "btn-ghost",
-  error: "focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 cursor-pointer",
-  errorOutline: "btn-outline btn-error",
-  success: "focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 cursor-pointer",
-  accent: "focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 cursor-pointer"
+const baseClasses = 'font-medium rounded-lg text-sm focus:outline-none focus:ring-4 cursor-pointer';
+
+const variantClasses = {
+  primary: 'bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary/50',
+  secondary: 'text-white bg-purple-700 hover:bg-purple-800 focus:ring-purple-300',
+  outline: 'text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100',
+  error: 'text-white bg-red-700 hover:bg-red-800 focus:ring-red-300',
+  ghost: 'hover:bg-base-200',
+  accent: 'text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-yellow-300',
+  success: 'text-white bg-green-700 hover:bg-green-800 focus:ring-green-300',
 };
 
-const sizes = {
-  sm: "btn-sm",
-  md: "",
-  lg: "btn-lg"
+const sizeClasses = {
+  sm: 'px-3 py-1.5 text-xs',
+  md: 'px-5 py-2.5',
+  lg: 'px-6 py-3 text-base',
 };
 
-const classes = [
-  "btn",
-  variants[variant],
-  sizes[size],
-  block && "btn-block",
-  disabled && "btn-disabled",
-  className
-]
-  .filter(Boolean)
-  .join(" ");
-
-const Tag = href ? "a" : "button";
+const Tag = href ? 'a' : 'button';
 ---
 
-{variant === 'primary' ? (
-  <Tag
-    href={disabled ? undefined : href}
-    class:list={[
-      "btn-primary",
-      // sizes[size],
-      block && "btn-block",
-      disabled && "btn-disabled",
-      className
-    ]}
-    aria-disabled={disabled ? "true" : undefined}
-    tabindex={disabled ? "-1" : undefined}
-    {...rest}
-  >
-    <span class="btn-primary-shadow"></span>
-    <span class="btn-primary-edge"></span>
-    <span class="btn-primary-front">
-      <slot />
-    </span>
-  </Tag>
-) : (
-  <Tag
-    href={disabled ? undefined : href}
-    class={classes}
-    aria-disabled={disabled ? "true" : undefined}
-    tabindex={disabled ? "-1" : undefined}
-    {...rest}
-  >
-    <slot />
-  </Tag>
-)}
+<Tag
+  class:list={[
+    baseClasses,
+    variantClasses[variant],
+    sizeClasses[size],
+    className
+  ]}
+  href={href}
+  {...rest}
+>
+  <slot />
+</Tag>

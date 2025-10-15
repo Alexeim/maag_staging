@@ -19,32 +19,32 @@ const {
 const displayImage = imageUrl || picture3.src;
 ---
 
-
-<div class="w-full flex flex-col gap-2 max-h-[300px] min-w-[220px] lg:min-w-0">
-  <div class="w-full overflow-hidden rounded-lg">
-    {imageUrl ? (
-      <img
-        src={displayImage}
-        alt={title}
-        class="w-full h-auto object-cover object-center"
-        loading="lazy"
-      />
-    ) : (
-      <Image
-        src={picture3}
-        alt="Hot content image"
-        class="w-full h-auto object-cover object-center"
-        loading="eager"
-      />
-    )}
+<div class="w-full flex flex-col gap-2 max-h-[300px] min-w-[220px] lg:min-w-0 max-w-[303px]">
+  <div class="w-full h-40 overflow-hidden rounded-lg">
+    <a href={href} class="block w-full h-full">
+      {imageUrl ? (
+        <img
+          src={displayImage}
+          alt={title}
+          class="w-full h-full object-cover object-center"
+          loading="lazy"
+        />
+      ) : (
+        <Image
+          src={picture3}
+          alt="Hot content image"
+          class="w-full h-full object-cover object-center"
+          loading="eager"
+        />
+      )}
+    </a>
   </div>
   <p class="text-error uppercase mb-3 font-inter text-xs tracking-[.46em]">
     {category}
   </p>
-  <a href={href} class="block">
-    <h3 class="truncate text-base lg:text-lg leading-tight font-old-standard mb-4 hover:underline">
+  <h3 class="text-base lg:text-lg leading-tight font-old-standard mb-4">
+    <a href={href} class="hover:underline truncate block w-full">
       {title}
-    </h3>
-  </a>
-
+    </a>
+  </h3>
 </div>
