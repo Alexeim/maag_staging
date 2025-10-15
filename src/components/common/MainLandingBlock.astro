@@ -154,14 +154,14 @@ try {
 <section class="w-full lg:max-h-[790px] px-4 lg:px-8 bg-base-200 mb-0">
   <div class="flex flex-col lg:flex-row gap-6 lg:gap-4">
     {/* News Column - THINNER */}
-    <aside class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-r lg:border-gray-300 lg:max-h-[780px] lg:overflow-y-scroll">
+    <aside class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-r lg:border-gray-300 lg:max-h-[780px]">
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
       >
         Новости
       </h2>
       <div
-        class="flex space-x-6 overflow-x-auto pb-2 lg:flex-col lg:space-x-0 lg:space-y-6 lg:overflow-x-visible"
+        class="flex space-x-6 overflow-x-auto pb-2 lg:flex-col lg:space-x-0 lg:space-y-6 lg:overflow-x-visible lg:overflow-y-scroll lg:max-h-[720px]"
       >
         {
           newsArticles.map((newsItem) => (
