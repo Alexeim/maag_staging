@@ -50,7 +50,7 @@ const getPrimaryTag = (article: any) => {
       : [];
 
   const firstTag = rawTags.find(
-    (tag) => typeof tag === "string" && tag.trim().length > 0,
+    (tag: string) => typeof tag === "string" && tag.trim().length > 0,
   );
 
   if (firstTag) {
@@ -197,7 +197,7 @@ try {
         <h3 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard">
           {CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY]}
         </h3>
-        <div class="flex gap-6 overflow-x-auto lg:flex-col lg:gap-6 lg:overflow-visible pb-2">
+        <div class="flex gap-6 overflow-x-auto lg:flex-col items-center lg:gap-6 lg:overflow-visible pb-2">
           {hotContentArticles.length > 0
             ? hotContentArticles.map((article) => (
                 <NetlenkaCard

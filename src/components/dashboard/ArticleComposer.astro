@@ -1,7 +1,7 @@
 ---
 import Button from "@/components/common/Button.astro";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
-import { Paperclip } from "lucide-astro";
+import { CloudUpload } from "lucide-astro";
 
 interface Props {
   heading: string;
@@ -158,7 +158,8 @@ const {
 
     <label class="block text-sm font-medium text-base-content mb-2">Обложка статьи</label>
     <div class="flex items-center" x-data="{ fileName: '' }">
-      <label for="file-upload" class="btn btn-outline btn-sm">
+      <label for="file-upload" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
+        <CloudUpload/>
         Загрузить файл
       </label>
       <input
@@ -225,8 +226,9 @@ const {
                 <div x-data="{ blockFileName: '' }" class="space-y-3">
                   <label class="block text-sm font-medium">Изображение</label>
                   <div class="flex items-center gap-3">
-                    <label :for="'block-image-upload-' + index" class="btn btn-outline btn-sm">
-                      Загрузить изображение
+                    <label :for="'block-image-upload-' + index" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
+                      <CloudUpload/>
+                      Загрузить файл
                     </label>
                     <input
                       :id="'block-image-upload-' + index"
@@ -298,12 +300,12 @@ const {
     <div class="mt-6">
       <template x-if="showBlockOptions">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 border border-base-300 rounded-lg bg-base-100">
-          <button @click="addBlock('paragraph')" class="btn btn-outline btn-sm justify-start">Обычный абзац</button>
-          <button @click="addBlock('first-paragraph')" class="btn btn-outline btn-sm justify-start">Абзац с буквицей</button>
-          <button @click="addBlock('h2')" class="btn btn-outline btn-sm justify-start">Подзаголовок H2</button>
-          <button @click="addBlock('h3')" class="btn btn-outline btn-sm justify-start">Подзаголовок H3</button>
-          <button @click="addBlock('quote')" class="btn btn-outline btn-sm justify-start">Цитата</button>
-          <button @click="addBlock('image')" class="btn btn-outline btn-sm justify-start">Картинка</button>
+          <button @click="addBlock('paragraph')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Обычный абзац</button>
+          <button @click="addBlock('first-paragraph')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Абзац с буквицей</button>
+          <button @click="addBlock('h2')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Подзаголовок H2</button>
+          <button @click="addBlock('h3')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Подзаголовок H3</button>
+          <button @click="addBlock('quote')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Цитата</button>
+          <button @click="addBlock('image')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Картинка</button>
         </div>
       </template>
 
