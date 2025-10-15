@@ -1,14 +1,25 @@
 ---
 import Button from "@/components/common/Button.astro";
 
+import { CloudUpload } from "lucide-astro";
+
 interface Props {
   heading: string;
   submitLabel: string;
   eventCreatorState: string;
   cancelHref?: string;
+  deleteEventId?: string | null;
+  deleteRedirect?: string;
 }
 
-const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as Props;
+const {
+  heading,
+  submitLabel,
+  eventCreatorState,
+  cancelHref,
+  deleteEventId = null,
+  deleteRedirect = "/dashboard/events",
+} = Astro.props as Props;
 ---
 
 <div class="max-w-4xl mx-auto" x-data={`$lazy('eventCreator', ${eventCreatorState})`}>
@@ -45,7 +56,7 @@ const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as P
       <template x-for="(label, value) in categoryLabels" :key="value">
         <button
           type="button"
-          class="px-4 py-2 rounded-lg border text-sm transition"
+          class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer"
           :class="eventForm.category === value ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
           @click="setCategory(value)"
         >
@@ -59,9 +70,9 @@ const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as P
         id="landing-flag"
         type="checkbox"
         x-model="eventForm.isOnLanding"
-        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2"
+        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
       />
-      <label for="landing-flag" class="text-sm font-medium text-base-content">
+      <label for="landing-flag" class="text-sm font-medium text-base-content cursor-pointer">
         Показать событие в блоке «Календарь» на главной
       </label>
     </div>
@@ -73,7 +84,7 @@ const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as P
           type="date"
           x-model="eventForm.startDate"
           @change="setStartDate($event.target.value)"
-          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
         />
       </div>
       <div>
@@ -82,7 +93,7 @@ const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as P
           type="date"
           x-model="eventForm.endDate"
           @change="setEndDate($event.target.value)"
-          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
           placeholder="Оставь пустым, если событие на один день"
         />
       </div>
@@ -96,7 +107,7 @@ const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as P
           <template x-for="tag in getAvailableTags()" :key="tag.value">
             <button
               type="button"
-              class="px-4 py-2 rounded-full border text-sm transition"
+              class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
               :class="isTagSelected(tag.value) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
               @click="toggleTag(tag.value)"
             >
@@ -137,7 +148,7 @@ const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as P
                   <span x-text="getTagLabel(tag)"></span>
                   <button
                     type="button"
-                    class="text-base-content/60 hover:text-base-content"
+                    class="text-base-content/60 hover:text-base-content cursor-pointer"
                     @click="removeTag(tag)"
                   >
                     ×
@@ -174,7 +185,8 @@ const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as P
 
     <label class="block text-sm font-medium text-base-content mb-2">Обложка события</label>
     <div class="flex items-center" x-data="{ fileName: '' }">
-      <label for="file-upload" class="btn btn-outline btn-sm">
+      <label for="file-upload" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
+      <CloudUpload/>
         Загрузить файл
       </label>
       <input
@@ -241,8 +253,9 @@ const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as P
                 <div x-data="{ blockFileName: '' }" class="space-y-3">
                   <label class="block text-sm font-medium">Изображение</label>
                   <div class="flex items-center gap-3">
-                    <label :for="'block-image-upload-' + index" class="btn btn-outline btn-sm">
-                      Загрузить изображение
+                    <label :for="'block-image-upload-' + index" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
+                      <CloudUpload/>
+                      Загрузить файл
                     </label>
                     <input
                       :id="'block-image-upload-' + index"
@@ -274,8 +287,8 @@ const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as P
               </template>
 
               <div class="flex justify-end gap-3">
-                <Button variant="secondary" @click="cancelEdit()">Отмена</Button>
-                <Button variant="primary" @click="updateBlock()">Сохранить блок</Button>
+                <Button variant="accent" @click="cancelEdit()">Отмена</Button>
+                <Button variant="success" @click="updateBlock()">Сохранить блок</Button>
               </div>
             </div>
           </template>
@@ -303,7 +316,7 @@ const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as P
 
               <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                 <Button variant="outline" size="sm" @click="editBlock(index)">Редактировать</Button>
-                <Button variant="danger" size="sm" @click="deleteBlock(index)">Удалить</Button>
+                <Button variant="error" size="sm" @click="deleteBlock(index)">Удалить</Button>
               </div>
             </div>
           </template>
@@ -330,10 +343,20 @@ const { heading, submitLabel, eventCreatorState, cancelHref } = Astro.props as P
   </section>
 
   <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <div class="flex gap-2"></div>
+    <div class="flex gap-2">
+      {deleteEventId && (
+        <button
+          type="button"
+          class="cursor-pointer text-white bg-red-700 hover:bg-red-800 focus:ring-red-300"
+          @click={`deleteEvent('${deleteRedirect}')`}
+        >
+          Удалить событие
+        </button>
+      )}
+    </div>
     <div class="flex justify-end gap-3">
       {cancelHref && (
-        <a href={cancelHref} class="btn btn-outline">Отмена</a>
+        <a href={cancelHref} class="cursor-pointer text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-yellow-300 flex flex-row items-center justify-center px-4 py-2 rounded-lg">Отмена</a>
       )}
       <Button variant="primary" @click="saveEvent()">{submitLabel}</Button>
     </div>

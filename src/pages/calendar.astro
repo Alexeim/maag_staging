@@ -8,12 +8,140 @@ import baletImage from "../assets/images/calendar/balet.png";
 import theatreShowImage from "../assets/images/calendar/theatre-show.png";
 import smallEventImage from "../assets/images/calendar/small-event.png";
 import picture1 from "../assets/images/culture.jpg";
+import { eventsApi } from "@/lib/api/api";
 
-
-const imagePaths = {
-  theatreShowSrc: theatreShowImage.src,
-  smallEventSrc: smallEventImage.src,
+const EVENT_CATEGORY_LABELS: Record<string, string> = {
+  exhibition: "Выставка",
+  concert: "Концерт",
+  performance: "Спектакль",
 };
+
+const toDate = (value: unknown): Date | null => {
+  if (!value) {
+    return null;
+  }
+  if (value instanceof Date) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "object") {
+    const maybeSeconds =
+      (value as { seconds?: number; _seconds?: number }).seconds ??
+      (value as { seconds?: number; _seconds?: number })._seconds;
+    if (typeof maybeSeconds === "number") {
+      return new Date(maybeSeconds * 1000);
+    }
+    if (typeof (value as { toDate?: () => Date }).toDate === "function") {
+      const parsed = (value as { toDate: () => Date }).toDate();
+      return parsed instanceof Date && !Number.isNaN(parsed.getTime()) ? parsed : null;
+    }
+  }
+  return null;
+};
+
+const extractDescription = (blocks: any): string => {
+  if (!Array.isArray(blocks)) {
+    return "Подробнее скоро.";
+  }
+  const blockWithText = blocks.find(
+    (block) => typeof block?.text === "string" && block.text.trim().length > 0,
+  );
+  if (!blockWithText) {
+    return "Подробнее скоро.";
+  }
+  const text = blockWithText.text.trim();
+  return text.length > 180 ? `${text.slice(0, 177).trim()}...` : text;
+};
+
+const formatDateRange = (startIso: string, endIso: string | null): string => {
+  const start = toDate(startIso);
+  if (!start) {
+    return "Дата уточняется";
+  }
+  const end = endIso ? toDate(endIso) : null;
+  const format = (date: Date, withYear = false) =>
+    date.toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "long",
+      ...(withYear ? { year: "numeric" } : {}),
+    });
+  if (!end || start.getTime() === end.getTime()) {
+    return format(start, true);
+  }
+  const sameYear = end.getUTCFullYear() === start.getUTCFullYear();
+  return `${format(start, !sameYear)} – ${format(end, true)}`;
+};
+
+let eventsResponse: any[] = [];
+
+try {
+  eventsResponse = await eventsApi.list();
+} catch (error) {
+  console.error("Failed to fetch events:", error);
+}
+
+const normalizedEvents = eventsResponse
+  .map((event) => {
+    const startDate = toDate(event?.startDate);
+    if (!startDate) {
+      return null;
+    }
+    startDate.setUTCHours(0, 0, 0, 0);
+    const endDate = toDate(event?.endDate);
+    if (endDate) {
+      endDate.setUTCHours(0, 0, 0, 0);
+    }
+    const category = typeof event?.category === "string" ? event.category : "";
+    const categoryLabel =
+      EVENT_CATEGORY_LABELS[category as keyof typeof EVENT_CATEGORY_LABELS] || "Событие";
+    const primaryTag =
+      Array.isArray(event?.tags) && event.tags.length > 0 && typeof event.tags[0] === "string"
+        ? event.tags[0]
+        : categoryLabel;
+
+    return {
+      id: event.id,
+      title: event.title ?? "Событие",
+      imageUrl: typeof event.imageUrl === "string" ? event.imageUrl : null,
+      startDate: startDate.toISOString(),
+      endDate: endDate ? endDate.toISOString() : null,
+      category,
+      categoryLabel,
+      tagLabel: primaryTag,
+      description: extractDescription(event?.content),
+      url: `/events/${event.id}`,
+    };
+  })
+  .filter((event): event is NonNullable<typeof event> => Boolean(event))
+  .sort(
+    (a, b) =>
+      new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
+  );
+
+const heroFallbackImages = [baletImage, picture1, theatreShowImage];
+
+const featuredEvents = normalizedEvents.slice(0, 3).map((event, index) => ({
+  ...event,
+  dateRange: formatDateRange(event.startDate, event.endDate),
+  fallbackImage: heroFallbackImages[index] ?? baletImage,
+}));
+
+const calendarState = JSON.stringify({
+  imagePaths: {
+    theatreShowSrc: theatreShowImage.src,
+    smallEventSrc: smallEventImage.src,
+  },
+  events: normalizedEvents,
+}).replace(/</g, "\\u003c");
+
+const defaultLocation = "Место уточняется";
 ---
 
 <Layout
@@ -25,7 +153,7 @@ const imagePaths = {
   <main
     id="calendar-wrapper"
     class="bg-base-200 px-4 lg:px-20 py-12"
-    x-data=`$lazy('calendar', { imagePaths: ${JSON.stringify(imagePaths)} })`
+    x-data={`$lazy('calendar', ${calendarState})`}
     @change-month.window="changeMonth($event.detail)"
     @date-selected.window="selectDate($event.detail.day)"
     @filter-changed.window="setFilter($event.detail.filter)"
@@ -38,33 +166,37 @@ const imagePaths = {
           Календарь
         </h1>
         <div class="p-6 lg:p-8">
-          <EventCard
-            tag="Выставка"
-            date="10-15 Сентября"
-            title="Огюст Роден и его бабы. Сплетни, интриги, расследования."
-            location="Место"
-            image={baletImage}
-            class="h-[70vh]"
-          />
-          <div class="flex flex-col lg:flex-row mt-6">
-            <EventCard
-              tag="Выставка"
-              date="10-15 Сентября"
-              title="Огюст Роден и его бабы. Сплетни, интриги, расследования."
-              location="Место"
-              image={picture1}
-              class="mb-6 lg:mb-0 lg:mr-6"
-              textSize="med"
-            />
-            <EventCard
-              tag="Выставка"
-              date="10-15 Сентября"
-              title="Огюст Роден и его бабы. Сплетни, интриги, расследования."
-              location="Место"
-              image={theatreShowImage}
-              textSize="med"
-            />
-          </div>
+          {featuredEvents.length > 0 ? (
+            <>
+              <EventCard
+                tag={featuredEvents[0].tagLabel}
+                date={featuredEvents[0].dateRange}
+                title={featuredEvents[0].title}
+                location={defaultLocation}
+                image={featuredEvents[0].fallbackImage}
+                imageUrl={featuredEvents[0].imageUrl ?? undefined}
+                class="h-[70vh]"
+              />
+              <div class="flex flex-col lg:flex-row mt-6">
+                {featuredEvents.slice(1).map((event, index) => (
+                  <EventCard
+                    tag={event.tagLabel}
+                    date={event.dateRange}
+                    title={event.title}
+                    location={defaultLocation}
+                    image={event.fallbackImage}
+                    imageUrl={event.imageUrl ?? undefined}
+                    class={index === 0 ? "mb-6 lg:mb-0 lg:mr-6" : "mb-6 lg:mb-0"}
+                    textSize="med"
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div class="bg-white rounded-xl shadow-lg p-10 text-center">
+              <p class="text-base-content/70">Скоро здесь появятся события.</p>
+            </div>
+          )}
         </div>
       </div>
 

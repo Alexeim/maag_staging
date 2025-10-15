@@ -1,0 +1,191 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import { eventsApi } from "@/lib/api/api";
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+
+const normalizeDate = (value: unknown) => {
+  if (!value) {
+    return null;
+  }
+  if (value instanceof Date) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "object") {
+    if (typeof (value as { toDate?: () => Date }).toDate === "function") {
+      const parsed = (value as { toDate: () => Date }).toDate();
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+    const seconds =
+      (value as { seconds?: number }).seconds ??
+      (value as { _seconds?: number })._seconds;
+    const nanoseconds =
+      (value as { nanoseconds?: number }).nanoseconds ??
+      (value as { _nanoseconds?: number })._nanoseconds ??
+      0;
+    if (typeof seconds === "number") {
+      return new Date(seconds * 1000 + nanoseconds / 1_000_000);
+    }
+  }
+  return null;
+};
+
+const formatRange = (start: Date | null, end: Date | null) => {
+  if (!start) {
+    return "Дата уточняется";
+  }
+  const startStr = start.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  if (!end || start.getTime() === end.getTime()) {
+    return startStr;
+  }
+  const endStr = end.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  return `${startStr} — ${endStr}`;
+};
+
+let events = [] as Awaited<ReturnType<typeof eventsApi.list>>;
+try {
+  events = await eventsApi.list();
+} catch (error) {
+  console.error("Failed to load events", error);
+  events = [];
+}
+
+const decoratedEvents = events.map((event) => {
+  const startDate = normalizeDate(event.startDate);
+  const endDate = normalizeDate(event.endDate);
+  return {
+    ...event,
+    startDateFormatted: startDate,
+    endDateFormatted: endDate,
+    dateRangeLabel: formatRange(startDate, endDate),
+    categoryLabel: (() => {
+      switch (event.category) {
+        case "exhibition":
+          return "Выставка";
+        case "concert":
+          return "Концерт";
+        case "performance":
+          return "Спектакль";
+        default:
+          return "Событие";
+      }
+    })(),
+  };
+});
+---
+
+<DashboardLayout title="Управление событиями" active="events">
+  <div
+    class="bg-base-100 border border-base-300 rounded-xl p-6"
+    x-data={`$lazy('eventList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
+  >
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-semibold">События</h2>
+        <p class="text-sm text-base-content/70 mt-1">
+          Управляй расписанием — редактируй, закрепляй для лендинга, удаляй лишнее.
+        </p>
+      </div>
+    </div>
+
+    {decoratedEvents.length > 0 ? (
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-base-content">
+          <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+            <tr>
+              <th scope="col" class="px-6 py-3">
+                Событие
+              </th>
+              <th scope="col" class="px-6 py-3">
+                Даты
+              </th>
+              <th scope="col" class="px-6 py-3 hidden lg:table-cell">
+                Категория / теги
+              </th>
+              <th scope="col" class="px-6 py-3 hidden md:table-cell">
+                Landing
+              </th>
+              <th scope="col" class="px-6 py-3">
+                <span class="sr-only">Действия</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {decoratedEvents.map((eventItem, index) => {
+              const isLast = index === decoratedEvents.length - 1;
+              const tagsLabel = Array.isArray(eventItem.tags) && eventItem.tags.length > 0
+                ? eventItem.tags.join(", ")
+                : "—";
+              return (
+                <tr
+                  class:list={[
+                    "bg-base-100 hover:bg-base-200/50",
+                    !isLast && "border-b border-base-300",
+                  ]}
+                >
+                  <th scope="row" class="px-6 py-4 font-medium text-base-content whitespace-nowrap">
+                    <div class="font-semibold truncate max-w-xs" title={eventItem.title}>{eventItem.title}</div>
+                    <div class="text-xs text-base-content/60 mt-1 truncate" title={eventItem.id}>ID: {eventItem.id}</div>
+                  </th>
+                  <td class="px-6 py-4">
+                    <div class="flex flex-col gap-1">
+                      <span class="font-semibold">{eventItem.dateRangeLabel}</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 hidden lg:table-cell">
+                    <div class="flex flex-col gap-1">
+                      <span class="font-semibold">{eventItem.categoryLabel}</span>
+                      <span class="text-xs text-base-content/70">
+                        {tagsLabel}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 hidden md:table-cell">
+                    {eventItem.isOnLanding ? (
+                      <span class="badge badge-success badge-sm">on</span>
+                    ) : (
+                      <span class="badge badge-ghost badge-sm text-base-content/60">off</span>
+                    )}
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex justify-end gap-4">
+                      <a href={`/dashboard/event/${eventItem.id}/edit`} class="font-medium text-primary hover:underline">
+                        Редактировать
+                      </a>
+                      <button
+                        type="button"
+                        class="font-medium text-error hover:underline"
+                        @click={`handleDeleteClick('${eventItem.id}', '${eventItem.title.replace(/'/g, "\\'")}')`}
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <div class="p-8 text-center text-base-content/70">
+        <p>Пока нет событий. Создай первое, чтобы заполнить календарь.</p>
+      </div>
+    )}
+  </div>
+</DashboardLayout>

@@ -84,6 +84,7 @@ try {
   cultureCardArticles = cultureArticles.slice(1, 4);
   hotContentArticles = articles
     .filter((article) => isHotContentArticle(article))
+    .reverse()
     .slice(0, 6);
 } catch (error) {
   console.error("Failed to fetch culture articles:", error);

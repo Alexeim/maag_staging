@@ -39,11 +39,7 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
                   x-text="event.title"
                 >
                 </h3>
-                <p
-                  class="font-serif text-lg mt-4 text-base-content"
-                  x-text="event.description"
-                >
-                </p>
+                <p class="font-serif text-lg mt-4 text-base-content" x-text="event.description"></p>
               </div>
               <div class="text-lg font-semibold">
                 <div
@@ -63,12 +59,12 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
                   class="flex items-center gap-4 py-2 border-b border-gray-300 font-inter"
                 >
                   <span set:html={calendarIcon} />
-                  <span class="text-neutral text-sm" x-text="event.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })"></span>
+                  <span class="text-neutral text-sm" x-text="event.dateRangeLabel"></span>
                 </div>
               </div>
               <div class="mt-auto">
                 <a
-                  href="#"
+                  :href="event.url"
                   class="btn bg-base-300 text-base-content rounded-lg"
                   x-text="'Подробнее'"></a>
               </div>

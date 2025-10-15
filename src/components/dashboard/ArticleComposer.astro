@@ -52,7 +52,7 @@ const {
       id="category-select"
       x-model="article.category"
       @change="handleCategoryChange($event.target.value)"
-      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
     >
       <option value="" disabled>Выберите категорию...</option>
       <option value="culture">Культура</option>
@@ -65,9 +65,9 @@ const {
         id="hot-content-flag"
         type="checkbox"
         x-model="article.isHotContent"
-        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2"
+        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
       />
-      <label for="hot-content-flag" class="text-sm font-medium text-base-content">
+      <label for="hot-content-flag" class="text-sm font-medium text-base-content cursor-pointer">
         Отметить как «Самое читаемое»
       </label>
     </div>
@@ -80,7 +80,7 @@ const {
           <template x-for="tag in getAvailableTags()" :key="tag.value">
             <button
               type="button"
-              class="px-4 py-2 rounded-full border text-sm transition"
+              class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
               :class="isTagSelected(tag.value) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
               @click="toggleTag(tag.value)"
             >
@@ -121,7 +121,7 @@ const {
                   <span x-text="getTagLabel(tag)"></span>
                   <button
                     type="button"
-                    class="text-base-content/60 hover:text-base-content"
+                    class="text-base-content/60 hover:text-base-content cursor-pointer"
                     @click="removeTag(tag)"
                   >
                     ×
@@ -141,7 +141,7 @@ const {
                   <span x-text="tag"></span>
                   <button
                     type="button"
-                    class="text-base-content/60 hover:text-base-content"
+                    class="text-base-content/60 hover:text-base-content cursor-pointer"
                     @click="removeTechTag(tag)"
                   >
                     ×
@@ -287,7 +287,7 @@ const {
 
               <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                 <Button variant="outline" size="sm" @click="editBlock(index)">Редактировать</Button>
-                <Button variant="danger" size="sm" @click="deleteBlock(index)">Удалить</Button>
+                <Button variant="error" size="sm" @click="deleteBlock(index)">Удалить</Button>
               </div>
             </div>
           </template>
@@ -318,7 +318,7 @@ const {
       <template x-if="isEditMode && articleId">
         <button
           type="button"
-          class="btn btn-error btn-sm text-error-content"
+          class="cursor-pointer text-white bg-red-700 hover:bg-red-800 focus:ring-red-300 flex flex-row items-center justify-center px-4 py-2 rounded-lg"
           @click="deleteArticle(deleteRedirect)"
         >
           Удалить статью
@@ -328,7 +328,7 @@ const {
     <div class="flex justify-end gap-3">
       <Button variant="secondary" @click="previewArticle()">Предпросмотр</Button>
       {cancelHref && (
-        <a href={cancelHref} class="btn btn-outline">Отмена</a>
+        <a href={cancelHref} class="cursor-pointer text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-yellow-300 flex flex-row items-center justify-center px-4 py-2 rounded-lg">Отмена</a>
       )}
       <Button variant="primary" @click="saveArticle()">{submitLabel}</Button>
     </div>

@@ -1,5 +1,4 @@
 ---
-import { Image } from "astro:assets";
 import locationIcon from "../../assets/images/calendar/location.svg?raw";
 
 interface Props {
@@ -7,7 +6,8 @@ interface Props {
   date: string;
   title: string;
   location: string;
-  image: ImageMetadata;
+  image?: ImageMetadata;
+  imageUrl?: string;
   class?: string;
   textSize?: "med" | "lg";
 }
@@ -18,9 +18,20 @@ const {
   title,
   location,
   image,
+  imageUrl,
   class: className,
   textSize = "lg",
 } = Astro.props;
+
+const resolvedImageSrc = (() => {
+  if (typeof imageUrl === "string" && imageUrl.trim().length > 0) {
+    return imageUrl;
+  }
+  if (image && "src" in image) {
+    return image.src;
+  }
+  return "";
+})();
 ---
 
 <div
@@ -28,7 +39,7 @@ const {
     "text-white overflow-hidden p-8 flex flex-col justify-end h-96 bg-gradient-to-t from-black/70 via-black/40 to-transparent",
     className,
   ]}
-  style={`background-image: url(${image.src}); background-size: cover; background-position: center;`}
+  style={`background-image: url(${resolvedImageSrc}); background-size: cover; background-position: center;`}
 >
   <div>
     <span class="text-xs uppercase tracking-widest font-medium text-error font-inter"

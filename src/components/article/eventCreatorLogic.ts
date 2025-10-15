@@ -65,6 +65,18 @@ export default function eventCreatorLogic(initialState = {}) {
     copy.startDate = normalizeDate(copy.startDate);
     copy.endDate = normalizeDate(copy.endDate);
     copy.isOnLanding = Boolean(copy.isOnLanding);
+    const contentBlocks = Array.isArray(copy.contentBlocks)
+      ? copy.contentBlocks
+      : Array.isArray(copy.content)
+        ? copy.content
+        : [];
+    copy.contentBlocks = contentBlocks;
+    copy.content = contentBlocks;
+    copy.tags = Array.isArray(copy.tags) ? copy.tags : [];
+    copy.techTags = Array.isArray(copy.techTags) ? copy.techTags : [];
+    copy.title = typeof copy.title === "string" ? copy.title : "";
+    copy.imageUrl = typeof copy.imageUrl === "string" ? copy.imageUrl : "";
+    copy.imageCaption = typeof copy.imageCaption === "string" ? copy.imageCaption : "";
     return copy;
   };
 
@@ -87,6 +99,16 @@ export default function eventCreatorLogic(initialState = {}) {
         const normalized = normalizeIncoming(initialEvent);
         if (normalized) {
           this.article = { ...this.article, ...normalized };
+          this.article.contentBlocks = Array.isArray(normalized.contentBlocks)
+            ? normalized.contentBlocks
+            : [];
+          this.article.tags = Array.isArray(normalized.tags) ? normalized.tags : [];
+          this.article.techTags = Array.isArray(normalized.techTags)
+            ? normalized.techTags
+            : [];
+          this.article.imageUrl = normalized.imageUrl;
+          this.article.imageCaption = normalized.imageCaption ?? "";
+          this.article.title = normalized.title ?? "";
           this.eventForm.startDate = normalized.startDate;
           this.eventForm.endDate = normalized.endDate;
           this.eventForm.category = normalized.category;
@@ -239,6 +261,35 @@ export default function eventCreatorLogic(initialState = {}) {
         const message =
           error instanceof Error ? error.message : "Что-то пошло не так при сохранении события.";
         window.Alpine.store("ui").showToast(message, "error");
+      }
+    },
+
+    deleteEvent(redirectUrl: string) {
+      if (!this.eventId) {
+        return;
+      }
+
+      const performDelete = async () => {
+        try {
+          await eventsApi.delete(this.eventId as string);
+          window.Alpine.store("ui").showToast("Событие удалено");
+          setTimeout(() => {
+            window.location.href = redirectUrl || "/dashboard/events";
+          }, 1500);
+        } catch (error) {
+          console.error(error);
+          window.Alpine.store("ui").showToast("Не получилось удалить событие.", "error");
+        }
+      };
+
+      const uiStore = window.Alpine?.store?.("ui");
+      if (uiStore?.showConfirmation) {
+        uiStore.showConfirmation(
+          `Удалить событие «${this.article.title || "без названия"}»? Это действие необратимо.`,
+          performDelete,
+        );
+      } else if (window.confirm("Удалить событие? Это действие необратимо.")) {
+        performDelete();
       }
     },
   };

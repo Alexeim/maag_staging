@@ -8,6 +8,7 @@ const components: Record<string, () => Promise<any>> = {
   calendar: () => import('@/components/calendar/logic'),
   articleCreator: () => import('@/components/article/creatorLogic'),
   eventCreator: () => import('@/components/article/eventCreatorLogic'),
+  eventList: () => import('@/components/dashboard/eventListLogic'),
   authModal: () => import('@/components/auth/authLogic'),
 };
 
@@ -125,6 +126,13 @@ export default function(Alpine: Alpine) {
       setEndDate() {},
       setCategory() {},
       saveEvent() {},
+      deleteEvent() {},
+      // --- Event List defaults ---
+      apiBase: '',
+      buildApiUrl() { return ''; },
+      notify() {},
+      confirmAndDelete() {},
+      handleDeleteClick() {},
       // --- Auth Modal properties ---
       formType: 'login',
       formData: { email: '', password: '', confirmPassword: '', firstName: '', lastName: '' },

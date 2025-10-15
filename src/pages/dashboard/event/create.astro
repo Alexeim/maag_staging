@@ -10,8 +10,8 @@ const eventCreatorState = JSON.stringify({
     paris: parisTags.parisTags,
   },
   isEditMode: false,
-  onSaveRedirect: "/dashboard",
-});
+  onSaveRedirect: "/dashboard/events",
+}).replace(/</g, "\\u003c");
 ---
 
 <DashboardLayout title="Создать событие" active="create-event">
@@ -19,6 +19,6 @@ const eventCreatorState = JSON.stringify({
     heading="Создать новое событие"
     submitLabel="Сохранить событие"
     eventCreatorState={eventCreatorState}
-    cancelHref="/dashboard"
+    cancelHref="/dashboard/events"
   />
 </DashboardLayout>
