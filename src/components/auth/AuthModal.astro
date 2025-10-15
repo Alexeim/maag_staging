@@ -34,19 +34,19 @@ import Input from "@/components/common/Input.astro";
     <!-- Login Form -->
     <template x-if="$store.auth.formType === 'login'">
       <form @submit.prevent="handleSubmit">
-        <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
+        <h2 class="text-2xl font-bold mb-6 text-center">Войти</h2>
         <div class="space-y-4">
           <Input type="email" name="email" placeholder="Email" :value="formData.email" required />
           <Input type="password" name="password" placeholder="Password" :value="formData.password" required />
         </div>
         <div class="mt-6">
           <Button type="submit" class="w-full" :disabled="isLoading">
-            <span x-show="!isLoading">Login</span>
-            <span x-show="isLoading">Loading...</span>
+            <span x-show="!isLoading">Войти</span>
+            <span x-show="isLoading">Загрузка...</span>
           </Button>
         </div>
         <p class="text-sm text-center mt-4">
-          Don't have an account? <button type="button" @click="$store.auth.switchTo('signup')" class="text-primary hover:underline">Sign up</button>
+          Не зарегистрирован? <button type="button" @click="$store.auth.switchTo('signup')" class="text-primary hover:underline cursor-pointer">Тебе сюда</button>
         </p>
       </form>
     </template>
@@ -54,22 +54,22 @@ import Input from "@/components/common/Input.astro";
     <!-- Signup Form -->
     <template x-if="$store.auth.formType === 'signup'">
       <form @submit.prevent="handleSubmit">
-        <h2 class="text-2xl font-bold mb-6 text-center">Sign Up</h2>
+        <h2 class="text-2xl font-bold mb-6 text-center">Зарегистрируйся</h2>
         <div class="space-y-4">
-          <Input type="text" name="firstName" placeholder="First Name" :value="formData.firstName" required />
-          <Input type="text" name="lastName" placeholder="Last Name" :value="formData.lastName" required />
+          <Input type="text" name="firstName" placeholder="Имя" :value="formData.firstName" required />
+          <Input type="text" name="lastName" placeholder="Фамилия" :value="formData.lastName" required />
           <Input type="email" name="email" placeholder="Email" :value="formData.email" required />
           <Input type="password" name="password" placeholder="Password" :value="formData.password" required />
-          <Input type="password" name="confirmPassword" placeholder="Confirm Password" :value="formData.confirmPassword" required />
+          <Input type="password" name="confirmPassword" placeholder="Подтвердить Password" :value="formData.confirmPassword" required />
         </div>
         <div class="mt-6">
           <Button type="submit" class="w-full" :disabled="isLoading">
-            <span x-show="!isLoading">Sign Up</span>
-            <span x-show="isLoading">Loading...</span>
+            <span x-show="!isLoading">Регистрация</span>
+            <span x-show="isLoading">Загрузка...</span>
           </Button>
         </div>
         <p class="text-sm text-center mt-4">
-          Already have an account? <button type="button" @click="$store.auth.switchTo('login')" class="text-primary hover:underline">Login</button>
+          Уже как дома? <button type="button" @click="$store.auth.switchTo('login')" class="text-primary hover:underline cursor-pointer">Заходи</button>
         </p>
       </form>
     </template>
