@@ -125,9 +125,13 @@ export default function articleCreatorLogic(initialState = {}) {
         ? ""
         : normalizedCategory;
     copy.isHotContent = isHotContentLegacy;
-    copy.contentBlocks = Array.isArray(copy.content)
+    const blocks = Array.isArray(copy.content)
       ? copy.content
-      : [];
+      : Array.isArray(copy.contentBlocks)
+        ? copy.contentBlocks
+        : [];
+    copy.contentBlocks = blocks;
+    copy.content = blocks;
     copy.tags = normalizeTags(copy.tags, copy.category);
     copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
     copy.imageCaption = copy.imageCaption ?? "";
@@ -264,35 +268,37 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     init() {
-      // The `isPreview` flag is passed from the page component
-      if (this.isPreview) {
-        // On the preview page, always load from storage, replacing the initial object
-        const previewData = localStorage.getItem("articlePreview");
-        if (previewData) {
-          const normalized = normalizeLoadedArticle(JSON.parse(previewData));
-          if (normalized) {
-            this.article = normalized;
+      type PreviewState = {
+        article?: unknown;
+        articleId?: string | null;
+        isEditMode?: boolean;
+      };
+      let previewState: PreviewState | null = null;
+
+      if (typeof window !== "undefined") {
+        try {
+          const stored = window.localStorage?.getItem("articlePreview");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && typeof parsed === "object") {
+              if ("article" in parsed || "articleId" in parsed || "isEditMode" in parsed) {
+                previewState = parsed as PreviewState;
+              } else {
+                previewState = { article: parsed } as PreviewState;
+              }
+            } else {
+              previewState = { article: parsed } as PreviewState;
+            }
           }
+        } catch (error) {
+          console.error("Failed to parse preview draft:", error);
         }
-      } else {
-              if (this.isEditMode) {
-                // On the create page, merge if a draft exists to preserve the initial structure
-                const draftData = localStorage.getItem("articlePreview");
-                if (draftData) {
-                  const normalized = normalizeLoadedArticle(JSON.parse(draftData));
-                  if (normalized) {
-                    Object.assign(this.article, normalized);
-                  }
-                }
-              }      }
-      this.article.tags = this.article.tags ?? [];
-      this.article.techTags = this.article.techTags ?? [];
-      this.article.isHotContent = Boolean(this.article.isHotContent);
+      }
 
       if (initialArticle) {
-        const normalized = normalizeLoadedArticle(initialArticle);
-        if (normalized) {
-          this.article = normalized;
+        const normalizedInitial = normalizeLoadedArticle(initialArticle);
+        if (normalizedInitial) {
+          this.article = normalizedInitial;
         }
       }
 
@@ -306,6 +312,55 @@ export default function articleCreatorLogic(initialState = {}) {
       if (onSaveRedirect) {
         this.onSaveRedirect = onSaveRedirect;
       }
+
+      const shouldApplyPreview = (() => {
+        if (!previewState?.article) {
+          return false;
+        }
+        if (this.isPreview) {
+          return true;
+        }
+        const previewId =
+          typeof previewState.articleId === "string" && previewState.articleId
+            ? previewState.articleId
+            : null;
+        const isPreviewEdit = Boolean(previewState?.isEditMode);
+        const isSameEdit =
+          this.isEditMode && previewId !== null && previewId === this.articleId;
+        const isCreateDraft =
+          !this.isEditMode && !previewId && !isPreviewEdit;
+        return isSameEdit || isCreateDraft;
+      })();
+
+      if (shouldApplyPreview && previewState?.article) {
+        const normalizedPreview = normalizeLoadedArticle(previewState.article);
+        if (normalizedPreview) {
+          if (this.isPreview) {
+            this.article = normalizedPreview;
+            if (typeof previewState.articleId === "string" && previewState.articleId) {
+              this.articleId = previewState.articleId;
+            }
+            if (typeof previewState.isEditMode === "boolean") {
+              this.isEditMode = previewState.isEditMode;
+            }
+          } else {
+            Object.assign(this.article, normalizedPreview);
+          }
+        }
+      } else if (previewState) {
+        try {
+          window.localStorage?.removeItem("articlePreview");
+        } catch (error) {
+          console.warn("Failed to cleanup mismatched preview draft:", error);
+        }
+      }
+
+      this.article.tags = this.article.tags ?? [];
+      this.article.techTags = this.article.techTags ?? [];
+      this.article.isHotContent = Boolean(this.article.isHotContent);
+      this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
+        ? this.article.contentBlocks
+        : [];
     },
 
     // --- Title editing methods (unchanged) ---
@@ -454,13 +509,22 @@ export default function articleCreatorLogic(initialState = {}) {
 
     // For Preview Page
     returnToEdit() {
-      window.location.href = "/article/create";
+      const target =
+        this.isEditMode && this.articleId
+          ? `/dashboard/article/${this.articleId}/edit`
+          : "/dashboard/article/create";
+      window.location.href = target;
     },
 
     // --- Preview and Save methods ---
     previewArticle() {
-      localStorage.setItem("articlePreview", JSON.stringify(this.article));
-      window.location.href = "/article/preview";
+      const previewState = {
+        article: this.article,
+        articleId: this.articleId,
+        isEditMode: this.isEditMode,
+      };
+      localStorage.setItem("articlePreview", JSON.stringify(previewState));
+      window.location.href = "/dashboard/article/preview";
     },
 
     async saveArticle() {

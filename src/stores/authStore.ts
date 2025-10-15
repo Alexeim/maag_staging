@@ -14,6 +14,7 @@ interface AuthStore {
   profile: UserProfile | null;
   isLoggedIn: boolean;
   isLoading: boolean; // To know when Firebase is checking the auth state
+  isProfileLoaded: boolean; // To know when the backend profile is fetched
   readonly initials: string;
   openAuthModal(): void;
   closeAuthModal(): void;
@@ -29,6 +30,7 @@ export const authStore: AuthStore = {
   profile: null,
   isLoggedIn: false,
   isLoading: true,
+  isProfileLoaded: false,
   
   get initials() {
     if (this.profile) {
@@ -54,9 +56,20 @@ export const authStore: AuthStore = {
 
   setUser(user, profile = null) {
     this.user = user;
-    this.profile = profile;
     this.isLoggedIn = !!user;
-    this.isLoading = false;
+    this.isLoading = false; // Firebase auth check is done
+    
+    if (profile) {
+      this.profile = profile;
+      this.isProfileLoaded = true; // Backend profile is now loaded
+    } else if (user) {
+      // User is logged in, but we don't have profile data yet.
+      // This can happen on initial page load.
+      this.isProfileLoaded = false;
+    } else {
+      // User is logged out.
+      this.isProfileLoaded = false;
+    }
   },
 
   clearUser() {
@@ -64,5 +77,6 @@ export const authStore: AuthStore = {
     this.profile = null;
     this.isLoggedIn = false;
     this.isLoading = false;
+    this.isProfileLoaded = false;
   }
 };

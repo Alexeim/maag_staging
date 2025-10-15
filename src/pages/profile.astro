@@ -95,16 +95,19 @@ import Layout from "../Layouts/Layout.astro";
 
           <!-- Account Form -->
           <div class="space-y-10 w-full max-w-lg" x-data="$lazy('profile')">
-            <!-- Show loading or logged out message -->
+            <!-- Show loading states -->
             <template x-if="$store.auth.isLoading">
-              <p>Loading profile...</p>
+              <p>Проверка сессии...</p>
             </template>
             <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
-              <p>Please log in to view your profile.</p>
+              <p>Пожалуйста, войдите, чтобы увидеть свой профиль.</p>
+            </template>
+            <template x-if="!$store.auth.isLoading && $store.auth.isLoggedIn && !$store.auth.isProfileLoaded">
+              <p>Загрузка данных профиля...</p>
             </template>
 
-            <!-- Show form only when logged in -->
-            <template x-if="!$store.auth.isLoading && $store.auth.isLoggedIn">
+            <!-- Show form only when logged in AND profile is loaded -->
+            <template x-if="$store.auth.isProfileLoaded">
               <div>
                 <!-- Email Field (Read-only) -->
                 <div class="space-y-4 mb-10">

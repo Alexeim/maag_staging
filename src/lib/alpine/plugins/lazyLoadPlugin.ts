@@ -8,7 +8,6 @@ const components: Record<string, () => Promise<any>> = {
   calendar: () => import('@/components/calendar/logic'),
   articleCreator: () => import('@/components/article/creatorLogic'),
   authModal: () => import('@/components/auth/authLogic'),
-  profile: () => import('@/components/profile/profileLogic'),
 };
 
 export default function(Alpine: Alpine) {
@@ -25,10 +24,18 @@ export default function(Alpine: Alpine) {
         return importer()
           .then(module => {
             const data = module.default(initialState);
+            
+            // Extract the loaded module's init function, if it exists
+            const newInit = data.init;
+            
+            // Remove init from the data object to avoid conflicts/recursion
+            delete data.init;
+
             Object.assign(this, data);
             
-            if (typeof this.init === 'function') {
-              this.init.call(this);
+            // If the loaded module had an init, call it now
+            if (typeof newInit === 'function') {
+              newInit.call(this);
             }
 
             this.$nextTick(() => {

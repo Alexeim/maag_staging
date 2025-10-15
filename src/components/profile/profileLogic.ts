@@ -12,7 +12,9 @@ export default () => ({
   },
 
   init() {
-    // Populate form with data from the auth store when component initializes
+    // Populate form with data from the auth store when component initializes.
+    // This is now safe because the parent Astro component waits for `isProfileLoaded`
+    // to be true before rendering the component that uses this logic.
     const authStore = Alpine.store('auth') as AuthStore;
     if (authStore.profile) {
       this.form.firstName = authStore.profile.firstName || '';
