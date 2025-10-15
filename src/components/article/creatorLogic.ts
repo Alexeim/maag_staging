@@ -125,8 +125,8 @@ export default function articleCreatorLogic(initialState = {}) {
         ? ""
         : normalizedCategory;
     copy.isHotContent = isHotContentLegacy;
-    copy.contentBlocks = Array.isArray(copy.contentBlocks)
-      ? copy.contentBlocks
+    copy.contentBlocks = Array.isArray(copy.content)
+      ? copy.content
       : [];
     copy.tags = normalizeTags(copy.tags, copy.category);
     copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
@@ -292,7 +292,7 @@ export default function articleCreatorLogic(initialState = {}) {
       if (initialArticle) {
         const normalized = normalizeLoadedArticle(initialArticle);
         if (normalized) {
-          Object.assign(this.article, normalized);
+          this.article = normalized;
         }
       }
 
