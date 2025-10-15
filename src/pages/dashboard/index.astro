@@ -1,0 +1,156 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import { articlesApi } from "@/lib/api/api";
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+
+const normalizeDate = (value: any) => {
+  if (!value) {
+    return null;
+  }
+  if (typeof value === "string") {
+    const cleaned = value
+      .replace(/\u202f/g, " ")
+      .replace(/\s+at\s+/i, " ")
+      .replace(/UTC([+-]\d{1,2})/, "GMT$1");
+    const parsed = new Date(cleaned);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed;
+    }
+    const fallback = new Date(value);
+    return Number.isNaN(fallback.getTime()) ? null : fallback;
+  }
+  if (typeof value === "number") {
+    return new Date(value);
+  }
+  if (typeof value === "object") {
+    if (typeof value.toDate === "function") {
+      return value.toDate();
+    }
+    const seconds =
+      "seconds" in value
+        ? value.seconds
+        : "_seconds" in value
+          ? value._seconds
+          : null;
+    if (seconds !== null) {
+      const nanos =
+        "nanoseconds" in value
+          ? value.nanoseconds
+          : "_nanoseconds" in value
+            ? value._nanoseconds
+            : 0;
+      const millis = seconds * 1000 + nanos / 1_000_000;
+      return new Date(millis);
+    }
+  }
+  return null;
+};
+
+let articlesRaw = [] as Awaited<ReturnType<typeof articlesApi.list>>;
+try {
+  articlesRaw = await articlesApi.list();
+} catch (error) {
+  console.error("Failed to load articles", error);
+}
+
+const articles = articlesRaw.map((article) => {
+  const createdAtDate = normalizeDate(article.createdAt);
+  const updatedAtDate = normalizeDate((article as any).updatedAt);
+  return {
+    ...article,
+    createdAtFormatted: createdAtDate
+      ? createdAtDate.toLocaleDateString("ru-RU", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "—",
+    updatedAtFormatted: updatedAtDate
+      ? updatedAtDate.toLocaleDateString("ru-RU", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : null,
+  };
+});
+---
+
+<DashboardLayout title="Управление статьями" active="articles">
+  <div 
+    class="bg-base-100 border border-base-300 rounded-xl p-6"
+    x-data={`$lazy('articleList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
+  >
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-semibold">Статьи</h2>
+        <p class="text-sm text-base-content/70 mt-1">
+          Управляй опубликованными и черновыми материалами.
+        </p>
+      </div>
+      <a href="/dashboard/article/create" class="btn btn-primary">
+        Создать статью
+      </a>
+    </div>
+
+    {articles.length > 0 ? (
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr class="text-xs uppercase text-base-content/60">
+              <th scope="col">Заголовок</th>
+              <th scope="col">Категория / тег</th>
+              <th scope="col" class="hidden md:table-cell">Создана</th>
+              <th scope="col" class="text-right">Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {articles.map((article) => {
+              const categoryLabel = article.isHotContent
+                ? "Самое Читаемое"
+                : article.category || "—";
+              const tagsLabel = Array.isArray(article.tags)
+                ? article.tags.join(", ")
+                : "—";
+              return (
+                <tr class="hover">
+                  <td class="max-w-sm">
+                    <div class="font-semibold truncate" title={article.title}>{article.title}</div>
+                    <div class="text-xs text-base-content/60 mt-1 truncate" title={article.id}>ID: {article.id}</div>
+                  </td>
+                  <td class="align-middle">
+                    <div class="flex flex-col gap-1">
+                      <span class="badge badge-outline w-fit">{categoryLabel}</span>
+                      <span class="text-xs text-base-content/70">
+                        Теги: {tagsLabel}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="hidden md:table-cell align-middle text-sm text-base-content/70">{article.createdAtFormatted}</td>
+                  <td class="align-middle text-right">
+                    <div class="flex justify-end gap-2">
+                      <a href={`/dashboard/article/${article.id}/edit`} class="btn btn-sm btn-outline">
+                        Редактировать
+                      </a>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-error text-error-content"
+                        @click={`handleDeleteClick('${article.id}', '${article.title.replace(/'/g, "\\'")}')`}
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <div class="p-8 text-center text-base-content/70">
+        <p>Пока нет статей. Создай первую, чтобы начать.</p>
+      </div>
+    )}
+  </div>
+</DashboardLayout>

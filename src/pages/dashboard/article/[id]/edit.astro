@@ -1,0 +1,46 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import ArticleComposer from "@/components/dashboard/ArticleComposer.astro";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+import { articlesApi } from "@/lib/api/api";
+
+const { id } = Astro.params;
+
+let article = null;
+try {
+  article = await articlesApi.getById(id);
+} catch (error) {
+  console.error("Failed to fetch article", error);
+}
+
+const articleCreatorState = JSON.stringify({
+  categoryTags: {
+    culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
+  },
+  initialArticle: article,
+  articleId: id,
+  isEditMode: true,
+  onSaveRedirect: "/dashboard",
+});
+---
+
+<DashboardLayout title={`Редактировать статью`} active="articles">
+  {article ? (
+    <ArticleComposer
+      heading={`Редактировать статью`}
+      submitLabel="Обновить статью"
+      articleCreatorState={articleCreatorState}
+      cancelHref="/dashboard"
+      deleteArticleId={id}
+      deleteRedirect="/dashboard"
+    />
+  ) : (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Статья не найдена</h2>
+      <p class="text-base-content/70">Возможно, материал был удалён или указан неверный идентификатор.</p>
+      <a href="/dashboard" class="btn btn-primary mt-4">Вернуться в дашборд</a>
+    </div>
+  )}
+</DashboardLayout>

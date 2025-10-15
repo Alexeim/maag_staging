@@ -160,6 +160,19 @@ export const articlesApi = {
   getById(id: string, token?: string) {
     return request<ArticleResponse>(`/api/articles/${id}`, { token });
   },
+  update(id: string, payload: ArticlePayload, token?: string) {
+    return request<ArticleResponse>(`/api/articles/${id}`, {
+      method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+  delete(id: string, token?: string) {
+    return request<void>(`/api/articles/${id}`, {
+      method: "DELETE",
+      token,
+    });
+  },
 };
 
 export interface UpdateUserProfilePayload {

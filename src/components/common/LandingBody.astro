@@ -76,7 +76,9 @@ let hotContentArticles: any[] = [];
 try {
   const articles = await articlesApi.list();
   cultureArticles = articles.filter(
-    (article) => normalizeCategory(article.category) === CULTURE_CATEGORY_KEY
+    (article) => 
+      normalizeCategory(article.category) === CULTURE_CATEGORY_KEY && 
+      !isHotContentArticle(article)
   );
   cultureHero = cultureArticles[0] ?? null;
   cultureCardArticles = cultureArticles.slice(1, 4);

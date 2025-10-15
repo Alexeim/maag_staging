@@ -15,9 +15,17 @@ const createBlock = (type, data) => ({ type, ...data });
 export default function articleCreatorLogic(initialState = {}) {
   const {
     categoryTags = {},
+    initialArticle = null,
+    articleId = null,
+    isEditMode = false,
+    onSaveRedirect = null,
     ...restInitialState
   } = initialState as {
     categoryTags?: Record<string, Array<{ title: string; value: string }>>;
+    initialArticle?: Record<string, unknown> | null;
+    articleId?: string | null;
+    isEditMode?: boolean;
+    onSaveRedirect?: string | null;
   };
 
   const categoryLabels: Record<string, string> = {
@@ -104,6 +112,28 @@ export default function articleCreatorLogic(initialState = {}) {
     return normalized;
   };
 
+  const normalizeLoadedArticle = (data: any) => {
+    if (!data || typeof data !== "object") {
+      return null;
+    }
+    const copy = JSON.parse(JSON.stringify(data));
+    const normalizedCategory = normalizeCategory(copy.category);
+    const isHotContentLegacy =
+      Boolean(copy.isHotContent) || normalizedCategory === "hotContent";
+    copy.category =
+      isHotContentLegacy && normalizedCategory === "hotContent"
+        ? ""
+        : normalizedCategory;
+    copy.isHotContent = isHotContentLegacy;
+    copy.contentBlocks = Array.isArray(copy.contentBlocks)
+      ? copy.contentBlocks
+      : [];
+    copy.tags = normalizeTags(copy.tags, copy.category);
+    copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
+    copy.imageCaption = copy.imageCaption ?? "";
+    return copy;
+  };
+
   return {
     article: {
       title: "",
@@ -135,6 +165,9 @@ export default function articleCreatorLogic(initialState = {}) {
     uploadProgress: 0,
 
     categoryTags,
+    articleId,
+    isEditMode,
+    onSaveRedirect,
     newTagInput: "",
 
     categoryLabels,
@@ -236,48 +269,43 @@ export default function articleCreatorLogic(initialState = {}) {
         // On the preview page, always load from storage, replacing the initial object
         const previewData = localStorage.getItem("articlePreview");
         if (previewData) {
-          const parsedData = JSON.parse(previewData);
-          const normalizedCategory = normalizeCategory(parsedData.category);
-          const isHotContentLegacy =
-            Boolean(parsedData.isHotContent) ||
-            normalizedCategory === "hotContent";
-          parsedData.category =
-            isHotContentLegacy && normalizedCategory === "hotContent"
-              ? ""
-              : normalizedCategory;
-          parsedData.isHotContent = isHotContentLegacy;
-          parsedData.tags = normalizeTags(parsedData.tags, parsedData.category);
-          parsedData.techTags = normalizeTechTags(
-            parsedData.techTags ?? parsedData.customTags,
-          );
-          this.article = parsedData;
+          const normalized = normalizeLoadedArticle(JSON.parse(previewData));
+          if (normalized) {
+            this.article = normalized;
+          }
         }
       } else {
-        // On the create page, merge if a draft exists to preserve the initial structure
-        const draftData = localStorage.getItem("articlePreview");
-        if (draftData) {
-          const parsedData = JSON.parse(draftData);
-          // Ensure contentBlocks is always an array, even in older drafts
-          parsedData.contentBlocks = parsedData.contentBlocks || [];
-          const normalizedCategory = normalizeCategory(parsedData.category);
-          const isHotContentLegacy =
-            Boolean(parsedData.isHotContent) ||
-            normalizedCategory === "hotContent";
-          parsedData.category =
-            isHotContentLegacy && normalizedCategory === "hotContent"
-              ? ""
-              : normalizedCategory;
-          parsedData.isHotContent = isHotContentLegacy;
-          parsedData.tags = normalizeTags(parsedData.tags, parsedData.category);
-          parsedData.techTags = normalizeTechTags(
-            parsedData.techTags ?? parsedData.customTags,
-          );
-          Object.assign(this.article, parsedData);
-        }
-      }
+              if (this.isEditMode) {
+                // On the create page, merge if a draft exists to preserve the initial structure
+                const draftData = localStorage.getItem("articlePreview");
+                if (draftData) {
+                  const normalized = normalizeLoadedArticle(JSON.parse(draftData));
+                  if (normalized) {
+                    Object.assign(this.article, normalized);
+                  }
+                }
+              }      }
       this.article.tags = this.article.tags ?? [];
       this.article.techTags = this.article.techTags ?? [];
       this.article.isHotContent = Boolean(this.article.isHotContent);
+
+      if (initialArticle) {
+        const normalized = normalizeLoadedArticle(initialArticle);
+        if (normalized) {
+          Object.assign(this.article, normalized);
+        }
+      }
+
+      if (articleId) {
+        this.articleId = articleId;
+        this.isEditMode = true;
+      }
+      if (typeof isEditMode === "boolean") {
+        this.isEditMode = isEditMode;
+      }
+      if (onSaveRedirect) {
+        this.onSaveRedirect = onSaveRedirect;
+      }
     },
 
     // --- Title editing methods (unchanged) ---
@@ -411,8 +439,16 @@ export default function articleCreatorLogic(initialState = {}) {
 
     // Deletes a block
     deleteBlock(index) {
-      if (confirm("Ты точно хочешь удалить этот блок?")) {
+      const removeBlock = () => {
         this.article.contentBlocks.splice(index, 1);
+      };
+
+      const uiStore = window.Alpine?.store?.("ui");
+      if (uiStore?.showConfirmation) {
+        uiStore.showConfirmation("Ты точно хочешь удалить этот блок?", removeBlock);
+      } else {
+        console.warn('UI store недоступен, удаляем блок без подтверждения');
+        removeBlock();
       }
     },
 
@@ -440,7 +476,7 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.tags = normalizeTags(this.article.tags, this.article.category);
       this.article.techTags = normalizeTechTags(this.article.techTags);
 
-      if (!this.article.category) {
+      if (!this.article.category && !this.article.isHotContent) {
         window.Alpine.store("ui").showToast(
           "Выбери категорию перед сохранением — это обязательное поле.",
           "error",
@@ -472,8 +508,7 @@ export default function articleCreatorLogic(initialState = {}) {
 
       try {
         const tagsForDb = this.article.tags.map((tag) => this.getTagLabel(tag));
-
-        const result = await articlesApi.create({
+        const payload = {
           title: this.article.title,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
@@ -483,11 +518,20 @@ export default function articleCreatorLogic(initialState = {}) {
           tags: tagsForDb,
           techTags: this.article.techTags,
           isHotContent: this.article.isHotContent,
-        });
+        };
 
-        window.Alpine.store("ui").showToast("Статья успешно создана! Молодец!");
-        localStorage.removeItem("articlePreview");
-        window.location.href = `/article/${result.id}`;
+        if (this.isEditMode && this.articleId) {
+          await articlesApi.update(this.articleId, payload);
+          window.Alpine.store("ui").showToast("Статья успешно обновлена!");
+          localStorage.removeItem("articlePreview");
+          const redirectTo = this.onSaveRedirect || `/dashboard/article/${this.articleId}/edit`;
+          window.location.href = redirectTo;
+        } else {
+          const result = await articlesApi.create(payload);
+          window.Alpine.store("ui").showToast("Статья успешно создана! Молодец!");
+          localStorage.removeItem("articlePreview");
+          window.location.href = `/article/${result.id}`;
+        }
       } catch (error) {
         console.error("Проблемка сохранения:", error);
         const message =
@@ -499,5 +543,37 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     ...restInitialState,
+
+    deleteArticle(redirectUrl) {
+      if (!this.articleId) return;
+
+      const performDelete = async () => {
+        try {
+          const response = await articlesApi.del(this.articleId);
+          if (response.status !== 200 && response.status !== 204) {
+            throw new Error(`Deletion failed with status: ${response.status}`);
+          }
+          window.Alpine.store("ui").showToast("Статья удалена");
+          setTimeout(() => {
+            window.location.href = redirectUrl || '/dashboard';
+          }, 1500);
+        } catch (error) {
+          console.error(error);
+          window.Alpine.store("ui").showToast("Не удалось удалить статью.", "error");
+        }
+      };
+
+      const uiStore = window.Alpine?.store?.("ui");
+      if (uiStore?.showConfirmation) {
+        uiStore.showConfirmation(
+          `Удалить статью «${this.article.title}»? Это действие необратимо.`,
+          performDelete
+        );
+      } else {
+        if (confirm("Вы уверены, что хотите удалить эту статью?")) {
+          performDelete();
+        }
+      }
+    },
   };
 }

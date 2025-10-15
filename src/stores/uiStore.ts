@@ -1,3 +1,4 @@
+import type { Alpine } from 'alpinejs';
 
 interface Toast {
   message: string;
@@ -11,7 +12,7 @@ interface ConfirmationModal {
   onConfirm: () => void;
 }
 
-interface UiStore {
+export interface UiStore {
   toast: Toast;
   confirmation: ConfirmationModal;
   showToast(message: string, type?: 'success' | 'error'): void;
@@ -19,36 +20,38 @@ interface UiStore {
   hideConfirmation(): void;
 }
 
-export const uiStore: UiStore = {
-  toast: {
-    message: '',
-    type: 'success',
-    show: false,
-  },
-  confirmation: {
-    message: '',
-    show: false,
-    onConfirm: () => {},
-  },
+export function createUiStore(): UiStore {
+  return {
+    toast: {
+      message: '',
+      type: 'success',
+      show: false,
+    },
+    confirmation: {
+      message: '',
+      show: false,
+      onConfirm: () => {},
+    },
 
-  showToast(message, type = 'success') {
-    this.toast.message = message;
-    this.toast.type = type;
-    this.toast.show = true;
-    setTimeout(() => {
-      this.toast.show = false;
-    }, 3000);
-  },
+    showToast(message, type = 'success') {
+      this.toast.message = message;
+      this.toast.type = type;
+      this.toast.show = true;
+      setTimeout(() => {
+        this.toast.show = false;
+      }, 3000);
+    },
 
-  showConfirmation(message, onConfirm) {
-    this.confirmation.message = message;
-    this.confirmation.onConfirm = onConfirm;
-    this.confirmation.show = true;
-  },
+    showConfirmation(message, onConfirm) {
+      this.confirmation.message = message;
+      this.confirmation.onConfirm = onConfirm;
+      this.confirmation.show = true;
+    },
 
-  hideConfirmation() {
-    this.confirmation.show = false;
-    this.confirmation.message = '';
-    this.confirmation.onConfirm = () => {};
-  },
-};
+    hideConfirmation() {
+      this.confirmation.show = false;
+      this.confirmation.message = '';
+      this.confirmation.onConfirm = () => {};
+    },
+  };
+}

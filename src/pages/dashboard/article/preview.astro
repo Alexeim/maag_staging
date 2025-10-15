@@ -1,0 +1,95 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import ArticleHeader from "@/components/article/ArticleHeader.astro";
+import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import SocialShare from "@/components/article/SocialShare.astro";
+import ArticleImage from "@/components/article/ArticleImage.astro";
+import ArticleBody from "@/components/article/ArticleBody.astro";
+import Button from "@/components/common/Button.astro";
+import articleData from "@/content/articlePage/RU/Article.json";
+---
+
+<DashboardLayout title="Предпросмотр статьи" active="create-article">
+  <div
+    id="preview-container"
+    class="max-w-[1512px] mx-auto"
+    x-data="$lazy('articleCreator', { isPreview: true })"
+  >
+    <div class="bg-base-100 border border-base-300 rounded-xl shadow-sm">
+      <div class="px-6 py-6 border-b border-base-300 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold">Предпросмотр статьи</h1>
+          <p class="text-sm text-base-content/70 mt-1">
+            Используй кнопки внизу, чтобы вернуться к редактированию или сохранить материал.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <Button variant="secondary" @click="returnToEdit()">Вернуться к редактированию</Button>
+          <Button variant="primary" @click="saveArticle()">Сохранить статью</Button>
+        </div>
+      </div>
+
+      <main class="bg-base-100">
+        <div class="pt-16 pb-20 flex flex-col items-center gap-16">
+          <div class="flex flex-col gap-8 max-w-[825px] w-full px-6">
+            <div>
+              <p 
+                class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter'] mb-2" 
+                x-text="getCategoryLabel(article.category)">
+              </p>
+              <ArticleHeader :title="article.title" />
+            </div>
+            <ArticleAuthor
+              name={articleData.author.name}
+              avatarUrl={articleData.author.avatarUrl}
+            />
+            <SocialShare readTime={5} />
+          </div>
+
+          <template x-if="article.imageUrl">
+            <figure class="w-full max-w-[1200px] px-6">
+              <img
+                :src="article.imageUrl"
+                alt="Article Image Preview"
+                class="w-full h-auto rounded-lg shadow-lg"
+              />
+              <figcaption
+                x-show="article.imageCaption"
+                x-text="article.imageCaption"
+                class="text-center text-sm text-base-content/60 mt-2"
+              ></figcaption>
+            </figure>
+          </template>
+        </div>
+
+        <div class="max-w-[1400px] mx-auto px-6 pb-16">
+          <div class="prose lg:prose-xl max-w-[825px] mx-auto">
+            <template x-for="block in article.contentBlocks" :key="block.type + Math.random()">
+              <div class="mb-4">
+                <p
+                  :class="{
+                    'text-lg': block.type === 'paragraph',
+                    'text-xl first-letter:text-4xl first-letter:font-bold': block.type === 'first-paragraph',
+                    'text-4xl font-bold': block.type === 'h1',
+                    'text-3xl font-bold': block.type === 'h2',
+                    'text-2xl font-bold': block.type === 'h3',
+                    'text-2xl italic border-l-4 pl-4 my-4': block.type === 'quote'
+                  }"
+                  x-text="block.text"
+                  x-show="block.text"
+                ></p>
+
+                <template x-if="block.type === 'image'">
+                  <figure>
+                    <img :src="block.url" alt="Содержимое статьи" class="rounded-md w-full">
+                    <figcaption class="text-center text-sm text-base-content/60 mt-2" x-text="block.caption"></figcaption>
+                  </figure>
+                </template>
+              </div>
+            </template>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</DashboardLayout>

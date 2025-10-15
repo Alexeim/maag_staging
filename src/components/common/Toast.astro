@@ -8,10 +8,7 @@
   x-transition:leave-start="opacity-100 transform translate-y-0"
   x-transition:leave-end="opacity-0 transform translate-y-2"
   class="fixed bottom-5 right-5 z-[1000] p-4 rounded-md shadow-lg text-white"
-  :class="{
-    'bg-success': $store.ui.toast.type === 'success',
-    'bg-error': $store.ui.toast.type === 'error'
-  }"
+  :class="{ 'bg-success': $store.ui.toast.type === 'success', 'bg-error': $store.ui.toast.type === 'error' }"
   style="display: none;"
   x-text="$store.ui.toast.message"
 >

@@ -43,7 +43,7 @@ const {
     <ViewTransitions />
     <title>{title}</title>
   </head>
-  <body class="bg-base-200" x-data>
+  <body class="bg-base-200" x-data="$lazy('layout')">
     <Header
       variant={navbarVariant}
       cultureText={navbarContent.items[0].label}
@@ -73,7 +73,7 @@ const {
       </ul>
 
       <!-- Bottom Section -->
-      <div class="flex flex-col gap-7" x-data>
+      <div class="flex flex-col gap-7" x-data="$lazy('navbar')">
         <!-- Loading State -->
         <template x-if="$store.auth.isLoading">
           <button class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-inter text-[14px] w-full" disabled>...</button>
@@ -88,7 +88,7 @@ const {
             <a href="/profile" class="flex items-center justify-center w-12 h-12 bg-primary text-primary-content rounded-full font-bold text-xl hover:drop-shadow-lg transition-shadow">
               <div x-text="$store.auth.initials"></div>
             </a>
-            <button @click.prevent="signOut(auth); $store.navbar.close()" class="bg-transparent text-base-content/70 hover:text-base-content text-center font-inter text-[14px] w-full">Выйти</button>
+            <button @click.prevent="handleSignOut(); $store.navbar.close()" class="bg-transparent text-base-content/70 hover:text-base-content text-center font-inter text-[14px] w-full">Выйти</button>
           </div>
         </template>
 
@@ -104,21 +104,5 @@ const {
     <AuthModal />
     <Toast />
     <ConfirmationModal />
-
-    <script>
-      import { signOut } from 'firebase/auth';
-      import { auth } from '@/lib/firebase/client';
-      
-      // Make functions available to Alpine
-      window.signOut = signOut;
-      window.auth = auth;
-
-      // Close mobile menu on page navigation
-      document.addEventListener('astro:after-swap', () => {
-        if (window.Alpine && window.Alpine.store('navbar')) {
-          window.Alpine.store('navbar').close();
-        }
-      });
-    </script>
   </body>
 </html>

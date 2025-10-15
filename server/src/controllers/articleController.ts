@@ -136,3 +136,86 @@ export const getArticleById = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Server error while getting article' });
     }
 };
+
+/**
+ * @description Update an article
+ * @route PUT /api/articles/:id
+ */
+export const updateArticle = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const articleDoc = await articlesCollection.doc(id).get();
+
+    if (!articleDoc.exists) {
+      return res.status(404).json({ message: 'Article not found' });
+    }
+
+    const {
+      title,
+      content,
+      imageUrl,
+      imageCaption,
+      authorId,
+      category,
+      tags = [],
+      techTags = [],
+      isHotContent = false,
+    } = req.body;
+
+    if (!title || !content || !authorId) {
+      return res.status(400).json({ message: 'Title, content, and authorId are required' });
+    }
+
+    const normalizedTags = Array.isArray(tags)
+      ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
+      : [];
+    const normalizedTechTags = Array.isArray(techTags)
+      ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
+      : [];
+    const legacyHotContent =
+      typeof category === 'string' && category.trim() === 'hotContent';
+    const persistedCategory = legacyHotContent ? '' : category;
+
+    const updatedArticle = {
+      title,
+      authorId,
+      content,
+      imageUrl,
+      imageCaption,
+      category: persistedCategory,
+      tags: normalizedTags,
+      techTags: normalizedTechTags,
+      isHotContent: Boolean(isHotContent) || legacyHotContent,
+      updatedAt: new Date(),
+    };
+
+    await articlesCollection.doc(id).update(updatedArticle);
+
+    res.status(200).json({ id, ...articleDoc.data(), ...updatedArticle });
+  } catch (error) {
+    console.error('Error updating article:', error);
+    res.status(500).json({ message: 'Server error while updating article' });
+  }
+};
+
+/**
+ * @description Delete an article
+ * @route DELETE /api/articles/:id
+ */
+export const deleteArticle = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const articleDoc = await articlesCollection.doc(id).get();
+
+    if (!articleDoc.exists) {
+      return res.status(404).json({ message: 'Article not found' });
+    }
+
+    await articlesCollection.doc(id).delete();
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting article:', error);
+    res.status(500).json({ message: 'Server error while deleting article' });
+  }
+};

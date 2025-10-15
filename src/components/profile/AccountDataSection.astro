@@ -14,7 +14,7 @@
   </div>
 
   <!-- Account Form -->
-  <div class="space-y-10 w-full max-w-lg" x-data="profileForm()">
+  <div class="space-y-10 w-full max-w-lg" x-data="$lazy('profile')">
     <!-- Email Field -->
     <div class="space-y-4">
       <div class="space-y-4">
@@ -26,7 +26,7 @@
         <div class="bg-base-100 border border-neutral-200 rounded-lg p-2">
           <input
             type="email"
-            value="blabla@gmail.com"
+            x-model="$store.auth.profile.email"
             readonly
             class="w-full bg-transparent text-xs font-inter text-neutral-400 outline-none"
           />
@@ -53,16 +53,14 @@
               class="w-full bg-transparent text-xs font-inter text-neutral-400 outline-none"
             />
           </div>
-          <button class="btn-primary">
-            <span class="btn-primary-shadow"></span>
-            <span class="btn-primary-edge"></span>
-            <span class="btn-primary-front">Поменять пароль</span>
+          <button class="btn btn-outline btn-primary" @click.prevent="">
+            Поменять пароль
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Name Field -->
+    <!-- Name Fields -->
     <div class="space-y-4">
       <div class="space-y-4">
         <label
@@ -73,25 +71,40 @@
         <div class="bg-base-100 border border-neutral-200 rounded-lg p-2">
           <input
             type="text"
-            value="Сергей Петрович"
-            x-model="formData.name"
-            class="w-full bg-transparent text-xs font-inter text-neutral-400 outline-none"
+            placeholder="Ваше имя"
+            x-model="formData.firstName"
+            class="w-full bg-transparent text-xs font-inter text-base-content outline-none"
+          />
+        </div>
+      </div>
+      <div class="space-y-4">
+        <label
+          class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+        >
+          Фамилия
+        </label>
+        <div class="bg-base-100 border border-neutral-200 rounded-lg p-2">
+          <input
+            type="text"
+            placeholder="Ваша фамилия"
+            x-model="formData.lastName"
+            class="w-full bg-transparent text-xs font-inter text-base-content outline-none"
           />
         </div>
       </div>
     </div>
 
     <!-- Action Buttons -->
-    <div class="space-y-4">
+    <div class="space-y-4 pt-6">
       <button
-        class="w-full bg-primary text-primary-content rounded-2xl py-2 px-4 text-sm font-inter font-normal hover:bg-primary/90 transition-colors"
+        class="btn btn-primary w-full"
         @click="saveChanges()"
       >
         Сохранить изменения
       </button>
 
       <button
-        class="w-full border border-error text-error rounded-2xl py-2 px-4 text-sm font-inter font-normal hover:bg-error/5 transition-colors"
+        class="btn btn-error btn-outline w-full"
         @click="deleteAccount()"
       >
         Удалить аккаунт
@@ -99,32 +112,3 @@
     </div>
   </div>
 </div>
-
-<script>
-  function profileForm() {
-    return {
-      formData: {
-        name: "Сергей Петрович",
-        email: "blabla@gmail.com",
-      },
-
-      saveChanges() {
-        // Handle save changes
-        console.log("Saving changes:", this.formData);
-        // Add toast notification or other feedback
-      },
-
-      deleteAccount() {
-        // Handle account deletion
-        if (
-          confirm(
-            "Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить."
-          )
-        ) {
-          console.log("Deleting account");
-          // Add actual deletion logic
-        }
-      },
-    };
-  }
-</script>

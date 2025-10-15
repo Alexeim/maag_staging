@@ -1,0 +1,24 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import ArticleComposer from "@/components/dashboard/ArticleComposer.astro";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+
+const articleCreatorState = JSON.stringify({
+  categoryTags: {
+    culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
+  },
+  isEditMode: false,
+  onSaveRedirect: "/dashboard",
+});
+---
+
+<DashboardLayout title="Создать статью" active="create-article">
+  <ArticleComposer
+    heading="Создать новую статью"
+    submitLabel="Сохранить статью"
+    articleCreatorState={articleCreatorState}
+    cancelHref="/dashboard"
+  />
+</DashboardLayout>

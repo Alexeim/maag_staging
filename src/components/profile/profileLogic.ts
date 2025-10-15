@@ -1,51 +1,74 @@
 import { usersApi } from "@/lib/api/api";
-export default function profileLogic() {
-  return {
-    form: {
-      firstName: '',
-      lastName: '',
-    },
-    init() {
-      // Use a watcher to reactively populate the form when the profile loads
-      this.$watch('$store.auth.profile', (newProfile) => {
-        if (newProfile) {
-          this.form.firstName = newProfile.firstName;
-          this.form.lastName = newProfile.lastName;
-        }
-      });
-      // Initial population in case the profile is already loaded
-      if (this.$store.auth.profile) {
-        this.form.firstName = this.$store.auth.profile.firstName;
-        this.form.lastName = this.$store.auth.profile.lastName;
-      }
-    },
+import { auth } from "@/lib/firebase/client";
+import type { UiStore } from "@/stores/uiStore";
+import type { AuthStore } from "@/stores/authStore";
 
-    async saveChanges() {
-      const uid = window.Alpine.store('auth').user?.uid;
-      if (!uid) {
-        window.Alpine.store('ui').showToast('Error: Not logged in.', 'error');
-        return;
-      }
+declare const Alpine: any;
 
-      try {
-        const updatedProfile = await usersApi.update(uid, this.form);
-        window.Alpine.store('auth').setUser(window.Alpine.store('auth').user, updatedProfile);
-        window.Alpine.store('ui').showToast('Profile updated successfully!');
-      } catch (error) {
-        console.error('Failed to save changes:', error);
-        window.Alpine.store('ui').showToast('An error occurred.', 'error');
-      }
-    },
+export default () => ({
+  form: {
+    firstName: "",
+    lastName: "",
+  },
 
-    deleteAccount() {
-      window.Alpine.store('ui').showConfirmation(
-        "Are you sure you want to delete your account? This cannot be undone.",
-        () => {
-          console.log("Deleting account...");
-          // Actual deletion logic would go here
-          window.Alpine.store('ui').showToast('Account deleted (not really)!', 'error');
-        }
+  init() {
+    // Populate form with data from the auth store when component initializes
+    const authStore = Alpine.store('auth') as AuthStore;
+    if (authStore.profile) {
+      this.form.firstName = authStore.profile.firstName || '';
+      this.form.lastName = authStore.profile.lastName || '';
+    }
+  },
+
+  async saveChanges() {
+    const authStore = Alpine.store('auth') as AuthStore;
+    const uiStore = Alpine.store('ui') as UiStore;
+    
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+      uiStore?.showToast?.("Вы не авторизованы.", "error");
+      return;
+    }
+
+    try {
+      const token = await currentUser.getIdToken(true); // Force refresh for security
+      
+      const updatedProfile = await usersApi.update(
+        currentUser.uid,
+        this.form,
+        token
       );
-    },
-  };
-}
+      
+      // THIS IS THE ORIGINAL, CORRECT WAY TO UPDATE THE STORE
+      authStore.setUser(authStore.user, updatedProfile);
+
+      uiStore?.showToast?.("Изменения успешно сохранены!");
+
+    } catch (error) {
+      console.error("Failed to save profile:", error);
+      uiStore?.showToast?.("Не удалось сохранить изменения.", "error");
+    }
+  },
+
+  deleteAccount() {
+    const uiStore = Alpine.store('ui') as UiStore;
+    
+    const performDelete = () => {
+      console.log("Deleting account");
+      // Add actual deletion logic here, e.g., call an API endpoint
+      uiStore?.showToast?.("Аккаунт удалён (демо)");
+    };
+
+    const message = "Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.";
+    
+    if (uiStore?.showConfirmation) {
+      uiStore.showConfirmation(message, performDelete);
+    } else {
+      // Fallback for safety
+      if (confirm(message)) {
+        performDelete();
+      }
+    }
+  },
+});

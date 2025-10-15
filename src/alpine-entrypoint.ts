@@ -1,7 +1,7 @@
 import type { Alpine } from 'alpinejs';
 import { navbarStore } from '@/stores/navbarStore';
 import { authStore } from '@/stores/authStore';
-import { uiStore } from '@/stores/uiStore';
+import { createUiStore } from '@/stores/uiStore';
 import lazyLoadPlugin from '@/lib/alpine/plugins/lazyLoadPlugin';
 import { auth } from '@/lib/firebase/client';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -13,7 +13,7 @@ export default (Alpine: Alpine) => {
   Alpine.plugin(lazyLoadPlugin);
   Alpine.store('navbar', navbarStore);
   Alpine.store('auth', authStore);
-  Alpine.store('ui', uiStore);
+  Alpine.store('ui', createUiStore());
 
   // Firebase Auth State Listener
   onAuthStateChanged(auth, async (user) => {
