@@ -11,13 +11,20 @@ const CATEGORY_LABELS: Record<string, string> = {
   hotContent: "Самое Читаемое",
 };
 
+// Takes a category display name (e.g., "Культура") and returns its internal key (e.g., "culture").
+// If the display name is not found, it returns the original value.
 const normalizeCategory = (value?: string) => {
+  // If the input value is null, undefined, or an empty string, return it immediately.
   if (!value) {
     return value;
   }
+  // Convert the CATEGORY_LABELS object into an array of [key, value] pairs
+  // and find the first pair where the value (the display name) matches the input value.
   const entry = Object.entries(CATEGORY_LABELS).find(
     ([, label]) => label === value,
   );
+  // If an entry was found, return its key (the internal name, e.g., "culture").
+  // Otherwise, return the original input value.
   return entry ? entry[0] : value;
 };
 
