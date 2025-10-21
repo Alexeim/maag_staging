@@ -1,0 +1,63 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getFlipperById } from "../../lib/api/api";
+
+const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect("/404");
+}
+
+const flipper = await getFlipperById(id);
+
+if (!flipper || !flipper.carouselContent) {
+  return Astro.redirect("/404");
+}
+
+const xDataString = `{ activeSlide: 0, slides: ${JSON.stringify(flipper.carouselContent)} }`;
+---
+
+<Layout title={flipper.title}>
+  <div class="container mx-auto px-4 py-8" x-data={xDataString}>
+    <h1 class="text-4xl font-bold mb-4 text-center">{flipper.title}</h1>
+    
+    <div class="relative max-w-4xl mx-auto">
+      <div class="overflow-hidden relative h-96">
+        <template x-for="(item, index) in slides" :key="index">
+          <div 
+            x-show="activeSlide === index" 
+            class="absolute inset-0 duration-700 ease-in-out"
+            x-transition:enter="transition ease-in-out duration-700"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in-out duration-700"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+          >
+            <img :src="item.imageUrl" class="w-full h-full object-cover rounded-lg" :alt="item.caption || 'Carousel image'">
+            <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-4 rounded-b-lg">
+              <p class="text-center" x-text="item.caption"></p>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <button @click="activeSlide = (activeSlide - 1 + slides.length) % slides.length"
+              class="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white bg-opacity-50 rounded-full p-3 text-black hover:bg-opacity-75 transition">
+        &#10094;
+      </button>
+      <button @click="activeSlide = (activeSlide + 1) % slides.length"
+              class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white bg-opacity-50 rounded-full p-3 text-black hover:bg-opacity-75 transition">
+        &#10095;
+      </button>
+
+      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+        <template x-for="(slide, index) in slides" :key="index">
+          <button @click="activeSlide = index" 
+                  :class="{'bg-white': activeSlide === index, 'bg-white/50': activeSlide !== index}" 
+                  class="w-3 h-3 rounded-full hover:bg-white transition"></button>
+        </template>
+      </div>
+    </div>
+  </div>
+</Layout>

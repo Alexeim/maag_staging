@@ -1,0 +1,35 @@
+---
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import FlipperComposer from "../../../../components/dashboard/FlipperComposer.astro";
+import { getFlipperById } from "../../../../lib/api/api";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+
+const { id } = Astro.params;
+const flipper = await getFlipperById(id);
+
+if (!flipper) {
+  return Astro.redirect("/404");
+}
+
+const categoryTags = {
+  culture: cultureTags.cultureTags,
+  paris: parisTags.parisTags,
+};
+
+const creatorState = JSON.stringify({
+  initialFlipper: flipper,
+  flipperId: id,
+  isEditMode: true,
+  onSaveRedirect: "/dashboard/flippers",
+  categoryTags,
+});
+---
+
+<DashboardLayout title={`Редактирование: ${flipper.title}`} active="flippers">
+  <FlipperComposer
+    heading={`Редактирование: ${flipper.title}`}
+    submitLabel="Обновить листалку"
+    creatorState={creatorState}
+  />
+</DashboardLayout>

@@ -166,6 +166,14 @@ export interface UserProfileResponse {
   createdAt: string | Date;
 }
 
+export interface FlipperPayload {
+  title: string;
+  category?: string;
+  tags?: string[];
+  techTags?: string[];
+  carouselContent: { imageUrl: string; caption: string }[];
+}
+
 export const articlesApi = {
   list(token?: string) {
     return request<ArticleResponse[]>("/api/articles", { token });
@@ -194,6 +202,39 @@ export const articlesApi = {
     });
   },
 };
+
+export const flippersApi = {
+  getAll(token?: string) {
+    return request<any[]>("/api/flippers", { token });
+  },
+  create(payload: FlipperPayload, token?: string) {
+    return request<any>("/api/flippers", {
+      method: "POST",
+      body: payload,
+      token,
+    });
+  },
+  getById(id: string, token?: string) {
+    return request<any>(`/api/flippers/${id}`, { token });
+  },
+  update(id: string, payload: FlipperPayload, token?: string) {
+    return request<any>(`/api/flippers/${id}`, {
+      method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+  del(id: string, token?: string) {
+    return request<Response>(`/api/flippers/${id}`, {
+      method: "DELETE",
+      token,
+    });
+  },
+};
+
+export const getFlippers = () => flippersApi.getAll();
+export const getFlipperById = (id: string) => flippersApi.getById(id);
+export const deleteFlipper = (id: string) => flippersApi.del(id);
 
 export const eventsApi = {
   list(token?: string) {

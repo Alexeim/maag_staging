@@ -1,0 +1,22 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import FlipperComposer from "../../../components/dashboard/FlipperComposer.astro";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+
+const categoryTags = {
+  culture: cultureTags.cultureTags,
+  paris: parisTags.parisTags,
+};
+
+const creatorState = JSON.stringify({
+  initialFlipper: null,
+  flipperId: null,
+  isEditMode: false,
+  categoryTags,
+});
+---
+
+<DashboardLayout title="Создать листалку" active="create-flipper">
+  <FlipperComposer creatorState={creatorState} />
+</DashboardLayout>

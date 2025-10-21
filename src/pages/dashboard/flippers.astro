@@ -1,0 +1,92 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import { getFlippers } from "../../lib/api/api";
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+
+const flippers = await getFlippers();
+---
+
+<DashboardLayout title="Листалки" active="flippers">
+  <div 
+    class="bg-base-100 border border-base-300 rounded-xl p-6"
+    x-data={`$lazy('flipperList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
+  >
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-semibold">Листалки</h2>
+        <p class="text-sm text-base-content/70 mt-1">
+          Управляй созданными листалками.
+        </p>
+      </div>
+    </div>
+
+    {flippers.length > 0 ? (
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left rtl:text-right text-base-content">
+          <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+            <tr>
+              <th scope="col" class="px-6 py-3">
+                Заголовок
+              </th>
+              <th scope="col" class="px-6 py-3 hidden md:table-cell">
+                Создана
+              </th>
+              <th scope="col" class="px-6 py-3">
+                <span class="sr-only">Действия</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {flippers.map((flipper, index) => {
+              const isLast = index === flippers.length - 1;
+              const createdAtDate = new Date(flipper.createdAt);
+              const createdAtFormatted = createdAtDate.toLocaleDateString("ru-RU", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              });
+
+              return (
+                <tr
+                  class:list=[
+                    "bg-base-100 hover:bg-base-200/50",
+                    !isLast && "border-b border-base-300",
+                  ]
+                >
+                  <th scope="row" class="px-6 py-4 font-medium text-base-content whitespace-nowrap">
+                    <div class="font-semibold truncate max-w-xs" title={flipper.title}>{flipper.title}</div>
+                    <div class="text-xs text-base-content/60 mt-1 truncate" title={flipper.id}>ID: {flipper.id}</div>
+                  </th>
+                  <td class="px-6 py-4 hidden md:table-cell">
+                    {createdAtFormatted}
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex justify-end gap-4">
+                      <a href={`/flippers/${flipper.id}`} class="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank">
+                        Просмотр
+                      </a>
+                      <a href={`/dashboard/flippers/edit/${flipper.id}`} class="font-medium text-primary hover:underline">
+                        Редактировать
+                      </a>
+                      <button
+                        type="button"
+                        class="font-medium text-error hover:underline"
+                        @click={`handleDeleteClick('${flipper.id}', '${flipper.title.replace(/'/g, "\'")}')`}
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <div class="p-8 text-center text-base-content/70">
+        <p>Пока нет листалок. Создай первую, чтобы начать.</p>
+      </div>
+    )}
+  </div>
+</DashboardLayout>
