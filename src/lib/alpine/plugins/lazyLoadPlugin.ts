@@ -146,6 +146,30 @@ export default function(Alpine: Alpine) {
       form: { firstName: '', lastName: '' },
       saveChanges() {},
       deleteAccount() {},
+      // --- Flipper Creator properties ---
+      flipper: {
+        title: '',
+        category: '',
+        tags: [],
+        techTags: [],
+        carouselContent: [],
+      },
+      uploading: false,
+      uploadProgress: 0,
+      uploadingIndex: -1,
+      newTagInput: '',
+      getAvailableTags() { return []; },
+      getTagLabel(value: string) { return value; },
+      isTagSelected(value: string) { return false; },
+      toggleTag() {},
+      removeTag() {},
+      addCustomTag() {},
+      removeTechTag() {},
+      handleCategoryChange() {},
+      addCarouselItem() {},
+      removeCarouselItem() {},
+      handleImageUpload() {},
+      saveFlipper() {},
     };
   });
 }
