@@ -1,24 +1,22 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
-import { getFlipperById } from "../../lib/api/api";
+import Flipper from "../../components/flipper/Flipper.astro";
+import { flippersApi } from "../../lib/api/api";
 
 const { id } = Astro.params;
+const flipper = await flippersApi.getById(id);
 
-if (!id) {
+if (!flipper) {
   return Astro.redirect("/404");
 }
-
-const flipper = await getFlipperById(id);
-
-if (!flipper || !flipper.carouselContent) {
-  return Astro.redirect("/404");
-}
-
-const xDataString = `{ activeSlide: 0, slides: ${JSON.stringify(flipper.carouselContent)} }`;
+const flipperState = JSON.stringify({
+  activeSlide: 0,
+  slides: flipper.carouselContent || [],
+});
 ---
 
 <Layout title={flipper.title}>
-  <div class="container mx-auto px-4 py-8" x-data={xDataString}>
+  <div class="container mx-auto px-4 py-8" x-data={flipperState}>
     <h1 class="text-4xl font-bold mb-4 text-center">{flipper.title}</h1>
     
     <div class="relative max-w-4xl mx-auto">

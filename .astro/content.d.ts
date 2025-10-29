@@ -210,6 +210,14 @@ declare module 'astro:content' {
   rendered?: RenderedContent;
   filePath?: string;
 }>;
+"tags": Record<string, {
+  id: string;
+  body?: string;
+  collection: "tags";
+  data: any;
+  rendered?: RenderedContent;
+  filePath?: string;
+}>;
 
 	};
 

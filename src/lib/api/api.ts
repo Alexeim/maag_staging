@@ -174,6 +174,22 @@ export interface FlipperPayload {
   carouselContent: { imageUrl: string; caption: string }[];
 }
 
+export interface InterviewPayload {
+  title: string;
+  authorId: string;
+  content: unknown[];
+  imageUrl?: string;
+  imageCaption?: string;
+  tags?: string[];
+}
+
+export interface InterviewResponse extends InterviewPayload {
+  id: string;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
+  author?: unknown;
+}
+
 export const articlesApi = {
   list(token?: string) {
     return request<ArticleResponse[]>("/api/articles", { token });
@@ -204,7 +220,7 @@ export const articlesApi = {
 };
 
 export const flippersApi = {
-  getAll(token?: string) {
+  list(token?: string) {
     return request<any[]>("/api/flippers", { token });
   },
   create(payload: FlipperPayload, token?: string) {
@@ -224,17 +240,42 @@ export const flippersApi = {
       token,
     });
   },
-  del(id: string, token?: string) {
-    return request<Response>(`/api/flippers/${id}`, {
+  delete(id: string, token?: string) {
+    return request<void>(`/api/flippers/${id}`, {
       method: "DELETE",
       token,
     });
   },
 };
 
-export const getFlippers = () => flippersApi.getAll();
-export const getFlipperById = (id: string) => flippersApi.getById(id);
-export const deleteFlipper = (id: string) => flippersApi.del(id);
+export const interviewsApi = {
+  list(token?: string) {
+    return request<InterviewResponse[]>("/api/interviews", { token });
+  },
+  create(payload: InterviewPayload, token?: string) {
+    return request<InterviewResponse>("/api/interviews", {
+      method: "POST",
+      body: payload,
+      token,
+    });
+  },
+  getById(id: string, token?: string) {
+    return request<InterviewResponse>(`/api/interviews/${id}`, { token });
+  },
+  update(id: string, payload: InterviewPayload, token?: string) {
+    return request<InterviewResponse>(`/api/interviews/${id}`, {
+      method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+  delete(id: string, token?: string) {
+    return request<void>(`/api/interviews/${id}`, {
+      method: "DELETE",
+      token,
+    });
+  },
+};
 
 export const eventsApi = {
   list(token?: string) {

@@ -1,0 +1,38 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import InterviewComposer from "@/components/dashboard/InterviewComposer.astro";
+import { interviewsApi } from "@/lib/api/api";
+
+const { id } = Astro.params;
+
+let interview = null;
+if (id) {
+  try {
+    interview = await interviewsApi.getById(id);
+  } catch (error) {
+    console.error(`Failed to load interview with id ${id}`, error);
+    // Optionally, you can redirect to a 404 page or show an error message
+  }
+}
+
+const interviewCreatorState = JSON.stringify({
+  isEditMode: true,
+  interviewId: id,
+  initialInterview: interview,
+});
+---
+
+<DashboardLayout title="Редактировать интервью" active="interviews">
+  {interview ? (
+    <InterviewComposer
+      heading="Редактировать интервью"
+      submitLabel="Сохранить изменения"
+      interviewCreatorState={interviewCreatorState}
+      cancelHref="/dashboard/interviews"
+    />
+  ) : (
+    <div class="p-8 text-center text-base-content/70">
+      <p>Интервью не найдено или произошла ошибка загрузки.</p>
+    </div>
+  )}
+</DashboardLayout>

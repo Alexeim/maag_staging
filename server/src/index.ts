@@ -5,6 +5,7 @@ import articleRoutes from './routes/articleRoutes'; // Import article routes
 import eventRoutes from './routes/eventRoutes'; // Import event routes
 import userRoutes from './routes/userRoutes'; // Import user routes
 import flipperRoutes from './routes/flipperRoutes'; // Import flipper routes
+import interviewRoutes from './routes/interviewRoutes'; // Import interview routes
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -27,6 +28,9 @@ app.use('/api/users', userRoutes);
 
 // Use the flipper routes
 app.use('/api/flippers', flipperRoutes);
+
+// Use the interview routes
+app.use('/api/interviews', interviewRoutes);
 
 // Test route to verify Firebase connection
 app.get('/api/test-firebase', async (req, res) => {

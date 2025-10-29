@@ -1,0 +1,19 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import InterviewComposer from "@/components/dashboard/InterviewComposer.astro";
+
+const interviewCreatorState = JSON.stringify({
+  isEditMode: false,
+  interviewId: null,
+  initialInterview: null,
+});
+---
+
+<DashboardLayout title="Создать интервью" active="create-interview">
+  <InterviewComposer
+    heading="Создать новое интервью"
+    submitLabel="Опубликовать"
+    interviewCreatorState={interviewCreatorState}
+    cancelHref="/dashboard/interviews"
+  />
+</DashboardLayout>

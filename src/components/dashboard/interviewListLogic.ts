@@ -1,4 +1,3 @@
-import { flippersApi } from "@/lib/api/api";
 import type { UiStore } from "@/stores/uiStore";
 
 declare const Alpine: any;
@@ -21,8 +20,6 @@ export default (initialState: { apiBaseUrl: string }) => ({
 
   buildApiUrl(path: string) {
     try {
-      // Ensures that we don't have double slashes if apiBase ends with one
-      // and path starts with one.
       const combined = `${this.apiBase.replace(/\/$/, "")}/${path.replace(
         /^\//,
         "",
@@ -36,15 +33,19 @@ export default (initialState: { apiBaseUrl: string }) => ({
 
   async confirmAndDelete(id: string) {
     try {
-      await flippersApi.delete(id); // Changed to flippersApi.delete
-      this.notify("Листалка удалена");
-      // Use a slight delay to allow the user to see the toast message
+      const response = await fetch(this.buildApiUrl(`/api/interviews/${id}`), {
+        method: "DELETE",
+      });
+      if (!response.ok && response.status !== 204) { // 204 No Content is a success
+        throw new Error(`Deletion failed with status: ${response.status}`);
+      }
+      this.notify("Интервью удалено");
       setTimeout(() => {
         window.location.reload();
       }, 1500);
     } catch (error) {
       console.error(error);
-      this.notify("Не удалось удалить листалку. Попробуй ещё раз.", "error");
+      this.notify("Не удалось удалить интервью. Попробуй ещё раз.", "error");
     }
   },
 

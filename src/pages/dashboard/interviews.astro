@@ -1,9 +1,7 @@
 ---
-import DashboardLayout from "../../Layouts/DashboardLayout.astro";
-import { flippersApi } from "../../lib/api/api";
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import { interviewsApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
-
-const flippersRaw = await flippersApi.list();
 
 const normalizeDate = (value: any) => {
   if (!value) return null;
@@ -27,76 +25,76 @@ const normalizeDate = (value: any) => {
   return null;
 };
 
-const flippers = flippersRaw.map((flipper) => {
-  const createdAtDate = normalizeDate(flipper.createdAt);
+let interviewsRaw = [] as Awaited<ReturnType<typeof interviewsApi.list>>;
+try {
+  interviewsRaw = await interviewsApi.list();
+} catch (error) {
+  console.error("Failed to load interviews", error);
+}
+
+const interviews = interviewsRaw.map((interview) => {
+  const createdAtDate = normalizeDate(interview.createdAt);
+  const updatedAtDate = normalizeDate((interview as any).updatedAt);
   return {
-    ...flipper,
+    ...interview,
     createdAtFormatted: createdAtDate
       ? createdAtDate.toLocaleDateString("ru-RU", { year: "numeric", month: "short", day: "numeric" })
       : "—",
+    updatedAtFormatted: updatedAtDate
+      ? updatedAtDate.toLocaleDateString("ru-RU", { year: "numeric", month: "short", day: "numeric" })
+      : null,
   };
 });
 ---
 
-<DashboardLayout title="Листалки" active="flippers">
+<DashboardLayout title="Управление интервью" active="interviews">
   <div 
     class="bg-base-100 border border-base-300 rounded-xl p-6"
-    x-data={`$lazy('flipperList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
+    x-data={`$lazy('interviewList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
   >
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h2 class="text-xl font-semibold">Листалки</h2>
+        <h2 class="text-xl font-semibold">Интервью</h2>
         <p class="text-sm text-base-content/70 mt-1">
-          Управляй созданными листалками.
+          Управляй опубликованными и черновыми интервью.
         </p>
       </div>
     </div>
 
-    {flippers.length > 0 ? (
+    {interviews.length > 0 ? (
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-base-content">
           <thead class="text-xs text-base-content/70 uppercase bg-base-200">
             <tr>
-              <th scope="col" class="px-6 py-3">
-                Заголовок
-              </th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">
-                Создана
-              </th>
-              <th scope="col" class="px-6 py-3">
-                <span class="sr-only">Действия</span>
-              </th>
+              <th scope="col" class="px-6 py-3">Заголовок</th>
+              <th scope="col" class="px-6 py-3">Теги</th>
+              <th scope="col" class="px-6 py-3 hidden md:table-cell">Создана</th>
+              <th scope="col" class="px-6 py-3"><span class="sr-only">Действия</span></th>
             </tr>
           </thead>
           <tbody>
-            {flippers.map((flipper, index) => {
-              const isLast = index === flippers.length - 1;
+            {interviews.map((interview, index) => {
+              const isLast = index === interviews.length - 1;
+              const tagsLabel = Array.isArray(interview.tags) ? interview.tags.join(", ") : "—";
               return (
-                <tr
-                  class:list=[
-                    "bg-base-100 hover:bg-base-200/50",
-                    !isLast && "border-b border-base-300",
-                  ]
-                >
+                <tr class:list={["bg-base-100 hover:bg-base-200/50", !isLast && "border-b border-base-300"]}>
                   <th scope="row" class="px-6 py-4 font-medium text-base-content whitespace-nowrap">
-                    <div class="font-semibold truncate max-w-xs" title={flipper.title}>{flipper.title}</div>
-                    <div class="text-xs text-base-content/60 mt-1 truncate" title={flipper.id}>ID: {flipper.id}</div>
+                    <div class="font-semibold truncate max-w-xs" title={interview.title}>{interview.title}</div>
+                    <div class="text-xs text-base-content/60 mt-1 truncate" title={interview.id}>ID: {interview.id}</div>
                   </th>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    {flipper.createdAtFormatted}
+                  <td class="px-6 py-4">
+                    <span class="text-xs text-base-content/70">{tagsLabel}</span>
                   </td>
+                  <td class="px-6 py-4 hidden md:table-cell">{interview.createdAtFormatted}</td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-4">
-                      <a href={`/flippers/${flipper.id}`} class="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank">
-                        Просмотр
-                      </a>
-                      <a href={`/dashboard/flippers/edit/${flipper.id}`} class="font-medium text-primary hover:underline">
+                      <a href={`/dashboard/interview/${interview.id}/edit`} class="font-medium text-primary hover:underline">
                         Редактировать
                       </a>
                       <button
                         type="button"
                         class="font-medium text-error hover:underline"
-                        @click={`handleDeleteClick('${flipper.id}', '${flipper.title.replace(/'/g, "\'")}')`}
+                        @click={`handleDeleteClick('${interview.id}', '${interview.title.replace(/'/g, "\'")}')`}
                       >
                         Удалить
                       </button>
@@ -110,7 +108,7 @@ const flippers = flippersRaw.map((flipper) => {
       </div>
     ) : (
       <div class="p-8 text-center text-base-content/70">
-        <p>Пока нет листалок. Создай первую, чтобы начать.</p>
+        <p>Пока нет интервью. Создай первое, чтобы начать.</p>
       </div>
     )}
   </div>

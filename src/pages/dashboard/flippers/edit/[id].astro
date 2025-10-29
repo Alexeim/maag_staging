@@ -1,12 +1,12 @@
 ---
 import DashboardLayout from "../../../../Layouts/DashboardLayout.astro";
 import FlipperComposer from "../../../../components/dashboard/FlipperComposer.astro";
-import { getFlipperById } from "../../../../lib/api/api";
+import { flippersApi } from "../../../../lib/api/api";
 import cultureTags from "@/content/tags/CultureTags.json";
 import parisTags from "@/content/tags/ParisTags.json";
 
 const { id } = Astro.params;
-const flipper = await getFlipperById(id);
+const flipper = await flippersApi.getById(id);
 
 if (!flipper) {
   return Astro.redirect("/404");

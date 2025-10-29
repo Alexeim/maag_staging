@@ -12,6 +12,8 @@ const components: Record<string, () => Promise<any>> = {
   eventCreator: () => import('@/components/article/eventCreatorLogic'),
   eventList: () => import('@/components/dashboard/eventListLogic'),
   authModal: () => import('@/components/auth/authLogic'),
+  interviewList: () => import('@/components/dashboard/interviewListLogic'),
+  interviewCreator: () => import('@/components/dashboard/interviewCreatorLogic'),
 };
 
 export default function(Alpine: Alpine) {
@@ -80,6 +82,14 @@ export default function(Alpine: Alpine) {
         techTags: [],
         category: '',
         isHotContent: false,
+      },
+      // --- Interview Creator properties ---
+      interview: {
+        title: '',
+        imageUrl: '',
+        imageCaption: '',
+        contentBlocks: [],
+        tags: [],
       },
       showBlockOptions: false,
       editingIndex: null,
