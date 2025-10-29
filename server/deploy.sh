@@ -17,7 +17,8 @@ gcloud run deploy maag-api \
   --platform managed \
   --region europe-west9 \
   --allow-unauthenticated \
-  --set-secrets="FIREBASE_CONFIG_JSON=FIREBASE_CONFIG_JSON:latest"
+  --set-env-vars="FRONTEND_URL=https://maag-frontend-953634001415.europe-west9.run.app" \
+  --set-secrets="FIREBASE_CONFIG_JSON=FIREBASE_CONFIG_JSON:latest,STRIPE_SECRET_KEY=STRIPE_SECRET_KEY:latest,STRIPE_WEBHOOK_SECRET=STRIPE_WEBHOOK_SECRET:latest"
 
 echo ""
 echo "####################################"
