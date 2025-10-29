@@ -1,0 +1,41 @@
+---
+import { Image } from "astro:assets";
+import picture1 from "../../assets/images/culture.jpg"; // Placeholder
+
+interface Props {
+  tag?: string;
+  interviewee?: string;
+  quote?: string;
+  imageUrl?: string;
+  href?: string;
+}
+
+const { 
+  tag = "Интервью", 
+  interviewee = "Скоро здесь будет имя", 
+  quote = "Скоро здесь будет интересная цитата...", 
+  imageUrl = picture1,
+  href = "#"
+} = Astro.props;
+---
+
+<div id="interview-box" class="w-full bg-white flex flex-col gap-6 lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px]">
+  <a href={href} class="block w-[200px] h-[200px] rounded-full overflow-hidden flex-shrink-0">
+    <Image
+      src={imageUrl}
+      alt={`Фотография ${interviewee}`}
+      class="w-full h-full object-cover object-center"
+      loading="lazy"
+      inferSize={true}
+    />
+  </a>
+  <div class="w-full lg:w-fit">
+    <a href={href}>
+      <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">{tag}</p>
+      <h4 class="text-base lg:text-lg leading-tight font-old-standard">{interviewee}:</h4>
+      <p class="text-2xl lg:text-3xl leading-tight font-thin font-old-standard text-wrap break-words hover:underline">
+        "{quote}"
+      </p>
+    </a>
+  </div>
+</div>

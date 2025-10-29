@@ -1,9 +1,10 @@
 ---
 import { Image } from "astro:assets";
-import { articlesApi } from "@/lib/api/api";
+import { articlesApi, interviewsApi } from "@/lib/api/api";
 
 import NetlenkaCard from "./NetlenkaCard.astro";
 import ArticleCard from "./ArticleCard.astro";
+import LatestInterview from "../HomePage/LatestInterview.astro";
 
 import picture1 from "../../assets/images/culture.jpg";
 
@@ -72,6 +73,7 @@ let cultureArticles: any[] = [];
 let cultureHero: any = null;
 let cultureCardArticles: any[] = [];
 let hotContentArticles: any[] = [];
+let latestInterview: any = null;
 
 try {
   const articles = await articlesApi.list();
@@ -86,9 +88,39 @@ try {
     .filter((article) => isHotContentArticle(article))
     .reverse()
     .slice(0, 6);
+  
+  const interviews = await interviewsApi.list();
+  latestInterview = interviews[0] ?? null;
+
 } catch (error) {
-  console.error("Failed to fetch culture articles:", error);
+  console.error("Failed to fetch data for LandingBody:", error);
 }
+
+const extractQuoteOrAnswer = (interview: any) => {
+  if (!interview || !Array.isArray(interview.content)) {
+    return null;
+  }
+  const quoteBlock = interview.content.find(block => block.type === 'quote' && block.text);
+  if (quoteBlock) {
+    return quoteBlock.text;
+  }
+  const qaBlock = interview.content.find(block => block.type === 'qa' && block.answer);
+  if (qaBlock) {
+    return qaBlock.answer;
+  }
+  return null;
+};
+
+const truncateText = (text: string | null, maxLength: number = 100) => {
+  if (!text) return null;
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return text.substring(0, maxLength) + '...';
+};
+
+const interviewQuote = truncateText(extractQuoteOrAnswer(latestInterview));
+
 ---
 
 <section class="w-full px-4 lg:px-8 bg-base-200 mt-0 pb-12 overflow-hidden">
@@ -171,22 +203,15 @@ try {
             )}
           </div>
 
-          <div id="interview-box" class="w-full bg-white flex flex-col gap-6 lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px]">
-
-            <div class="w-[200px] h-[200px] rounded-full overflow-hidden">
-              <Image
-                src={picture1}
-                alt="Culture image"
-                class="w-full h-full object-cover object-center"
-                loading="eager"
-              />
-            </div>
-            <div class="w-full lg:w-fit">
-              <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">Balet</p>
-              <h4 class="text-base lg:text-lg leading-tight font-old-standard">hoasfhjasd:</h4>
-              <p class="text-2xl lg:text-3xl leading-tight font-thin font-old-standard text-wrap break-words">"kafjlsakdjfkadjsflkasdjfkjasdkfljas"</p>
-            </div>
-          </div>
+          {latestInterview && (
+            <LatestInterview 
+              tag={latestInterview.tags?.[0]}
+              interviewee={latestInterview.interviewee}
+              quote={interviewQuote}
+              imageUrl={latestInterview.imageUrl}
+              href={`/interviews/${latestInterview.id}`}
+            />
+          )}
         </div>
       </div>
       <div class="flex flex-row">

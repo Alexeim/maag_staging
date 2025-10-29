@@ -1,0 +1,116 @@
+---
+import Layout from "../../Layouts/Layout.astro";
+import { interviewsApi } from "../../lib/api/api";
+import ArticleHeader from "../../components/article/ArticleHeader.astro";
+import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
+import SocialShare from "../../components/article/SocialShare.astro";
+import { Image } from "astro:assets";
+
+const { id } = Astro.params;
+
+let interview = null;
+try {
+  if (id) {
+    interview = await interviewsApi.getById(id);
+  }
+} catch (error) {
+  console.error("Failed to fetch interview:", error);
+}
+
+if (!interview) {
+  return Astro.redirect("/404");
+}
+
+const { title, author, interviewee, content, imageUrl, imageCaption, tags } =
+  interview;
+const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
+---
+
+<Layout title={title}>
+  <div class="pt-[150px] pb-[100px] flex flex-col items-center gap-[100px]">
+    <div class="flex flex-col gap-8 max-w-[825px] w-full px-4">
+      <ArticleHeader category={tags?.[0] || "Интервью"} title={title} />
+      {author && <ArticleAuthor name={authorName} avatarUrl={author.avatar} />}
+    </div>
+
+    {
+      imageUrl && (
+        <figure class="w-full max-w-[1200px]">
+          <Image
+            src={imageUrl}
+            alt={imageCaption || title}
+            class="w-full h-auto rounded-lg shadow-lg"
+            inferSize={true}
+          />
+          {imageCaption && (
+            <figcaption class="text-center text-sm text-gray-500 mt-2">
+              {imageCaption}
+            </figcaption>
+          )}
+        </figure>
+      )
+    }
+
+    <div class="max-w-[825px] w-full flex flex-col gap-12 px-4">
+      {
+        content.map((block) => {
+          switch (block.type) {
+            case "first-paragraph":
+              return (
+                <p class="text-lg first-letter:text-4xl first-letter:font-bold">
+                  {block.text}
+                </p>
+              );
+            case "paragraph":
+              return <p class="text-base">{block.text}</p>;
+            case "h2":
+              return <h2 class="text-2xl font-semibold">{block.text}</h2>;
+            case "h3":
+              return <h3 class="text-xl font-semibold">{block.text}</h3>;
+            case "quote":
+              return (
+                <blockquote class="text-lg italic border-l-4 pl-4 my-4 border-base-300">
+                  {block.text}
+                </blockquote>
+              );
+            case "image":
+              return (
+                <figure>
+                  <Image
+                    src={block.url}
+                    alt={block.caption || "Interview content image"}
+                    class="rounded-md w-full object-cover"
+                    inferSize={true}
+                  />
+                  {block.caption && (
+                    <figcaption class="text-center text-sm text-base-content/60 mt-2">
+                      {block.caption}
+                    </figcaption>
+                  )}
+                </figure>
+              );
+            case "qa":
+              return (
+                <div class="space-y-4">
+                  <div class="text-error">
+                    <span class="font-bold">{authorName}:</span>
+                    <p class="inline">{block.question}</p>
+                  </div>
+                  <div>
+                    <span class="font-bold">{interviewee}:</span>
+                    <p class="inline">{block.answer}</p>
+                  </div>
+                </div>
+              );
+            default:
+              return null;
+          }
+        })
+      }
+    </div>
+
+    <div class="max-w-[825px] w-full px-4">
+      <SocialShare />
+    </div>
+  </div>
+</Layout>
