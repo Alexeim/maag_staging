@@ -74,6 +74,7 @@ export default function interviewCreatorLogic(initialState = {}) {
   return {
     interview: {
       title: "",
+      interviewee: "",
       imageUrl: "",
       imageCaption: "",
       contentBlocks: [],
@@ -281,6 +282,10 @@ export default function interviewCreatorLogic(initialState = {}) {
         window.Alpine.store("ui").showToast("Добавь заголовок.", "error");
         return;
       }
+      if (!this.interview.interviewee) {
+        window.Alpine.store("ui").showToast("Добавь имя интервьюируемого.", "error");
+        return;
+      }
       if (!this.interview.imageUrl) {
         window.Alpine.store("ui").showToast("Загрузи обложку.", "error");
         return;
@@ -293,6 +298,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       try {
         const payload = {
           title: this.interview.title,
+          interviewee: this.interview.interviewee,
           imageUrl: this.interview.imageUrl,
           imageCaption: this.interview.imageCaption,
           authorId: "HxpjsagLQxlUb2oCiM6h", // Hardcoded for now

@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
-import { getDb } from '../services/firebase';
+import { getDb, deleteFileFromStorage } from '../services/firebase';
 
 // Interface for Flipper structure
 export interface Flipper {
   id?: string;
   title: string;
+  authorId: string;
   category?: string;
   tags?: string[];
   techTags?: string[];
@@ -22,10 +23,10 @@ const flippersCollection = db.collection('flippers');
  */
 export const createFlipper = async (req: Request, res: Response) => {
   try {
-    const { title, category, tags = [], techTags = [], carouselContent = [] } = req.body;
+    const { title, authorId, category, tags = [], techTags = [], carouselContent = [] } = req.body;
 
-    if (!title) {
-      return res.status(400).json({ message: 'Заголовок обязателен' });
+    if (!title || !authorId) {
+      return res.status(400).json({ message: 'Заголовок и ID автора обязательны' });
     }
     if (!Array.isArray(carouselContent) || carouselContent.length === 0) {
       return res.status(400).json({ message: 'Для листалки нужен хотя бы один слайд' });
@@ -40,6 +41,7 @@ export const createFlipper = async (req: Request, res: Response) => {
 
     const newFlipper: Omit<Flipper, 'id'> = {
       title,
+      authorId,
       category,
       tags: normalizedTags,
       techTags: normalizedTechTags,
@@ -94,7 +96,23 @@ export const getFlipperById = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'Flipper not found' });
         }
 
-        res.status(200).json({ id: doc.id, ...doc.data() });
+        const flipperData = doc.data() as Flipper;
+
+        let authorData = null;
+        if (flipperData.authorId) {
+            const userDoc = await db.collection('authors').doc(flipperData.authorId).get();
+            if (userDoc.exists) {
+                authorData = userDoc.data();
+            }
+        }
+
+        const flipperWithAuthor = {
+            id: doc.id,
+            ...flipperData,
+            author: authorData,
+        };
+
+        res.status(200).json(flipperWithAuthor);
     } catch (error) {
         console.error('Error getting flipper by id:', error);
         res.status(500).json({ message: 'Server error while getting flipper' });
@@ -108,10 +126,10 @@ export const getFlipperById = async (req: Request, res: Response) => {
 export const updateFlipper = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, category, tags = [], techTags = [], carouselContent = [] } = req.body;
+    const { title, authorId, category, tags = [], techTags = [], carouselContent = [] } = req.body;
 
-    if (!title) {
-      return res.status(400).json({ message: 'Заголовок обязателен' });
+    if (!title || !authorId) {
+      return res.status(400).json({ message: 'Заголовок и ID автора обязательны' });
     }
     if (!Array.isArray(carouselContent) || carouselContent.length === 0) {
       return res.status(400).json({ message: 'Для листалки нужен хотя бы один слайд' });
@@ -126,6 +144,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
 
     const updatedFlipper = {
       title,
+      authorId,
       category,
       tags: normalizedTags,
       techTags: normalizedTechTags,
@@ -153,6 +172,22 @@ export const deleteFlipper = async (req: Request, res: Response) => {
 
     if (!doc.exists) {
       return res.status(404).json({ message: 'Flipper not found' });
+    }
+
+    const flipperData = doc.data() as Flipper;
+    const imageUrlsToDelete: string[] = [];
+
+    if (Array.isArray(flipperData.carouselContent)) {
+      for (const item of flipperData.carouselContent) {
+        if (item.imageUrl) {
+          imageUrlsToDelete.push(item.imageUrl);
+        }
+      }
+    }
+
+    if (imageUrlsToDelete.length > 0) {
+      console.log(`[Flipper Delete] Deleting ${imageUrlsToDelete.length} associated images.`);
+      await Promise.all(imageUrlsToDelete.map(url => deleteFileFromStorage(url)));
     }
 
     await flippersCollection.doc(id).delete();

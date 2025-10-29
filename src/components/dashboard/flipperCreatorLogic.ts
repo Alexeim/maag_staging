@@ -206,6 +206,7 @@ export default function flipperCreatorLogic(initialState = {}) {
         const tagsForDb = this.flipper.tags.map((tag) => this.getTagLabel(tag));
         const payload = {
           ...this.flipper,
+          authorId: "HxpjsagLQxlUb2oCiM6h", // Hardcoded author ID
           tags: tagsForDb,
           techTags: normalizeTechTags(this.flipper.techTags),
         };

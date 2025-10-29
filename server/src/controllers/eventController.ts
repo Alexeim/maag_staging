@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getDb } from '../services/firebase';
+import { getDb, deleteFileFromStorage } from '../services/firebase';
 
 export interface EventItem {
   id?: string;
@@ -230,6 +230,26 @@ export const deleteEvent = async (req: Request, res: Response) => {
 
     if (!eventDoc.exists) {
       return res.status(404).json({ message: 'Event not found' });
+    }
+
+    const eventData = eventDoc.data() as EventItem;
+    const imageUrlsToDelete: string[] = [];
+
+    if (eventData.imageUrl) {
+      imageUrlsToDelete.push(eventData.imageUrl);
+    }
+
+    if (Array.isArray(eventData.content)) {
+      for (const block of eventData.content) {
+        if (block.type === 'image' && block.url) {
+          imageUrlsToDelete.push(block.url);
+        }
+      }
+    }
+
+    if (imageUrlsToDelete.length > 0) {
+      console.log(`[Event Delete] Deleting ${imageUrlsToDelete.length} associated images.`);
+      await Promise.all(imageUrlsToDelete.map(url => deleteFileFromStorage(url)));
     }
 
     await eventsCollection.doc(id).delete();

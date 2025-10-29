@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
-import { getDb } from '../services/firebase';
+import { getDb, deleteFileFromStorage } from '../services/firebase';
 
 // Interface for our Interview structure
 export interface Interview {
   id?: string;
   title: string;
   authorId: string;
+  interviewee: string;
   content: any[]; // Array of content blocks
   imageUrl?: string;
   imageCaption?: string;
@@ -29,11 +30,12 @@ export const createInterview = async (req: Request, res: Response) => {
       imageUrl,
       imageCaption,
       authorId,
+      interviewee,
       tags = [],
     } = req.body;
 
-    if (!title || !content || !authorId) {
-      return res.status(400).json({ message: 'Title, content, and authorId are required' });
+    if (!title || !content || !authorId || !interviewee) {
+      return res.status(400).json({ message: 'Title, content, authorId, and interviewee are required' });
     }
 
     const normalizedTags = Array.isArray(tags)
@@ -43,6 +45,7 @@ export const createInterview = async (req: Request, res: Response) => {
     const newInterview: Omit<Interview, 'id'> = {
       title,
       authorId,
+      interviewee,
       content,
       imageUrl,
       imageCaption,
@@ -141,11 +144,12 @@ export const updateInterview = async (req: Request, res: Response) => {
       imageUrl,
       imageCaption,
       authorId,
+      interviewee,
       tags = [],
     } = req.body;
 
-    if (!title || !content || !authorId) {
-      return res.status(400).json({ message: 'Title, content, and authorId are required' });
+    if (!title || !content || !authorId || !interviewee) {
+      return res.status(400).json({ message: 'Title, content, authorId, and interviewee are required' });
     }
 
     const normalizedTags = Array.isArray(tags)
@@ -155,6 +159,7 @@ export const updateInterview = async (req: Request, res: Response) => {
     const updatedInterview = {
       title,
       authorId,
+      interviewee,
       content,
       imageUrl,
       imageCaption,
@@ -184,6 +189,30 @@ export const deleteInterview = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Interview not found' });
     }
 
+    const interviewData = interviewDoc.data() as Interview;
+    const imageUrlsToDelete: string[] = [];
+
+    // Collect main image URL
+    if (interviewData.imageUrl) {
+      imageUrlsToDelete.push(interviewData.imageUrl);
+    }
+
+    // Collect image URLs from content blocks
+    if (Array.isArray(interviewData.content)) {
+      for (const block of interviewData.content) {
+        if (block.type === 'image' && block.url) {
+          imageUrlsToDelete.push(block.url);
+        }
+      }
+    }
+
+    // Asynchronously delete all images from storage
+    if (imageUrlsToDelete.length > 0) {
+      console.log(`[Interview Delete] Deleting ${imageUrlsToDelete.length} associated images.`);
+      await Promise.all(imageUrlsToDelete.map(url => deleteFileFromStorage(url)));
+    }
+
+    // Delete the Firestore document
     await interviewsCollection.doc(id).delete();
 
     res.status(204).send();

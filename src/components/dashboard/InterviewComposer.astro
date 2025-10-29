@@ -46,6 +46,17 @@ const {
 
     <hr class="my-6" />
 
+    <label class="block text-sm font-medium text-base-content mb-2">Имя интервьюируемого</label>
+    <input
+      type="text"
+      x-model="interview.interviewee"
+      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+      placeholder="Введите полное имя человека, у которого брали интервью"
+    />
+    <p class="text-xs text-base-content/60 mt-1">Это имя будет отображаться на странице интервью.</p>
+
+    <hr class="my-6" />
+
     <div class="mt-6">
       <label class="block text-sm font-medium text-base-content mb-3">Теги</label>
       <div class="mt-4 flex flex-col gap-2">

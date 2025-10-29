@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getDb } from '../services/firebase';
+import { getDb, deleteFileFromStorage } from '../services/firebase';
 
 // Interface for our Article structure
 export interface Article {
@@ -211,6 +211,30 @@ export const deleteArticle = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Article not found' });
     }
 
+    const articleData = articleDoc.data() as Article;
+    const imageUrlsToDelete: string[] = [];
+
+    // Collect main image URL
+    if (articleData.imageUrl) {
+      imageUrlsToDelete.push(articleData.imageUrl);
+    }
+
+    // Collect image URLs from content blocks
+    if (Array.isArray(articleData.content)) {
+      for (const block of articleData.content) {
+        if (block.type === 'image' && block.url) {
+          imageUrlsToDelete.push(block.url);
+        }
+      }
+    }
+
+    // Asynchronously delete all images from storage
+    if (imageUrlsToDelete.length > 0) {
+      console.log(`[Article Delete] Deleting ${imageUrlsToDelete.length} associated images.`);
+      await Promise.all(imageUrlsToDelete.map(url => deleteFileFromStorage(url)));
+    }
+
+    // Delete the Firestore document
     await articlesCollection.doc(id).delete();
 
     res.status(204).send();

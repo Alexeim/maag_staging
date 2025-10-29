@@ -177,6 +177,7 @@ export interface FlipperPayload {
 export interface InterviewPayload {
   title: string;
   authorId: string;
+  interviewee: string;
   content: unknown[];
   imageUrl?: string;
   imageCaption?: string;
