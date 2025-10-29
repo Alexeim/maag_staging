@@ -40,7 +40,7 @@ import Layout from "../Layouts/Layout.astro";
       <!-- Main Content -->
       <div class="space-y-20">
         <!-- Subscription Section -->
-        <div class="space-y-8">
+        <div class="space-y-8" x-data="$lazy('subscriptionManager')">
           <!-- Section Header -->
           <div class="space-y-6">
             <div class="w-full h-px bg-neutral-200"></div>
@@ -53,31 +53,37 @@ import Layout from "../Layouts/Layout.astro";
 
           <!-- Subscription Content -->
           <div class="space-y-8 w-full max-w-2xl">
-            <!-- Payment Date -->
-            <div class="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8">
-              <div class="w-full lg:w-44">
-                <p class="text-lg font-lora text-base-content">Оплачено до</p>
-              </div>
-              <div class="w-full lg:w-44">
-                <p class="text-lg font-lora text-accent">25.08.2026</p>
-              </div>
-              <div class="w-full lg:w-auto">
-                <button class="btn btn-primary w-full lg:w-auto">Оплатить</button>
-              </div>
-            </div>
+            <template x-if="!$store.auth.isProfileLoaded">
+              <p>Загрузка данных о подписке...</p>
+            </template>
 
-            <!-- Payment Method -->
-            <div class="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8">
-              <div class="w-full lg:w-44">
-                <p class="text-lg font-lora text-base-content">Способ оплаты</p>
+            <template x-if="$store.auth.isProfileLoaded">
+              <div>
+                <!-- Если подписка активна -->
+                <template x-if="isSubscribed">
+                  <div class="space-y-4">
+                    <p>Статус: <span class="font-bold text-accent" x-text="subscriptionStatus"></span></p>
+                    <p>Оплачено до: <span class="font-bold" x-text="subscriptionEndDate"></span></p>
+                    <button @click="manageSubscription()" class="btn btn-primary w-full lg:w-auto">
+                      Управлять подпиской
+                    </button>
+                  </div>
+                </template>
+
+                <!-- Если подписки нет -->
+                <template x-if="!isSubscribed">
+                  <div class="space-y-4">
+                    <p>У вас нет активной подписки.</p>
+                    <button @click="createSubscription()" class="btn btn-primary w-full lg:w-auto">
+                      Подписаться
+                    </button>
+                    <button @click="forceRefresh()" class="btn btn-secondary w-full lg:w-auto">
+                      Обновить статус
+                    </button>
+                  </div>
+                </template>
               </div>
-              <div class="w-full lg:w-44">
-                <p class="text-lg font-lora text-accent">PayPal</p>
-              </div>
-              <div class="w-full lg:w-auto">
-                <button class="btn btn-primary w-full lg:w-auto">Поменять способ оплаты</button>
-              </div>
-            </div>
+            </template>
           </div>
         </div>
 

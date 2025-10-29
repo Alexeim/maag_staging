@@ -11,7 +11,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors()); // In a real app, configure this with your frontend's origin
+// Middleware для Stripe webhook, чтобы получить raw body
+app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/api', (req, res) => {
   res.send('Hello from the MAAG API!');
@@ -24,7 +28,10 @@ app.use('/api/articles', articleRoutes);
 app.use('/api/events', eventRoutes);
 
 // Use the user routes
+import stripeRoutes from './routes/stripeRoutes';
+
 app.use('/api/users', userRoutes);
+app.use('/stripe', stripeRoutes);
 
 // Use the flipper routes
 app.use('/api/flippers', flipperRoutes);

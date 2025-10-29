@@ -12,14 +12,18 @@ export default () => ({
   },
 
   init() {
-    // Populate form with data from the auth store when component initializes.
-    // This is now safe because the parent Astro component waits for `isProfileLoaded`
-    // to be true before rendering the component that uses this logic.
-    const authStore = Alpine.store('auth') as AuthStore;
-    if (authStore.profile) {
-      this.form.firstName = authStore.profile.firstName || '';
-      this.form.lastName = authStore.profile.lastName || '';
-    }
+    // Use Alpine.effect to reactively update the form.
+    // It runs once on init and then again whenever authStore.profile changes.
+    // This solves the race condition where the component initializes
+    // before the user's profile data has been fetched from the server.
+    Alpine.effect(() => {
+      const authStore = Alpine.store('auth') as AuthStore;
+      if (authStore.profile) {
+        console.log('Alpine.effect triggered, profile data is now available:', authStore.profile);
+        this.form.firstName = authStore.profile.firstName || '';
+        this.form.lastName = authStore.profile.lastName || '';
+      }
+    });
   },
 
   async saveChanges() {

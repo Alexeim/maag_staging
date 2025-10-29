@@ -14,6 +14,7 @@ const components: Record<string, () => Promise<any>> = {
   authModal: () => import('@/components/auth/authLogic'),
   interviewList: () => import('@/components/dashboard/interviewListLogic'),
   interviewCreator: () => import('@/components/dashboard/interviewCreatorLogic'),
+  subscriptionManager: () => import('@/components/profile/subscriptionLogic'),
 };
 
 export default function(Alpine: Alpine) {
@@ -164,22 +165,16 @@ export default function(Alpine: Alpine) {
         techTags: [],
         carouselContent: [],
       },
-      uploading: false,
-      uploadProgress: 0,
       uploadingIndex: -1,
-      newTagInput: '',
-      getAvailableTags() { return []; },
-      getTagLabel(value: string) { return value; },
-      isTagSelected(value: string) { return false; },
-      toggleTag() {},
-      removeTag() {},
-      addCustomTag() {},
-      removeTechTag() {},
-      handleCategoryChange() {},
       addCarouselItem() {},
       removeCarouselItem() {},
-      handleImageUpload() {},
       saveFlipper() {},
+      // --- Subscription Manager properties ---
+      isSubscribed: false,
+      subscriptionStatus: '',
+      subscriptionEndDate: '',
+      createSubscription() {},
+      manageSubscription() {},
     };
   });
 }
