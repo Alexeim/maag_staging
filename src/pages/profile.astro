@@ -1,5 +1,6 @@
 ---
 import Layout from "../Layouts/Layout.astro";
+import { BadgeCheck } from "lucide-astro";
 ---
 
 <Layout
@@ -38,7 +39,7 @@ import Layout from "../Layouts/Layout.astro";
       </div>
 
       <!-- Main Content -->
-      <div class="space-y-20">
+      <div class="space-y-20 mb-16">
         <!-- Subscription Section -->
         <div class="space-y-8" x-data="$lazy('subscriptionManager')">
           <!-- Section Header -->
@@ -62,9 +63,20 @@ import Layout from "../Layouts/Layout.astro";
                 <!-- Если подписка активна -->
                 <template x-if="isSubscribed">
                   <div class="space-y-4">
-                    <p>Статус: <span class="font-bold text-accent" x-text="subscriptionStatus"></span></p>
-                    <p>Оплачено до: <span class="font-bold" x-text="subscriptionEndDate"></span></p>
-                    <button @click="manageSubscription()" class="btn btn-primary w-full lg:w-auto">
+                    <p>
+                      Статус: <span
+                        class="font-bold text-success"
+                        x-text="subscriptionStatus"></span>
+                    </p>
+                    <p>
+                      Оплачено до: <span
+                        class="font-bold"
+                        x-text="subscriptionEndDate"></span>
+                    </p>
+                    <button
+                      @click="manageSubscription()"
+                      class="cursor-pointer text-sm bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary/50 p-2 rounded-xl"
+                    >
                       Управлять подпиской
                     </button>
                   </div>
@@ -74,10 +86,16 @@ import Layout from "../Layouts/Layout.astro";
                 <template x-if="!isSubscribed">
                   <div class="space-y-4">
                     <p>У вас нет активной подписки.</p>
-                    <button @click="createSubscription()" class="btn btn-primary w-full lg:w-auto">
+                    <button
+                      @click="createSubscription()"
+                      class="cursor-pointer text-sm bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary/50 p-2 rounded-xl"
+                    >
                       Подписаться
                     </button>
-                    <button @click="forceRefresh()" class="btn btn-secondary w-full lg:w-auto">
+                    <button
+                      @click="forceRefresh()"
+                      class="cursor-pointer text-sm text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100 p-2 rounded-xl"
+                    >
                       Обновить статус
                     </button>
                   </div>
@@ -108,7 +126,9 @@ import Layout from "../Layouts/Layout.astro";
             <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
               <p>Пожалуйста, войдите, чтобы увидеть свой профиль.</p>
             </template>
-            <template x-if="!$store.auth.isLoading && $store.auth.isLoggedIn && !$store.auth.isProfileLoaded">
+            <template
+              x-if="!$store.auth.isLoading && $store.auth.isLoggedIn && !$store.auth.isProfileLoaded"
+            >
               <p>Загрузка данных профиля...</p>
             </template>
 
@@ -117,45 +137,92 @@ import Layout from "../Layouts/Layout.astro";
               <div>
                 <!-- Email Field (Read-only) -->
                 <div class="space-y-4 mb-10">
-                  <label class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content">email</label>
-                  <div class="bg-base-100 border border-neutral-200 rounded-lg p-2">
-                    <div x-text="$store.auth.user?.email" class="w-full bg-transparent text-xs font-inter text-neutral-400 outline-none"></div>
+                  <label
+                    class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+                    >email</label
+                  >
+                  <div
+                    class="bg-base-100 border border-neutral-200 rounded-lg p-2"
+                  >
+                    <div
+                      x-text="$store.auth.user?.email"
+                      class="w-full bg-transparent text-xs font-inter text-neutral-400 outline-none"
+                    >
+                    </div>
                   </div>
                 </div>
 
                 <!-- Password Field -->
                 <div class="space-y-4 mb-10">
-                  <label class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content">Пароль</label>
-                  <div class="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-2">
-                    <div class="bg-base-100 border border-neutral-200 rounded-lg p-2 w-full lg:flex-1">
-                      <input type="password" value="**********" readonly class="w-full bg-transparent text-[16px] lg:text-xs font-inter text-neutral-400 outline-none" />
+                  <label
+                    class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+                    >Пароль</label
+                  >
+                  <div
+                    class="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-2"
+                  >
+                    <div
+                      class="bg-base-100 border border-neutral-200 rounded-lg p-2 w-full lg:flex-1"
+                    >
+                      <input
+                        type="password"
+                        value="**********"
+                        readonly
+                        class="w-full bg-transparent text-[16px] lg:text-xs font-inter text-neutral-400 outline-none"
+                      />
                     </div>
                     <div class="w-full lg:w-auto">
-                      <button class="btn btn-primary w-full lg:w-auto">Поменять пароль</button>
+                      <button class="btn btn-primary w-full lg:w-auto"
+                        >Поменять пароль</button
+                      >
                     </div>
                   </div>
                 </div>
 
                 <!-- Name Fields -->
                 <div class="space-y-4 mb-4">
-                  <label class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content">First Name</label>
-                  <div class="bg-base-100 border border-neutral-200 rounded-lg p-2">
-                    <input type="text" x-model="form.firstName" class="w-full bg-transparent text-[16px] lg:text-xs font-inter text-neutral-400 outline-none" />
+                  <label
+                    class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+                    >First Name</label
+                  >
+                  <div
+                    class="bg-base-100 border border-neutral-200 rounded-lg p-2"
+                  >
+                    <input
+                      type="text"
+                      x-model="form.firstName"
+                      class="w-full bg-transparent text-[16px] lg:text-xs font-inter text-neutral-400 outline-none"
+                    />
                   </div>
                 </div>
                 <div class="space-y-4">
-                  <label class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content">Last Name</label>
-                  <div class="bg-base-100 border border-neutral-200 rounded-lg p-2">
-                    <input type="text" x-model="form.lastName" class="w-full bg-transparent text-[16px] lg:text-xs font-inter text-neutral-400 outline-none" />
+                  <label
+                    class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+                    >Last Name</label
+                  >
+                  <div
+                    class="bg-base-100 border border-neutral-200 rounded-lg p-2"
+                  >
+                    <input
+                      type="text"
+                      x-model="form.lastName"
+                      class="w-full bg-transparent text-[16px] lg:text-xs font-inter text-neutral-400 outline-none"
+                    />
                   </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="space-y-4 mt-10">
-                  <button @click="saveChanges()" class="w-full bg-primary text-primary-content rounded-2xl py-2 px-4 text-sm font-inter font-normal hover:bg-primary/90 transition-colors">
+                  <button
+                    @click="saveChanges()"
+                    class="w-full bg-primary text-primary-content rounded-xl py-2 px-4 text-sm font-inter font-normal hover:bg-primary/90 transition-colors cursor-pointer"
+                  >
                     Сохранить изменения
                   </button>
-                  <button @click="deleteAccount()" class="w-full border border-error text-error rounded-2xl py-2 px-4 text-sm font-inter font-normal hover:bg-error/5 transition-colors">
+                  <button
+                    @click="deleteAccount()"
+                    class="w-full border border-error text-error rounded-xl py-2 px-4 text-sm font-inter font-normal hover:bg-error/5 transition-colors cursor-pointer"
+                  >
                     Удалить аккаунт
                   </button>
                 </div>
