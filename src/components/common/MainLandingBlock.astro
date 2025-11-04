@@ -21,7 +21,7 @@ const normalizeCategory = (value?: string) => {
   // Convert the CATEGORY_LABELS object into an array of [key, value] pairs
   // and find the first pair where the value (the display name) matches the input value.
   const entry = Object.entries(CATEGORY_LABELS).find(
-    ([, label]) => label === value,
+    ([, label]) => label === value
   );
   // If an entry was found, return its key (the internal name, e.g., "culture").
   // Otherwise, return the original input value.
@@ -44,7 +44,7 @@ const getPrimaryTag = (article: any) => {
       : [];
 
   const firstTag = rawTags.find(
-    (tag) => typeof tag === "string" && tag.trim().length > 0,
+    (tag) => typeof tag === "string" && tag.trim().length > 0
   );
 
   if (firstTag) {
@@ -58,8 +58,7 @@ const getPrimaryTag = (article: any) => {
   return getCategoryLabel(article?.category);
 };
 
-const isNewsCategory = (value?: string) =>
-  normalizeCategory(value) === "news";
+const isNewsCategory = (value?: string) => normalizeCategory(value) === "news";
 
 const isHotContentArticle = (article: any) =>
   Boolean(article?.isHotContent) ||
@@ -76,8 +75,7 @@ try {
   mainArticle =
     articles.find(
       (article) =>
-        !isNewsCategory(article.category) &&
-        !isHotContentArticle(article),
+        !isNewsCategory(article.category) && !isHotContentArticle(article)
     ) || null;
 
   // Filter for news articles
@@ -116,7 +114,9 @@ const toDate = (value: unknown): Date | null => {
     }
     if (typeof (value as { toDate?: () => Date }).toDate === "function") {
       const parsed = (value as { toDate: () => Date }).toDate();
-      return parsed instanceof Date && !Number.isNaN(parsed.getTime()) ? parsed : null;
+      return parsed instanceof Date && !Number.isNaN(parsed.getTime())
+        ? parsed
+        : null;
     }
   }
   return null;
@@ -158,10 +158,12 @@ try {
 }
 ---
 
-<section class="w-full lg:max-h-[790px] px-4 lg:px-8 bg-base-200 mb-0">
+<section class="w-full lg:max-h-[990px] px-4 lg:px-8 bg-base-200 mb-0">
   <div class="flex flex-col lg:flex-row gap-6 lg:gap-4">
     {/* News Column - THINNER */}
-    <aside class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-r lg:border-gray-300 lg:max-h-[780px]">
+    <aside
+      class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-r lg:border-gray-300 lg:max-h-[980px]"
+    >
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
       >
@@ -174,7 +176,10 @@ try {
           newsArticles.map((newsItem) => (
             <div class="flex-shrink-0 sm:w-1/2 md:w-1/3 lg:w-full">
               <div class="flex items-start gap-4">
-                <a href={`/article/${newsItem.id}`} class="block bg-base-200 z-50">
+                <a
+                  href={`/article/${newsItem.id}`}
+                  class="block bg-base-200 z-50"
+                >
                   <Image
                     src={newsItem.imageUrl}
                     alt={`News image for ${newsItem.title}`}
@@ -185,11 +190,14 @@ try {
                   />
                 </a>
                 <div class="flex-1 max-w-40">
-                    <a href={`/article/${newsItem.id}`} class="block bg-base-200 z-50">
-                      <h3 class="text-base font-bold font-old-standard mt-1 leading-tight truncate">
-                        {newsItem.title}
-                      </h3>
-                    </a>
+                  <a
+                    href={`/article/${newsItem.id}`}
+                    class="block bg-base-200 z-50"
+                  >
+                    <h3 class="text-base font-bold font-old-standard mt-1 leading-tight">
+                      {newsItem.title}
+                    </h3>
+                  </a>
                 </div>
               </div>
             </div>
@@ -198,140 +206,165 @@ try {
       </div>
     </aside>
 
-
     {/* Main Column - WIDER */}
-    <article class="w-full lg:w-6/12 lg:px-4 order-first lg:order-none relative">
+    <article
+      class="w-full lg:w-6/12 lg:px-4 order-first lg:order-none relative"
+    >
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
       >
         Главное
       </h2>
-      {mainArticle ? (
-        <div>
-          <a href={`/article/${mainArticle.id}`} class="block bg-base-200 z-50">
-            <img
-              src={mainArticle.imageUrl}
-              alt={mainArticle.title}
-              class="w-full h-auto lg:h-[600px] object-cover relative lg:z-40"
-              transition:name={`main-article-image-${mainArticle.id}`}
-            />
-          </a>
-          <div class="p-4 lg:p-6">
-            {mainArticle.category && (
-              <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
-                {getPrimaryTag(mainArticle)}
-              </p>
-            )}
-            <a href={`/article/${mainArticle.id}`} class="block bg-base-200 z-50">
-              <h2 class="max-w-[600px] text-3xl lg:text-5xl leading-tight font-thin font-old-standard truncate">
-                {mainArticle.title} <Image
-                  src={maagLogo}
-                  alt="MAAG"
-                  class="w-8 h-8 lg:w-10 lg:h-10 inline-block align-middle"
-                />
-              </h2>
+      {
+        mainArticle ? (
+          <div>
+            <a
+              href={`/article/${mainArticle.id}`}
+              class="block bg-base-200 z-50"
+            >
+              <img
+                src={mainArticle.imageUrl}
+                alt={mainArticle.title}
+                class="w-full h-auto lg:h-[600px] object-cover relative lg:z-40"
+                transition:name={`main-article-image-${mainArticle.id}`}
+              />
             </a>
+            <div class="p-4 lg:p-6">
+              {mainArticle.category && (
+                <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
+                  {getPrimaryTag(mainArticle)}
+                </p>
+              )}
+              <a
+                href={`/article/${mainArticle.id}`}
+                class="block bg-base-200 z-50"
+              >
+                <h2 class="max-w-[600px] text-3xl lg:text-5xl leading-tight font-thin font-old-standard">
+                  {mainArticle.title}{" "}
+                  <Image
+                    src={maagLogo}
+                    alt="MAAG"
+                    class="w-8 h-8 lg:w-10 lg:h-10 inline-block align-middle"
+                  />
+                </h2>
+              </a>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div>
-          <div class="p-4 lg:p-6">
-            <p>Главных статей для отображения нет.</p>
+        ) : (
+          <div>
+            <div class="p-4 lg:p-6">
+              <p>Главных статей для отображения нет.</p>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </article>
 
     {/* Calendar Column */}
-    <aside class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0">
+    <aside
+      class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
+    >
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
       >
         Календарь
       </h2>
-      {landingEvent ? (
-        <a href={`/events/${landingEvent.id}`} class="block bg-white rounded-xl shadow-lg overflow-hidden">
-          <div class="p-4 lg:p-2 flex items-center gap-3">
-            <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
-              <p class="text-2xl lg:text-2xl text-black/60 font-thin font-old-standard">
-                {formatEventDate(landingEvent.startDate)?.day || "--"}
+      {
+        landingEvent ? (
+          <a
+            href={`/events/${landingEvent.id}`}
+            class="block bg-white rounded-xl shadow-lg overflow-hidden"
+          >
+            <div class="p-4 lg:p-2 flex items-center gap-3">
+              <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
+                <p class="text-2xl lg:text-2xl text-black/60 font-thin font-old-standard">
+                  {formatEventDate(landingEvent.startDate)?.day || "--"}
+                </p>
+              </div>
+              <p class="text-[12px] font-inter uppercase tracking-[0.15em]">
+                {(
+                  formatEventDate(landingEvent.startDate)?.month || ""
+                ).toUpperCase() || "Дата"}
               </p>
             </div>
-            <p class="text-[12px] font-inter uppercase tracking-[0.15em]">
-              {(formatEventDate(landingEvent.startDate)?.month || "").toUpperCase() || "Дата"}
-            </p>
-          </div>
-          {landingEvent.imageUrl ? (
-            <img
-              src={landingEvent.imageUrl}
-              alt={landingEvent.title}
-              class="w-full h-auto lg:h-[240px] object-cover"
-              loading="lazy"
-            />
-          ) : (
+            {landingEvent.imageUrl ? (
+              <img
+                src={landingEvent.imageUrl}
+                alt={landingEvent.title}
+                class="w-full h-auto lg:h-[240px] object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <Image
+                src={picture2}
+                alt="Event"
+                class="w-full h-auto lg:h-[240px] object-cover"
+              />
+            )}
+            <div class="p-4 lg:p-6">
+              <p class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]">
+                {eventCategoryLabels[landingEvent.category] || "Событие"}
+              </p>
+              <h2 class="text-base lg:text-lg leading-tight font-old-standard mb-4">
+                {landingEvent.title}
+              </h2>
+              <div class="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-calendar"
+                >
+                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                  <line x1="16" x2="16" y1="2" y2="6" />
+                  <line x1="8" x2="8" y1="2" y2="6" />
+                  <line x1="3" x2="21" y1="10" y2="10" />
+                </svg>
+                <p class="text-sm text-gray-600">
+                  {landingEvent.endDate &&
+                  landingEvent.endDate.getTime() !==
+                    landingEvent.startDate.getTime()
+                    ? `${landingEvent.startDate.toLocaleDateString("ru-RU")} – ${landingEvent.endDate.toLocaleDateString("ru-RU")}`
+                    : landingEvent.startDate.toLocaleDateString("ru-RU")}
+                </p>
+              </div>
+            </div>
+          </a>
+        ) : (
+          <div class="bg-white rounded-xl shadow-lg">
+            <div class="p-4 lg:p-2 flex items-center gap-3">
+              <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
+                <p class="text-2xl lg:text-2xl text-black/50 font-thin font-old-standard">
+                  --
+                </p>
+              </div>
+              <p class="text-[12px] font-inter uppercase tracking-[0.15em]">
+                Скоро
+              </p>
+            </div>
             <Image
               src={picture2}
-              alt="Event"
+              alt="Event placeholder"
               class="w-full h-auto lg:h-[240px] object-cover"
             />
-          )}
-          <div class="p-4 lg:p-6">
-            <p class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]">
-              {eventCategoryLabels[landingEvent.category] || "Событие"}
-            </p>
-            <h2 class="text-base lg:text-lg leading-tight font-old-standard mb-4">
-              {landingEvent.title}
-            </h2>
-            <div class="flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="lucide lucide-calendar"
-              >
-                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-                <line x1="16" x2="16" y1="2" y2="6"></line>
-                <line x1="8" x2="8" y1="2" y2="6"></line>
-                <line x1="3" x2="21" y1="10" y2="10"></line>
-              </svg>
-              <p class="text-sm text-gray-600">
-                {landingEvent.endDate && landingEvent.endDate.getTime() !== landingEvent.startDate.getTime()
-                  ? `${landingEvent.startDate.toLocaleDateString("ru-RU")} – ${landingEvent.endDate.toLocaleDateString("ru-RU")}`
-                  : landingEvent.startDate.toLocaleDateString("ru-RU")}
+            <div class="p-4 lg:p-6">
+              <p class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]">
+                Событие
               </p>
+              <h2 class="text-base lg:text-lg leading-tight font-old-standard mb-4">
+                Скоро появится событие
+              </h2>
+              <p class="text-sm text-gray-600">Следи за обновлениями</p>
             </div>
           </div>
-        </a>
-      ) : (
-        <div class="bg-white rounded-xl shadow-lg">
-          <div class="p-4 lg:p-2 flex items-center gap-3">
-            <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
-              <p class="text-2xl lg:text-2xl text-black/50 font-thin font-old-standard">--</p>
-            </div>
-            <p class="text-[12px] font-inter uppercase tracking-[0.15em]">Скоро</p>
-          </div>
-          <Image
-            src={picture2}
-            alt="Event placeholder"
-            class="w-full h-auto lg:h-[240px] object-cover"
-          />
-          <div class="p-4 lg:p-6">
-            <p class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]">
-              Событие
-            </p>
-            <h2 class="text-base lg:text-lg leading-tight font-old-standard mb-4">
-              Скоро появится событие
-            </h2>
-            <p class="text-sm text-gray-600">Следи за обновлениями</p>
-          </div>
-        </div>
-      )}
+        )
+      }
     </aside>
   </div>
 </section>
