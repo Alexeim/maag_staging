@@ -15,46 +15,54 @@ const { contentBlocks } = Astro.props;
 ---
 
 <div class="max-w-[826px] mx-auto">
-  <article class="prose lg:prose-xl max-w-full space-y-8">
-    {contentBlocks.map((block) => {
-      switch (block.type) {
-        case 'first-paragraph':
-          return (
-            <p class="text-xl first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-3 font-serif text-justify">
-              {block.text}
-            </p>
-          );
-        case 'paragraph':
-          return (
-            <p class="text-lg font-serif text-justify">{block.text}</p>
-          );
-        case 'h2':
-          return <h2 class="text-3xl font-bold">{block.text}</h2>;
-        case 'h3':
-          return <h3 class="text-2xl font-bold">{block.text}</h3>;
-        case 'quote':
-          return (
-            <blockquote class="text-2xl italic pl-4 my-4">
-              "{block.text}"
-            </blockquote>
-          );
-        case 'image':
-          return (
-            <figure class="not-prose">
-              <img src={block.url} alt={block.caption || 'Article image'} class="rounded-lg w-full" />
-              {block.caption && (
-                <figcaption class="text-center text-sm text-gray-500 mt-2">{block.caption}</figcaption>
-              )}
-            </figure>
-          );
-        // ADD OTHER BLOCK TYPES FROM ALEXEI'S LIST HERE
-        // case 'quote-with-author':
-        //   return ...
-        // case 'image-left-text-right':
-        //   return ...
-        default:
-          return null;
-      }
-    })}
+  <article class="prose lg:prose-xl max-w-full space-y-12">
+    {
+      contentBlocks.map((block) => {
+        switch (block.type) {
+          case "first-paragraph":
+            return (
+              <p class="text-lg first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-3 font-lora text-justify">
+                {block.text}
+              </p>
+            );
+          case "paragraph":
+            return <p class="text-lg font-lora text-justify">{block.text}</p>;
+          case "h2":
+            return <h2 class="text-xl font-bold font-inter">{block.text}</h2>;
+          case "h3":
+            return <h3 class="text-2xl font-bold font-inter">{block.text}</h3>;
+          case "quote":
+            return (
+              <div class="bg-white p-2">
+                <blockquote class="text-3xl italic font-lora pl-4 my-4">
+                  "{block.text}"
+                </blockquote>
+              </div>
+            );
+          case "image":
+            return (
+              <figure class="not-prose">
+                <img
+                  src={block.url}
+                  alt={block.caption || "Article image"}
+                  class="w-full"
+                />
+                {block.caption && (
+                  <figcaption class="text-center text-sm text-gray-500 mt-2">
+                    {block.caption}
+                  </figcaption>
+                )}
+              </figure>
+            );
+          // ADD OTHER BLOCK TYPES FROM ALEXEI'S LIST HERE
+          // case 'quote-with-author':
+          //   return ...
+          // case 'image-left-text-right':
+          //   return ...
+          default:
+            return null;
+        }
+      })
+    }
   </article>
 </div>
