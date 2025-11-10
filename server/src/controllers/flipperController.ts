@@ -64,7 +64,7 @@ export const createFlipper = async (req: Request, res: Response) => {
  */
 export const getFlippers = async (req: Request, res: Response) => {
   try {
-    const snapshot = await flippersCollection.get();
+    const snapshot = await flippersCollection.orderBy('createdAt', 'desc').get();
     
     if (snapshot.empty) {
       return res.status(200).json([]);
