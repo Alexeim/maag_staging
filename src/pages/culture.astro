@@ -6,6 +6,74 @@ import logoFull from "../assets/logo/logoFull.svg";
 import { Image } from "astro:assets";
 import CategoryHero from "@/components/common/CategoryHero.astro";
 import ArticleCard from "@/components/common/ArticleCard.astro";
+import { articlesApi, flippersApi, type FlipperPayload } from "@/lib/api/api";
+
+interface FlipperResponse extends FlipperPayload {
+  id: string;
+  createdAt: string | Date;
+}
+
+// Helper function to convert Firebase Timestamp to Date
+const getDate = (timestamp: any): Date => {
+  if (timestamp instanceof Date) {
+    return timestamp;
+  }
+  if (timestamp && typeof timestamp === 'object' && '_seconds' in timestamp) {
+    return new Date(timestamp._seconds * 1000);
+  }
+  return new Date(timestamp);
+};
+
+const normalizeCategory = (value?: string) => {
+  if (!value) return null;
+  return value.toLowerCase().trim();
+};
+
+const isHotContent = (item: any) =>
+  Boolean(item?.isHotContent) || normalizeCategory(item?.category) === 'hotcontent';
+
+const getPrimaryTag = (item: any) => {
+  const rawTags = Array.isArray(item?.tags) ? item.tags : (typeof item?.tags === 'string' ? [item.tags] : []);
+  const firstTag = rawTags.find((tag: string) => typeof tag === 'string' && tag.trim().length > 0);
+  if (firstTag) return firstTag.trim();
+  return item?.category || 'Культура';
+};
+
+let cultureItems: any[] = [];
+
+try {
+  const [articles, flippers] = await Promise.all([
+    articlesApi.list(),
+    flippersApi.list() as Promise<FlipperResponse[]>,
+  ]);
+
+  const allItems = [
+    ...articles.map(article => ({ ...article, type: 'article', href: `/article/${article.id}` })),
+    ...flippers.map(flipper => ({
+      ...flipper,
+      type: 'flipper',
+      href: `/flippers/${flipper.id}`,
+      imageUrl: flipper.carouselContent?.[0]?.imageUrl,
+    })),
+  ].sort((a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime());
+
+  // Filter items: category === 'culture' AND NOT hot content
+  cultureItems = allItems.filter(item =>
+    normalizeCategory(item.category) === 'culture' && !isHotContent(item)
+  );
+} catch (error) {
+  console.error("Failed to fetch culture items:", error);
+}
+
+// Skip first 4 items (already shown in LandingBody: hero + 3 cards)
+const remainingItems = cultureItems.slice(4);
+
+// Split remaining items into rows of 3
+const itemsPerRow = 3;
+const cultureRows: any[][] = [];
+for (let i = 0; i < remainingItems.length; i += itemsPerRow) {
+  cultureRows.push(remainingItems.slice(i, i + itemsPerRow));
+}
 ---
 
 <Layout
@@ -14,16 +82,23 @@ import ArticleCard from "@/components/common/ArticleCard.astro";
   title="Maag"
   useClientRouter={true}
 >
-  <CategoryHero title={"Culture"}/>
+  <CategoryHero title={"Культура"}/>
   <LandingBody isLanding={false}/>
-  <div id="culture-articles-box" class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-2 lg:px-4 min-h-[100px]">
-    <ArticleCard isNetlenka={false}/>
-    <ArticleCard isNetlenka={false}/>
-    <ArticleCard isNetlenka={false}/>
-  </div>
-  <div id="culture-articles-box" class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-2 lg:px-4 min-h-[100px]">
-    <ArticleCard isNetlenka={false}/>
-    <ArticleCard isNetlenka={false}/>
-    <ArticleCard isNetlenka={false}/>
-  </div>
+  {cultureRows.map((row) => (
+    <div id="culture-articles-box" class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-2 lg:px-4 min-h-[100px]">
+      {row.map((item) => (
+        <ArticleCard
+          key={item.id}
+          isNetlenka={false}
+          title={item.title}
+          category={getPrimaryTag(item)}
+          imageUrl={item.imageUrl}
+          href={item.href}
+        />
+      ))}
+      {row.length < itemsPerRow && Array.from({ length: itemsPerRow - row.length }).map((_, i) => (
+        <ArticleCard key={`placeholder-${i}`} isNetlenka={false} />
+      ))}
+    </div>
+  ))}
 </Layout>

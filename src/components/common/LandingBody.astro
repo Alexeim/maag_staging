@@ -1,6 +1,6 @@
 ---
 import { Image } from "astro:assets";
-import { articlesApi, interviewsApi } from "@/lib/api/api";
+import { articlesApi, interviewsApi, flippersApi, type FlipperPayload } from "@/lib/api/api";
 
 import NetlenkaCard from "./NetlenkaCard.astro";
 import ArticleCard from "./ArticleCard.astro";
@@ -12,6 +12,11 @@ interface LandingBodyProps {
   isLanding?: boolean
 }
 
+interface FlipperResponse extends FlipperPayload {
+  id: string;
+  createdAt: string | Date;
+}
+
 const {isLanding = true} = Astro.props as LandingBodyProps
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -19,6 +24,14 @@ const CATEGORY_LABELS: Record<string, string> = {
   paris: "Париж",
   news: "Новости",
   hotContent: "Самое Читаемое",
+  ballet: "Балет",
+  interview: "Интервью",
+  performance: "Спектакль",
+  performances: "Спектакль",
+  concert: "Концерт",
+  concerts: "Концерт",
+  exhibition: "Выставка",
+  exhibitions: "Выставка",
 };
 
 const CULTURE_CATEGORY_KEY = "culture";
@@ -26,75 +39,78 @@ const CULTURE_CATEGORY_LABEL = CATEGORY_LABELS[CULTURE_CATEGORY_KEY];
 const HOT_CONTENT_CATEGORY_KEY = "hotContent";
 
 const normalizeCategory = (value?: string) => {
-  if (!value) {
-    return value;
-  }
+  if (!value) return null;
+  const lowerCaseValue = value.toLowerCase();
   const entry = Object.entries(CATEGORY_LABELS).find(
-    ([, label]) => label === value,
+    ([key, label]) => key === lowerCaseValue || label.toLowerCase() === lowerCaseValue
   );
-  return entry ? entry[0] : value;
+  return entry ? entry[0] : lowerCaseValue;
 };
 
 const getCategoryLabel = (value?: string) => {
+  if (!value) return CATEGORY_LABELS[CULTURE_CATEGORY_KEY];
   const normalized = normalizeCategory(value);
-  if (normalized && CATEGORY_LABELS[normalized]) {
-    return CATEGORY_LABELS[normalized];
-  }
-  return value ?? CULTURE_CATEGORY_LABEL;
+  return normalized ? (CATEGORY_LABELS[normalized] || value) : value;
 };
 
-const getPrimaryTag = (article: any) => {
-  const rawTags = Array.isArray(article?.tags)
-    ? article.tags
-    : typeof article?.tags === "string"
-      ? [article.tags]
-      : [];
-
-  const firstTag = rawTags.find(
-    (tag: string) => typeof tag === "string" && tag.trim().length > 0,
-  );
-
-  if (firstTag) {
-    return firstTag.trim();
-  }
-
-  if (article?.isHotContent) {
-    return CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY];
-  }
-
-  return getCategoryLabel(article?.category);
+const getPrimaryTag = (item: any) => {
+  const rawTags = Array.isArray(item?.tags) ? item.tags : (typeof item?.tags === 'string' ? [item.tags] : []);
+  const firstTag = rawTags.find((tag: string) => typeof tag === 'string' && tag.trim().length > 0);
+  if (firstTag) return getCategoryLabel(firstTag.trim());
+  if (item?.isHotContent) return CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY];
+  return getCategoryLabel(item?.category);
 };
+const isHotContent = (item: any) =>
+  Boolean(item?.isHotContent) || normalizeCategory(item?.category) === HOT_CONTENT_CATEGORY_KEY;
 
-const isHotContentArticle = (article: any) =>
-  Boolean(article?.isHotContent) ||
-  normalizeCategory(article?.category) === HOT_CONTENT_CATEGORY_KEY;
-
-let cultureArticles: any[] = [];
-let cultureHero: any = null;
-let cultureCardArticles: any[] = [];
+let cultureItems: any[] = [];
 let hotContentArticles: any[] = [];
 let latestInterview: any = null;
 
+const getDate = (timestamp: any): Date => {
+  if (timestamp && typeof timestamp === 'object' && timestamp._seconds) {
+    return new Date(timestamp._seconds * 1000);
+  }
+  return new Date(timestamp);
+};
+
 try {
-  const articles = await articlesApi.list();
-  cultureArticles = articles.filter(
-    (article) => 
-      normalizeCategory(article.category) === CULTURE_CATEGORY_KEY && 
-      !isHotContentArticle(article)
-  );
-  cultureHero = cultureArticles[0] ?? null;
-  cultureCardArticles = cultureArticles.slice(1, 4);
-  hotContentArticles = articles
-    .filter((article) => isHotContentArticle(article))
-    .reverse()
-    .slice(0, 6);
+  const [articles, flippers, interviews] = await Promise.all([
+    articlesApi.list(),
+    flippersApi.list() as Promise<FlipperResponse[]>,
+    interviewsApi.list()
+  ]);
+
+  console.log(`--- STEP 1: RAW DATA ---`);
+  console.log(`Loaded ${articles.length} articles, ${flippers.length} flippers.`);
+
+  const allItems = [
+    ...articles.map(article => ({ ...article, type: 'article', href: `/article/${article.id}` })),
+    ...flippers.map(flipper => ({
+      ...flipper,
+      type: 'flipper',
+      href: `/flippers/${flipper.id}`,
+      imageUrl: flipper.carouselContent?.[0]?.imageUrl,
+    })),
+  ].sort((a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime());
+
+  console.log(`--- STEP 2: COMBINED ---`);
+  console.log(`Total items in allItems: ${allItems.length}`);
+
+  cultureItems = allItems.filter(item => normalizeCategory(item.category) === CULTURE_CATEGORY_KEY && !isHotContent(item));
   
-  const interviews = await interviewsApi.list();
+  console.log(`--- STEP 3: FILTERED ---`);
+  console.log(`Items in cultureItems after filtering: ${cultureItems.length}`);
+
+  hotContentArticles = articles.filter(isHotContent).reverse().slice(0, 6);
   latestInterview = interviews[0] ?? null;
 
 } catch (error) {
   console.error("Failed to fetch data for LandingBody:", error);
 }
+
+const cultureHero = cultureItems[0] ?? null;
+const cultureCardItems = cultureItems.slice(1, 4);
 
 const extractQuoteOrAnswer = (interview: any) => {
   if (!interview || !Array.isArray(interview.content)) {
@@ -127,14 +143,14 @@ const interviewQuote = truncateText(extractQuoteOrAnswer(latestInterview));
   <div class="flex flex-col-reverse lg:flex-row min-h-[200px] gap-8 mb-0 lg:mb-6">
     <div class="w-full lg:w-9/12 flex flex-col">
       <div class="pl-0 lg:pl-4 pr-0">
-        <h2 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard">Culture</h2>
+        <h2 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard">{CATEGORY_LABELS[CULTURE_CATEGORY_KEY]}</h2>
         <div class="w-full flex flex-col gap-8">
           <div class="w-full bg-white flex flex-col gap-6 lg:flex-row lg:gap-8 items-start justify-start min-h-[100px]">
             {cultureHero ? (
               <>
                 <div class="w-full lg:w-3/5 h-auto lg:h-[400px] overflow-hidden">
                   {cultureHero.imageUrl ? (
-                    <a href={`/article/${cultureHero.id}`} class="block w-full h-full">
+                    <a href={cultureHero.href} class="block w-full h-full">
                       <img
                         src={cultureHero.imageUrl}
                         alt={cultureHero.title}
@@ -155,7 +171,7 @@ const interviewQuote = truncateText(extractQuoteOrAnswer(latestInterview));
                   <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
                     {getPrimaryTag(cultureHero)}
                   </p>
-                  <a href={`/article/${cultureHero.id}`} class="block">
+                  <a href={cultureHero.href} class="block">
                     <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-old-standard text-wrap break-words hover:underline">
                       {cultureHero.title}
                     </h4>
@@ -183,15 +199,15 @@ const interviewQuote = truncateText(extractQuoteOrAnswer(latestInterview));
           </div>
 
           <div id="culture-articles-box" class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 lg:px-4 min-h-[100px]">
-            {cultureCardArticles.length > 0 ? (
-              cultureCardArticles.map((article) => (
+            {cultureCardItems.length > 0 ? (
+              cultureCardItems.map((item) => (
                 <ArticleCard
-                  key={article.id}
+                  key={item.id}
                   isNetlenka={false}
-                  title={article.title}
-                  category={getPrimaryTag(article)}
-                  imageUrl={article.imageUrl}
-                  href={`/article/${article.id}`}
+                  title={item.title}
+                  category={getPrimaryTag(item)}
+                  imageUrl={item.imageUrl}
+                  href={item.href}
                 />
               ))
             ) : (
