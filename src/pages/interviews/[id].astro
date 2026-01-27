@@ -39,7 +39,7 @@ const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
           <Image
             src={imageUrl}
             alt={imageCaption || title}
-            class="w-full h-auto rounded-lg shadow-lg"
+            class="article-image rounded-lg shadow-lg"
             inferSize={true}
           />
           {imageCaption && (
@@ -79,7 +79,7 @@ const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
                   <Image
                     src={block.url}
                     alt={block.caption || "Interview content image"}
-                    class="rounded-md w-full object-cover"
+                    class="article-image rounded-md object-cover"
                     inferSize={true}
                   />
                   {block.caption && (

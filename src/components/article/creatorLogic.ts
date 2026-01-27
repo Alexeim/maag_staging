@@ -390,7 +390,7 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     // --- Image Upload Method ---
-    handleImageUpload(event, isCover = true, blockIndex = null) {
+    handleImageUpload(event, isCover = true, blockIndex = null, column = null) {
       const file = event.target.files[0];
       if (!file) return;
 
@@ -418,13 +418,13 @@ export default function articleCreatorLogic(initialState = {}) {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
             if (isCover) {
               this.article.imageUrl = downloadURL;
-            } else if (
-              blockIndex !== null &&
-              this.editingBlock &&
-              this.editingBlock.type === "image"
-            ) {
-              // Update the URL for the specific image block being edited
-              this.editingBlock.url = downloadURL;
+            } else if (blockIndex !== null && this.editingBlock) {
+              if (this.editingBlock.type === "image") {
+                this.editingBlock.url = downloadURL;
+              } else if (this.editingBlock.type === "two-columns" && column) {
+                this.editingBlock[column].content = downloadURL;
+                this.editingBlock[column].type = 'image'; // Ensure type is image
+              }
             }
             this.uploading = false;
             window.Alpine.store("ui").showToast("Картинка успешно загружена!");
@@ -454,6 +454,12 @@ export default function articleCreatorLogic(initialState = {}) {
           break;
         case "image":
           newBlockData = { url: "", caption: "" };
+          break;
+        case "two-columns":
+          newBlockData = {
+            left: { type: "text", content: "", caption: "" },
+            right: { type: "text", content: "", caption: "" },
+          };
           break;
         // Add other cases here
         default:

@@ -259,6 +259,108 @@ const {
                 </div>
               </template>
 
+              <template x-if="editingBlock.type === 'two-columns'">
+                <div class="space-y-4">
+                  <div class="flex gap-4">
+                    <!-- Left Column Editor -->
+                    <div class="w-1/2 space-y-3 p-3 border border-base-300 rounded-lg">
+                      <h4 class="text-md font-semibold">Левая колонка</h4>
+                      <label class="block text-sm font-medium">Тип контента</label>
+                      <select x-model="editingBlock.left.type" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5">
+                        <option value="text">Текст</option>
+                        <option value="image">Изображение</option>
+                      </select>
+
+                      <template x-if="editingBlock.left.type === 'text'">
+                        <div>
+                          <label class="block text-sm font-medium">Текст</label>
+                          <textarea x-model="editingBlock.left.content" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" rows="5"></textarea>
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.left.type === 'image'">
+                        <div x-data="{ leftBlockFileName: '' }" class="space-y-3">
+                          <label class="block text-sm font-medium">Изображение</label>
+                          <div class="flex items-center gap-3">
+                            <label :for="'left-block-image-upload-' + index" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
+                              <CloudUpload/>
+                              Загрузить файл
+                            </label>
+                            <input
+                              :id="'left-block-image-upload-' + index"
+                              type="file"
+                              class="hidden"
+                              @change="handleImageUpload($event, false, index, 'left'); leftBlockFileName = $event.target.files[0]?.name || ''"
+                              accept="image/png, image/jpeg, image/webp"
+                            />
+                            <span
+                              x-text="leftBlockFileName || (editingBlock.left.content ? 'Изображение загружено' : 'Файл не выбран')"
+                              class="text-sm text-base-content/70"
+                            ></span>
+                          </div>
+                          <img x-show="editingBlock.left.content" :src="editingBlock.left.content" alt="Предпросмотр левой колонки" class="rounded-md max-h-48" />
+                          <label class="block text-sm font-medium mt-2">Подпись к изображению</label>
+                          <input
+                            type="text"
+                            x-model="editingBlock.left.caption"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Введите подпись..."
+                          />
+                        </div>
+                      </template>
+                    </div>
+
+                    <!-- Right Column Editor -->
+                    <div class="w-1/2 space-y-3 p-3 border border-base-300 rounded-lg">
+                      <h4 class="text-md font-semibold">Правая колонка</h4>
+                      <label class="block text-sm font-medium">Тип контента</label>
+                      <select x-model="editingBlock.right.type" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5">
+                        <option value="text">Текст</option>
+                        <option value="image">Изображение</option>
+                      </select>
+
+                      <template x-if="editingBlock.right.type === 'text'">
+                        <div>
+                          <label class="block text-sm font-medium">Текст</label>
+                          <textarea x-model="editingBlock.right.content" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" rows="5"></textarea>
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.right.type === 'image'">
+                        <div x-data="{ rightBlockFileName: '' }" class="space-y-3">
+                          <label class="block text-sm font-medium">Изображение</label>
+                          <div class="flex items-center gap-3">
+                            <label :for="'right-block-image-upload-' + index" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
+                              <CloudUpload/>
+                              Загрузить файл
+                            </label>
+                            <input
+                              :id="'right-block-image-upload-' + index"
+                              type="file"
+                              class="hidden"
+                              @change="handleImageUpload($event, false, index, 'right'); rightBlockFileName = $event.target.files[0]?.name || ''"
+                              accept="image/png, image/jpeg, image/webp"
+                            />
+                            <span
+                              x-text="rightBlockFileName || (editingBlock.right.content ? 'Изображение загружено' : 'Файл не выбран')"
+                              class="text-sm text-base-content/70"
+                            ></span>
+                          </div>
+                          <img x-show="editingBlock.right.content" :src="editingBlock.right.content" alt="Предпросмотр правой колонки" class="rounded-md max-h-48" />
+                          <label class="block text-sm font-medium mt-2">Подпись к изображению</label>
+                          <input
+                            type="text"
+                            x-model="editingBlock.right.caption"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Введите подпись..."
+                          />
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
               <div class="flex justify-end gap-3">
                 <Button variant="secondary" @click="cancelEdit()">Отмена</Button>
                 <Button variant="primary" @click="updateBlock()">Сохранить блок</Button>
@@ -306,6 +408,7 @@ const {
           <button @click="addBlock('h3')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Подзаголовок H3</button>
           <button @click="addBlock('quote')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Цитата</button>
           <button @click="addBlock('image')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Картинка</button>
+          <button @click="addBlock('two-columns')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Две колонки</button>
         </div>
       </template>
 

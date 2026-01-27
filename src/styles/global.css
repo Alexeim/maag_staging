@@ -59,12 +59,8 @@
   font-family: "Inter", sans-serif;
 }
 
-.font-lora {
-  font-family: "Lora", serif;
-}
-
-.font-old-standard {
-  font-family: "Old Standard TT", serif;
+.font-oswald {
+  font-family: "Oswald", sans-serif;
 }
 
 /* Mobile Menu Styles */
@@ -98,3 +94,12 @@ body.menu-open .mobile-menu-panel {
 [REMOVED] 3D Button Styles were here.
 The custom implementation was removed in favor of standard DaisyUI buttons.
 */
+
+.article-image {
+  max-height: 620px;
+  width: auto;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+

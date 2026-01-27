@@ -14,7 +14,7 @@ import { BadgeCheck } from "lucide-astro";
       <!-- Page Header -->
       <div class="mb-8">
         <h1
-          class="text-4xl font-lora font-normal uppercase tracking-[0.46em] text-base-content mb-5"
+          class="text-4xl font-oswald font-normal uppercase tracking-[0.46em] text-base-content mb-5"
         >
           Личный кабинет
         </h1>
@@ -22,14 +22,14 @@ import { BadgeCheck } from "lucide-astro";
         <!-- Navigation Tabs -->
         <div class="flex flex-col lg:flex-row gap-4 lg:gap-8">
           <button
-            class="w-full lg:w-auto text-left lg:text-center text-xs font-inter font-semibold uppercase tracking-[0.25em] text-base-content border-b-2 border-accent pb-1"
+            class="w-full lg:w-auto text-left lg:text-center text-xs font-oswald font-semibold uppercase tracking-[0.25em] text-base-content border-b-2 border-accent pb-1"
             x-data="{ active: true }"
             :class="{ 'text-accent': active }"
           >
             настройка аккаунта
           </button>
           <button
-            class="w-full lg:w-auto text-left lg:text-center text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content/70 hover:text-base-content transition-colors"
+            class="w-full lg:w-auto text-left lg:text-center text-xs font-oswald font-normal uppercase tracking-[0.25em] text-base-content/70 hover:text-base-content transition-colors"
             x-data="{ active: false }"
             :class="{ 'text-accent': active }"
           >
@@ -46,7 +46,7 @@ import { BadgeCheck } from "lucide-astro";
           <div class="space-y-6">
             <div class="w-full h-px bg-neutral-200"></div>
             <h2
-              class="text-base font-lora font-normal uppercase tracking-[0.46em] text-base-content"
+              class="text-base font-oswald font-normal uppercase tracking-[0.46em] text-base-content"
             >
               Подписка
             </h2>
@@ -111,7 +111,7 @@ import { BadgeCheck } from "lucide-astro";
           <div class="space-y-6">
             <div class="w-full h-px bg-neutral-200"></div>
             <h2
-              class="text-base font-lora font-normal uppercase tracking-[0.46em] text-base-content"
+              class="text-base font-oswald font-normal uppercase tracking-[0.46em] text-base-content"
             >
               Данные аккаунта
             </h2>
@@ -138,7 +138,7 @@ import { BadgeCheck } from "lucide-astro";
                 <!-- Email Field (Read-only) -->
                 <div class="space-y-4 mb-10">
                   <label
-                    class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+                    class="text-xs font-oswald font-normal uppercase tracking-[0.25em] text-base-content"
                     >email</label
                   >
                   <div
@@ -146,7 +146,7 @@ import { BadgeCheck } from "lucide-astro";
                   >
                     <div
                       x-text="$store.auth.user?.email"
-                      class="w-full bg-transparent text-xs font-inter text-neutral-400 outline-none"
+                      class="w-full bg-transparent text-xs font-oswald text-neutral-400 outline-none"
                     >
                     </div>
                   </div>
@@ -155,7 +155,7 @@ import { BadgeCheck } from "lucide-astro";
                 <!-- Password Field -->
                 <div class="space-y-4 mb-10">
                   <label
-                    class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+                    class="text-xs font-oswald font-normal uppercase tracking-[0.25em] text-base-content"
                     >Пароль</label
                   >
                   <div
@@ -168,7 +168,7 @@ import { BadgeCheck } from "lucide-astro";
                         type="password"
                         value="**********"
                         readonly
-                        class="w-full bg-transparent text-[16px] lg:text-xs font-inter text-neutral-400 outline-none"
+                        class="w-full bg-transparent text-[16px] lg:text-xs font-oswald text-neutral-400 outline-none"
                       />
                     </div>
                     <div class="w-full lg:w-auto">
@@ -182,7 +182,7 @@ import { BadgeCheck } from "lucide-astro";
                 <!-- Name Fields -->
                 <div class="space-y-4 mb-4">
                   <label
-                    class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+                    class="text-xs font-oswald font-normal uppercase tracking-[0.25em] text-base-content"
                     >First Name</label
                   >
                   <div
@@ -191,13 +191,13 @@ import { BadgeCheck } from "lucide-astro";
                     <input
                       type="text"
                       x-model="form.firstName"
-                      class="w-full bg-transparent text-[16px] lg:text-xs font-inter text-neutral-400 outline-none"
+                      class="w-full bg-transparent text-[16px] lg:text-xs font-oswald text-neutral-400 outline-none"
                     />
                   </div>
                 </div>
                 <div class="space-y-4">
                   <label
-                    class="text-xs font-inter font-normal uppercase tracking-[0.25em] text-base-content"
+                    class="text-xs font-oswald font-normal uppercase tracking-[0.25em] text-base-content"
                     >Last Name</label
                   >
                   <div
@@ -206,7 +206,7 @@ import { BadgeCheck } from "lucide-astro";
                     <input
                       type="text"
                       x-model="form.lastName"
-                      class="w-full bg-transparent text-[16px] lg:text-xs font-inter text-neutral-400 outline-none"
+                      class="w-full bg-transparent text-[16px] lg:text-xs font-oswald text-neutral-400 outline-none"
                     />
                   </div>
                 </div>
@@ -215,13 +215,13 @@ import { BadgeCheck } from "lucide-astro";
                 <div class="space-y-4 mt-10">
                   <button
                     @click="saveChanges()"
-                    class="w-full bg-primary text-primary-content rounded-xl py-2 px-4 text-sm font-inter font-normal hover:bg-primary/90 transition-colors cursor-pointer"
+                    class="w-full bg-primary text-primary-content rounded-xl py-2 px-4 text-sm font-oswald font-normal hover:bg-primary/90 transition-colors cursor-pointer"
                   >
                     Сохранить изменения
                   </button>
                   <button
                     @click="deleteAccount()"
-                    class="w-full border border-error text-error rounded-xl py-2 px-4 text-sm font-inter font-normal hover:bg-error/5 transition-colors cursor-pointer"
+                    class="w-full border border-error text-error rounded-xl py-2 px-4 text-sm font-oswald font-normal hover:bg-error/5 transition-colors cursor-pointer"
                   >
                     Удалить аккаунт
                   </button>

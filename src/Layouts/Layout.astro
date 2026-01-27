@@ -37,7 +37,7 @@ const {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Oswald:wght@200..700&display=swap"
       rel="stylesheet"
     />
     <ViewTransitions />
@@ -65,22 +65,22 @@ const {
     <div id="mobile-menu" x-show="$store.navbar.isOpen" x-cloak class="fixed top-0 right-0 w-[235px] h-screen bg-base-100 z-[999] lg:hidden flex flex-col justify-between p-8" x-transition:enter="transform transition ease-in-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
       <!-- Links -->
       <ul class="flex flex-col gap-4 text-base-content">
-        <li class="font-old-standard uppercase tracking-[.46em] text-base font-normal"><a href="/culture">Культура</a></li>
-        <li class="font-old-standard uppercase tracking-[.46em] text-base font-normal"><a href="/paris">Париж</a></li>
-        <li class="font-old-standard uppercase tracking-[.46em] text-base font-normal"><a href="/building">Дети</a></li>
-        <li class="font-old-standard uppercase tracking-[.46em] text-base font-normal"><a href="/calendar">Календарь</a></li>
-        <li class="font-old-standard uppercase tracking-[.46em] text-base font-normal"><a href="/building">О проекте</a></li>
+        <li class="font-oswald uppercase tracking-[.46em] text-base font-normal"><a href="/culture">Культура</a></li>
+        <li class="font-oswald uppercase tracking-[.46em] text-base font-normal"><a href="/paris">Париж</a></li>
+        <li class="font-oswald uppercase tracking-[.46em] text-base font-normal"><a href="/building">Дети</a></li>
+        <li class="font-oswald uppercase tracking-[.46em] text-base font-normal"><a href="/calendar">Календарь</a></li>
+        <li class="font-oswald uppercase tracking-[.46em] text-base font-normal"><a href="/building">О проекте</a></li>
       </ul>
 
       <!-- Bottom Section -->
       <div class="flex flex-col gap-7" x-data="$lazy('navbar')">
         <!-- Loading State -->
         <template x-if="$store.auth.isLoading">
-          <button class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-inter text-[14px] w-full" disabled>...</button>
+          <button class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-oswald text-[14px] w-full" disabled>...</button>
         </template>
         <!-- Logged Out State -->
         <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
-          <button @click.prevent="$store.auth.openAuthModal(); $store.navbar.close()" class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-inter text-[14px] w-full">Войти</button>
+          <button @click.prevent="$store.auth.openAuthModal(); $store.navbar.close()" class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-oswald text-[14px] w-full">Войти</button>
         </template>
         <!-- Logged In State -->
         <template x-if="!$store.auth.isLoading && $store.auth.isLoggedIn">
@@ -88,7 +88,7 @@ const {
             <a href="/profile" class="flex items-center justify-center w-12 h-12 bg-primary text-primary-content rounded-full font-bold text-xl hover:drop-shadow-lg transition-shadow">
               <div x-text="$store.auth.initials"></div>
             </a>
-            <button @click.prevent="handleSignOut(); $store.navbar.close()" class="bg-transparent text-base-content/70 hover:text-base-content text-center font-inter text-[14px] w-full">Выйти</button>
+            <button @click.prevent="handleSignOut(); $store.navbar.close()" class="bg-transparent text-base-content/70 hover:text-base-content text-center font-oswald text-[14px] w-full">Выйти</button>
           </div>
         </template>
 

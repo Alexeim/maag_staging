@@ -7,62 +7,130 @@ interface Block {
   // Add other potential block properties here
 }
 
+interface ColumnData {
+  type: 'image' | 'text';
+  content: string; // url for image, text for text
+  caption?: string;
+}
+
+interface TwoColumnBlock extends Block {
+  type: 'two-columns';
+  left: ColumnData;
+  right: ColumnData;
+}
+
+interface RenderableBlock {
+  type: 'prose-group' | 'two-columns';
+  content?: Block[]; // for prose-group
+  block?: TwoColumnBlock; // for two-columns
+}
+
 interface Props {
-  contentBlocks: Block[];
+  contentBlocks: (Block | TwoColumnBlock)[];
 }
 
 const { contentBlocks } = Astro.props;
+
+const renderableGroups: RenderableBlock[] = [];
+let currentProseGroup: Block[] = [];
+
+for (const block of contentBlocks) {
+  if (block.type === 'two-columns') {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({ type: 'prose-group', content: currentProseGroup });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({ type: 'two-columns', block: block as TwoColumnBlock });
+  } else {
+    currentProseGroup.push(block);
+  }
+}
+
+if (currentProseGroup.length > 0) {
+  renderableGroups.push({ type: 'prose-group', content: currentProseGroup });
+}
+
 ---
 
-<div class="max-w-[826px] mx-auto">
-  <article class="prose lg:prose-xl max-w-full space-y-12">
-    {
-      contentBlocks.map((block) => {
-        switch (block.type) {
-          case "first-paragraph":
-            return (
-              <p class="text-lg first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-3 font-lora text-justify">
-                {block.text}
-              </p>
-            );
-          case "paragraph":
-            return <p class="text-lg font-lora text-justify">{block.text}</p>;
-          case "h2":
-            return <h2 class="text-xl font-bold font-inter">{block.text}</h2>;
-          case "h3":
-            return <h3 class="text-2xl font-bold font-inter">{block.text}</h3>;
-          case "quote":
-            return (
-              <div class="bg-white p-2">
-                <blockquote class="text-3xl italic font-lora pl-4 my-4">
-                  "{block.text}"
-                </blockquote>
-              </div>
-            );
-          case "image":
-            return (
-              <figure class="not-prose">
-                <img
-                  src={block.url}
-                  alt={block.caption || "Article image"}
-                  class="w-full"
-                />
-                {block.caption && (
-                  <figcaption class="text-center text-sm text-gray-500 mt-2">
-                    {block.caption}
-                  </figcaption>
-                )}
-              </figure>
-            );
-          // ADD OTHER BLOCK TYPES FROM ALEXEI'S LIST HERE
-          // case 'quote-with-author':
-          //   return ...
-          // case 'image-left-text-right':
-          //   return ...
-          default:
-            return null;
-        }
-      })
+<div class="flex flex-col items-center">
+  {renderableGroups.map(group => {
+    if (group.type === 'prose-group' && group.content) {
+      return (
+        <div class="max-w-[826px] mx-auto">
+          <article class="prose lg:prose-xl max-w-full space-y-12">
+            {group.content.map(block => {
+              switch (block.type) {
+                case "first-paragraph":
+                  return (
+                    <p class="text-lg first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-3 font-oswald text-justify">
+                      {block.text}
+                    </p>
+                  );
+                case "paragraph":
+                  return <p class="text-lg font-oswald text-justify">{block.text}</p>;
+                case "h2":
+                  return <h2 class="text-xl font-bold font-oswald">{block.text}</h2>;
+                case "h3":
+                  return <h3 class="text-2xl font-bold font-oswald">{block.text}</h3>;
+                case "quote":
+                  return (
+                    <div class="bg-white p-2">
+                      <blockquote class="text-3xl italic font-oswald pl-4 my-4">
+                        "{block.text}"
+                      </blockquote>
+                    </div>
+                  );
+                case "image":
+                  return (
+                    <figure class="not-prose flex flex-col items-center">
+                      <img
+                        src={block.url}
+                        alt={block.caption || "Article image"}
+                        class="article-image"
+                      />
+                      {block.caption && (
+                        <figcaption class="text-center text-sm text-gray-500 mt-2">
+                          {block.caption}
+                        </figcaption>
+                      )}
+                    </figure>
+                  );
+                default:
+                  return null;
+              }
+            })}
+          </article>
+        </div>
+      );
+    } else if (group.type === 'two-columns' && group.block) {
+      const twoColumnBlock = group.block;
+      return (
+        <div class="w-full lg:max-w-[900px] my-12 px-4">
+          <div class="flex flex-col lg:flex-row gap-8 items-center">
+            <div class="w-full lg:w-1/2 flex justify-center">
+              {twoColumnBlock.left.type === 'image' ? (
+                <figure class="flex flex-col items-center">
+                  <img src={twoColumnBlock.left.content} alt={twoColumnBlock.left.caption || "Left column image"} class="article-image" />
+                  {twoColumnBlock.left.caption && <figcaption class="text-center text-sm text-gray-500 mt-2">{twoColumnBlock.left.caption}</figcaption>}
+                </figure>
+              ) : (
+                <p class="text-lg font-oswald text-justify">{twoColumnBlock.left.content}</p>
+              )}
+            </div>
+            <div class="w-full lg:w-1/2 flex justify-center">
+              {twoColumnBlock.right.type === 'image' ? (
+                <figure class="flex flex-col items-center">
+                  <img src={twoColumnBlock.right.content} alt={twoColumnBlock.right.caption || "Right column image"} class="article-image" />
+                  {twoColumnBlock.right.caption && <figcaption class="text-center text-sm text-gray-500 mt-2">{twoColumnBlock.right.caption}</figcaption>}
+                </figure>
+              ) : (
+                <p class="text-lg font-oswald text-justify">{twoColumnBlock.right.content}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      );
     }
-  </article>
+    return null;
+  })}
 </div>

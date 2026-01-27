@@ -56,25 +56,25 @@ const logoSrc = logo.src;
       >
         <ul class="flex items-center text-base-content whitespace-nowrap">
           <li
-            class="nav-item font-old-standard uppercase tracking-[.46em] text-base font-normal hover:border-b hover:border-base-content pb-0.5"
+            class="nav-item font-oswald uppercase tracking-[.46em] text-base font-normal hover:border-b hover:border-base-content pb-0.5"
           >
             <a href="/culture" class="">Культура</a>
           </li>
           <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
           <li
-            class="nav-item font-old-standard uppercase tracking-[.46em] text-base font-normal hover:border-b hover:border-base-content pb-0.5"
+            class="nav-item font-oswald uppercase tracking-[.46em] text-base font-normal hover:border-b hover:border-base-content pb-0.5"
           >
             <a href="/paris" class="">Париж</a>
           </li>
           <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
           <li
-            class="nav-item font-old-standard uppercase tracking-[.46em] text-base font-normal hover:border-b hover:border-base-content pb-0.5"
+            class="nav-item font-oswald uppercase tracking-[.46em] text-base font-normal hover:border-b hover:border-base-content pb-0.5"
           >
             <a href="/calendar" class="">Календарь</a>
           </li>
           <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
           <li
-            class="nav-item font-old-standard uppercase tracking-[.46em] text-base font-normal hover:border-b hover:border-base-content pb-0.5"
+            class="nav-item font-oswald uppercase tracking-[.46em] text-base font-normal hover:border-b hover:border-base-content pb-0.5"
           >
             <a href="/building" class="">О проекте</a>
           </li>
@@ -118,7 +118,7 @@ const logoSrc = logo.src;
         <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
           <button
             @click.prevent="$store.auth.openAuthModal()"
-            class="border border-primary bg-primary text-primary-content rounded-[9px] py-1.5 px-4 text-center font-inter text-[14px] w-full cursor-pointer hover:bg-primary/80 transition-colors"
+            class="border border-primary bg-primary text-primary-content rounded-[9px] py-1.5 px-4 text-center font-oswald text-[14px] w-full cursor-pointer hover:bg-primary/80 transition-colors"
           >
             Войти
           </button>

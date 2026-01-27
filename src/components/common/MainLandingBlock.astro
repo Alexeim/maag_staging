@@ -165,7 +165,7 @@ try {
       class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-r lg:border-gray-300 lg:max-h-[980px]"
     >
       <h2
-        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
+        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
       >
         Новости
       </h2>
@@ -194,7 +194,7 @@ try {
                     href={`/article/${newsItem.id}`}
                     class="block bg-base-200 z-50"
                   >
-                    <h3 class="text-base font-bold font-old-standard mt-1 leading-tight">
+                    <h3 class="text-base font-bold font-oswald mt-1 leading-tight">
                       {newsItem.title}
                     </h3>
                   </a>
@@ -211,7 +211,7 @@ try {
       class="w-full lg:w-6/12 lg:px-4 order-first lg:order-none relative"
     >
       <h2
-        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
+        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
       >
         Главное
       </h2>
@@ -239,7 +239,7 @@ try {
                 href={`/article/${mainArticle.id}`}
                 class="block bg-base-200 z-50"
               >
-                <h2 class="max-w-[600px] text-3xl lg:text-5xl leading-tight font-thin font-old-standard">
+                <h2 class="max-w-[600px] text-3xl lg:text-5xl leading-tight font-thin font-oswald">
                   {mainArticle.title}{" "}
                   <Image
                     src={maagLogo}
@@ -265,7 +265,7 @@ try {
       class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
     >
       <h2
-        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old-standard"
+        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
       >
         Календарь
       </h2>
@@ -277,11 +277,11 @@ try {
           >
             <div class="p-4 lg:p-2 flex items-center gap-3">
               <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
-                <p class="text-2xl lg:text-2xl text-black/60 font-thin font-old-standard">
+                <p class="text-2xl lg:text-2xl text-black/60 font-thin font-oswald">
                   {formatEventDate(landingEvent.startDate)?.day || "--"}
                 </p>
               </div>
-              <p class="text-[12px] font-inter uppercase tracking-[0.15em]">
+              <p class="text-[12px] font-oswald uppercase tracking-[0.15em]">
                 {(
                   formatEventDate(landingEvent.startDate)?.month || ""
                 ).toUpperCase() || "Дата"}
@@ -305,7 +305,7 @@ try {
               <p class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]">
                 {eventCategoryLabels[landingEvent.category] || "Событие"}
               </p>
-              <h2 class="text-base lg:text-lg leading-tight font-old-standard mb-4">
+              <h2 class="text-base lg:text-lg leading-tight font-oswald mb-4">
                 {landingEvent.title}
               </h2>
               <div class="flex items-center gap-2">
@@ -340,11 +340,11 @@ try {
           <div class="bg-white rounded-xl shadow-lg">
             <div class="p-4 lg:p-2 flex items-center gap-3">
               <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
-                <p class="text-2xl lg:text-2xl text-black/50 font-thin font-old-standard">
+                <p class="text-2xl lg:text-2xl text-black/50 font-thin font-oswald">
                   --
                 </p>
               </div>
-              <p class="text-[12px] font-inter uppercase tracking-[0.15em]">
+              <p class="text-[12px] font-oswald uppercase tracking-[0.15em]">
                 Скоро
               </p>
             </div>
@@ -357,7 +357,7 @@ try {
               <p class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]">
                 Событие
               </p>
-              <h2 class="text-base lg:text-lg leading-tight font-old-standard mb-4">
+              <h2 class="text-base lg:text-lg leading-tight font-oswald mb-4">
                 Скоро появится событие
               </h2>
               <p class="text-sm text-gray-600">Следи за обновлениями</p>
