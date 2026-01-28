@@ -68,12 +68,12 @@ import articleData from "@/content/articlePage/RU/Article.json";
               <div class="mb-4">
                 <p
                   :class="{
-                    'text-lg': block.type === 'paragraph',
-                    'text-xl first-letter:text-4xl first-letter:font-bold': block.type === 'first-paragraph',
+                    'text-lg font-thin': block.type === 'paragraph',
+                    'text-xl first-letter:text-4xl first-letter:font-bold font-thin': block.type === 'first-paragraph',
                     'text-4xl font-bold': block.type === 'h1',
                     'text-3xl font-bold': block.type === 'h2',
                     'text-2xl font-bold': block.type === 'h3',
-                    'text-2xl italic border-l-4 pl-4 my-4': block.type === 'quote'
+                    'text-2xl italic border-l-4 pl-4 my-4 font-thin': block.type === 'quote'
                   }"
                   x-text="block.text"
                   x-show="block.text"
@@ -84,6 +84,41 @@ import articleData from "@/content/articlePage/RU/Article.json";
                     <img :src="block.url" alt="Содержимое статьи" class="rounded-md w-full">
                     <figcaption class="text-center text-sm text-base-content/60 mt-2" x-text="block.caption"></figcaption>
                   </figure>
+                </template>
+
+                <template x-if="block.type === 'two-columns'">
+                    <div class="w-full lg:max-w-[900px] my-12 px-4">
+                        <div class="flex flex-col lg:flex-row gap-8 items-center">
+                            <div class="w-full lg:w-1/2 flex justify-center">
+                                <template x-if="block.left.type === 'image'">
+                                    <figure class="flex flex-col items-center">
+                                        <img :src="block.left.content" :alt="block.left.caption || 'Left column image'"
+                                            class="article-image" />
+                                        <figcaption x-show="block.left.caption"
+                                            class="text-center text-sm text-gray-500 mt-2"
+                                            x-text="block.left.caption"></figcaption>
+                                    </figure>
+                                </template>
+                                <template x-if="block.left.type === 'text'">
+                                    <p class="text-lg font-oswald text-justify font-thin" x-text="block.left.content"></p>
+                                </template>
+                            </div>
+                            <div class="w-full lg:w-1/2 flex justify-center">
+                                <template x-if="block.right.type === 'image'">
+                                    <figure class="flex flex-col items-center">
+                                        <img :src="block.right.content" :alt="block.right.caption || 'Right column image'"
+                                            class="article-image" />
+                                        <figcaption x-show="block.right.caption"
+                                            class="text-center text-sm text-gray-500 mt-2"
+                                            x-text="block.right.caption"></figcaption>
+                                    </figure>
+                                </template>
+                                <template x-if="block.right.type === 'text'">
+                                    <p class="text-lg font-oswald text-justify font-thin" x-text="block.right.content"></p>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
                 </template>
               </div>
             </template>

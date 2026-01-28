@@ -57,19 +57,19 @@ const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
           switch (block.type) {
             case "first-paragraph":
               return (
-                <p class="text-lg first-letter:text-4xl first-letter:font-bold">
+                <p class="text-lg first-letter:text-4xl first-letter:font-bold font-thin">
                   {block.text}
                 </p>
               );
             case "paragraph":
-              return <p class="text-base">{block.text}</p>;
+              return <p class="text-base font-thin">{block.text}</p>;
             case "h2":
               return <h2 class="text-2xl font-semibold">{block.text}</h2>;
             case "h3":
               return <h3 class="text-xl font-semibold">{block.text}</h3>;
             case "quote":
               return (
-                <blockquote class="text-lg italic border-l-4 pl-4 my-4 border-base-300">
+                <blockquote class="text-lg italic border-l-4 pl-4 my-4 border-base-300 font-thin">
                   {block.text}
                 </blockquote>
               );
@@ -94,11 +94,11 @@ const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
                 <div class="space-y-4">
                   <div class="text-error">
                     <span class="font-bold">{authorName}:</span>
-                    <p class="inline">{block.question}</p>
+                    <p class="inline font-thin">{block.question}</p>
                   </div>
                   <div>
                     <span class="font-bold">{interviewee}:</span>
-                    <p class="inline">{block.answer}</p>
+                    <p class="inline font-thin">{block.answer}</p>
                   </div>
                 </div>
               );
