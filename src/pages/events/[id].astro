@@ -3,6 +3,7 @@ import Layout from "../../Layouts/Layout.astro";
 import ArticleHeader from "../../components/article/ArticleHeader.astro";
 import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
 import SocialShare from "../../components/article/SocialShare.astro";
+import ArticleImage from "../../components/article/ArticleImage.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
 import { ApiError, eventsApi } from "@/lib/api/api";
@@ -114,17 +115,14 @@ const displayEvent = {
             </div>
 
             {displayEvent.imageUrl && (
-              <figure class="w-full max-w-[1200px]">
-                <img
-                  src={displayEvent.imageUrl}
-                  alt={displayEvent.imageAlt}
-                  class="article-image rounded-lg shadow-lg"
-                  transition:name={`event-image-${id}`}
-                />
-                {displayEvent.imageCaption && (
-                  <figcaption class="text-center text-sm text-gray-500 mt-2">{displayEvent.imageCaption}</figcaption>
-                )}
-              </figure>
+              <ArticleImage
+                src={displayEvent.imageUrl}
+                alt={displayEvent.imageAlt}
+                caption={displayEvent.imageCaption}
+                transitionName={`event-image-${id}`}
+                figureClass="max-w-[1200px]"
+                imageClass="shadow-lg rounded-lg"
+              />
             )}
           </div>
 

@@ -39,40 +39,37 @@ const getPrimaryTag = (item: any) => {
   return item?.category || 'Культура';
 };
 
-let cultureItems: any[] = [];
+let mainInCategoryArticle: any = null;
+let cultureArticles: any[] = [];
 
 try {
-  const [articles, flippers] = await Promise.all([
-    articlesApi.list(),
-    flippersApi.list() as Promise<FlipperResponse[]>,
-  ]);
+  const articles = await articlesApi.list();
 
-  const allItems = [
-    ...articles.map(article => ({ ...article, type: 'article', href: `/article/${article.id}` })),
-    ...flippers.map(flipper => ({
-      ...flipper,
-      type: 'flipper',
-      href: `/flippers/${flipper.id}`,
-      imageUrl: flipper.carouselContent?.[0]?.imageUrl,
-    })),
-  ].sort((a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime());
+  const rawCultureArticles = articles
+    .map(article => ({ ...article, type: 'article', href: `/article/${article.id}` }))
+    .filter(article => normalizeCategory(article.category) === 'culture')
+    .sort((a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime());
 
-  // Filter items: category === 'culture' AND NOT hot content
-  cultureItems = allItems.filter(item =>
-    normalizeCategory(item.category) === 'culture' && !isHotContent(item)
+  // Find the main article for this category
+  mainInCategoryArticle = rawCultureArticles.find(article => article.isMainInCategory) || null;
+
+  // Filter out the main article from the rest, and also hot content (as per original logic for other items)
+  // If mainInCategoryArticle exists, it's also filtered out from this list
+  cultureArticles = rawCultureArticles.filter(article =>
+    (mainInCategoryArticle ? article.id !== mainInCategoryArticle.id : true) && !isHotContent(article)
   );
+
 } catch (error) {
-  console.error("Failed to fetch culture items:", error);
+  console.error("Failed to fetch culture articles:", error);
 }
 
-// Skip first 4 items (already shown in LandingBody: hero + 3 cards)
-const remainingItems = cultureItems.slice(4);
+const itemsToShow = cultureArticles.slice(0); // All remaining culture articles
 
 // Split remaining items into rows of 3
 const itemsPerRow = 3;
 const cultureRows: any[][] = [];
-for (let i = 0; i < remainingItems.length; i += itemsPerRow) {
-  cultureRows.push(remainingItems.slice(i, i + itemsPerRow));
+for (let i = 0; i < itemsToShow.length; i += itemsPerRow) {
+  cultureRows.push(itemsToShow.slice(i, i + itemsPerRow));
 }
 ---
 
@@ -82,8 +79,8 @@ for (let i = 0; i < remainingItems.length; i += itemsPerRow) {
   title="Maag"
   useClientRouter={true}
 >
-  <CategoryHero title={"Культура"}/>
-  <LandingBody isLanding={false}/>
+  <CategoryHero title={"Культура"} article={mainInCategoryArticle} />
+
   {cultureRows.map((row) => (
     <div id="culture-articles-box" class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-2 lg:px-4 min-h-[100px]">
       {row.map((item) => (

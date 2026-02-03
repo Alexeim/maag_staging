@@ -3,8 +3,6 @@ import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import ArticleHeader from "@/components/article/ArticleHeader.astro";
 import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import SocialShare from "@/components/article/SocialShare.astro";
-import ArticleImage from "@/components/article/ArticleImage.astro";
-import ArticleBody from "@/components/article/ArticleBody.astro";
 import Button from "@/components/common/Button.astro";
 import articleData from "@/content/articlePage/RU/Article.json";
 ---
@@ -33,11 +31,19 @@ import articleData from "@/content/articlePage/RU/Article.json";
         <div class="pt-16 pb-20 flex flex-col items-center gap-16">
           <div class="flex flex-col gap-8 max-w-[825px] w-full px-6">
             <div>
-              <p 
-                class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter'] mb-2" 
+              <p
+                class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter'] mb-2"
                 x-text="getCategoryLabel(article.category)">
               </p>
-              <ArticleHeader :title="article.title" />
+              <h1
+                class="text-3xl lg:text-[44px] leading-tight lg:leading-[1.28] font-oswald text-base-content w-full"
+                x-text="article.title">
+              </h1>
+              <p
+                x-show="article.lead"
+                x-text="article.lead"
+                class="text-lg lg:text-xl text-base-content/80 font-oswald font-thin leading-relaxed mt-4">
+              </p>
             </div>
             <ArticleAuthor
               name={articleData.author.name}
@@ -86,40 +92,30 @@ import articleData from "@/content/articlePage/RU/Article.json";
                   </figure>
                 </template>
 
-                <template x-if="block.type === 'two-columns'">
-                    <div class="w-full lg:max-w-[900px] my-12 px-4">
-                        <div class="flex flex-col lg:flex-row gap-8 items-center">
-                            <div class="w-full lg:w-1/2 flex justify-center">
-                                <template x-if="block.left.type === 'image'">
-                                    <figure class="flex flex-col items-center">
-                                        <img :src="block.left.content" :alt="block.left.caption || 'Left column image'"
-                                            class="article-image" />
-                                        <figcaption x-show="block.left.caption"
-                                            class="text-center text-sm text-gray-500 mt-2"
-                                            x-text="block.left.caption"></figcaption>
-                                    </figure>
-                                </template>
-                                <template x-if="block.left.type === 'text'">
-                                    <p class="text-lg font-oswald text-justify font-thin" x-text="block.left.content"></p>
-                                </template>
-                            </div>
-                            <div class="w-full lg:w-1/2 flex justify-center">
-                                <template x-if="block.right.type === 'image'">
-                                    <figure class="flex flex-col items-center">
-                                        <img :src="block.right.content" :alt="block.right.caption || 'Right column image'"
-                                            class="article-image" />
-                                        <figcaption x-show="block.right.caption"
-                                            class="text-center text-sm text-gray-500 mt-2"
-                                            x-text="block.right.caption"></figcaption>
-                                    </figure>
-                                </template>
-                                <template x-if="block.right.type === 'text'">
-                                    <p class="text-lg font-oswald text-justify font-thin" x-text="block.right.content"></p>
-                                </template>
-                            </div>
+                <div x-show="block.type === 'two-columns'" x-cloak class="w-full lg:max-w-[900px] my-12 px-4">
+                    <div class="flex flex-col lg:flex-row gap-8 items-center">
+                        <div class="w-full lg:w-1/2 flex justify-center">
+                            <figure x-show="block.left?.type === 'image'" class="flex flex-col items-center">
+                                <img :src="block.left?.content" :alt="block.left?.caption || 'Left column image'"
+                                    class="article-image" />
+                                <figcaption x-show="block.left?.caption"
+                                    class="text-center text-sm text-gray-500 mt-2"
+                                    x-text="block.left?.caption"></figcaption>
+                            </figure>
+                            <p x-show="block.left?.type === 'text'" class="text-lg font-oswald text-justify font-thin" x-text="block.left?.content"></p>
+                        </div>
+                        <div class="w-full lg:w-1/2 flex justify-center">
+                            <figure x-show="block.right?.type === 'image'" class="flex flex-col items-center">
+                                <img :src="block.right?.content" :alt="block.right?.caption || 'Right column image'"
+                                    class="article-image" />
+                                <figcaption x-show="block.right?.caption"
+                                    class="text-center text-sm text-gray-500 mt-2"
+                                    x-text="block.right?.caption"></figcaption>
+                            </figure>
+                            <p x-show="block.right?.type === 'text'" class="text-lg font-oswald text-justify font-thin" x-text="block.right?.content"></p>
                         </div>
                     </div>
-                </template>
+                </div>
               </div>
             </template>
           </div>

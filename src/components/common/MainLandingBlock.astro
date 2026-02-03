@@ -73,6 +73,7 @@ try {
 
   // Filter for the main article (latest that is NOT news)
   mainArticle =
+    articles.find((article) => article.isOnLanding) ||
     articles.find(
       (article) =>
         !isNewsCategory(article.category) && !isHotContentArticle(article)

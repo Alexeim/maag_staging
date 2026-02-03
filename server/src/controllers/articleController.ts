@@ -5,6 +5,7 @@ import { getDb, deleteFileFromStorage } from '../services/firebase';
 export interface Article {
   id?: string;
   title: string;
+  lead?: string; // Вводка — краткое описание под заголовком
   authorId: string;
   content: any[]; // Array of content blocks (e.g., { type: 'paragraph', text: '...' })
   imageUrl?: string;
@@ -13,6 +14,8 @@ export interface Article {
   tags?: string[];
   techTags?: string[];
   isHotContent?: boolean;
+  isOnLanding?: boolean;
+  isMainInCategory?: boolean;
   createdAt: Date;
 }
 
@@ -28,6 +31,7 @@ export const createArticle = async (req: Request, res: Response) => {
     // --- UPDATED: Added imageCaption and category ---
     const {
       title,
+      lead,
       content,
       imageUrl,
       imageCaption,
@@ -36,6 +40,8 @@ export const createArticle = async (req: Request, res: Response) => {
       tags = [],
       techTags = [],
       isHotContent = false,
+      isOnLanding = false,
+      isMainInCategory = false,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -54,6 +60,7 @@ export const createArticle = async (req: Request, res: Response) => {
 
     const newArticle: Omit<Article, 'id'> = {
       title,
+      lead: lead || '',
       authorId,
       content,
       imageUrl,
@@ -62,6 +69,8 @@ export const createArticle = async (req: Request, res: Response) => {
       tags: normalizedTags,
       techTags: normalizedTechTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
+      isOnLanding: Boolean(isOnLanding),
+      isMainInCategory: Boolean(isMainInCategory),
       createdAt: new Date(),
     };
 
@@ -152,6 +161,7 @@ export const updateArticle = async (req: Request, res: Response) => {
 
     const {
       title,
+      lead,
       content,
       imageUrl,
       imageCaption,
@@ -160,6 +170,8 @@ export const updateArticle = async (req: Request, res: Response) => {
       tags = [],
       techTags = [],
       isHotContent = false,
+      isOnLanding = false,
+      isMainInCategory = false,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -178,6 +190,7 @@ export const updateArticle = async (req: Request, res: Response) => {
 
     const updatedArticle = {
       title,
+      lead: lead || '',
       authorId,
       content,
       imageUrl,
@@ -186,6 +199,8 @@ export const updateArticle = async (req: Request, res: Response) => {
       tags: normalizedTags,
       techTags: normalizedTechTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
+      isOnLanding: Boolean(isOnLanding),
+      isMainInCategory: Boolean(isMainInCategory),
       updatedAt: new Date(),
     };
 

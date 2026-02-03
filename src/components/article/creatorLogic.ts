@@ -141,6 +141,7 @@ export default function articleCreatorLogic(initialState = {}) {
   return {
     article: {
       title: "",
+      lead: "", // Вводка — краткое описание под заголовком
       imageUrl: "",
       imageCaption: "", // <-- Added caption for the main image
       // --- REFACTORED: from 'paragraphs' to 'contentBlocks' ---
@@ -149,6 +150,8 @@ export default function articleCreatorLogic(initialState = {}) {
       techTags: [],
       category: "", // <-- Added category
       isHotContent: false,
+      isOnLanding: false,
+      isMainInCategory: false,
     },
 
     // --- State for managing the block creation UI ---
@@ -357,7 +360,10 @@ export default function articleCreatorLogic(initialState = {}) {
 
       this.article.tags = this.article.tags ?? [];
       this.article.techTags = this.article.techTags ?? [];
+      this.article.lead = this.article.lead ?? "";
       this.article.isHotContent = Boolean(this.article.isHotContent);
+      this.article.isOnLanding = Boolean(this.article.isOnLanding);
+      this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? this.article.contentBlocks
         : [];
@@ -580,6 +586,7 @@ export default function articleCreatorLogic(initialState = {}) {
         const tagsForDb = this.article.tags.map((tag) => this.getTagLabel(tag));
         const payload = {
           title: this.article.title,
+          lead: this.article.lead,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
           authorId: "HxpjsagLQxlUb2oCiM6h",
@@ -588,6 +595,8 @@ export default function articleCreatorLogic(initialState = {}) {
           tags: tagsForDb,
           techTags: this.article.techTags,
           isHotContent: this.article.isHotContent,
+          isOnLanding: this.article.isOnLanding,
+          isMainInCategory: this.article.isMainInCategory,
         };
 
         if (this.isEditMode && this.articleId) {

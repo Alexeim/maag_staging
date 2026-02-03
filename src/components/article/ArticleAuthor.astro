@@ -8,12 +8,32 @@ const { name, avatarUrl } = Astro.props;
 ---
 
 <div class="flex items-center gap-[17px]">
-  <img
-    src={avatarUrl}
-    alt={`Аватар ${name}`}
-    class="w-[42px] h-[42px] bg-neutral rounded-full object-cover"
-  />
-  <span class="text-base font-medium font-serif text-base-content"
-    >{name}</span
+  <div
+    class="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden"
+  >
+    <div
+      class="object-cover w-full h-full"
+      x-data={`{imageError: false, avatarUrl: ${JSON.stringify(avatarUrl)}, name: ${JSON.stringify(name)}}`}
+    >
+      <template x-if="!imageError">
+        <img
+          :src="avatarUrl"
+          alt="avatar"
+          @error="imageError = true"
+          class="object-cover w-full h-full"
+          style="display: none"
+          x-init="$nextTick(() => { $el.style.display = 'block' })"
+        />
+      </template>
+      <template x-if="imageError">
+        <div
+          class="flex h-full w-full items-center justify-center bg-gray-300 text-white"
+        >
+          <span x-text="name[0].toUpperCase()"></span>
+        </div>
+      </template>
+    </div>
+  </div>
+  <span class="text-base font-normal font-oswald text-base-content">{name}</span
   >
 </div>

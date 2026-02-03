@@ -43,11 +43,12 @@ const rawCategory =
 
 const displayArticle = {
   title: articleData?.header?.title || articleData?.title || 'Article',
+  lead: articleData?.lead || '',
   category: rawCategory
     ? CATEGORY_LABELS[rawCategory] || rawCategory
     : 'Category',
   authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : 'Author',
-  authorAvatar: articleData?.author?.avatarUrl,
+  authorAvatar: articleData?.author?.avatar,
   readTime: articleData?.meta?.readTime || '5 min read',
   imageUrl: articleData?.imageUrl, // For dynamic articles
   imageCaption: articleData?.imageCaption || '', // <-- Get the caption
@@ -73,26 +74,25 @@ const displayArticle = {
               <ArticleHeader
                 category={displayArticle.category}
                 title={displayArticle.title}
+                lead={displayArticle.lead}
               />
               <ArticleAuthor
                 name={displayArticle.authorName}
                 avatarUrl={displayArticle.authorAvatar}
               />
-              <SocialShare readTime={displayArticle.readTime} />
+              {/* <SocialShare readTime={displayArticle.readTime} /> */}
             </div>
 
-            {id !== 'main-article' && displayArticle.imageUrl && (
-              <figure class="w-full max-w-[1200px]">
-                <img 
-                    src={displayArticle.imageUrl} 
-                    alt={displayArticle.imageAlt} 
-                    class="w-full h-auto shadow-lg"
-                    transition:name={`main-article-image-${id}`}
-                  />
-                {displayArticle.imageCaption && (
-                  <figcaption class="text-center text-sm text-gray-500 mt-2">{displayArticle.imageCaption}</figcaption>
-                )}
-              </figure>
+            {displayArticle.imageUrl && (
+              <ArticleImage
+                src={displayArticle.imageUrl}
+                alt={displayArticle.imageAlt}
+                caption={displayArticle.imageCaption}
+                transitionName={`main-article-image-${id}`}
+                figureClass="max-w-[1200px]"
+                imageClass="shadow-lg"
+                figcaptionClass="text-center font-oswald text-sm text-gray-500 mt-2"
+              />
             )}
           </div>
 

@@ -22,32 +22,70 @@ const {
 } = Astro.props as Props;
 ---
 
-<div class="max-w-4xl mx-auto" x-data={`$lazy('articleCreator', ${articleCreatorState})`}>
+<div
+  class="max-w-4xl mx-auto"
+  x-data={`$lazy('articleCreator', ${articleCreatorState})`}
+>
   <h1 class="text-3xl font-bold mb-6">{heading}</h1>
 
-  <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
+  <section
+    class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm"
+  >
     <h2 class="text-xl font-semibold mb-4">Основная информация</h2>
 
-    <label class="block text-sm font-medium text-base-content mb-2">Заголовок статьи</label>
+    <label class="block text-sm font-medium text-base-content mb-2"
+      >Заголовок статьи</label
+    >
     <template x-if="isEditingTitle">
       <div>
-        <input type="text" x-model="editingTitleText" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" />
+        <input
+          type="text"
+          x-model="editingTitleText"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        />
         <div class="flex justify-end gap-3 mt-3">
-          <Button variant="secondary" size="sm" @click="cancelEditTitle()">Отмена</Button>
-          <Button variant="primary" size="sm" @click="saveTitle()">Сохранить</Button>
+          <Button variant="secondary" size="sm" @click="cancelEditTitle()"
+            >Отмена</Button
+          >
+          <Button variant="primary" size="sm" @click="saveTitle()"
+            >Сохранить</Button
+          >
         </div>
       </div>
     </template>
     <template x-if="!isEditingTitle">
-      <div class="flex justify-between items-center border border-base-300 rounded-lg px-4 py-3">
-        <h3 class="text-lg font-semibold" x-text="article.title || 'Введите заголовок...'"></h3>
-        <Button variant="outline" size="sm" @click="editTitle()">Редактировать</Button>
+      <div
+        class="flex justify-between items-center border border-base-300 rounded-lg px-4 py-3"
+      >
+        <h3
+          class="text-lg font-semibold"
+          x-text="article.title || 'Введите заголовок...'"
+        >
+        </h3>
+        <Button variant="outline" size="sm" @click="editTitle()"
+          >Редактировать</Button
+        >
       </div>
     </template>
 
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-base-content mb-2"
+        >Вводка (лид)</label
+      >
+      <textarea
+        x-model="article.lead"
+        rows="3"
+        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        placeholder="Краткое описание статьи, которое отображается под заголовком..."
+      ></textarea>
+    </div>
+
     <hr class="my-6" />
 
-    <label for="category-select" class="block text-sm font-medium text-base-content mb-2">Категория</label>
+    <label
+      for="category-select"
+      class="block text-sm font-medium text-base-content mb-2">Категория</label
+    >
     <select
       id="category-select"
       x-model="article.category"
@@ -67,13 +105,48 @@ const {
         x-model="article.isHotContent"
         class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
       />
-      <label for="hot-content-flag" class="text-sm font-medium text-base-content cursor-pointer">
+      <label
+        for="hot-content-flag"
+        class="text-sm font-medium text-base-content cursor-pointer"
+      >
         Отметить как «Самое читаемое»
       </label>
     </div>
 
+    <div class="mt-4 flex items-center gap-3">
+      <input
+        id="on-landing-flag"
+        type="checkbox"
+        x-model="article.isOnLanding"
+        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+      />
+      <label
+        for="on-landing-flag"
+        class="text-sm font-medium text-base-content cursor-pointer"
+      >
+        Показывать как главную статью на посадочной странице
+      </label>
+    </div>
+
+    <div class="mt-4 flex items-center gap-3">
+      <input
+        id="main-in-category-flag"
+        type="checkbox"
+        x-model="article.isMainInCategory"
+        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+      />
+      <label
+        for="main-in-category-flag"
+        class="text-sm font-medium text-base-content cursor-pointer"
+      >
+        Показывать как главную статью в категории
+      </label>
+    </div>
+
     <div class="mt-6">
-      <label class="block text-sm font-medium text-base-content mb-3">Теги</label>
+      <label class="block text-sm font-medium text-base-content mb-3"
+        >Теги</label
+      >
 
       <template x-if="getAvailableTags().length > 0">
         <div class="flex flex-wrap gap-2">
@@ -104,20 +177,30 @@ const {
             class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
             placeholder="Добавь тег латиницей, например art-market"
           />
-          <Button variant="outline" size="sm" type="button" @click="addCustomTag()">Добавить тег</Button>
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            @click="addCustomTag()">Добавить тег</Button
+          >
         </div>
         <p class="text-xs text-base-content/60">
-          Техническое значение тега уходит в базу данных, поэтому используй латиницу.
+          Техническое значение тега уходит в базу данных, поэтому используй
+          латиницу.
         </p>
       </div>
 
       <div class="mt-3 flex flex-col gap-3">
         <template x-if="article.tags.length > 0">
           <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Категорийные теги</p>
+            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">
+              Категорийные теги
+            </p>
             <div class="flex flex-wrap gap-2 mt-1">
               <template x-for="tag in article.tags" :key="tag">
-                <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
+                <span
+                  class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm"
+                >
                   <span x-text="getTagLabel(tag)"></span>
                   <button
                     type="button"
@@ -134,10 +217,14 @@ const {
 
         <template x-if="article.techTags.length > 0">
           <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Техтеги</p>
+            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">
+              Техтеги
+            </p>
             <div class="flex flex-wrap gap-2 mt-1">
               <template x-for="tag in article.techTags" :key="`tech-${tag}`">
-                <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
+                <span
+                  class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm"
+                >
                   <span x-text="tag"></span>
                   <button
                     type="button"
@@ -156,10 +243,15 @@ const {
 
     <hr class="my-6" />
 
-    <label class="block text-sm font-medium text-base-content mb-2">Обложка статьи</label>
+    <label class="block text-sm font-medium text-base-content mb-2"
+      >Обложка статьи</label
+    >
     <div class="flex items-center" x-data="{ fileName: '' }">
-      <label for="file-upload" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
-        <CloudUpload/>
+      <label
+        for="file-upload"
+        class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+      >
+        <CloudUpload />
         Загрузить файл
       </label>
       <input
@@ -171,20 +263,29 @@ const {
       />
       <span
         x-text="fileName ? fileName : (article.imageUrl ? 'Изображение загружено' : 'Файл не выбран')"
-        class="ml-4 text-sm text-base-content/70"
-      ></span>
+        class="ml-4 text-sm text-base-content/70"></span>
     </div>
     <div x-show="uploading" class="mt-4">
       <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
       <div class="w-full bg-base-200 rounded-full h-2">
-        <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+        <div
+          class="bg-primary h-2 rounded-full"
+          :style="{ width: uploadProgress + '%' }"
+        >
+        </div>
       </div>
     </div>
     <div x-show="article.imageUrl && !uploading" class="mt-4 space-y-4">
       <p class="text-sm text-success">Главное изображение успешно загружено!</p>
-      <img :src="article.imageUrl" alt="Предпросмотр обложки" class="rounded-md max-h-60 w-full object-cover" />
+      <img
+        :src="article.imageUrl"
+        alt="Предпросмотр обложки"
+        class="rounded-md max-h-60 w-full object-cover"
+      />
       <div>
-        <label class="block text-sm font-medium text-base-content mb-2">Подпись к изображению</label>
+        <label class="block text-sm font-medium text-base-content mb-2"
+          >Подпись к изображению</label
+        >
         <template x-if="isEditingCaption">
           <div>
             <input
@@ -194,15 +295,27 @@ const {
               placeholder="Введите подпись..."
             />
             <div class="flex justify-end gap-3 mt-3">
-              <Button variant="secondary" size="sm" @click="cancelEditCaption()">Отмена</Button>
-              <Button variant="primary" size="sm" @click="saveCaption()">Сохранить</Button>
+              <Button variant="secondary" size="sm" @click="cancelEditCaption()"
+                >Отмена</Button
+              >
+              <Button variant="primary" size="sm" @click="saveCaption()"
+                >Сохранить</Button
+              >
             </div>
           </div>
         </template>
         <template x-if="!isEditingCaption">
-          <div class="flex justify-between items-center border border-base-300 rounded-lg px-4 py-3">
-            <p class="text-base-content" x-text="article.imageCaption || 'Подпись отсутствует...'"></p>
-            <Button variant="outline" size="sm" @click="editCaption()">Редактировать</Button>
+          <div
+            class="flex justify-between items-center border border-base-300 rounded-lg px-4 py-3"
+          >
+            <p
+              class="text-base-content"
+              x-text="article.imageCaption || 'Подпись отсутствует...'"
+            >
+            </p>
+            <Button variant="outline" size="sm" @click="editCaption()"
+              >Редактировать</Button
+            >
           </div>
         </template>
       </div>
@@ -213,21 +326,35 @@ const {
     <h2 class="text-xl font-semibold mb-4">Содержание статьи</h2>
     <div class="space-y-4">
       <template x-for="(block, index) in article.contentBlocks" :key="index">
-        <div class="p-4 border border-base-300 rounded-lg bg-base-100 relative group">
+        <div
+          class="p-4 border border-base-300 rounded-lg bg-base-100 relative group"
+        >
           <template x-if="editingIndex === index">
             <div class="space-y-4">
-              <h3 class="text-lg font-semibold capitalize" x-text="editingBlock.type.replace('-', ' ')"></h3>
+              <h3
+                class="text-lg font-semibold capitalize"
+                x-text="editingBlock.type.replace('-', ' ')"
+              >
+              </h3>
 
-              <template x-if="['paragraph', 'first-paragraph', 'h1', 'h2', 'h3', 'quote'].includes(editingBlock.type)">
-                <textarea x-model="editingBlock.text" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" rows="5"></textarea>
+              <template
+                x-if="['paragraph', 'first-paragraph', 'h1', 'h2', 'h3', 'quote'].includes(editingBlock.type)"
+              >
+                <textarea
+                  x-model="editingBlock.text"
+                  class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                  rows="5"></textarea>
               </template>
 
               <template x-if="editingBlock.type === 'image'">
                 <div x-data="{ blockFileName: '' }" class="space-y-3">
                   <label class="block text-sm font-medium">Изображение</label>
                   <div class="flex items-center gap-3">
-                    <label :for="'block-image-upload-' + index" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
-                      <CloudUpload/>
+                    <label
+                      :for="'block-image-upload-' + index"
+                      class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                    >
+                      <CloudUpload />
                       Загрузить файл
                     </label>
                     <input
@@ -239,17 +366,30 @@ const {
                     />
                     <span
                       x-text="blockFileName || (editingBlock.url ? 'Изображение загружено' : 'Файл не выбран')"
-                      class="text-sm text-base-content/70"
-                    ></span>
+                      class="text-sm text-base-content/70"></span>
                   </div>
                   <div x-show="uploading && editingIndex === index">
-                    <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
+                    <p>
+                      Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"
+                      ></span>
+                    </p>
                     <div class="w-full bg-base-200 rounded-full h-2">
-                      <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                      <div
+                        class="bg-primary h-2 rounded-full"
+                        :style="{ width: uploadProgress + '%' }"
+                      >
+                      </div>
                     </div>
                   </div>
-                  <img x-show="editingBlock.url && !uploading" :src="editingBlock.url" alt="Предпросмотр блока" class="rounded-md max-h-48" />
-                  <label class="block text-sm font-medium mt-2">Подпись к изображению</label>
+                  <img
+                    x-show="editingBlock.url && !uploading"
+                    :src="editingBlock.url"
+                    alt="Предпросмотр блока"
+                    class="rounded-md max-h-48"
+                  />
+                  <label class="block text-sm font-medium mt-2"
+                    >Подпись к изображению</label
+                  >
                   <input
                     type="text"
                     x-model="editingBlock.caption"
@@ -263,10 +403,17 @@ const {
                 <div class="space-y-4">
                   <div class="flex gap-4">
                     <!-- Left Column Editor -->
-                    <div class="w-1/2 space-y-3 p-3 border border-base-300 rounded-lg">
+                    <div
+                      class="w-1/2 space-y-3 p-3 border border-base-300 rounded-lg"
+                    >
                       <h4 class="text-md font-semibold">Левая колонка</h4>
-                      <label class="block text-sm font-medium">Тип контента</label>
-                      <select x-model="editingBlock.left.type" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5">
+                      <label class="block text-sm font-medium"
+                        >Тип контента</label
+                      >
+                      <select
+                        x-model="editingBlock.left.type"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      >
                         <option value="text">Текст</option>
                         <option value="image">Изображение</option>
                       </select>
@@ -274,16 +421,27 @@ const {
                       <template x-if="editingBlock.left.type === 'text'">
                         <div>
                           <label class="block text-sm font-medium">Текст</label>
-                          <textarea x-model="editingBlock.left.content" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" rows="5"></textarea>
+                          <textarea
+                            x-model="editingBlock.left.content"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            rows="5"></textarea>
                         </div>
                       </template>
 
                       <template x-if="editingBlock.left.type === 'image'">
-                        <div x-data="{ leftBlockFileName: '' }" class="space-y-3">
-                          <label class="block text-sm font-medium">Изображение</label>
+                        <div
+                          x-data="{ leftBlockFileName: '' }"
+                          class="space-y-3"
+                        >
+                          <label class="block text-sm font-medium"
+                            >Изображение</label
+                          >
                           <div class="flex items-center gap-3">
-                            <label :for="'left-block-image-upload-' + index" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
-                              <CloudUpload/>
+                            <label
+                              :for="'left-block-image-upload-' + index"
+                              class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                            >
+                              <CloudUpload />
                               Загрузить файл
                             </label>
                             <input
@@ -295,11 +453,17 @@ const {
                             />
                             <span
                               x-text="leftBlockFileName || (editingBlock.left.content ? 'Изображение загружено' : 'Файл не выбран')"
-                              class="text-sm text-base-content/70"
-                            ></span>
+                              class="text-sm text-base-content/70"></span>
                           </div>
-                          <img x-show="editingBlock.left.content" :src="editingBlock.left.content" alt="Предпросмотр левой колонки" class="rounded-md max-h-48" />
-                          <label class="block text-sm font-medium mt-2">Подпись к изображению</label>
+                          <img
+                            x-show="editingBlock.left.content"
+                            :src="editingBlock.left.content"
+                            alt="Предпросмотр левой колонки"
+                            class="rounded-md max-h-48"
+                          />
+                          <label class="block text-sm font-medium mt-2"
+                            >Подпись к изображению</label
+                          >
                           <input
                             type="text"
                             x-model="editingBlock.left.caption"
@@ -311,10 +475,17 @@ const {
                     </div>
 
                     <!-- Right Column Editor -->
-                    <div class="w-1/2 space-y-3 p-3 border border-base-300 rounded-lg">
+                    <div
+                      class="w-1/2 space-y-3 p-3 border border-base-300 rounded-lg"
+                    >
                       <h4 class="text-md font-semibold">Правая колонка</h4>
-                      <label class="block text-sm font-medium">Тип контента</label>
-                      <select x-model="editingBlock.right.type" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5">
+                      <label class="block text-sm font-medium"
+                        >Тип контента</label
+                      >
+                      <select
+                        x-model="editingBlock.right.type"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      >
                         <option value="text">Текст</option>
                         <option value="image">Изображение</option>
                       </select>
@@ -322,16 +493,27 @@ const {
                       <template x-if="editingBlock.right.type === 'text'">
                         <div>
                           <label class="block text-sm font-medium">Текст</label>
-                          <textarea x-model="editingBlock.right.content" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" rows="5"></textarea>
+                          <textarea
+                            x-model="editingBlock.right.content"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            rows="5"></textarea>
                         </div>
                       </template>
 
                       <template x-if="editingBlock.right.type === 'image'">
-                        <div x-data="{ rightBlockFileName: '' }" class="space-y-3">
-                          <label class="block text-sm font-medium">Изображение</label>
+                        <div
+                          x-data="{ rightBlockFileName: '' }"
+                          class="space-y-3"
+                        >
+                          <label class="block text-sm font-medium"
+                            >Изображение</label
+                          >
                           <div class="flex items-center gap-3">
-                            <label :for="'right-block-image-upload-' + index" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
-                              <CloudUpload/>
+                            <label
+                              :for="'right-block-image-upload-' + index"
+                              class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                            >
+                              <CloudUpload />
                               Загрузить файл
                             </label>
                             <input
@@ -343,11 +525,17 @@ const {
                             />
                             <span
                               x-text="rightBlockFileName || (editingBlock.right.content ? 'Изображение загружено' : 'Файл не выбран')"
-                              class="text-sm text-base-content/70"
-                            ></span>
+                              class="text-sm text-base-content/70"></span>
                           </div>
-                          <img x-show="editingBlock.right.content" :src="editingBlock.right.content" alt="Предпросмотр правой колонки" class="rounded-md max-h-48" />
-                          <label class="block text-sm font-medium mt-2">Подпись к изображению</label>
+                          <img
+                            x-show="editingBlock.right.content"
+                            :src="editingBlock.right.content"
+                            alt="Предпросмотр правой колонки"
+                            class="rounded-md max-h-48"
+                          />
+                          <label class="block text-sm font-medium mt-2"
+                            >Подпись к изображению</label
+                          >
                           <input
                             type="text"
                             x-model="editingBlock.right.caption"
@@ -362,8 +550,11 @@ const {
               </template>
 
               <div class="flex justify-end gap-3">
-                <Button variant="secondary" @click="cancelEdit()">Отмена</Button>
-                <Button variant="primary" @click="updateBlock()">Сохранить блок</Button>
+                <Button variant="secondary" @click="cancelEdit()">Отмена</Button
+                >
+                <Button variant="primary" @click="updateBlock()"
+                  >Сохранить блок</Button
+                >
               </div>
             </div>
           </template>
@@ -380,18 +571,64 @@ const {
                   'text-lg italic border-l-4 pl-4 my-4 border-base-300': block.type === 'quote'
                 }"
                 x-text="block.text"
-              ></p>
+              >
+              </p>
 
               <template x-if="block.type === 'image'">
                 <figure>
-                  <img :src="block.url" alt="Содержимое статьи" class="rounded-md w-full object-cover" />
-                  <figcaption class="text-center text-sm text-base-content/60 mt-2" x-text="block.caption"></figcaption>
+                  <img
+                    :src="block.url"
+                    alt="Содержимое статьи"
+                    class="rounded-md w-full object-cover"
+                  />
+                  <figcaption
+                    class="text-center text-sm text-base-content/60 mt-2"
+                    x-text="block.caption"
+                  >
+                  </figcaption>
                 </figure>
               </template>
 
-              <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                <Button variant="outline" size="sm" @click="editBlock(index)">Редактировать</Button>
-                <Button variant="error" size="sm" @click="deleteBlock(index)">Удалить</Button>
+              <div x-show="block.type === 'two-columns'" class="flex flex-col lg:flex-row gap-4 w-full">
+                <div class="w-full lg:w-1/2 flex flex-col items-center">
+                  <img
+                    x-show="block.left?.type === 'image'"
+                    :src="block.left?.content"
+                    :alt="block.left?.caption || 'Левая колонка'"
+                    class="rounded-md max-h-32 object-cover"
+                  />
+                  <p
+                    x-show="block.left?.type === 'text'"
+                    x-text="block.left?.content"
+                    class="text-sm text-base-content/80"
+                  ></p>
+                  <span x-show="block.left?.caption" x-text="block.left?.caption" class="text-xs text-base-content/60 mt-1"></span>
+                </div>
+                <div class="w-full lg:w-1/2 flex flex-col items-center">
+                  <img
+                    x-show="block.right?.type === 'image'"
+                    :src="block.right?.content"
+                    :alt="block.right?.caption || 'Правая колонка'"
+                    class="rounded-md max-h-32 object-cover"
+                  />
+                  <p
+                    x-show="block.right?.type === 'text'"
+                    x-text="block.right?.content"
+                    class="text-sm text-base-content/80"
+                  ></p>
+                  <span x-show="block.right?.caption" x-text="block.right?.caption" class="text-xs text-base-content/60 mt-1"></span>
+                </div>
+              </div>
+
+              <div
+                class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2"
+              >
+                <Button variant="outline" size="sm" @click="editBlock(index)"
+                  >Редактировать</Button
+                >
+                <Button variant="error" size="sm" @click="deleteBlock(index)"
+                  >Удалить</Button
+                >
               </div>
             </div>
           </template>
@@ -401,24 +638,58 @@ const {
 
     <div class="mt-6">
       <template x-if="showBlockOptions">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 border border-base-300 rounded-lg bg-base-100">
-          <button @click="addBlock('paragraph')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Обычный абзац</button>
-          <button @click="addBlock('first-paragraph')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Абзац с буквицей</button>
-          <button @click="addBlock('h2')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Подзаголовок H2</button>
-          <button @click="addBlock('h3')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Подзаголовок H3</button>
-          <button @click="addBlock('quote')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Цитата</button>
-          <button @click="addBlock('image')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Картинка</button>
-          <button @click="addBlock('two-columns')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Две колонки</button>
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 border border-base-300 rounded-lg bg-base-100"
+        >
+          <button
+            @click="addBlock('paragraph')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Обычный абзац</button
+          >
+          <button
+            @click="addBlock('first-paragraph')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Абзац с буквицей</button
+          >
+          <button
+            @click="addBlock('h2')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Подзаголовок H2</button
+          >
+          <button
+            @click="addBlock('h3')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Подзаголовок H3</button
+          >
+          <button
+            @click="addBlock('quote')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Цитата</button
+          >
+          <button
+            @click="addBlock('image')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Картинка</button
+          >
+          <button
+            @click="addBlock('two-columns')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Две колонки</button
+          >
         </div>
       </template>
 
       <div x-show="!showBlockOptions" class="text-center">
-        <Button variant="primary" @click="openBlockSelector()">+ Добавить блок</Button>
+        <Button variant="primary" @click="openBlockSelector()"
+          >+ Добавить блок</Button
+        >
       </div>
     </div>
   </section>
 
-  <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <div
+    class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+  >
     <div class="flex gap-2">
       <template x-if="isEditMode && articleId">
         <button
@@ -431,10 +702,18 @@ const {
       </template>
     </div>
     <div class="flex justify-end gap-3">
-      <Button variant="secondary" @click="previewArticle()">Предпросмотр</Button>
-      {cancelHref && (
-        <a href={cancelHref} class="cursor-pointer text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-yellow-300 flex flex-row items-center justify-center px-4 py-2 rounded-lg">Отмена</a>
-      )}
+      <Button variant="secondary" @click="previewArticle()">Предпросмотр</Button
+      >
+      {
+        cancelHref && (
+          <a
+            href={cancelHref}
+            class="cursor-pointer text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-yellow-300 flex flex-row items-center justify-center px-4 py-2 rounded-lg"
+          >
+            Отмена
+          </a>
+        )
+      }
       <Button variant="primary" @click="saveArticle()">{submitLabel}</Button>
     </div>
   </div>
