@@ -78,6 +78,7 @@ const endDate = toDate(eventData?.endDate);
 
 const displayEvent = {
   title: eventData?.title || "Event",
+  lead: eventData?.lead || '',
   category: eventData?.category ? CATEGORY_LABELS[eventData.category] || eventData.category : "Категория",
   authorName: "Organizers",
   authorAvatar: undefined,
@@ -106,6 +107,7 @@ const displayEvent = {
               <ArticleHeader
                 category={displayEvent.category}
                 title={displayEvent.title}
+                lead={displayEvent.lead}
               />
               <ArticleAuthor
                 name={displayEvent.authorName}

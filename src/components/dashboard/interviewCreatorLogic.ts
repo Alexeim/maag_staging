@@ -1,4 +1,4 @@
-import { interviewsApi } from "@/lib/api/api";
+import { interviewsApi, articlesApi, eventsApi, flippersApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
   getStorage,
@@ -68,6 +68,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.content = blocks;
     copy.tags = normalizeTags(copy.tags);
     copy.imageCaption = copy.imageCaption ?? "";
+    copy.lead = copy.lead ?? "";
     return copy;
   };
 
@@ -75,6 +76,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     interview: {
       title: "",
       interviewee: "",
+      lead: "",
       imageUrl: "",
       imageCaption: "",
       contentBlocks: [],
@@ -94,6 +96,13 @@ export default function interviewCreatorLogic(initialState = {}) {
     isEditMode,
     onSaveRedirect,
     newTagInput: "",
+
+    // State for managing content lists for link blocks
+    contentListsLoading: false,
+    allArticles: [],
+    allEvents: [],
+    allInterviews: [],
+    allFlippers: [],
 
     isTagSelected(value: string) {
       return this.interview.tags.includes(value);
@@ -135,6 +144,45 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.newTagInput = "";
     },
 
+    async fetchContentLists() {
+      this.contentListsLoading = true;
+      try {
+        const [articles, events, interviews, flippers] = await Promise.all([
+          articlesApi.list(),
+          eventsApi.list(),
+          interviewsApi.list(),
+          flippersApi.list(),
+        ]);
+        this.allArticles = articles;
+        this.allEvents = events;
+        this.allInterviews = interviews;
+        this.allFlippers = flippers;
+      } catch (error) {
+        console.error("Failed to fetch content lists:", error);
+        window.Alpine?.store("ui")?.showToast?.(
+          "Не удалось загрузить списки контента для ссылок.",
+          "error",
+        );
+      } finally {
+        this.contentListsLoading = false;
+      }
+    },
+
+    getFilteredContentList(contentType) {
+      switch (contentType) {
+        case "article":
+          return this.allArticles;
+        case "event":
+          return this.allEvents;
+        case "interview":
+          return this.allInterviews;
+        case "flipper":
+          return this.allFlippers;
+        default:
+          return [];
+      }
+    },
+
     init() {
       if (initialInterview) {
         const normalizedInitial = normalizeLoadedInterview(initialInterview);
@@ -156,6 +204,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.interview.contentBlocks = Array.isArray(this.interview.contentBlocks)
         ? this.interview.contentBlocks
         : [];
+      this.fetchContentLists();
     },
 
     editTitle() {
@@ -236,6 +285,14 @@ export default function interviewCreatorLogic(initialState = {}) {
         case "qa":
           newBlockData = { question: "", answer: "" };
           break;
+        case "link":
+          newBlockData = {
+            text: "",
+            linkedContentType: "article", // Default to article
+            linkedContentId: "",
+            linkedContentTitle: "",
+          };
+          break;
         default:
           break;
       }
@@ -299,6 +356,7 @@ export default function interviewCreatorLogic(initialState = {}) {
         const payload = {
           title: this.interview.title,
           interviewee: this.interview.interviewee,
+          lead: this.interview.lead,
           imageUrl: this.interview.imageUrl,
           imageCaption: this.interview.imageCaption,
           authorId: "HxpjsagLQxlUb2oCiM6h", // Hardcoded for now

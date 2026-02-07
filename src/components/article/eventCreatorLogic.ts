@@ -77,6 +77,7 @@ export default function eventCreatorLogic(initialState = {}) {
     copy.title = typeof copy.title === "string" ? copy.title : "";
     copy.imageUrl = typeof copy.imageUrl === "string" ? copy.imageUrl : "";
     copy.imageCaption = typeof copy.imageCaption === "string" ? copy.imageCaption : "";
+    copy.lead = copy.lead ?? "";
     return copy;
   };
 
@@ -237,6 +238,7 @@ export default function eventCreatorLogic(initialState = {}) {
         content: this.article.contentBlocks,
         imageUrl: this.article.imageUrl,
         imageCaption: this.article.imageCaption,
+        lead: this.article.lead,
         category,
         tags: this.article.tags,
         techTags: this.article.techTags,

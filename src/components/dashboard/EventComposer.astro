@@ -49,6 +49,16 @@ const {
       </div>
     </template>
 
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-base-content mb-2">Вводка (лид)</label>
+      <textarea
+        x-model="article.lead"
+        rows="3"
+        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        placeholder="Краткое описание события, которое отображается под заголовком..."
+      ></textarea>
+    </div>
+
     <hr class="my-6" />
 
     <label class="block text-sm font-medium text-base-content mb-2">Категория</label>
@@ -286,6 +296,45 @@ const {
                 </div>
               </template>
 
+              <template x-if="editingBlock.type === 'link'">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium">Текст ссылки</label>
+                    <input
+                      type="text"
+                      x-model="editingBlock.text"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="Введите текст для ссылки..."
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium">Тип контента</label>
+                    <select
+                      x-model="editingBlock.linkedContentType"
+                      @change="editingBlock.linkedContentId = ''"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    >
+                      <option value="article">Статья</option>
+                      <option value="event">Событие</option>
+                      <option value="interview">Интервью</option>
+                      <option value="flipper">Флиппер</option>
+                    </select>
+                  </div>
+                  <div x-show="editingBlock.linkedContentType">
+                    <label class="block text-sm font-medium">Выберите контент</label>
+                    <select
+                      x-model="editingBlock.linkedContentId"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    >
+                      <option value="" disabled>Выберите...</option>
+                      <template x-for="item in getFilteredContentList(editingBlock.linkedContentType)" :key="item.id">
+                        <option :value="item.id" x-text="item.title"></option>
+                      </template>
+                    </select>
+                  </div>
+                </div>
+              </template>
+
               <div class="flex justify-end gap-3">
                 <Button variant="accent" @click="cancelEdit()">Отмена</Button>
                 <Button variant="success" @click="updateBlock()">Сохранить блок</Button>
@@ -333,6 +382,11 @@ const {
           <button @click="addBlock('h3')" class="btn btn-outline btn-sm justify-start">Подзаголовок H3</button>
           <button @click="addBlock('quote')" class="btn btn-outline btn-sm justify-start">Цитата</button>
           <button @click="addBlock('image')" class="btn btn-outline btn-sm justify-start">Картинка</button>
+          <button
+            @click="addBlock('link')"
+            class="btn btn-outline btn-sm justify-start"
+            >Блок-ссылка</button
+          >
         </div>
       </template>
 

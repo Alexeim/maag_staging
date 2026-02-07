@@ -4,7 +4,9 @@ interface Block {
   text?: string;
   url?: string;
   caption?: string;
-  // Add other potential block properties here
+  linkedContentType?: "article" | "event" | "interview" | "flipper";
+  linkedContentId?: string;
+  linkedContentTitle?: string;
 }
 
 interface ColumnData {
@@ -107,12 +109,31 @@ if (currentProseGroup.length > 0) {
                           class="article-image"
                         />
                         {block.caption && (
-                          <figcaption class="text-center font-oswald text-sm text-gray-500 mt-2">
+                          <figcaption class="text-center font-oswald text-xs text-gray-500 mt-2">
                             {block.caption}
                           </figcaption>
                         )}
                       </figure>
                     );
+                  case "link":
+                    {
+                      const hrefMap = {
+                        article: `/article/${block.linkedContentId}`,
+                        event: `/events/${block.linkedContentId}`,
+                        interview: `/interviews/${block.linkedContentId}`,
+                        flipper: `/flippers/${block.linkedContentId}`,
+                      };
+                      const href = block.linkedContentType && block.linkedContentId
+                        ? hrefMap[block.linkedContentType]
+                        : "#";
+                      return (
+                        <p class="text-lg font-oswald text-justify font-thin">
+                          <a href={href} class="text-blue-600 hover:underline">
+                            {block.text || "Ссылка"}
+                          </a>
+                        </p>
+                      );
+                    }
                   default:
                     return null;
                 }
@@ -134,7 +155,7 @@ if (currentProseGroup.length > 0) {
                       class="article-image"
                     />
                     {twoColumnBlock.left.caption && (
-                      <figcaption class="text-center font-oswald text-sm text-gray-500 mt-2">
+                      <figcaption class="text-center font-oswald text-xs text-gray-500 mt-2">
                         {twoColumnBlock.left.caption}
                       </figcaption>
                     )}
@@ -154,7 +175,7 @@ if (currentProseGroup.length > 0) {
                       class="article-image"
                     />
                     {twoColumnBlock.right.caption && (
-                      <figcaption class="text-center font-oswald text-sm text-gray-500 mt-2">
+                      <figcaption class="text-center font-oswald text-xs text-gray-500 mt-2">
                         {twoColumnBlock.right.caption}
                       </figcaption>
                     )}

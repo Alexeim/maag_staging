@@ -79,8 +79,8 @@ try {
         !isNewsCategory(article.category) && !isHotContentArticle(article)
     ) || null;
 
-  // Filter for news articles
-  newsArticles = articles.filter((article) => isNewsCategory(article.category));
+  // Filter for news articles, limit to 5 for the landing page
+  newsArticles = articles.filter((article) => isNewsCategory(article.category)).slice(0, 5);
 } catch (error) {
   console.error("Failed to fetch articles:", error);
 }
@@ -171,7 +171,7 @@ try {
         Новости
       </h2>
       <div
-        class="flex space-x-6 overflow-x-auto pb-2 lg:flex-col lg:space-x-0 lg:space-y-6 lg:overflow-x-visible lg:overflow-y-scroll lg:max-h-[720px]"
+        class="flex space-x-6 overflow-x-hidden pb-2 lg:flex-col lg:space-x-0 lg:space-y-6 lg:overflow-x-visible lg:overflow-y-hidden"
       >
         {
           newsArticles.map((newsItem) => (

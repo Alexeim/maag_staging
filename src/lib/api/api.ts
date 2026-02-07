@@ -120,6 +120,7 @@ export interface ArticlePayload {
   content: unknown[];
   imageUrl?: string;
   imageCaption?: string;
+  lead?: string;
   category?: string;
   tags?: string[];
   techTags?: string[];
@@ -138,6 +139,7 @@ export interface EventPayload {
   content: unknown[];
   imageUrl?: string;
   imageCaption?: string;
+  lead?: string;
   category: 'exhibition' | 'concert' | 'performance';
   tags: string[];
   techTags: string[];
@@ -181,6 +183,7 @@ export interface InterviewPayload {
   content: unknown[];
   imageUrl?: string;
   imageCaption?: string;
+  lead?: string;
   tags?: string[];
 }
 

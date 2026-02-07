@@ -547,11 +547,49 @@ const {
                     </div>
                   </div>
                 </div>
-              </template>
-
-              <div class="flex justify-end gap-3">
-                <Button variant="secondary" @click="cancelEdit()">Отмена</Button
-                >
+                            </template>
+              
+                            <template x-if="editingBlock.type === 'link'">
+                              <div class="space-y-4">
+                                <div>
+                                  <label class="block text-sm font-medium">Текст ссылки</label>
+                                  <input
+                                    type="text"
+                                    x-model="editingBlock.text"
+                                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                                    placeholder="Введите текст для ссылки..."
+                                  />
+                                </div>
+                                <div>
+                                  <label class="block text-sm font-medium">Тип контента</label>
+                                  <select
+                                    x-model="editingBlock.linkedContentType"
+                                    @change="editingBlock.linkedContentId = ''"
+                                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                                  >
+                                    <option value="article">Статья</option>
+                                    <option value="event">Событие</option>
+                                    <option value="interview">Интервью</option>
+                                    <option value="flipper">Флиппер</option>
+                                  </select>
+                                </div>
+                                <div x-show="editingBlock.linkedContentType">
+                                  <label class="block text-sm font-medium">Выберите контент</label>
+                                  <select
+                                    x-model="editingBlock.linkedContentId"
+                                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                                  >
+                                    <option value="" disabled>Выберите...</option>
+                                    <template x-for="item in getFilteredContentList(editingBlock.linkedContentType)" :key="item.id">
+                                      <option :value="item.id" x-text="item.title"></option>
+                                    </template>
+                                  </select>
+                                </div>
+                              </div>
+                            </template>
+              
+                            <div class="flex justify-end gap-3">
+                              <Button variant="secondary" @click="cancelEdit()">Отмена</Button>
                 <Button variant="primary" @click="updateBlock()"
                   >Сохранить блок</Button
                 >
@@ -675,6 +713,11 @@ const {
             @click="addBlock('two-columns')"
             class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
             >Две колонки</button
+          >
+          <button
+            @click="addBlock('link')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Блок-ссылка</button
           >
         </div>
       </template>

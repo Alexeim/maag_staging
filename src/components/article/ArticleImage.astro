@@ -8,38 +8,51 @@ interface Props {
   caption: string;
   transitionName?: string;
   figureClass?: string; // Классы для внешнего контейнера figure/div
-  imageClass?: string;  // Классы для тега img
+  imageClass?: string; // Классы для тега img
   figcaptionClass?: string; // Классы для текста подписи
 }
-const { src, alt, caption, transitionName, figureClass, imageClass, figcaptionClass } = Astro.props;
+const {
+  src,
+  alt,
+  caption,
+  transitionName,
+  figureClass,
+  imageClass,
+  figcaptionClass,
+} = Astro.props;
 
-const defaultImageClasses = "w-full h-auto lg:h-[649px] object-contain object-center";
-const finalImageClasses = `${defaultImageClasses} ${imageClass || ''}`;
+const defaultImageClasses =
+  "w-full h-auto lg:h-[649px] object-contain object-center";
+const finalImageClasses = `${defaultImageClasses} ${imageClass || ""}`;
 
-const defaultFigureClasses = "flex flex-col items-center gap-[13px] w-full max-w-[1400px] mx-auto";
-const finalFigureClasses = `${defaultFigureClasses} ${figureClass || ''}`;
+const defaultFigureClasses =
+  "flex flex-col items-center gap-[13px] w-full max-w-[1400px] mx-auto";
+const finalFigureClasses = `${defaultFigureClasses} ${figureClass || ""}`;
 
-const defaultFigcaptionClasses = "text-base leading-[1.6] text-neutral-500 font-['Inter']";
-const finalFigcaptionClasses = `${defaultFigcaptionClasses} ${figcaptionClass || ''}`;
+const defaultFigcaptionClasses =
+  "text-xs leading-[1.6] text-gray-500 font-oswald text-center mb-8";
+const finalFigcaptionClasses = `${defaultFigcaptionClasses} ${figcaptionClass || ""}`;
 ---
 
 <div class={finalFigureClasses}>
   <div class="w-full lg:h-[649px] bg-base-200 overflow-hidden">
-    {typeof src === 'string' ? (
-      <img
-        src={src}
-        alt={alt}
-        class={finalImageClasses}
-        transition:name={transitionName}
-      />
-    ) : (
-      <Image
-        src={src}
-        alt={alt}
-        class={finalImageClasses}
-        transition:name={transitionName}
-      />
-    )}
+    {
+      typeof src === "string" ? (
+        <img
+          src={src}
+          alt={alt}
+          class={finalImageClasses}
+          transition:name={transitionName}
+        />
+      ) : (
+        <Image
+          src={src}
+          alt={alt}
+          class={finalImageClasses}
+          transition:name={transitionName}
+        />
+      )
+    }
   </div>
   <div class="max-w-[826px] w-full">
     <p class={finalFigcaptionClasses}>

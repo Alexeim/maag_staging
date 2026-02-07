@@ -6,6 +6,18 @@ import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
 import SocialShare from "../../components/article/SocialShare.astro";
 import { Image } from "astro:assets";
 
+interface Block {
+  type: string;
+  text?: string;
+  url?: string;
+  caption?: string;
+  question?: string;
+  answer?: string;
+  linkedContentType?: "article" | "event" | "interview" | "flipper";
+  linkedContentId?: string;
+  linkedContentTitle?: string;
+}
+
 const { id } = Astro.params;
 
 let interview = null;
@@ -21,7 +33,7 @@ if (!interview) {
   return Astro.redirect("/404");
 }
 
-const { title, author, interviewee, content, imageUrl, imageCaption, tags } =
+const { title, author, interviewee, content, imageUrl, imageCaption, tags, lead } =
   interview;
 const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
 ---
@@ -29,7 +41,7 @@ const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
 <Layout title={title}>
   <div class="pt-[150px] pb-[100px] flex flex-col items-center gap-[100px]">
     <div class="flex flex-col gap-8 max-w-[825px] w-full px-4">
-      <ArticleHeader category={tags?.[0] || "Интервью"} title={title} />
+      <ArticleHeader category={tags?.[0] || "Интервью"} title={title} lead={lead} />
       {author && <ArticleAuthor name={authorName} avatarUrl={author.avatar} />}
     </div>
 
@@ -102,6 +114,25 @@ const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
                   </div>
                 </div>
               );
+            case "link":
+              {
+                const hrefMap = {
+                  article: `/article/${block.linkedContentId}`,
+                  event: `/events/${block.linkedContentId}`,
+                  interview: `/interviews/${block.linkedContentId}`,
+                  flipper: `/flippers/${block.linkedContentId}`,
+                };
+                const href = block.linkedContentType && block.linkedContentId
+                  ? hrefMap[block.linkedContentType]
+                  : "#";
+                return (
+                  <p class="text-lg font-thin">
+                    <a href={href} class="text-blue-600 hover:underline">
+                      {block.text || "Ссылка"}
+                    </a>
+                  </p>
+                );
+              }
             default:
               return null;
           }

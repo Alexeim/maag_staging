@@ -1,4 +1,4 @@
-import { articlesApi } from "@/lib/api/api";
+import { articlesApi, eventsApi, interviewsApi, flippersApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
   getStorage,
@@ -154,6 +154,13 @@ export default function articleCreatorLogic(initialState = {}) {
       isMainInCategory: false,
     },
 
+    // --- State for managing content lists for link blocks ---
+    contentListsLoading: false,
+    allArticles: [],
+    allEvents: [],
+    allInterviews: [],
+    allFlippers: [],
+
     // --- State for managing the block creation UI ---
     showBlockOptions: false,
 
@@ -270,6 +277,44 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.techTags = normalizeTechTags(this.article.techTags);
     },
 
+    async fetchContentLists() {
+      this.contentListsLoading = true;
+      try {
+        const [articles, events, interviews, flippers] = await Promise.all([
+          articlesApi.list(),
+          eventsApi.list(),
+          interviewsApi.list(),
+          flippersApi.list(),
+        ]);
+        this.allArticles = articles;
+        this.allEvents = events;
+        this.allInterviews = interviews;
+        this.allFlippers = flippers;
+      } catch (error) {
+        console.error("Failed to fetch content lists:", error);
+        window.Alpine?.store("ui")?.showToast?.(
+          "Не удалось загрузить списки контента для ссылок.",
+          "error",
+        );
+      } finally {
+        this.contentListsLoading = false;
+      }
+    },
+
+    getFilteredContentList(contentType) {
+      switch (contentType) {
+        case "article":
+          return this.allArticles;
+        case "event":
+          return this.allEvents;
+        case "interview":
+          return this.allInterviews;
+        case "flipper":
+          return this.allFlippers;
+        default:
+          return [];
+      }
+    },
     init() {
       type PreviewState = {
         article?: unknown;
@@ -367,6 +412,8 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? this.article.contentBlocks
         : [];
+
+      this.fetchContentLists();
     },
 
     // --- Title editing methods (unchanged) ---
@@ -465,6 +512,14 @@ export default function articleCreatorLogic(initialState = {}) {
           newBlockData = {
             left: { type: "text", content: "", caption: "" },
             right: { type: "text", content: "", caption: "" },
+          };
+          break;
+        case "link":
+          newBlockData = {
+            text: "",
+            linkedContentType: "article", // Default to article
+            linkedContentId: "",
+            linkedContentTitle: "",
           };
           break;
         // Add other cases here

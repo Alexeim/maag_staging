@@ -5,6 +5,7 @@ export interface EventItem {
   id?: string;
   title: string;
   authorId: string;
+  lead?: string;
   content: any[];
   imageUrl?: string;
   imageCaption?: string;
@@ -62,6 +63,7 @@ export const createEvent = async (req: Request, res: Response) => {
       imageUrl,
       imageCaption,
       authorId,
+      lead,
       category,
       tags = [],
       techTags = [],
@@ -96,6 +98,7 @@ export const createEvent = async (req: Request, res: Response) => {
     const newEvent: Omit<EventItem, 'id'> = {
       title,
       authorId,
+      lead: lead || '',
       content,
       imageUrl,
       imageCaption,
@@ -168,6 +171,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       imageUrl,
       imageCaption,
       authorId,
+      lead,
       category,
       tags = [],
       techTags = [],
@@ -202,6 +206,7 @@ export const updateEvent = async (req: Request, res: Response) => {
     const payload: Partial<EventItem> = {
       title,
       authorId,
+      lead: lead || '',
       content,
       imageUrl,
       imageCaption,

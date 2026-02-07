@@ -9,7 +9,7 @@ const { name, avatarUrl } = Astro.props;
 
 <div class="flex items-center gap-[17px]">
   <div
-    class="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden"
+    class="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden"
   >
     <div
       class="object-cover w-full h-full"
@@ -34,6 +34,5 @@ const { name, avatarUrl } = Astro.props;
       </template>
     </div>
   </div>
-  <span class="text-base font-normal font-oswald text-base-content">{name}</span
-  >
+  <span class="text-base font-thin font-oswald text-base-content">{name}</span>
 </div>

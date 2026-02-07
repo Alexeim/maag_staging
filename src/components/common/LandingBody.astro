@@ -102,7 +102,7 @@ try {
   console.log(`--- STEP 3: FILTERED ---`);
   console.log(`Items in cultureItems after filtering: ${cultureItems.length}`);
 
-  hotContentArticles = articles.filter(isHotContent).reverse().slice(0, 6);
+  hotContentArticles = articles.filter(isHotContent).slice(0, 6);
   latestInterview = interviews[0] ?? null;
 
 } catch (error) {
@@ -220,8 +220,7 @@ const interviewQuote = truncateText(extractQuoteOrAnswer(latestInterview));
           </div>
 
           {latestInterview && (
-            <LatestInterview 
-              tag={latestInterview.tags?.[0]}
+            <LatestInterview
               interviewee={latestInterview.interviewee}
               quote={interviewQuote}
               imageUrl={latestInterview.imageUrl}
