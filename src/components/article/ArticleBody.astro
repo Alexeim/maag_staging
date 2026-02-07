@@ -1,4 +1,6 @@
 ---
+import QuoteIcon from "../../assets/icons/quote.svg";
+
 interface Block {
   type: string;
   text?: string;
@@ -94,10 +96,12 @@ if (currentProseGroup.length > 0) {
                     );
                   case "quote":
                     return (
-                      <div class="bg-white p-2">
+                      <div class="p-2 flex flex-col items-center justify-center gap-2">
+                        <QuoteIcon class="w-8 h-8" />
                         <blockquote class="text-3xl italic font-oswald pl-4 my-4 font-thin">
-                          "{block.text}"
+                          {block.text}
                         </blockquote>
+                        <QuoteIcon class="w-8 h-8 rotate-180" />
                       </div>
                     );
                   case "image":
@@ -115,25 +119,28 @@ if (currentProseGroup.length > 0) {
                         )}
                       </figure>
                     );
-                  case "link":
-                    {
-                      const hrefMap = {
-                        article: `/article/${block.linkedContentId}`,
-                        event: `/events/${block.linkedContentId}`,
-                        interview: `/interviews/${block.linkedContentId}`,
-                        flipper: `/flippers/${block.linkedContentId}`,
-                      };
-                      const href = block.linkedContentType && block.linkedContentId
+                  case "link": {
+                    const hrefMap = {
+                      article: `/article/${block.linkedContentId}`,
+                      event: `/events/${block.linkedContentId}`,
+                      interview: `/interviews/${block.linkedContentId}`,
+                      flipper: `/flippers/${block.linkedContentId}`,
+                    };
+                    const href =
+                      block.linkedContentType && block.linkedContentId
                         ? hrefMap[block.linkedContentType]
                         : "#";
-                      return (
-                        <p class="text-lg font-oswald text-justify font-thin">
-                          <a href={href} class="text-blue-600 hover:underline">
-                            {block.text || "Ссылка"}
-                          </a>
-                        </p>
-                      );
-                    }
+                    return (
+                      <p class="text-lg font-oswald text-justify font-thin">
+                        <a
+                          href={href}
+                          class="text-xl font-oswald font-semibold hover:underline"
+                        >
+                          {block.text || "Ссылка"}
+                        </a>
+                      </p>
+                    );
+                  }
                   default:
                     return null;
                 }

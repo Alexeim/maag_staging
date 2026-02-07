@@ -2,6 +2,7 @@
 import Layout from "../../Layouts/Layout.astro";
 import ArticleHeader from "../../components/article/ArticleHeader.astro";
 import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
+import ArticleDate from "@/components/article/ArticleDate.astro";
 import SocialShare from "../../components/article/SocialShare.astro";
 import ArticleImage from "../../components/article/ArticleImage.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
@@ -70,7 +71,7 @@ const displayArticle = {
         <>
           <!-- Article Header Section -->
           <div class="pt-[50px] pb-[70px] flex flex-col items-center gap-[50px]">
-            <div class="flex flex-col gap-8 max-w-[825px] w-full">
+            <div class="flex flex-col gap-4 max-w-[825px] w-full">
               <ArticleHeader
                 category={displayArticle.category}
                 title={displayArticle.title}
@@ -80,6 +81,7 @@ const displayArticle = {
                 name={displayArticle.authorName}
                 avatarUrl={displayArticle.authorAvatar}
               />
+              <ArticleDate createdAt={articleData.createdAt} />
               {/* <SocialShare readTime={displayArticle.readTime} /> */}
             </div>
 

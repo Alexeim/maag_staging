@@ -19,24 +19,28 @@ const {
 const displayImage = imageUrl || picture3.src;
 ---
 
-<div class="w-full flex flex-col gap-2 max-h-[300px] min-w-[220px] lg:min-w-0 max-w-[303px]">
-  <div class="w-full h-40 overflow-hidden rounded-lg">
+<div
+  class="w-full flex flex-col gap-2 max-h-[300px] min-w-[220px] lg:min-w-0 max-w-[303px]"
+>
+  <div class="w-full h-40 overflow-hidden">
     <a href={href} class="block w-full h-full">
-      {imageUrl ? (
-        <img
-          src={displayImage}
-          alt={title}
-          class="w-full h-full object-cover object-center"
-          loading="lazy"
-        />
-      ) : (
-        <Image
-          src={picture3}
-          alt="Hot content image"
-          class="w-full h-full object-cover object-center"
-          loading="eager"
-        />
-      )}
+      {
+        imageUrl ? (
+          <img
+            src={displayImage}
+            alt={title}
+            class="w-full h-full object-cover object-center"
+            loading="lazy"
+          />
+        ) : (
+          <Image
+            src={picture3}
+            alt="Hot content image"
+            class="w-full h-full object-cover object-center"
+            loading="eager"
+          />
+        )
+      }
     </a>
   </div>
   <p class="text-error uppercase mb-3 font-inter text-xs tracking-[.46em]">

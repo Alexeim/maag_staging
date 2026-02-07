@@ -177,7 +177,40 @@ const {
               </template>
 
               <template x-if="editingBlock.type === 'image'">
-                <!-- Image block editing UI remains the same -->
+                <div x-data="{ blockFileName: '' }" class="space-y-3">
+                  <label class="block text-sm font-medium">Изображение</label>
+                  <div class="flex items-center gap-3">
+                    <label :for="'block-image-upload-' + index" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
+                      <CloudUpload/>
+                      Загрузить файл
+                    </label>
+                    <input
+                      :id="'block-image-upload-' + index"
+                      type="file"
+                      class="hidden"
+                      @change="handleImageUpload($event, false, index); blockFileName = $event.target.files[0]?.name || ''"
+                      accept="image/png, image/jpeg, image/webp"
+                    />
+                    <span
+                      x-text="blockFileName || (editingBlock.url ? 'Изображение загружено' : 'Файл не выбран')"
+                      class="text-sm text-base-content/70"
+                    ></span>
+                  </div>
+                  <div x-show="uploading && editingIndex === index">
+                    <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
+                    <div class="w-full bg-base-200 rounded-full h-2">
+                      <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                    </div>
+                  </div>
+                  <img x-show="editingBlock.url && !uploading" :src="editingBlock.url" alt="Предпросмотр блока" class="rounded-md max-h-48" />
+                  <label class="block text-sm font-medium mt-2">Подпись к изображению</label>
+                  <input
+                    type="text"
+                    x-model="editingBlock.caption"
+                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    placeholder="Введите подпись..."
+                  />
+                </div>
               </template>
 
               <template x-if="editingBlock.type === 'qa'">

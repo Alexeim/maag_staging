@@ -1,0 +1,37 @@
+---
+interface Props {
+  createdAt: string | Date | { toDate: () => Date } | { _seconds: number };
+}
+
+const { createdAt } = Astro.props;
+
+let date: Date;
+
+if (typeof createdAt === 'object' && createdAt !== null) {
+  if ('toDate' in createdAt && typeof createdAt.toDate === 'function') {
+    // Вариант 1: Настоящий объект Firebase Timestamp
+    date = createdAt.toDate();
+  } else if ('_seconds' in createdAt && typeof createdAt._seconds === 'number') {
+    // Вариант 2: Сериализованный объект Timestamp с сервера
+    date = new Date(createdAt._seconds * 1000);
+  } else {
+    // Попытка обработать как обычный объект (маловероятно, но для надежности)
+    date = new Date(createdAt as any);
+  }
+} else {
+  // Вариант 3: Обычная строка или объект Date
+  date = new Date(createdAt);
+}
+
+const formattedDate = !isNaN(date.getTime())
+  ? date.toLocaleDateString("ru-RU", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).replace(' г.', '') // Remove " г."
+  : "Некорректная дата";
+---
+
+<span class="text-sm font-oswald text-base-content">
+  {formattedDate}
+</span>

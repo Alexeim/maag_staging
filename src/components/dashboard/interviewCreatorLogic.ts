@@ -255,8 +255,12 @@ export default function interviewCreatorLogic(initialState = {}) {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
             if (isCover) {
               this.interview.imageUrl = downloadURL;
-            } else if (blockIndex !== null && this.editingBlock && this.editingBlock.type === "image") {
-              this.editingBlock.url = downloadURL;
+            } else if (blockIndex !== null && this.editingIndex !== null && this.interview.contentBlocks[this.editingIndex]?.type === "image") {
+              this.interview.contentBlocks[this.editingIndex].url = downloadURL;
+              // Also update editingBlock to reflect this change
+              if (this.editingBlock && this.editingBlock.type === "image") {
+                this.editingBlock.url = downloadURL;
+              }
             }
             this.uploading = false;
             window.Alpine.store("ui").showToast("Картинка успешно загружена!");
