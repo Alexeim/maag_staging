@@ -21,7 +21,7 @@ const normalizeCategory = (value?: string) => {
   // Convert the CATEGORY_LABELS object into an array of [key, value] pairs
   // and find the first pair where the value (the display name) matches the input value.
   const entry = Object.entries(CATEGORY_LABELS).find(
-    ([, label]) => label === value
+    ([, label]) => label === value,
   );
   // If an entry was found, return its key (the internal name, e.g., "culture").
   // Otherwise, return the original input value.
@@ -44,7 +44,7 @@ const getPrimaryTag = (article: any) => {
       : [];
 
   const firstTag = rawTags.find(
-    (tag) => typeof tag === "string" && tag.trim().length > 0
+    (tag) => typeof tag === "string" && tag.trim().length > 0,
   );
 
   if (firstTag) {
@@ -76,11 +76,14 @@ try {
     articles.find((article) => article.isOnLanding) ||
     articles.find(
       (article) =>
-        !isNewsCategory(article.category) && !isHotContentArticle(article)
-    ) || null;
+        !isNewsCategory(article.category) && !isHotContentArticle(article),
+    ) ||
+    null;
 
   // Filter for news articles, limit to 5 for the landing page
-  newsArticles = articles.filter((article) => isNewsCategory(article.category)).slice(0, 5);
+  newsArticles = articles
+    .filter((article) => isNewsCategory(article.category))
+    .slice(0, 5);
 } catch (error) {
   console.error("Failed to fetch articles:", error);
 }
@@ -195,7 +198,7 @@ try {
                     href={`/article/${newsItem.id}`}
                     class="block bg-base-200 z-50"
                   >
-                    <h3 class="text-base font-bold font-oswald mt-1 leading-tight">
+                    <h3 class="text-base font-bold font-oswald mt-1 leading-tight hover:underline">
                       {newsItem.title}
                     </h3>
                   </a>
@@ -240,7 +243,7 @@ try {
                 href={`/article/${mainArticle.id}`}
                 class="block bg-base-200 z-50"
               >
-                <h2 class="max-w-[600px] text-3xl lg:text-5xl leading-tight font-thin font-oswald">
+                <h2 class="max-w-[600px] text-3xl lg:text-5xl leading-tight font-thin font-oswald hover:underline">
                   {mainArticle.title}{" "}
                   <Image
                     src={maagLogo}

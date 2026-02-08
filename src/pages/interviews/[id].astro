@@ -50,7 +50,7 @@ const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
 ---
 
 <Layout title={title}>
-  <div class="pt-[50px] pb-[50px] flex flex-col items-center gap-[50px]">
+  <div class="pt-[50px] pb-[70px] flex flex-col items-center gap-[50px]">
     <div class="flex flex-col gap-4 max-w-[825px] w-full px-4">
       <ArticleHeader category={"Интервью"} title={title} lead={lead} />
       {author && <ArticleAuthor name={authorName} avatarUrl={author.avatar} />}

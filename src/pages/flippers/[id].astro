@@ -2,6 +2,7 @@
 import Layout from "../../Layouts/Layout.astro";
 import ArticleHeader from "../../components/article/ArticleHeader.astro";
 import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
+import ArticleDate from "@/components/article/ArticleDate.astro";
 import { flippersApi } from "../../lib/api/api";
 import ArrowLeft from "../../assets/svg/arrowLeft.svg";
 import ArrowRight from "../../assets/svg/arrowRight.svg";
@@ -20,8 +21,8 @@ const flipperState = JSON.stringify({
 
 <Layout title={flipper.title}>
   <div class="container mx-auto px-4 py-8" x-data={flipperState}>
-    <div class="pt-[150px] pb-[100px] flex flex-col items-center gap-[100px]">
-      <div class="flex flex-col gap-8 max-w-[825px] w-full">
+    <div class="pt-[50px] pb-[70px] flex flex-col items-center gap-[50px]">
+      <div class="flex flex-col gap-4 max-w-[825px] w-full">
         <ArticleHeader category={flipper.techTags[0]} title={flipper.title} />
         {
           flipper.author && (
@@ -31,11 +32,12 @@ const flipperState = JSON.stringify({
             />
           )
         }
+        {flipper.createdAt && <ArticleDate createdAt={flipper.createdAt} />}
       </div>
     </div>
 
     <div class="relative w-full max-w-[1200px] mx-auto">
-      <div class="overflow-hidden relative min-h-[800px]">
+      <div class="overflow-hidden relative h-[600px] w-full">
         <template x-for="(item, index) in slides" :key="index">
           <div
             x-show="activeSlide === index"
@@ -49,30 +51,30 @@ const flipperState = JSON.stringify({
           >
             <img
               :src="item.imageUrl"
-              class="w-full h-full object-cover rounded-lg"
+              class="w-full h-full object-contain rounded-lg"
               :alt="item.caption || 'Carousel image'"
             />
           </div>
         </template>
-      </div>
 
-      <button
-        @click="activeSlide = (activeSlide - 1 + slides.length) % slides.length"
-        class="absolute top-1/2 left-2 transform -translate-y-1/2 bg-opacity-50 rounded-full p-3 hover:bg-opacity-75 transition cursor-pointer"
-      >
-        <ArrowLeft />
-      </button>
-      <button
-        @click="activeSlide = (activeSlide + 1) % slides.length"
-        class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-opacity-50 rounded-full p-3 hover:bg-opacity-75 transition cursor-pointer"
-      >
-        <ArrowRight />
-      </button>
+        <button
+          @click="activeSlide = (activeSlide - 1 + slides.length) % slides.length"
+          class="absolute top-1/2 left-2 transform -translate-y-1/2 rounded-full p-3 transition cursor-pointer text-neutral-300 hover:text-neutral-400"
+        >
+          <ArrowLeft />
+        </button>
+        <button
+          @click="activeSlide = (activeSlide + 1) % slides.length"
+          class="absolute top-1/2 right-2 transform -translate-y-1/2 rounded-full p-3 transition cursor-pointer text-neutral-300 hover:text-neutral-400"
+        >
+          <ArrowRight />
+        </button>
+      </div>
 
       <!-- Caption and dots moved here -->
       <div class="mt-4 text-center">
         <p
-          class="text-base-content text-lg"
+          class="text-base-content font-oswald font-thin text-lg"
           x-text="slides[activeSlide].caption"
         >
         </p>
@@ -83,7 +85,8 @@ const flipperState = JSON.stringify({
           <button
             @click="activeSlide = index"
             :class="{'bg-primary': activeSlide === index, 'bg-base-300': activeSlide !== index}"
-            class="w-3 h-3 rounded-full hover:bg-primary transition"></button>
+            class="w-3 h-3 rounded-full hover:bg-primary transition cursor-pointer"
+          ></button>
         </template>
       </div>
     </div>
