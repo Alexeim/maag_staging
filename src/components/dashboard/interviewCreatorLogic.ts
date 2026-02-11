@@ -69,6 +69,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.tags = normalizeTags(copy.tags);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.lead = copy.lead ?? "";
+    copy.mainQuote = copy.mainQuote ?? "";
     return copy;
   };
 
@@ -77,6 +78,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       title: "",
       interviewee: "",
       lead: "",
+      mainQuote: "",
       imageUrl: "",
       imageCaption: "",
       contentBlocks: [],
@@ -231,7 +233,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.isEditingCaption = false;
     },
 
-    handleImageUpload(event, isCover = true, blockIndex = null) {
+    handleImageUpload(event, isCover = true, blockIndex = null, column = null) {
       const file = event.target.files[0];
       if (!file) return;
 
@@ -255,6 +257,9 @@ export default function interviewCreatorLogic(initialState = {}) {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
             if (isCover) {
               this.interview.imageUrl = downloadURL;
+            } else if (column && this.editingBlock?.type === "two-columns") {
+              this.editingBlock[column].content = downloadURL;
+              this.editingBlock[column].type = "image";
             } else if (blockIndex !== null && this.editingIndex !== null && this.interview.contentBlocks[this.editingIndex]?.type === "image") {
               this.interview.contentBlocks[this.editingIndex].url = downloadURL;
               // Also update editingBlock to reflect this change
@@ -285,6 +290,12 @@ export default function interviewCreatorLogic(initialState = {}) {
           break;
         case "image":
           newBlockData = { url: "", caption: "" };
+          break;
+        case "two-columns":
+          newBlockData = {
+            left: { type: "text", content: "", caption: "" },
+            right: { type: "text", content: "", caption: "" },
+          };
           break;
         case "qa":
           newBlockData = { question: "", answer: "" };
@@ -361,6 +372,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           title: this.interview.title,
           interviewee: this.interview.interviewee,
           lead: this.interview.lead,
+          mainQuote: this.interview.mainQuote,
           imageUrl: this.interview.imageUrl,
           imageCaption: this.interview.imageCaption,
           authorId: "HxpjsagLQxlUb2oCiM6h", // Hardcoded for now

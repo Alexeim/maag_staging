@@ -163,7 +163,9 @@ const truncateText = (text: string | null, maxLength: number = 100) => {
   return text.substring(0, maxLength) + "...";
 };
 
-const interviewQuote = truncateText(extractQuoteOrAnswer(latestInterview));
+const interviewQuote = latestInterview?.mainQuote
+  ? truncateText(latestInterview.mainQuote)
+  : truncateText(extractQuoteOrAnswer(latestInterview));
 ---
 
 <section class="w-full px-4 lg:px-8 bg-base-200 mt-0 pb-12 overflow-hidden">

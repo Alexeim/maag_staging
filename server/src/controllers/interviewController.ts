@@ -8,6 +8,7 @@ export interface Interview {
   authorId: string;
   interviewee: string;
   lead?: string;
+  mainQuote?: string;
   content: any[]; // Array of content blocks
   imageUrl?: string;
   imageCaption?: string;
@@ -33,6 +34,7 @@ export const createInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead,
+      mainQuote,
       tags = [],
     } = req.body;
 
@@ -49,6 +51,7 @@ export const createInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead: lead || '',
+      mainQuote: mainQuote || '',
       content,
       imageUrl,
       imageCaption,
@@ -149,6 +152,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead,
+      mainQuote,
       tags = [],
     } = req.body;
 
@@ -165,6 +169,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead: lead || '',
+      mainQuote: mainQuote || '',
       content,
       imageUrl,
       imageCaption,

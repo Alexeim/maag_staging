@@ -187,6 +187,7 @@ export interface InterviewPayload {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  mainQuote?: string;
   tags?: string[];
 }
 
