@@ -4,21 +4,35 @@ interface Props {
   alt: string;
   caption?: string;
   transitionName?: string;
+  transitionAliases?: string[];
 }
 
-const { src, alt, caption, transitionName } = Astro.props;
+const { src, alt, caption, transitionName, transitionAliases = [] } = Astro.props;
 ---
 
 <figure>
   <img
     src={src}
     alt={alt}
-    class="rounded-md w-full object-cover max-h-[400px]"
+    class="w-full object-cover max-h-[400px]"
     transition:name={transitionName}
   />
-  {caption && (
-    <figcaption class="text-xs text-gray-500 font-oswald tracking-wide mt-2">
-      {caption}
-    </figcaption>
-  )}
+  {
+    caption && (
+      <figcaption class="text-xs text-gray-500 font-oswald tracking-wide mt-2">
+        {caption}
+      </figcaption>
+    )
+  }
 </figure>
+{
+  transitionAliases.map((alias) => (
+    <img
+      src={src}
+      alt=""
+      aria-hidden="true"
+      class="fixed w-px h-px opacity-0 pointer-events-none -z-10"
+      transition:name={alias}
+    />
+  ))
+}

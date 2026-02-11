@@ -55,6 +55,8 @@ const displayArticle = {
   imageAlt: articleData?.mainImage?.alt || 'Article image',
   contentBlocks: articleData?.content || [],
 };
+
+const transitionAliases = [`landing-body-main-article-image-${id}`];
 ---
 
 <Layout
@@ -93,6 +95,7 @@ const displayArticle = {
                 alt={displayArticle.imageAlt}
                 caption={displayArticle.imageCaption}
                 transitionName={`main-article-image-${id}`}
+                transitionAliases={transitionAliases}
                 figureClass="max-w-[1200px]"
                 imageClass="shadow-lg"
                 figcaptionClass="text-center font-oswald text-sm text-gray-500 mt-2"

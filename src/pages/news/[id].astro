@@ -46,6 +46,7 @@ const imageCaption = articleData?.imageCaption || "";
 const contentBlocks = (articleData?.content || []).filter(
   (block: any) => block.type === "paragraph"
 );
+const transitionAliases = [`landing-body-main-article-image-${id}`];
 ---
 
 <Layout title={`${title} - Maag`} navbarVariant="default" useClientRouter={true}>
@@ -69,6 +70,7 @@ const contentBlocks = (articleData?.content || []).filter(
                   alt={title}
                   caption={imageCaption}
                   transitionName={`main-article-image-${id}`}
+                  transitionAliases={transitionAliases}
                 />
               </div>
             )}

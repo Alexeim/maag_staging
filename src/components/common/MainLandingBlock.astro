@@ -133,6 +133,26 @@ const formatEventDate = (value: unknown) => {
   };
 };
 
+const formatArticleDate = (value: unknown) => {
+  const date = toDate(value);
+  if (!date) {
+    return "";
+  }
+  return date.toLocaleDateString("ru-RU", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+const formatArticleMeta = (article: any, fallbackCategory = "") => {
+  const parts = [
+    formatArticleDate(article?.createdAt),
+    getPrimaryTag(article) || fallbackCategory,
+  ].filter(Boolean);
+  return parts.join(" • ");
+};
+
 const pickPinnedEvent = (events: any[]) => {
   const pinned = events.find((event) => Boolean(event?.isOnLanding));
   if (!pinned) {
@@ -170,15 +190,15 @@ try {
         Новости
       </h2>
       <div
-        class="flex space-x-6 overflow-x-hidden pb-2 lg:flex-col lg:space-x-0 lg:space-y-6 lg:overflow-x-visible lg:overflow-y-hidden"
+        class="flex space-x-6 overflow-x-hidden pb-2 lg:flex-col lg:space-x-0 lg:space-y-0 lg:overflow-x-visible lg:overflow-y-hidden"
       >
         {
           newsArticles.map((newsItem) => (
-            <div class="flex-shrink-0 sm:w-1/2 md:w-1/3 lg:w-full">
+            <div class="flex-shrink-0 sm:w-1/2 md:w-1/3 lg:w-full lg:py-4 lg:border-b lg:border-base-content/15 last:lg:border-b-0">
               <div class="flex items-start gap-4">
                 <a
                   href={`/news/${newsItem.id}`}
-                  class="block bg-base-200 z-50"
+                  class="block bg-base-200 z-50 transition-opacity duration-200 hover:opacity-90"
                 >
                   <Image
                     src={newsItem.imageUrl}
@@ -192,12 +212,20 @@ try {
                 <div class="flex-1 max-w-40">
                   <a
                     href={`/news/${newsItem.id}`}
-                    class="block bg-base-200 z-50"
+                    class="block bg-base-200 z-50 transition-opacity duration-200 hover:opacity-90"
                   >
-                    <h3 class="text-base font-bold font-oswald mt-1 leading-tight hover:underline">
+                    <h3 class="text-base font-bold font-oswald leading-tight hover:underline transition-opacity duration-200 hover:opacity-90">
                       {newsItem.title}
                     </h3>
                   </a>
+                  <p class="mt-2 text-base-content/55 font-inter uppercase tracking-wide">
+                    <span class="text-xs">
+                      {formatArticleDate(newsItem?.createdAt)}
+                    </span>
+                    <span class="text-[10px] font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                      {getPrimaryTag(newsItem) || "Новости"}
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -220,7 +248,7 @@ try {
           <div>
             <a
               href={`/${mainArticle.isNews ? "news" : "article"}/${mainArticle.id}`}
-              class="block bg-base-200 z-50"
+              class="block bg-base-200 z-50 transition-opacity duration-200 hover:opacity-90"
             >
               <img
                 src={mainArticle.imageUrl}
@@ -230,16 +258,20 @@ try {
               />
             </a>
             <div class="p-4 lg:p-6">
-              {mainArticle.category && (
-                <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
-                  {getPrimaryTag(mainArticle)}
-                </p>
-              )}
+              <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3">
+                <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                  {getPrimaryTag(mainArticle) || "Новости"}
+                </span>
+                <span class="text-lg font-bold font-['Inter']">·</span>
+                <span class="text-xs">
+                  {formatArticleDate(mainArticle?.createdAt)}
+                </span>
+              </div>
               <a
                 href={`/${mainArticle.isNews ? "news" : "article"}/${mainArticle.id}`}
-                class="block bg-base-200 z-50"
+                class="block bg-base-200 z-50 transition-opacity duration-200 hover:opacity-90"
               >
-                <h2 class="max-w-[600px] text-3xl lg:text-5xl leading-tight font-thin font-oswald hover:underline">
+                <h2 class="max-w-[600px] text-3xl lg:text-5xl leading-tight font-thin font-oswald hover:underline transition-opacity duration-200 hover:opacity-90">
                   {mainArticle.title}{" "}
                   <Image
                     src={maagLogo}
@@ -293,12 +325,14 @@ try {
                 alt={landingEvent.title}
                 class="w-full h-auto lg:h-[240px] object-cover"
                 loading="lazy"
+                transition:name={`event-image-${landingEvent.id}`}
               />
             ) : (
               <Image
                 src={picture2}
                 alt="Event"
                 class="w-full h-auto lg:h-[240px] object-cover"
+                transition:name={`event-image-${landingEvent.id}`}
               />
             )}
             <div class="p-4 lg:p-6">

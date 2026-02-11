@@ -1,101 +1,316 @@
 ---
-import LandingBody from "@/components/common/LandingBody.astro";
 import Layout from "../Layouts/Layout.astro";
-import eric from "../assets/common/image.jpg";
-import logoFull from "../assets/logo/logoFull.svg";
-import { Image } from "astro:assets";
-import CategoryHero from "@/components/common/CategoryHero.astro";
-import ArticleCard from "@/components/common/ArticleCard.astro";
-import { articlesApi, flippersApi, type FlipperPayload } from "@/lib/api/api";
+import picture1 from "../assets/images/culture.jpg";
+import { articlesApi } from "@/lib/api/api";
 
-interface FlipperResponse extends FlipperPayload {
-  id: string;
-  createdAt: string | Date;
-}
+const CATEGORY_LABELS: Record<string, string> = {
+  culture: "Культура",
+  hotContent: "Самое Читаемое",
+};
 
-// Helper function to convert Firebase Timestamp to Date
+const CULTURE_CATEGORY_KEY = "culture";
+const HOT_CONTENT_CATEGORY_KEY = "hotContent";
+
+const normalizeCategory = (value?: string) => {
+  if (!value) return null;
+  const lowerCaseValue = value.toLowerCase().trim();
+  const entry = Object.entries(CATEGORY_LABELS).find(
+    ([key, label]) =>
+      key.toLowerCase() === lowerCaseValue ||
+      label.toLowerCase() === lowerCaseValue,
+  );
+  return entry ? entry[0] : lowerCaseValue;
+};
+
+const isHotContent = (item: any) =>
+  Boolean(item?.isHotContent) ||
+  normalizeCategory(item?.category) === HOT_CONTENT_CATEGORY_KEY;
+
+const isMainInCategoryItem = (item: any) =>
+  item?.isMainInCategory === true ||
+  item?.isMainInCategory === "true" ||
+  item?.isMainInCategory === 1 ||
+  item?.isMainInCategory === "1";
+
 const getDate = (timestamp: any): Date => {
   if (timestamp instanceof Date) {
     return timestamp;
   }
-  if (timestamp && typeof timestamp === 'object' && '_seconds' in timestamp) {
-    return new Date(timestamp._seconds * 1000);
+  if (timestamp && typeof timestamp === "object" && "_seconds" in timestamp) {
+    return new Date((timestamp as { _seconds: number })._seconds * 1000);
   }
   return new Date(timestamp);
 };
 
-const normalizeCategory = (value?: string) => {
-  if (!value) return null;
-  return value.toLowerCase().trim();
+const formatDate = (value: unknown) => {
+  const date = getDate(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return date.toLocaleDateString("ru-RU", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 };
 
-const isHotContent = (item: any) =>
-  Boolean(item?.isHotContent) || normalizeCategory(item?.category) === 'hotcontent';
+const toArticleHref = (article: any) =>
+  `/${article?.isNews ? "news" : "article"}/${article.id}`;
 
-const getPrimaryTag = (item: any) => {
-  const rawTags = Array.isArray(item?.tags) ? item.tags : (typeof item?.tags === 'string' ? [item.tags] : []);
-  const firstTag = rawTags.find((tag: string) => typeof tag === 'string' && tag.trim().length > 0);
-  if (firstTag) return firstTag.trim();
-  return item?.category || 'Культура';
+const truncateText = (text?: string, maxLength: number = 220) => {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trim()}...`;
 };
 
-let mainInCategoryArticle: any = null;
-let cultureArticles: any[] = [];
+const getTransitionName = (item: any) => {
+  if (!item?.id) {
+    return undefined;
+  }
+  const href = typeof item?.href === "string" ? item.href : "";
+  if (href.startsWith("/events/")) {
+    return `event-image-${item.id}`;
+  }
+  if (
+    href.startsWith("/article/") ||
+    href.startsWith("/news/") ||
+    href.startsWith("/interviews/")
+  ) {
+    return `main-article-image-${item.id}`;
+  }
+  return undefined;
+};
+
+let primaryCultureArticle: any = null;
+let secondaryCultureArticle: any = null;
+let cultureFeed: any[] = [];
+let hotContentItems: any[] = [];
 
 try {
   const articles = await articlesApi.list();
 
-  const rawCultureArticles = articles
-    .map(article => ({ ...article, type: 'article', href: (article as any).isNews ? `/news/${article.id}` : `/article/${article.id}` }))
-    .filter(article => normalizeCategory(article.category) === 'culture')
-    .sort((a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime());
-
-  // Find the main article for this category
-  mainInCategoryArticle = rawCultureArticles.find(article => article.isMainInCategory) || null;
-
-  // Filter out the main article from the rest, and also hot content (as per original logic for other items)
-  // If mainInCategoryArticle exists, it's also filtered out from this list
-  cultureArticles = rawCultureArticles.filter(article =>
-    (mainInCategoryArticle ? article.id !== mainInCategoryArticle.id : true) && !isHotContent(article)
+  const sortedArticles = [...articles].sort(
+    (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
   );
 
+  const cultureItems = sortedArticles
+    .filter(
+      (article) =>
+        normalizeCategory(article.category) === CULTURE_CATEGORY_KEY &&
+        !isHotContent(article),
+    )
+    .map((article) => ({
+      ...article,
+      href: toArticleHref(article),
+    }));
+
+  primaryCultureArticle =
+    cultureItems.find((item) => isMainInCategoryItem(item)) ??
+    cultureItems[0] ??
+    null;
+
+  const cultureWithoutPrimary = cultureItems.filter((item) =>
+    primaryCultureArticle ? item.id !== primaryCultureArticle.id : true,
+  );
+
+  secondaryCultureArticle = cultureWithoutPrimary[0] ?? null;
+  cultureFeed = cultureWithoutPrimary.slice(1);
+
+  hotContentItems = sortedArticles
+    .filter((article) => isHotContent(article))
+    .map((article) => ({
+      ...article,
+      href: toArticleHref(article),
+    }))
+    .slice(0, 6);
 } catch (error) {
-  console.error("Failed to fetch culture articles:", error);
-}
-
-const itemsToShow = cultureArticles.slice(0); // All remaining culture articles
-
-// Split remaining items into rows of 3
-const itemsPerRow = 3;
-const cultureRows: any[][] = [];
-for (let i = 0; i < itemsToShow.length; i += itemsPerRow) {
-  cultureRows.push(itemsToShow.slice(i, i + itemsPerRow));
+  console.error("Failed to fetch culture page articles:", error);
 }
 ---
 
 <Layout
   navbarVariant="default"
   includePreFooterCTA={false}
-  title="Maag"
+  title="Культура - Maag"
   useClientRouter={true}
 >
-  <CategoryHero title={"Культура"} article={mainInCategoryArticle} />
+  <main class="bg-base-200 min-h-screen pb-16">
+    <section class="max-w-[1400px] mx-auto px-4 lg:px-8 pt-8 lg:pt-12">
+      <div class="border-b border-base-content/25 pb-6">
+        <h1 class="text-4xl lg:text-6xl font-oswald font-thin leading-none">
+          Культура
+        </h1>
+      </div>
 
-  {cultureRows.map((row) => (
-    <div id="culture-articles-box" class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-2 lg:px-4 min-h-[100px]">
-      {row.map((item) => (
-        <ArticleCard
-          key={item.id}
-          isNetlenka={false}
-          title={item.title}
-          category={getPrimaryTag(item)}
-          imageUrl={item.imageUrl}
-          href={item.href}
-        />
-      ))}
-      {row.length < itemsPerRow && Array.from({ length: itemsPerRow - row.length }).map((_, i) => (
-        <ArticleCard key={`placeholder-${i}`} isNetlenka={false} />
-      ))}
-    </div>
-  ))}
+      <section
+        class="mt-8 lg:mt-10 grid grid-cols-1 lg:grid-cols-[0.9fr_1.55fr_1fr] gap-6 lg:gap-7"
+      >
+        <aside class="lg:pr-4 lg:border-r lg:border-base-content/15">
+          <h2
+            class="text-xs uppercase tracking-[0.35em] text-base-content/60 font-inter mb-4"
+          >
+            {CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY]}
+          </h2>
+
+          {
+            hotContentItems.length > 0 ? (
+              <div class="divide-y divide-base-content/15 border-y border-base-content/20">
+                {hotContentItems.map((item) => (
+                  <article class="py-4 grid grid-cols-[minmax(0,1fr)_84px] gap-3 items-start">
+                    <div>
+                      <a href={item.href} class="block">
+                        <h4 class="text-3xl lg:text-[40px] leading-[1.02] font-oswald font-thin hover:underline">
+                          {item.title}
+                        </h4>
+                      </a>
+                      {item.lead && (
+                        <p class="mt-2 text-sm leading-relaxed text-base-content/75">
+                          {truncateText(item.lead, 95)}
+                        </p>
+                      )}
+                      <p class="mt-3 text-[11px] font-inter uppercase tracking-[0.18em] text-base-content/50">
+                        {formatDate(item.createdAt)}
+                      </p>
+                    </div>
+                    <a
+                      href={item.href}
+                      class="block overflow-hidden mt-1 transition-opacity duration-200 hover:opacity-90"
+                    >
+                      <img
+                        src={item.imageUrl || picture1.src}
+                        alt={item.title}
+                        class="w-[84px] h-[84px] object-cover object-center"
+                        loading="lazy"
+                        transition:name={getTransitionName(item)}
+                      />
+                    </a>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p class="text-sm text-base-content/70">
+                Пока нет материалов в блоке hot content.
+              </p>
+            )
+          }
+        </aside>
+
+        <div class="lg:pr-4 lg:border-r lg:border-base-content/15">
+          {
+            primaryCultureArticle ? (
+              <article>
+                <a
+                  href={primaryCultureArticle.href}
+                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
+                >
+                  <img
+                    src={primaryCultureArticle.imageUrl || picture1.src}
+                    alt={primaryCultureArticle.title}
+                    class="w-full h-[320px] lg:h-[560px] object-cover object-center"
+                    loading="lazy"
+                    transition:name={getTransitionName(primaryCultureArticle)}
+                  />
+                </a>
+                <a href={primaryCultureArticle.href} class="block mt-5">
+                  <h2 class="text-3xl lg:text-[52px] leading-[1.02] font-oswald font-thin hover:underline">
+                    {primaryCultureArticle.title}
+                  </h2>
+                </a>
+                {primaryCultureArticle.lead && (
+                  <p class="mt-3 text-lg leading-relaxed text-base-content/80">
+                    {truncateText(primaryCultureArticle.lead, 220)}
+                  </p>
+                )}
+                <p class="mt-4 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                  {formatDate(primaryCultureArticle.createdAt)}
+                </p>
+              </article>
+            ) : (
+              <article class="border border-base-content/15 p-6">
+                <p class="text-base-content/70">
+                  Пока нет материалов категории «Культура».
+                </p>
+              </article>
+            )
+          }
+        </div>
+
+        <div class="lg:pr-4 lg:border-r lg:border-base-content/15">
+          {
+            secondaryCultureArticle ? (
+              <article>
+                <a
+                  href={secondaryCultureArticle.href}
+                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
+                >
+                  <img
+                    src={secondaryCultureArticle.imageUrl || picture1.src}
+                    alt={secondaryCultureArticle.title}
+                    class="w-full h-[320px] lg:h-[420px] object-cover object-center"
+                    loading="lazy"
+                    transition:name={getTransitionName(secondaryCultureArticle)}
+                  />
+                </a>
+                <a href={secondaryCultureArticle.href} class="block mt-5">
+                  <h3 class="text-3xl lg:text-[46px] leading-[1.05] font-oswald font-thin hover:underline">
+                    {secondaryCultureArticle.title}
+                  </h3>
+                </a>
+                {secondaryCultureArticle.lead && (
+                  <p class="mt-3 text-lg leading-relaxed text-base-content/80">
+                    {truncateText(secondaryCultureArticle.lead, 180)}
+                  </p>
+                )}
+                <p class="mt-4 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                  {formatDate(secondaryCultureArticle.createdAt)}
+                </p>
+              </article>
+            ) : (
+              <article class="border border-base-content/15 p-6">
+                <p class="text-base-content/70">
+                  Добавьте еще один материал в культуру для второго блока.
+                </p>
+              </article>
+            )
+          }
+        </div>
+      </section>
+
+      <section class="mt-10 lg:mt-14 border-t border-base-content/25 pt-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-10">
+          {
+            cultureFeed.map((item) => (
+              <article class="border-b border-base-content/15 pb-6">
+                <a
+                  href={item.href}
+                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
+                >
+                  <img
+                    src={item.imageUrl || picture1.src}
+                    alt={item.title}
+                    class="w-full h-[220px] lg:h-[250px] object-cover object-center"
+                    loading="lazy"
+                    transition:name={getTransitionName(item)}
+                  />
+                </a>
+                <a href={item.href} class="block mt-4">
+                  <h3 class="text-3xl lg:text-[40px] leading-[1.04] font-oswald font-thin hover:underline">
+                    {item.title}
+                  </h3>
+                </a>
+                {item.lead && (
+                  <p class="mt-3 text-base leading-relaxed text-base-content/75">
+                    {truncateText(item.lead, 190)}
+                  </p>
+                )}
+                <p class="mt-4 text-xs font-inter uppercase tracking-[0.2em] text-base-content/55">
+                  {formatDate(item.createdAt)}
+                </p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+    </section>
+  </main>
 </Layout>

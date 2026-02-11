@@ -5,6 +5,8 @@ import picture3 from "../../assets/images/article_content/par.jpeg";
 interface NetlenkaCardProps {
   title?: string;
   category?: string;
+  date?: string;
+  transitionName?: string;
   imageUrl?: string;
   href?: string;
 }
@@ -12,18 +14,25 @@ interface NetlenkaCardProps {
 const {
   title = "Без названия",
   category = "Самое Читаемое",
+  date = "",
+  transitionName,
   imageUrl,
   href = "#",
 } = Astro.props as NetlenkaCardProps;
 
 const displayImage = imageUrl || picture3.src;
+const formattedCategory = `<span class="text-accent">${category}</span>`;
+const meta = [date, formattedCategory].filter(Boolean).join(" • ");
 ---
 
 <div
   class="w-full flex flex-col gap-2 max-h-[300px] min-w-[220px] lg:min-w-0 max-w-[303px]"
 >
   <div class="w-full h-40 overflow-hidden">
-    <a href={href} class="block w-full h-full">
+    <a
+      href={href}
+      class="block w-full h-full transition-opacity duration-200 hover:opacity-90"
+    >
       {
         imageUrl ? (
           <img
@@ -31,6 +40,7 @@ const displayImage = imageUrl || picture3.src;
             alt={title}
             class="w-full h-full object-cover object-center"
             loading="lazy"
+            transition:name={transitionName}
           />
         ) : (
           <Image
@@ -38,16 +48,24 @@ const displayImage = imageUrl || picture3.src;
             alt="Hot content image"
             class="w-full h-full object-cover object-center"
             loading="eager"
+            transition:name={transitionName}
           />
         )
       }
     </a>
   </div>
-  <p class="text-error uppercase mb-3 font-inter text-xs tracking-[.46em]">
-    {category}
-  </p>
-  <h3 class="text-base lg:text-lg leading-tight font-oswald mb-4">
-    <a href={href} class="hover:underline truncate block w-full">
+  {
+    meta && (
+      <p class="text-[11px] text-base-content/55 font-inter uppercase tracking-wide mt-1">
+        <Fragment set:html={meta} />
+      </p>
+    )
+  }
+  <h3 class="text-base lg:text-lg leading-tight font-oswald mb-3">
+    <a
+      href={href}
+      class="hover:underline transition-opacity duration-200 hover:opacity-90 truncate block w-full"
+    >
       {title}
     </a>
   </h3>

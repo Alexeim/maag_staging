@@ -8,6 +8,7 @@ interface Props {
   quote?: string;
   imageUrl?: string;
   href?: string;
+  transitionName?: string;
 }
 
 const { 
@@ -15,7 +16,8 @@ const {
   interviewee = "Скоро здесь будет имя", 
   quote = "Скоро здесь будет интересная цитата...", 
   imageUrl = picture1,
-  href = "#"
+  href = "#",
+  transitionName,
 } = Astro.props;
 ---
 
@@ -27,6 +29,7 @@ const {
       class="w-full h-full object-cover object-center"
       loading="lazy"
       inferSize={true}
+      transition:name={transitionName}
     />
   </a>
   <div class="w-full lg:w-fit">

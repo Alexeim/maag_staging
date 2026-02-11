@@ -7,6 +7,7 @@ interface Props {
   alt: string;
   caption: string;
   transitionName?: string;
+  transitionAliases?: string[];
   figureClass?: string; // Классы для внешнего контейнера figure/div
   imageClass?: string; // Классы для тега img
   figcaptionClass?: string; // Классы для текста подписи
@@ -16,6 +17,7 @@ const {
   alt,
   caption,
   transitionName,
+  transitionAliases = [],
   figureClass,
   imageClass,
   figcaptionClass,
@@ -32,6 +34,7 @@ const finalFigureClasses = `${defaultFigureClasses} ${figureClass || ""}`;
 const defaultFigcaptionClasses =
   "text-xs leading-[1.6] text-gray-500 font-oswald tracking-wide text-center mb-8";
 const finalFigcaptionClasses = `${defaultFigcaptionClasses} ${figcaptionClass || ""}`;
+const imageSrc = typeof src === "string" ? src : src.src;
 ---
 
 <div class={finalFigureClasses}>
@@ -54,6 +57,17 @@ const finalFigcaptionClasses = `${defaultFigcaptionClasses} ${figcaptionClass ||
       )
     }
   </div>
+  {
+    transitionAliases.map((alias) => (
+      <img
+        src={imageSrc}
+        alt=""
+        aria-hidden="true"
+        class="fixed w-px h-px opacity-0 pointer-events-none -z-10"
+        transition:name={alias}
+      />
+    ))
+  }
   <div class="max-w-[826px] w-full">
     <p class={finalFigcaptionClasses}>
       {caption}

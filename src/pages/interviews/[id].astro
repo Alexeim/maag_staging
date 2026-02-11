@@ -49,9 +49,10 @@ const {
   lead,
 } = interview;
 const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
+const transitionAliases = [`landing-body-main-article-image-${id}`];
 ---
 
-<Layout title={title}>
+<Layout title={title} useClientRouter={true}>
   <div class="pt-[50px] pb-[70px] flex flex-col items-center gap-[50px]">
     <div class="flex flex-col gap-4 max-w-[825px] w-full px-4">
       <ArticleHeader category={"Интервью"} title={title} lead={lead} />
@@ -66,6 +67,7 @@ const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
           alt={imageCaption || title}
           caption={imageCaption}
           transitionName={`main-article-image-${id}`}
+          transitionAliases={transitionAliases}
           figureClass="max-w-[1200px]"
           imageClass="shadow-lg"
           figcaptionClass="text-center text-sm text-gray-500 mt-2"
