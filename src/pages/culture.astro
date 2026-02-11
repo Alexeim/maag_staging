@@ -46,7 +46,7 @@ try {
   const articles = await articlesApi.list();
 
   const rawCultureArticles = articles
-    .map(article => ({ ...article, type: 'article', href: `/article/${article.id}` }))
+    .map(article => ({ ...article, type: 'article', href: (article as any).isNews ? `/news/${article.id}` : `/article/${article.id}` }))
     .filter(article => normalizeCategory(article.category) === 'culture')
     .sort((a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime());
 

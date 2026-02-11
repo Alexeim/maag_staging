@@ -72,25 +72,25 @@ if (currentProseGroup.length > 0) {
                 switch (block.type) {
                   case "first-paragraph":
                     return (
-                      <p class="text-lg first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-3 font-oswald text-justify font-thin">
+                      <p class="text-lg first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-3 font-oswald tracking-wide text-justify font-thin">
                         {block.text}
                       </p>
                     );
                   case "paragraph":
                     return (
-                      <p class="text-lg font-oswald text-justify font-thin">
+                      <p class="text-lg font-oswald text-justify font-thin tracking-wide">
                         {block.text}
                       </p>
                     );
                   case "h2":
                     return (
-                      <h2 class="text-xl font-bold font-oswald">
+                      <h2 class="text-xl font-bold font-oswald tracking-wide">
                         {block.text}
                       </h2>
                     );
                   case "h3":
                     return (
-                      <h3 class="text-2xl font-bold font-oswald">
+                      <h3 class="text-2xl font-bold font-oswald tracking-wide">
                         {block.text}
                       </h3>
                     );
@@ -113,7 +113,7 @@ if (currentProseGroup.length > 0) {
                           class="article-image"
                         />
                         {block.caption && (
-                          <figcaption class="text-center font-oswald text-xs text-gray-500 mt-2">
+                          <figcaption class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2">
                             {block.caption}
                           </figcaption>
                         )}
@@ -134,7 +134,7 @@ if (currentProseGroup.length > 0) {
                       <p class="text-lg font-oswald text-justify font-thin">
                         <a
                           href={href}
-                          class="text-xl font-oswald font-semibold hover:underline"
+                          class="text-xl font-oswald tracking-wide font-semibold hover:underline"
                         >
                           {block.text || "Ссылка"}
                         </a>
@@ -162,13 +162,13 @@ if (currentProseGroup.length > 0) {
                       class="article-image"
                     />
                     {twoColumnBlock.left.caption && (
-                      <figcaption class="text-center font-oswald text-xs text-gray-500 mt-2">
+                      <figcaption class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2">
                         {twoColumnBlock.left.caption}
                       </figcaption>
                     )}
                   </figure>
                 ) : (
-                  <p class="text-lg font-oswald text-justify font-thin">
+                  <p class="text-lg font-oswald tracking-wide text-justify font-thin">
                     {twoColumnBlock.left.content}
                   </p>
                 )}
@@ -182,13 +182,13 @@ if (currentProseGroup.length > 0) {
                       class="article-image"
                     />
                     {twoColumnBlock.right.caption && (
-                      <figcaption class="text-center font-oswald text-xs text-gray-500 mt-2">
+                      <figcaption class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2">
                         {twoColumnBlock.right.caption}
                       </figcaption>
                     )}
                   </figure>
                 ) : (
-                  <p class="text-lg font-oswald text-justify font-thin">
+                  <p class="text-lg font-oswald tracking-wide text-justify font-thin">
                     {twoColumnBlock.right.content}
                   </p>
                 )}

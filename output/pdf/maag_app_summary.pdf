@@ -1,0 +1,157 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 2750 >>
+stream
+BT
+/F2 18 Tf
+1 0 0 1 54 744 Tm
+(MAAG App Summary) Tj
+/F2 12 Tf
+1 0 0 1 54 716 Tm
+(What It Is) Tj
+/F1 10.5 Tf
+1 0 0 1 54 702 Tm
+(MAAG is an Astro web app with an Express API that serves content pages and a dashboard for managing) Tj
+/F1 10.5 Tf
+1 0 0 1 54 688 Tm
+(articles, events, interviews, and related data.) Tj
+/F2 12 Tf
+1 0 0 1 54 664 Tm
+(Who It Is For) Tj
+/F1 10.5 Tf
+1 0 0 1 54 650 Tm
+(MAAG editorial/admin team managing content and subscriptions \(readers are secondary\).) Tj
+/F2 12 Tf
+1 0 0 1 54 626 Tm
+(What It Does) Tj
+/F1 10.5 Tf
+1 0 0 1 64 612 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 612 Tm
+(Articles CRUD with tags, categories, and hero images) Tj
+/F1 10.5 Tf
+1 0 0 1 64 598 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 598 Tm
+(Events CRUD and event detail pages) Tj
+/F1 10.5 Tf
+1 0 0 1 64 584 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 584 Tm
+(Interviews CRUD and interview detail pages) Tj
+/F1 10.5 Tf
+1 0 0 1 64 570 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 570 Tm
+(Flippers CRUD and list/detail pages) Tj
+/F1 10.5 Tf
+1 0 0 1 64 556 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 556 Tm
+(User profiles with Firebase Auth integration) Tj
+/F1 10.5 Tf
+1 0 0 1 64 542 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 542 Tm
+(Stripe subscription checkout, portal, and webhooks) Tj
+/F1 10.5 Tf
+1 0 0 1 64 528 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 528 Tm
+(Calendar and dashboard UI for content management) Tj
+/F2 12 Tf
+1 0 0 1 54 504 Tm
+(How It Works) Tj
+/F1 10.5 Tf
+1 0 0 1 64 490 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 490 Tm
+(Frontend: Astro site in src/ with public pages and dashboard layouts/components.) Tj
+/F1 10.5 Tf
+1 0 0 1 64 476 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 476 Tm
+(Backend: Express API in server/src with routes for articles, events, interviews, flippers, users,) Tj
+/F1 10.5 Tf
+1 0 0 1 76 462 Tm
+(and Stripe.) Tj
+/F1 10.5 Tf
+1 0 0 1 64 448 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 448 Tm
+(Data: Firebase Admin SDK for Firestore/Auth/Storage; client uses Firebase JS SDK.) Tj
+/F1 10.5 Tf
+1 0 0 1 64 434 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 434 Tm
+(Billing: Stripe API in server with webhooks writing subscription data to Firestore users.) Tj
+/F2 12 Tf
+1 0 0 1 54 410 Tm
+(How To Run) Tj
+/F1 10.5 Tf
+1 0 0 1 64 396 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 396 Tm
+(Install deps: npm install && npm install --prefix server) Tj
+/F1 10.5 Tf
+1 0 0 1 64 382 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 382 Tm
+(Set env vars: PUBLIC_FIREBASE_* \(frontend\), FIREBASE_CONFIG_JSON, STRIPE_SECRET_KEY,) Tj
+/F1 10.5 Tf
+1 0 0 1 76 368 Tm
+(STRIPE_WEBHOOK_SECRET, FRONTEND_URL \(values Not found in repo\)) Tj
+/F1 10.5 Tf
+1 0 0 1 64 354 Tm
+(-) Tj
+/F1 10.5 Tf
+1 0 0 1 76 354 Tm
+(Run dev: npm run dev \(Astro at http://localhost:4321, API at http://localhost:3000\)) Tj
+/F1 8.5 Tf
+1 0 0 1 358 28.799999999999997 Tm
+(Generated from repo evidence) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Pages /Count 1 /Kids [5 0 R] >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 4 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+6 0 obj
+<< /Type /Catalog /Pages 4 0 R >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000000154 00000 n 
+0000002956 00000 n 
+0000003013 00000 n 
+0000003149 00000 n 
+trailer
+<< /Size 7 /Root 6 0 R >>
+startxref
+3198
+%%EOF

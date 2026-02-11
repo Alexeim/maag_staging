@@ -16,6 +16,7 @@ export interface Article {
   isHotContent?: boolean;
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
+  isNews?: boolean;
   createdAt: Date;
 }
 
@@ -42,6 +43,7 @@ export const createArticle = async (req: Request, res: Response) => {
       isHotContent = false,
       isOnLanding = false,
       isMainInCategory = false,
+      isNews = false,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -65,12 +67,13 @@ export const createArticle = async (req: Request, res: Response) => {
       content,
       imageUrl,
       imageCaption,
-      category: persistedCategory, // <-- Added category
+      category: persistedCategory,
       tags: normalizedTags,
       techTags: normalizedTechTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
+      isNews: Boolean(isNews),
       createdAt: new Date(),
     };
 
@@ -172,6 +175,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       isHotContent = false,
       isOnLanding = false,
       isMainInCategory = false,
+      isNews = false,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -201,6 +205,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
+      isNews: Boolean(isNews),
       updatedAt: new Date(),
     };
 

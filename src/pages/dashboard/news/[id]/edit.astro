@@ -1,0 +1,53 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import NewsComposer from "@/components/dashboard/NewsComposer.astro";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+import { articlesApi } from "@/lib/api/api";
+
+const { id } = Astro.params;
+
+let article = null;
+try {
+  article = await articlesApi.getById(id!);
+} catch (error) {
+  console.error("Failed to fetch news article", error);
+}
+
+const newsCreatorState = JSON.stringify({
+  categoryTags: {
+    culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
+  },
+  initialArticle: article,
+  articleId: id,
+  isEditMode: true,
+  onSaveRedirect: "/dashboard/news",
+});
+---
+
+<DashboardLayout title="Редактировать новость" active="news">
+  {article ? (
+    <NewsComposer
+      heading="Редактировать новость"
+      submitLabel="Обновить новость"
+      newsCreatorState={newsCreatorState}
+      cancelHref="/dashboard/news"
+      deleteArticleId={id}
+      deleteRedirect="/dashboard/news"
+    />
+  ) : (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Новость не найдена</h2>
+      <p class="text-base-content/70">
+        Возможно, материал был удалён или указан неверный идентификатор.
+      </p>
+      <a
+        href="/dashboard/news"
+        class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
+      >
+        Назад к новостям
+      </a>
+    </div>
+  )}
+</DashboardLayout>

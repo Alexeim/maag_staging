@@ -17,7 +17,6 @@ const { id } = Astro.params;
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
   paris: "Париж",
-  news: "Новости",
   hotContent: "Самое Читаемое",
 };
 
@@ -77,12 +76,15 @@ const displayArticle = {
                 title={displayArticle.title}
                 lead={displayArticle.lead}
               />
-              <ArticleAuthor
-                name={displayArticle.authorName}
-                avatarUrl={displayArticle.authorAvatar}
-              />
-              <ArticleDate createdAt={articleData.createdAt} />
-              {/* <SocialShare readTime={displayArticle.readTime} /> */}
+              <div class="flex flex-row items-center justify-start gap-4">
+                <ArticleAuthor
+                  name={displayArticle.authorName}
+                  avatarUrl={displayArticle.authorAvatar}
+                />
+                <div>·</div>
+                <ArticleDate createdAt={articleData.createdAt} />
+                {/* <SocialShare readTime={displayArticle.readTime} /> */}
+              </div>
             </div>
 
             {displayArticle.imageUrl && (

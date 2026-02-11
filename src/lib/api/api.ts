@@ -125,6 +125,9 @@ export interface ArticlePayload {
   tags?: string[];
   techTags?: string[];
   isHotContent?: boolean;
+  isOnLanding?: boolean;
+  isMainInCategory?: boolean;
+  isNews?: boolean;
 }
 
 export interface ArticleResponse extends ArticlePayload {

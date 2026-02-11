@@ -1,0 +1,111 @@
+---
+import Layout from "@/Layouts/Layout.astro";
+import ArticleDate from "@/components/article/ArticleDate.astro";
+import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import NewsImage from "@/components/article/NewsImage.astro";
+import { ApiError, articlesApi } from "@/lib/api/api";
+
+const { id } = Astro.params;
+
+const CATEGORY_LABELS: Record<string, string> = {
+  culture: "Культура",
+  paris: "Париж",
+  hotContent: "Самое Читаемое",
+};
+
+let articleData: any;
+let error: string | null = null;
+
+try {
+  articleData = await articlesApi.getById(id!);
+} catch (e: any) {
+  console.error(e);
+  if (e instanceof ApiError) {
+    error =
+      e.status === 404
+        ? "Новость не найдена."
+        : `Ошибка загрузки: ${e.message}`;
+  } else {
+    error = `Ошибка загрузки: ${e.message}`;
+  }
+}
+
+const rawCategory = articleData?.category ?? null;
+const categoryLabel = rawCategory
+  ? CATEGORY_LABELS[rawCategory] || rawCategory
+  : "Новости";
+
+const title = articleData?.title || "Новость";
+const mainParagraph = articleData?.lead || "";
+const authorName = articleData?.author
+  ? `${articleData.author.firstName} ${articleData.author.lastName}`
+  : "Автор";
+const authorAvatar = articleData?.author?.avatar;
+const imageUrl = articleData?.imageUrl;
+const imageCaption = articleData?.imageCaption || "";
+const contentBlocks = (articleData?.content || []).filter(
+  (block: any) => block.type === "paragraph"
+);
+---
+
+<Layout title={`${title} - Maag`} navbarVariant="default" useClientRouter={true}>
+  <main class="bg-base-200 min-h-screen">
+    <div class="max-w-5xl mx-auto pt-14 pb-14 mb-12 flex flex-col gap-8">
+      {error && <div class="text-red-500 text-center pt-20">{error}</div>}
+      {!error && articleData && (
+        <>
+          <h4
+            class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']"
+          >
+            {categoryLabel}
+          </h4>
+
+          <!-- Two-column hero: image left, title + main paragraph right -->
+          <div class="flex flex-col md:flex-row items-start justify-center gap-6">
+            {imageUrl && (
+              <div class="w-full md:w-1/2">
+                <NewsImage
+                  src={imageUrl}
+                  alt={title}
+                  caption={imageCaption}
+                  transitionName={`main-article-image-${id}`}
+                />
+              </div>
+            )}
+            <div class:list={["w-full", imageUrl ? "md:w-1/2" : ""]}>
+              <h3 class="text-2xl font-semibold font-oswald tracking-wider mb-4">
+                {title}
+              </h3>
+              {mainParagraph && (
+                <p class="font-oswald font-thin tracking-wide">
+                  {mainParagraph}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <!-- Content blocks (paragraphs) -->
+          {contentBlocks.length > 0 && (
+            <div class="flex flex-col gap-6">
+              {contentBlocks.map((block: any) => (
+                <p class="font-oswald font-thin tracking-wide">
+                  {block.text}
+                </p>
+              ))}
+            </div>
+          )}
+
+          <!-- Author + Date -->
+          <div class="flex flex-row items-center justify-start gap-4">
+            <ArticleAuthor
+              name={authorName}
+              avatarUrl={authorAvatar}
+            />
+            <div>&middot;</div>
+            <ArticleDate createdAt={articleData.createdAt} />
+          </div>
+        </>
+      )}
+    </div>
+  </main>
+</Layout>

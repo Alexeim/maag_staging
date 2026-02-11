@@ -4,28 +4,20 @@ import { articlesApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
 const normalizeDate = (value: any) => {
-  if (!value) {
-    return null;
-  }
+  if (!value) return null;
   if (typeof value === "string") {
     const cleaned = value
       .replace(/\u202f/g, " ")
       .replace(/\s+at\s+/i, " ")
       .replace(/UTC([+-]\d{1,2})/, "GMT$1");
     const parsed = new Date(cleaned);
-    if (!Number.isNaN(parsed.getTime())) {
-      return parsed;
-    }
+    if (!Number.isNaN(parsed.getTime())) return parsed;
     const fallback = new Date(value);
     return Number.isNaN(fallback.getTime()) ? null : fallback;
   }
-  if (typeof value === "number") {
-    return new Date(value);
-  }
+  if (typeof value === "number") return new Date(value);
   if (typeof value === "object") {
-    if (typeof value.toDate === "function") {
-      return value.toDate();
-    }
+    if (typeof value.toDate === "function") return value.toDate();
     const seconds =
       "seconds" in value
         ? value.seconds
@@ -39,8 +31,7 @@ const normalizeDate = (value: any) => {
           : "_nanoseconds" in value
             ? value._nanoseconds
             : 0;
-      const millis = seconds * 1000 + nanos / 1_000_000;
-      return new Date(millis);
+      return new Date(seconds * 1000 + nanos / 1_000_000);
     }
   }
   return null;
@@ -53,65 +44,53 @@ try {
   console.error("Failed to load articles", error);
 }
 
-const articles = articlesRaw.filter((a) => !((a as any).isNews)).map((article) => {
-  const createdAtDate = normalizeDate(article.createdAt);
-  const updatedAtDate = normalizeDate((article as any).updatedAt);
-  return {
-    ...article,
-    createdAtFormatted: createdAtDate
-      ? createdAtDate.toLocaleDateString("ru-RU", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "—",
-    updatedAtFormatted: updatedAtDate
-      ? updatedAtDate.toLocaleDateString("ru-RU", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : null,
-  };
-});
+const newsItems = articlesRaw
+  .filter((a) => Boolean((a as any).isNews))
+  .map((article) => {
+    const createdAtDate = normalizeDate(article.createdAt);
+    return {
+      ...article,
+      createdAtFormatted: createdAtDate
+        ? createdAtDate.toLocaleDateString("ru-RU", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+        : "—",
+    };
+  });
 ---
 
-<DashboardLayout title="Управление статьями" active="articles">
-  <div 
+<DashboardLayout title="Управление новостями" active="news">
+  <div
     class="bg-base-100 border border-base-300 rounded-xl p-6"
-    x-data={`$lazy('articleList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
+    x-data={`$lazy('newsList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
   >
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h2 class="text-xl font-semibold">Статьи</h2>
+        <h2 class="text-xl font-semibold">Новости</h2>
         <p class="text-sm text-base-content/70 mt-1">
-          Управляй опубликованными и черновыми материалами.
+          Управляй новостными материалами.
         </p>
       </div>
     </div>
 
-    {articles.length > 0 ? (
+    {newsItems.length > 0 ? (
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-base-content">
           <thead class="text-xs text-base-content/70 uppercase bg-base-200">
             <tr>
-              <th scope="col" class="px-6 py-3">
-                Заголовок
-              </th>
-              <th scope="col" class="px-6 py-3">
-                Категория / теги
-              </th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">
-                Создана
-              </th>
+              <th scope="col" class="px-6 py-3">Заголовок</th>
+              <th scope="col" class="px-6 py-3">Категория / теги</th>
+              <th scope="col" class="px-6 py-3 hidden md:table-cell">Создана</th>
               <th scope="col" class="px-6 py-3">
                 <span class="sr-only">Действия</span>
               </th>
             </tr>
           </thead>
           <tbody>
-            {articles.map((article, index) => {
-              const isLast = index === articles.length - 1;
+            {newsItems.map((article, index) => {
+              const isLast = index === newsItems.length - 1;
               const categoryLabel = article.isHotContent
                 ? "Самое Читаемое"
                 : article.category || "—";
@@ -125,9 +104,22 @@ const articles = articlesRaw.filter((a) => !((a as any).isNews)).map((article) =
                     !isLast && "border-b border-base-300",
                   ]}
                 >
-                  <th scope="row" class="px-6 py-4 font-medium text-base-content whitespace-nowrap">
-                    <div class="font-semibold truncate max-w-xs" title={article.title}>{article.title}</div>
-                    <div class="text-xs text-base-content/60 mt-1 truncate" title={article.id}>ID: {article.id}</div>
+                  <th
+                    scope="row"
+                    class="px-6 py-4 font-medium text-base-content whitespace-nowrap"
+                  >
+                    <div
+                      class="font-semibold truncate max-w-xs"
+                      title={article.title}
+                    >
+                      {article.title}
+                    </div>
+                    <div
+                      class="text-xs text-base-content/60 mt-1 truncate"
+                      title={article.id}
+                    >
+                      ID: {article.id}
+                    </div>
                   </th>
                   <td class="px-6 py-4">
                     <div class="flex flex-col gap-1">
@@ -142,7 +134,10 @@ const articles = articlesRaw.filter((a) => !((a as any).isNews)).map((article) =
                   </td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-4">
-                      <a href={`/dashboard/article/${article.id}/edit`} class="font-medium text-primary hover:underline">
+                      <a
+                        href={`/dashboard/news/${article.id}/edit`}
+                        class="font-medium text-primary hover:underline"
+                      >
                         Редактировать
                       </a>
                       <button
@@ -162,7 +157,7 @@ const articles = articlesRaw.filter((a) => !((a as any).isNews)).map((article) =
       </div>
     ) : (
       <div class="p-8 text-center text-base-content/70">
-        <p>Пока нет статей. Создай первую, чтобы начать.</p>
+        <p>Пока нет новостей. Создай первую!</p>
       </div>
     )}
   </div>

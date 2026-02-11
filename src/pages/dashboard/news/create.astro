@@ -1,0 +1,24 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import NewsComposer from "@/components/dashboard/NewsComposer.astro";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+
+const newsCreatorState = JSON.stringify({
+  categoryTags: {
+    culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
+  },
+  isEditMode: false,
+  onSaveRedirect: "/dashboard/news",
+});
+---
+
+<DashboardLayout title="Создать новость" active="create-news">
+  <NewsComposer
+    heading="Создать новость"
+    submitLabel="Сохранить новость"
+    newsCreatorState={newsCreatorState}
+    cancelHref="/dashboard/news"
+  />
+</DashboardLayout>

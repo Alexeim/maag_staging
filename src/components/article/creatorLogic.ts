@@ -31,7 +31,6 @@ export default function articleCreatorLogic(initialState = {}) {
   const categoryLabels: Record<string, string> = {
     culture: "Культура",
     paris: "Париж",
-    news: "Новости",
     hotContent: "Самое Читаемое",
   };
 

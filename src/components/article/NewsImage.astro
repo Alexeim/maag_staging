@@ -1,0 +1,24 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  transitionName?: string;
+}
+
+const { src, alt, caption, transitionName } = Astro.props;
+---
+
+<figure>
+  <img
+    src={src}
+    alt={alt}
+    class="rounded-md w-full object-cover max-h-[400px]"
+    transition:name={transitionName}
+  />
+  {caption && (
+    <figcaption class="text-xs text-gray-500 font-oswald tracking-wide mt-2">
+      {caption}
+    </figcaption>
+  )}
+</figure>

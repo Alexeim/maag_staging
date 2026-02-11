@@ -14,6 +14,8 @@ const components: Record<string, () => Promise<any>> = {
   authModal: () => import('@/components/auth/authLogic'),
   interviewList: () => import('@/components/dashboard/interviewListLogic'),
   interviewCreator: () => import('@/components/dashboard/interviewCreatorLogic'),
+  newsCreator: () => import('@/components/dashboard/newsCreatorLogic'),
+  newsList: () => import('@/components/dashboard/newsListLogic'),
   subscriptionManager: () => import('@/components/profile/subscriptionLogic'),
 };
 
