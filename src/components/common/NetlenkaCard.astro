@@ -22,7 +22,11 @@ const {
 
 const displayImage = imageUrl || picture3.src;
 const formattedCategory = `<span class="text-accent">${category}</span>`;
-const meta = [date, formattedCategory].filter(Boolean).join(" • ");
+const meta = [date, formattedCategory]
+  .filter(Boolean)
+  .join(
+    "<span class='text-black font-inter uppercase tracking-wide'> • </span>",
+  );
 ---
 
 <div
