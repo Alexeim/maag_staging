@@ -97,11 +97,13 @@ const formatArticleDate = (timestamp: unknown) => {
   if (Number.isNaN(date.getTime())) {
     return "";
   }
-  return date.toLocaleDateString("ru-RU", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+  return date
+    .toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
+    .replace(" г.", "");
 };
 
 const formatArticleMeta = (item: any, fallbackCategory = "") => {
@@ -275,7 +277,9 @@ const interviewQuote = latestInterview?.mainQuote
                       <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
                         {getPrimaryTag(cultureHero) || "Новости"}
                       </span>
-                      <span class="text-lg font-bold font-['Inter']">·</span>
+                      <span class="text-black text-lg font-bold font-['Inter']">
+                        ·
+                      </span>
                       <span class="text-xs">
                         {formatArticleDate(cultureHero?.createdAt)}
                       </span>

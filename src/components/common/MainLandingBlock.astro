@@ -138,11 +138,13 @@ const formatArticleDate = (value: unknown) => {
   if (!date) {
     return "";
   }
-  return date.toLocaleDateString("ru-RU", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+  return date
+    .toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
+    .replace(" г.", "");
 };
 
 const formatArticleMeta = (article: any, fallbackCategory = "") => {
@@ -262,7 +264,9 @@ try {
                 <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
                   {getPrimaryTag(mainArticle) || "Новости"}
                 </span>
-                <span class="text-lg font-bold font-['Inter']">·</span>
+                <span class="text-black text-lg font-bold font-['Inter']">
+                  ·
+                </span>
                 <span class="text-xs">
                   {formatArticleDate(mainArticle?.createdAt)}
                 </span>
@@ -364,8 +368,10 @@ try {
                   {landingEvent.endDate &&
                   landingEvent.endDate.getTime() !==
                     landingEvent.startDate.getTime()
-                    ? `${landingEvent.startDate.toLocaleDateString("ru-RU")} – ${landingEvent.endDate.toLocaleDateString("ru-RU")}`
-                    : landingEvent.startDate.toLocaleDateString("ru-RU")}
+                    ? `${landingEvent.startDate.toLocaleDateString("ru-RU").replace(" г.", "")} – ${landingEvent.endDate.toLocaleDateString("ru-RU").replace(" г.", "")}`
+                    : landingEvent.startDate
+                        .toLocaleDateString("ru-RU")
+                        .replace(" г.", "")}
                 </p>
               </div>
             </div>
