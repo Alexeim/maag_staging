@@ -1,4 +1,10 @@
-import { interviewsApi, articlesApi, eventsApi, flippersApi } from "@/lib/api/api";
+import {
+  interviewsApi,
+  articlesApi,
+  eventsApi,
+  flippersApi,
+  authorsApi,
+} from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
   getStorage,
@@ -105,6 +111,12 @@ export default function interviewCreatorLogic(initialState = {}) {
     allEvents: [],
     allInterviews: [],
     allFlippers: [],
+    authorsLoading: false,
+    authors: [],
+    selectedAuthorId: "",
+    useNewAuthor: false,
+    newAuthorFirstName: "",
+    newAuthorLastName: "",
 
     isTagSelected(value: string) {
       return this.interview.tags.includes(value);
@@ -184,6 +196,66 @@ export default function interviewCreatorLogic(initialState = {}) {
           return [];
       }
     },
+    getAuthorLabel(author: any) {
+      const firstName =
+        typeof author?.firstName === "string" ? author.firstName.trim() : "";
+      const lastName =
+        typeof author?.lastName === "string" ? author.lastName.trim() : "";
+      return `${firstName} ${lastName}`.trim();
+    },
+    ensureSelectedAuthorPresent() {
+      if (!this.selectedAuthorId) {
+        return;
+      }
+      const exists = this.authors.some(
+        (author: any) => author.id === this.selectedAuthorId,
+      );
+      if (exists) {
+        return;
+      }
+      const fallbackAuthor = this.interview?.author;
+      if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
+        this.authors.unshift({
+          id: this.selectedAuthorId,
+          firstName: fallbackAuthor.firstName || "",
+          lastName: fallbackAuthor.lastName || "",
+          role: fallbackAuthor.role || "author",
+          avatar: fallbackAuthor.avatar || "",
+        });
+      }
+    },
+    async loadAuthors() {
+      this.authorsLoading = true;
+      try {
+        const authors = await authorsApi.list();
+        this.authors = Array.isArray(authors) ? authors : [];
+        this.ensureSelectedAuthorPresent();
+      } catch (error) {
+        console.error("Failed to fetch authors:", error);
+      } finally {
+        this.authorsLoading = false;
+      }
+    },
+    async resolveAuthorId() {
+      if (this.useNewAuthor) {
+        const firstName = this.newAuthorFirstName.trim();
+        const lastName = this.newAuthorLastName.trim();
+        if (!firstName || !lastName) {
+          throw new Error("Заполни имя и фамилию нового автора.");
+        }
+        const createdAuthor = await authorsApi.create({ firstName, lastName });
+        this.authors.unshift(createdAuthor);
+        this.selectedAuthorId = createdAuthor.id;
+        this.useNewAuthor = false;
+        this.newAuthorFirstName = "";
+        this.newAuthorLastName = "";
+        return createdAuthor.id;
+      }
+      if (!this.selectedAuthorId) {
+        throw new Error("Выбери автора из списка или создай нового.");
+      }
+      return this.selectedAuthorId;
+    },
 
     init() {
       if (initialInterview) {
@@ -206,7 +278,13 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.interview.contentBlocks = Array.isArray(this.interview.contentBlocks)
         ? this.interview.contentBlocks
         : [];
+      this.selectedAuthorId =
+        typeof this.interview.authorId === "string"
+          ? this.interview.authorId
+          : "";
+      this.ensureSelectedAuthorPresent();
       this.fetchContentLists();
+      this.loadAuthors();
     },
 
     editTitle() {
@@ -368,6 +446,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       }
 
       try {
+        const resolvedAuthorId = await this.resolveAuthorId();
         const payload = {
           title: this.interview.title,
           interviewee: this.interview.interviewee,
@@ -375,7 +454,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           mainQuote: this.interview.mainQuote,
           imageUrl: this.interview.imageUrl,
           imageCaption: this.interview.imageCaption,
-          authorId: "HxpjsagLQxlUb2oCiM6h", // Hardcoded for now
+          authorId: resolvedAuthorId,
           content: this.interview.contentBlocks,
           tags: this.interview.tags,
         };

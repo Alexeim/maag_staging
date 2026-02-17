@@ -39,7 +39,7 @@ const resolvedImageSrc = (() => {
 <a
   href={url}
   class:list={[
-    "group relative text-white overflow-hidden p-8 flex flex-col justify-end h-96 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.28)] transition-transform duration-300 hover:-translate-y-1",
+    "group relative text-white overflow-hidden p-4 sm:p-6 lg:p-8 flex flex-col justify-end h-96 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.28)] transition-transform duration-300 hover:-translate-y-1",
     className,
   ]}
   style={`background-image: url(${resolvedImageSrc}); background-size: cover; background-position: center;`}
@@ -53,25 +53,25 @@ const resolvedImageSrc = (() => {
   >
   </div>
   <div
-    class="relative z-10 max-w-2xl bg-black/45 backdrop-blur-sm p-4 border border-white/20"
+    class="relative z-10 max-w-2xl bg-black/45 backdrop-blur-sm p-3 sm:p-4 border border-white/20"
   >
     <span
-      class="text-xs uppercase tracking-[0.25em] font-medium text-error font-inter"
+      class="text-[11px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.25em] font-medium text-error font-inter"
       >{tag}</span
     >
-    <p class="font-inter text-base mt-1 tracking-[0.02em] font-light uppercase">
+    <p class="font-inter text-sm sm:text-base mt-1 tracking-[0.02em] font-light uppercase">
       {date}
     </p>
     <h3
-      class={`font-oswald ${textSize === "lg" ? "text-4xl" : "text-2xl"} mt-2 leading-tight text-balance tracking-[0.015em] font-medium`}
+      class={`font-oswald ${textSize === "lg" ? "text-2xl sm:text-3xl lg:text-4xl" : "text-xl sm:text-2xl"} mt-2 leading-tight text-balance tracking-[0.015em] font-medium`}
     >
       {title}
     </h3>
     <div
-      class="flex items-center mt-4 text-base font-inter tracking-[0.02em] font-light text-white/95"
+      class="flex items-start mt-3 sm:mt-4 text-sm sm:text-base font-inter tracking-[0.02em] font-light text-white/95"
     >
-      <MapPin class="w-4 h-4 shrink-0" />
-      <span class="ml-2">{location}</span>
+      <MapPin class="w-4 h-4 shrink-0 mt-0.5" />
+      <span class="ml-2 break-words">{location}</span>
     </div>
   </div>
 </a>

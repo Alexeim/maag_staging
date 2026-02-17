@@ -342,28 +342,29 @@ export default function eventCreatorLogic(initialState = {}) {
         return;
       }
 
-      const payload = {
-        title: this.article.title,
-        authorId: "HxpjsagLQxlUb2oCiM6h",
-        content: this.article.contentBlocks,
-        imageUrl: this.article.imageUrl,
-        imageCaption: this.article.imageCaption,
-        lead: this.article.lead,
-        category,
-        tags: this.article.tags,
-        techTags: this.article.techTags,
-        startDate: this.eventForm.startDate,
-        endDate: normalizedEndDate,
-        dateType: this.eventForm.dateType,
-        address: this.eventForm.address?.trim() || "",
-        timeMode,
-        startTime: startTime || null,
-        endTime: timeMode === "range" ? endTime : null,
-        isOnLanding: Boolean(this.eventForm.isOnLanding),
-        isMainEvent: Boolean(this.eventForm.isMainEvent),
-      };
-
       try {
+        const resolvedAuthorId = await this.resolveAuthorId();
+        const payload = {
+          title: this.article.title,
+          authorId: resolvedAuthorId,
+          content: this.article.contentBlocks,
+          imageUrl: this.article.imageUrl,
+          imageCaption: this.article.imageCaption,
+          lead: this.article.lead,
+          category,
+          tags: this.article.tags,
+          techTags: this.article.techTags,
+          startDate: this.eventForm.startDate,
+          endDate: normalizedEndDate,
+          dateType: this.eventForm.dateType,
+          address: this.eventForm.address?.trim() || "",
+          timeMode,
+          startTime: startTime || null,
+          endTime: timeMode === "range" ? endTime : null,
+          isOnLanding: Boolean(this.eventForm.isOnLanding),
+          isMainEvent: Boolean(this.eventForm.isMainEvent),
+        };
+
         if (this.isEditMode && this.eventId) {
           await eventsApi.update(this.eventId, payload);
           window.Alpine.store("ui").showToast("Событие обновлено, красота!");

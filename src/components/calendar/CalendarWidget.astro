@@ -2,11 +2,11 @@
 // This component is now controlled by Alpine.js from the parent page
 ---
 
-<div class="bg-white/90 border border-base-300 p-6 lg:p-8 w-full max-w-md shadow-[0_18px_40px_rgba(0,0,0,0.08)]">
+<div class="bg-white/90 border border-base-300 p-4 sm:p-5 lg:p-8 w-full max-w-md shadow-[0_18px_40px_rgba(0,0,0,0.08)]">
   <div x-show="isLazyLoading" class="text-center">Загрузка...</div>
 
   <div x-show="!isLazyLoading">
-    <div class="flex justify-between items-center mb-5">
+    <div class="flex justify-between items-center mb-4 sm:mb-5 gap-2">
       <button
         @click="$dispatch('change-month', -1)"
         class="w-9 h-9 border border-base-300 rounded-none flex items-center justify-center cursor-pointer transition-colors hover:bg-base-200"
@@ -26,7 +26,7 @@
         >
       </button>
       <h3
-        class="font-semibold text-2xl text-base-content capitalize font-inter tracking-[0.04em]"
+        class="font-semibold text-lg sm:text-xl lg:text-2xl text-base-content capitalize font-inter tracking-[0.03em] text-center"
         x-text="`${monthName} ${year}`"
       >
       </h3>
@@ -49,7 +49,7 @@
         >
       </button>
     </div>
-    <div class="grid grid-cols-7 text-center text-neutral my-4 font-inter text-sm tracking-[0.08em] uppercase">
+    <div class="grid grid-cols-7 text-center text-neutral my-3 sm:my-4 font-inter text-[11px] sm:text-sm tracking-[0.06em] sm:tracking-[0.08em] uppercase">
       <div>Пн</div>
       <div>Вт</div>
       <div>Ср</div>
@@ -58,7 +58,7 @@
       <div>Сб</div>
       <div>Вс</div>
     </div>
-    <div class="grid grid-cols-7 text-center gap-y-2">
+    <div class="grid grid-cols-7 text-center gap-y-1.5 sm:gap-y-2">
       <template x-for="i in firstDayOfMonth">
         <div></div>
       </template>
@@ -70,7 +70,7 @@
               'bg-error text-error-content': isSameDay(selectedDate, new Date(Date.UTC(year, month, day))),
               'hover:bg-gray-200': !isSameDay(selectedDate, new Date(Date.UTC(year, month, day)))
             }"
-            class="w-11 h-11 flex items-center justify-center mx-auto transition-colors cursor-pointer font-inter font-medium tracking-[0.02em]"
+            class="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 flex items-center justify-center mx-auto transition-colors cursor-pointer font-inter font-medium tracking-[0.02em]"
             x-text="day"></button>
           <div
             x-show="hasEvent(day)"

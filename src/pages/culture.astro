@@ -1,7 +1,7 @@
 ---
 import Layout from "../Layouts/Layout.astro";
 import picture1 from "../assets/images/culture.jpg";
-import { articlesApi } from "@/lib/api/api";
+import { articlesApi, interviewsApi, flippersApi } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -20,6 +20,21 @@ const normalizeCategory = (value?: string) => {
       label.toLowerCase() === lowerCaseValue,
   );
   return entry ? entry[0] : lowerCaseValue;
+};
+
+const TAG_LABEL_ALIASES: Record<string, string> = {
+  exhibition: "Выставка",
+  exhibitions: "Выставка",
+  concert: "Концерт",
+  concerts: "Концерт",
+  performance: "Спектакль",
+  performances: "Спектакль",
+  theatre: "Театр",
+  theater: "Театр",
+  theatres: "Театры",
+  theaters: "Театры",
+  culture: "Культура",
+  paris: "Париж",
 };
 
 const isHotContent = (item: any) =>
@@ -47,15 +62,49 @@ const formatDate = (value: unknown) => {
   if (Number.isNaN(date.getTime())) {
     return "";
   }
-  return date.toLocaleDateString("ru-RU", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+  return date
+    .toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
+    .replace(" г.", "");
 };
 
-const toArticleHref = (article: any) =>
-  `/${article?.isNews ? "news" : "article"}/${article.id}`;
+const normalizeTags = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
+    .filter(Boolean);
+};
+
+const getPrimaryTag = (item: any): string => {
+  if (item?.contentType === "interview") {
+    return "Интервью";
+  }
+  if (item?.isNews) {
+    return "Новости";
+  }
+  const tags = normalizeTags(item?.tags);
+  if (tags.length === 0) {
+    return "";
+  }
+  const firstTag = tags[0];
+  const normalized = firstTag.toLowerCase();
+  return TAG_LABEL_ALIASES[normalized] ?? firstTag;
+};
+
+const toContentHref = (item: any) => {
+  if (item?.contentType === "interview") {
+    return `/interviews/${item.id}`;
+  }
+  if (item?.contentType === "flipper") {
+    return `/flippers/${item.id}`;
+  }
+  return `/${item?.isNews ? "news" : "article"}/${item.id}`;
+};
 
 const truncateText = (text?: string, maxLength: number = 220) => {
   if (!text) return "";
@@ -87,13 +136,37 @@ let cultureFeed: any[] = [];
 let hotContentItems: any[] = [];
 
 try {
-  const articles = await articlesApi.list();
+  const [articles, interviews, flippers] = await Promise.all([
+    articlesApi.list(),
+    interviewsApi.list(),
+    flippersApi.list(),
+  ]);
 
-  const sortedArticles = [...articles].sort(
+  const allContent = [
+    ...articles.map((article) => ({
+      ...article,
+      contentType: "article",
+      tags: normalizeTags(article?.tags),
+    })),
+    ...interviews.map((interview) => ({
+      ...interview,
+      contentType: "interview",
+      category: "culture",
+      tags: normalizeTags(interview?.tags),
+    })),
+    ...flippers.map((flipper) => ({
+      ...flipper,
+      contentType: "flipper",
+      imageUrl: flipper?.carouselContent?.[0]?.imageUrl || null,
+      tags: normalizeTags(flipper?.tags),
+    })),
+  ];
+
+  const sortedContent = [...allContent].sort(
     (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
   );
 
-  const cultureItems = sortedArticles
+  const cultureItems = sortedContent
     .filter(
       (article) =>
         normalizeCategory(article.category) === CULTURE_CATEGORY_KEY &&
@@ -101,7 +174,7 @@ try {
     )
     .map((article) => ({
       ...article,
-      href: toArticleHref(article),
+      href: toContentHref(article),
     }));
 
   primaryCultureArticle =
@@ -116,11 +189,11 @@ try {
   secondaryCultureArticle = cultureWithoutPrimary[0] ?? null;
   cultureFeed = cultureWithoutPrimary.slice(1);
 
-  hotContentItems = sortedArticles
+  hotContentItems = sortedContent
     .filter((article) => isHotContent(article))
     .map((article) => ({
       ...article,
-      href: toArticleHref(article),
+      href: toContentHref(article),
     }))
     .slice(0, 6);
 } catch (error) {
@@ -147,30 +220,38 @@ try {
       >
         <aside class="lg:pr-4 lg:border-r lg:border-base-content/15">
           <h2
-            class="text-xs uppercase tracking-[0.35em] text-base-content/60 font-inter mb-4"
+            class="text-xs uppercase tracking-[0.35em] text-error font-inter mb-4"
           >
             {CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY]}
           </h2>
 
           {
             hotContentItems.length > 0 ? (
-              <div class="divide-y divide-base-content/15 border-y border-base-content/20">
+              <div class="flex gap-4 overflow-x-auto pb-3 -mx-1 px-1 lg:block lg:overflow-visible lg:pb-0 lg:mx-0 lg:px-0 lg:divide-y lg:divide-base-content/15 lg:border-y lg:border-base-content/20">
                 {hotContentItems.map((item) => (
-                  <article class="py-4 grid grid-cols-[minmax(0,1fr)_84px] gap-3 items-start">
+                  <article class="min-w-[270px] max-w-[270px] flex-shrink-0 border border-base-content/20 p-3 grid grid-cols-[minmax(0,1fr)_72px] gap-3 items-start lg:min-w-0 lg:max-w-none lg:border-0 lg:p-0 lg:py-4 lg:grid-cols-[minmax(0,1fr)_84px]">
                     <div>
                       <a href={item.href} class="block">
-                        <h4 class="text-3xl lg:text-[40px] leading-[1.02] font-oswald font-thin hover:underline">
+                        <h4 class="text-2xl lg:text-[34px] leading-[1.06] font-oswald font-thin hover:underline">
                           {item.title}
                         </h4>
                       </a>
                       {item.lead && (
-                        <p class="mt-2 text-sm leading-relaxed text-base-content/75">
+                        <p class="mt-2 text-sm leading-relaxed text-base-content/75 font-oswald font-thin tracking-wide">
                           {truncateText(item.lead, 95)}
                         </p>
                       )}
-                      <p class="mt-3 text-[11px] font-inter uppercase tracking-[0.18em] text-base-content/50">
-                        {formatDate(item.createdAt)}
-                      </p>
+                      <div class="mt-3 flex items-center gap-2 text-[11px] font-inter uppercase tracking-[0.18em] text-base-content/50">
+                        {getPrimaryTag(item) && (
+                          <>
+                            <span class="text-[10px] font-medium uppercase tracking-[0.22em] text-error">
+                              {getPrimaryTag(item)}
+                            </span>
+                            <span class="text-base-content/45">·</span>
+                          </>
+                        )}
+                        <span>{formatDate(item.createdAt)}</span>
+                      </div>
                     </div>
                     <a
                       href={item.href}
@@ -179,7 +260,7 @@ try {
                       <img
                         src={item.imageUrl || picture1.src}
                         alt={item.title}
-                        class="w-[84px] h-[84px] object-cover object-center"
+                        class="w-[72px] h-[72px] lg:w-[84px] lg:h-[84px] object-cover object-center"
                         loading="lazy"
                         transition:name={getTransitionName(item)}
                       />
@@ -188,7 +269,7 @@ try {
                 ))}
               </div>
             ) : (
-              <p class="text-sm text-base-content/70">
+              <p class="text-sm text-base-content/70 font-oswald font-thin tracking-wide">
                 Пока нет материалов в блоке hot content.
               </p>
             )
@@ -217,17 +298,25 @@ try {
                   </h2>
                 </a>
                 {primaryCultureArticle.lead && (
-                  <p class="mt-3 text-lg leading-relaxed text-base-content/80">
+                  <p class="mt-3 text-lg leading-relaxed text-base-content/80 font-oswald font-thin tracking-wide">
                     {truncateText(primaryCultureArticle.lead, 220)}
                   </p>
                 )}
-                <p class="mt-4 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                  {formatDate(primaryCultureArticle.createdAt)}
-                </p>
+                <div class="mt-4 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                  {getPrimaryTag(primaryCultureArticle) && (
+                    <>
+                      <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
+                        {getPrimaryTag(primaryCultureArticle)}
+                      </span>
+                      <span class="text-base-content/45">·</span>
+                    </>
+                  )}
+                  <span>{formatDate(primaryCultureArticle.createdAt)}</span>
+                </div>
               </article>
             ) : (
               <article class="border border-base-content/15 p-6">
-                <p class="text-base-content/70">
+                <p class="text-base-content/70 font-oswald font-thin tracking-wide">
                   Пока нет материалов категории «Культура».
                 </p>
               </article>
@@ -257,17 +346,25 @@ try {
                   </h3>
                 </a>
                 {secondaryCultureArticle.lead && (
-                  <p class="mt-3 text-lg leading-relaxed text-base-content/80">
+                  <p class="mt-3 text-lg leading-relaxed text-base-content/80 font-oswald font-thin tracking-wide">
                     {truncateText(secondaryCultureArticle.lead, 180)}
                   </p>
                 )}
-                <p class="mt-4 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                  {formatDate(secondaryCultureArticle.createdAt)}
-                </p>
+                <div class="mt-4 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                  {getPrimaryTag(secondaryCultureArticle) && (
+                    <>
+                      <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
+                        {getPrimaryTag(secondaryCultureArticle)}
+                      </span>
+                      <span class="text-base-content/45">·</span>
+                    </>
+                  )}
+                  <span>{formatDate(secondaryCultureArticle.createdAt)}</span>
+                </div>
               </article>
             ) : (
               <article class="border border-base-content/15 p-6">
-                <p class="text-base-content/70">
+                <p class="text-base-content/70 font-oswald font-thin tracking-wide">
                   Добавьте еще один материал в культуру для второго блока.
                 </p>
               </article>
@@ -299,13 +396,21 @@ try {
                   </h3>
                 </a>
                 {item.lead && (
-                  <p class="mt-3 text-base leading-relaxed text-base-content/75">
+                  <p class="mt-3 text-base leading-relaxed text-base-content/75 font-oswald font-thin tracking-wide">
                     {truncateText(item.lead, 190)}
                   </p>
                 )}
-                <p class="mt-4 text-xs font-inter uppercase tracking-[0.2em] text-base-content/55">
-                  {formatDate(item.createdAt)}
-                </p>
+                <div class="mt-4 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.2em] text-base-content/55">
+                  {getPrimaryTag(item) && (
+                    <>
+                      <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
+                        {getPrimaryTag(item)}
+                      </span>
+                      <span class="text-base-content/45">·</span>
+                    </>
+                  )}
+                  <span>{formatDate(item.createdAt)}</span>
+                </div>
               </article>
             ))
           }

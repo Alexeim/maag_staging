@@ -2,6 +2,12 @@
 import Button from "@/components/common/Button.astro";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 import { CloudUpload } from "lucide-astro";
+import locationIcon from "@/assets/icons/new/location.svg?raw";
+import timeIcon from "@/assets/icons/new/time.svg?raw";
+import moneyIcon from "@/assets/icons/new/money.svg?raw";
+import ideaIcon from "@/assets/icons/new/idea.svg?raw";
+import likeIcon from "@/assets/icons/new/like.svg?raw";
+import dislikeIcon from "@/assets/icons/new/dislike.svg?raw";
 
 interface Props {
   heading: string;
@@ -78,6 +84,57 @@ const {
         class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
         placeholder="Краткое описание статьи, которое отображается под заголовком..."
       ></textarea>
+    </div>
+
+    <div class="mt-6 space-y-3">
+      <label class="block text-sm font-medium text-base-content">Автор</label>
+
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          @click="useNewAuthor = false"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          :class="!useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          Выбрать из списка
+        </button>
+        <button
+          type="button"
+          @click="useNewAuthor = true"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          :class="useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          Новый автор
+        </button>
+      </div>
+
+      <div x-show="!useNewAuthor">
+        <select
+          x-model="selectedAuthorId"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+        >
+          <option value="">Выберите автора...</option>
+          <template x-for="author in authors" :key="author.id">
+            <option :value="author.id" x-text="getAuthorLabel(author)"></option>
+          </template>
+        </select>
+        <p x-show="authorsLoading" class="text-xs text-base-content/60 mt-1">Загружаем авторов...</p>
+      </div>
+
+      <div x-show="useNewAuthor" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input
+          type="text"
+          x-model="newAuthorFirstName"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+          placeholder="Имя автора"
+        />
+        <input
+          type="text"
+          x-model="newAuthorLastName"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+          placeholder="Фамилия автора"
+        />
+      </div>
     </div>
 
     <hr class="my-6" />
@@ -235,6 +292,45 @@ const {
                 </span>
               </template>
             </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <hr class="my-6" />
+
+    <div class="mt-6">
+      <label class="block text-sm font-medium text-base-content mb-3"
+        >Tips</label
+      >
+      <div class="space-y-3 border border-base-300 bg-base-100/70 p-4">
+        <template x-for="tip in tipOptions" :key="tip.type">
+          <div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_auto_1fr] gap-3 items-center border-b border-base-300 pb-3 last:border-b-0 last:pb-0">
+            <label class="inline-flex items-center">
+              <input
+                type="checkbox"
+                class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+                :checked="isTipSelected(tip.type)"
+                @change="toggleTip(tip.type)"
+              />
+            </label>
+            <span class="inline-flex items-center gap-2 text-sm font-inter text-base-content/80">
+              <span x-show="tip.type === 'location'" set:html={locationIcon}></span>
+              <span x-show="tip.type === 'time'" set:html={timeIcon}></span>
+              <span x-show="tip.type === 'money'" set:html={moneyIcon}></span>
+              <span x-show="tip.type === 'idea'" set:html={ideaIcon}></span>
+              <span x-show="tip.type === 'like'" set:html={likeIcon}></span>
+              <span x-show="tip.type === 'dislike'" set:html={dislikeIcon}></span>
+              <span x-text="tip.label"></span>
+            </span>
+            <input
+              type="text"
+              class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+              :disabled="!isTipSelected(tip.type)"
+              :value="getTipText(tip.type)"
+              @input="setTipText(tip.type, $event.target.value)"
+              placeholder="Текст подсказки..."
+            />
           </div>
         </template>
       </div>

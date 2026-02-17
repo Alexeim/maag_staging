@@ -118,6 +118,7 @@ export interface ArticlePayload {
   title: string;
   authorId: string;
   content: unknown[];
+  tips?: Array<{ type: string; text: string }>;
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
@@ -177,8 +178,21 @@ export interface UserProfileResponse {
   createdAt: string | Date;
 }
 
+export interface AuthorPayload {
+  firstName: string;
+  lastName: string;
+}
+
+export interface AuthorResponse extends AuthorPayload {
+  id: string;
+  role: "author" | "reader" | "admin" | string;
+  avatar: string;
+  createdAt: string | Date;
+}
+
 export interface FlipperPayload {
   title: string;
+  authorId: string;
   category?: string;
   tags?: string[];
   techTags?: string[];
@@ -339,6 +353,19 @@ export const usersApi = {
   update(uid: string, payload: UpdateUserProfilePayload, token?: string) {
     return request<UserProfileResponse>(`/api/users/${uid}`, {
       method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+};
+
+export const authorsApi = {
+  list(token?: string) {
+    return request<AuthorResponse[]>("/api/authors", { token });
+  },
+  create(payload: AuthorPayload, token?: string) {
+    return request<AuthorResponse>("/api/authors", {
+      method: "POST",
       body: payload,
       token,
     });

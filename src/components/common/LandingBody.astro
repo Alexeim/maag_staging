@@ -59,6 +59,7 @@ const getCategoryLabel = (value?: string) => {
 };
 
 const getPrimaryTag = (item: any) => {
+  if (item?.isNews) return "Новости";
   const rawTags = Array.isArray(item?.tags)
     ? item.tags
     : typeof item?.tags === "string"

@@ -9,9 +9,9 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
 
   <div x-show="!isLazyLoading">
     <!-- Main Event List -->
-    <div class="space-y-10 lg:space-y-14 border-b border-base-300 pb-10 mb-8">
+    <div class="space-y-8 lg:space-y-14 border-b border-base-300 pb-10 mb-8">
       <h2
-        class="text-3xl lg:text-4xl font-inter font-semibold tracking-[0.06em] uppercase"
+        class="text-2xl sm:text-3xl lg:text-4xl font-inter font-semibold tracking-[0.04em] sm:tracking-[0.06em] uppercase"
         x-text="selectedDate ? selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' }) : ''"
       >
       </h2>
@@ -32,52 +32,52 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
               <img
                 x-bind:src="event.image"
                 alt="Event Image"
-                class="w-full h-64 lg:h-full object-cover"
+                class="w-full h-56 sm:h-64 lg:h-full object-cover"
               />
             </div>
             <div class="flex flex-col gap-5 w-full">
               <div>
                 <span
-                  class="text-sm uppercase tracking-[0.25em] font-medium text-error font-inter"
+                  class="text-xs sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.25em] font-medium text-error font-inter"
                   x-text="event.tag"></span>
                 <h3
-                  class="font-oswald text-2xl mt-2 leading-tight tracking-[0.02em] font-medium"
+                  class="font-oswald text-xl sm:text-2xl mt-2 leading-tight tracking-[0.02em] font-medium"
                   x-text="event.title"
                 >
                 </h3>
                 <p
-                  class="font-oswald text-lg mt-4 text-base-content/90 tracking-[0.012em] font-light leading-8"
+                  class="font-oswald text-base sm:text-lg mt-3 sm:mt-4 text-base-content/90 tracking-[0.012em] font-light leading-7 sm:leading-8"
                   x-text="event.description"
                 >
                 </p>
               </div>
               <div
-                class="text-lg font-semibold border border-base-300 bg-base-100/70 px-4"
+                class="text-base sm:text-lg font-semibold border border-base-300 bg-base-100/70 px-3 sm:px-4"
               >
                 <div
-                  class="flex items-center gap-4 py-2 border-b border-base-300 font-inter"
+                  class="flex items-start gap-3 sm:gap-4 py-2 border-b border-base-300 font-inter"
                 >
                   <span set:html={locationIcon} />
-                  <span class="text-neutral text-sm" x-text="event.location"
+                  <span class="text-neutral text-xs sm:text-sm break-words" x-text="event.location"
                   ></span>
                 </div>
                 <div
-                  class="flex items-center gap-4 py-2 border-b border-base-300 font-inter"
+                  class="flex items-start gap-3 sm:gap-4 py-2 border-b border-base-300 font-inter"
                 >
                   <span set:html={timeIcon} />
-                  <span class="text-neutral text-sm" x-text="event.time"></span>
+                  <span class="text-neutral text-xs sm:text-sm break-words" x-text="event.time"></span>
                 </div>
-                <div class="flex items-center gap-4 py-2 font-inter">
+                <div class="flex items-start gap-3 sm:gap-4 py-2 font-inter">
                   <span set:html={calendarIcon} />
                   <span
-                    class="text-neutral text-sm"
+                    class="text-neutral text-xs sm:text-sm break-words"
                     x-text="event.dateRangeLabel"></span>
                 </div>
               </div>
               <div class="mt-auto">
                 <a
                   :href="event.url"
-                  class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-normal font-oswald py-2 px-4 rounded inline-flex items-center"
+                  class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-normal font-oswald py-2 px-4 inline-flex items-center"
                   x-text="'Подробнее'"></a>
               </div>
             </div>
@@ -105,7 +105,7 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
           <!-- Inlined SmallEventCard -->
           <a
             :href="event.url"
-            class="bg-white border border-base-300 shadow-lg overflow-hidden w-[265px] flex-shrink-0 transition-transform duration-300 hover:-translate-y-1"
+            class="bg-white border border-base-300 shadow-lg overflow-hidden w-[240px] sm:w-[265px] flex-shrink-0 transition-transform duration-300 hover:-translate-y-1"
           >
             <img
               x-bind:src="event.image"

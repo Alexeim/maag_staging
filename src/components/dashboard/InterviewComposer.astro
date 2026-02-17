@@ -65,6 +65,57 @@ const {
       <p class="text-xs text-base-content/60 mt-1">Эта цитата отображается в блоке интервью на лендинге. Если не заполнить, будет использована первая цитата или ответ из контента.</p>
     </div>
 
+    <div class="mt-6 space-y-3">
+      <label class="block text-sm font-medium text-base-content">Автор</label>
+
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          @click="useNewAuthor = false"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          :class="!useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          Выбрать из списка
+        </button>
+        <button
+          type="button"
+          @click="useNewAuthor = true"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          :class="useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          Новый автор
+        </button>
+      </div>
+
+      <div x-show="!useNewAuthor">
+        <select
+          x-model="selectedAuthorId"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+        >
+          <option value="">Выберите автора...</option>
+          <template x-for="author in authors" :key="author.id">
+            <option :value="author.id" x-text="getAuthorLabel(author)"></option>
+          </template>
+        </select>
+        <p x-show="authorsLoading" class="text-xs text-base-content/60 mt-1">Загружаем авторов...</p>
+      </div>
+
+      <div x-show="useNewAuthor" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input
+          type="text"
+          x-model="newAuthorFirstName"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+          placeholder="Имя автора"
+        />
+        <input
+          type="text"
+          x-model="newAuthorLastName"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+          placeholder="Фамилия автора"
+        />
+      </div>
+    </div>
+
     <hr class="my-6" />
 
     <label class="block text-sm font-medium text-base-content mb-2">Имя интервьюируемого</label>

@@ -1,4 +1,4 @@
-import { articlesApi } from "@/lib/api/api";
+import { articlesApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
   getStorage,
@@ -141,6 +141,12 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     isEditMode,
     onSaveRedirect,
     newTagInput: "",
+    authorsLoading: false,
+    authors: [],
+    selectedAuthorId: "",
+    useNewAuthor: false,
+    newAuthorFirstName: "",
+    newAuthorLastName: "",
 
     categoryLabels,
     getCategoryLabel(value?: string) {
@@ -207,6 +213,66 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       this.article.tags = normalizeTags(this.article.tags, value);
       this.article.techTags = normalizeTechTags(this.article.techTags);
     },
+    getAuthorLabel(author: any) {
+      const firstName =
+        typeof author?.firstName === "string" ? author.firstName.trim() : "";
+      const lastName =
+        typeof author?.lastName === "string" ? author.lastName.trim() : "";
+      return `${firstName} ${lastName}`.trim();
+    },
+    ensureSelectedAuthorPresent() {
+      if (!this.selectedAuthorId) {
+        return;
+      }
+      const exists = this.authors.some(
+        (author: any) => author.id === this.selectedAuthorId,
+      );
+      if (exists) {
+        return;
+      }
+      const fallbackAuthor = this.article?.author;
+      if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
+        this.authors.unshift({
+          id: this.selectedAuthorId,
+          firstName: fallbackAuthor.firstName || "",
+          lastName: fallbackAuthor.lastName || "",
+          role: fallbackAuthor.role || "author",
+          avatar: fallbackAuthor.avatar || "",
+        });
+      }
+    },
+    async loadAuthors() {
+      this.authorsLoading = true;
+      try {
+        const authors = await authorsApi.list();
+        this.authors = Array.isArray(authors) ? authors : [];
+        this.ensureSelectedAuthorPresent();
+      } catch (error) {
+        console.error("Failed to fetch authors:", error);
+      } finally {
+        this.authorsLoading = false;
+      }
+    },
+    async resolveAuthorId() {
+      if (this.useNewAuthor) {
+        const firstName = this.newAuthorFirstName.trim();
+        const lastName = this.newAuthorLastName.trim();
+        if (!firstName || !lastName) {
+          throw new Error("Заполни имя и фамилию нового автора.");
+        }
+        const createdAuthor = await authorsApi.create({ firstName, lastName });
+        this.authors.unshift(createdAuthor);
+        this.selectedAuthorId = createdAuthor.id;
+        this.useNewAuthor = false;
+        this.newAuthorFirstName = "";
+        this.newAuthorLastName = "";
+        return createdAuthor.id;
+      }
+      if (!this.selectedAuthorId) {
+        throw new Error("Выбери автора из списка или создай нового.");
+      }
+      return this.selectedAuthorId;
+    },
 
     init() {
       if (initialArticle) {
@@ -230,6 +296,10 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? this.article.contentBlocks
         : [];
+      this.selectedAuthorId =
+        typeof this.article.authorId === "string" ? this.article.authorId : "";
+      this.ensureSelectedAuthorPresent();
+      this.loadAuthors();
     },
 
     // Title editing
@@ -355,13 +425,14 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       }
 
       try {
+        const resolvedAuthorId = await this.resolveAuthorId();
         const tagsForDb = this.article.tags.map((tag: string) => this.getTagLabel(tag));
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
-          authorId: "HxpjsagLQxlUb2oCiM6h",
+          authorId: resolvedAuthorId,
           content: this.article.contentBlocks,
           category: this.article.category,
           tags: tagsForDb,

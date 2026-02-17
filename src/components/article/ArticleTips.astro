@@ -1,0 +1,59 @@
+---
+import locationIcon from "@/assets/icons/new/location.svg?raw";
+import timeIcon from "@/assets/icons/new/time.svg?raw";
+import moneyIcon from "@/assets/icons/new/money.svg?raw";
+import ideaIcon from "@/assets/icons/new/idea.svg?raw";
+import likeIcon from "@/assets/icons/new/like.svg?raw";
+import dislikeIcon from "@/assets/icons/new/dislike.svg?raw";
+
+interface Tip {
+  type: string;
+  text: string;
+}
+
+interface Props {
+  tips?: Tip[];
+}
+
+const { tips = [] } = Astro.props as Props;
+
+const ICONS: Record<string, string> = {
+  location: locationIcon,
+  time: timeIcon,
+  money: moneyIcon,
+  idea: ideaIcon,
+  like: likeIcon,
+  dislike: dislikeIcon,
+};
+
+const preparedTips = tips
+  .filter(
+    (tip) =>
+      tip &&
+      typeof tip.type === "string" &&
+      typeof tip.text === "string" &&
+      tip.text.trim().length > 0,
+  )
+  .map((tip) => ({
+    type: tip.type.trim().toLowerCase(),
+    text: tip.text.trim(),
+  }))
+  .filter((tip) => Boolean(ICONS[tip.type]));
+---
+
+{
+  preparedTips.length > 0 && (
+    <section class="max-w-[826px] mx-auto mt-12">
+      <div class="border border-base-300 bg-white/85">
+        {preparedTips.map((tip) => (
+          <div class="grid grid-cols-[auto_1fr] items-start gap-4 px-4 py-3 border-b border-base-300 last:border-b-0">
+            <span class="mt-0.5" set:html={ICONS[tip.type]} />
+            <p class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90">
+              {tip.text}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}

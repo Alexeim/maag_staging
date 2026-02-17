@@ -1,4 +1,4 @@
-import { flippersApi } from "@/lib/api/api";
+import { flippersApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
   getStorage,
@@ -88,6 +88,12 @@ export default function flipperCreatorLogic(initialState = {}) {
     onSaveRedirect,
     categoryTags,
     newTagInput: "",
+    authorsLoading: false,
+    authors: [],
+    selectedAuthorId: "",
+    useNewAuthor: false,
+    newAuthorFirstName: "",
+    newAuthorLastName: "",
 
     init() {
       if (initialFlipper) {
@@ -99,6 +105,10 @@ export default function flipperCreatorLogic(initialState = {}) {
           this.flipper.carouselContent = [{ imageUrl: "", caption: "" }];
         }
       }
+      this.selectedAuthorId =
+        typeof this.flipper.authorId === "string" ? this.flipper.authorId : "";
+      this.ensureSelectedAuthorPresent();
+      this.loadAuthors();
     },
 
     getAvailableTags() {
@@ -160,6 +170,66 @@ export default function flipperCreatorLogic(initialState = {}) {
       this.flipper.tags = normalizeTags(this.flipper.tags, value);
       this.flipper.techTags = normalizeTechTags(this.flipper.techTags);
     },
+    getAuthorLabel(author: any) {
+      const firstName =
+        typeof author?.firstName === "string" ? author.firstName.trim() : "";
+      const lastName =
+        typeof author?.lastName === "string" ? author.lastName.trim() : "";
+      return `${firstName} ${lastName}`.trim();
+    },
+    ensureSelectedAuthorPresent() {
+      if (!this.selectedAuthorId) {
+        return;
+      }
+      const exists = this.authors.some(
+        (author: any) => author.id === this.selectedAuthorId,
+      );
+      if (exists) {
+        return;
+      }
+      const fallbackAuthor = this.flipper?.author;
+      if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
+        this.authors.unshift({
+          id: this.selectedAuthorId,
+          firstName: fallbackAuthor.firstName || "",
+          lastName: fallbackAuthor.lastName || "",
+          role: fallbackAuthor.role || "author",
+          avatar: fallbackAuthor.avatar || "",
+        });
+      }
+    },
+    async loadAuthors() {
+      this.authorsLoading = true;
+      try {
+        const authors = await authorsApi.list();
+        this.authors = Array.isArray(authors) ? authors : [];
+        this.ensureSelectedAuthorPresent();
+      } catch (error) {
+        console.error("Failed to fetch authors:", error);
+      } finally {
+        this.authorsLoading = false;
+      }
+    },
+    async resolveAuthorId() {
+      if (this.useNewAuthor) {
+        const firstName = this.newAuthorFirstName.trim();
+        const lastName = this.newAuthorLastName.trim();
+        if (!firstName || !lastName) {
+          throw new Error("Заполни имя и фамилию нового автора.");
+        }
+        const createdAuthor = await authorsApi.create({ firstName, lastName });
+        this.authors.unshift(createdAuthor);
+        this.selectedAuthorId = createdAuthor.id;
+        this.useNewAuthor = false;
+        this.newAuthorFirstName = "";
+        this.newAuthorLastName = "";
+        return createdAuthor.id;
+      }
+      if (!this.selectedAuthorId) {
+        throw new Error("Выбери автора из списка или создай нового.");
+      }
+      return this.selectedAuthorId;
+    },
 
     addCarouselItem() {
       this.flipper.carouselContent.push({ imageUrl: "", caption: "" });
@@ -203,10 +273,11 @@ export default function flipperCreatorLogic(initialState = {}) {
       }
 
       try {
+        const resolvedAuthorId = await this.resolveAuthorId();
         const tagsForDb = this.flipper.tags.map((tag) => this.getTagLabel(tag));
         const payload = {
           ...this.flipper,
-          authorId: "HxpjsagLQxlUb2oCiM6h", // Hardcoded author ID
+          authorId: resolvedAuthorId,
           tags: tagsForDb,
           techTags: normalizeTechTags(this.flipper.techTags),
         };

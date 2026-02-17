@@ -1,4 +1,4 @@
-import { articlesApi, eventsApi, interviewsApi, flippersApi } from "@/lib/api/api";
+import { articlesApi, eventsApi, interviewsApi, flippersApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
   getStorage,
@@ -11,6 +11,9 @@ const storage = getStorage(app);
 
 // Helper to create a new block object
 const createBlock = (type, data) => ({ type, ...data });
+const TIP_TYPES = ["location", "time", "money", "idea", "like", "dislike"] as const;
+type TipType = (typeof TIP_TYPES)[number];
+type TipItem = { type: TipType; text: string };
 
 export default function articleCreatorLogic(initialState = {}) {
   const {
@@ -133,8 +136,40 @@ export default function articleCreatorLogic(initialState = {}) {
     copy.content = blocks;
     copy.tags = normalizeTags(copy.tags, copy.category);
     copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
+    copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
     return copy;
+  };
+
+  const normalizeTips = (tips?: unknown): TipItem[] => {
+    if (!Array.isArray(tips)) {
+      return [];
+    }
+    const deduped = new Set<TipType>();
+    const normalized: TipItem[] = [];
+    for (const rawItem of tips) {
+      if (!rawItem || typeof rawItem !== "object") {
+        continue;
+      }
+      const typeValue = (rawItem as { type?: string }).type;
+      if (!typeValue || !TIP_TYPES.includes(typeValue as TipType)) {
+        continue;
+      }
+      const type = typeValue as TipType;
+      if (deduped.has(type)) {
+        continue;
+      }
+      const text =
+        typeof (rawItem as { text?: string }).text === "string"
+          ? (rawItem as { text?: string }).text!.trim()
+          : "";
+      if (!text) {
+        continue;
+      }
+      deduped.add(type);
+      normalized.push({ type, text });
+    }
+    return normalized;
   };
 
   return {
@@ -147,6 +182,7 @@ export default function articleCreatorLogic(initialState = {}) {
       contentBlocks: [],
       tags: [],
       techTags: [],
+      tips: [] as TipItem[],
       category: "", // <-- Added category
       isHotContent: false,
       isOnLanding: false,
@@ -159,6 +195,12 @@ export default function articleCreatorLogic(initialState = {}) {
     allEvents: [],
     allInterviews: [],
     allFlippers: [],
+    authorsLoading: false,
+    authors: [],
+    selectedAuthorId: "",
+    useNewAuthor: false,
+    newAuthorFirstName: "",
+    newAuthorLastName: "",
 
     // --- State for managing the block creation UI ---
     showBlockOptions: false,
@@ -184,6 +226,14 @@ export default function articleCreatorLogic(initialState = {}) {
     newTagInput: "",
 
     categoryLabels,
+    tipOptions: [
+      { type: "location" as TipType, label: "Локация" },
+      { type: "time" as TipType, label: "Время" },
+      { type: "money" as TipType, label: "Стоимость" },
+      { type: "idea" as TipType, label: "Идея" },
+      { type: "like" as TipType, label: "Плюсы" },
+      { type: "dislike" as TipType, label: "Минусы" },
+    ],
     getCategoryLabel(value?: string) {
       if (!value) {
         return "Category";
@@ -274,6 +324,88 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.category = value;
       this.article.tags = normalizeTags(this.article.tags, value);
       this.article.techTags = normalizeTechTags(this.article.techTags);
+    },
+    isTipSelected(type: TipType) {
+      return this.article.tips.some((tip: TipItem) => tip.type === type);
+    },
+    toggleTip(type: TipType) {
+      const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
+      if (idx >= 0) {
+        this.article.tips.splice(idx, 1);
+      } else {
+        this.article.tips.push({ type, text: "" });
+      }
+    },
+    getTipText(type: TipType) {
+      const tip = this.article.tips.find((item: TipItem) => item.type === type);
+      return tip?.text ?? "";
+    },
+    setTipText(type: TipType, value: string) {
+      const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
+      if (idx < 0) {
+        return;
+      }
+      this.article.tips[idx].text = value;
+    },
+    getAuthorLabel(author: any) {
+      const firstName =
+        typeof author?.firstName === "string" ? author.firstName.trim() : "";
+      const lastName =
+        typeof author?.lastName === "string" ? author.lastName.trim() : "";
+      return `${firstName} ${lastName}`.trim();
+    },
+    ensureSelectedAuthorPresent() {
+      if (!this.selectedAuthorId) {
+        return;
+      }
+      const alreadyExists = this.authors.some(
+        (author: any) => author.id === this.selectedAuthorId,
+      );
+      if (alreadyExists) {
+        return;
+      }
+      const fallbackAuthor = this.article?.author;
+      if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
+        this.authors.unshift({
+          id: this.selectedAuthorId,
+          firstName: fallbackAuthor.firstName || "",
+          lastName: fallbackAuthor.lastName || "",
+          role: fallbackAuthor.role || "author",
+          avatar: fallbackAuthor.avatar || "",
+        });
+      }
+    },
+    async loadAuthors() {
+      this.authorsLoading = true;
+      try {
+        const authors = await authorsApi.list();
+        this.authors = Array.isArray(authors) ? authors : [];
+        this.ensureSelectedAuthorPresent();
+      } catch (error) {
+        console.error("Failed to fetch authors:", error);
+      } finally {
+        this.authorsLoading = false;
+      }
+    },
+    async resolveAuthorId() {
+      if (this.useNewAuthor) {
+        const firstName = this.newAuthorFirstName.trim();
+        const lastName = this.newAuthorLastName.trim();
+        if (!firstName || !lastName) {
+          throw new Error("Заполни имя и фамилию нового автора.");
+        }
+        const createdAuthor = await authorsApi.create({ firstName, lastName });
+        this.authors.unshift(createdAuthor);
+        this.selectedAuthorId = createdAuthor.id;
+        this.useNewAuthor = false;
+        this.newAuthorFirstName = "";
+        this.newAuthorLastName = "";
+        return createdAuthor.id;
+      }
+      if (!this.selectedAuthorId) {
+        throw new Error("Выбери автора из списка или создай нового.");
+      }
+      return this.selectedAuthorId;
     },
 
     async fetchContentLists() {
@@ -404,6 +536,7 @@ export default function articleCreatorLogic(initialState = {}) {
 
       this.article.tags = this.article.tags ?? [];
       this.article.techTags = this.article.techTags ?? [];
+      this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isOnLanding = Boolean(this.article.isOnLanding);
@@ -411,8 +544,12 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? this.article.contentBlocks
         : [];
+      this.selectedAuthorId =
+        typeof this.article.authorId === "string" ? this.article.authorId : "";
+      this.ensureSelectedAuthorPresent();
 
       this.fetchContentLists();
+      this.loadAuthors();
     },
 
     // --- Title editing methods (unchanged) ---
@@ -605,6 +742,7 @@ export default function articleCreatorLogic(initialState = {}) {
           : normalizedCategory;
       this.article.tags = normalizeTags(this.article.tags, this.article.category);
       this.article.techTags = normalizeTechTags(this.article.techTags);
+      this.article.tips = normalizeTips(this.article.tips);
 
       if (!this.article.category && !this.article.isHotContent) {
         window.Alpine.store("ui").showToast(
@@ -637,17 +775,19 @@ export default function articleCreatorLogic(initialState = {}) {
       }
 
       try {
+        const resolvedAuthorId = await this.resolveAuthorId();
         const tagsForDb = this.article.tags.map((tag) => this.getTagLabel(tag));
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
-          authorId: "HxpjsagLQxlUb2oCiM6h",
+          authorId: resolvedAuthorId,
           content: this.article.contentBlocks,
           category: this.article.category,
           tags: tagsForDb,
           techTags: this.article.techTags,
+          tips: this.article.tips,
           isHotContent: this.article.isHotContent,
           isOnLanding: this.article.isOnLanding,
           isMainInCategory: this.article.isMainInCategory,

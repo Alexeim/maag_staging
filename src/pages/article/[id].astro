@@ -6,6 +6,7 @@ import ArticleDate from "@/components/article/ArticleDate.astro";
 import SocialShare from "../../components/article/SocialShare.astro";
 import ArticleImage from "../../components/article/ArticleImage.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
+import ArticleTips from "../../components/article/ArticleTips.astro";
 import RecentArticles from "../../components/article/RecentArticles.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
 import type { ImageMetadata } from "astro";
@@ -54,6 +55,7 @@ const displayArticle = {
   imageCaption: articleData?.imageCaption || '', // <-- Get the caption
   imageAlt: articleData?.mainImage?.alt || 'Article image',
   contentBlocks: articleData?.content || [],
+  tips: Array.isArray(articleData?.tips) ? articleData.tips : [],
 };
 
 const transitionAliases = [`landing-body-main-article-image-${id}`];
@@ -106,6 +108,7 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
           <!-- Article Content -->
           <div class="max-w-[1400px] mx-auto px-14 pb-[100px]">
             <ArticleBody contentBlocks={displayArticle.contentBlocks} />
+            <ArticleTips tips={displayArticle.tips} />
             
             {/* Conditionally render EventDetails only if the data exists */}
             {(articleData?.eventDetails) && (

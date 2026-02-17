@@ -8,6 +8,7 @@ export interface Article {
   lead?: string; // Вводка — краткое описание под заголовком
   authorId: string;
   content: any[]; // Array of content blocks (e.g., { type: 'paragraph', text: '...' })
+  tips?: Array<{ type: string; text: string }>;
   imageUrl?: string;
   imageCaption?: string;
   category?: string; // <-- Added category
@@ -23,6 +24,30 @@ export interface Article {
 const db = getDb();
 const articlesCollection = db.collection('articles');
 
+const normalizeTips = (tips: unknown): Array<{ type: string; text: string }> => {
+  if (!Array.isArray(tips)) {
+    return [];
+  }
+
+  const deduped = new Set<string>();
+  const normalized: Array<{ type: string; text: string }> = [];
+
+  tips.forEach((rawTip) => {
+    if (!rawTip || typeof rawTip !== 'object') {
+      return;
+    }
+    const type = String((rawTip as { type?: unknown }).type ?? '').trim().toLowerCase();
+    const text = String((rawTip as { text?: unknown }).text ?? '').trim();
+    if (!type || !text || deduped.has(type)) {
+      return;
+    }
+    deduped.add(type);
+    normalized.push({ type, text });
+  });
+
+  return normalized;
+};
+
 /**
  * @description Create a new article
  * @route POST /api/articles
@@ -34,6 +59,7 @@ export const createArticle = async (req: Request, res: Response) => {
       title,
       lead,
       content,
+      tips = [],
       imageUrl,
       imageCaption,
       authorId,
@@ -56,6 +82,7 @@ export const createArticle = async (req: Request, res: Response) => {
     const normalizedTechTags = Array.isArray(techTags)
       ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
+    const normalizedTips = normalizeTips(tips);
     const legacyHotContent =
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
@@ -65,6 +92,7 @@ export const createArticle = async (req: Request, res: Response) => {
       lead: lead || '',
       authorId,
       content,
+      tips: normalizedTips,
       imageUrl,
       imageCaption,
       category: persistedCategory,
@@ -166,6 +194,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       title,
       lead,
       content,
+      tips = [],
       imageUrl,
       imageCaption,
       authorId,
@@ -188,6 +217,7 @@ export const updateArticle = async (req: Request, res: Response) => {
     const normalizedTechTags = Array.isArray(techTags)
       ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
+    const normalizedTips = normalizeTips(tips);
     const legacyHotContent =
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
@@ -197,6 +227,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       lead: lead || '',
       authorId,
       content,
+      tips: normalizedTips,
       imageUrl,
       imageCaption,
       category: persistedCategory,
