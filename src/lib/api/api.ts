@@ -148,7 +148,13 @@ export interface EventPayload {
   techTags: string[];
   startDate: string | Date;
   endDate?: string | Date | null;
+  dateType?: "single" | "duration";
+  address?: string;
+  timeMode?: "none" | "start" | "range";
+  startTime?: string | null;
+  endTime?: string | null;
   isOnLanding: boolean;
+  isMainEvent?: boolean;
 }
 
 export interface EventResponse extends EventPayload {

@@ -1,8 +1,6 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
 import ArticleHeader from "../../components/article/ArticleHeader.astro";
-import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
-import SocialShare from "../../components/article/SocialShare.astro";
 import ArticleImage from "../../components/article/ArticleImage.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
@@ -24,6 +22,10 @@ const toDate = (value: unknown): Date | null => {
     return value;
   }
   if (typeof value === "string") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "number") {
     const parsed = new Date(value);
     return Number.isNaN(parsed.getTime()) ? null : parsed;
   }
@@ -56,6 +58,29 @@ const formatDateRange = (start: Date | null, end: Date | null): string | null =>
   return `${format(start)} — ${format(end)}`;
 };
 
+const formatTimeLabel = (event: any): string | null => {
+  const mode =
+    event?.timeMode === "start" || event?.timeMode === "range" ? event.timeMode : "none";
+  const start = typeof event?.startTime === "string" ? event.startTime.trim() : "";
+  const end = typeof event?.endTime === "string" ? event.endTime.trim() : "";
+  if (mode === "start" && start) {
+    return `Начало в ${start}`;
+  }
+  if (mode === "range" && start && end) {
+    return `${start} — ${end}`;
+  }
+  return null;
+};
+
+const normalizeTags = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .map((item) => (typeof item === "string" ? item.trim() : ""))
+    .filter(Boolean);
+};
+
 let eventData: any;
 let error: string | null = null;
 
@@ -66,28 +91,33 @@ try {
   if (e instanceof ApiError) {
     error =
       e.status === 404
-        ? "Event not found."
-        : `Error fetching event: ${e.message}`;
+        ? "Событие не найдено."
+        : `Ошибка загрузки события: ${e.message}`;
   } else {
-    error = `Error fetching event: ${e.message}`;
+    error = `Ошибка загрузки события: ${e.message}`;
   }
 }
 
 const startDate = toDate(eventData?.startDate);
 const endDate = toDate(eventData?.endDate);
+const tags = normalizeTags(eventData?.tags);
+const techTags = normalizeTags(eventData?.techTags);
+const allTags = [...tags, ...techTags];
 
 const displayEvent = {
-  title: eventData?.title || "Event",
-  lead: eventData?.lead || '',
-  category: eventData?.category ? CATEGORY_LABELS[eventData.category] || eventData.category : "Категория",
-  authorName: "Organizers",
-  authorAvatar: undefined,
-  readTime: "—",
+  title: eventData?.title || "Событие",
+  lead: eventData?.lead || "",
+  category: eventData?.category ? CATEGORY_LABELS[eventData.category] || eventData.category : "Событие",
   imageUrl: eventData?.imageUrl,
   imageCaption: eventData?.imageCaption || "",
-  imageAlt: eventData?.mainImage?.alt || "Event image",
+  imageAlt: eventData?.mainImage?.alt || "Изображение события",
   contentBlocks: eventData?.content || [],
+  address:
+    typeof eventData?.address === "string" && eventData.address.trim().length > 0
+      ? eventData.address
+      : "Место уточняется",
   datesLabel: formatDateRange(startDate, endDate),
+  timeLabel: formatTimeLabel(eventData),
 };
 ---
 
@@ -102,18 +132,23 @@ const displayEvent = {
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}
       {!error && eventData && (
         <>
-          <div class="pt-[150px] pb-[100px] flex flex-col items-center gap-[100px]">
-            <div class="flex flex-col gap-8 max-w-[825px] w-full">
+          <div class="pt-[150px] pb-[70px] flex flex-col items-center gap-[56px]">
+            <div class="flex flex-col gap-8 max-w-[825px] w-full px-4">
               <ArticleHeader
                 category={displayEvent.category}
                 title={displayEvent.title}
                 lead={displayEvent.lead}
               />
-              <ArticleAuthor
-                name={displayEvent.authorName}
-                avatarUrl={displayEvent.authorAvatar}
-              />
-              <SocialShare readTime={displayEvent.readTime} />
+              <div class="flex flex-wrap gap-2">
+                {allTags.map((tag) => (
+                  <span class="px-3 py-1 rounded-full bg-base-300 text-sm">{tag}</span>
+                ))}
+              </div>
+              {displayEvent.datesLabel && (
+                <div class="text-sm text-base-content/70 uppercase tracking-[0.2em]">
+                  {displayEvent.datesLabel}
+                </div>
+              )}
             </div>
 
             {displayEvent.imageUrl && (
@@ -128,11 +163,15 @@ const displayEvent = {
             )}
           </div>
 
-          <div class="max-w-[1400px] mx-auto px-14 pb-[100px]">
+          <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
             <ArticleBody contentBlocks={displayEvent.contentBlocks} />
 
             {displayEvent.datesLabel && (
-              <EventDetails address="—" dates={displayEvent.datesLabel} />
+              <EventDetails
+                address={displayEvent.address}
+                dates={displayEvent.datesLabel}
+                time={displayEvent.timeLabel}
+              />
             )}
           </div>
         </>

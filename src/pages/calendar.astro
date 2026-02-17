@@ -16,6 +16,38 @@ const EVENT_CATEGORY_LABELS: Record<string, string> = {
   performance: "Спектакль",
 };
 
+const TAG_LABEL_ALIASES: Record<string, string> = {
+  exhibition: "Выставка",
+  exhibitions: "Выставки",
+  concert: "Концерт",
+  concerts: "Концерты",
+  performance: "Спектакль",
+  performances: "Спектакли",
+  theatre: "Театр",
+  theatres: "Театры",
+  theater: "Театр",
+  theaters: "Театры",
+  event: "Событие",
+  events: "События",
+};
+
+const toRoman = (num: number): string => {
+  if (!Number.isFinite(num) || num <= 0) {
+    return "";
+  }
+  const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+  const symbols = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"];
+  let n = Math.floor(num);
+  let out = "";
+  for (let i = 0; i < values.length; i += 1) {
+    while (n >= values[i]) {
+      out += symbols[i];
+      n -= values[i];
+    }
+  }
+  return out;
+};
+
 const toDate = (value: unknown): Date | null => {
   if (!value) {
     return null;
@@ -60,6 +92,26 @@ const extractDescription = (blocks: any): string => {
   return text.length > 180 ? `${text.slice(0, 177).trim()}...` : text;
 };
 
+const resolveTagLabel = (rawTag: unknown, fallback: string): string => {
+  if (typeof rawTag !== "string") {
+    return fallback;
+  }
+  const trimmed = rawTag.trim();
+  if (!trimmed) {
+    return fallback;
+  }
+  const normalized = trimmed.toLowerCase();
+  const districtMatch = normalized.match(/^district[-\s_]?(\d{1,2})$/i);
+  if (districtMatch) {
+    const districtNum = Number(districtMatch[1]);
+    const roman = toRoman(districtNum);
+    if (roman) {
+      return roman;
+    }
+  }
+  return TAG_LABEL_ALIASES[normalized] ?? trimmed;
+};
+
 const formatDateRange = (startIso: string, endIso: string | null): string => {
   const start = toDate(startIso);
   if (!start) {
@@ -101,10 +153,10 @@ const normalizedEvents = eventsResponse
     const category = typeof event?.category === "string" ? event.category : "";
     const categoryLabel =
       EVENT_CATEGORY_LABELS[category as keyof typeof EVENT_CATEGORY_LABELS] || "Событие";
-    const primaryTag =
-      Array.isArray(event?.tags) && event.tags.length > 0 && typeof event.tags[0] === "string"
-        ? event.tags[0]
-        : categoryLabel;
+    const primaryTag = resolveTagLabel(
+      Array.isArray(event?.tags) && event.tags.length > 0 ? event.tags[0] : null,
+      categoryLabel,
+    );
 
     return {
       id: event.id,
@@ -112,10 +164,19 @@ const normalizedEvents = eventsResponse
       imageUrl: typeof event.imageUrl === "string" ? event.imageUrl : null,
       startDate: startDate.toISOString(),
       endDate: endDate ? endDate.toISOString() : null,
+      dateType: event?.dateType === "duration" ? "duration" : "single",
+      address: typeof event?.address === "string" ? event.address : "",
+      timeMode:
+        event?.timeMode === "start" || event?.timeMode === "range"
+          ? event.timeMode
+          : "none",
+      startTime: typeof event?.startTime === "string" ? event.startTime : null,
+      endTime: typeof event?.endTime === "string" ? event.endTime : null,
       category,
       categoryLabel,
       tagLabel: primaryTag,
       description: extractDescription(event?.content),
+      isMainEvent: Boolean(event?.isMainEvent),
       url: `/events/${event.id}`,
     };
   })
@@ -127,11 +188,68 @@ const normalizedEvents = eventsResponse
 
 const heroFallbackImages = [baletImage, picture1, theatreShowImage];
 
-const featuredEvents = normalizedEvents.slice(0, 3).map((event, index) => ({
-  ...event,
-  dateRange: formatDateRange(event.startDate, event.endDate),
-  fallbackImage: heroFallbackImages[index] ?? baletImage,
-}));
+const now = new Date();
+const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+const weekEndUtc = new Date(todayUtc);
+weekEndUtc.setUTCDate(weekEndUtc.getUTCDate() + 6);
+
+const upcomingOrCurrentEvents = normalizedEvents.filter((event) => {
+  const end = toDate(event.endDate ?? event.startDate);
+  return end ? end.getTime() >= todayUtc.getTime() : false;
+});
+
+const currentMonthMainEvent = upcomingOrCurrentEvents.find((event) => {
+  if (!event.isMainEvent) {
+    return false;
+  }
+  const start = toDate(event.startDate);
+  return (
+    start &&
+    start.getUTCFullYear() === todayUtc.getUTCFullYear() &&
+    start.getUTCMonth() === todayUtc.getUTCMonth()
+  );
+});
+
+const featuredMainEvent =
+  currentMonthMainEvent ??
+  upcomingOrCurrentEvents.find((event) => event.isMainEvent) ??
+  upcomingOrCurrentEvents[upcomingOrCurrentEvents.length - 1] ??
+  normalizedEvents[normalizedEvents.length - 1] ??
+  null;
+
+const weeklyEvents = upcomingOrCurrentEvents
+  .filter((event) => {
+    const start = toDate(event.startDate);
+    const end = toDate(event.endDate ?? event.startDate);
+    if (!start || !end) {
+      return false;
+    }
+    return start.getTime() <= weekEndUtc.getTime() && end.getTime() >= todayUtc.getTime();
+  });
+
+const upcomingWithoutMain = upcomingOrCurrentEvents.filter(
+  (event) => !featuredMainEvent || event.id !== featuredMainEvent.id,
+);
+
+const weeklyFallbackPool = (
+  weeklyEvents.length >= 3 ? weeklyEvents : upcomingWithoutMain
+)
+  .filter((event) => !featuredMainEvent || event.id !== featuredMainEvent.id)
+  .slice(0, 4);
+
+const weeklyHighlights = weeklyFallbackPool.map((event, index) => ({
+    ...event,
+    dateRange: formatDateRange(event.startDate, event.endDate),
+    fallbackImage: heroFallbackImages[(index + 1) % heroFallbackImages.length] ?? baletImage,
+  }));
+
+const featuredEventCard =
+  featuredMainEvent &&
+  {
+    ...featuredMainEvent,
+    dateRange: formatDateRange(featuredMainEvent.startDate, featuredMainEvent.endDate),
+    fallbackImage: heroFallbackImages[0] ?? baletImage,
+  };
 
 const calendarState = JSON.stringify({
   imagePaths: {
@@ -141,7 +259,6 @@ const calendarState = JSON.stringify({
   events: normalizedEvents,
 }).replace(/</g, "\\u003c");
 
-const defaultLocation = "Место уточняется";
 ---
 
 <Layout
@@ -152,60 +269,75 @@ const defaultLocation = "Место уточняется";
 >
   <main
     id="calendar-wrapper"
-    class="bg-base-200 px-4 lg:px-20 py-12"
+    class="relative overflow-hidden bg-base-200 px-4 lg:px-20 py-12"
     x-data={`$lazy('calendar', ${calendarState})`}
     @change-month.window="changeMonth($event.detail)"
     @date-selected.window="selectDate($event.detail.day)"
     @filter-changed.window="setFilter($event.detail.filter)"
   >
-    <div>
-      <div>
+    <div class="max-w-[1500px] mx-auto">
+      <div class="relative">
+        <div class="absolute -top-24 -left-16 w-72 h-72 bg-error/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute top-1/3 -right-12 w-80 h-80 bg-primary/10 blur-3xl pointer-events-none"></div>
         <h1
-          class="text-4xl font-serif uppercase tracking-widest text-black mb-18"
+          class="relative text-4xl lg:text-5xl font-oswald font-semibold uppercase tracking-[0.22em] text-black mb-8 lg:mb-10"
         >
           Календарь
         </h1>
-        <div class="p-6 lg:p-8">
-          {featuredEvents.length > 0 ? (
+        <div class="relative p-4 lg:p-8 bg-white/60 border border-white/70 shadow-[0_20px_60px_rgba(0,0,0,0.08)] backdrop-blur-sm">
+          {featuredEventCard ? (
             <>
+              <h2 class="text-xs lg:text-sm font-inter font-medium uppercase tracking-[0.35em] text-base-content/70 mb-4">
+                СОБЫТИЕ МЕСЯЦА
+              </h2>
               <EventCard
-                tag={featuredEvents[0].tagLabel}
-                date={featuredEvents[0].dateRange}
-                title={featuredEvents[0].title}
-                location={defaultLocation}
-                image={featuredEvents[0].fallbackImage}
-                imageUrl={featuredEvents[0].imageUrl ?? undefined}
-                class="h-[70vh]"
+                tag={featuredEventCard.tagLabel}
+                date={featuredEventCard.dateRange}
+                title={featuredEventCard.title}
+                location={featuredEventCard.address || "Место уточняется"}
+                url={featuredEventCard.url}
+                image={featuredEventCard.fallbackImage}
+                imageUrl={featuredEventCard.imageUrl ?? undefined}
+                class="h-[58vh] lg:h-[70vh]"
               />
-              <div class="flex flex-col lg:flex-row mt-6">
-                {featuredEvents.slice(1).map((event, index) => (
+              <h3 class="text-xs lg:text-sm font-inter font-medium uppercase tracking-[0.35em] text-base-content/70 mt-8 mb-4">
+                ГЛАВНОЕ НА ЭТОЙ НЕДЕЛЕ
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {weeklyHighlights.map((event) => (
                   <EventCard
                     tag={event.tagLabel}
                     date={event.dateRange}
                     title={event.title}
-                    location={defaultLocation}
+                    location={event.address || "Место уточняется"}
+                    url={event.url}
                     image={event.fallbackImage}
                     imageUrl={event.imageUrl ?? undefined}
-                    class={index === 0 ? "mb-6 lg:mb-0 lg:mr-6" : "mb-6 lg:mb-0"}
+                    class="h-[38vh] lg:h-[42vh]"
                     textSize="med"
                   />
                 ))}
               </div>
+              {weeklyHighlights.length === 0 && (
+                <div class="border border-base-300 bg-base-100/90 p-6 text-base-content/70 font-oswald tracking-[0.015em]">
+                  В ближайшие дни новых событий нет. Как только добавим расписание, здесь появятся 3-4 карточки недели.
+                </div>
+              )}
             </>
           ) : (
-            <div class="bg-white rounded-xl shadow-lg p-10 text-center">
-              <p class="text-base-content/70">Скоро здесь появятся события.</p>
+            <div class="bg-white shadow-lg p-10 text-center">
+              <p class="text-base-content/70 font-oswald tracking-[0.015em]">Скоро здесь появятся события.</p>
             </div>
           )}
         </div>
       </div>
 
       <div class="flex flex-col lg:flex-row mt-16">
-        <div class="w-full mb-16 lg:mb-0 lg:mr-16">
-          <h2 class="text-lg font-serif uppercase tracking-widest mb-8">
+        <div class="w-full mb-16 lg:mb-0">
+          <h2 class="text-lg font-oswald font-medium uppercase tracking-[0.25em] mb-8 text-base-content/80">
             Расписание
           </h2>
-          <div class="w-full flex flex-col lg:flex-row gap-6 mb-18">
+          <div class="w-full flex flex-col xl:flex-row gap-6 mb-18">
             <CalendarWidget />
             <FilterButtons />
           </div>

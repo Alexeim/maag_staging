@@ -87,6 +87,40 @@ const {
       </label>
     </div>
 
+    <div class="mt-4 flex items-center gap-3">
+      <input
+        id="main-event-flag"
+        type="checkbox"
+        x-model="eventForm.isMainEvent"
+        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+      />
+      <label for="main-event-flag" class="text-sm font-medium text-base-content cursor-pointer">
+        Отметить как «Событие месяца» в календаре
+      </label>
+    </div>
+
+    <div class="mt-6">
+      <label class="block text-sm font-medium text-base-content mb-2">Формат дат</label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button
+          type="button"
+          class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer"
+          :class="eventForm.dateType === 'single' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+          @click="setDateType('single')"
+        >
+          Одна дата
+        </button>
+        <button
+          type="button"
+          class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer"
+          :class="eventForm.dateType === 'duration' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+          @click="setDateType('duration')"
+        >
+          Диапазон дат
+        </button>
+      </div>
+    </div>
+
     <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div>
         <label class="block text-sm font-medium text-base-content mb-2">Дата начала</label>
@@ -97,7 +131,7 @@ const {
           class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
         />
       </div>
-      <div>
+      <div x-show="eventForm.dateType === 'duration'">
         <label class="block text-sm font-medium text-base-content mb-2">Дата окончания</label>
         <input
           type="date"
@@ -106,6 +140,48 @@ const {
           class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
           placeholder="Оставь пустым, если событие на один день"
         />
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <label class="block text-sm font-medium text-base-content mb-2">Адрес / место</label>
+      <textarea
+        x-model="eventForm.address"
+        rows="3"
+        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        placeholder="Например: Paris, Grand Palais, Avenue Winston Churchill, 75008"
+      ></textarea>
+    </div>
+
+    <div class="mt-6">
+      <label class="block text-sm font-medium text-base-content mb-2">Время события</label>
+      <select
+        x-model="eventForm.timeMode"
+        @change="setTimeMode($event.target.value)"
+        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+      >
+        <option value="none">Не указывать время</option>
+        <option value="start">Только время начала</option>
+        <option value="range">Диапазон времени</option>
+      </select>
+
+      <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4" x-show="eventForm.timeMode !== 'none'">
+        <div>
+          <label class="block text-sm font-medium text-base-content mb-2">Начало</label>
+          <input
+            type="time"
+            x-model="eventForm.startTime"
+            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+          />
+        </div>
+        <div x-show="eventForm.timeMode === 'range'">
+          <label class="block text-sm font-medium text-base-content mb-2">Окончание</label>
+          <input
+            type="time"
+            x-model="eventForm.endTime"
+            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+          />
+        </div>
       </div>
     </div>
 
@@ -139,7 +215,7 @@ const {
             type="text"
             x-model="newTagInput"
             class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-            placeholder="Добавь тег латиницей"
+            placeholder="Добавь тег латиницей, например photo-week"
           />
           <Button variant="outline" size="sm" type="button" @click="addCustomTag()">Добавить тег</Button>
         </div>
@@ -296,6 +372,154 @@ const {
                 </div>
               </template>
 
+              <template x-if="editingBlock.type === 'two-columns'">
+                <div class="space-y-4">
+                  <div class="flex gap-4">
+                    <div
+                      class="w-1/2 space-y-3 p-3 border border-base-300 rounded-lg"
+                    >
+                      <h4 class="text-md font-semibold">Левая колонка</h4>
+                      <label class="block text-sm font-medium"
+                        >Тип контента</label
+                      >
+                      <select
+                        x-model="editingBlock.left.type"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      >
+                        <option value="text">Текст</option>
+                        <option value="image">Изображение</option>
+                      </select>
+
+                      <template x-if="editingBlock.left.type === 'text'">
+                        <div>
+                          <label class="block text-sm font-medium">Текст</label>
+                          <textarea
+                            x-model="editingBlock.left.content"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            rows="5"></textarea>
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.left.type === 'image'">
+                        <div
+                          x-data="{ leftBlockFileName: '' }"
+                          class="space-y-3"
+                        >
+                          <label class="block text-sm font-medium"
+                            >Изображение</label
+                          >
+                          <div class="flex items-center gap-3">
+                            <label
+                              :for="'left-block-image-upload-' + index"
+                              class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                            >
+                              <CloudUpload />
+                              Загрузить файл
+                            </label>
+                            <input
+                              :id="'left-block-image-upload-' + index"
+                              type="file"
+                              class="hidden"
+                              @change="handleImageUpload($event, false, index, 'left'); leftBlockFileName = $event.target.files[0]?.name || ''"
+                              accept="image/png, image/jpeg, image/webp"
+                            />
+                            <span
+                              x-text="leftBlockFileName || (editingBlock.left.content ? 'Изображение загружено' : 'Файл не выбран')"
+                              class="text-sm text-base-content/70"></span>
+                          </div>
+                          <img
+                            x-show="editingBlock.left.content"
+                            :src="editingBlock.left.content"
+                            alt="Предпросмотр левой колонки"
+                            class="rounded-md max-h-48"
+                          />
+                          <label class="block text-sm font-medium mt-2"
+                            >Подпись к изображению</label
+                          >
+                          <input
+                            type="text"
+                            x-model="editingBlock.left.caption"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Введите подпись..."
+                          />
+                        </div>
+                      </template>
+                    </div>
+
+                    <div
+                      class="w-1/2 space-y-3 p-3 border border-base-300 rounded-lg"
+                    >
+                      <h4 class="text-md font-semibold">Правая колонка</h4>
+                      <label class="block text-sm font-medium"
+                        >Тип контента</label
+                      >
+                      <select
+                        x-model="editingBlock.right.type"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      >
+                        <option value="text">Текст</option>
+                        <option value="image">Изображение</option>
+                      </select>
+
+                      <template x-if="editingBlock.right.type === 'text'">
+                        <div>
+                          <label class="block text-sm font-medium">Текст</label>
+                          <textarea
+                            x-model="editingBlock.right.content"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            rows="5"></textarea>
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.right.type === 'image'">
+                        <div
+                          x-data="{ rightBlockFileName: '' }"
+                          class="space-y-3"
+                        >
+                          <label class="block text-sm font-medium"
+                            >Изображение</label
+                          >
+                          <div class="flex items-center gap-3">
+                            <label
+                              :for="'right-block-image-upload-' + index"
+                              class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                            >
+                              <CloudUpload />
+                              Загрузить файл
+                            </label>
+                            <input
+                              :id="'right-block-image-upload-' + index"
+                              type="file"
+                              class="hidden"
+                              @change="handleImageUpload($event, false, index, 'right'); rightBlockFileName = $event.target.files[0]?.name || ''"
+                              accept="image/png, image/jpeg, image/webp"
+                            />
+                            <span
+                              x-text="rightBlockFileName || (editingBlock.right.content ? 'Изображение загружено' : 'Файл не выбран')"
+                              class="text-sm text-base-content/70"></span>
+                          </div>
+                          <img
+                            x-show="editingBlock.right.content"
+                            :src="editingBlock.right.content"
+                            alt="Предпросмотр правой колонки"
+                            class="rounded-md max-h-48"
+                          />
+                          <label class="block text-sm font-medium mt-2"
+                            >Подпись к изображению</label
+                          >
+                          <input
+                            type="text"
+                            x-model="editingBlock.right.caption"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Введите подпись..."
+                          />
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
               <template x-if="editingBlock.type === 'link'">
                 <div class="space-y-4">
                   <div>
@@ -363,6 +587,37 @@ const {
                 </figure>
               </template>
 
+              <div x-show="block.type === 'two-columns'" class="flex flex-col lg:flex-row gap-4 w-full">
+                <div class="w-full lg:w-1/2 flex flex-col items-center">
+                  <img
+                    x-show="block.left?.type === 'image'"
+                    :src="block.left?.content"
+                    :alt="block.left?.caption || 'Левая колонка'"
+                    class="rounded-md max-h-32 object-cover"
+                  />
+                  <p
+                    x-show="block.left?.type === 'text'"
+                    x-text="block.left?.content"
+                    class="text-sm text-base-content/80"
+                  ></p>
+                  <span x-show="block.left?.caption" x-text="block.left?.caption" class="text-xs text-base-content/60 mt-1"></span>
+                </div>
+                <div class="w-full lg:w-1/2 flex flex-col items-center">
+                  <img
+                    x-show="block.right?.type === 'image'"
+                    :src="block.right?.content"
+                    :alt="block.right?.caption || 'Правая колонка'"
+                    class="rounded-md max-h-32 object-cover"
+                  />
+                  <p
+                    x-show="block.right?.type === 'text'"
+                    x-text="block.right?.content"
+                    class="text-sm text-base-content/80"
+                  ></p>
+                  <span x-show="block.right?.caption" x-text="block.right?.caption" class="text-xs text-base-content/60 mt-1"></span>
+                </div>
+              </div>
+
               <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                 <Button variant="outline" size="sm" @click="editBlock(index)">Редактировать</Button>
                 <Button variant="error" size="sm" @click="deleteBlock(index)">Удалить</Button>
@@ -382,6 +637,7 @@ const {
           <button @click="addBlock('h3')" class="btn btn-outline btn-sm justify-start">Подзаголовок H3</button>
           <button @click="addBlock('quote')" class="btn btn-outline btn-sm justify-start">Цитата</button>
           <button @click="addBlock('image')" class="btn btn-outline btn-sm justify-start">Картинка</button>
+          <button @click="addBlock('two-columns')" class="btn btn-outline btn-sm justify-start">Две колонки</button>
           <button
             @click="addBlock('link')"
             class="btn btn-outline btn-sm justify-start"

@@ -1,64 +1,46 @@
 ---
-import { Image } from "astro:assets";
-import mapPinIcon from "../../assets/icons/map-pin.svg";
-import { Calendar } from "@lucide/astro";
-import Button from "../common/Button.astro";
+import { MapPin, CalendarDays, Clock3 } from "@lucide/astro";
 
 interface Props {
   address: string;
   dates: string;
+  time?: string | null;
 }
-const { address, dates } = Astro.props;
+const { address, dates, time = null } = Astro.props;
 ---
 
-<div class="max-w-[826px] mx-auto mt-[100px] space-y-8">
-  <hr class="w-full border-t border-base-300" />
-
-  <div class="space-y-8">
-    <div class="flex flex-col lg:flex-row gap-8 items-start">
-      <div class="flex-1 space-y-8">
-        <div class="space-y-8">
-          <div class="space-y-2">
-            <h3 class="text-base font-semibold text-base-content font-['Inter']">
-              Адрес
-            </h3>
-            <p class="text-lg text-base-content font-serif">{address}</p>
-          </div>
-
-          <Button variant="primary">
-            <Image src={mapPinIcon} alt="Map Pin Icon" class="w-4 h-5" />
-            <span class="text-sm font-['Inter']"
-              >Открыть в Google maps</span
-            >
-          </Button>
-        </div>
-
-        <div class="space-y-8">
-          <div class="space-y-2">
-            <h3 class="text-base font-semibold text-base-content font-['Inter']">
-              Даты
-            </h3>
-            <p class="text-lg text-base-content font-serif">{dates}</p>
-          </div>
-
-          <Button variant="primary">
-            <Calendar class="w-4 h-5" />
-            <span class="text-sm font-['Inter']"
-              >Добавить в календарь</span
-            >
-          </Button>
-        </div>
-      </div>
-
-      <div class="flex-1 w-full">
-        <div
-          class="w-full h-64 bg-base-300 rounded-lg flex items-center justify-center"
-        >
-          <span class="text-neutral-content font-['Inter']"
-            >🌎 Map: Paris, France</span
-          >
-        </div>
+<div class="max-w-[826px] mx-auto mt-[100px]">
+  <div class="border-y border-base-300 bg-white divide-y divide-base-300">
+    <div class="px-5 lg:px-8 py-6 lg:py-7 flex items-start gap-4">
+      <MapPin class="w-5 h-5 text-error mt-0.5 shrink-0" />
+      <div class="space-y-1">
+        <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-error">
+          Адрес
+        </h3>
+        <p class="text-lg text-base-content font-oswald leading-tight">{address}</p>
       </div>
     </div>
-  </div>
+
+    <div class="px-5 lg:px-8 py-6 lg:py-7 flex items-start gap-4">
+      <CalendarDays class="w-5 h-5 text-error mt-0.5 shrink-0" />
+      <div class="space-y-1">
+        <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-error">
+          Даты
+        </h3>
+        <p class="text-lg text-base-content font-oswald leading-tight">{dates}</p>
+      </div>
+    </div>
+
+    {time && (
+      <div class="px-5 lg:px-8 py-6 lg:py-7 flex items-start gap-4">
+        <Clock3 class="w-5 h-5 text-error mt-0.5 shrink-0" />
+        <div class="space-y-1">
+          <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-error">
+            Время
+          </h3>
+          <p class="text-lg text-base-content font-oswald leading-tight">{time}</p>
+        </div>
+      </div>
+    )}
+    </div>
 </div>

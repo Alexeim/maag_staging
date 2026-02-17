@@ -14,6 +14,11 @@ type IncomingEvent = {
   title: string;
   startDate: string;
   endDate?: string | null;
+  dateType?: "single" | "duration";
+  address?: string;
+  timeMode?: "none" | "start" | "range";
+  startTime?: string | null;
+  endTime?: string | null;
   category?: string;
   categoryLabel?: string;
   tagLabel?: string;
@@ -93,6 +98,23 @@ const ensureString = (value: unknown, fallback: string): string => {
   return fallback;
 };
 
+const formatTimeLabel = (incoming: IncomingEvent): string => {
+  const mode =
+    incoming?.timeMode === "start" || incoming?.timeMode === "range"
+      ? incoming.timeMode
+      : "none";
+  const start = ensureString(incoming?.startTime, "");
+  const end = ensureString(incoming?.endTime, "");
+
+  if (mode === "start" && start) {
+    return `Начало в ${start}`;
+  }
+  if (mode === "range" && start && end) {
+    return `${start} – ${end}`;
+  }
+  return "Время уточняется";
+};
+
 const createEventNormalizer =
   (imagePaths: ImagePaths) =>
   (incoming: IncomingEvent): NormalizedEvent | null => {
@@ -126,8 +148,8 @@ const createEventNormalizer =
       tag: tagLabel,
       image: fallbackImage,
       description,
-      location: "Место уточняется",
-      time: "Время уточняется",
+      location: ensureString(incoming?.address, "Место уточняется"),
+      time: formatTimeLabel(incoming),
       startDate,
       endDate,
       dateRangeLabel: formatRangeLabel(startDate, endDate),
@@ -141,6 +163,16 @@ const isDateWithinRange = (date: Date, event: NormalizedEvent) => {
   }
   const time = date.getTime();
   return time >= event.startDate.getTime() && time <= event.endDate.getTime();
+};
+
+const isBoundaryDate = (date: Date, event: NormalizedEvent) => {
+  const time = date.getTime();
+  return time === event.startDate.getTime() || time === event.endDate.getTime();
+};
+
+const isOngoingDate = (date: Date, event: NormalizedEvent) => {
+  const time = date.getTime();
+  return time > event.startDate.getTime() && time < event.endDate.getTime();
 };
 
 export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[] } = {}) => ({
@@ -169,12 +201,18 @@ export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[
       .filter((event): event is NormalizedEvent => Boolean(event))
       .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
 
-    if (this.events.length > 0) {
-      const firstEventDate = new Date(this.events[0].startDate);
-      this.selectedDate = resetToUtcMidnight(firstEventDate);
-    } else {
-      const today = resetToUtcMidnight(new Date());
+    const today = resetToUtcMidnight(new Date());
+    const ongoingToday = this.events.some((event) => isDateWithinRange(today, event));
+    const nearestUpcoming = this.events.find(
+      (event) =>
+        event.startDate.getTime() >= today.getTime() ||
+        event.endDate.getTime() >= today.getTime(),
+    );
+
+    if (ongoingToday || !nearestUpcoming) {
       this.selectedDate = today;
+    } else {
+      this.selectedDate = resetToUtcMidnight(new Date(nearestUpcoming.startDate));
     }
 
     this.year = this.selectedDate.getUTCFullYear();
@@ -213,8 +251,12 @@ export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[
         ? eventsForDate
         : eventsForDate.filter((event) => event.tag === this.activeFilter);
 
-    this.filteredEvents = filtered;
-    this.smallEvents = filtered.slice(1, 5);
+    this.filteredEvents = filtered.filter((event) =>
+      isBoundaryDate(this.selectedDate as Date, event),
+    );
+    this.smallEvents = filtered
+      .filter((event) => isOngoingDate(this.selectedDate as Date, event))
+      .slice(0, 4);
   },
 
   changeMonth(direction: number) {
@@ -236,7 +278,7 @@ export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[
 
   hasEvent(day: number) {
     const date = new Date(Date.UTC(this.year, this.month, day));
-    return this.events.some((event) => isDateWithinRange(date, event));
+    return this.events.some((event) => isBoundaryDate(date, event));
   },
 
   setFilter(filter: string) {

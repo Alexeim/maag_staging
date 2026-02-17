@@ -120,6 +120,9 @@ const decoratedEvents = events.map((event) => {
               <th scope="col" class="px-6 py-3 hidden md:table-cell">
                 Landing
               </th>
+              <th scope="col" class="px-6 py-3 hidden md:table-cell">
+                Main
+              </th>
               <th scope="col" class="px-6 py-3">
                 <span class="sr-only">Действия</span>
               </th>
@@ -157,6 +160,13 @@ const decoratedEvents = events.map((event) => {
                   </td>
                   <td class="px-6 py-4 hidden md:table-cell">
                     {eventItem.isOnLanding ? (
+                      <span class="badge badge-success badge-sm">on</span>
+                    ) : (
+                      <span class="badge badge-ghost badge-sm text-base-content/60">off</span>
+                    )}
+                  </td>
+                  <td class="px-6 py-4 hidden md:table-cell">
+                    {eventItem.isMainEvent ? (
                       <span class="badge badge-success badge-sm">on</span>
                     ) : (
                       <span class="badge badge-ghost badge-sm text-base-content/60">off</span>

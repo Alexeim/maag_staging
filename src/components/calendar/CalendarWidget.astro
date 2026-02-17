@@ -2,14 +2,14 @@
 // This component is now controlled by Alpine.js from the parent page
 ---
 
-<div class="bg-white p-8 w-full max-w-md">
+<div class="bg-white/90 border border-base-300 p-6 lg:p-8 w-full max-w-md shadow-[0_18px_40px_rgba(0,0,0,0.08)]">
   <div x-show="isLazyLoading" class="text-center">Загрузка...</div>
 
   <div x-show="!isLazyLoading">
     <div class="flex justify-between items-center mb-5">
       <button
         @click="$dispatch('change-month', -1)"
-        class="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center cursor-pointer"
+        class="w-9 h-9 border border-base-300 rounded-none flex items-center justify-center cursor-pointer transition-colors hover:bg-base-200"
       >
         <svg
           width="8"
@@ -26,13 +26,13 @@
         >
       </button>
       <h3
-        class="font-semibold text-2xl text-base-content capitalize font-oswald"
+        class="font-semibold text-2xl text-base-content capitalize font-inter tracking-[0.04em]"
         x-text="`${monthName} ${year}`"
       >
       </h3>
       <button
         @click="$dispatch('change-month', 1)"
-        class="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center cursor-pointer"
+        class="w-9 h-9 border border-base-300 rounded-none flex items-center justify-center cursor-pointer transition-colors hover:bg-base-200"
       >
         <svg
           width="8"
@@ -49,7 +49,7 @@
         >
       </button>
     </div>
-    <div class="grid grid-cols-7 text-center text-neutral my-4 font-oswald">
+    <div class="grid grid-cols-7 text-center text-neutral my-4 font-inter text-sm tracking-[0.08em] uppercase">
       <div>Пн</div>
       <div>Вт</div>
       <div>Ср</div>
@@ -70,11 +70,11 @@
               'bg-error text-error-content': isSameDay(selectedDate, new Date(Date.UTC(year, month, day))),
               'hover:bg-gray-200': !isSameDay(selectedDate, new Date(Date.UTC(year, month, day)))
             }"
-            class="w-12 h-12 flex items-center justify-center mx-auto rounded-full transition-colors cursor-pointer"
+            class="w-11 h-11 flex items-center justify-center mx-auto transition-colors cursor-pointer font-inter font-medium tracking-[0.02em]"
             x-text="day"></button>
           <div
             x-show="hasEvent(day)"
-            class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-error rounded-full"
+            class="absolute bottom-[3px] left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-error rounded-full"
           >
           </div>
         </div>

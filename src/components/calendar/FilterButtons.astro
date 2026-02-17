@@ -2,14 +2,14 @@
 // This component is now controlled by Alpine.js from the parent page
 ---
 
-<div class="bg-white p-4 flex flex-col gap-4 font-oswald">
+<div class="bg-white/90 border border-base-300 p-5 lg:p-6 flex flex-col gap-4 shadow-[0_18px_40px_rgba(0,0,0,0.08)] w-full">
   <div x-show="isLazyLoading" class="text-center">...</div>
 
   <div x-show="!isLazyLoading">
     <button
       @click="$dispatch('filter-changed', { filter: 'все' })"
       :class="{'btn-base-300': activeFilter === 'все', 'bg-gray-100': activeFilter !== 'все'}"
-      class="btn btn-sm rounded-full flex items-center gap-2 mb-4 w-36 cursor-pointer px-2 py-1"
+      class="btn btn-sm rounded-none flex items-center gap-2 mb-2 w-fit cursor-pointer px-3 py-1.5 tracking-[0.03em] font-medium font-inter"
     >
       <svg
         width="10"
@@ -22,14 +22,15 @@
           stroke="currentColor"
           stroke-linecap="round"></path></svg
       >
-      <span x-text="`${events.length} событий`"></span>
+      <span x-text="`${events.length} событий`" class="font-inter"></span>
     </button>
-    <div class="flex flex-row flex-wrap gap-4">
+    <p class="text-xs uppercase tracking-[0.2em] text-base-content/60 font-inter">Фильтры по теме</p>
+    <div class="flex flex-row flex-wrap gap-2">
       <template x-for="filter in filters">
         <button
           @click="$dispatch('filter-changed', { filter })"
           :class="{'btn-base-300': activeFilter === filter, 'bg-gray-100': activeFilter !== filter}"
-          class="btn btn-sm rounded-full capitalize px-2 py-1 cursor-pointer"
+          class="btn btn-sm rounded-none capitalize px-3 py-1.5 cursor-pointer tracking-[0.03em] font-medium font-inter"
           x-text="filter"
         >
         </button>
