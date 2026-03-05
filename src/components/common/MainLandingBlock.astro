@@ -225,14 +225,36 @@ try {
                       {newsItem.title}
                     </h3>
                   </a>
-                  <p class="mt-2 text-base-content/55 font-inter uppercase tracking-wide">
-                    <span class="text-xs">
+                  <div class="mt-2 flex flex-col gap-0.5 font-inter uppercase tracking-wide">
+                    <span class="text-[10px] text-base-content/55">
                       {formatArticleDate(newsItem?.createdAt)}
                     </span>
-                    <span class="text-[10px] font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {getPrimaryTag(newsItem) || "Новости"}
-                    </span>
-                  </p>
+                    {(() => {
+                      const rawTags = Array.isArray(newsItem?.tags)
+                        ? newsItem.tags
+                        : typeof newsItem?.tags === "string"
+                          ? [newsItem.tags]
+                          : [];
+                      const firstTag = rawTags.find(
+                        (t: string) => typeof t === "string" && t.trim().length > 0,
+                      )?.trim();
+                      const category = getCategoryLabel(newsItem?.category);
+                      const labels = [firstTag !== category ? category : null, firstTag].filter(Boolean);
+                      return (
+                        <div class="flex flex-row flex-nowrap items-center gap-1">
+                          {labels.length > 0
+                            ? labels.map((label, i) => (
+                                <>
+                                  {i > 0 && <span class="text-[9px] text-base-content/40">·</span>}
+                                  <span class="text-[9px] font-medium tracking-[0.25em] text-accent font-['Inter'] whitespace-nowrap">{label}</span>
+                                </>
+                              ))
+                            : <span class="text-[9px] font-medium tracking-[0.25em] text-accent font-['Inter']">Новости</span>
+                          }
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             </div>

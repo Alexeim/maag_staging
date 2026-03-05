@@ -352,6 +352,39 @@ export default function interviewCreatorLogic(initialState = {}) {
       );
     },
 
+    // Uploads a slide image for a flipper block being edited
+    handleFlipperSlideUpload(event, slideIndex: number) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.uploading = true;
+      this.uploadProgress = 0;
+
+      const storageRef = ref(storage, `interviews/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          this.uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          window.Alpine.store("ui").showToast(`Проблема загрузки картинки: ${error.message}`, "error");
+          this.uploading = false;
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            if (this.editingBlock?.slides?.[slideIndex] !== undefined) {
+              this.editingBlock.slides[slideIndex].imageUrl = downloadURL;
+            }
+            this.uploading = false;
+            window.Alpine.store("ui").showToast("Картинка успешно загружена!");
+          });
+        },
+      );
+    },
+
     openBlockSelector() {
       this.showBlockOptions = true;
     },
@@ -384,6 +417,11 @@ export default function interviewCreatorLogic(initialState = {}) {
             linkedContentType: "article", // Default to article
             linkedContentId: "",
             linkedContentTitle: "",
+          };
+          break;
+        case "flipper":
+          newBlockData = {
+            slides: [{ imageUrl: "", caption: "" }],
           };
           break;
         default:

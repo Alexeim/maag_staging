@@ -622,6 +622,39 @@ export default function articleCreatorLogic(initialState = {}) {
       );
     },
 
+    // Uploads a slide image for a flipper block being edited
+    handleFlipperSlideUpload(event, slideIndex: number) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.uploading = true;
+      this.uploadProgress = 0;
+
+      const storageRef = ref(storage, `articles/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          this.uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          window.Alpine.store("ui").showToast(`Проблема загрузки картинки: ${error.message}`, "error");
+          this.uploading = false;
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            if (this.editingBlock?.slides?.[slideIndex] !== undefined) {
+              this.editingBlock.slides[slideIndex].imageUrl = downloadURL;
+            }
+            this.uploading = false;
+            window.Alpine.store("ui").showToast("Картинка успешно загружена!");
+          });
+        },
+      );
+    },
+
     // --- REFACTORED: Block management methods ---
 
     // Opens the menu to select a new block type
@@ -658,7 +691,11 @@ export default function articleCreatorLogic(initialState = {}) {
             linkedContentTitle: "",
           };
           break;
-        // Add other cases here
+        case "flipper":
+          newBlockData = {
+            slides: [{ imageUrl: "", caption: "" }],
+          };
+          break;
         default:
           break;
       }

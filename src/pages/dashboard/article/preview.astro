@@ -116,6 +116,57 @@ import articleData from "@/content/articlePage/RU/Article.json";
                         </div>
                     </div>
                 </div>
+
+                <template x-if="block.type === 'flipper'">
+                  <div x-data="{ current: 0 }" class="w-full my-8">
+                    <div class="relative overflow-hidden rounded-lg">
+                      <div
+                        class="flex transition-transform duration-500 ease-in-out"
+                        :style="`transform: translateX(-${current * 100}%)`"
+                      >
+                        <template x-for="(slide, si) in block.slides" :key="si">
+                          <figure class="min-w-full flex flex-col items-center">
+                            <img
+                              :src="slide.imageUrl"
+                              :alt="slide.caption || 'Слайд'"
+                              class="w-full object-cover max-h-[600px]"
+                            />
+                            <figcaption
+                              x-show="slide.caption"
+                              x-text="slide.caption"
+                              class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2 px-4"
+                            ></figcaption>
+                          </figure>
+                        </template>
+                      </div>
+                      <button
+                        type="button"
+                        x-show="block.slides?.length > 1"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-10 h-10 flex items-center justify-center transition cursor-pointer"
+                        @click="current = (current - 1 + block.slides.length) % block.slides.length"
+                        aria-label="Предыдущий слайд"
+                      >‹</button>
+                      <button
+                        type="button"
+                        x-show="block.slides?.length > 1"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-10 h-10 flex items-center justify-center transition cursor-pointer"
+                        @click="current = (current + 1) % block.slides.length"
+                        aria-label="Следующий слайд"
+                      >›</button>
+                    </div>
+                    <div x-show="block.slides?.length > 1" class="flex justify-center gap-2 mt-4">
+                      <template x-for="(slide, si) in block.slides" :key="'dot-' + si">
+                        <button
+                          type="button"
+                          class="w-2 h-2 rounded-full transition cursor-pointer"
+                          :class="current === si ? 'bg-base-content' : 'bg-base-content/30'"
+                          @click="current = si"
+                          :aria-label="'Слайд ' + (si + 1)"
+                        ></button>
+                      </template>
+                    </div>
+                  </div>
+                </template>
               </div>
             </template>
           </div>

@@ -23,10 +23,21 @@ interface TwoColumnBlock extends Block {
   right: ColumnData;
 }
 
+interface FlipperSlide {
+  imageUrl: string;
+  caption?: string;
+}
+
+interface FlipperBlock extends Block {
+  type: "flipper";
+  slides: FlipperSlide[];
+}
+
 interface RenderableBlock {
-  type: "prose-group" | "two-columns";
+  type: "prose-group" | "two-columns" | "flipper";
   content?: Block[]; // for prose-group
   block?: TwoColumnBlock; // for two-columns
+  flipper?: FlipperBlock; // for flipper
 }
 
 interface Props {
@@ -50,6 +61,18 @@ for (const block of contentBlocks) {
     renderableGroups.push({
       type: "two-columns",
       block: block as TwoColumnBlock,
+    });
+  } else if (block.type === "flipper") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "flipper",
+      flipper: block as FlipperBlock,
     });
   } else {
     currentProseGroup.push(block);
@@ -194,6 +217,72 @@ if (currentProseGroup.length > 0) {
                 )}
               </div>
             </div>
+          </div>
+        );
+      } else if (group.type === "flipper" && group.flipper) {
+        const { slides } = group.flipper;
+        if (!slides || slides.length === 0) return null;
+        return (
+          <div
+            class="w-full lg:max-w-[900px] my-12 px-4"
+            x-data={`{ current: 0, total: ${slides.length}, captions: ${JSON.stringify(slides.map((s) => s.caption || ""))} }`}
+          >
+            <div class="relative overflow-hidden h-[600px] bg-white">
+              <div
+                class="flex h-full transition-transform duration-500 ease-in-out"
+                :style="`transform: translateX(-${current * 100}%)`"
+              >
+                {slides.map((slide) => (
+                  <div class="min-w-full h-full flex items-center justify-center bg-white">
+                    <img
+                      src={slide.imageUrl}
+                      alt={slide.caption || "Слайд"}
+                      class="h-full w-auto"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {slides.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-10 h-10 flex items-center justify-center transition cursor-pointer"
+                    @click="current = (current - 1 + total) % total"
+                    aria-label="Предыдущий слайд"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-10 h-10 flex items-center justify-center transition cursor-pointer"
+                    @click="current = (current + 1) % total"
+                    aria-label="Следующий слайд"
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+            </div>
+
+            <p
+              x-show="captions[current]"
+              x-text="captions[current]"
+              class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2 px-4 min-h-[1rem]"
+            ></p>
+            {slides.length > 1 && (
+              <div class="flex justify-center gap-2 mt-4">
+                {slides.map((_, i) => (
+                  <button
+                    type="button"
+                    class="w-2 h-2 rounded-full transition cursor-pointer"
+                    :class={`current === ${i} ? 'bg-base-content' : 'bg-base-content/30'`}
+                    @click={`current = ${i}`}
+                    aria-label={`Слайд ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         );
       }
