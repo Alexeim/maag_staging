@@ -1,5 +1,6 @@
 ---
 import Layout from "../Layouts/Layout.astro";
+import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import picture1 from "../assets/images/culture.jpg";
 import { articlesApi, interviewsApi, flippersApi } from "@/lib/api/api";
 
@@ -132,8 +133,10 @@ const getTransitionName = (item: any) => {
 
 let primaryCultureArticle: any = null;
 let secondaryCultureArticle: any = null;
+let tertiaryCultureArticle: any = null;
 let cultureFeed: any[] = [];
 let hotContentItems: any[] = [];
+let featuredInterview: any = null;
 
 try {
   const [articles, interviews, flippers] = await Promise.all([
@@ -177,17 +180,30 @@ try {
       href: toContentHref(article),
     }));
 
+  // Top 3 slots: articles and flippers only, no interviews
+  const topItems = cultureItems.filter(
+    (item) => item.contentType !== "interview",
+  );
+
   primaryCultureArticle =
-    cultureItems.find((item) => isMainInCategoryItem(item)) ??
-    cultureItems[0] ??
+    topItems.find((item) => isMainInCategoryItem(item)) ??
+    topItems[0] ??
     null;
 
-  const cultureWithoutPrimary = cultureItems.filter((item) =>
+  const topWithoutPrimary = topItems.filter((item) =>
     primaryCultureArticle ? item.id !== primaryCultureArticle.id : true,
   );
 
-  secondaryCultureArticle = cultureWithoutPrimary[0] ?? null;
-  cultureFeed = cultureWithoutPrimary.slice(1);
+  secondaryCultureArticle = topWithoutPrimary[0] ?? null;
+  tertiaryCultureArticle = topWithoutPrimary[1] ?? null;
+
+  // Feed: everything in culture minus the top 3 (interviews included here)
+  const topIds = new Set(
+    [primaryCultureArticle?.id, secondaryCultureArticle?.id, tertiaryCultureArticle?.id].filter(Boolean),
+  );
+  cultureFeed = cultureItems.filter((item) => !topIds.has(item.id));
+
+  featuredInterview = interviews[0] ?? null;
 
   hotContentItems = sortedContent
     .filter((article) => isHotContent(article))
@@ -199,6 +215,22 @@ try {
 } catch (error) {
   console.error("Failed to fetch culture page articles:", error);
 }
+
+const extractInterviewQuote = (interview: any): string | null => {
+  if (!interview) return null;
+  if (interview.mainQuote) return interview.mainQuote;
+  if (!Array.isArray(interview.content)) return interview.lead ?? null;
+  const quoteBlock = interview.content.find(
+    (b: any) => b.type === "quote" && b.text,
+  );
+  if (quoteBlock) return quoteBlock.text;
+  const qaBlock = interview.content.find(
+    (b: any) => b.type === "qa" && b.answer,
+  );
+  return qaBlock?.answer ?? interview.lead ?? null;
+};
+
+const interviewQuote = extractInterviewQuote(featuredInterview);
 ---
 
 <Layout
@@ -216,9 +248,61 @@ try {
       </div>
 
       <section
-        class="mt-8 lg:mt-10 grid grid-cols-1 lg:grid-cols-[0.9fr_1.55fr_1fr] gap-6 lg:gap-7"
+        class="mt-8 lg:mt-10 grid grid-cols-1 lg:grid-cols-[1fr_1fr_0.6fr] lg:grid-rows-[auto_auto] gap-6 lg:gap-7"
       >
-        <aside class="lg:pr-4 lg:border-r lg:border-base-content/15">
+        {/* Primary article — spans 2 cols, row 1 */}
+        <div class="lg:col-span-2 lg:row-start-1">
+          {
+            primaryCultureArticle ? (
+              <article class="bg-white overflow-hidden">
+                <a
+                  href={primaryCultureArticle.href}
+                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
+                >
+                  <img
+                    src={primaryCultureArticle.imageUrl || picture1.src}
+                    alt={primaryCultureArticle.title}
+                    class="w-full h-[280px] lg:h-[460px] object-cover object-center"
+                    loading="lazy"
+                    transition:name={getTransitionName(primaryCultureArticle)}
+                  />
+                </a>
+                <div class="p-4 lg:p-5">
+                  <a href={primaryCultureArticle.href} class="block">
+                    <h2 class="text-3xl lg:text-[44px] leading-[1.02] font-oswald font-thin hover:underline">
+                      {primaryCultureArticle.title}
+                    </h2>
+                  </a>
+                  {primaryCultureArticle.lead && (
+                    <p class="mt-3 text-base leading-relaxed text-base-content/80 font-oswald font-thin tracking-wide">
+                      {truncateText(primaryCultureArticle.lead, 200)}
+                    </p>
+                  )}
+                  <div class="mt-4 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                    {getPrimaryTag(primaryCultureArticle) && (
+                      <>
+                        <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
+                          {getPrimaryTag(primaryCultureArticle)}
+                        </span>
+                        <span class="text-base-content/45">·</span>
+                      </>
+                    )}
+                    <span>{formatDate(primaryCultureArticle.createdAt)}</span>
+                  </div>
+                </div>
+              </article>
+            ) : (
+              <article class="bg-white p-6">
+                <p class="text-base-content/70 font-oswald font-thin tracking-wide">
+                  Пока нет материалов категории «Культура».
+                </p>
+              </article>
+            )
+          }
+        </div>
+
+        {/* Sidebar — col 3, spans both rows */}
+        <aside class="lg:col-start-3 lg:row-start-1 lg:row-span-2 lg:pl-4 lg:border-l lg:border-base-content/15">
           <h2
             class="text-xs uppercase tracking-[0.35em] text-error font-inter mb-4"
           >
@@ -229,19 +313,14 @@ try {
             hotContentItems.length > 0 ? (
               <div class="flex gap-4 overflow-x-auto pb-3 -mx-1 px-1 lg:block lg:overflow-visible lg:pb-0 lg:mx-0 lg:px-0 lg:divide-y lg:divide-base-content/15 lg:border-y lg:border-base-content/20">
                 {hotContentItems.map((item) => (
-                  <article class="min-w-[270px] max-w-[270px] flex-shrink-0 border border-base-content/20 p-3 grid grid-cols-[minmax(0,1fr)_72px] gap-3 items-start lg:min-w-0 lg:max-w-none lg:border-0 lg:p-0 lg:py-4 lg:grid-cols-[minmax(0,1fr)_84px]">
+                  <article class="min-w-[270px] max-w-[270px] flex-shrink-0 border border-base-content/20 p-3 grid grid-cols-[minmax(0,1fr)_72px] gap-3 items-start lg:min-w-0 lg:max-w-none lg:border-0 lg:p-0 lg:py-4 lg:grid-cols-[minmax(0,1fr)_72px]">
                     <div>
                       <a href={item.href} class="block">
-                        <h4 class="text-2xl lg:text-[34px] leading-[1.06] font-oswald font-thin hover:underline">
+                        <h4 class="text-base lg:text-lg leading-[1.2] font-oswald font-thin hover:underline">
                           {item.title}
                         </h4>
                       </a>
-                      {item.lead && (
-                        <p class="mt-2 text-sm leading-relaxed text-base-content/75 font-oswald font-thin tracking-wide">
-                          {truncateText(item.lead, 95)}
-                        </p>
-                      )}
-                      <div class="mt-3 flex items-center gap-2 text-[11px] font-inter uppercase tracking-[0.18em] text-base-content/50">
+                      <div class="mt-2 flex items-center gap-2 text-[11px] font-inter uppercase tracking-[0.18em] text-base-content/50">
                         {getPrimaryTag(item) && (
                           <>
                             <span class="text-[10px] font-medium uppercase tracking-[0.22em] text-error">
@@ -260,7 +339,7 @@ try {
                       <img
                         src={item.imageUrl || picture1.src}
                         alt={item.title}
-                        class="w-[72px] h-[72px] lg:w-[84px] lg:h-[84px] object-cover object-center"
+                        class="w-[72px] h-[72px] object-cover object-center"
                         loading="lazy"
                         transition:name={getTransitionName(item)}
                       />
@@ -270,64 +349,17 @@ try {
               </div>
             ) : (
               <p class="text-sm text-base-content/70 font-oswald font-thin tracking-wide">
-                Пока нет материалов в блоке hot content.
+                Пока нет материалов в блоке «Самое читаемое».
               </p>
             )
           }
         </aside>
 
-        <div class="lg:pr-4 lg:border-r lg:border-base-content/15">
-          {
-            primaryCultureArticle ? (
-              <article>
-                <a
-                  href={primaryCultureArticle.href}
-                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
-                >
-                  <img
-                    src={primaryCultureArticle.imageUrl || picture1.src}
-                    alt={primaryCultureArticle.title}
-                    class="w-full h-[320px] lg:h-[560px] object-cover object-center"
-                    loading="lazy"
-                    transition:name={getTransitionName(primaryCultureArticle)}
-                  />
-                </a>
-                <a href={primaryCultureArticle.href} class="block mt-5">
-                  <h2 class="text-3xl lg:text-[52px] leading-[1.02] font-oswald font-thin hover:underline">
-                    {primaryCultureArticle.title}
-                  </h2>
-                </a>
-                {primaryCultureArticle.lead && (
-                  <p class="mt-3 text-lg leading-relaxed text-base-content/80 font-oswald font-thin tracking-wide">
-                    {truncateText(primaryCultureArticle.lead, 220)}
-                  </p>
-                )}
-                <div class="mt-4 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                  {getPrimaryTag(primaryCultureArticle) && (
-                    <>
-                      <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
-                        {getPrimaryTag(primaryCultureArticle)}
-                      </span>
-                      <span class="text-base-content/45">·</span>
-                    </>
-                  )}
-                  <span>{formatDate(primaryCultureArticle.createdAt)}</span>
-                </div>
-              </article>
-            ) : (
-              <article class="border border-base-content/15 p-6">
-                <p class="text-base-content/70 font-oswald font-thin tracking-wide">
-                  Пока нет материалов категории «Культура».
-                </p>
-              </article>
-            )
-          }
-        </div>
-
-        <div class="lg:pr-4 lg:border-r lg:border-base-content/15">
+        {/* Secondary article — col 1, row 2 */}
+        <div class="lg:col-start-1 lg:row-start-2">
           {
             secondaryCultureArticle ? (
-              <article>
+              <article class="bg-white overflow-hidden">
                 <a
                   href={secondaryCultureArticle.href}
                   class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
@@ -335,72 +367,113 @@ try {
                   <img
                     src={secondaryCultureArticle.imageUrl || picture1.src}
                     alt={secondaryCultureArticle.title}
-                    class="w-full h-[320px] lg:h-[420px] object-cover object-center"
+                    class="w-full h-[200px] lg:h-[220px] object-cover object-center"
                     loading="lazy"
                     transition:name={getTransitionName(secondaryCultureArticle)}
                   />
                 </a>
-                <a href={secondaryCultureArticle.href} class="block mt-5">
-                  <h3 class="text-3xl lg:text-[46px] leading-[1.05] font-oswald font-thin hover:underline">
-                    {secondaryCultureArticle.title}
-                  </h3>
-                </a>
-                {secondaryCultureArticle.lead && (
-                  <p class="mt-3 text-lg leading-relaxed text-base-content/80 font-oswald font-thin tracking-wide">
-                    {truncateText(secondaryCultureArticle.lead, 180)}
-                  </p>
-                )}
-                <div class="mt-4 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                  {getPrimaryTag(secondaryCultureArticle) && (
-                    <>
-                      <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
-                        {getPrimaryTag(secondaryCultureArticle)}
-                      </span>
-                      <span class="text-base-content/45">·</span>
-                    </>
-                  )}
-                  <span>{formatDate(secondaryCultureArticle.createdAt)}</span>
+                <div class="p-3 lg:p-4">
+                  <a href={secondaryCultureArticle.href} class="block">
+                    <h3 class="text-xl lg:text-[26px] leading-[1.05] font-oswald font-thin hover:underline">
+                      {secondaryCultureArticle.title}
+                    </h3>
+                  </a>
+                  <div class="mt-2 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                    {getPrimaryTag(secondaryCultureArticle) && (
+                      <>
+                        <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
+                          {getPrimaryTag(secondaryCultureArticle)}
+                        </span>
+                        <span class="text-base-content/45">·</span>
+                      </>
+                    )}
+                    <span>{formatDate(secondaryCultureArticle.createdAt)}</span>
+                  </div>
                 </div>
               </article>
-            ) : (
-              <article class="border border-base-content/15 p-6">
-                <p class="text-base-content/70 font-oswald font-thin tracking-wide">
-                  Добавьте еще один материал в культуру для второго блока.
-                </p>
+            ) : null
+          }
+        </div>
+
+        {/* Tertiary article — col 2, row 2 */}
+        <div class="lg:col-start-2 lg:row-start-2">
+          {
+            tertiaryCultureArticle ? (
+              <article class="bg-white overflow-hidden">
+                <a
+                  href={tertiaryCultureArticle.href}
+                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
+                >
+                  <img
+                    src={tertiaryCultureArticle.imageUrl || picture1.src}
+                    alt={tertiaryCultureArticle.title}
+                    class="w-full h-[200px] lg:h-[220px] object-cover object-center"
+                    loading="lazy"
+                    transition:name={getTransitionName(tertiaryCultureArticle)}
+                  />
+                </a>
+                <div class="p-3 lg:p-4">
+                  <a href={tertiaryCultureArticle.href} class="block">
+                    <h3 class="text-xl lg:text-[26px] leading-[1.05] font-oswald font-thin hover:underline">
+                      {tertiaryCultureArticle.title}
+                    </h3>
+                  </a>
+                  <div class="mt-2 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                    {getPrimaryTag(tertiaryCultureArticle) && (
+                      <>
+                        <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
+                          {getPrimaryTag(tertiaryCultureArticle)}
+                        </span>
+                        <span class="text-base-content/45">·</span>
+                      </>
+                    )}
+                    <span>{formatDate(tertiaryCultureArticle.createdAt)}</span>
+                  </div>
+                </div>
               </article>
-            )
+            ) : null
           }
         </div>
       </section>
 
+      {
+        featuredInterview && interviewQuote && (
+          <div class="mt-10 lg:mt-12 border-t border-base-content/25">
+            <LatestInterview
+              tag="Интервью"
+              interviewee={featuredInterview.interviewee ?? featuredInterview.title}
+              quote={interviewQuote}
+              imageUrl={featuredInterview.imageUrl || picture1.src}
+              href={`/interviews/${featuredInterview.id}`}
+              transitionName={`main-article-image-${featuredInterview.id}`}
+            />
+          </div>
+        )
+      }
+
       <section class="mt-10 lg:mt-14 border-t border-base-content/25 pt-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-10">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-8">
           {
             cultureFeed.map((item) => (
-              <article class="border-b border-base-content/15 pb-6">
+              <article class="border-b border-base-content/15 pb-5">
                 <a
                   href={item.href}
-                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
+                  class={`block overflow-hidden transition-opacity duration-200 hover:opacity-90${item.contentType === "interview" ? " aspect-square rounded-full" : ""}`}
                 >
                   <img
                     src={item.imageUrl || picture1.src}
                     alt={item.title}
-                    class="w-full h-[220px] lg:h-[250px] object-cover object-center"
+                    class={`object-cover object-center${item.contentType === "interview" ? " w-full h-full rounded-full" : " w-full h-[160px] lg:h-[180px]"}`}
                     loading="lazy"
                     transition:name={getTransitionName(item)}
                   />
                 </a>
-                <a href={item.href} class="block mt-4">
-                  <h3 class="text-3xl lg:text-[40px] leading-[1.04] font-oswald font-thin hover:underline">
+                <a href={item.href} class="block mt-3">
+                  <h3 class="text-xl lg:text-2xl leading-[1.1] font-oswald font-thin hover:underline">
                     {item.title}
                   </h3>
                 </a>
-                {item.lead && (
-                  <p class="mt-3 text-base leading-relaxed text-base-content/75 font-oswald font-thin tracking-wide">
-                    {truncateText(item.lead, 190)}
-                  </p>
-                )}
-                <div class="mt-4 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.2em] text-base-content/55">
+                <div class="mt-2 flex items-center gap-2 text-[11px] font-inter uppercase tracking-[0.2em] text-base-content/55">
                   {getPrimaryTag(item) && (
                     <>
                       <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
