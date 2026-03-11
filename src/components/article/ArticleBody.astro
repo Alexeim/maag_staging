@@ -1,11 +1,16 @@
 ---
 import QuoteIcon from "../../assets/icons/quote.svg";
+import ArticleVideo from "./ArticleVideo.astro";
 
 interface Block {
   type: string;
   text?: string;
   url?: string;
   caption?: string;
+  question?: string;
+  answer?: string;
+  sourceType?: string;
+  provider?: string;
   linkedContentType?: "article" | "event" | "interview" | "flipper";
   linkedContentId?: string;
   linkedContentTitle?: string;
@@ -34,10 +39,11 @@ interface FlipperBlock extends Block {
 }
 
 interface RenderableBlock {
-  type: "prose-group" | "two-columns" | "flipper";
+  type: "prose-group" | "two-columns" | "flipper" | "video";
   content?: Block[]; // for prose-group
   block?: TwoColumnBlock; // for two-columns
   flipper?: FlipperBlock; // for flipper
+  video?: Block;
 }
 
 interface Props {
@@ -73,6 +79,18 @@ for (const block of contentBlocks) {
     renderableGroups.push({
       type: "flipper",
       flipper: block as FlipperBlock,
+    });
+  } else if (block.type === "video") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "video",
+      video: block,
     });
   } else {
     currentProseGroup.push(block);
@@ -164,11 +182,32 @@ if (currentProseGroup.length > 0) {
                       </p>
                     );
                   }
+                  case "qa":
+                    return (
+                      <div class="space-y-4">
+                        {block.question && (
+                          <p class="text-xl font-oswald tracking-wide font-semibold italic">
+                            {block.question}
+                          </p>
+                        )}
+                        {block.answer && (
+                          <p class="text-lg font-oswald text-justify font-thin tracking-wide">
+                            {block.answer}
+                          </p>
+                        )}
+                      </div>
+                    );
                   default:
                     return null;
                 }
               })}
             </article>
+          </div>
+        );
+      } else if (group.type === "video" && group.video) {
+        return (
+          <div class="w-full lg:max-w-[900px] my-12 px-4">
+            <ArticleVideo block={group.video} />
           </div>
         );
       } else if (group.type === "two-columns" && group.block) {

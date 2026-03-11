@@ -92,6 +92,35 @@ import articleData from "@/content/articlePage/RU/Article.json";
                   </figure>
                 </template>
 
+                <template x-if="block.type === 'video'">
+                  <figure class="space-y-2">
+                    <video
+                      x-show="block.sourceType === 'upload' && block.url"
+                      :src="block.url"
+                      controls
+                      playsinline
+                      class="rounded-md w-full max-h-[620px] bg-black"
+                    ></video>
+                    <div
+                      x-show="block.sourceType === 'embed' && getVideoEmbedUrl(block.url)"
+                      class="w-full aspect-video rounded-md overflow-hidden bg-black"
+                    >
+                      <iframe
+                        :src="getVideoEmbedUrl(block.url)"
+                        class="w-full h-full border-0"
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                      ></iframe>
+                    </div>
+                    <figcaption
+                      x-show="block.caption"
+                      class="text-center text-sm text-base-content/60 mt-2"
+                      x-text="block.caption"
+                    ></figcaption>
+                  </figure>
+                </template>
+
                 <div x-show="block.type === 'two-columns'" x-cloak class="w-full lg:max-w-[900px] my-12 px-4">
                     <div class="flex flex-col lg:flex-row gap-8 items-center">
                         <div class="w-full lg:w-1/2 flex justify-center">

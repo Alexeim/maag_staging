@@ -5,6 +5,11 @@ import {
   flippersApi,
   authorsApi,
 } from "@/lib/api/api";
+import {
+  detectVideoProvider,
+  getVideoEmbedUrl as resolveVideoEmbedUrl,
+  normalizeVideoBlock,
+} from "@/lib/utils/video";
 import { app } from "../../lib/firebase/client";
 import {
   getStorage,
@@ -70,8 +75,10 @@ export default function interviewCreatorLogic(initialState = {}) {
     }
     const copy = JSON.parse(JSON.stringify(data));
     const blocks = Array.isArray(copy.content) ? copy.content : [];
-    copy.contentBlocks = blocks;
-    copy.content = blocks;
+    copy.contentBlocks = blocks.map((block: any) =>
+      block?.type === "video" ? normalizeVideoBlock(block) : block,
+    );
+    copy.content = copy.contentBlocks;
     copy.tags = normalizeTags(copy.tags);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.lead = copy.lead ?? "";
@@ -120,6 +127,40 @@ export default function interviewCreatorLogic(initialState = {}) {
 
     isTagSelected(value: string) {
       return this.interview.tags.includes(value);
+    },
+    getVideoProvider(url: string, sourceType = "embed") {
+      return detectVideoProvider(url, sourceType);
+    },
+    getVideoEmbedUrl(url: string) {
+      return resolveVideoEmbedUrl(url);
+    },
+    validateVideoBlock(block, showToast = true) {
+      if (!block || block.type !== "video") {
+        return true;
+      }
+      const normalized = normalizeVideoBlock(block);
+      if (!normalized.url) {
+        if (showToast) {
+          window.Alpine?.store("ui")?.showToast?.(
+            "Для видео-блока добавь файл или ссылку.",
+            "error",
+          );
+        }
+        return false;
+      }
+      if (
+        normalized.sourceType === "embed" &&
+        !resolveVideoEmbedUrl(normalized.url)
+      ) {
+        if (showToast) {
+          window.Alpine?.store("ui")?.showToast?.(
+            "Поддерживаются только ссылки YouTube и Vimeo.",
+            "error",
+          );
+        }
+        return false;
+      }
+      return true;
     },
     toggleTag(value: string) {
       const idx = this.interview.tags.indexOf(value);
@@ -276,7 +317,9 @@ export default function interviewCreatorLogic(initialState = {}) {
       }
       this.interview.tags = this.interview.tags ?? [];
       this.interview.contentBlocks = Array.isArray(this.interview.contentBlocks)
-        ? this.interview.contentBlocks
+        ? this.interview.contentBlocks.map((block: any) =>
+            block?.type === "video" ? normalizeVideoBlock(block) : block,
+          )
         : [];
       this.selectedAuthorId =
         typeof this.interview.authorId === "string"
@@ -352,6 +395,41 @@ export default function interviewCreatorLogic(initialState = {}) {
       );
     },
 
+    handleVideoUpload(event, blockIndex = null) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.uploading = true;
+      this.uploadProgress = 0;
+
+      const storageRef = ref(storage, `interviews/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          this.uploading = true;
+          this.uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          window.Alpine.store("ui").showToast(`Проблема загрузки видео: ${error.message}`, "error");
+          this.uploading = false;
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            if (blockIndex !== null && this.editingBlock?.type === "video") {
+              this.editingBlock.sourceType = "upload";
+              this.editingBlock.url = downloadURL;
+              this.editingBlock.provider = "upload";
+            }
+            this.uploading = false;
+            window.Alpine.store("ui").showToast("Видео успешно загружено!");
+          });
+        },
+      );
+    },
+
     // Uploads a slide image for a flipper block being edited
     handleFlipperSlideUpload(event, slideIndex: number) {
       const file = event.target.files[0];
@@ -402,6 +480,14 @@ export default function interviewCreatorLogic(initialState = {}) {
         case "image":
           newBlockData = { url: "", caption: "" };
           break;
+        case "video":
+          newBlockData = {
+            sourceType: "embed",
+            url: "",
+            caption: "",
+            provider: "unknown",
+          };
+          break;
         case "two-columns":
           newBlockData = {
             left: { type: "text", content: "", caption: "" },
@@ -437,10 +523,19 @@ export default function interviewCreatorLogic(initialState = {}) {
     editBlock(index) {
       this.editingIndex = index;
       this.editingBlock = JSON.parse(JSON.stringify(this.interview.contentBlocks[index]));
+      if (this.editingBlock?.type === "video") {
+        this.editingBlock = normalizeVideoBlock(this.editingBlock);
+      }
     },
 
     updateBlock() {
       if (this.editingIndex !== null) {
+        if (this.editingBlock?.type === "video") {
+          this.editingBlock = normalizeVideoBlock(this.editingBlock);
+          if (!this.validateVideoBlock(this.editingBlock)) {
+            return;
+          }
+        }
         this.interview.contentBlocks[this.editingIndex] = this.editingBlock;
         this.cancelEdit();
       }
@@ -465,6 +560,16 @@ export default function interviewCreatorLogic(initialState = {}) {
 
     async saveInterview() {
       this.interview.tags = normalizeTags(this.interview.tags);
+      this.interview.contentBlocks = this.interview.contentBlocks.map((block: any) =>
+        block?.type === "video" ? normalizeVideoBlock(block) : block,
+      );
+
+      const hasInvalidVideoBlock = this.interview.contentBlocks.some(
+        (block: any) => !this.validateVideoBlock(block),
+      );
+      if (hasInvalidVideoBlock) {
+        return;
+      }
 
       if (!this.interview.title) {
         window.Alpine.store("ui").showToast("Добавь заголовок.", "error");

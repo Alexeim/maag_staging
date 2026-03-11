@@ -1,6 +1,11 @@
 import { articlesApi, eventsApi, interviewsApi, flippersApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
+  detectVideoProvider,
+  getVideoEmbedUrl as resolveVideoEmbedUrl,
+  normalizeVideoBlock,
+} from "@/lib/utils/video";
+import {
   getStorage,
   ref,
   uploadBytesResumable,
@@ -114,6 +119,20 @@ export default function articleCreatorLogic(initialState = {}) {
     return normalized;
   };
 
+  const normalizeContentBlocks = (blocks?: unknown) => {
+    if (!Array.isArray(blocks)) {
+      return [];
+    }
+    return blocks.map((block) => {
+      if (!block || typeof block !== "object") {
+        return block;
+      }
+      return (block as { type?: string }).type === "video"
+        ? normalizeVideoBlock(block as any)
+        : block;
+    });
+  };
+
   const normalizeLoadedArticle = (data: any) => {
     if (!data || typeof data !== "object") {
       return null;
@@ -132,8 +151,8 @@ export default function articleCreatorLogic(initialState = {}) {
       : Array.isArray(copy.contentBlocks)
         ? copy.contentBlocks
         : [];
-    copy.contentBlocks = blocks;
-    copy.content = blocks;
+    copy.contentBlocks = normalizeContentBlocks(blocks);
+    copy.content = copy.contentBlocks;
     copy.tags = normalizeTags(copy.tags, copy.category);
     copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
     copy.tips = normalizeTips(copy.tips);
@@ -239,6 +258,46 @@ export default function articleCreatorLogic(initialState = {}) {
         return "Category";
       }
       return this.categoryLabels[value] || value;
+    },
+    normalizeContentBlocks(blocks) {
+      return normalizeContentBlocks(blocks);
+    },
+    getVideoProvider(url: string, sourceType = "embed") {
+      return detectVideoProvider(url, sourceType);
+    },
+    getVideoEmbedUrl(url: string) {
+      return resolveVideoEmbedUrl(url);
+    },
+    normalizeEditableVideoBlock(block) {
+      return normalizeVideoBlock(block);
+    },
+    validateVideoBlock(block, showToast = true) {
+      if (!block || block.type !== "video") {
+        return true;
+      }
+      const normalized = normalizeVideoBlock(block);
+      if (!normalized.url) {
+        if (showToast) {
+          window.Alpine?.store("ui")?.showToast?.(
+            "Для видео-блока добавь файл или ссылку.",
+            "error",
+          );
+        }
+        return false;
+      }
+      if (
+        normalized.sourceType === "embed" &&
+        !resolveVideoEmbedUrl(normalized.url)
+      ) {
+        if (showToast) {
+          window.Alpine?.store("ui")?.showToast?.(
+            "Поддерживаются только ссылки YouTube и Vimeo.",
+            "error",
+          );
+        }
+        return false;
+      }
+      return true;
     },
     getAvailableTags() {
       if (!this.article?.category) {
@@ -542,7 +601,7 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.isOnLanding = Boolean(this.article.isOnLanding);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
-        ? this.article.contentBlocks
+        ? normalizeContentBlocks(this.article.contentBlocks)
         : [];
       this.selectedAuthorId =
         typeof this.article.authorId === "string" ? this.article.authorId : "";
@@ -622,6 +681,49 @@ export default function articleCreatorLogic(initialState = {}) {
       );
     },
 
+    handleVideoUpload(event, blockIndex = null) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.uploading = true;
+      this.uploadProgress = 0;
+
+      const storageRef = ref(storage, `articles/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          this.uploading = true;
+          this.uploadProgress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          window.Alpine.store("ui").showToast(
+            `Проблема загрузки видео: ${error.message}`,
+            "error",
+          );
+          this.uploading = false;
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            if (
+              blockIndex !== null &&
+              this.editingBlock &&
+              this.editingBlock.type === "video"
+            ) {
+              this.editingBlock.sourceType = "upload";
+              this.editingBlock.url = downloadURL;
+              this.editingBlock.provider = "upload";
+            }
+            this.uploading = false;
+            window.Alpine.store("ui").showToast("Видео успешно загружено!");
+          });
+        },
+      );
+    },
+
     // Uploads a slide image for a flipper block being edited
     handleFlipperSlideUpload(event, slideIndex: number) {
       const file = event.target.files[0];
@@ -677,6 +779,14 @@ export default function articleCreatorLogic(initialState = {}) {
         case "image":
           newBlockData = { url: "", caption: "" };
           break;
+        case "video":
+          newBlockData = {
+            sourceType: "embed",
+            url: "",
+            caption: "",
+            provider: "unknown",
+          };
+          break;
         case "two-columns":
           newBlockData = {
             left: { type: "text", content: "", caption: "" },
@@ -715,12 +825,20 @@ export default function articleCreatorLogic(initialState = {}) {
       this.editingBlock = JSON.parse(
         JSON.stringify(this.article.contentBlocks[index]),
       );
+      if (this.editingBlock?.type === "video") {
+        this.editingBlock = normalizeVideoBlock(this.editingBlock);
+      }
     },
 
     // Saves the changes to the block
     updateBlock() {
       if (this.editingIndex !== null) {
-        // You might want to add validation here
+        if (this.editingBlock?.type === "video") {
+          this.editingBlock = normalizeVideoBlock(this.editingBlock);
+          if (!this.validateVideoBlock(this.editingBlock)) {
+            return;
+          }
+        }
         this.article.contentBlocks[this.editingIndex] = this.editingBlock;
         this.cancelEdit();
       }
@@ -777,9 +895,19 @@ export default function articleCreatorLogic(initialState = {}) {
         isHotContentFlag && normalizedCategory === "hotContent"
           ? ""
           : normalizedCategory;
+      this.article.contentBlocks = normalizeContentBlocks(
+        this.article.contentBlocks,
+      );
       this.article.tags = normalizeTags(this.article.tags, this.article.category);
       this.article.techTags = normalizeTechTags(this.article.techTags);
       this.article.tips = normalizeTips(this.article.tips);
+
+      const hasInvalidVideoBlock = this.article.contentBlocks.some(
+        (block) => !this.validateVideoBlock(block),
+      );
+      if (hasInvalidVideoBlock) {
+        return;
+      }
 
       if (!this.article.category && !this.article.isHotContent) {
         window.Alpine.store("ui").showToast(

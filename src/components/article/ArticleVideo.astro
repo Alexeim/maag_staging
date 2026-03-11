@@ -1,0 +1,57 @@
+---
+import {
+  getVideoEmbedUrl,
+  normalizeVideoBlock,
+  type VideoBlockData,
+} from "@/lib/utils/video";
+
+interface Props {
+  block: VideoBlockData;
+}
+
+const { block } = Astro.props as Props;
+const normalizedBlock = normalizeVideoBlock(block);
+const embedUrl =
+  normalizedBlock.sourceType === "embed"
+    ? getVideoEmbedUrl(normalizedBlock.url)
+    : null;
+---
+
+<figure class="not-prose flex flex-col items-center">
+  <div class="w-full max-w-[826px] bg-base-200 overflow-hidden">
+    {
+      normalizedBlock.sourceType === "upload" && normalizedBlock.url ? (
+        <video
+          src={normalizedBlock.url}
+          controls
+          playsinline
+          preload="metadata"
+          class="article-image w-full"
+        />
+      ) : embedUrl ? (
+        <div class="w-full aspect-video max-h-[620px]">
+          <iframe
+            src={embedUrl}
+            title={normalizedBlock.caption || "Embedded video"}
+            class="w-full h-full border-0"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          ></iframe>
+        </div>
+      ) : (
+        <div class="w-full min-h-[220px] flex items-center justify-center text-sm text-base-content/60 px-6 text-center">
+          Видео недоступно или ссылка не поддерживается.
+        </div>
+      )
+    }
+  </div>
+  {
+    normalizedBlock.caption && (
+      <figcaption class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2">
+        {normalizedBlock.caption}
+      </figcaption>
+    )
+  }
+</figure>

@@ -358,6 +358,7 @@ const interviewQuote = latestInterview?.mainQuote
                     title={item.title}
                     category={getCategoryLabel(item.category)}
                     date={formatArticleDate(item.createdAt)}
+                    lead={truncateText(item.lead, 120) || undefined}
                     transitionName={getTransitionName(item)}
                     imageUrl={item.imageUrl}
                     href={item.href}
@@ -411,6 +412,11 @@ const interviewQuote = latestInterview?.mainQuote
                   title={article.title}
                   category={getCategoryLabel(article.category)}
                   date={formatArticleDate(article.createdAt)}
+                  lead={
+                    article.isNews
+                      ? undefined
+                      : truncateText(article.lead, 90) || undefined
+                  }
                   transitionName={getTransitionName({
                     id: article.id,
                     href: `/${article.isNews ? "news" : "article"}/${article.id}`,
@@ -532,6 +538,7 @@ const interviewQuote = latestInterview?.mainQuote
                       title={item.title}
                       category={getCategoryLabel(item.category)}
                       date={formatArticleDate(item.createdAt)}
+                      lead={truncateText(item.lead, 120) || undefined}
                       transitionName={getTransitionName(item)}
                       imageUrl={item.imageUrl}
                       href={item.href}

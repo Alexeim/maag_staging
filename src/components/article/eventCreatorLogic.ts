@@ -1,5 +1,6 @@
 import { eventsApi } from "@/lib/api/api";
 import articleCreatorLogic from "@/components/article/creatorLogic";
+import { normalizeVideoBlock } from "@/lib/utils/video";
 
 type EventCategory = "exhibition" | "concert" | "performance";
 type EventDateType = "single" | "duration";
@@ -100,8 +101,10 @@ export default function eventCreatorLogic(initialState = {}) {
       : Array.isArray(copy.content)
         ? copy.content
         : [];
-    copy.contentBlocks = contentBlocks;
-    copy.content = contentBlocks;
+    copy.contentBlocks = contentBlocks.map((block: any) =>
+      block?.type === "video" ? normalizeVideoBlock(block) : block,
+    );
+    copy.content = copy.contentBlocks;
     copy.tags = Array.isArray(copy.tags) ? copy.tags : [];
     copy.techTags = Array.isArray(copy.techTags) ? copy.techTags : [];
     copy.title = typeof copy.title === "string" ? copy.title : "";

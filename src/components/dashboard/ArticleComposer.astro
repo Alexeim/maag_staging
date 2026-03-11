@@ -494,6 +494,110 @@ const {
                 </div>
               </template>
 
+              <template x-if="editingBlock.type === 'video'">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-2">Источник видео</label>
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        class="px-3 py-2 border text-sm cursor-pointer"
+                        :class="editingBlock.sourceType === 'upload' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+                        @click="editingBlock.sourceType = 'upload'; editingBlock.provider = 'upload'"
+                      >
+                        Загрузить файл
+                      </button>
+                      <button
+                        type="button"
+                        class="px-3 py-2 border text-sm cursor-pointer"
+                        :class="editingBlock.sourceType === 'embed' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+                        @click="editingBlock.sourceType = 'embed'; editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
+                      >
+                        YouTube / Vimeo
+                      </button>
+                    </div>
+                  </div>
+
+                  <div x-show="editingBlock.sourceType === 'upload'" x-data="{ videoFileName: '' }" class="space-y-3">
+                    <label class="block text-sm font-medium">Видео файл</label>
+                    <div class="flex items-center gap-3">
+                      <label
+                        :for="'block-video-upload-' + index"
+                        class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                      >
+                        <CloudUpload />
+                        Загрузить видео
+                      </label>
+                      <input
+                        :id="'block-video-upload-' + index"
+                        type="file"
+                        class="hidden"
+                        @change="handleVideoUpload($event, index); videoFileName = $event.target.files[0]?.name || ''"
+                        accept="video/mp4,video/webm,video/quicktime"
+                      />
+                      <span
+                        x-text="videoFileName || (editingBlock.url ? 'Видео загружено' : 'Файл не выбран')"
+                        class="text-sm text-base-content/70"
+                      ></span>
+                    </div>
+                    <div x-show="uploading && editingIndex === index">
+                      <p>
+                        Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span>
+                      </p>
+                      <div class="w-full bg-base-200 rounded-full h-2">
+                        <div
+                          class="bg-primary h-2 rounded-full"
+                          :style="{ width: uploadProgress + '%' }"
+                        ></div>
+                      </div>
+                    </div>
+                    <video
+                      x-show="editingBlock.url && !uploading"
+                      :src="editingBlock.url"
+                      controls
+                      playsinline
+                      class="rounded-md max-h-48 w-full bg-black"
+                    ></video>
+                  </div>
+
+                  <div x-show="editingBlock.sourceType === 'embed'" class="space-y-3">
+                    <label class="block text-sm font-medium">Ссылка на видео</label>
+                    <input
+                      type="url"
+                      x-model="editingBlock.url"
+                      @input="editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="https://www.youtube.com/watch?v=... или https://vimeo.com/..."
+                    />
+                    <p class="text-xs text-base-content/60">
+                      Поддерживаются только YouTube и Vimeo.
+                    </p>
+                    <div
+                      x-show="getVideoEmbedUrl(editingBlock.url)"
+                      class="w-full aspect-video rounded-md overflow-hidden bg-black"
+                    >
+                      <iframe
+                        :src="getVideoEmbedUrl(editingBlock.url)"
+                        class="w-full h-full border-0"
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                      ></iframe>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium mt-2">Подпись к видео</label>
+                    <input
+                      type="text"
+                      x-model="editingBlock.caption"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="Введите подпись..."
+                    />
+                  </div>
+                </div>
+              </template>
+
               <template x-if="editingBlock.type === 'two-columns'">
                 <div class="space-y-4">
                   <div class="flex gap-4">
@@ -765,6 +869,38 @@ const {
                 </figure>
               </template>
 
+              <template x-if="block.type === 'video'">
+                <figure class="space-y-2">
+                  <video
+                    x-show="block.sourceType === 'upload' && block.url"
+                    :src="block.url"
+                    controls
+                    playsinline
+                    class="rounded-md w-full max-h-64 bg-black"
+                  ></video>
+                  <div
+                    x-show="block.sourceType === 'embed' && getVideoEmbedUrl(block.url)"
+                    class="w-full aspect-video rounded-md overflow-hidden bg-black"
+                  >
+                    <iframe
+                      :src="getVideoEmbedUrl(block.url)"
+                      class="w-full h-full border-0"
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowfullscreen
+                    ></iframe>
+                  </div>
+                  <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">
+                    <span x-text="block.sourceType === 'upload' ? 'Загруженное видео' : 'Видео по ссылке'"></span>
+                  </p>
+                  <figcaption
+                    x-show="block.caption"
+                    class="text-center text-sm text-base-content/60 mt-2"
+                    x-text="block.caption"
+                  ></figcaption>
+                </figure>
+              </template>
+
               <div x-show="block.type === 'two-columns'" class="flex flex-col lg:flex-row gap-4 w-full">
                 <div class="w-full lg:w-1/2 flex flex-col items-center">
                   <img
@@ -871,6 +1007,11 @@ const {
             @click="addBlock('link')"
             class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
             >Блок-ссылка</button
+          >
+          <button
+            @click="addBlock('video')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Видео</button
           >
           <button
             @click="addBlock('flipper')"
