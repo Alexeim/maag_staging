@@ -32,14 +32,58 @@ const normalizeCategory = (value?: string | null): EventCategory | "" => {
   return "";
 };
 
-const normalizeDate = (value?: string | Date | null): string => {
+const toDate = (value: unknown): Date | null => {
   if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const parsed = new Date(trimmed);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  if (typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  if (typeof value === "object") {
+    const maybeSeconds =
+      (value as { seconds?: number; _seconds?: number }).seconds ??
+      (value as { seconds?: number; _seconds?: number })._seconds;
+
+    if (typeof maybeSeconds === "number") {
+      const parsed = new Date(maybeSeconds * 1000);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    if (typeof (value as { toDate?: () => Date }).toDate === "function") {
+      const parsed = (value as { toDate: () => Date }).toDate();
+      return parsed instanceof Date && !Number.isNaN(parsed.getTime()) ? parsed : null;
+    }
+  }
+
+  return null;
+};
+
+const normalizeDate = (value?: unknown): string => {
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
+    return value.trim();
+  }
+
+  const date = toDate(value);
+  if (!date) {
     return "";
   }
-  const date = typeof value === "string" || value instanceof Date ? new Date(value) : null;
-  if (!date || Number.isNaN(date.getTime())) {
-    return "";
-  }
+
   return date.toISOString().split("T")[0];
 };
 
