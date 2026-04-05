@@ -1,6 +1,8 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
 import ArticleHeader from "../../components/article/ArticleHeader.astro";
+import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
+import ArticleDate from "../../components/article/ArticleDate.astro";
 import ArticleImage from "../../components/article/ArticleImage.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
@@ -108,6 +110,10 @@ const displayEvent = {
   title: eventData?.title || "Событие",
   lead: eventData?.lead || "",
   category: eventData?.category ? CATEGORY_LABELS[eventData.category] || eventData.category : "Событие",
+  authorName: eventData?.author
+    ? `${eventData.author.firstName} ${eventData.author.lastName}`
+    : "MAAG",
+  authorAvatar: eventData?.author?.avatar,
   imageUrl: eventData?.imageUrl,
   imageCaption: eventData?.imageCaption || "",
   imageAlt: eventData?.mainImage?.alt || "Изображение события",
@@ -139,6 +145,14 @@ const displayEvent = {
                 title={displayEvent.title}
                 lead={displayEvent.lead}
               />
+              <div class="flex flex-row items-center justify-start gap-4">
+                <ArticleAuthor
+                  name={displayEvent.authorName}
+                  avatarUrl={displayEvent.authorAvatar}
+                />
+                <div>·</div>
+                <ArticleDate createdAt={eventData.createdAt} />
+              </div>
               <div class="flex flex-wrap gap-2">
                 {allTags.map((tag) => (
                   <span class="px-3 py-1 rounded-full bg-base-300 text-sm">{tag}</span>

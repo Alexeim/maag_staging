@@ -9,6 +9,7 @@ export interface Flipper {
   category?: string;
   tags?: string[];
   techTags?: string[];
+  isHotContent?: boolean;
   carouselContent: { imageUrl: string; caption: string }[];
   createdAt: Date;
   updatedAt?: Date;
@@ -23,7 +24,15 @@ const flippersCollection = db.collection('flippers');
  */
 export const createFlipper = async (req: Request, res: Response) => {
   try {
-    const { title, authorId, category, tags = [], techTags = [], carouselContent = [] } = req.body;
+    const {
+      title,
+      authorId,
+      category,
+      tags = [],
+      techTags = [],
+      isHotContent = false,
+      carouselContent = [],
+    } = req.body;
 
     if (!title || !authorId) {
       return res.status(400).json({ message: 'Заголовок и ID автора обязательны' });
@@ -38,13 +47,17 @@ export const createFlipper = async (req: Request, res: Response) => {
     const normalizedTechTags = Array.isArray(techTags)
       ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
+    const legacyHotContent =
+      typeof category === 'string' && category.trim() === 'hotContent';
+    const persistedCategory = legacyHotContent ? '' : category;
 
     const newFlipper: Omit<Flipper, 'id'> = {
       title,
       authorId,
-      category,
+      category: persistedCategory,
       tags: normalizedTags,
       techTags: normalizedTechTags,
+      isHotContent: Boolean(isHotContent) || legacyHotContent,
       carouselContent,
       createdAt: new Date(),
     };
@@ -126,7 +139,15 @@ export const getFlipperById = async (req: Request, res: Response) => {
 export const updateFlipper = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, authorId, category, tags = [], techTags = [], carouselContent = [] } = req.body;
+    const {
+      title,
+      authorId,
+      category,
+      tags = [],
+      techTags = [],
+      isHotContent = false,
+      carouselContent = [],
+    } = req.body;
 
     if (!title || !authorId) {
       return res.status(400).json({ message: 'Заголовок и ID автора обязательны' });
@@ -141,13 +162,17 @@ export const updateFlipper = async (req: Request, res: Response) => {
     const normalizedTechTags = Array.isArray(techTags)
       ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
+    const legacyHotContent =
+      typeof category === 'string' && category.trim() === 'hotContent';
+    const persistedCategory = legacyHotContent ? '' : category;
 
     const updatedFlipper = {
       title,
       authorId,
-      category,
+      category: persistedCategory,
       tags: normalizedTags,
       techTags: normalizedTechTags,
+      isHotContent: Boolean(isHotContent) || legacyHotContent,
       carouselContent,
       updatedAt: new Date(),
     };

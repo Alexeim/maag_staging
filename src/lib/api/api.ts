@@ -162,6 +162,7 @@ export interface EventResponse extends EventPayload {
   id: string;
   createdAt: string | Date;
   updatedAt?: string | Date;
+  author?: unknown;
 }
 
 export interface UserProfilePayload {
@@ -196,6 +197,7 @@ export interface FlipperPayload {
   category?: string;
   tags?: string[];
   techTags?: string[];
+  isHotContent?: boolean;
   carouselContent: { imageUrl: string; caption: string }[];
 }
 

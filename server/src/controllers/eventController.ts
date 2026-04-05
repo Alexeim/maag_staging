@@ -238,7 +238,21 @@ export const getEventById = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    res.status(200).json({ id: eventDoc.id, ...eventDoc.data() });
+    const eventData = eventDoc.data() as EventItem;
+
+    let authorData = null;
+    if (eventData.authorId) {
+      const authorDoc = await db.collection('authors').doc(eventData.authorId).get();
+      if (authorDoc.exists) {
+        authorData = authorDoc.data();
+      }
+    }
+
+    res.status(200).json({
+      id: eventDoc.id,
+      ...eventData,
+      author: authorData,
+    });
   } catch (error) {
     console.error('Error getting event by id:', error);
     res.status(500).json({ message: 'Server error while getting event' });

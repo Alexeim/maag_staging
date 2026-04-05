@@ -4,6 +4,7 @@ import {
   articlesApi,
   interviewsApi,
   flippersApi,
+  type InterviewResponse,
   type FlipperPayload,
 } from "@/lib/api/api";
 
@@ -42,6 +43,10 @@ const CULTURE_CATEGORY_KEY = "culture";
 const CULTURE_CATEGORY_LABEL = CATEGORY_LABELS[CULTURE_CATEGORY_KEY];
 const PARIS_CATEGORY_KEY = "paris";
 const HOT_CONTENT_CATEGORY_KEY = "hotContent";
+const LANDING_HOT_CONTENT_CATEGORY_KEYS = new Set([
+  CULTURE_CATEGORY_KEY,
+  PARIS_CATEGORY_KEY,
+]);
 
 const normalizeCategory = (value?: string) => {
   if (!value) return null;
@@ -60,6 +65,9 @@ const getCategoryLabel = (value?: string) => {
 };
 
 const getPrimaryTag = (item: any) => {
+  if (item?.type === "interview" || item?.contentType === "interview") {
+    return CATEGORY_LABELS.interview;
+  }
   if (item?.isNews) return "Новости";
   const rawTags = Array.isArray(item?.tags)
     ? item.tags
@@ -77,6 +85,10 @@ const isHotContent = (item: any) =>
   Boolean(item?.isHotContent) ||
   normalizeCategory(item?.category) === HOT_CONTENT_CATEGORY_KEY;
 
+const isLandingHotContentItem = (item: any) =>
+  isHotContent(item) &&
+  LANDING_HOT_CONTENT_CATEGORY_KEYS.has(normalizeCategory(item?.category) || "");
+
 const isMainInCategoryItem = (item: any) =>
   item?.isMainInCategory === true ||
   item?.isMainInCategory === "true" ||
@@ -85,7 +97,7 @@ const isMainInCategoryItem = (item: any) =>
 
 let cultureItems: any[] = [];
 let parisItems: any[] = [];
-let hotContentArticles: any[] = [];
+let hotContentItems: any[] = [];
 let latestInterview: any = null;
 
 const getDate = (timestamp: any): Date => {
@@ -139,16 +151,26 @@ const getTransitionName = (item: any) => {
   return undefined;
 };
 
+const toContentHref = (item: any) => {
+  if (item?.type === "interview" || item?.contentType === "interview") {
+    return `/interviews/${item.id}`;
+  }
+  if (item?.type === "flipper" || item?.contentType === "flipper") {
+    return `/flippers/${item.id}`;
+  }
+  return `/${item?.isNews ? "news" : "article"}/${item.id}`;
+};
+
 try {
   const [articles, flippers, interviews] = await Promise.all([
     articlesApi.list(),
     flippersApi.list() as Promise<FlipperResponse[]>,
-    interviewsApi.list(),
+    interviewsApi.list() as Promise<InterviewResponse[]>,
   ]);
 
   console.log(`--- STEP 1: RAW DATA ---`);
   console.log(
-    `Loaded ${articles.length} articles, ${flippers.length} flippers.`,
+    `Loaded ${articles.length} articles, ${flippers.length} flippers, ${interviews.length} interviews.`,
   );
 
   const allItems = [
@@ -188,7 +210,28 @@ try {
   console.log(`Items in cultureItems after filtering: ${cultureItems.length}`);
   console.log(`Items in parisItems after filtering: ${parisItems.length}`);
 
-  hotContentArticles = articles.filter(isHotContent).slice(0, 6);
+  hotContentItems = [
+    ...articles.map((article) => ({
+      ...article,
+      type: "article",
+      href: toContentHref(article),
+    })),
+    ...interviews.map((interview) => ({
+      ...interview,
+      type: "interview",
+      category: CULTURE_CATEGORY_KEY,
+      href: toContentHref({ ...interview, type: "interview" }),
+    })),
+    ...flippers.map((flipper) => ({
+      ...flipper,
+      type: "flipper",
+      href: toContentHref({ ...flipper, type: "flipper" }),
+      imageUrl: flipper.carouselContent?.[0]?.imageUrl,
+    })),
+  ]
+    .sort((a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime())
+    .filter((item) => isLandingHotContentItem(item))
+    .slice(0, 6);
   latestInterview = interviews[0] ?? null;
 } catch (error) {
   console.error("Failed to fetch data for LandingBody:", error);
@@ -405,24 +448,24 @@ const interviewQuote = latestInterview?.mainQuote
           class="flex gap-6 overflow-x-auto lg:flex-col items-center lg:gap-6 lg:overflow-visible pb-2"
         >
           {
-            hotContentArticles.length > 0 ? (
-              hotContentArticles.map((article) => (
+            hotContentItems.length > 0 ? (
+              hotContentItems.map((item) => (
                 <NetlenkaCard
-                  key={article.id}
-                  title={article.title}
-                  category={getCategoryLabel(article.category)}
-                  date={formatArticleDate(article.createdAt)}
+                  key={item.id}
+                  title={item.title}
+                  category={getPrimaryTag(item)}
+                  date={formatArticleDate(item.createdAt)}
                   lead={
-                    article.isNews
+                    item.isNews || item.type === "flipper"
                       ? undefined
-                      : truncateText(article.lead, 90) || undefined
+                      : truncateText(
+                          item.type === "interview" ? item.mainQuote || item.lead : item.lead,
+                          90,
+                        ) || undefined
                   }
-                  transitionName={getTransitionName({
-                    id: article.id,
-                    href: `/${article.isNews ? "news" : "article"}/${article.id}`,
-                  })}
-                  imageUrl={article.imageUrl}
-                  href={`/${article.isNews ? "news" : "article"}/${article.id}`}
+                  transitionName={getTransitionName(item)}
+                  imageUrl={item.imageUrl}
+                  href={item.href}
                 />
               ))
             ) : (

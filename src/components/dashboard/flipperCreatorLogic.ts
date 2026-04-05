@@ -72,10 +72,30 @@ export default function flipperCreatorLogic(initialState = {}) {
     return normalized;
   };
 
+  const normalizeLoadedFlipper = (data: any) => {
+    if (!data || typeof data !== "object") {
+      return null;
+    }
+    const copy = JSON.parse(JSON.stringify(data));
+    const normalizedCategory =
+      typeof copy.category === "string" ? copy.category.trim() : "";
+    const isHotContentLegacy =
+      Boolean(copy.isHotContent) || normalizedCategory === "hotContent";
+    copy.category =
+      isHotContentLegacy && normalizedCategory === "hotContent"
+        ? ""
+        : normalizedCategory;
+    copy.isHotContent = isHotContentLegacy;
+    copy.tags = normalizeTags(copy.tags, copy.category);
+    copy.techTags = normalizeTechTags(copy.techTags);
+    return copy;
+  };
+
   return {
     flipper: {
       title: "",
       category: "",
+      isHotContent: false,
       tags: [],
       techTags: [],
       carouselContent: [{ imageUrl: "", caption: "" }],
@@ -97,9 +117,7 @@ export default function flipperCreatorLogic(initialState = {}) {
 
     init() {
       if (initialFlipper) {
-        const flipperCopy = JSON.parse(JSON.stringify(initialFlipper));
-        flipperCopy.tags = normalizeTags(flipperCopy.tags, flipperCopy.category);
-        flipperCopy.techTags = normalizeTechTags(flipperCopy.techTags);
+        const flipperCopy = normalizeLoadedFlipper(initialFlipper);
         this.flipper = { ...this.flipper, ...flipperCopy };
         if (!this.flipper.carouselContent || this.flipper.carouselContent.length === 0) {
           this.flipper.carouselContent = [{ imageUrl: "", caption: "" }];
@@ -263,6 +281,21 @@ export default function flipperCreatorLogic(initialState = {}) {
     },
 
     async saveFlipper() {
+      const normalizedCategory =
+        typeof this.flipper.category === "string"
+          ? this.flipper.category.trim()
+          : "";
+      const isHotContentFlag =
+        Boolean(this.flipper.isHotContent) ||
+        normalizedCategory === "hotContent";
+      this.flipper.isHotContent = isHotContentFlag;
+      this.flipper.category =
+        isHotContentFlag && normalizedCategory === "hotContent"
+          ? ""
+          : normalizedCategory;
+      this.flipper.tags = normalizeTags(this.flipper.tags, this.flipper.category);
+      this.flipper.techTags = normalizeTechTags(this.flipper.techTags);
+
       if (!this.flipper.title) {
         window.Alpine.store("ui").showToast("Заголовок обязателен.", "error");
         return;
@@ -280,6 +313,7 @@ export default function flipperCreatorLogic(initialState = {}) {
           authorId: resolvedAuthorId,
           tags: tagsForDb,
           techTags: normalizeTechTags(this.flipper.techTags),
+          isHotContent: Boolean(this.flipper.isHotContent),
         };
 
         if (this.isEditMode && this.flipperId) {
