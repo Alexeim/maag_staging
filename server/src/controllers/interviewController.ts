@@ -9,6 +9,7 @@ export interface Interview {
   interviewee: string;
   lead?: string;
   mainQuote?: string;
+  isHotContent?: boolean;
   content: any[]; // Array of content blocks
   imageUrl?: string;
   imageCaption?: string;
@@ -36,6 +37,7 @@ export const createInterview = async (req: Request, res: Response) => {
       lead,
       mainQuote,
       tags = [],
+      isHotContent = false,
     } = req.body;
 
     if (!title || !content || !authorId || !interviewee) {
@@ -52,6 +54,7 @@ export const createInterview = async (req: Request, res: Response) => {
       interviewee,
       lead: lead || '',
       mainQuote: mainQuote || '',
+      isHotContent: Boolean(isHotContent),
       content,
       imageUrl,
       imageCaption,
@@ -154,6 +157,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       lead,
       mainQuote,
       tags = [],
+      isHotContent = false,
     } = req.body;
 
     if (!title || !content || !authorId || !interviewee) {
@@ -170,6 +174,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       interviewee,
       lead: lead || '',
       mainQuote: mainQuote || '',
+      isHotContent: Boolean(isHotContent),
       content,
       imageUrl,
       imageCaption,

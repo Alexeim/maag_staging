@@ -90,6 +90,10 @@ export default function(Alpine: Alpine) {
       // --- Interview Creator properties ---
       interview: {
         title: '',
+        interviewee: '',
+        lead: '',
+        mainQuote: '',
+        isHotContent: false,
         imageUrl: '',
         imageCaption: '',
         contentBlocks: [],

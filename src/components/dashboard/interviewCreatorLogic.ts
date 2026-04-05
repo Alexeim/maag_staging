@@ -83,6 +83,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.imageCaption = copy.imageCaption ?? "";
     copy.lead = copy.lead ?? "";
     copy.mainQuote = copy.mainQuote ?? "";
+    copy.isHotContent = Boolean(copy.isHotContent);
     return copy;
   };
 
@@ -92,6 +93,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       interviewee: "",
       lead: "",
       mainQuote: "",
+      isHotContent: false,
       imageUrl: "",
       imageCaption: "",
       contentBlocks: [],
@@ -316,6 +318,7 @@ export default function interviewCreatorLogic(initialState = {}) {
         this.onSaveRedirect = onSaveRedirect;
       }
       this.interview.tags = this.interview.tags ?? [];
+      this.interview.isHotContent = Boolean(this.interview.isHotContent);
       this.interview.contentBlocks = Array.isArray(this.interview.contentBlocks)
         ? this.interview.contentBlocks.map((block: any) =>
             block?.type === "video" ? normalizeVideoBlock(block) : block,
@@ -595,6 +598,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           interviewee: this.interview.interviewee,
           lead: this.interview.lead,
           mainQuote: this.interview.mainQuote,
+          isHotContent: Boolean(this.interview.isHotContent),
           imageUrl: this.interview.imageUrl,
           imageCaption: this.interview.imageCaption,
           authorId: resolvedAuthorId,

@@ -211,6 +211,7 @@ export interface InterviewPayload {
   lead?: string;
   mainQuote?: string;
   tags?: string[];
+  isHotContent?: boolean;
 }
 
 export interface InterviewResponse extends InterviewPayload {
