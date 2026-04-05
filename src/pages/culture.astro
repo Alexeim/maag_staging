@@ -124,18 +124,33 @@ const getTransitionName = (item: any) => {
   if (
     href.startsWith("/article/") ||
     href.startsWith("/news/") ||
-    href.startsWith("/interviews/")
+    href.startsWith("/interviews/") ||
+    href.startsWith("/flippers/")
   ) {
     return `main-article-image-${item.id}`;
   }
   return undefined;
 };
 
+const extractInterviewQuote = (interview: any): string | null => {
+  if (!interview) return null;
+  if (interview.mainQuote) return interview.mainQuote;
+  if (!Array.isArray(interview.content)) return interview.lead ?? null;
+  const quoteBlock = interview.content.find(
+    (block: any) => block.type === "quote" && block.text,
+  );
+  if (quoteBlock) return quoteBlock.text;
+  const qaBlock = interview.content.find(
+    (block: any) => block.type === "qa" && block.answer,
+  );
+  return qaBlock?.answer ?? interview.lead ?? null;
+};
+
 let primaryCultureArticle: any = null;
 let secondaryCultureArticle: any = null;
 let tertiaryCultureArticle: any = null;
+let editorialSidebarItems: any[] = [];
 let cultureFeed: any[] = [];
-let hotContentItems: any[] = [];
 let featuredInterview: any = null;
 
 try {
@@ -169,26 +184,19 @@ try {
     (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
   );
 
-  const cultureItems = sortedContent
-    .filter(
-      (article) =>
-        normalizeCategory(article.category) === CULTURE_CATEGORY_KEY &&
-        !isHotContent(article),
-    )
-    .map((article) => ({
-      ...article,
-      href: toContentHref(article),
+  const allCultureItems = sortedContent
+    .filter((item) => normalizeCategory(item.category) === CULTURE_CATEGORY_KEY)
+    .map((item) => ({
+      ...item,
+      href: toContentHref(item),
     }));
 
-  // Top 3 slots: articles and flippers only, no interviews
-  const topItems = cultureItems.filter(
-    (item) => item.contentType !== "interview",
+  const topItems = allCultureItems.filter(
+    (item) => !isHotContent(item) && item.contentType !== "interview",
   );
 
   primaryCultureArticle =
-    topItems.find((item) => isMainInCategoryItem(item)) ??
-    topItems[0] ??
-    null;
+    topItems.find((item) => isMainInCategoryItem(item)) ?? topItems[0] ?? null;
 
   const topWithoutPrimary = topItems.filter((item) =>
     primaryCultureArticle ? item.id !== primaryCultureArticle.id : true,
@@ -197,40 +205,46 @@ try {
   secondaryCultureArticle = topWithoutPrimary[0] ?? null;
   tertiaryCultureArticle = topWithoutPrimary[1] ?? null;
 
-  // Feed: everything in culture minus the top 3 (interviews included here)
   const topIds = new Set(
-    [primaryCultureArticle?.id, secondaryCultureArticle?.id, tertiaryCultureArticle?.id].filter(Boolean),
+    [
+      primaryCultureArticle?.id,
+      secondaryCultureArticle?.id,
+      tertiaryCultureArticle?.id,
+    ].filter(Boolean),
   );
-  cultureFeed = cultureItems.filter((item) => !topIds.has(item.id));
 
-  featuredInterview = interviews[0] ?? null;
+  featuredInterview =
+    allCultureItems.find(
+      (item) => item.contentType === "interview" && !topIds.has(item.id),
+    ) ??
+    allCultureItems.find((item) => item.contentType === "interview") ??
+    null;
 
-  hotContentItems = sortedContent
-    .filter((article) => isHotContent(article))
-    .map((article) => ({
-      ...article,
-      href: toContentHref(article),
-    }))
-    .slice(0, 6);
+  const excludedIds = new Set(
+    [...topIds, featuredInterview?.id].filter(Boolean),
+  );
+
+  editorialSidebarItems = allCultureItems
+    .filter((item) => !excludedIds.has(item.id))
+    .slice(0, 4);
+
+  const sidebarIds = new Set(editorialSidebarItems.map((item) => item.id));
+
+  cultureFeed = allCultureItems.filter(
+    (item) => !excludedIds.has(item.id) && !sidebarIds.has(item.id),
+  );
 } catch (error) {
   console.error("Failed to fetch culture page articles:", error);
 }
 
-const extractInterviewQuote = (interview: any): string | null => {
-  if (!interview) return null;
-  if (interview.mainQuote) return interview.mainQuote;
-  if (!Array.isArray(interview.content)) return interview.lead ?? null;
-  const quoteBlock = interview.content.find(
-    (b: any) => b.type === "quote" && b.text,
-  );
-  if (quoteBlock) return quoteBlock.text;
-  const qaBlock = interview.content.find(
-    (b: any) => b.type === "qa" && b.answer,
-  );
-  return qaBlock?.answer ?? interview.lead ?? null;
-};
-
 const interviewQuote = extractInterviewQuote(featuredInterview);
+const secondaryStories = [
+  secondaryCultureArticle,
+  tertiaryCultureArticle,
+].filter(Boolean);
+const editorialGridItems = cultureFeed.slice(0, 8);
+const featuredInterviewName =
+  featuredInterview?.interviewee ?? featuredInterview?.title ?? "";
 ---
 
 <Layout
@@ -239,256 +253,248 @@ const interviewQuote = extractInterviewQuote(featuredInterview);
   title="Культура - Maag"
   useClientRouter={true}
 >
-  <main class="bg-base-200 min-h-screen pb-16">
-    <section class="max-w-[1400px] mx-auto px-4 lg:px-8 pt-8 lg:pt-12">
-      <div class="border-b border-base-content/25 pb-6">
-        <h1 class="text-4xl lg:text-6xl font-oswald font-thin leading-none">
-          Культура
-        </h1>
-      </div>
+  <main
+    class="min-h-screen bg-base-200 font-oswald text-[#302821] [background-image:radial-gradient(circle_at_top_center,rgba(255,255,255,0.82),transparent_48%)]"
+  >
+    <div
+      class="mx-auto max-w-[1160px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
+    >
+      <h1 class="m-0 text-[1.05rem] font-medium uppercase tracking-[0.5em]">
+        Культура
+      </h1>
 
       <section
-        class="mt-8 lg:mt-10 grid grid-cols-1 lg:grid-cols-[1fr_1fr_0.6fr] lg:grid-rows-[auto_auto] gap-6 lg:gap-7"
+        class="mt-6 grid gap-7 lg:grid-cols-[minmax(0,1fr)_14rem] lg:items-start"
       >
-        {/* Primary article — spans 2 cols, row 1 */}
-        <div class="lg:col-span-2 lg:row-start-1">
+        <div class="grid gap-8">
           {
             primaryCultureArticle ? (
-              <article class="bg-white overflow-hidden">
+              <article class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
                 <a
                   href={primaryCultureArticle.href}
-                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
+                  class="block overflow-hidden"
+                  aria-label={primaryCultureArticle.title}
                 >
                   <img
                     src={primaryCultureArticle.imageUrl || picture1.src}
                     alt={primaryCultureArticle.title}
-                    class="w-full h-[280px] lg:h-[460px] object-cover object-center"
+                    class="block h-full min-h-[15rem] w-full object-cover lg:min-h-[21rem]"
                     loading="lazy"
                     transition:name={getTransitionName(primaryCultureArticle)}
                   />
                 </a>
-                <div class="p-4 lg:p-5">
-                  <a href={primaryCultureArticle.href} class="block">
-                    <h2 class="text-3xl lg:text-[44px] leading-[1.02] font-oswald font-thin hover:underline">
-                      {primaryCultureArticle.title}
+
+                <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                  <p class="m-0">
+                    <span class="font-inter text-[0.58rem] font-semibold uppercase tracking-[0.3em] text-error">
+                      {getPrimaryTag(primaryCultureArticle) || "Культура"}
+                    </span>
+                  </p>
+
+                  <a
+                    href={primaryCultureArticle.href}
+                    class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                  >
+                    <h2 class="m-0 max-w-[11ch] text-[clamp(1.9rem,3.5vw,2.8rem)] font-normal leading-[1.04]">
+                      {truncateText(primaryCultureArticle.title, 96)}
                     </h2>
                   </a>
+
                   {primaryCultureArticle.lead && (
-                    <p class="mt-3 text-base leading-relaxed text-base-content/80 font-oswald font-thin tracking-wide">
-                      {truncateText(primaryCultureArticle.lead, 200)}
+                    <p class="m-0 max-w-[28ch] text-base leading-[1.55] text-[#302821bd]">
+                      {truncateText(primaryCultureArticle.lead, 180)}
                     </p>
                   )}
-                  <div class="mt-4 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                    {getPrimaryTag(primaryCultureArticle) && (
-                      <>
-                        <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
-                          {getPrimaryTag(primaryCultureArticle)}
-                        </span>
-                        <span class="text-base-content/45">·</span>
-                      </>
-                    )}
-                    <span>{formatDate(primaryCultureArticle.createdAt)}</span>
-                  </div>
+
+                  <p class="mt-[0.4rem] font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]">
+                    {formatDate(primaryCultureArticle.createdAt)}
+                  </p>
                 </div>
               </article>
             ) : (
-              <article class="bg-white p-6">
-                <p class="text-base-content/70 font-oswald font-thin tracking-wide">
-                  Пока нет материалов категории «Культура».
-                </p>
+              <article class="border border-[#3028211a] bg-white/70 p-5 text-[1.05rem] font-light leading-[1.5]">
+                Пока нет материалов категории «Культура».
               </article>
             )
           }
-        </div>
-
-        {/* Sidebar — col 3, spans both rows */}
-        <aside class="lg:col-start-3 lg:row-start-1 lg:row-span-2 lg:pl-4 lg:border-l lg:border-base-content/15">
-          <h2
-            class="text-xs uppercase tracking-[0.35em] text-error font-inter mb-4"
-          >
-            {CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY]}
-          </h2>
 
           {
-            hotContentItems.length > 0 ? (
-              <div class="flex gap-4 overflow-x-auto pb-3 -mx-1 px-1 lg:block lg:overflow-visible lg:pb-0 lg:mx-0 lg:px-0 lg:divide-y lg:divide-base-content/15 lg:border-y lg:border-base-content/20">
-                {hotContentItems.map((item) => (
-                  <article class="min-w-[270px] max-w-[270px] flex-shrink-0 border border-base-content/20 p-3 grid grid-cols-[minmax(0,1fr)_72px] gap-3 items-start lg:min-w-0 lg:max-w-none lg:border-0 lg:p-0 lg:py-4 lg:grid-cols-[minmax(0,1fr)_72px]">
-                    <div>
-                      <a href={item.href} class="block">
-                        <h4 class="text-base lg:text-lg leading-[1.2] font-oswald font-thin hover:underline">
-                          {item.title}
-                        </h4>
-                      </a>
-                      <div class="mt-2 flex items-center gap-2 text-[11px] font-inter uppercase tracking-[0.18em] text-base-content/50">
-                        {getPrimaryTag(item) && (
-                          <>
-                            <span class="text-[10px] font-medium uppercase tracking-[0.22em] text-error">
-                              {getPrimaryTag(item)}
-                            </span>
-                            <span class="text-base-content/45">·</span>
-                          </>
-                        )}
-                        <span>{formatDate(item.createdAt)}</span>
-                      </div>
-                    </div>
+            secondaryStories.length > 0 && (
+              <div class="grid gap-4 sm:grid-cols-2">
+                {secondaryStories.map((item) => (
+                  <article class="grid gap-[0.8rem]">
                     <a
                       href={item.href}
-                      class="block overflow-hidden mt-1 transition-opacity duration-200 hover:opacity-90"
+                      class="block aspect-[1.3/1] overflow-hidden"
+                      aria-label={item.title}
                     >
                       <img
                         src={item.imageUrl || picture1.src}
                         alt={item.title}
-                        class="w-[72px] h-[72px] object-cover object-center"
+                        class="block h-full w-full object-cover"
                         loading="lazy"
                         transition:name={getTransitionName(item)}
                       />
                     </a>
+
+                    <div class="grid gap-[0.55rem]">
+                      <p class="m-0">
+                        <span class="font-inter text-[0.58rem] font-semibold uppercase tracking-[0.3em] text-error">
+                          {getPrimaryTag(item) || "Культура"}
+                        </span>
+                      </p>
+
+                      <a
+                        href={item.href}
+                        class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                      >
+                        <h3 class="m-0 text-[1.4rem] font-normal leading-[1.12]">
+                          {truncateText(item.title, 88)}
+                        </h3>
+                      </a>
+                    </div>
                   </article>
                 ))}
               </div>
-            ) : (
-              <p class="text-sm text-base-content/70 font-oswald font-thin tracking-wide">
-                Пока нет материалов в блоке «Самое читаемое».
-              </p>
             )
           }
+        </div>
+
+        <aside class="min-w-0">
+          <div
+            class="grid gap-4 border-t border-[#3028211f] pt-4 lg:border-t-0 lg:border-l lg:border-[#3028211f] lg:pt-0 lg:pl-[1.1rem]"
+          >
+            <p
+              class="m-0 text-[0.82rem] font-medium uppercase tracking-[0.38em]"
+            >
+              Нетленка
+            </p>
+
+            {
+              editorialSidebarItems.length > 0 ? (
+                editorialSidebarItems.map((item) => (
+                  <article class="grid gap-[0.65rem] border-b border-[#3028211a] pb-4">
+                    <a
+                      href={item.href}
+                      class="block aspect-[1.1/0.82] overflow-hidden"
+                      aria-label={item.title}
+                    >
+                      <img
+                        src={item.imageUrl || picture1.src}
+                        alt={item.title}
+                        class="block h-full w-full object-cover"
+                        loading="lazy"
+                        transition:name={getTransitionName(item)}
+                      />
+                    </a>
+
+                    <div class="grid gap-[0.55rem]">
+                      <p class="m-0">
+                        <span class="font-inter text-[0.58rem] font-semibold uppercase tracking-[0.3em] text-error">
+                          {getPrimaryTag(item) || "Культура"}
+                        </span>
+                      </p>
+
+                      <a
+                        href={item.href}
+                        class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                      >
+                        <h3 class="m-0 text-base font-normal leading-[1.16]">
+                          {truncateText(item.title, 70)}
+                        </h3>
+                      </a>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p class="m-0 font-inter text-[0.88rem] leading-[1.5] text-[#3028219e]">
+                  Пока нет материалов для боковой колонки.
+                </p>
+              )
+            }
+          </div>
         </aside>
-
-        {/* Secondary article — col 1, row 2 */}
-        <div class="lg:col-start-1 lg:row-start-2">
-          {
-            secondaryCultureArticle ? (
-              <article class="bg-white overflow-hidden">
-                <a
-                  href={secondaryCultureArticle.href}
-                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
-                >
-                  <img
-                    src={secondaryCultureArticle.imageUrl || picture1.src}
-                    alt={secondaryCultureArticle.title}
-                    class="w-full h-[200px] lg:h-[220px] object-cover object-center"
-                    loading="lazy"
-                    transition:name={getTransitionName(secondaryCultureArticle)}
-                  />
-                </a>
-                <div class="p-3 lg:p-4">
-                  <a href={secondaryCultureArticle.href} class="block">
-                    <h3 class="text-xl lg:text-[26px] leading-[1.05] font-oswald font-thin hover:underline">
-                      {secondaryCultureArticle.title}
-                    </h3>
-                  </a>
-                  <div class="mt-2 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                    {getPrimaryTag(secondaryCultureArticle) && (
-                      <>
-                        <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
-                          {getPrimaryTag(secondaryCultureArticle)}
-                        </span>
-                        <span class="text-base-content/45">·</span>
-                      </>
-                    )}
-                    <span>{formatDate(secondaryCultureArticle.createdAt)}</span>
-                  </div>
-                </div>
-              </article>
-            ) : null
-          }
-        </div>
-
-        {/* Tertiary article — col 2, row 2 */}
-        <div class="lg:col-start-2 lg:row-start-2">
-          {
-            tertiaryCultureArticle ? (
-              <article class="bg-white overflow-hidden">
-                <a
-                  href={tertiaryCultureArticle.href}
-                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
-                >
-                  <img
-                    src={tertiaryCultureArticle.imageUrl || picture1.src}
-                    alt={tertiaryCultureArticle.title}
-                    class="w-full h-[200px] lg:h-[220px] object-cover object-center"
-                    loading="lazy"
-                    transition:name={getTransitionName(tertiaryCultureArticle)}
-                  />
-                </a>
-                <div class="p-3 lg:p-4">
-                  <a href={tertiaryCultureArticle.href} class="block">
-                    <h3 class="text-xl lg:text-[26px] leading-[1.05] font-oswald font-thin hover:underline">
-                      {tertiaryCultureArticle.title}
-                    </h3>
-                  </a>
-                  <div class="mt-2 flex items-center gap-2 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                    {getPrimaryTag(tertiaryCultureArticle) && (
-                      <>
-                        <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
-                          {getPrimaryTag(tertiaryCultureArticle)}
-                        </span>
-                        <span class="text-base-content/45">·</span>
-                      </>
-                    )}
-                    <span>{formatDate(tertiaryCultureArticle.createdAt)}</span>
-                  </div>
-                </div>
-              </article>
-            ) : null
-          }
-        </div>
       </section>
 
       {
         featuredInterview && interviewQuote && (
-          <div class="mt-10 lg:mt-12 border-t border-base-content/25">
+          <section class="mt-[2.2rem]">
             <LatestInterview
               tag="Интервью"
-              interviewee={featuredInterview.interviewee ?? featuredInterview.title}
-              quote={interviewQuote}
+              interviewee={featuredInterviewName}
+              quote={truncateText(interviewQuote, 130)}
               imageUrl={featuredInterview.imageUrl || picture1.src}
               href={`/interviews/${featuredInterview.id}`}
               transitionName={`main-article-image-${featuredInterview.id}`}
             />
-          </div>
+          </section>
         )
       }
 
-      <section class="mt-10 lg:mt-14 border-t border-base-content/25 pt-8">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-8">
-          {
-            cultureFeed.map((item) => (
-              <article class="border-b border-base-content/15 pb-5">
-                <a
-                  href={item.href}
-                  class={`block overflow-hidden transition-opacity duration-200 hover:opacity-90${item.contentType === "interview" ? " aspect-square rounded-full" : ""}`}
+      <section class="mt-[1.6rem] border-t border-[#3028211f] pt-[1.6rem]">
+        {
+          editorialGridItems.length > 0 ? (
+            <div class="grid grid-cols-2 gap-x-4 gap-y-[1.4rem] lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
+              {editorialGridItems.map((item) => (
+                <article
+                  class:list={[
+                    "grid gap-[0.8rem]",
+                    item.contentType === "interview" && "content-start",
+                  ]}
                 >
-                  <img
-                    src={item.imageUrl || picture1.src}
-                    alt={item.title}
-                    class={`object-cover object-center${item.contentType === "interview" ? " w-full h-full rounded-full" : " w-full h-[160px] lg:h-[180px]"}`}
-                    loading="lazy"
-                    transition:name={getTransitionName(item)}
-                  />
-                </a>
-                <a href={item.href} class="block mt-3">
-                  <h3 class="text-xl lg:text-2xl leading-[1.1] font-oswald font-thin hover:underline">
-                    {item.title}
-                  </h3>
-                </a>
-                <div class="mt-2 flex items-center gap-2 text-[11px] font-inter uppercase tracking-[0.2em] text-base-content/55">
-                  {getPrimaryTag(item) && (
-                    <>
-                      <span class="text-[10px] font-medium uppercase tracking-[0.24em] text-error">
-                        {getPrimaryTag(item)}
+                  <a
+                    href={item.href}
+                    class:list={[
+                      "block overflow-hidden bg-white/50 aspect-[1.02/1]",
+                      item.contentType === "interview" &&
+                        "mx-auto w-full max-w-[12rem] aspect-square rounded-full bg-transparent",
+                    ]}
+                    aria-label={item.title}
+                  >
+                    <img
+                      src={item.imageUrl || picture1.src}
+                      alt={item.title}
+                      class:list={[
+                        "block h-full w-full object-cover",
+                        item.contentType === "interview" && "rounded-full",
+                      ]}
+                      loading="lazy"
+                      transition:name={getTransitionName(item)}
+                    />
+                  </a>
+
+                  <div
+                    class:list={[
+                      "grid gap-[0.55rem]",
+                      item.contentType === "interview" &&
+                        "mx-auto w-full max-w-[12rem]",
+                    ]}
+                  >
+                    <p class="m-0">
+                      <span class="font-inter text-[0.58rem] font-semibold uppercase tracking-[0.3em] text-error">
+                        {getPrimaryTag(item) || "Культура"}
                       </span>
-                      <span class="text-base-content/45">·</span>
-                    </>
-                  )}
-                  <span>{formatDate(item.createdAt)}</span>
-                </div>
-              </article>
-            ))
-          }
-        </div>
+                    </p>
+
+                    <a
+                      href={item.href}
+                      class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                    >
+                      <h3 class="m-0 text-[1.18rem] font-normal leading-[1.18]">
+                        {truncateText(item.title, 72)}
+                      </h3>
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <article class="bg-white/70 p-5 text-[1.05rem] font-light leading-[1.5]">
+              Больше материалов пока нет.
+            </article>
+          )
+        }
       </section>
-    </section>
+    </div>
   </main>
 </Layout>
