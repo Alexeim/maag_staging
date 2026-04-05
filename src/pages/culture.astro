@@ -189,7 +189,11 @@ try {
   );
 
   const allCultureItems = sortedContent
-    .filter((item) => normalizeCategory(item.category) === CULTURE_CATEGORY_KEY)
+    .filter(
+      (item) =>
+        normalizeCategory(item.category) === CULTURE_CATEGORY_KEY &&
+        !item.isNews,
+    )
     .map((item) => ({
       ...item,
       href: toContentHref(item),
@@ -229,13 +233,21 @@ try {
   );
 
   editorialSidebarItems = allCultureItems
-    .filter((item) => !excludedIds.has(item.id))
+    .filter(
+      (item) =>
+        !excludedIds.has(item.id) &&
+        isHotContent(item) &&
+        !item.isNews,
+    )
     .slice(0, 4);
 
   const sidebarIds = new Set(editorialSidebarItems.map((item) => item.id));
 
   cultureFeed = allCultureItems.filter(
-    (item) => !excludedIds.has(item.id) && !sidebarIds.has(item.id),
+    (item) =>
+      !excludedIds.has(item.id) &&
+      !sidebarIds.has(item.id) &&
+      !isHotContent(item),
   );
 } catch (error) {
   console.error("Failed to fetch culture page articles:", error);
@@ -362,6 +374,10 @@ const featuredInterviewName =
                           {truncateText(item.lead, 120)}
                         </p>
                       )}
+
+                      <p class="m-0 font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]">
+                        {formatDate(item.createdAt)}
+                      </p>
                     </div>
                   </article>
                 ))}
@@ -494,6 +510,10 @@ const featuredInterviewName =
                         {truncateText(item.title, 72)}
                       </h3>
                     </a>
+
+                    <p class="m-0 font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]">
+                      {formatDate(item.createdAt)}
+                    </p>
                   </div>
                 </article>
               ))}
