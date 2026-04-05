@@ -110,7 +110,11 @@ const toContentHref = (item: any) => {
 const truncateText = (text?: string, maxLength: number = 220) => {
   if (!text) return "";
   if (text.length <= maxLength) return text;
-  return `${text.slice(0, maxLength).trim()}...`;
+  const truncated = text.slice(0, maxLength).trim();
+  const lastSpaceIndex = truncated.lastIndexOf(" ");
+  const safeText =
+    lastSpaceIndex > 0 ? truncated.slice(0, lastSpaceIndex) : truncated;
+  return `${safeText.trim()}...`;
 };
 
 const getTransitionName = (item: any) => {
@@ -257,7 +261,7 @@ const featuredInterviewName =
     class="min-h-screen bg-base-200 font-oswald text-[#302821] [background-image:radial-gradient(circle_at_top_center,rgba(255,255,255,0.82),transparent_48%)]"
   >
     <div
-      class="mx-auto max-w-[1160px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
+      class="mx-auto max-w-7xl px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
     >
       <h1 class="m-0 text-[1.05rem] font-medium uppercase tracking-[0.5em]">
         Культура
@@ -301,8 +305,8 @@ const featuredInterviewName =
                   </a>
 
                   {primaryCultureArticle.lead && (
-                    <p class="m-0 max-w-[28ch] text-base leading-[1.55] text-[#302821bd]">
-                      {truncateText(primaryCultureArticle.lead, 180)}
+                    <p class="m-0 text-base leading-[1.55] text-[#302821bd]">
+                      {truncateText(primaryCultureArticle.lead, 280)}
                     </p>
                   )}
 
@@ -352,6 +356,12 @@ const featuredInterviewName =
                           {truncateText(item.title, 88)}
                         </h3>
                       </a>
+
+                      {item.lead && (
+                        <p class="m-0 text-[0.98rem] leading-[1.5] text-[#302821bd]">
+                          {truncateText(item.lead, 120)}
+                        </p>
+                      )}
                     </div>
                   </article>
                 ))}
