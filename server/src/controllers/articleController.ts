@@ -7,6 +7,7 @@ export interface Article {
   title: string;
   lead?: string; // Вводка — краткое описание под заголовком
   authorId: string;
+  articleType?: 'standard' | 'tips'; // Type of article layout
   content: any[]; // Array of content blocks (e.g., { type: 'paragraph', text: '...' })
   tips?: Array<{ type: string; text: string }>;
   imageUrl?: string;
@@ -63,6 +64,7 @@ export const createArticle = async (req: Request, res: Response) => {
       imageUrl,
       imageCaption,
       authorId,
+      articleType = 'standard',
       category,
       tags = [],
       techTags = [],
@@ -91,6 +93,7 @@ export const createArticle = async (req: Request, res: Response) => {
       title,
       lead: lead || '',
       authorId,
+      articleType: articleType === 'tips' ? 'tips' : 'standard',
       content,
       tips: normalizedTips,
       imageUrl,
@@ -198,6 +201,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       imageUrl,
       imageCaption,
       authorId,
+      articleType = 'standard',
       category,
       tags = [],
       techTags = [],
@@ -226,6 +230,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       title,
       lead: lead || '',
       authorId,
+      articleType: articleType === 'tips' ? 'tips' : 'standard',
       content,
       tips: normalizedTips,
       imageUrl,
@@ -275,6 +280,10 @@ export const deleteArticle = async (req: Request, res: Response) => {
       for (const block of articleData.content) {
         if (block.type === 'image' && block.url) {
           imageUrlsToDelete.push(block.url);
+        }
+        // tips-item blocks can have their own image per item
+        if (block.type === 'tips-item' && block.imageUrl) {
+          imageUrlsToDelete.push(block.imageUrl);
         }
       }
     }

@@ -17,6 +17,7 @@ const components: Record<string, () => Promise<any>> = {
   newsCreator: () => import('@/components/dashboard/newsCreatorLogic'),
   newsList: () => import('@/components/dashboard/newsListLogic'),
   subscriptionManager: () => import('@/components/profile/subscriptionLogic'),
+  tipsArticleCreator: () => import('@/components/dashboard/tipsArticleCreatorLogic'),
 };
 
 export default function(Alpine: Alpine) {
@@ -203,6 +204,12 @@ export default function(Alpine: Alpine) {
       addCarouselItem() {},
       removeCarouselItem() {},
       saveFlipper() {},
+      // --- Tips Article Creator defaults ---
+      addTipsItem() {},
+      moveBlock() {},
+      handleCoverUpload() {},
+      handleItemImageUpload() {},
+      uploadingBlockIndex: null,
       // --- Subscription Manager properties ---
       isSubscribed: false,
       subscriptionStatus: '',

@@ -114,9 +114,22 @@ export async function request<T>(
   return responseBody as T;
 }
 
+export interface TipsItemBlock {
+  type: 'tips-item';
+  heading: string;
+  imageUrl?: string;
+  imageCaption?: string;
+  meta1?: string;       // First info line (location, time, price, etc.)
+  meta2?: string;       // Second info line (link text or extra info)
+  meta2IsLink?: boolean;
+  meta2Url?: string;    // URL when meta2 is a link
+  text?: string;        // Main paragraph text
+}
+
 export interface ArticlePayload {
   title: string;
   authorId: string;
+  articleType?: 'standard' | 'tips';
   content: unknown[];
   tips?: Array<{ type: string; text: string }>;
   imageUrl?: string;

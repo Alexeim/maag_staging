@@ -1,0 +1,24 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import TipsArticleComposer from "@/components/dashboard/TipsArticleComposer.astro";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+
+const tipsCreatorState = JSON.stringify({
+  categoryTags: {
+    culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
+  },
+  isEditMode: false,
+  onSaveRedirect: "/dashboard",
+});
+---
+
+<DashboardLayout title="Создать tips-статью" active="create-tips">
+  <TipsArticleComposer
+    heading="Создать tips-статью"
+    submitLabel="Сохранить статью"
+    tipsCreatorState={tipsCreatorState}
+    cancelHref="/dashboard"
+  />
+</DashboardLayout>

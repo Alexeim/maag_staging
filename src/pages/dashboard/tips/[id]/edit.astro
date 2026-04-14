@@ -1,0 +1,45 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import TipsArticleComposer from "@/components/dashboard/TipsArticleComposer.astro";
+import { articlesApi } from "@/lib/api/api";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+
+const { id } = Astro.params;
+
+let article = null;
+if (id) {
+  try {
+    article = await articlesApi.getById(id);
+  } catch (error) {
+    console.error(`Failed to load tips article with id ${id}`, error);
+  }
+}
+
+const tipsCreatorState = JSON.stringify({
+  categoryTags: {
+    culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
+  },
+  isEditMode: true,
+  articleId: id,
+  initialArticle: article,
+  onSaveRedirect: "/dashboard",
+});
+---
+
+<DashboardLayout title="Редактировать tips-статью" active="create-tips">
+  {article ? (
+    <TipsArticleComposer
+      heading="Редактировать tips-статью"
+      submitLabel="Сохранить изменения"
+      tipsCreatorState={tipsCreatorState}
+      cancelHref="/dashboard"
+      deleteArticleId={id}
+    />
+  ) : (
+    <div class="p-8 text-center text-base-content/70">
+      <p>Статья не найдена или произошла ошибка загрузки.</p>
+    </div>
+  )}
+</DashboardLayout>

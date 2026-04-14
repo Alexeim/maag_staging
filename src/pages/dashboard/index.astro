@@ -53,7 +53,7 @@ try {
   console.error("Failed to load articles", error);
 }
 
-const articles = articlesRaw.filter((a) => !((a as any).isNews)).map((article) => {
+const articles = articlesRaw.filter((a) => !((a as any).isNews) && (a as any).articleType !== 'tips').map((article) => {
   const createdAtDate = normalizeDate(article.createdAt);
   const updatedAtDate = normalizeDate((article as any).updatedAt);
   return {

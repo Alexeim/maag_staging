@@ -1,0 +1,88 @@
+---
+interface TipsItemBlock {
+  type: 'tips-item';
+  heading?: string;
+  imageUrl?: string;
+  imageCaption?: string;
+  meta1?: string;
+  meta2?: string;
+  meta2IsLink?: boolean;
+  meta2Url?: string;
+  text?: string;
+}
+
+interface Props {
+  contentBlocks: TipsItemBlock[];
+}
+
+const { contentBlocks } = Astro.props;
+
+const items = contentBlocks.filter((b) => b != null && b.type === 'tips-item');
+---
+
+<div class="max-w-[826px] mx-auto space-y-16">
+  {items.map((item, i) => (
+    <article class="flex flex-col gap-5">
+
+      {/* Heading */}
+      {item.heading && (
+        <h2 class="text-2xl font-bold font-oswald tracking-wide">
+          {item.heading}
+        </h2>
+      )}
+
+      {/* Item image */}
+      {item.imageUrl && (
+        <figure class="flex flex-col items-center">
+          <img
+            src={item.imageUrl}
+            alt={item.imageCaption || item.heading || `Пункт ${i + 1}`}
+            class="w-full rounded-sm object-cover max-h-[500px]"
+          />
+          {item.imageCaption && (
+            <figcaption class="text-center font-oswald text-sm text-gray-500 mt-2">
+              {item.imageCaption}
+            </figcaption>
+          )}
+        </figure>
+      )}
+
+      {/* Meta lines */}
+      <div class="flex flex-col gap-1">
+        {item.meta1 && (
+          <p class="text-sm font-oswald tracking-wide text-base-content/70">
+            {item.meta1}
+          </p>
+        )}
+        {item.meta2 && (
+          <p class="text-sm font-oswald tracking-wide text-base-content/70">
+            {item.meta2IsLink && item.meta2Url ? (
+              <a
+                href={item.meta2Url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline hover:text-base-content transition-colors"
+              >
+                {item.meta2}
+              </a>
+            ) : (
+              item.meta2
+            )}
+          </p>
+        )}
+      </div>
+
+      {/* Body text */}
+      {item.text && (
+        <p class="text-lg font-oswald text-justify font-thin tracking-wide">
+          {item.text}
+        </p>
+      )}
+
+      {/* Separator between items (not after the last one) */}
+      {i < items.length - 1 && (
+        <hr class="border-base-300 mt-4" />
+      )}
+    </article>
+  ))}
+</div>

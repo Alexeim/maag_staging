@@ -3,17 +3,11 @@ import Layout from "../../Layouts/Layout.astro";
 import ArticleHeader from "../../components/article/ArticleHeader.astro";
 import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
-import SocialShare from "../../components/article/SocialShare.astro";
 import ArticleImage from "../../components/article/ArticleImage.astro";
-import ArticleBody from "../../components/article/ArticleBody.astro";
-import ArticleTips from "../../components/article/ArticleTips.astro";
-import RecentArticles from "../../components/article/RecentArticles.astro";
-import EventDetails from "../../components/article/EventDetails.astro";
-import type { ImageMetadata } from "astro";
-import { newsItems } from "@/content/mockNews";
+import TipsArticleBody from "../../components/article/TipsArticleBody.astro";
 import { ApiError, articlesApi } from "@/lib/api/api";
 
-const { id } = Astro.params;
+const { id } = Astro.params as { id: string };
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -31,39 +25,32 @@ try {
   if (e instanceof ApiError) {
     error =
       e.status === 404
-        ? "Article not found."
-        : `Error fetching article: ${e.message}`;
+        ? "Статья не найдена."
+        : `Ошибка загрузки: ${e.message}`;
   } else {
-    error = `Error fetching article: ${e.message}`;
+    error = `Ошибка загрузки: ${e.message}`;
   }
 }
 
-// Redirect tips articles to their dedicated page
-if (articleData?.articleType === 'tips') {
-  return Astro.redirect(`/tips/${id}`);
-}
-
-// Normalize data for the template
 const rawCategory =
   articleData?.category ?? articleData?.header?.category ?? null;
 
 const displayArticle = {
-  title: articleData?.header?.title || articleData?.title || 'Article',
-  lead: articleData?.lead || '',
+  title: articleData?.header?.title || articleData?.title || "Статья",
+  lead: articleData?.lead || "",
   category: rawCategory
     ? CATEGORY_LABELS[rawCategory] || rawCategory
-    : 'Category',
-  authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : 'Author',
+    : "Категория",
+  authorName: articleData?.author
+    ? `${articleData.author.firstName} ${articleData.author.lastName}`
+    : "Автор",
   authorAvatar: articleData?.author?.avatar,
-  readTime: articleData?.meta?.readTime || '5 min read',
-  imageUrl: articleData?.imageUrl, // For dynamic articles
-  imageCaption: articleData?.imageCaption || '', // <-- Get the caption
-  imageAlt: articleData?.mainImage?.alt || 'Article image',
+  imageUrl: articleData?.imageUrl,
+  imageCaption: articleData?.imageCaption || "",
+  imageAlt: articleData?.mainImage?.alt || "Обложка статьи",
   contentBlocks: articleData?.content || [],
-  tips: Array.isArray(articleData?.tips) ? articleData.tips : [],
 };
 
-const transitionAliases = [`landing-body-main-article-image-${id}`];
 ---
 
 <Layout
@@ -77,7 +64,7 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}
       {!error && articleData && (
         <>
-          <!-- Article Header Section -->
+          <!-- Header -->
           <div class="pt-[50px] pb-[70px] flex flex-col items-center gap-[50px]">
             <div class="flex flex-col gap-4 max-w-[825px] w-full">
               <ArticleHeader
@@ -92,7 +79,6 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
                 />
                 <div>·</div>
                 <ArticleDate createdAt={articleData.createdAt} />
-                {/* <SocialShare readTime={displayArticle.readTime} /> */}
               </div>
             </div>
 
@@ -101,8 +87,6 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
                 src={displayArticle.imageUrl}
                 alt={displayArticle.imageAlt}
                 caption={displayArticle.imageCaption}
-                transitionName={`main-article-image-${id}`}
-                transitionAliases={transitionAliases}
                 figureClass="max-w-[1200px]"
                 imageClass="shadow-lg"
                 figcaptionClass="text-center font-oswald text-sm text-gray-500 mt-2"
@@ -110,20 +94,9 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
             )}
           </div>
 
-          <!-- Article Content -->
+          <!-- Tips content -->
           <div class="max-w-[1400px] mx-auto px-14 pb-[100px]">
-            <ArticleBody contentBlocks={displayArticle.contentBlocks} />
-            <ArticleTips tips={displayArticle.tips} />
-            
-            {/* Conditionally render EventDetails only if the data exists */}
-            {(articleData?.eventDetails) && (
-              <EventDetails
-                address={articleData.eventDetails.address}
-                dates={articleData.eventDetails.dates}
-              />
-            )}
-            
-            {/* RecentArticles component removed as per user instruction to remove all static logic */}
+            <TipsArticleBody contentBlocks={displayArticle.contentBlocks} />
           </div>
         </>
       )}
