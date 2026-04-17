@@ -234,6 +234,57 @@ export interface InterviewResponse extends InterviewPayload {
   author?: unknown;
 }
 
+export interface GuidePayload {
+  title: string;
+  authorId: string;
+  content: unknown[];
+  tips?: Array<{ type: string; text: string }>;
+  imageUrl?: string;
+  imageCaption?: string;
+  lead?: string;
+  category?: string;
+  tags?: string[];
+  techTags?: string[];
+  isHotContent?: boolean;
+  isOnLanding?: boolean;
+  isMainInCategory?: boolean;
+}
+
+export interface GuideResponse extends GuidePayload {
+  id: string;
+  createdAt: string | Date;
+  author?: unknown;
+}
+
+export const guidesApi = {
+  list(token?: string) {
+    return request<GuideResponse[]>("/api/guides", { token });
+  },
+  create(payload: GuidePayload, token?: string) {
+    return request<GuideResponse>("/api/guides", {
+      method: "POST",
+      body: payload,
+      token,
+    });
+  },
+  getById(id: string, token?: string) {
+    return request<GuideResponse>(`/api/guides/${id}`, { token });
+  },
+  update(id: string, payload: GuidePayload, token?: string) {
+    return request<GuideResponse>(`/api/guides/${id}`, {
+      method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+  delete(id: string, token?: string) {
+    return request<void>(`/api/guides/${id}`, {
+      method: "DELETE",
+      token,
+    });
+  },
+};
+
 export const articlesApi = {
   list(token?: string) {
     return request<ArticleResponse[]>("/api/articles", { token });

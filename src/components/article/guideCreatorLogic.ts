@@ -1,0 +1,989 @@
+import { guidesApi, eventsApi, interviewsApi, flippersApi, authorsApi } from "@/lib/api/api";
+import { app } from "../../lib/firebase/client";
+import {
+  detectVideoProvider,
+  getVideoEmbedUrl as resolveVideoEmbedUrl,
+  normalizeVideoBlock,
+} from "@/lib/utils/video";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+
+const storage = getStorage(app);
+
+const createBlock = (type, data) => ({ type, ...data });
+const TIP_TYPES = ["location", "time", "money", "idea", "like", "dislike"] as const;
+type TipType = (typeof TIP_TYPES)[number];
+type TipItem = { type: TipType; text: string };
+
+export default function guideCreatorLogic(initialState = {}) {
+  const {
+    categoryTags = {},
+    initialArticle = null,
+    articleId = null,
+    isEditMode = false,
+    onSaveRedirect = null,
+    ...restInitialState
+  } = initialState as {
+    categoryTags?: Record<string, Array<{ title: string; value: string }>>;
+    initialArticle?: Record<string, unknown> | null;
+    articleId?: string | null;
+    isEditMode?: boolean;
+    onSaveRedirect?: string | null;
+  };
+
+  const categoryLabels: Record<string, string> = {
+    culture: "Культура",
+    paris: "Париж",
+    hotContent: "Самое Читаемое",
+  };
+
+  const categoryMapLegacy: Record<string, string> = Object.fromEntries(
+    Object.entries(categoryLabels).map(([key, label]) => [label, key]),
+  );
+
+  const normalizeCategory = (value?: string) => {
+    if (!value) {
+      return value;
+    }
+    return categoryMapLegacy[value] || value;
+  };
+
+  const buildLegacyTagMap = (category?: string) => {
+    if (!category) {
+      return {};
+    }
+    const tags = categoryTags[category];
+    if (!tags) {
+      return {};
+    }
+    return Object.fromEntries(tags.map((tag) => [tag.title, tag.value]));
+  };
+
+  const slugifyTag = (value: string) => {
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+  };
+
+  const normalizeTags = (tags?: string[], category?: string) => {
+    if (!Array.isArray(tags)) {
+      return [];
+    }
+    const legacyMap = buildLegacyTagMap(category);
+    const deduped = new Set<string>();
+    const normalized: string[] = [];
+
+    for (const rawTag of tags) {
+      if (typeof rawTag !== "string") {
+        continue;
+      }
+      const trimmed = rawTag.trim();
+      if (!trimmed) {
+        continue;
+      }
+      const mapped = legacyMap[trimmed] || trimmed;
+      if (!deduped.has(mapped)) {
+        deduped.add(mapped);
+        normalized.push(mapped);
+      }
+    }
+
+    return normalized;
+  };
+
+  const normalizeTechTags = (tags?: string[]) => {
+    if (!Array.isArray(tags)) {
+      return [];
+    }
+    const deduped = new Set<string>();
+    const normalized: string[] = [];
+    for (const rawTag of tags) {
+      if (typeof rawTag !== "string") {
+        continue;
+      }
+      const slug = slugifyTag(rawTag);
+      if (!slug || deduped.has(slug)) {
+        continue;
+      }
+      deduped.add(slug);
+      normalized.push(slug);
+    }
+    return normalized;
+  };
+
+  const normalizeContentBlocks = (blocks?: unknown) => {
+    if (!Array.isArray(blocks)) {
+      return [];
+    }
+    return blocks.map((block) => {
+      if (!block || typeof block !== "object") {
+        return block;
+      }
+      return (block as { type?: string }).type === "video"
+        ? normalizeVideoBlock(block as any)
+        : block;
+    });
+  };
+
+  const normalizeLoadedGuide = (data: any) => {
+    if (!data || typeof data !== "object") {
+      return null;
+    }
+    const copy = JSON.parse(JSON.stringify(data));
+    const normalizedCategory = normalizeCategory(copy.category);
+    const isHotContentLegacy =
+      Boolean(copy.isHotContent) || normalizedCategory === "hotContent";
+    copy.category =
+      isHotContentLegacy && normalizedCategory === "hotContent"
+        ? ""
+        : normalizedCategory;
+    copy.isHotContent = isHotContentLegacy;
+    const blocks = Array.isArray(copy.content)
+      ? copy.content
+      : Array.isArray(copy.contentBlocks)
+        ? copy.contentBlocks
+        : [];
+    copy.contentBlocks = normalizeContentBlocks(blocks);
+    copy.content = copy.contentBlocks;
+    copy.tags = normalizeTags(copy.tags, copy.category);
+    copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
+    copy.tips = normalizeTips(copy.tips);
+    copy.imageCaption = copy.imageCaption ?? "";
+    return copy;
+  };
+
+  const normalizeTips = (tips?: unknown): TipItem[] => {
+    if (!Array.isArray(tips)) {
+      return [];
+    }
+    const deduped = new Set<TipType>();
+    const normalized: TipItem[] = [];
+    for (const rawItem of tips) {
+      if (!rawItem || typeof rawItem !== "object") {
+        continue;
+      }
+      const typeValue = (rawItem as { type?: string }).type;
+      if (!typeValue || !TIP_TYPES.includes(typeValue as TipType)) {
+        continue;
+      }
+      const type = typeValue as TipType;
+      if (deduped.has(type)) {
+        continue;
+      }
+      const text =
+        typeof (rawItem as { text?: string }).text === "string"
+          ? (rawItem as { text?: string }).text!.trim()
+          : "";
+      if (!text) {
+        continue;
+      }
+      deduped.add(type);
+      normalized.push({ type, text });
+    }
+    return normalized;
+  };
+
+  return {
+    article: {
+      title: "",
+      lead: "",
+      imageUrl: "",
+      imageCaption: "",
+      contentBlocks: [],
+      tags: [],
+      techTags: [],
+      tips: [] as TipItem[],
+      category: "",
+      isHotContent: false,
+      isOnLanding: false,
+      isMainInCategory: false,
+    },
+
+    contentListsLoading: false,
+    allArticles: [],
+    allEvents: [],
+    allInterviews: [],
+    allFlippers: [],
+    authorsLoading: false,
+    authors: [],
+    selectedAuthorId: "",
+    useNewAuthor: false,
+    newAuthorFirstName: "",
+    newAuthorLastName: "",
+
+    showBlockOptions: false,
+
+    editingIndex: null,
+    editingBlock: null,
+
+    isEditingTitle: false,
+    editingTitleText: "",
+
+    isEditingCaption: false,
+    editingCaptionText: "",
+
+    uploading: false,
+    uploadProgress: 0,
+
+    categoryTags,
+    articleId,
+    isEditMode,
+    onSaveRedirect,
+    newTagInput: "",
+
+    categoryLabels,
+    tipOptions: [
+      { type: "location" as TipType, label: "Локация" },
+      { type: "time" as TipType, label: "Время" },
+      { type: "money" as TipType, label: "Стоимость" },
+      { type: "idea" as TipType, label: "Идея" },
+      { type: "like" as TipType, label: "Плюсы" },
+      { type: "dislike" as TipType, label: "Минусы" },
+    ],
+    getCategoryLabel(value?: string) {
+      if (!value) {
+        return "Category";
+      }
+      return this.categoryLabels[value] || value;
+    },
+    normalizeContentBlocks(blocks) {
+      return normalizeContentBlocks(blocks);
+    },
+    getVideoProvider(url: string, sourceType = "embed") {
+      return detectVideoProvider(url, sourceType);
+    },
+    getVideoEmbedUrl(url: string) {
+      return resolveVideoEmbedUrl(url);
+    },
+    normalizeEditableVideoBlock(block) {
+      return normalizeVideoBlock(block);
+    },
+    validateVideoBlock(block, showToast = true) {
+      if (!block || block.type !== "video") {
+        return true;
+      }
+      const normalized = normalizeVideoBlock(block);
+      if (!normalized.url) {
+        if (showToast) {
+          window.Alpine?.store("ui")?.showToast?.(
+            "Для видео-блока добавь файл или ссылку.",
+            "error",
+          );
+        }
+        return false;
+      }
+      if (
+        normalized.sourceType === "embed" &&
+        !resolveVideoEmbedUrl(normalized.url)
+      ) {
+        if (showToast) {
+          window.Alpine?.store("ui")?.showToast?.(
+            "Поддерживаются только ссылки YouTube и Vimeo.",
+            "error",
+          );
+        }
+        return false;
+      }
+      return true;
+    },
+    getAvailableTags() {
+      if (!this.article?.category) {
+        return [];
+      }
+      return this.categoryTags[this.article.category] || [];
+    },
+    getTagLabel(value: string) {
+      const availableForCurrent = this.getAvailableTags();
+      const match = availableForCurrent.find((tag) => tag.value === value);
+      if (match) {
+        return match.title;
+      }
+      for (const tags of Object.values(this.categoryTags)) {
+        const found = tags.find((tag) => tag.value === value);
+        if (found) {
+          return found.title;
+        }
+      }
+      return value;
+    },
+    isTagSelected(value: string) {
+      return this.article.tags.includes(value);
+    },
+    toggleTag(value: string) {
+      const normalized = normalizeTags([value], this.article.category)[0] || value;
+      const idx = this.article.tags.indexOf(normalized);
+      if (idx >= 0) {
+        this.article.tags.splice(idx, 1);
+      } else {
+        this.article.tags.push(normalized);
+        const techIdx = this.article.techTags.indexOf(normalized);
+        if (techIdx >= 0) {
+          this.article.techTags.splice(techIdx, 1);
+        }
+      }
+      this.article.tags = normalizeTags(this.article.tags, this.article.category);
+    },
+    removeTag(value: string) {
+      const idx = this.article.tags.indexOf(value);
+      if (idx >= 0) {
+        this.article.tags.splice(idx, 1);
+      }
+    },
+    addCustomTag() {
+      const slug = slugifyTag(this.newTagInput);
+      if (!slug) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Введи тег латиницей — это значение уходит в базу данных.",
+          "error",
+        );
+        return;
+      }
+      if (this.article.tags.includes(slug)) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Такой тег уже выбран.",
+          "info",
+        );
+        this.newTagInput = "";
+        return;
+      }
+      if (this.article.techTags.includes(slug)) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Такой техтег уже есть.",
+          "info",
+        );
+        this.newTagInput = "";
+        return;
+      }
+      this.article.techTags.push(slug);
+      this.article.techTags = normalizeTechTags(this.article.techTags);
+      this.newTagInput = "";
+    },
+    removeTechTag(value: string) {
+      const idx = this.article.techTags.indexOf(value);
+      if (idx >= 0) {
+        this.article.techTags.splice(idx, 1);
+      }
+    },
+    handleCategoryChange(value: string) {
+      this.article.category = value;
+      this.article.tags = normalizeTags(this.article.tags, value);
+      this.article.techTags = normalizeTechTags(this.article.techTags);
+    },
+    isTipSelected(type: TipType) {
+      return this.article.tips.some((tip: TipItem) => tip.type === type);
+    },
+    toggleTip(type: TipType) {
+      const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
+      if (idx >= 0) {
+        this.article.tips.splice(idx, 1);
+      } else {
+        this.article.tips.push({ type, text: "" });
+      }
+    },
+    getTipText(type: TipType) {
+      const tip = this.article.tips.find((item: TipItem) => item.type === type);
+      return tip?.text ?? "";
+    },
+    setTipText(type: TipType, value: string) {
+      const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
+      if (idx < 0) {
+        return;
+      }
+      this.article.tips[idx].text = value;
+    },
+    getAuthorLabel(author: any) {
+      const firstName =
+        typeof author?.firstName === "string" ? author.firstName.trim() : "";
+      const lastName =
+        typeof author?.lastName === "string" ? author.lastName.trim() : "";
+      return `${firstName} ${lastName}`.trim();
+    },
+    ensureSelectedAuthorPresent() {
+      if (!this.selectedAuthorId) {
+        return;
+      }
+      const alreadyExists = this.authors.some(
+        (author: any) => author.id === this.selectedAuthorId,
+      );
+      if (alreadyExists) {
+        return;
+      }
+      const fallbackAuthor = this.article?.author;
+      if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
+        this.authors.unshift({
+          id: this.selectedAuthorId,
+          firstName: fallbackAuthor.firstName || "",
+          lastName: fallbackAuthor.lastName || "",
+          role: fallbackAuthor.role || "author",
+          avatar: fallbackAuthor.avatar || "",
+        });
+      }
+    },
+    async loadAuthors() {
+      this.authorsLoading = true;
+      try {
+        const authors = await authorsApi.list();
+        this.authors = Array.isArray(authors) ? authors : [];
+        this.ensureSelectedAuthorPresent();
+      } catch (error) {
+        console.error("Failed to fetch authors:", error);
+      } finally {
+        this.authorsLoading = false;
+      }
+    },
+    async resolveAuthorId() {
+      if (this.useNewAuthor) {
+        const firstName = this.newAuthorFirstName.trim();
+        const lastName = this.newAuthorLastName.trim();
+        if (!firstName || !lastName) {
+          throw new Error("Заполни имя и фамилию нового автора.");
+        }
+        const createdAuthor = await authorsApi.create({ firstName, lastName });
+        this.authors.unshift(createdAuthor);
+        this.selectedAuthorId = createdAuthor.id;
+        this.useNewAuthor = false;
+        this.newAuthorFirstName = "";
+        this.newAuthorLastName = "";
+        return createdAuthor.id;
+      }
+      if (!this.selectedAuthorId) {
+        throw new Error("Выбери автора из списка или создай нового.");
+      }
+      return this.selectedAuthorId;
+    },
+
+    async fetchContentLists() {
+      this.contentListsLoading = true;
+      try {
+        const [articles, events, interviews, flippers] = await Promise.all([
+          guidesApi.list(),
+          eventsApi.list(),
+          interviewsApi.list(),
+          flippersApi.list(),
+        ]);
+        this.allArticles = articles;
+        this.allEvents = events;
+        this.allInterviews = interviews;
+        this.allFlippers = flippers;
+      } catch (error) {
+        console.error("Failed to fetch content lists:", error);
+        window.Alpine?.store("ui")?.showToast?.(
+          "Не удалось загрузить списки контента для ссылок.",
+          "error",
+        );
+      } finally {
+        this.contentListsLoading = false;
+      }
+    },
+
+    getFilteredContentList(contentType) {
+      switch (contentType) {
+        case "article":
+          return this.allArticles;
+        case "event":
+          return this.allEvents;
+        case "interview":
+          return this.allInterviews;
+        case "flipper":
+          return this.allFlippers;
+        default:
+          return [];
+      }
+    },
+
+    init() {
+      type PreviewState = {
+        article?: unknown;
+        articleId?: string | null;
+        isEditMode?: boolean;
+      };
+      let previewState: PreviewState | null = null;
+
+      if (typeof window !== "undefined") {
+        try {
+          const stored = window.localStorage?.getItem("guidePreview");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && typeof parsed === "object") {
+              if ("article" in parsed || "articleId" in parsed || "isEditMode" in parsed) {
+                previewState = parsed as PreviewState;
+              } else {
+                previewState = { article: parsed } as PreviewState;
+              }
+            } else {
+              previewState = { article: parsed } as PreviewState;
+            }
+          }
+        } catch (error) {
+          console.error("Failed to parse preview draft:", error);
+        }
+      }
+
+      if (initialArticle) {
+        const normalizedInitial = normalizeLoadedGuide(initialArticle);
+        if (normalizedInitial) {
+          this.article = normalizedInitial;
+        }
+      }
+
+      if (articleId) {
+        this.articleId = articleId;
+        this.isEditMode = true;
+      }
+      if (typeof isEditMode === "boolean") {
+        this.isEditMode = isEditMode;
+      }
+      if (onSaveRedirect) {
+        this.onSaveRedirect = onSaveRedirect;
+      }
+
+      const shouldApplyPreview = (() => {
+        if (!previewState?.article) {
+          return false;
+        }
+        if (this.isPreview) {
+          return true;
+        }
+        const previewId =
+          typeof previewState.articleId === "string" && previewState.articleId
+            ? previewState.articleId
+            : null;
+        const isPreviewEdit = Boolean(previewState?.isEditMode);
+        const isSameEdit =
+          this.isEditMode && previewId !== null && previewId === this.articleId;
+        const isCreateDraft =
+          !this.isEditMode && !previewId && !isPreviewEdit;
+        return isSameEdit || isCreateDraft;
+      })();
+
+      if (shouldApplyPreview && previewState?.article) {
+        const normalizedPreview = normalizeLoadedGuide(previewState.article);
+        if (normalizedPreview) {
+          if (this.isPreview) {
+            this.article = normalizedPreview;
+            if (typeof previewState.articleId === "string" && previewState.articleId) {
+              this.articleId = previewState.articleId;
+            }
+            if (typeof previewState.isEditMode === "boolean") {
+              this.isEditMode = previewState.isEditMode;
+            }
+          } else {
+            Object.assign(this.article, normalizedPreview);
+          }
+        }
+      } else if (previewState) {
+        try {
+          window.localStorage?.removeItem("guidePreview");
+        } catch (error) {
+          console.warn("Failed to cleanup mismatched preview draft:", error);
+        }
+      }
+
+      this.article.tags = this.article.tags ?? [];
+      this.article.techTags = this.article.techTags ?? [];
+      this.article.tips = normalizeTips(this.article.tips);
+      this.article.lead = this.article.lead ?? "";
+      this.article.isHotContent = Boolean(this.article.isHotContent);
+      this.article.isOnLanding = Boolean(this.article.isOnLanding);
+      this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
+      this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
+        ? normalizeContentBlocks(this.article.contentBlocks)
+        : [];
+      this.selectedAuthorId =
+        typeof this.article.authorId === "string" ? this.article.authorId : "";
+      this.ensureSelectedAuthorPresent();
+
+      this.fetchContentLists();
+      this.loadAuthors();
+    },
+
+    editTitle() {
+      this.isEditingTitle = true;
+      this.editingTitleText = this.article.title;
+    },
+    saveTitle() {
+      this.article.title = this.editingTitleText;
+      this.isEditingTitle = false;
+    },
+    cancelEditTitle() {
+      this.isEditingTitle = false;
+    },
+
+    editCaption() {
+      this.isEditingCaption = true;
+      this.editingCaptionText = this.article.imageCaption;
+    },
+    saveCaption() {
+      this.article.imageCaption = this.editingCaptionText;
+      this.isEditingCaption = false;
+    },
+    cancelEditCaption() {
+      this.isEditingCaption = false;
+    },
+
+    handleImageUpload(event, isCover = true, blockIndex = null, column = null) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.uploading = true;
+      this.uploadProgress = 0;
+
+      const storageRef = ref(storage, `guides/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          this.uploadProgress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          window.Alpine.store("ui").showToast(
+            `Проблема загрузки картинки: ${error.message}`,
+            "error",
+          );
+          this.uploading = false;
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            if (isCover) {
+              this.article.imageUrl = downloadURL;
+            } else if (blockIndex !== null && this.editingBlock) {
+              if (this.editingBlock.type === "image") {
+                this.editingBlock.url = downloadURL;
+              } else if (this.editingBlock.type === "two-columns" && column) {
+                this.editingBlock[column].content = downloadURL;
+                this.editingBlock[column].type = 'image';
+              }
+            }
+            this.uploading = false;
+            window.Alpine.store("ui").showToast("Картинка успешно загружена!");
+          });
+        },
+      );
+    },
+
+    handleVideoUpload(event, blockIndex = null) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.uploading = true;
+      this.uploadProgress = 0;
+
+      const storageRef = ref(storage, `guides/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          this.uploading = true;
+          this.uploadProgress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          window.Alpine.store("ui").showToast(
+            `Проблема загрузки видео: ${error.message}`,
+            "error",
+          );
+          this.uploading = false;
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            if (
+              blockIndex !== null &&
+              this.editingBlock &&
+              this.editingBlock.type === "video"
+            ) {
+              this.editingBlock.sourceType = "upload";
+              this.editingBlock.url = downloadURL;
+              this.editingBlock.provider = "upload";
+            }
+            this.uploading = false;
+            window.Alpine.store("ui").showToast("Видео успешно загружено!");
+          });
+        },
+      );
+    },
+
+    handleFlipperSlideUpload(event, slideIndex: number) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.uploading = true;
+      this.uploadProgress = 0;
+
+      const storageRef = ref(storage, `guides/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          this.uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          window.Alpine.store("ui").showToast(`Проблема загрузки картинки: ${error.message}`, "error");
+          this.uploading = false;
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            if (this.editingBlock?.slides?.[slideIndex] !== undefined) {
+              this.editingBlock.slides[slideIndex].imageUrl = downloadURL;
+            }
+            this.uploading = false;
+            window.Alpine.store("ui").showToast("Картинка успешно загружена!");
+          });
+        },
+      );
+    },
+
+    openBlockSelector() {
+      this.showBlockOptions = true;
+    },
+
+    addBlock(type) {
+      let newBlockData = {};
+      switch (type) {
+        case "paragraph":
+        case "first-paragraph":
+        case "h2":
+        case "h3":
+        case "quote":
+          newBlockData = { text: "" };
+          break;
+        case "image":
+          newBlockData = { url: "", caption: "" };
+          break;
+        case "video":
+          newBlockData = {
+            sourceType: "embed",
+            url: "",
+            caption: "",
+            provider: "unknown",
+          };
+          break;
+        case "two-columns":
+          newBlockData = {
+            left: { type: "text", content: "", caption: "" },
+            right: { type: "text", content: "", caption: "" },
+          };
+          break;
+        case "link":
+          newBlockData = {
+            text: "",
+            linkedContentType: "article",
+            linkedContentId: "",
+            linkedContentTitle: "",
+          };
+          break;
+        case "flipper":
+          newBlockData = {
+            slides: [{ imageUrl: "", caption: "" }],
+          };
+          break;
+        default:
+          break;
+      }
+
+      const newBlock = createBlock(type, newBlockData);
+      this.article.contentBlocks.push(newBlock);
+      this.showBlockOptions = false;
+
+      this.editBlock(this.article.contentBlocks.length - 1);
+    },
+
+    editBlock(index) {
+      this.editingIndex = index;
+      this.editingBlock = JSON.parse(
+        JSON.stringify(this.article.contentBlocks[index]),
+      );
+      if (this.editingBlock?.type === "video") {
+        this.editingBlock = normalizeVideoBlock(this.editingBlock);
+      }
+    },
+
+    updateBlock() {
+      if (this.editingIndex !== null) {
+        if (this.editingBlock?.type === "video") {
+          this.editingBlock = normalizeVideoBlock(this.editingBlock);
+          if (!this.validateVideoBlock(this.editingBlock)) {
+            return;
+          }
+        }
+        this.article.contentBlocks[this.editingIndex] = this.editingBlock;
+        this.cancelEdit();
+      }
+    },
+
+    cancelEdit() {
+      this.editingIndex = null;
+      this.editingBlock = null;
+    },
+
+    deleteBlock(index) {
+      const removeBlock = () => {
+        this.article.contentBlocks.splice(index, 1);
+      };
+
+      const uiStore = window.Alpine?.store?.("ui");
+      if (uiStore?.showConfirmation) {
+        uiStore.showConfirmation("Ты точно хочешь удалить этот блок?", removeBlock);
+      } else {
+        removeBlock();
+      }
+    },
+
+    returnToEdit() {
+      const target =
+        this.isEditMode && this.articleId
+          ? `/dashboard/guide/${this.articleId}/edit`
+          : "/dashboard/guide/create";
+      window.location.href = target;
+    },
+
+    previewArticle() {
+      const previewState = {
+        article: this.article,
+        articleId: this.articleId,
+        isEditMode: this.isEditMode,
+      };
+      localStorage.setItem("guidePreview", JSON.stringify(previewState));
+      window.location.href = "/dashboard/guide/preview";
+    },
+
+    async saveArticle() {
+      const normalizedCategory = normalizeCategory(this.article.category) || "";
+      const isHotContentFlag =
+        Boolean(this.article.isHotContent) ||
+        normalizedCategory === "hotContent";
+      this.article.isHotContent = isHotContentFlag;
+      this.article.category =
+        isHotContentFlag && normalizedCategory === "hotContent"
+          ? ""
+          : normalizedCategory;
+      this.article.contentBlocks = normalizeContentBlocks(
+        this.article.contentBlocks,
+      );
+      this.article.tags = normalizeTags(this.article.tags, this.article.category);
+      this.article.techTags = normalizeTechTags(this.article.techTags);
+      this.article.tips = normalizeTips(this.article.tips);
+
+      const hasInvalidVideoBlock = this.article.contentBlocks.some(
+        (block) => !this.validateVideoBlock(block),
+      );
+      if (hasInvalidVideoBlock) {
+        return;
+      }
+
+      if (!this.article.category && !this.article.isHotContent) {
+        window.Alpine.store("ui").showToast(
+          "Выбери категорию перед сохранением — это обязательное поле.",
+          "error",
+        );
+        return;
+      }
+
+      const hasTags =
+        Array.isArray(this.article.tags) && this.article.tags.length > 0;
+      const hasTechTags =
+        Array.isArray(this.article.techTags) &&
+        this.article.techTags.length > 0;
+
+      if (!hasTags && !hasTechTags) {
+        window.Alpine.store("ui").showToast(
+          "Добавь хотя бы один тег или техтег — без них путеводитель не сохранится.",
+          "error",
+        );
+        return;
+      }
+
+      if (!this.article.imageUrl) {
+        window.Alpine.store("ui").showToast(
+          "Загрузи обложку путеводителя - обязательно!!!",
+          "error",
+        );
+        return;
+      }
+
+      try {
+        const resolvedAuthorId = await this.resolveAuthorId();
+        const tagsForDb = this.article.tags.map((tag) => this.getTagLabel(tag));
+        const payload = {
+          title: this.article.title,
+          lead: this.article.lead,
+          imageUrl: this.article.imageUrl,
+          imageCaption: this.article.imageCaption,
+          authorId: resolvedAuthorId,
+          content: this.article.contentBlocks,
+          category: this.article.category,
+          tags: tagsForDb,
+          techTags: this.article.techTags,
+          tips: this.article.tips,
+          isHotContent: this.article.isHotContent,
+          isOnLanding: this.article.isOnLanding,
+          isMainInCategory: this.article.isMainInCategory,
+        };
+
+        if (this.isEditMode && this.articleId) {
+          await guidesApi.update(this.articleId, payload);
+          window.Alpine.store("ui").showToast("Путеводитель успешно обновлён!");
+          localStorage.removeItem("guidePreview");
+          const redirectTo = this.onSaveRedirect || `/dashboard/guide/${this.articleId}/edit`;
+          window.location.href = redirectTo;
+        } else {
+          const result = await guidesApi.create(payload);
+          window.Alpine.store("ui").showToast("Путеводитель успешно создан! Молодец!");
+          localStorage.removeItem("guidePreview");
+          window.location.href = `/guide/${result.id}`;
+        }
+      } catch (error) {
+        console.error("Проблемка сохранения:", error);
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Во время сохранения путеводителя возникла ошибочка.";
+        window.Alpine.store("ui").showToast(message, "error");
+      }
+    },
+
+    ...restInitialState,
+
+    deleteArticle(redirectUrl) {
+      if (!this.articleId) return;
+
+      const performDelete = async () => {
+        try {
+          await guidesApi.delete(this.articleId);
+          window.Alpine.store("ui").showToast("Путеводитель удалён");
+          setTimeout(() => {
+            window.location.href = redirectUrl || '/dashboard/guides';
+          }, 1500);
+        } catch (error) {
+          console.error(error);
+          window.Alpine.store("ui").showToast("Не удалось удалить путеводитель.", "error");
+        }
+      };
+
+      const uiStore = window.Alpine?.store?.("ui");
+      if (uiStore?.showConfirmation) {
+        uiStore.showConfirmation(
+          `Удалить путеводитель «${this.article.title}»? Это действие необратимо.`,
+          performDelete
+        );
+      } else {
+        if (confirm("Вы уверены, что хотите удалить этот путеводитель?")) {
+          performDelete();
+        }
+      }
+    },
+  };
+}

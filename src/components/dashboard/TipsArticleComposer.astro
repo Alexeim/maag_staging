@@ -3,6 +3,8 @@ import Button from "@/components/common/Button.astro";
 import { CloudUpload } from "lucide-astro";
 import cultureTags from "@/content/tags/CultureTags.json";
 import parisTags from "@/content/tags/ParisTags.json";
+import locationIcon from "@/assets/icons/new/location.svg?raw";
+import timeIcon from "@/assets/icons/new/time.svg?raw";
 
 interface Props {
   heading: string;
@@ -293,33 +295,63 @@ const allParisTags = parisTags.parisTags;
 
     <div class="space-y-4">
       <template x-for="(block, index) in article.contentBlocks" :key="index">
-        <div class="border border-base-300 rounded-xl bg-base-100 overflow-hidden">
+        <div>
 
-          <!-- Collapsed preview -->
+          <!-- Collapsed preview — card layout matching public page -->
           <template x-if="editingIndex !== index">
-            <div class="flex items-center gap-4 px-4 py-3">
-              <span class="text-base-content/40 text-sm font-mono w-6 text-center" x-text="index + 1"></span>
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold truncate" x-text="block.heading || '(без заголовка)'"></p>
-                <p class="text-sm text-base-content/50 truncate" x-text="block.text || '(нет текста)'"></p>
+            <div>
+              <!-- Card preview -->
+              <div class="flex flex-col sm:flex-row gap-6 py-6">
+                <!-- Left: image -->
+                <template x-if="block.imageUrl">
+                  <div class="sm:w-[42%] shrink-0 bg-base-200">
+                    <img
+                      :src="block.imageUrl"
+                      :alt="block.heading || 'Фото'"
+                      class="w-full h-full object-cover"
+                      style="min-height:160px; max-height:220px;"
+                    />
+                  </div>
+                </template>
+                <!-- Right: content -->
+                <div class="flex flex-col justify-start gap-2 p-4" :class="block.imageUrl ? 'sm:w-[58%]' : 'w-full'">
+                  <p class="font-bold font-oswald tracking-wide leading-snug" x-text="block.heading || '(без заголовка)'"></p>
+                  <template x-if="block.meta1">
+                    <p class="flex items-center gap-1.5 text-xs text-base-content/60 font-oswald">
+                      <span class="opacity-50" set:html={locationIcon} />
+                      <span x-text="block.meta1"></span>
+                    </p>
+                  </template>
+                  <template x-if="block.meta2">
+                    <p class="flex items-center gap-1.5 text-xs text-base-content/60 font-oswald">
+                      <span class="opacity-50" set:html={timeIcon} />
+                      <span x-text="block.meta2"></span>
+                    </p>
+                  </template>
+                  <p class="text-xs text-base-content/50 font-oswald font-thin line-clamp-2" x-show="block.text" x-text="block.text"></p>
+                </div>
               </div>
-              <div class="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  @click="moveBlock(index, 'up')"
-                  :disabled="index === 0"
-                  class="p-1 rounded hover:bg-base-200 disabled:opacity-30 cursor-pointer"
-                  title="Вверх"
-                >↑</button>
-                <button
-                  type="button"
-                  @click="moveBlock(index, 'down')"
-                  :disabled="index === article.contentBlocks.length - 1"
-                  class="p-1 rounded hover:bg-base-200 disabled:opacity-30 cursor-pointer"
-                  title="Вниз"
-                >↓</button>
-                <Button variant="outline" size="sm" @click="editBlock(index)">Редактировать</Button>
-                <Button variant="error" size="sm" @click="deleteBlock(index)">Удалить</Button>
+              <!-- Controls row -->
+              <div class="flex items-center justify-between gap-2 px-4 py-2 border-t border-base-300 bg-base-200/40">
+                <span class="text-base-content/40 text-xs font-mono" x-text="'#' + (index + 1)"></span>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    @click="moveBlock(index, 'up')"
+                    :disabled="index === 0"
+                    class="p-1 rounded hover:bg-base-200 disabled:opacity-30 cursor-pointer"
+                    title="Вверх"
+                  >↑</button>
+                  <button
+                    type="button"
+                    @click="moveBlock(index, 'down')"
+                    :disabled="index === article.contentBlocks.length - 1"
+                    class="p-1 rounded hover:bg-base-200 disabled:opacity-30 cursor-pointer"
+                    title="Вниз"
+                  >↓</button>
+                  <Button variant="outline" size="sm" @click="editBlock(index)">Редактировать</Button>
+                  <Button variant="error" size="sm" @click="deleteBlock(index)">Удалить</Button>
+                </div>
               </div>
             </div>
           </template>
@@ -447,6 +479,7 @@ const allParisTags = parisTags.parisTags;
               </div>
             </div>
           </template>
+          <hr x-show="index < article.contentBlocks.length - 1" class="border-base-300 my-2" />
         </div>
       </template>
     </div>

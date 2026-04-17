@@ -18,6 +18,8 @@ const components: Record<string, () => Promise<any>> = {
   newsList: () => import('@/components/dashboard/newsListLogic'),
   subscriptionManager: () => import('@/components/profile/subscriptionLogic'),
   tipsArticleCreator: () => import('@/components/dashboard/tipsArticleCreatorLogic'),
+  guideCreator: () => import('@/components/article/guideCreatorLogic'),
+  guideList: () => import('@/components/dashboard/guideListLogic'),
 };
 
 export default function(Alpine: Alpine) {

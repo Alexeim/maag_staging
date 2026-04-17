@@ -1,0 +1,24 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import GuideComposer from "@/components/dashboard/GuideComposer.astro";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+
+const guideCreatorState = JSON.stringify({
+  categoryTags: {
+    culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
+  },
+  isEditMode: false,
+  onSaveRedirect: "/dashboard/guides",
+});
+---
+
+<DashboardLayout title="Создать путеводитель" active="create-guide">
+  <GuideComposer
+    heading="Создать новый путеводитель"
+    submitLabel="Сохранить путеводитель"
+    guideCreatorState={guideCreatorState}
+    cancelHref="/dashboard/guides"
+  />
+</DashboardLayout>

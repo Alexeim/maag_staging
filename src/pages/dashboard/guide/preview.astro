@@ -1,0 +1,199 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import SocialShare from "@/components/article/SocialShare.astro";
+import Button from "@/components/common/Button.astro";
+import articleData from "@/content/articlePage/RU/Article.json";
+---
+
+<DashboardLayout title="Предпросмотр путеводителя" active="guides">
+  <div
+    id="preview-container"
+    class="max-w-[1512px] mx-auto"
+    x-data="$lazy('guideCreator', { isPreview: true })"
+  >
+    <div class="bg-base-100 border border-base-300 rounded-xl shadow-sm">
+      <div class="px-6 py-6 border-b border-base-300 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold">Предпросмотр путеводителя</h1>
+          <p class="text-sm text-base-content/70 mt-1">
+            Используй кнопки внизу, чтобы вернуться к редактированию или сохранить материал.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <Button variant="secondary" @click="returnToEdit()">Вернуться к редактированию</Button>
+          <Button variant="primary" @click="saveArticle()">Сохранить путеводитель</Button>
+        </div>
+      </div>
+
+      <main class="bg-base-100">
+        <div class="pt-16 pb-20 flex flex-col items-center gap-16">
+          <div class="flex flex-col gap-8 max-w-[825px] w-full px-6">
+            <div>
+              <p
+                class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter'] mb-2"
+                x-text="getCategoryLabel(article.category)">
+              </p>
+              <h1
+                class="text-3xl lg:text-[44px] leading-tight lg:leading-[1.28] font-oswald text-base-content w-full"
+                x-text="article.title">
+              </h1>
+              <p
+                x-show="article.lead"
+                x-text="article.lead"
+                class="text-lg lg:text-xl text-base-content/80 font-oswald font-thin leading-relaxed mt-4">
+              </p>
+            </div>
+            <ArticleAuthor
+              name={articleData.author.name}
+              avatarUrl={articleData.author.avatarUrl}
+            />
+            <SocialShare readTime={5} />
+          </div>
+
+          <template x-if="article.imageUrl">
+            <figure class="w-full max-w-[1200px] px-6">
+              <img
+                :src="article.imageUrl"
+                alt="Guide Image Preview"
+                class="w-full h-auto rounded-lg shadow-lg"
+              />
+              <figcaption
+                x-show="article.imageCaption"
+                x-text="article.imageCaption"
+                class="text-center text-sm text-base-content/60 mt-2"
+              ></figcaption>
+            </figure>
+          </template>
+        </div>
+
+        <div class="max-w-[1400px] mx-auto px-6 pb-16">
+          <div class="prose lg:prose-xl max-w-[825px] mx-auto">
+            <template x-for="block in article.contentBlocks" :key="block.type + Math.random()">
+              <div class="mb-4">
+                <p
+                  :class="{
+                    'text-lg font-thin': block.type === 'paragraph',
+                    'text-xl first-letter:text-4xl first-letter:font-bold font-thin': block.type === 'first-paragraph',
+                    'text-4xl font-bold': block.type === 'h1',
+                    'text-3xl font-bold': block.type === 'h2',
+                    'text-2xl font-bold': block.type === 'h3',
+                    'text-2xl italic border-l-4 pl-4 my-4 font-thin': block.type === 'quote'
+                  }"
+                  x-text="block.text"
+                  x-show="block.text"
+                ></p>
+
+                <template x-if="block.type === 'image'">
+                  <figure>
+                    <img :src="block.url" alt="Содержимое путеводителя" class="rounded-md w-full">
+                    <figcaption class="text-center text-sm text-base-content/60 mt-2" x-text="block.caption"></figcaption>
+                  </figure>
+                </template>
+
+                <template x-if="block.type === 'video'">
+                  <figure class="space-y-2">
+                    <video
+                      x-show="block.sourceType === 'upload' && block.url"
+                      :src="block.url"
+                      controls
+                      playsinline
+                      class="rounded-md w-full max-h-[620px] bg-black"
+                    ></video>
+                    <div
+                      x-show="block.sourceType === 'embed' && getVideoEmbedUrl(block.url)"
+                      class="w-full aspect-video rounded-md overflow-hidden bg-black"
+                    >
+                      <iframe
+                        :src="getVideoEmbedUrl(block.url)"
+                        class="w-full h-full border-0"
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                      ></iframe>
+                    </div>
+                    <figcaption
+                      x-show="block.caption"
+                      class="text-center text-sm text-base-content/60 mt-2"
+                      x-text="block.caption"
+                    ></figcaption>
+                  </figure>
+                </template>
+
+                <div x-show="block.type === 'two-columns'" x-cloak class="w-full lg:max-w-[900px] my-12 px-4">
+                  <div class="flex flex-col lg:flex-row gap-8 items-center">
+                    <div class="w-full lg:w-1/2 flex justify-center">
+                      <figure x-show="block.left?.type === 'image'" class="flex flex-col items-center">
+                        <img :src="block.left?.content" :alt="block.left?.caption || 'Left column image'" class="article-image" />
+                        <figcaption x-show="block.left?.caption" class="text-center text-sm text-gray-500 mt-2" x-text="block.left?.caption"></figcaption>
+                      </figure>
+                      <p x-show="block.left?.type === 'text'" class="text-lg font-oswald text-justify font-thin" x-text="block.left?.content"></p>
+                    </div>
+                    <div class="w-full lg:w-1/2 flex justify-center">
+                      <figure x-show="block.right?.type === 'image'" class="flex flex-col items-center">
+                        <img :src="block.right?.content" :alt="block.right?.caption || 'Right column image'" class="article-image" />
+                        <figcaption x-show="block.right?.caption" class="text-center text-sm text-gray-500 mt-2" x-text="block.right?.caption"></figcaption>
+                      </figure>
+                      <p x-show="block.right?.type === 'text'" class="text-lg font-oswald text-justify font-thin" x-text="block.right?.content"></p>
+                    </div>
+                  </div>
+                </div>
+
+                <template x-if="block.type === 'flipper'">
+                  <div x-data="{ current: 0 }" class="w-full my-8">
+                    <div class="relative overflow-hidden rounded-lg">
+                      <div
+                        class="flex transition-transform duration-500 ease-in-out"
+                        :style="`transform: translateX(-${current * 100}%)`"
+                      >
+                        <template x-for="(slide, si) in block.slides" :key="si">
+                          <figure class="min-w-full flex flex-col items-center">
+                            <img
+                              :src="slide.imageUrl"
+                              :alt="slide.caption || 'Слайд'"
+                              class="w-full object-cover max-h-[600px]"
+                            />
+                            <figcaption
+                              x-show="slide.caption"
+                              x-text="slide.caption"
+                              class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2 px-4"
+                            ></figcaption>
+                          </figure>
+                        </template>
+                      </div>
+                      <button
+                        type="button"
+                        x-show="block.slides?.length > 1"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-10 h-10 flex items-center justify-center transition cursor-pointer"
+                        @click="current = (current - 1 + block.slides.length) % block.slides.length"
+                        aria-label="Предыдущий слайд"
+                      >‹</button>
+                      <button
+                        type="button"
+                        x-show="block.slides?.length > 1"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-10 h-10 flex items-center justify-center transition cursor-pointer"
+                        @click="current = (current + 1) % block.slides.length"
+                        aria-label="Следующий слайд"
+                      >›</button>
+                    </div>
+                    <div x-show="block.slides?.length > 1" class="flex justify-center gap-2 mt-4">
+                      <template x-for="(slide, si) in block.slides" :key="'dot-' + si">
+                        <button
+                          type="button"
+                          class="w-2 h-2 rounded-full transition cursor-pointer"
+                          :class="current === si ? 'bg-base-content' : 'bg-base-content/30'"
+                          @click="current = si"
+                          :aria-label="'Слайд ' + (si + 1)"
+                        ></button>
+                      </template>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</DashboardLayout>

@@ -1,6 +1,9 @@
 ---
+import locationIcon from "@/assets/icons/new/location.svg?raw";
+import timeIcon from "@/assets/icons/new/time.svg?raw";
+
 interface TipsItemBlock {
-  type: 'tips-item';
+  type: "tips-item";
   heading?: string;
   imageUrl?: string;
   imageCaption?: string;
@@ -17,72 +20,75 @@ interface Props {
 
 const { contentBlocks } = Astro.props;
 
-const items = contentBlocks.filter((b) => b != null && b.type === 'tips-item');
+const items = contentBlocks.filter((b) => b != null && b.type === "tips-item");
 ---
 
-<div class="max-w-[826px] mx-auto space-y-16">
-  {items.map((item, i) => (
-    <article class="flex flex-col gap-5">
+<div class="max-w-[826px] mx-auto">
+  {
+    items.map((item, i) => (
+      <article class="flex flex-col sm:flex-row py-8 gap-6">
+        {/* Left: image */}
+        {item.imageUrl && (
+          <div class="sm:w-[42%] shrink-0">
+            <img
+              src={item.imageUrl}
+              alt={item.imageCaption || item.heading || `Пункт ${i + 1}`}
+              class="w-full h-full object-cover"
+              style="min-height: 200px; max-height: 340px;"
+            />
+          </div>
+        )}
 
-      {/* Heading */}
-      {item.heading && (
-        <h2 class="text-2xl font-bold font-oswald tracking-wide">
-          {item.heading}
-        </h2>
-      )}
-
-      {/* Item image */}
-      {item.imageUrl && (
-        <figure class="flex flex-col items-center">
-          <img
-            src={item.imageUrl}
-            alt={item.imageCaption || item.heading || `Пункт ${i + 1}`}
-            class="w-full rounded-sm object-cover max-h-[500px]"
-          />
-          {item.imageCaption && (
-            <figcaption class="text-center font-oswald text-sm text-gray-500 mt-2">
-              {item.imageCaption}
-            </figcaption>
+        {/* Right: content */}
+        <div
+          class:list={[
+            "flex flex-col justify-start gap-3 p-5",
+            item.imageUrl ? "sm:w-[58%]" : "w-full",
+          ]}
+        >
+          {item.heading && (
+            <h2 class="text-xl font-bold font-oswald tracking-wide leading-snug">
+              {item.heading}
+            </h2>
           )}
-        </figure>
-      )}
+          <hr class="text-gray-300" />
 
-      {/* Meta lines */}
-      <div class="flex flex-col gap-1">
-        {item.meta1 && (
-          <p class="text-sm font-oswald tracking-wide text-base-content/70">
-            {item.meta1}
-          </p>
-        )}
-        {item.meta2 && (
-          <p class="text-sm font-oswald tracking-wide text-base-content/70">
-            {item.meta2IsLink && item.meta2Url ? (
-              <a
-                href={item.meta2Url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="underline hover:text-base-content transition-colors"
-              >
-                {item.meta2}
-              </a>
-            ) : (
-              item.meta2
+          {/* Meta lines */}
+          <div class="flex flex-col gap-1.5">
+            {item.meta1 && (
+              <p class="flex items-center gap-2 text-sm font-oswald tracking-wide text-base-content/70">
+                <span class="shrink-0 opacity-60" set:html={locationIcon} />
+                <span>{item.meta1}</span>
+              </p>
+              <hr class="text-gray-300" />
             )}
-          </p>
-        )}
-      </div>
+            {item.meta2 && (
+              <p class="flex items-center gap-2 text-sm font-oswald tracking-wide text-base-content/70">
+                <span class="shrink-0 opacity-60" set:html={timeIcon} />
+                {item.meta2IsLink && item.meta2Url ? (
+                  <a
+                    href={item.meta2Url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="underline hover:text-base-content transition-colors"
+                  >
+                    {item.meta2}
+                  </a>
+                ) : (
+                  <span>{item.meta2}</span>
+                )}
+              </p>
+              <hr class="text-gray-300" />
+            )}
+          </div>
 
-      {/* Body text */}
-      {item.text && (
-        <p class="text-lg font-oswald text-justify font-thin tracking-wide">
-          {item.text}
-        </p>
-      )}
-
-      {/* Separator between items (not after the last one) */}
-      {i < items.length - 1 && (
-        <hr class="border-base-300 mt-4" />
-      )}
-    </article>
-  ))}
+          {item.text && (
+            <p class="text-sm font-oswald font-thin tracking-wide leading-relaxed text-base-content/80 mt-1">
+              {item.text}
+            </p>
+          )}
+        </div>
+      </article>
+    ))
+  }
 </div>
