@@ -94,7 +94,9 @@ const isHotContent = (item: any) =>
 
 const isLandingHotContentItem = (item: any) =>
   isHotContent(item) &&
-  LANDING_HOT_CONTENT_CATEGORY_KEYS.has(normalizeCategory(item?.category) || "");
+  LANDING_HOT_CONTENT_CATEGORY_KEYS.has(
+    normalizeCategory(item?.category) || "",
+  );
 
 const isMainInCategoryItem = (item: any) =>
   item?.isMainInCategory === true ||
@@ -251,7 +253,9 @@ try {
       href: toContentHref({ ...guide, type: "guide" }),
     })),
   ]
-    .sort((a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime())
+    .sort(
+      (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
+    )
     .filter((item) => isLandingHotContentItem(item))
     .slice(0, 6);
   latestInterview = interviews[0] ?? null;
@@ -269,7 +273,9 @@ const cultureCardItems = cultureItems
   .slice(0, 3);
 
 const parisHero =
-  parisItems.find((item) => isMainInCategoryItem(item)) ?? parisItems[0] ?? null;
+  parisItems.find((item) => isMainInCategoryItem(item)) ??
+  parisItems[0] ??
+  null;
 
 const parisCardItems = parisItems
   .filter((item) => (parisHero ? item.id !== parisHero.id : true))
@@ -312,12 +318,14 @@ const interviewQuote = latestInterview?.mainQuote
   : truncateText(extractQuoteOrAnswer(latestInterview));
 ---
 
-<section class="w-full max-w-[1440px] mx-auto px-4 lg:px-8 bg-base-200 mt-0 pb-12 overflow-hidden">
+<section
+  class="w-full max-w-[1440px] mx-auto px-4 lg:px-8 bg-base-200 mt-0 pb-12 overflow-hidden"
+>
   <div
     class="grid grid-cols-1 lg:grid-cols-12 min-h-[200px] gap-6 lg:gap-4 mb-0 lg:mb-6"
   >
     <div class="order-2 lg:order-none lg:col-span-9 flex flex-col">
-      <div class="pl-0 lg:pl-4 pr-0">
+      <div class="pl-0 pr-0">
         <h2
           class="text-lg font-normal mb-5 uppercase tracking-[0.3em] font-oswald"
         >
@@ -354,7 +362,7 @@ const interviewQuote = latestInterview?.mainQuote
                       />
                     )}
                   </div>
-                  <div class="w-full lg:w-2/5 pt-3 px-4 lg:px-0">
+                  <div class="w-full lg:w-2/5 pt-3 px-4 lg:px-2">
                     {/* <p class="text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3">
                       {formatArticleMeta(
                         cultureHero,
@@ -381,7 +389,7 @@ const interviewQuote = latestInterview?.mainQuote
                       </h4>
                     </a>
                     {getCardLead(cultureHero) && (
-                      <p class="mt-3 text-base lg:text-lg leading-relaxed text-base-content/80 font-oswald break-words px-2 font-thin tracking-wide">
+                      <p class="mt-3 text-base lg:text-lg leading-relaxed text-base-content/80 font-oswald break-words font-thin tracking-wide">
                         {getCardLead(cultureHero)}
                       </p>
                     )}
@@ -412,7 +420,7 @@ const interviewQuote = latestInterview?.mainQuote
 
           <div
             id="culture-articles-box"
-            class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 lg:px-4 min-h-[100px] border-b border-base-content/15"
+            class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 min-h-[100px] border-b border-base-content/15"
           >
             {
               cultureCardItems.length > 0 ? (
@@ -458,7 +466,7 @@ const interviewQuote = latestInterview?.mainQuote
       <div class="flex flex-row"></div>
     </div>
     <div
-      class="order-1 lg:order-none lg:col-span-3 px-0 lg:px-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
+      class="order-1 lg:order-none lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
     >
       <div id="netlenka-container">
         <h3
@@ -499,122 +507,119 @@ const interviewQuote = latestInterview?.mainQuote
   </div>
   {
     isLanding && (
-      <div class="w-full flex flex-col px-4 min-h-[200px]">
+      <div class="w-full flex flex-col px-4 lg:px-0 min-h-[200px]">
         <h2 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald">
           {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
         </h2>
         <div class="w-full flex flex-col gap-8">
           <div class="w-full bg-white flex flex-col gap-6 lg:flex-row-reverse lg:gap-8 items-start justify-start min-h-[100px]">
-            {
-              parisHero ? (
-                <>
-                  <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
-                    {parisHero.imageUrl ? (
-                      <a
-                        href={parisHero.href}
-                        class="block w-full h-full transition-opacity duration-200 hover:opacity-90"
-                      >
-                        <img
-                          src={parisHero.imageUrl}
-                          alt={parisHero.title}
-                          class="w-full h-full object-cover object-center"
-                          loading="lazy"
-                          transition:name={getTransitionName(parisHero)}
-                        />
-                      </a>
-                    ) : (
-                      <Image
-                        src={picture1}
-                        alt="Paris image"
-                        class="w-full h-auto lg:h-[470px] object-cover object-center"
-                        loading="eager"
-                        transition:name={getTransitionName(parisHero)}
-                      />
-                    )}
-                  </div>
-                  <div class="w-full lg:w-2/5 pt-4 px-4 lg:pl-4">
-                    <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3">
-                      <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
-                        {getPrimaryTag(parisHero) || CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
-                      </span>
-                      <span class="text-black text-lg font-bold font-['Inter']">
-                        ·
-                      </span>
-                      <span class="text-xs">
-                        {formatArticleDate(parisHero?.createdAt)}
-                      </span>
-                    </div>
+            {parisHero ? (
+              <>
+                <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
+                  {parisHero.imageUrl ? (
                     <a
                       href={parisHero.href}
-                      class="block transition-opacity duration-200 hover:opacity-90"
+                      class="block w-full h-full transition-opacity duration-200 hover:opacity-90"
                     >
-                      <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-oswald text-wrap break-words hover:underline transition-opacity duration-200 hover:opacity-90">
-                        {parisHero.title}
-                      </h4>
+                      <img
+                        src={parisHero.imageUrl}
+                        alt={parisHero.title}
+                        class="w-full h-full object-cover object-center"
+                        loading="lazy"
+                        transition:name={getTransitionName(parisHero)}
+                      />
                     </a>
-                    {getCardLead(parisHero) && (
-                      <p class="mt-3 text-base lg:text-lg leading-relaxed text-base-content/80 font-oswald break-words px-2 font-thin tracking-wide">
-                        {getCardLead(parisHero)}
-                      </p>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
+                  ) : (
                     <Image
                       src={picture1}
                       alt="Paris image"
-                      class="w-full h-full object-cover object-center"
+                      class="w-full h-auto lg:h-[470px] object-cover object-center"
                       loading="eager"
+                      transition:name={getTransitionName(parisHero)}
                     />
+                  )}
+                </div>
+                <div class="w-full lg:w-2/5 pt-4 px-4 lg:pl-4">
+                  <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3">
+                    <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                      {getPrimaryTag(parisHero) ||
+                        CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
+                    </span>
+                    <span class="text-black text-lg font-bold font-['Inter']">
+                      ·
+                    </span>
+                    <span class="text-xs">
+                      {formatArticleDate(parisHero?.createdAt)}
+                    </span>
                   </div>
-                  <div class="w-full lg:w-2/5 pt-4 px-4 lg:pl-4">
-                    <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
-                      {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
-                    </p>
-                    <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-oswald text-wrap break-words">
-                      Нет статей в категории
+                  <a
+                    href={parisHero.href}
+                    class="block transition-opacity duration-200 hover:opacity-90"
+                  >
+                    <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-oswald text-wrap break-words hover:underline transition-opacity duration-200 hover:opacity-90">
+                      {parisHero.title}
                     </h4>
-                  </div>
-                </>
-              )
-            }
+                  </a>
+                  {getCardLead(parisHero) && (
+                    <p class="mt-3 text-base lg:text-lg leading-relaxed text-base-content/80 font-oswald break-words px-2 font-thin tracking-wide">
+                      {getCardLead(parisHero)}
+                    </p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
+                  <Image
+                    src={picture1}
+                    alt="Paris image"
+                    class="w-full h-full object-cover object-center"
+                    loading="eager"
+                  />
+                </div>
+                <div class="w-full lg:w-2/5 pt-4 px-4 lg:pl-4">
+                  <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
+                    {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
+                  </p>
+                  <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-oswald text-wrap break-words">
+                    Нет статей в категории
+                  </h4>
+                </div>
+              </>
+            )}
           </div>
 
-          {
-            parisCardRows.length > 0 ? (
-              parisCardRows.map((row, rowIndex) => (
-                <div
-                  id={`paris-articles-box-${rowIndex + 1}`}
-                  class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 lg:px-4 min-h-[100px]"
-                >
-                  {row.map((item) => (
-                    <ArticleCard
-                      key={item.id}
-                      isNetlenka={false}
-                      title={item.title}
-                      category={getCategoryLabel(item.category)}
-                      date={formatArticleDate(item.createdAt)}
-                      lead={truncateText(getCardLead(item), 120) || undefined}
-                      transitionName={getTransitionName(item)}
-                      imageUrl={item.imageUrl}
-                      href={item.href}
-                    />
-                  ))}
-                </div>
-              ))
-            ) : (
+          {parisCardRows.length > 0 ? (
+            parisCardRows.map((row, rowIndex) => (
               <div
-                id="paris-articles-box-empty"
-                class="w-full py-4 px-0 lg:px-4 min-h-[100px]"
+                id={`paris-articles-box-${rowIndex + 1}`}
+                class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 min-h-[100px]"
               >
-                <p class="text-sm text-base-content/70">
-                  Пока нет дополнительных материалов в разделе «Париж».
-                </p>
+                {row.map((item) => (
+                  <ArticleCard
+                    key={item.id}
+                    isNetlenka={false}
+                    title={item.title}
+                    category={getCategoryLabel(item.category)}
+                    date={formatArticleDate(item.createdAt)}
+                    lead={truncateText(getCardLead(item), 120) || undefined}
+                    transitionName={getTransitionName(item)}
+                    imageUrl={item.imageUrl}
+                    href={item.href}
+                  />
+                ))}
               </div>
-            )
-          }
+            ))
+          ) : (
+            <div
+              id="paris-articles-box-empty"
+              class="w-full py-4 px-0 lg:px-4 min-h-[100px]"
+            >
+              <p class="text-sm text-base-content/70">
+                Пока нет дополнительных материалов в разделе «Париж».
+              </p>
+            </div>
+          )}
         </div>
       </div>
     )

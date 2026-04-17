@@ -99,9 +99,7 @@ try {
   // Filter for the main article (latest that is NOT news)
   mainArticle =
     landingContent.find((item) => item.isOnLanding) ||
-    landingContent.find(
-      (item) => !item.isNews && !isHotContentArticle(item),
-    ) ||
+    landingContent.find((item) => !item.isNews && !isHotContentArticle(item)) ||
     null;
 
   // Filter for news articles, limit to 5 for the landing page
@@ -213,11 +211,13 @@ try {
 }
 ---
 
-<section class="w-full max-w-[1440px] mx-auto lg:max-h-[990px] px-4 lg:px-8 bg-base-200 mb-0">
+<section
+  class="w-full max-w-[1440px] mx-auto lg:max-h-[990px] px-4 lg:px-8 bg-base-200 mb-0"
+>
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4">
     {/* News Column - THINNER */}
     <aside
-      class="lg:col-span-3 px-0 lg:px-4 lg:border-r lg:border-gray-300 lg:max-h-[980px]"
+      class="lg:col-span-3 px-0 lg:pr-4 lg:border-r lg:border-gray-300 lg:max-h-[980px]"
     >
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
@@ -267,9 +267,7 @@ try {
     </aside>
 
     {/* Main Column - WIDER */}
-    <article
-      class="lg:col-span-6 lg:px-4 order-first lg:order-none relative"
-    >
+    <article class="lg:col-span-6 order-first lg:order-none relative">
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
       >
@@ -279,10 +277,7 @@ try {
         mainArticle ? (
           <div>
             <div class="aspect-[3/2] overflow-hidden relative z-50">
-              <a
-                  href={mainArticle.href}
-                class="block w-full h-full"
-              >
+              <a href={mainArticle.href} class="block w-full h-full">
                 <img
                   src={mainArticle.imageUrl}
                   alt={mainArticle.title}
@@ -291,7 +286,7 @@ try {
                 />
               </a>
             </div>
-            <div class="p-4 lg:p-6">
+            <div class="p-4 lg:p-0">
               <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3">
                 <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
                   {getPrimaryTag(mainArticle) || "Новости"}
@@ -316,13 +311,11 @@ try {
                   />
                 </h2>
               </a>
-              {
-                getCardLead(mainArticle) ? (
-                  <p class="text-base lg:text-xl leading-relaxed text-black/80 font-oswald font-thin tracking-wide">
-                    {getCardLead(mainArticle)}
-                  </p>
-                ) : null
-              }
+              {getCardLead(mainArticle) ? (
+                <p class="text-base lg:text-xl leading-relaxed text-black/80 font-oswald font-thin tracking-wide">
+                  {getCardLead(mainArticle)}
+                </p>
+              ) : null}
             </div>
           </div>
         ) : (
@@ -337,7 +330,7 @@ try {
 
     {/* Calendar Column */}
     <aside
-      class="lg:col-span-3 px-0 lg:px-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
+      class="lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
     >
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
