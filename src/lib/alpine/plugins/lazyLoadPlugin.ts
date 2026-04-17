@@ -81,6 +81,8 @@ export default function(Alpine: Alpine) {
       // --- Article Creator properties ---
       article: {
         title: '',
+        lead: '',
+        cardLead: '',
         imageUrl: '',
         imageCaption: '',
         contentBlocks: [],
@@ -95,6 +97,7 @@ export default function(Alpine: Alpine) {
         title: '',
         interviewee: '',
         lead: '',
+        cardLead: '',
         mainQuote: '',
         isHotContent: false,
         imageUrl: '',
@@ -197,6 +200,8 @@ export default function(Alpine: Alpine) {
       // --- Flipper Creator properties ---
       flipper: {
         title: '',
+        lead: '',
+        cardLead: '',
         category: '',
         tags: [],
         techTags: [],

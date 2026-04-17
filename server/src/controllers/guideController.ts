@@ -5,6 +5,7 @@ export interface Guide {
   id?: string;
   title: string;
   lead?: string;
+  cardLead?: string;
   authorId: string;
   content: any[];
   tips?: Array<{ type: string; text: string }>;
@@ -55,6 +56,7 @@ export const createGuide = async (req: Request, res: Response) => {
     const {
       title,
       lead,
+      cardLead,
       content,
       tips = [],
       imageUrl,
@@ -86,6 +88,7 @@ export const createGuide = async (req: Request, res: Response) => {
     const newGuide: Omit<Guide, 'id'> = {
       title,
       lead: lead || '',
+      cardLead: cardLead || '',
       authorId,
       content,
       tips: normalizedTipsData,
@@ -185,6 +188,7 @@ export const updateGuide = async (req: Request, res: Response) => {
     const {
       title,
       lead,
+      cardLead,
       content,
       tips = [],
       imageUrl,
@@ -216,6 +220,7 @@ export const updateGuide = async (req: Request, res: Response) => {
     const updatedGuide = {
       title,
       lead: lead || '',
+      cardLead: cardLead || '',
       authorId,
       content,
       tips: normalizedTipsData,

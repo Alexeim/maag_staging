@@ -6,6 +6,7 @@ export interface EventItem {
   title: string;
   authorId: string;
   lead?: string;
+  cardLead?: string;
   content: any[];
   imageUrl?: string;
   imageCaption?: string;
@@ -114,6 +115,7 @@ export const createEvent = async (req: Request, res: Response) => {
       imageCaption,
       authorId,
       lead,
+      cardLead,
       category,
       tags = [],
       techTags = [],
@@ -175,6 +177,7 @@ export const createEvent = async (req: Request, res: Response) => {
       title,
       authorId,
       lead: lead || '',
+      cardLead: cardLead || '',
       content,
       imageUrl,
       imageCaption,
@@ -275,6 +278,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       imageCaption,
       authorId,
       lead,
+      cardLead,
       category,
       tags = [],
       techTags = [],
@@ -337,6 +341,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       title,
       authorId,
       lead: lead || '',
+      cardLead: cardLead || '',
       content,
       imageUrl,
       imageCaption,

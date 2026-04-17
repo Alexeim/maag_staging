@@ -53,6 +53,7 @@ const normalizeLoadedArticle = (data: any) => {
   copy.tags = normalizeTags(copy.tags);
   copy.imageCaption = copy.imageCaption ?? "";
   copy.lead = copy.lead ?? "";
+  copy.cardLead = copy.cardLead ?? "";
   copy.isHotContent = Boolean(copy.isHotContent);
   copy.isOnLanding = Boolean(copy.isOnLanding);
   copy.isMainInCategory = Boolean(copy.isMainInCategory);
@@ -80,6 +81,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     article: {
       title: "",
       lead: "",
+      cardLead: "",
       imageUrl: "",
       imageCaption: "",
       category: "culture",
@@ -385,6 +387,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
+          cardLead: this.article.cardLead,
           authorId,
           articleType: "tips" as const,
           imageUrl: this.article.imageUrl,

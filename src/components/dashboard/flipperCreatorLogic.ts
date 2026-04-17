@@ -86,6 +86,8 @@ export default function flipperCreatorLogic(initialState = {}) {
         ? ""
         : normalizedCategory;
     copy.isHotContent = isHotContentLegacy;
+    copy.lead = copy.lead ?? "";
+    copy.cardLead = copy.cardLead ?? "";
     copy.tags = normalizeTags(copy.tags, copy.category);
     copy.techTags = normalizeTechTags(copy.techTags);
     return copy;
@@ -94,6 +96,8 @@ export default function flipperCreatorLogic(initialState = {}) {
   return {
     flipper: {
       title: "",
+      lead: "",
+      cardLead: "",
       category: "",
       isHotContent: false,
       tags: [],
@@ -311,6 +315,8 @@ export default function flipperCreatorLogic(initialState = {}) {
         const payload = {
           ...this.flipper,
           authorId: resolvedAuthorId,
+          lead: this.flipper.lead,
+          cardLead: this.flipper.cardLead,
           tags: tagsForDb,
           techTags: normalizeTechTags(this.flipper.techTags),
           isHotContent: Boolean(this.flipper.isHotContent),

@@ -82,6 +82,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.tags = normalizeTags(copy.tags);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.lead = copy.lead ?? "";
+    copy.cardLead = copy.cardLead ?? "";
     copy.mainQuote = copy.mainQuote ?? "";
     copy.isHotContent = Boolean(copy.isHotContent);
     return copy;
@@ -92,6 +93,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       title: "",
       interviewee: "",
       lead: "",
+      cardLead: "",
       mainQuote: "",
       isHotContent: false,
       imageUrl: "",
@@ -597,6 +599,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           title: this.interview.title,
           interviewee: this.interview.interviewee,
           lead: this.interview.lead,
+          cardLead: this.interview.cardLead,
           mainQuote: this.interview.mainQuote,
           isHotContent: Boolean(this.interview.isHotContent),
           imageUrl: this.interview.imageUrl,

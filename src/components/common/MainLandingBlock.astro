@@ -2,7 +2,7 @@
 import { Image } from "astro:assets";
 import maagLogo from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
-import { articlesApi, eventsApi } from "@/lib/api/api";
+import { articlesApi, eventsApi, guidesApi } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -57,6 +57,19 @@ const getPrimaryTag = (article: any) => {
   return getCategoryLabel(article?.category);
 };
 
+const getCardLead = (item: any) => {
+  const cardLead =
+    typeof item?.cardLead === "string" ? item.cardLead.trim() : "";
+  return cardLead;
+};
+
+const toContentHref = (item: any) => {
+  if (item?.contentType === "guide") {
+    return `/guide/${item.id}`;
+  }
+  return `/${item?.isNews ? "news" : "article"}/${item.id}`;
+};
+
 const isHotContentArticle = (article: any) =>
   Boolean(article?.isHotContent) ||
   normalizeCategory(article?.category) === "hotContent";
@@ -66,13 +79,28 @@ let newsArticles: any[] = [];
 let landingEvent: any = null;
 
 try {
-  const articles = await articlesApi.list();
+  const [articles, guides] = await Promise.all([
+    articlesApi.list(),
+    guidesApi.list(),
+  ]);
+  const landingContent = [
+    ...articles.map((article) => ({
+      ...article,
+      contentType: "article",
+      href: toContentHref(article),
+    })),
+    ...guides.map((guide) => ({
+      ...guide,
+      contentType: "guide",
+      href: toContentHref({ ...guide, contentType: "guide" }),
+    })),
+  ];
 
   // Filter for the main article (latest that is NOT news)
   mainArticle =
-    articles.find((article) => article.isOnLanding) ||
-    articles.find(
-      (article) => !article.isNews && !isHotContentArticle(article),
+    landingContent.find((item) => item.isOnLanding) ||
+    landingContent.find(
+      (item) => !item.isNews && !isHotContentArticle(item),
     ) ||
     null;
 
@@ -252,7 +280,7 @@ try {
           <div>
             <div class="aspect-[3/2] overflow-hidden relative z-50">
               <a
-                href={`/${mainArticle.isNews ? "news" : "article"}/${mainArticle.id}`}
+                  href={mainArticle.href}
                 class="block w-full h-full"
               >
                 <img
@@ -276,7 +304,7 @@ try {
                 </span>
               </div>
               <a
-                href={`/${mainArticle.isNews ? "news" : "article"}/${mainArticle.id}`}
+                href={mainArticle.href}
                 class="block mb-3 transition-opacity duration-200 hover:opacity-90"
               >
                 <h2 class="text-3xl lg:text-5xl leading-tight font-thin font-oswald hover:underline">
@@ -289,9 +317,9 @@ try {
                 </h2>
               </a>
               {
-                mainArticle.lead ? (
+                getCardLead(mainArticle) ? (
                   <p class="text-base lg:text-xl leading-relaxed text-black/80 font-oswald font-thin tracking-wide">
-                    {mainArticle.lead}
+                    {getCardLead(mainArticle)}
                   </p>
                 ) : null
               }

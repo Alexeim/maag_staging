@@ -8,6 +8,7 @@ export interface Interview {
   authorId: string;
   interviewee: string;
   lead?: string;
+  cardLead?: string;
   mainQuote?: string;
   isHotContent?: boolean;
   content: any[]; // Array of content blocks
@@ -35,6 +36,7 @@ export const createInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead,
+      cardLead,
       mainQuote,
       tags = [],
       isHotContent = false,
@@ -53,6 +55,7 @@ export const createInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead: lead || '',
+      cardLead: cardLead || '',
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
       content,
@@ -155,6 +158,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead,
+      cardLead,
       mainQuote,
       tags = [],
       isHotContent = false,
@@ -173,6 +177,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead: lead || '',
+      cardLead: cardLead || '',
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
       content,

@@ -103,6 +103,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.lead = copy.lead ?? "";
+    copy.cardLead = copy.cardLead ?? "";
     copy.isNews = true;
     return copy;
   };
@@ -111,6 +112,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     article: {
       title: "",
       lead: "",
+      cardLead: "",
       imageUrl: "",
       imageCaption: "",
       contentBlocks: [] as any[],
@@ -289,6 +291,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       this.article.tags = this.article.tags ?? [];
       this.article.techTags = this.article.techTags ?? [];
       this.article.lead = this.article.lead ?? "";
+      this.article.cardLead = this.article.cardLead ?? "";
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isOnLanding = Boolean(this.article.isOnLanding);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
@@ -430,6 +433,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
+          cardLead: this.article.cardLead,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
           authorId: resolvedAuthorId,

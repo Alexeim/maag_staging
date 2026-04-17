@@ -156,6 +156,7 @@ export default function guideCreatorLogic(initialState = {}) {
     copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
     copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
+    copy.cardLead = copy.cardLead ?? "";
     return copy;
   };
 
@@ -194,6 +195,7 @@ export default function guideCreatorLogic(initialState = {}) {
     article: {
       title: "",
       lead: "",
+      cardLead: "",
       imageUrl: "",
       imageCaption: "",
       contentBlocks: [],
@@ -590,6 +592,7 @@ export default function guideCreatorLogic(initialState = {}) {
       this.article.techTags = this.article.techTags ?? [];
       this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
+      this.article.cardLead = this.article.cardLead ?? "";
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isOnLanding = Boolean(this.article.isOnLanding);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
@@ -920,6 +923,7 @@ export default function guideCreatorLogic(initialState = {}) {
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
+          cardLead: this.article.cardLead,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
           authorId: resolvedAuthorId,

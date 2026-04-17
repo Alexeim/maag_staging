@@ -6,6 +6,7 @@ export interface Article {
   id?: string;
   title: string;
   lead?: string; // Вводка — краткое описание под заголовком
+  cardLead?: string;
   authorId: string;
   articleType?: 'standard' | 'tips'; // Type of article layout
   content: any[]; // Array of content blocks (e.g., { type: 'paragraph', text: '...' })
@@ -59,6 +60,7 @@ export const createArticle = async (req: Request, res: Response) => {
     const {
       title,
       lead,
+      cardLead,
       content,
       tips = [],
       imageUrl,
@@ -92,6 +94,7 @@ export const createArticle = async (req: Request, res: Response) => {
     const newArticle: Omit<Article, 'id'> = {
       title,
       lead: lead || '',
+      cardLead: cardLead || '',
       authorId,
       articleType: articleType === 'tips' ? 'tips' : 'standard',
       content,
@@ -196,6 +199,7 @@ export const updateArticle = async (req: Request, res: Response) => {
     const {
       title,
       lead,
+      cardLead,
       content,
       tips = [],
       imageUrl,
@@ -229,6 +233,7 @@ export const updateArticle = async (req: Request, res: Response) => {
     const updatedArticle = {
       title,
       lead: lead || '',
+      cardLead: cardLead || '',
       authorId,
       articleType: articleType === 'tips' ? 'tips' : 'standard',
       content,

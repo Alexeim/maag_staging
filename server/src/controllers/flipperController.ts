@@ -5,6 +5,8 @@ import { getDb, deleteFileFromStorage } from '../services/firebase';
 export interface Flipper {
   id?: string;
   title: string;
+  lead?: string;
+  cardLead?: string;
   authorId: string;
   category?: string;
   tags?: string[];
@@ -27,6 +29,8 @@ export const createFlipper = async (req: Request, res: Response) => {
     const {
       title,
       authorId,
+      lead,
+      cardLead,
       category,
       tags = [],
       techTags = [],
@@ -54,6 +58,8 @@ export const createFlipper = async (req: Request, res: Response) => {
     const newFlipper: Omit<Flipper, 'id'> = {
       title,
       authorId,
+      lead: lead || '',
+      cardLead: cardLead || '',
       category: persistedCategory,
       tags: normalizedTags,
       techTags: normalizedTechTags,
@@ -142,6 +148,8 @@ export const updateFlipper = async (req: Request, res: Response) => {
     const {
       title,
       authorId,
+      lead,
+      cardLead,
       category,
       tags = [],
       techTags = [],
@@ -169,6 +177,8 @@ export const updateFlipper = async (req: Request, res: Response) => {
     const updatedFlipper = {
       title,
       authorId,
+      lead: lead || '',
+      cardLead: cardLead || '',
       category: persistedCategory,
       tags: normalizedTags,
       techTags: normalizedTechTags,

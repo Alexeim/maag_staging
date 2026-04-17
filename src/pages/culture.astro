@@ -2,7 +2,7 @@
 import Layout from "../Layouts/Layout.astro";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import picture1 from "../assets/images/culture.jpg";
-import { articlesApi, interviewsApi, flippersApi } from "@/lib/api/api";
+import { articlesApi, interviewsApi, flippersApi, guidesApi } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -97,12 +97,21 @@ const getPrimaryTag = (item: any): string => {
   return TAG_LABEL_ALIASES[normalized] ?? firstTag;
 };
 
+const getCardLead = (item: any): string => {
+  const cardLead =
+    typeof item?.cardLead === "string" ? item.cardLead.trim() : "";
+  return cardLead;
+};
+
 const toContentHref = (item: any) => {
   if (item?.contentType === "interview") {
     return `/interviews/${item.id}`;
   }
   if (item?.contentType === "flipper") {
     return `/flippers/${item.id}`;
+  }
+  if (item?.contentType === "guide") {
+    return `/guide/${item.id}`;
   }
   return `/${item?.isNews ? "news" : "article"}/${item.id}`;
 };
@@ -129,7 +138,8 @@ const getTransitionName = (item: any) => {
     href.startsWith("/article/") ||
     href.startsWith("/news/") ||
     href.startsWith("/interviews/") ||
-    href.startsWith("/flippers/")
+    href.startsWith("/flippers/") ||
+    href.startsWith("/guide/")
   ) {
     return `main-article-image-${item.id}`;
   }
@@ -158,10 +168,11 @@ let cultureFeed: any[] = [];
 let featuredInterview: any = null;
 
 try {
-  const [articles, interviews, flippers] = await Promise.all([
+  const [articles, interviews, flippers, guides] = await Promise.all([
     articlesApi.list(),
     interviewsApi.list(),
     flippersApi.list(),
+    guidesApi.list(),
   ]);
 
   const allContent = [
@@ -181,6 +192,11 @@ try {
       contentType: "flipper",
       imageUrl: flipper?.carouselContent?.[0]?.imageUrl || null,
       tags: normalizeTags(flipper?.tags),
+    })),
+    ...guides.map((guide) => ({
+      ...guide,
+      contentType: "guide",
+      tags: normalizeTags(guide?.tags),
     })),
   ];
 
@@ -316,9 +332,9 @@ const featuredInterviewName =
                     </h2>
                   </a>
 
-                  {primaryCultureArticle.lead && (
+                  {getCardLead(primaryCultureArticle) && (
                     <p class="m-0 text-base leading-[1.55] text-[#302821bd]">
-                      {truncateText(primaryCultureArticle.lead, 280)}
+                      {truncateText(getCardLead(primaryCultureArticle), 280)}
                     </p>
                   )}
 
@@ -369,9 +385,9 @@ const featuredInterviewName =
                         </h3>
                       </a>
 
-                      {item.lead && (
+                      {getCardLead(item) && (
                         <p class="m-0 text-[0.98rem] leading-[1.5] text-[#302821bd]">
-                          {truncateText(item.lead, 120)}
+                          {truncateText(getCardLead(item), 120)}
                         </p>
                       )}
 

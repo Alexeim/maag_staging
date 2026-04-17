@@ -23,7 +23,11 @@ const flipperState = JSON.stringify({
   <div class="container mx-auto px-4 py-8" x-data={flipperState}>
     <div class="pt-[50px] pb-[70px] flex flex-col items-center gap-[50px]">
       <div class="flex flex-col gap-4 max-w-[825px] w-full">
-        <ArticleHeader category={flipper.techTags[0]} title={flipper.title} />
+        <ArticleHeader
+          category={flipper.techTags?.[0]}
+          title={flipper.title}
+          lead={flipper.lead}
+        />
         <div class="flex flex-row items-center justify-start gap-4">
           {
             flipper.author && (

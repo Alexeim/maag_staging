@@ -155,6 +155,7 @@ export default function eventCreatorLogic(initialState = {}) {
     copy.imageUrl = typeof copy.imageUrl === "string" ? copy.imageUrl : "";
     copy.imageCaption = typeof copy.imageCaption === "string" ? copy.imageCaption : "";
     copy.lead = copy.lead ?? "";
+    copy.cardLead = copy.cardLead ?? "";
     return copy;
   };
 
@@ -398,6 +399,7 @@ export default function eventCreatorLogic(initialState = {}) {
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
           lead: this.article.lead,
+          cardLead: this.article.cardLead,
           category,
           tags: this.article.tags,
           techTags: this.article.techTags,

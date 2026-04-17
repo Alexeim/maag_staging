@@ -135,6 +135,7 @@ export interface ArticlePayload {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  cardLead?: string;
   category?: string;
   tags?: string[];
   techTags?: string[];
@@ -157,6 +158,7 @@ export interface EventPayload {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  cardLead?: string;
   category: 'exhibition' | 'concert' | 'performance';
   tags: string[];
   techTags: string[];
@@ -207,6 +209,8 @@ export interface AuthorResponse extends AuthorPayload {
 export interface FlipperPayload {
   title: string;
   authorId: string;
+  lead?: string;
+  cardLead?: string;
   category?: string;
   tags?: string[];
   techTags?: string[];
@@ -222,6 +226,7 @@ export interface InterviewPayload {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  cardLead?: string;
   mainQuote?: string;
   tags?: string[];
   isHotContent?: boolean;
@@ -242,6 +247,7 @@ export interface GuidePayload {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  cardLead?: string;
   category?: string;
   tags?: string[];
   techTags?: string[];

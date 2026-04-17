@@ -157,6 +157,7 @@ export default function articleCreatorLogic(initialState = {}) {
     copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
     copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
+    copy.cardLead = copy.cardLead ?? "";
     return copy;
   };
 
@@ -195,6 +196,7 @@ export default function articleCreatorLogic(initialState = {}) {
     article: {
       title: "",
       lead: "", // Вводка — краткое описание под заголовком
+      cardLead: "",
       imageUrl: "",
       imageCaption: "", // <-- Added caption for the main image
       // --- REFACTORED: from 'paragraphs' to 'contentBlocks' ---
@@ -597,6 +599,7 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.techTags = this.article.techTags ?? [];
       this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
+      this.article.cardLead = this.article.cardLead ?? "";
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isOnLanding = Boolean(this.article.isOnLanding);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
@@ -945,6 +948,7 @@ export default function articleCreatorLogic(initialState = {}) {
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
+          cardLead: this.article.cardLead,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
           authorId: resolvedAuthorId,
