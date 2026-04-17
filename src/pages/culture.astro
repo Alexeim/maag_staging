@@ -258,7 +258,7 @@ const secondaryStories = [
   secondaryCultureArticle,
   tertiaryCultureArticle,
 ].filter(Boolean);
-const editorialGridItems = cultureFeed.slice(0, 8);
+const editorialGridItems = cultureFeed;
 const featuredInterviewName =
   featuredInterview?.interviewee ?? featuredInterview?.title ?? "";
 ---
@@ -273,7 +273,7 @@ const featuredInterviewName =
     class="min-h-screen bg-base-200 font-oswald text-[#302821] [background-image:radial-gradient(circle_at_top_center,rgba(255,255,255,0.82),transparent_48%)]"
   >
     <div
-      class="mx-auto max-w-7xl px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
+      class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
     >
       <h1 class="m-0 text-[1.05rem] font-medium uppercase tracking-[0.5em]">
         Культура
@@ -288,13 +288,13 @@ const featuredInterviewName =
               <article class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
                 <a
                   href={primaryCultureArticle.href}
-                  class="block overflow-hidden"
+                  class="block aspect-[3/2] overflow-hidden"
                   aria-label={primaryCultureArticle.title}
                 >
                   <img
                     src={primaryCultureArticle.imageUrl || picture1.src}
                     alt={primaryCultureArticle.title}
-                    class="block h-full min-h-[15rem] w-full object-cover lg:min-h-[21rem]"
+                    class="block h-full w-full object-cover"
                     loading="lazy"
                     transition:name={getTransitionName(primaryCultureArticle)}
                   />
@@ -302,7 +302,7 @@ const featuredInterviewName =
 
                 <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                   <p class="m-0">
-                    <span class="font-inter text-[0.58rem] font-semibold uppercase tracking-[0.3em] text-error">
+                    <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
                       {getPrimaryTag(primaryCultureArticle) || "Культура"}
                     </span>
                   </p>
@@ -341,7 +341,7 @@ const featuredInterviewName =
                   <article class="grid gap-[0.8rem]">
                     <a
                       href={item.href}
-                      class="block aspect-[1.3/1] overflow-hidden"
+                      class="block aspect-[3/2] overflow-hidden"
                       aria-label={item.title}
                     >
                       <img
@@ -355,7 +355,7 @@ const featuredInterviewName =
 
                     <div class="grid gap-[0.55rem]">
                       <p class="m-0">
-                        <span class="font-inter text-[0.58rem] font-semibold uppercase tracking-[0.3em] text-error">
+                        <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
                           {getPrimaryTag(item) || "Культура"}
                         </span>
                       </p>
@@ -375,7 +375,7 @@ const featuredInterviewName =
                         </p>
                       )}
 
-                      <p class="m-0 font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]">
+                      <p class="m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
                         {formatDate(item.createdAt)}
                       </p>
                     </div>
@@ -402,7 +402,7 @@ const featuredInterviewName =
                   <article class="grid gap-[0.65rem] border-b border-[#3028211a] pb-4">
                     <a
                       href={item.href}
-                      class="block aspect-[1.1/0.82] overflow-hidden"
+                      class="block aspect-[3/2] overflow-hidden"
                       aria-label={item.title}
                     >
                       <img
@@ -416,7 +416,7 @@ const featuredInterviewName =
 
                     <div class="grid gap-[0.55rem]">
                       <p class="m-0">
-                        <span class="font-inter text-[0.58rem] font-semibold uppercase tracking-[0.3em] text-error">
+                        <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
                           {getPrimaryTag(item) || "Культура"}
                         </span>
                       </p>
@@ -443,12 +443,12 @@ const featuredInterviewName =
       </section>
 
       {
-        featuredInterview && interviewQuote && (
+        featuredInterview && (
           <section class="mt-[2.2rem]">
             <LatestInterview
               tag="Интервью"
               interviewee={featuredInterviewName}
-              quote={truncateText(interviewQuote, 130)}
+              quote={interviewQuote ? truncateText(interviewQuote, 130) : undefined}
               imageUrl={featuredInterview.imageUrl || picture1.src}
               href={`/interviews/${featuredInterview.id}`}
               transitionName={`main-article-image-${featuredInterview.id}`}
@@ -497,7 +497,7 @@ const featuredInterviewName =
                     ]}
                   >
                     <p class="m-0">
-                      <span class="font-inter text-[0.58rem] font-semibold uppercase tracking-[0.3em] text-error">
+                      <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
                         {getPrimaryTag(item) || "Культура"}
                       </span>
                     </p>
@@ -511,7 +511,7 @@ const featuredInterviewName =
                       </h3>
                     </a>
 
-                    <p class="m-0 font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]">
+                    <p class="m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
                       {formatDate(item.createdAt)}
                     </p>
                   </div>

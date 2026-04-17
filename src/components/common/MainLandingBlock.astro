@@ -185,11 +185,11 @@ try {
 }
 ---
 
-<section class="w-full lg:max-h-[990px] px-4 lg:px-8 bg-base-200 mb-0">
-  <div class="flex flex-col lg:flex-row gap-6 lg:gap-4">
+<section class="w-full max-w-[1440px] mx-auto lg:max-h-[990px] px-4 lg:px-8 bg-base-200 mb-0">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4">
     {/* News Column - THINNER */}
     <aside
-      class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-r lg:border-gray-300 lg:max-h-[980px]"
+      class="lg:col-span-3 px-0 lg:px-4 lg:border-r lg:border-gray-300 lg:max-h-[980px]"
     >
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
@@ -217,6 +217,11 @@ try {
                   />
                 </a>
                 <div class="flex-1 max-w-40">
+                  <div class="mb-1">
+                    <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                      {getCategoryLabel(newsItem?.category) || "Новости"}
+                    </span>
+                  </div>
                   <a
                     href={`/news/${newsItem.id}`}
                     class="block bg-base-200 z-50 transition-opacity duration-200 hover:opacity-90"
@@ -225,36 +230,6 @@ try {
                       {newsItem.title}
                     </h3>
                   </a>
-                  <div class="mt-2 flex flex-col gap-0.5 font-inter uppercase tracking-wide">
-                    <span class="text-[10px] text-base-content/55">
-                      {formatArticleDate(newsItem?.createdAt)}
-                    </span>
-                    {(() => {
-                      const rawTags = Array.isArray(newsItem?.tags)
-                        ? newsItem.tags
-                        : typeof newsItem?.tags === "string"
-                          ? [newsItem.tags]
-                          : [];
-                      const firstTag = rawTags.find(
-                        (t: string) => typeof t === "string" && t.trim().length > 0,
-                      )?.trim();
-                      const category = getCategoryLabel(newsItem?.category);
-                      const labels = [firstTag !== category ? category : null, firstTag].filter(Boolean);
-                      return (
-                        <div class="flex flex-row flex-nowrap items-center gap-1">
-                          {labels.length > 0
-                            ? labels.map((label, i) => (
-                                <>
-                                  {i > 0 && <span class="text-[9px] text-base-content/40">·</span>}
-                                  <span class="text-[9px] font-medium tracking-[0.25em] text-accent font-['Inter'] whitespace-nowrap">{label}</span>
-                                </>
-                              ))
-                            : <span class="text-[9px] font-medium tracking-[0.25em] text-accent font-['Inter']">Новости</span>
-                          }
-                        </div>
-                      );
-                    })()}
-                  </div>
                 </div>
               </div>
             </div>
@@ -265,7 +240,7 @@ try {
 
     {/* Main Column - WIDER */}
     <article
-      class="w-full lg:w-6/12 lg:px-4 order-first lg:order-none relative"
+      class="lg:col-span-6 lg:px-4 order-first lg:order-none relative"
     >
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
@@ -275,30 +250,17 @@ try {
       {
         mainArticle ? (
           <div>
-            <div class="relative">
+            <div class="aspect-[3/2] overflow-hidden relative z-50">
               <a
                 href={`/${mainArticle.isNews ? "news" : "article"}/${mainArticle.id}`}
-                class="block bg-base-200 z-50 transition-opacity duration-200 hover:opacity-90"
+                class="block w-full h-full"
               >
                 <img
                   src={mainArticle.imageUrl}
                   alt={mainArticle.title}
-                  class="w-full h-auto lg:h-[600px] object-cover relative lg:z-40"
+                  class="w-full h-full object-cover"
                   transition:name={`main-article-image-${mainArticle.id}`}
                 />
-              </a>
-              <a
-                href={`/${mainArticle.isNews ? "news" : "article"}/${mainArticle.id}`}
-                class="absolute left-4 right-4 bottom-4 lg:left-6 lg:right-6 lg:bottom-6 z-50 block bg-base-200/90 backdrop-blur-[2px] px-4 py-4 lg:px-6 lg:py-5 transition-opacity duration-200 hover:opacity-90"
-              >
-                <h2 class="max-w-[600px] text-black text-3xl lg:text-5xl leading-tight font-thin font-oswald hover:underline">
-                  {mainArticle.title}{" "}
-                  <Image
-                    src={maagLogo}
-                    alt="MAAG"
-                    class="w-8 h-8 lg:w-10 lg:h-10 inline-block align-middle"
-                  />
-                </h2>
               </a>
             </div>
             <div class="p-4 lg:p-6">
@@ -313,21 +275,25 @@ try {
                   {formatArticleDate(mainArticle?.createdAt)}
                 </span>
               </div>
+              <a
+                href={`/${mainArticle.isNews ? "news" : "article"}/${mainArticle.id}`}
+                class="block mb-3 transition-opacity duration-200 hover:opacity-90"
+              >
+                <h2 class="text-3xl lg:text-5xl leading-tight font-thin font-oswald hover:underline">
+                  {mainArticle.title}{" "}
+                  <Image
+                    src={maagLogo}
+                    alt="MAAG"
+                    class="w-8 h-8 lg:w-10 lg:h-10 inline-block align-middle"
+                  />
+                </h2>
+              </a>
               {
                 mainArticle.lead ? (
-                  <p class="max-w-[600px] text-base lg:text-xl leading-relaxed text-black/80 font-oswald font-thin tracking-wide">
+                  <p class="text-base lg:text-xl leading-relaxed text-black/80 font-oswald font-thin tracking-wide">
                     {mainArticle.lead}
                   </p>
-                ) : (
-                  <a
-                    href={`/${mainArticle.isNews ? "news" : "article"}/${mainArticle.id}`}
-                    class="block bg-base-200 z-50 transition-opacity duration-200 hover:opacity-90"
-                  >
-                    <p class="max-w-[600px] text-base lg:text-xl leading-relaxed text-black/80 font-oswald font-thin tracking-wide hover:underline">
-                      Открыть материал
-                    </p>
-                  </a>
-                )
+                ) : null
               }
             </div>
           </div>
@@ -343,7 +309,7 @@ try {
 
     {/* Calendar Column */}
     <aside
-      class="w-full lg:w-3/12 px-0 lg:px-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
+      class="lg:col-span-3 px-0 lg:px-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
     >
       <h2
         class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
@@ -372,7 +338,7 @@ try {
               <img
                 src={landingEvent.imageUrl}
                 alt={landingEvent.title}
-                class="w-full h-auto lg:h-[240px] object-cover"
+                class="w-full aspect-[3/2] object-cover"
                 loading="lazy"
                 transition:name={`event-image-${landingEvent.id}`}
               />
@@ -380,12 +346,12 @@ try {
               <Image
                 src={picture2}
                 alt="Event"
-                class="w-full h-auto lg:h-[240px] object-cover"
+                class="w-full aspect-[3/2] object-cover"
                 transition:name={`event-image-${landingEvent.id}`}
               />
             )}
             <div class="p-4 lg:p-6">
-              <p class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]">
+              <p class="text-xs font-medium uppercase tracking-[0.25em] text-error font-['Inter'] mb-2">
                 {eventCategoryLabels[landingEvent.category] || "Событие"}
               </p>
               <h2 class="text-base lg:text-lg leading-tight font-oswald mb-4">
@@ -439,7 +405,7 @@ try {
               class="w-full h-auto lg:h-[240px] object-cover"
             />
             <div class="p-4 lg:p-6">
-              <p class="text-error uppercase text-[10px] mb-3 font-inter tracking-[0.15em]">
+              <p class="text-xs font-medium uppercase tracking-[0.25em] text-error font-['Inter'] mb-2">
                 Событие
               </p>
               <h2 class="text-base lg:text-lg leading-tight font-oswald mb-4">

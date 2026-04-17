@@ -23,18 +23,12 @@ const {
 } = Astro.props as NetlenkaCardProps;
 
 const displayImage = imageUrl || picture3.src;
-const formattedCategory = `<span class="text-accent">${category}</span>`;
-const meta = [date, formattedCategory]
-  .filter(Boolean)
-  .join(
-    "<span class='text-black font-inter uppercase tracking-wide'> • </span>",
-  );
 ---
 
 <div
   class="w-full flex flex-col gap-2 max-h-[300px] min-w-[220px] lg:min-w-0 max-w-[303px]"
 >
-  <div class="w-full h-40 overflow-hidden">
+  <div class="w-full aspect-[3/2] overflow-hidden">
     <a
       href={href}
       class="block w-full h-full transition-opacity duration-200 hover:opacity-90"
@@ -61,10 +55,12 @@ const meta = [date, formattedCategory]
     </a>
   </div>
   {
-    meta && (
-      <p class="text-[11px] text-base-content/55 font-inter uppercase tracking-wide mt-1">
-        <Fragment set:html={meta} />
-      </p>
+    (date || category) && (
+      <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mt-1">
+        {date && <span class="text-xs">{date}</span>}
+        {date && category && <span class="text-black text-lg font-bold font-['Inter'] leading-none">·</span>}
+        {category && <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">{category}</span>}
+      </div>
     )
   }
   <h3 class="text-base lg:text-lg leading-tight font-oswald mb-3">
