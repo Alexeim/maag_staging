@@ -19,6 +19,22 @@
     {
       "title": "дети",
       "value": "kids"
+    },
+    {
+      "title": "опера",
+      "value": "opera"
+    },
+    {
+      "title": "балет",
+      "value": "ballet"
+    },
+    {
+      "title": "танец",
+      "value": "dance"
+    },
+    {
+      "title": "музыка",
+      "value": "music"
     }
   ]
 }

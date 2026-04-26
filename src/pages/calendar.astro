@@ -29,6 +29,23 @@ const TAG_LABEL_ALIASES: Record<string, string> = {
   theaters: "Театры",
   event: "Событие",
   events: "События",
+  culture: "Культура",
+  paris: "Париж",
+  books: "Книги",
+  artMarket: "Арт-рынок",
+  artmarket: "Арт-рынок",
+  kids: "Дети",
+  opera: "Опера",
+  ballet: "Балет",
+  dance: "Танец",
+  music: "Музыка",
+  route: "Маршрут",
+  address: "Адрес",
+  notebook: "Записная книжка",
+  place: "Место",
+  ...Object.fromEntries(
+    Array.from({ length: 20 }, (_, i) => [`district-${i + 1}`, `${i + 1}-й округ`]),
+  ),
 };
 
 const toRoman = (num: number): string => {
