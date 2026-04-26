@@ -1067,7 +1067,7 @@ const {
           </a>
         )
       }
-      <Button variant="primary" @click="saveArticle()">{submitLabel}</Button>
+      <Button variant="primary" @click="saveArticle()" :disabled="isSaving" :class="{'opacity-50 cursor-not-allowed': isSaving}">{submitLabel}</Button>
     </div>
   </div>
 </div>

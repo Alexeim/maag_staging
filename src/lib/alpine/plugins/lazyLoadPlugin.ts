@@ -114,6 +114,7 @@ export default function(Alpine: Alpine) {
       editingCaptionText: '',
       uploading: false,
       uploadProgress: 0,
+      isSaving: false,
       categoryTags: {},
       articleId: null,
       isEditMode: false,
@@ -159,6 +160,7 @@ export default function(Alpine: Alpine) {
       previewArticle() {},
       returnToEdit() {},
       saveArticle() {},
+      saveInterview() {},
       // --- Event Creator defaults ---
       eventId: null,
       eventForm: {

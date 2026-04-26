@@ -107,6 +107,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     uploading: false,
     uploadProgress: 0,
     uploadingBlockIndex: null as number | null,
+    isSaving: false,
 
     // Author state
     authors: [] as any[],
@@ -361,24 +362,37 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
     // ── Save ──────────────────────────────────────────────────────────────────
     async saveArticle() {
-      // Auto-save the currently open block so the user doesn't lose unsaved edits
-      if (this.editingIndex !== null && this.editingBlock) {
-        this.article.contentBlocks[this.editingIndex] = this.editingBlock;
-        this.cancelEdit();
+      // Auto-commit any open block — prevents losing unsaved flipper/image/text edits
+      if (this.editingIndex !== null) {
+        this.updateBlock();
+        if (this.editingIndex !== null) return;
       }
+
+      // Block save while a file upload is still in progress
+      if (this.uploading) {
+        ui()?.showToast?.("Подожди — загрузка файла ещё не завершилась.", "error");
+        return;
+      }
+
+      // Guard against double-submit
+      if (this.isSaving) return;
+      this.isSaving = true;
 
       this.article.tags = normalizeTags(this.article.tags);
 
       if (!this.article.title) {
         ui()?.showToast?.("Добавь заголовок.", "error");
+        this.isSaving = false;
         return;
       }
       if (this.article.contentBlocks.length === 0) {
         ui()?.showToast?.("Добавь хотя бы один пункт.", "error");
+        this.isSaving = false;
         return;
       }
       if (this.article.tags.length === 0) {
         ui()?.showToast?.("Добавь хотя бы один тег.", "error");
+        this.isSaving = false;
         return;
       }
 
@@ -404,17 +418,18 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         if (this.isEditMode && this.articleId) {
           await articlesApi.update(this.articleId, payload);
           ui()?.showToast?.("Статья обновлена!");
-          globalThis.location.href = this.onSaveRedirect || "/dashboard";
+          setTimeout(() => { globalThis.location.href = this.onSaveRedirect || "/dashboard"; }, 1500);
         } else {
           await articlesApi.create(payload);
           ui()?.showToast?.("Статья создана!");
-          globalThis.location.href = "/dashboard";
+          setTimeout(() => { globalThis.location.href = "/dashboard"; }, 1500);
         }
       } catch (e) {
         console.error("Ошибка сохранения:", e);
         const msg =
           e instanceof Error ? e.message : "Ошибка во время сохранения.";
         ui()?.showToast?.(msg, "error");
+        this.isSaving = false;
       }
     },
   };

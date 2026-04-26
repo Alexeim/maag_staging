@@ -107,6 +107,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     uploading: false,
     uploadProgress: 0,
     uploadingIndex: -1,
+    isSaving: false,
     flipperId,
     isEditMode,
     onSaveRedirect,
@@ -285,6 +286,19 @@ export default function flipperCreatorLogic(initialState = {}) {
     },
 
     async saveFlipper() {
+      // Block save while a slide image is still uploading
+      if (this.uploading) {
+        window.Alpine.store("ui").showToast(
+          "Подожди — загрузка картинки ещё не завершилась.",
+          "error",
+        );
+        return;
+      }
+
+      // Guard against double-submit
+      if (this.isSaving) return;
+      this.isSaving = true;
+
       const normalizedCategory =
         typeof this.flipper.category === "string"
           ? this.flipper.category.trim()
@@ -302,10 +316,12 @@ export default function flipperCreatorLogic(initialState = {}) {
 
       if (!this.flipper.title) {
         window.Alpine.store("ui").showToast("Заголовок обязателен.", "error");
+        this.isSaving = false;
         return;
       }
       if (this.flipper.carouselContent.some(item => !item.imageUrl)) {
         window.Alpine.store("ui").showToast("Для каждого слайда нужно загрузить изображение.", "error");
+        this.isSaving = false;
         return;
       }
 
@@ -325,18 +341,18 @@ export default function flipperCreatorLogic(initialState = {}) {
         if (this.isEditMode && this.flipperId) {
           await flippersApi.update(this.flipperId, payload);
           window.Alpine.store("ui").showToast("Листалка успешно обновлена!");
-          if (this.onSaveRedirect) {
-            window.location.href = this.onSaveRedirect;
-          }
+          const redirectTo = this.onSaveRedirect || `/dashboard/flippers`;
+          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
         } else {
           await flippersApi.create(payload);
           window.Alpine.store("ui").showToast("Листалка успешно создана!");
-          window.location.href = `/dashboard/flippers`;
+          setTimeout(() => { globalThis.location.href = `/dashboard/flippers`; }, 1500);
         }
       } catch (error) {
         console.error("Ошибка сохранения листалки:", error);
         const message = error instanceof Error ? error.message : "Произошла неизвестная ошибка.";
         window.Alpine.store("ui").showToast(message, "error");
+        this.isSaving = false;
       }
     },
   };

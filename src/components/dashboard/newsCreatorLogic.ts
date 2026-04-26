@@ -137,6 +137,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
 
     uploading: false,
     uploadProgress: 0,
+    isSaving: false,
 
     categoryTags,
     articleId,
@@ -406,6 +407,25 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
 
     // Save
     async saveArticle() {
+      // Auto-commit any open block — prevents losing unsaved flipper/image/text edits
+      if (this.editingIndex !== null) {
+        this.updateBlock();
+        if (this.editingIndex !== null) return;
+      }
+
+      // Block save while a file upload is still in progress
+      if (this.uploading) {
+        (window as any).Alpine.store("ui").showToast(
+          "Подожди — загрузка файла ещё не завершилась.",
+          "error",
+        );
+        return;
+      }
+
+      // Guard against double-submit
+      if (this.isSaving) return;
+      this.isSaving = true;
+
       const normalizedCategory = normalizeCategory(this.article.category) || "";
       this.article.category = normalizedCategory;
       this.article.tags = normalizeTags(this.article.tags, this.article.category);
@@ -416,6 +436,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
           "Выбери категорию перед сохранением.",
           "error",
         );
+        this.isSaving = false;
         return;
       }
 
@@ -424,6 +445,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
           "Загрузи обложку новости!",
           "error",
         );
+        this.isSaving = false;
         return;
       }
 
@@ -451,11 +473,11 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
           await articlesApi.update(this.articleId, payload);
           (window as any).Alpine.store("ui").showToast("Новость обновлена!");
           const redirectTo = this.onSaveRedirect || `/dashboard/news/${this.articleId}/edit`;
-          window.location.href = redirectTo;
+          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
         } else {
           const result = await articlesApi.create(payload);
           (window as any).Alpine.store("ui").showToast("Новость создана!");
-          window.location.href = `/news/${result.id}`;
+          setTimeout(() => { globalThis.location.href = `/news/${result.id}`; }, 1500);
         }
       } catch (error) {
         console.error("Save error:", error);
@@ -464,6 +486,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
             ? error.message
             : "Ошибка сохранения новости.";
         (window as any).Alpine.store("ui").showToast(message, "error");
+        this.isSaving = false;
       }
     },
 

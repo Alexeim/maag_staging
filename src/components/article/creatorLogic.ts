@@ -239,6 +239,7 @@ export default function articleCreatorLogic(initialState = {}) {
 
     uploading: false,
     uploadProgress: 0,
+    isSaving: false,
 
     categoryTags,
     articleId,
@@ -889,6 +890,27 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     async saveArticle() {
+      // Auto-commit any open block — prevents losing unsaved flipper/image/text edits
+      if (this.editingIndex !== null) {
+        this.updateBlock();
+        // updateBlock() sets editingIndex to null on success, but returns early on
+        // invalid video — in that case we stop the save so the user can fix the block
+        if (this.editingIndex !== null) return;
+      }
+
+      // Block save while a file upload is still in progress
+      if (this.uploading) {
+        window.Alpine.store("ui").showToast(
+          "Подожди — загрузка файла ещё не завершилась.",
+          "error",
+        );
+        return;
+      }
+
+      // Guard against double-submit
+      if (this.isSaving) return;
+      this.isSaving = true;
+
       const normalizedCategory = normalizeCategory(this.article.category) || "";
       const isHotContentFlag =
         Boolean(this.article.isHotContent) ||
@@ -909,6 +931,7 @@ export default function articleCreatorLogic(initialState = {}) {
         (block) => !this.validateVideoBlock(block),
       );
       if (hasInvalidVideoBlock) {
+        this.isSaving = false;
         return;
       }
 
@@ -917,6 +940,7 @@ export default function articleCreatorLogic(initialState = {}) {
           "Выбери категорию перед сохранением — это обязательное поле.",
           "error",
         );
+        this.isSaving = false;
         return;
       }
 
@@ -931,6 +955,7 @@ export default function articleCreatorLogic(initialState = {}) {
           "Добавь хотя бы один тег или техтег — без них статья не сохранится.",
           "error",
         );
+        this.isSaving = false;
         return;
       }
 
@@ -939,6 +964,7 @@ export default function articleCreatorLogic(initialState = {}) {
           "Загрузи оболожку статьи - обязательно!!!",
           "error",
         );
+        this.isSaving = false;
         return;
       }
 
@@ -964,15 +990,15 @@ export default function articleCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.articleId) {
           await articlesApi.update(this.articleId, payload);
-          window.Alpine.store("ui").showToast("Статья успешно обновлена!");
           localStorage.removeItem("articlePreview");
+          window.Alpine.store("ui").showToast("Статья успешно обновлена!");
           const redirectTo = this.onSaveRedirect || `/dashboard/article/${this.articleId}/edit`;
-          window.location.href = redirectTo;
+          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
         } else {
           const result = await articlesApi.create(payload);
-          window.Alpine.store("ui").showToast("Статья успешно создана! Молодец!");
           localStorage.removeItem("articlePreview");
-          window.location.href = `/article/${result.id}`;
+          window.Alpine.store("ui").showToast("Статья успешно создана! Молодец!");
+          setTimeout(() => { globalThis.location.href = `/article/${result.id}`; }, 1500);
         }
       } catch (error) {
         console.error("Проблемка сохранения:", error);
@@ -981,6 +1007,7 @@ export default function articleCreatorLogic(initialState = {}) {
             ? error.message
             : "Во время сохранения статьи возникла ошибочка.";
         window.Alpine.store("ui").showToast(message, "error");
+        this.isSaving = false;
       }
     },
 

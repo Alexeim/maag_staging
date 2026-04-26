@@ -276,47 +276,58 @@ export default function eventCreatorLogic(initialState = {}) {
     },
 
     async saveArticle() {
-      const hasCover = Boolean(this.article.imageUrl);
-      if (!hasCover) {
+      // Auto-commit any open block — prevents losing unsaved flipper/image/text edits
+      if (this.editingIndex !== null) {
+        this.updateBlock();
+        if (this.editingIndex !== null) return;
+      }
+
+      // Block save while a file upload is still in progress
+      if (this.uploading) {
         window.Alpine.store("ui").showToast(
-          "Загрузи обложку события — без неё никак.",
+          "Подожди — загрузка файла ещё не завершилась.",
           "error",
         );
+        return;
+      }
+
+      // Guard against double-submit
+      if (this.isSaving) return;
+      this.isSaving = true;
+
+      const toast = (msg: string) => (globalThis as any).Alpine.store("ui").showToast(msg, "error");
+
+      const hasCover = Boolean(this.article.imageUrl);
+      if (!hasCover) {
+        toast("Загрузи обложку события — без неё никак.");
+        this.isSaving = false;
         return;
       }
 
       const category = this.eventForm.category;
       if (!category) {
-        window.Alpine.store("ui").showToast(
-          "Выбери категорию события.",
-          "error",
-        );
+        toast("Выбери категорию события.");
+        this.isSaving = false;
         return;
       }
 
       if (!this.article.title?.trim()) {
-        window.Alpine.store("ui").showToast(
-          "Напиши заголовок события.",
-          "error",
-        );
+        toast("Напиши заголовок события.");
+        this.isSaving = false;
         return;
       }
 
       if (!this.eventForm.startDate) {
-        window.Alpine.store("ui").showToast(
-          "Укажи дату начала события.",
-          "error",
-        );
+        toast("Укажи дату начала события.");
+        this.isSaving = false;
         return;
       }
 
       const start = new Date(this.eventForm.startDate);
       const isDuration = this.eventForm.dateType === "duration";
       if (isDuration && !this.eventForm.endDate) {
-        window.Alpine.store("ui").showToast(
-          "Для диапазона дат укажи дату окончания.",
-          "error",
-        );
+        toast("Для диапазона дат укажи дату окончания.");
+        this.isSaving = false;
         return;
       }
       const normalizedEndDate = isDuration
@@ -325,26 +336,20 @@ export default function eventCreatorLogic(initialState = {}) {
       const end = normalizedEndDate ? new Date(normalizedEndDate) : null;
 
       if (Number.isNaN(start.getTime())) {
-        window.Alpine.store("ui").showToast(
-          "Нормально введи дату начала, она какая-то странная.",
-          "error",
-        );
+        toast("Нормально введи дату начала, она какая-то странная.");
+        this.isSaving = false;
         return;
       }
 
       if (end && Number.isNaN(end.getTime())) {
-        window.Alpine.store("ui").showToast(
-          "Дата окончания введена криво.",
-          "error",
-        );
+        toast("Дата окончания введена криво.");
+        this.isSaving = false;
         return;
       }
 
       if (end && end < start) {
-        window.Alpine.store("ui").showToast(
-          "Дата окончания не может быть раньше старта.",
-          "error",
-        );
+        toast("Дата окончания не может быть раньше старта.");
+        this.isSaving = false;
         return;
       }
 
@@ -353,26 +358,20 @@ export default function eventCreatorLogic(initialState = {}) {
       const endTime = normalizeTime(this.eventForm.endTime);
 
       if (timeMode === "start" && !startTime) {
-        window.Alpine.store("ui").showToast(
-          "Укажи время начала события.",
-          "error",
-        );
+        toast("Укажи время начала события.");
+        this.isSaving = false;
         return;
       }
 
       if (timeMode === "range") {
         if (!startTime || !endTime) {
-          window.Alpine.store("ui").showToast(
-            "Для диапазона времени укажи и начало, и конец.",
-            "error",
-          );
+          toast("Для диапазона времени укажи и начало, и конец.");
+          this.isSaving = false;
           return;
         }
         if (endTime <= startTime) {
-          window.Alpine.store("ui").showToast(
-            "Конец временного диапазона должен быть позже начала.",
-            "error",
-          );
+          toast("Конец временного диапазона должен быть позже начала.");
+          this.isSaving = false;
           return;
         }
       }
@@ -383,10 +382,8 @@ export default function eventCreatorLogic(initialState = {}) {
       const hasTechTags = Array.isArray(this.article.techTags) && this.article.techTags.length > 0;
 
       if (!hasTags && !hasTechTags) {
-        window.Alpine.store("ui").showToast(
-          "Добавь хотя бы один тег или техтег.",
-          "error",
-        );
+        toast("Добавь хотя бы один тег или техтег.");
+        this.isSaving = false;
         return;
       }
 
@@ -416,19 +413,20 @@ export default function eventCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.eventId) {
           await eventsApi.update(this.eventId, payload);
-          window.Alpine.store("ui").showToast("Событие обновлено, красота!");
+          (globalThis as any).Alpine.store("ui").showToast("Событие обновлено, красота!");
           const redirectTo = this.onSaveRedirect || `/dashboard/event/${this.eventId}/edit`;
-          window.location.href = redirectTo;
+          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
         } else {
           const result = await eventsApi.create(payload);
-          window.Alpine.store("ui").showToast("Событие создано, поехали!");
-          window.location.href = `/events/${result.id}`;
+          (globalThis as any).Alpine.store("ui").showToast("Событие создано, поехали!");
+          setTimeout(() => { globalThis.location.href = `/events/${result.id}`; }, 1500);
         }
       } catch (error) {
         console.error("Event save error:", error);
         const message =
           error instanceof Error ? error.message : "Что-то пошло не так при сохранении события.";
         window.Alpine.store("ui").showToast(message, "error");
+        this.isSaving = false;
       }
     },
 

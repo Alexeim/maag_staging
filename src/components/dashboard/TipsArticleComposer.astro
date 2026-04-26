@@ -519,6 +519,6 @@ const allParisTags = parisTags.parisTags;
         </Button>
       )}
     </div>
-    <Button variant="primary" size="md" @click="saveArticle()">{submitLabel}</Button>
+    <Button variant="primary" size="md" @click="saveArticle()" :disabled="isSaving" :class="{'opacity-50 cursor-not-allowed': isSaving}">{submitLabel}</Button>
   </div>
 </div>

@@ -111,6 +111,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     editingCaptionText: "",
     uploading: false,
     uploadProgress: 0,
+    isSaving: false,
     interviewId,
     isEditMode,
     onSaveRedirect,
@@ -564,6 +565,25 @@ export default function interviewCreatorLogic(initialState = {}) {
     },
 
     async saveInterview() {
+      // Auto-commit any open block — prevents losing unsaved flipper/image/text edits
+      if (this.editingIndex !== null) {
+        this.updateBlock();
+        if (this.editingIndex !== null) return;
+      }
+
+      // Block save while a file upload is still in progress
+      if (this.uploading) {
+        window.Alpine.store("ui").showToast(
+          "Подожди — загрузка файла ещё не завершилась.",
+          "error",
+        );
+        return;
+      }
+
+      // Guard against double-submit
+      if (this.isSaving) return;
+      this.isSaving = true;
+
       this.interview.tags = normalizeTags(this.interview.tags);
       this.interview.contentBlocks = this.interview.contentBlocks.map((block: any) =>
         block?.type === "video" ? normalizeVideoBlock(block) : block,
@@ -573,23 +593,28 @@ export default function interviewCreatorLogic(initialState = {}) {
         (block: any) => !this.validateVideoBlock(block),
       );
       if (hasInvalidVideoBlock) {
+        this.isSaving = false;
         return;
       }
 
       if (!this.interview.title) {
         window.Alpine.store("ui").showToast("Добавь заголовок.", "error");
+        this.isSaving = false;
         return;
       }
       if (!this.interview.interviewee) {
         window.Alpine.store("ui").showToast("Добавь имя интервьюируемого.", "error");
+        this.isSaving = false;
         return;
       }
       if (!this.interview.imageUrl) {
         window.Alpine.store("ui").showToast("Загрузи обложку.", "error");
+        this.isSaving = false;
         return;
       }
       if (this.interview.tags.length === 0) {
         window.Alpine.store("ui").showToast("Добавь хотя бы один тег.", "error");
+        this.isSaving = false;
         return;
       }
 
@@ -613,16 +638,17 @@ export default function interviewCreatorLogic(initialState = {}) {
           await interviewsApi.update(this.interviewId, payload);
           window.Alpine.store("ui").showToast("Интервью успешно обновлено!");
           const redirectTo = this.onSaveRedirect || `/dashboard/interviews`;
-          window.location.href = redirectTo;
+          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
         } else {
-          const result = await interviewsApi.create(payload);
+          await interviewsApi.create(payload);
           window.Alpine.store("ui").showToast("Интервью успешно создано!");
-          window.location.href = `/dashboard/interviews`; // Redirect to the list
+          setTimeout(() => { globalThis.location.href = `/dashboard/interviews`; }, 1500);
         }
       } catch (error) {
         console.error("Ошибка сохранения интервью:", error);
         const message = error instanceof Error ? error.message : "Во время сохранения интервью возникла ошибка.";
         window.Alpine.store("ui").showToast(message, "error");
+        this.isSaving = false;
       }
     },
 
