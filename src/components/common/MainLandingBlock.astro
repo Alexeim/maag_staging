@@ -116,10 +116,21 @@ try {
     })),
   ];
 
-  // Filter for the main article (latest that is NOT news)
+  const isCategoryRubricItem = (item: any) => {
+    const cat = normalizeCategory(item?.category);
+    return cat === "culture" || cat === "paris";
+  };
+
+  // Explicit isOnLanding takes priority; fallback excludes culture/paris rubric articles
+  // so they stay in their own sections and don't duplicate on the landing hero.
   mainArticle =
     landingContent.find((item) => item.isOnLanding) ||
-    landingContent.find((item) => !item.isNews && !isHotContentArticle(item)) ||
+    landingContent.find(
+      (item) =>
+        !item.isNews &&
+        !isHotContentArticle(item) &&
+        !isCategoryRubricItem(item),
+    ) ||
     null;
 
   // Filter for news articles, limit to 5 for the landing page

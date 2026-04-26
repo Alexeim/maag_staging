@@ -1,11 +1,8 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
-import ArticleHeader from "../../components/article/ArticleHeader.astro";
-import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
-import ArticleDate from "@/components/article/ArticleDate.astro";
-import ArticleImage from "../../components/article/ArticleImage.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import ArticleTips from "../../components/article/ArticleTips.astro";
+import GuideHero from "@/components/guide/GuideHero.astro";
 import { ApiError, guidesApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
@@ -49,6 +46,8 @@ const displayGuide = {
   contentBlocks: guideData?.content || [],
   tips: Array.isArray(guideData?.tips) ? guideData.tips : [],
 };
+
+const transitionAliases = [`landing-body-main-article-image-${id}`];
 ---
 
 <Layout
@@ -62,37 +61,21 @@ const displayGuide = {
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}
       {!error && guideData && (
         <>
-          <div class="pt-[50px] pb-[70px] flex flex-col items-center gap-[50px]">
-            <div class="flex flex-col gap-4 max-w-[825px] w-full">
-              <ArticleHeader
-                category={displayGuide.category}
-                title={displayGuide.title}
-                lead={displayGuide.lead}
-              />
-              <div class="flex flex-row items-center justify-start gap-4">
-                <ArticleAuthor
-                  name={displayGuide.authorName}
-                  avatarUrl={displayGuide.authorAvatar}
-                />
-                <div>·</div>
-                <ArticleDate createdAt={guideData.createdAt} />
-              </div>
-            </div>
+          <GuideHero
+            category={displayGuide.category}
+            title={displayGuide.title}
+            lead={displayGuide.lead}
+            authorName={displayGuide.authorName}
+            authorAvatar={displayGuide.authorAvatar}
+            createdAt={guideData.createdAt}
+            imageUrl={displayGuide.imageUrl}
+            imageAlt={displayGuide.imageAlt}
+            imageCaption={displayGuide.imageCaption}
+            transitionName={`main-article-image-${id}`}
+            transitionAliases={transitionAliases}
+          />
 
-            {displayGuide.imageUrl && (
-              <ArticleImage
-                src={displayGuide.imageUrl}
-                alt={displayGuide.imageAlt}
-                caption={displayGuide.imageCaption}
-                transitionName={`guide-image-${id}`}
-                figureClass="max-w-[1200px]"
-                imageClass="shadow-lg"
-                figcaptionClass="text-center font-oswald text-sm text-gray-500 mt-2"
-              />
-            )}
-          </div>
-
-          <div class="max-w-[1400px] mx-auto px-14 pb-[100px]">
+          <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-14 pb-[100px]">
             <ArticleBody contentBlocks={displayGuide.contentBlocks} />
             <ArticleTips tips={displayGuide.tips} />
           </div>

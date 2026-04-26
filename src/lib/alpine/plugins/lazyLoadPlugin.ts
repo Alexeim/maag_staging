@@ -91,6 +91,8 @@ export default function(Alpine: Alpine) {
         tips: [],
         category: '',
         isHotContent: false,
+        isOnLanding: false,
+        isMainInCategory: false,
       },
       // --- Interview Creator properties ---
       interview: {
