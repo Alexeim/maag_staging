@@ -2,13 +2,14 @@
 import { defineConfig } from "astro/config";
 import alpinejs from "@astrojs/alpinejs";
 import tailwindcss from "@tailwindcss/vite";
+import compressor from "astro-compressor";
 
 import node from "@astrojs/node";
 
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
-  integrations: [alpinejs({ entrypoint: '/src/alpine-entrypoint.ts' })],
+  integrations: [alpinejs({ entrypoint: '/src/alpine-entrypoint.ts' }), compressor()],
   base: process.env.ASTRO_BASE_PATH || "/",
 
   vite: {
