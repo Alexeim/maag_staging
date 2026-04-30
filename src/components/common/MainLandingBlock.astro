@@ -30,7 +30,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   notebook: "Записная книжка",
   place: "Место",
   ...Object.fromEntries(
-    Array.from({ length: 20 }, (_, i) => [`district-${i + 1}`, `${i + 1}-й округ`]),
+    Array.from({ length: 20 }, (_, i) => [
+      `district-${i + 1}`,
+      `${i + 1}-й округ`,
+    ]),
   ),
 };
 
@@ -338,7 +341,7 @@ try {
                   <Image
                     src={maagLogo}
                     alt="MAAG"
-                    class="w-8 h-8 lg:w-10 lg:h-10 inline-block align-middle"
+                    class="w-8 h-8 lg:w-6 lg:h-6 inline-block align-baseline"
                   />
                 </h2>
               </a>
