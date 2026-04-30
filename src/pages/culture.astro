@@ -2,7 +2,12 @@
 import Layout from "../Layouts/Layout.astro";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import picture1 from "../assets/images/culture.jpg";
-import { articlesApi, interviewsApi, flippersApi, guidesApi } from "@/lib/api/api";
+import {
+  articlesApi,
+  interviewsApi,
+  flippersApi,
+  guidesApi,
+} from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -49,7 +54,10 @@ const TAG_LABEL_ALIASES: Record<string, string> = {
   notebook: "Записная книжка",
   place: "Место",
   ...Object.fromEntries(
-    Array.from({ length: 20 }, (_, i) => [`district-${i + 1}`, `${i + 1}-й округ`]),
+    Array.from({ length: 20 }, (_, i) => [
+      `district-${i + 1}`,
+      `${i + 1}-й округ`,
+    ]),
   ),
 };
 
@@ -265,10 +273,7 @@ try {
 
   editorialSidebarItems = allCultureItems
     .filter(
-      (item) =>
-        !excludedIds.has(item.id) &&
-        isHotContent(item) &&
-        !item.isNews,
+      (item) => !excludedIds.has(item.id) && isHotContent(item) && !item.isNews,
     )
     .slice(0, 4);
 
@@ -300,9 +305,7 @@ const featuredInterviewName =
   title="Культура - Maag"
   useClientRouter={true}
 >
-  <main
-    class="min-h-screen bg-base-200 font-oswald text-[#302821] [background-image:radial-gradient(circle_at_top_center,rgba(255,255,255,0.82),transparent_48%)]"
-  >
+  <main class="min-h-screen bg-base-200 font-oswald text-black">
     <div
       class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
     >
@@ -479,7 +482,9 @@ const featuredInterviewName =
             <LatestInterview
               tag="Интервью"
               interviewee={featuredInterviewName}
-              quote={interviewQuote ? truncateText(interviewQuote, 130) : undefined}
+              quote={
+                interviewQuote ? truncateText(interviewQuote, 130) : undefined
+              }
               imageUrl={featuredInterview.imageUrl || picture1.src}
               href={`/interviews/${featuredInterview.id}`}
               transitionName={`main-article-image-${featuredInterview.id}`}
