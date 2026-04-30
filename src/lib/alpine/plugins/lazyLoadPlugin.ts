@@ -18,6 +18,7 @@ const components: Record<string, () => Promise<any>> = {
   newsList: () => import('@/components/dashboard/newsListLogic'),
   subscriptionManager: () => import('@/components/profile/subscriptionLogic'),
   tipsArticleCreator: () => import('@/components/dashboard/tipsArticleCreatorLogic'),
+  tipsList: () => import('@/components/dashboard/tipsListLogic'),
   guideCreator: () => import('@/components/article/guideCreatorLogic'),
   guideList: () => import('@/components/dashboard/guideListLogic'),
 };

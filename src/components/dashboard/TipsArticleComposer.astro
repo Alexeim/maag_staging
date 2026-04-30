@@ -513,7 +513,7 @@ const allParisTags = parisTags.parisTags;
         <Button
           variant="error"
           size="md"
-          @click={`$store.ui.showConfirmation('Удалить статью?', async () => { await fetch('/api/articles/${deleteArticleId}', { method: 'DELETE', headers: { Authorization: 'Bearer ' + (await import('/src/lib/firebase/client.js').then(m => m.getIdToken())) } }); window.location.href = '${deleteRedirect}'; })`}
+          @click={`deleteArticle('${deleteRedirect}')`}
         >
           Удалить
         </Button>

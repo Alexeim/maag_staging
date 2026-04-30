@@ -360,6 +360,36 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       );
     },
 
+    // ── Delete ────────────────────────────────────────────────────────────────
+    deleteArticle(redirectUrl?: string) {
+      if (!this.articleId) return;
+
+      const performDelete = async () => {
+        try {
+          await articlesApi.delete(this.articleId!);
+          ui()?.showToast?.("Статья удалена");
+          setTimeout(() => {
+            globalThis.location.href = redirectUrl || "/dashboard";
+          }, 1500);
+        } catch (error) {
+          console.error(error);
+          ui()?.showToast?.("Не удалось удалить статью.", "error");
+        }
+      };
+
+      const uiStore = ui();
+      if (uiStore?.showConfirmation) {
+        uiStore.showConfirmation(
+          `Удалить статью «${this.article.title}»? Это действие необратимо.`,
+          performDelete,
+        );
+      } else {
+        if (globalThis.confirm("Вы уверены, что хотите удалить эту статью?")) {
+          performDelete();
+        }
+      }
+    },
+
     // ── Save ──────────────────────────────────────────────────────────────────
     async saveArticle() {
       // Auto-commit any open block — prevents losing unsaved flipper/image/text edits

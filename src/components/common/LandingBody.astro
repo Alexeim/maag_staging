@@ -52,7 +52,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   notebook: "Записная книжка",
   place: "Место",
   ...Object.fromEntries(
-    Array.from({ length: 20 }, (_, i) => [`district-${i + 1}`, `${i + 1}-й округ`]),
+    Array.from({ length: 20 }, (_, i) => [
+      `district-${i + 1}`,
+      `${i + 1}-й округ`,
+    ]),
   ),
 };
 
@@ -231,14 +234,16 @@ try {
     (item) =>
       normalizeCategory(item.category) === CULTURE_CATEGORY_KEY &&
       !isHotContent(item) &&
-      !item.isNews,
+      !item.isNews &&
+      !item.isOnLanding,
   );
 
   parisItems = allItems.filter(
     (item) =>
       normalizeCategory(item.category) === PARIS_CATEGORY_KEY &&
       !isHotContent(item) &&
-      !item.isNews,
+      !item.isNews &&
+      !item.isOnLanding,
   );
 
   console.log(`--- STEP 3: FILTERED ---`);
@@ -273,7 +278,7 @@ try {
       (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
     )
     .filter((item) => isLandingHotContentItem(item))
-    .slice(0, 6);
+    .slice(0, 4);
   latestInterview = interviews[0] ?? null;
 } catch (error) {
   console.error("Failed to fetch data for LandingBody:", error);

@@ -2,6 +2,7 @@
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import { articlesApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
 const normalizeDate = (value: any) => {
   if (!value) return null;
@@ -70,7 +71,7 @@ const articles = articlesRaw
 ---
 
 <DashboardLayout title="Tips-статьи" active="tips">
-  <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+  <div class="bg-base-100 border border-base-300 rounded-xl p-6" x-data={`$lazy('tipsList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}>
     <div class="flex items-center justify-between mb-6">
       <div>
         <h2 class="text-xl font-semibold">Tips-статьи</h2>
@@ -143,6 +144,13 @@ const articles = articlesRaw
                       >
                         Просмотр
                       </a>
+                      <button
+                        type="button"
+                        class="font-medium text-error hover:underline"
+                        @click={`handleDeleteClick('${article.id}', '${article.title.replace(/'/g, "\\'")}')`}
+                      >
+                        Удалить
+                      </button>
                     </div>
                   </td>
                 </tr>
