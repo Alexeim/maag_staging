@@ -17,7 +17,7 @@ interface Block {
 }
 
 interface ColumnData {
-  type: "image" | "text";
+  type: "image" | "text" | "quote";
   content: string; // url for image, text for text
   caption?: string;
 }
@@ -229,6 +229,14 @@ if (currentProseGroup.length > 0) {
                       </figcaption>
                     )}
                   </figure>
+                ) : twoColumnBlock.left.type === "quote" ? (
+                  <div class="w-full max-w-[420px] flex flex-col items-center">
+                    <QuoteIcon class="w-8 h-8" />
+                    <blockquote class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line">
+                      {twoColumnBlock.left.content}
+                    </blockquote>
+                    <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                  </div>
                 ) : (
                   <p class="text-lg font-oswald tracking-wide text-justify font-thin">
                     {twoColumnBlock.left.content}
@@ -249,6 +257,14 @@ if (currentProseGroup.length > 0) {
                       </figcaption>
                     )}
                   </figure>
+                ) : twoColumnBlock.right.type === "quote" ? (
+                  <div class="w-full max-w-[420px] flex flex-col items-center">
+                    <QuoteIcon class="w-8 h-8" />
+                    <blockquote class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line">
+                      {twoColumnBlock.right.content}
+                    </blockquote>
+                    <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                  </div>
                 ) : (
                   <p class="text-lg font-oswald tracking-wide text-justify font-thin">
                     {twoColumnBlock.right.content}

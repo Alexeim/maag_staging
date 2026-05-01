@@ -8,6 +8,7 @@ import moneyIcon from "@/assets/icons/new/money.svg?raw";
 import ideaIcon from "@/assets/icons/new/idea.svg?raw";
 import likeIcon from "@/assets/icons/new/like.svg?raw";
 import dislikeIcon from "@/assets/icons/new/dislike.svg?raw";
+import QuoteIcon from "@/assets/icons/quote.svg";
 
 interface Props {
   heading: string;
@@ -627,15 +628,19 @@ const {
                       >
                         <option value="text">Текст</option>
                         <option value="image">Изображение</option>
+                        <option value="quote">Цитата</option>
                       </select>
 
-                      <template x-if="editingBlock.left.type === 'text'">
+                      <template x-if="['text', 'quote'].includes(editingBlock.left.type)">
                         <div>
-                          <label class="block text-sm font-medium">Текст</label>
+                          <label class="block text-sm font-medium" x-text="editingBlock.left.type === 'quote' ? 'Цитата' : 'Текст'"></label>
                           <textarea
                             x-model="editingBlock.left.content"
                             class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
                             rows="5"></textarea>
+                          <p x-show="editingBlock.left.type === 'quote'" class="mt-2 text-xs text-base-content/60">
+                            Цитата отрендерится с красной кавычкой, курсивом и размером как у aside-текста.
+                          </p>
                         </div>
                       </template>
 
@@ -699,15 +704,19 @@ const {
                       >
                         <option value="text">Текст</option>
                         <option value="image">Изображение</option>
+                        <option value="quote">Цитата</option>
                       </select>
 
-                      <template x-if="editingBlock.right.type === 'text'">
+                      <template x-if="['text', 'quote'].includes(editingBlock.right.type)">
                         <div>
-                          <label class="block text-sm font-medium">Текст</label>
+                          <label class="block text-sm font-medium" x-text="editingBlock.right.type === 'quote' ? 'Цитата' : 'Текст'"></label>
                           <textarea
                             x-model="editingBlock.right.content"
                             class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
                             rows="5"></textarea>
+                          <p x-show="editingBlock.right.type === 'quote'" class="mt-2 text-xs text-base-content/60">
+                            Цитата отрендерится с красной кавычкой, курсивом и размером как у aside-текста.
+                          </p>
                         </div>
                       </template>
 
@@ -926,7 +935,15 @@ const {
                     x-text="block.left?.content"
                     class="text-sm text-base-content/80"
                   ></p>
-                  <span x-show="block.left?.caption" x-text="block.left?.caption" class="text-xs text-base-content/60 mt-1"></span>
+                  <div x-show="block.left?.type === 'quote'" class="w-full max-w-[420px]">
+                    <QuoteIcon class="w-8 h-8" />
+                    <blockquote
+                      x-text="block.left?.content"
+                      class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"
+                    ></blockquote>
+                    <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                  </div>
+                  <span x-show="block.left?.type === 'image' && block.left?.caption" x-text="block.left?.caption" class="text-xs text-base-content/60 mt-1"></span>
                 </div>
                 <div class="w-full lg:w-1/2 flex flex-col items-center">
                   <img
@@ -940,7 +957,15 @@ const {
                     x-text="block.right?.content"
                     class="text-sm text-base-content/80"
                   ></p>
-                  <span x-show="block.right?.caption" x-text="block.right?.caption" class="text-xs text-base-content/60 mt-1"></span>
+                  <div x-show="block.right?.type === 'quote'" class="w-full max-w-[420px]">
+                    <QuoteIcon class="w-8 h-8" />
+                    <blockquote
+                      x-text="block.right?.content"
+                      class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"
+                    ></blockquote>
+                    <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                  </div>
+                  <span x-show="block.right?.type === 'image' && block.right?.caption" x-text="block.right?.caption" class="text-xs text-base-content/60 mt-1"></span>
                 </div>
               </div>
 

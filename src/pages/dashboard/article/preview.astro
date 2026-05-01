@@ -5,6 +5,7 @@ import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import SocialShare from "@/components/article/SocialShare.astro";
 import Button from "@/components/common/Button.astro";
 import articleData from "@/content/articlePage/RU/Article.json";
+import QuoteIcon from "@/assets/icons/quote.svg";
 ---
 
 <DashboardLayout title="Предпросмотр статьи" active="create-article">
@@ -132,6 +133,11 @@ import articleData from "@/content/articlePage/RU/Article.json";
                                     x-text="block.left?.caption"></figcaption>
                             </figure>
                             <p x-show="block.left?.type === 'text'" class="text-lg font-oswald text-justify font-thin" x-text="block.left?.content"></p>
+                            <div x-show="block.left?.type === 'quote'" class="w-full max-w-[420px]">
+                                <QuoteIcon class="w-8 h-8" />
+                                <blockquote x-text="block.left?.content" class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"></blockquote>
+                                <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                            </div>
                         </div>
                         <div class="w-full lg:w-1/2 flex justify-center">
                             <figure x-show="block.right?.type === 'image'" class="flex flex-col items-center">
@@ -142,6 +148,11 @@ import articleData from "@/content/articlePage/RU/Article.json";
                                     x-text="block.right?.caption"></figcaption>
                             </figure>
                             <p x-show="block.right?.type === 'text'" class="text-lg font-oswald text-justify font-thin" x-text="block.right?.content"></p>
+                            <div x-show="block.right?.type === 'quote'" class="w-full max-w-[420px]">
+                                <QuoteIcon class="w-8 h-8" />
+                                <blockquote x-text="block.right?.content" class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"></blockquote>
+                                <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                            </div>
                         </div>
                     </div>
                 </div>
