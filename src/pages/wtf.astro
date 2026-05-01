@@ -1,0 +1,228 @@
+---
+import cultureImage from "../assets/images/culture.jpg";
+import mainImage from "../assets/images/main.jpeg";
+import calendarImage from "../assets/images/cal.jpeg";
+import parisImage from "../assets/images/article_content/par.jpeg";
+
+const slides = [
+  {
+    imageUrl: cultureImage.src,
+    text: "Всё начинается незаметно.",
+  },
+  {
+    imageUrl: mainImage.src,
+    text: "Ты ещё не понимаешь, что это важно.",
+  },
+  {
+    imageUrl: calendarImage.src,
+    text: "Но внутри уже что-то меняется.",
+  },
+  {
+    imageUrl: parisImage.src,
+    text: "Остаётся только помнить.",
+  },
+];
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Фотоистория</title>
+
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: #fff;
+        overflow: hidden;
+      }
+
+      .story {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #111;
+      }
+
+      .slider {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.5s ease;
+        will-change: transform;
+      }
+
+      .slide {
+        min-width: 100vw;
+        height: 100vh;
+        display: flex;
+      }
+
+      .left {
+        width: 50%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      .right {
+        width: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px;
+        font-size: 28px;
+        line-height: 1.4;
+        background: #111;
+      }
+
+      .right p {
+        max-width: 16ch;
+        margin: 0;
+      }
+
+      .nav {
+        position: fixed;
+        right: 30px;
+        bottom: 30px;
+        display: flex;
+        gap: 10px;
+        z-index: 10;
+      }
+
+      .nav button {
+        background: transparent;
+        border: 1px solid #fff;
+        color: #fff;
+        padding: 10px 20px;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .nav button:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+
+      @media (max-width: 900px) {
+        body {
+          overflow: auto;
+        }
+
+        .story {
+          height: auto;
+          min-height: 100vh;
+          padding-bottom: 92px;
+        }
+
+        .slider {
+          height: auto;
+        }
+
+        .slide {
+          min-width: 100vw;
+          height: auto;
+          min-height: 100vh;
+          flex-direction: column;
+        }
+
+        .left,
+        .right {
+          width: 100%;
+        }
+
+        .left {
+          min-height: 52vh;
+        }
+
+        .right {
+          min-height: 48vh;
+          padding: 32px 24px;
+          font-size: 22px;
+          align-items: flex-start;
+        }
+
+        .right p {
+          max-width: none;
+        }
+
+        .nav {
+          right: 16px;
+          bottom: 16px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="story">
+      <div class="slider" id="slider">
+        {
+          slides.map((slide) => (
+            <section class="slide">
+              <div
+                class="left"
+                style={`background-image:url('${slide.imageUrl}')`}
+              ></div>
+              <div class="right">
+                <p>{slide.text}</p>
+              </div>
+            </section>
+          ))
+        }
+      </div>
+
+      <div class="nav">
+        <button id="prev-button" type="button" aria-label="Предыдущий слайд">
+          ←
+        </button>
+        <button id="next-button" type="button" aria-label="Следующий слайд">
+          →
+        </button>
+      </div>
+    </main>
+
+    <script>
+      const slider = document.getElementById("slider");
+      const prevButton = document.getElementById("prev-button");
+      const nextButton = document.getElementById("next-button");
+      const total = document.querySelectorAll(".slide").length;
+
+      let index = 0;
+
+      const update = () => {
+        if (!slider || !prevButton || !nextButton) return;
+
+        slider.style.transform = `translateX(-${index * 100}vw)`;
+        prevButton.disabled = index === 0;
+        nextButton.disabled = index === total - 1;
+      };
+
+      prevButton?.addEventListener("click", () => {
+        if (index === 0) return;
+        index -= 1;
+        update();
+      });
+
+      nextButton?.addEventListener("click", () => {
+        if (index >= total - 1) return;
+        index += 1;
+        update();
+      });
+
+      update();
+    </script>
+  </body>
+</html>

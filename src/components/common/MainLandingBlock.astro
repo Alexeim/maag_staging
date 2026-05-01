@@ -325,10 +325,10 @@ try {
                 <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
                   {getPrimaryTag(mainArticle) || "Новости"}
                 </span>
-                <span class="text-black text-lg font-bold font-['Inter']">
+                <span class="hidden text-black text-lg font-bold font-['Inter']">
                   ·
                 </span>
-                <span class="text-xs">
+                <span class="hidden text-xs">
                   {formatArticleDate(mainArticle?.createdAt)}
                 </span>
               </div>
@@ -377,7 +377,7 @@ try {
             href={`/events/${landingEvent.id}`}
             class="block bg-white rounded-xl shadow-lg overflow-hidden"
           >
-            <div class="p-4 lg:p-2 flex items-center gap-3">
+            <div class="hidden p-4 lg:p-2 flex items-center gap-3">
               <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
                 <p class="text-2xl lg:text-2xl text-black/60 font-thin font-oswald">
                   {formatEventDate(landingEvent.startDate)?.day || "--"}
@@ -412,7 +412,7 @@ try {
               <h2 class="text-base lg:text-lg leading-tight font-oswald mb-4">
                 {landingEvent.title}
               </h2>
-              <div class="flex items-center gap-2">
+              <div class="hidden flex items-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"

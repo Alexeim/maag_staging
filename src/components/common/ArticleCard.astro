@@ -8,6 +8,7 @@ interface ArticleCardProps {
   title?: string;
   category?: string;
   date?: string;
+  hideDate?: boolean;
   lead?: string;
   transitionName?: string;
   imageUrl?: string;
@@ -19,6 +20,7 @@ const {
   title = "Без названия",
   category = "Культура",
   date = "",
+  hideDate = false,
   lead = "",
   transitionName,
   imageUrl,
@@ -58,8 +60,8 @@ const displayImage = imageUrl || picture1.src;
   {
     (date || category) && (
       <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mt-1">
-        {date && <span class="text-xs">{date}</span>}
-        {date && category && <span class="text-black text-lg font-bold font-['Inter'] leading-none">·</span>}
+        {date && <span class:list={["text-xs", hideDate && "hidden"]}>{date}</span>}
+        {date && category && <span class:list={["text-black text-lg font-bold font-['Inter'] leading-none", hideDate && "hidden"]}>·</span>}
         {category && <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">{category}</span>}
       </div>
     )

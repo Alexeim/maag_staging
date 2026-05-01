@@ -22,6 +22,39 @@ const normalizeCategory = (value?: string) => {
   return entry ? entry[0] : lowerCaseValue;
 };
 
+const TAG_LABEL_ALIASES: Record<string, string> = {
+  exhibition: "Выставка",
+  exhibitions: "Выставка",
+  concert: "Концерт",
+  concerts: "Концерт",
+  performance: "Спектакль",
+  performances: "Спектакль",
+  theatre: "Театр",
+  theater: "Театр",
+  theatres: "Театры",
+  theaters: "Театры",
+  culture: "Культура",
+  paris: "Париж",
+  books: "Книги",
+  artMarket: "Арт-рынок",
+  artmarket: "Арт-рынок",
+  kids: "Дети",
+  opera: "Опера",
+  ballet: "Балет",
+  dance: "Танец",
+  music: "Музыка",
+  route: "Маршрут",
+  address: "Адрес",
+  notebook: "Записная книжка",
+  place: "Место",
+  ...Object.fromEntries(
+    Array.from({ length: 20 }, (_, i) => [
+      `district-${i + 1}`,
+      `${i + 1}-й округ`,
+    ]),
+  ),
+};
+
 const isHotContent = (item: any) =>
   Boolean(item?.isHotContent) ||
   normalizeCategory(item?.category) === HOT_CONTENT_CATEGORY_KEY;
@@ -47,11 +80,41 @@ const formatDate = (value: unknown) => {
   if (Number.isNaN(date.getTime())) {
     return "";
   }
-  return date.toLocaleDateString("ru-RU", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+  return date
+    .toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
+    .replace(" г.", "");
+};
+
+const normalizeTags = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
+    .filter(Boolean);
+};
+
+const getPrimaryTag = (item: any): string => {
+  if (item?.isNews) {
+    return "Новости";
+  }
+  const tags = normalizeTags(item?.tags);
+  if (tags.length === 0) {
+    return "";
+  }
+  const firstTag = tags[0];
+  const normalized = firstTag.toLowerCase();
+  return TAG_LABEL_ALIASES[normalized] ?? firstTag;
+};
+
+const getCardLead = (item: any): string => {
+  const cardLead =
+    typeof item?.cardLead === "string" ? item.cardLead.trim() : "";
+  return cardLead;
 };
 
 const toContentHref = (item: any) => {
@@ -64,16 +127,14 @@ const toContentHref = (item: any) => {
   return `/${item?.isNews ? "news" : "article"}/${item.id}`;
 };
 
-const getCardLead = (item: any): string => {
-  const cardLead =
-    typeof item?.cardLead === "string" ? item.cardLead.trim() : "";
-  return cardLead;
-};
-
 const truncateText = (text?: string, maxLength: number = 220) => {
   if (!text) return "";
   if (text.length <= maxLength) return text;
-  return `${text.slice(0, maxLength).trim()}...`;
+  const truncated = text.slice(0, maxLength).trim();
+  const lastSpaceIndex = truncated.lastIndexOf(" ");
+  const safeText =
+    lastSpaceIndex > 0 ? truncated.slice(0, lastSpaceIndex) : truncated;
+  return `${safeText.trim()}...`;
 };
 
 const getTransitionName = (item: any) => {
@@ -98,8 +159,9 @@ const getTransitionName = (item: any) => {
 
 let primaryParisArticle: any = null;
 let secondaryParisArticle: any = null;
+let tertiaryParisArticle: any = null;
+let editorialSidebarItems: any[] = [];
 let parisFeed: any[] = [];
-let hotContentItems: any[] = [];
 
 try {
   const [articles, flippers, guides] = await Promise.all([
@@ -112,15 +174,18 @@ try {
     ...articles.map((article) => ({
       ...article,
       contentType: "article",
+      tags: normalizeTags(article?.tags),
     })),
     ...flippers.map((flipper) => ({
       ...flipper,
       contentType: "flipper",
       imageUrl: flipper?.carouselContent?.[0]?.imageUrl || null,
+      tags: normalizeTags(flipper?.tags),
     })),
     ...guides.map((guide) => ({
       ...guide,
       contentType: "guide",
+      tags: normalizeTags(guide?.tags),
     })),
   ];
 
@@ -128,39 +193,60 @@ try {
     (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
   );
 
-  const parisItems = sortedContent
+  const allParisItems = sortedContent
     .filter(
       (item) =>
         normalizeCategory(item.category) === PARIS_CATEGORY_KEY &&
-        !isHotContent(item),
+        !item.isNews,
     )
     .map((item) => ({
       ...item,
       href: toContentHref(item),
     }));
 
-  primaryParisArticle =
-    parisItems.find((item) => isMainInCategoryItem(item)) ??
-    parisItems[0] ??
-    null;
+  const topItems = allParisItems.filter((item) => !isHotContent(item));
 
-  const parisWithoutPrimary = parisItems.filter((item) =>
+  primaryParisArticle =
+    topItems.find((item) => isMainInCategoryItem(item)) ?? topItems[0] ?? null;
+
+  const topWithoutPrimary = topItems.filter((item) =>
     primaryParisArticle ? item.id !== primaryParisArticle.id : true,
   );
 
-  secondaryParisArticle = parisWithoutPrimary[0] ?? null;
-  parisFeed = parisWithoutPrimary.slice(1);
+  secondaryParisArticle = topWithoutPrimary[0] ?? null;
+  tertiaryParisArticle = topWithoutPrimary[1] ?? null;
 
-  hotContentItems = sortedContent
-    .filter((item) => isHotContent(item))
-    .map((item) => ({
-      ...item,
-      href: toContentHref(item),
-    }))
-    .slice(0, 6);
+  const topIds = new Set(
+    [
+      primaryParisArticle?.id,
+      secondaryParisArticle?.id,
+      tertiaryParisArticle?.id,
+    ].filter(Boolean),
+  );
+
+  const parisHotContentItems = allParisItems.filter(
+    (item) => !topIds.has(item.id) && isHotContent(item) && !item.isNews,
+  );
+
+  editorialSidebarItems = parisHotContentItems.slice(0, 4);
+
+  const sidebarIds = new Set(editorialSidebarItems.map((item) => item.id));
+
+  parisFeed = allParisItems.filter(
+    (item) =>
+      !topIds.has(item.id) &&
+      !sidebarIds.has(item.id) &&
+      !isHotContent(item),
+  );
 } catch (error) {
   console.error("Failed to fetch paris page articles:", error);
 }
+
+const secondaryStories = [
+  secondaryParisArticle,
+  tertiaryParisArticle,
+].filter(Boolean);
+const editorialGridItems = parisFeed;
 ---
 
 <Layout
@@ -169,183 +255,227 @@ try {
   title="Париж - Maag"
   useClientRouter={true}
 >
-  <main class="bg-base-200 min-h-screen pb-16">
-    <section class="max-w-[1400px] mx-auto px-4 lg:px-8 pt-8 lg:pt-12">
-      <div class="border-b border-base-content/25 pb-6">
-        <h1 class="text-4xl lg:text-6xl font-oswald font-thin leading-none">
-          Париж
-        </h1>
-      </div>
+  <main class="min-h-screen bg-base-200 font-oswald text-black">
+    <div
+      class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
+    >
+      <h1 class="m-0 text-[1.05rem] font-medium uppercase tracking-[0.5em]">
+        Париж
+      </h1>
 
       <section
-        class="mt-8 lg:mt-10 grid grid-cols-1 lg:grid-cols-[1.55fr_1fr_0.9fr] gap-6 lg:gap-7"
+        class="mt-6 grid gap-7 lg:grid-cols-[minmax(0,1fr)_14rem] lg:items-start"
       >
-        <div class="lg:pr-4 lg:border-r lg:border-base-content/15">
+        <div class="grid gap-8">
           {
             primaryParisArticle ? (
-              <article>
+              <article class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
                 <a
                   href={primaryParisArticle.href}
-                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
+                  class="block aspect-[3/2] overflow-hidden"
+                  aria-label={primaryParisArticle.title}
                 >
                   <img
                     src={primaryParisArticle.imageUrl || picture1.src}
                     alt={primaryParisArticle.title}
-                    class="w-full h-[320px] lg:h-[560px] object-cover object-center"
+                    class="block h-full w-full object-cover"
                     loading="lazy"
                     transition:name={getTransitionName(primaryParisArticle)}
                   />
                 </a>
-                <a href={primaryParisArticle.href} class="block mt-5">
-                  <h2 class="text-3xl lg:text-[52px] leading-[1.02] font-oswald font-thin hover:underline">
-                    {primaryParisArticle.title}
-                  </h2>
-                </a>
-                {getCardLead(primaryParisArticle) && (
-                  <p class="mt-3 text-lg leading-relaxed text-base-content/80">
-                    {truncateText(getCardLead(primaryParisArticle), 220)}
+
+                <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                  <p class="m-0">
+                    <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                      {getPrimaryTag(primaryParisArticle) || "Париж"}
+                    </span>
                   </p>
-                )}
-                <p class="mt-4 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                  {formatDate(primaryParisArticle.createdAt)}
-                </p>
+
+                  <a
+                    href={primaryParisArticle.href}
+                    class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                  >
+                    <h2 class="m-0 max-w-[11ch] text-[clamp(1.9rem,3.5vw,2.8rem)] font-normal leading-[1.04]">
+                      {truncateText(primaryParisArticle.title, 96)}
+                    </h2>
+                  </a>
+
+                  {getCardLead(primaryParisArticle) && (
+                    <p class="m-0 text-base leading-[1.55] text-[#302821bd]">
+                      {truncateText(getCardLead(primaryParisArticle), 280)}
+                    </p>
+                  )}
+
+                  <p class="hidden mt-[0.4rem] font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]">
+                    {formatDate(primaryParisArticle.createdAt)}
+                  </p>
+                </div>
               </article>
             ) : (
-              <article class="border border-base-content/15 p-6">
-                <p class="text-base-content/70">
-                  Пока нет материалов категории «Париж».
-                </p>
+              <article class="border border-[#3028211a] bg-white/70 p-5 text-[1.05rem] font-light leading-[1.5]">
+                Пока нет материалов категории «Париж».
               </article>
             )
           }
-        </div>
-
-        <div class="lg:pr-4 lg:border-r lg:border-base-content/15">
-          {
-            secondaryParisArticle ? (
-              <article>
-                <a
-                  href={secondaryParisArticle.href}
-                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
-                >
-                  <img
-                    src={secondaryParisArticle.imageUrl || picture1.src}
-                    alt={secondaryParisArticle.title}
-                    class="w-full h-[320px] lg:h-[420px] object-cover object-center"
-                    loading="lazy"
-                    transition:name={getTransitionName(secondaryParisArticle)}
-                  />
-                </a>
-                <a href={secondaryParisArticle.href} class="block mt-5">
-                  <h3 class="text-3xl lg:text-[46px] leading-[1.05] font-oswald font-thin hover:underline">
-                    {secondaryParisArticle.title}
-                  </h3>
-                </a>
-                {getCardLead(secondaryParisArticle) && (
-                  <p class="mt-3 text-lg leading-relaxed text-base-content/80">
-                    {truncateText(getCardLead(secondaryParisArticle), 180)}
-                  </p>
-                )}
-                <p class="mt-4 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                  {formatDate(secondaryParisArticle.createdAt)}
-                </p>
-              </article>
-            ) : (
-              <article class="border border-base-content/15 p-6">
-                <p class="text-base-content/70">
-                  Добавьте еще один материал в Париж для второго блока.
-                </p>
-              </article>
-            )
-          }
-        </div>
-
-        <aside>
-          <h2
-            class="text-xs uppercase tracking-[0.35em] text-base-content/60 font-inter mb-4"
-          >
-            {CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY]}
-          </h2>
 
           {
-            hotContentItems.length > 0 ? (
-              <div class="divide-y divide-base-content/15 border-y border-base-content/20">
-                {hotContentItems.map((item) => (
-                  <article class="py-4 grid grid-cols-[minmax(0,1fr)_84px] gap-3 items-start">
-                    <div>
-                      <a href={item.href} class="block">
-                        <h4 class="text-3xl lg:text-[40px] leading-[1.02] font-oswald font-thin hover:underline">
-                          {item.title}
-                        </h4>
-                      </a>
-                      {getCardLead(item) && (
-                        <p class="mt-2 text-sm leading-relaxed text-base-content/75">
-                          {truncateText(getCardLead(item), 95)}
-                        </p>
-                      )}
-                      <p class="mt-3 text-[11px] font-inter uppercase tracking-[0.18em] text-base-content/50">
-                        {formatDate(item.createdAt)}
-                      </p>
-                    </div>
+            secondaryStories.length > 0 && (
+              <div class="grid gap-4 sm:grid-cols-2">
+                {secondaryStories.map((item) => (
+                  <article class="grid gap-[0.8rem]">
                     <a
                       href={item.href}
-                      class="block overflow-hidden mt-1 transition-opacity duration-200 hover:opacity-90"
+                      class="block aspect-[3/2] overflow-hidden"
+                      aria-label={item.title}
                     >
                       <img
                         src={item.imageUrl || picture1.src}
                         alt={item.title}
-                        class="w-[84px] h-[84px] object-cover object-center"
+                        class="block h-full w-full object-cover"
                         loading="lazy"
                         transition:name={getTransitionName(item)}
                       />
                     </a>
+
+                    <div class="grid gap-[0.55rem]">
+                      <p class="m-0">
+                        <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                          {getPrimaryTag(item) || "Париж"}
+                        </span>
+                      </p>
+
+                      <a
+                        href={item.href}
+                        class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                      >
+                        <h3 class="m-0 text-[1.4rem] font-normal leading-[1.12]">
+                          {truncateText(item.title, 88)}
+                        </h3>
+                      </a>
+
+                      {getCardLead(item) && (
+                        <p class="m-0 text-[0.98rem] leading-[1.5] text-[#302821bd]">
+                          {truncateText(getCardLead(item), 120)}
+                        </p>
+                      )}
+
+                      <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                        {formatDate(item.createdAt)}
+                      </p>
+                    </div>
                   </article>
                 ))}
               </div>
-            ) : (
-              <p class="text-sm text-base-content/70">
-                Пока нет материалов в блоке hot content.
-              </p>
             )
           }
+        </div>
+
+        <aside class="min-w-0">
+          <div
+            class="grid gap-4 border-t border-[#3028211f] pt-4 lg:border-t-0 lg:border-l lg:border-[#3028211f] lg:pt-0 lg:pl-[1.1rem]"
+          >
+            <p
+              class="m-0 text-[0.82rem] font-medium uppercase tracking-[0.38em]"
+            >
+              Нетленка
+            </p>
+
+            {
+              editorialSidebarItems.length > 0 ? (
+                editorialSidebarItems.map((item) => (
+                  <article class="grid gap-[0.65rem] border-b border-[#3028211a] pb-4">
+                    <a
+                      href={item.href}
+                      class="block aspect-[3/2] overflow-hidden"
+                      aria-label={item.title}
+                    >
+                      <img
+                        src={item.imageUrl || picture1.src}
+                        alt={item.title}
+                        class="block h-full w-full object-cover"
+                        loading="lazy"
+                        transition:name={getTransitionName(item)}
+                      />
+                    </a>
+
+                    <div class="grid gap-[0.55rem]">
+                      <p class="m-0">
+                        <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                          {getPrimaryTag(item) || "Париж"}
+                        </span>
+                      </p>
+
+                      <a
+                        href={item.href}
+                        class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                      >
+                        <h3 class="m-0 text-base font-normal leading-[1.16]">
+                          {truncateText(item.title, 70)}
+                        </h3>
+                      </a>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p class="m-0 font-inter text-[0.88rem] leading-[1.5] text-[#3028219e]">
+                  Пока нет материалов для боковой колонки.
+                </p>
+              )
+            }
+          </div>
         </aside>
       </section>
 
-      <section class="mt-10 lg:mt-14 border-t border-base-content/25 pt-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-10">
-          {
-            parisFeed.map((item) => (
-              <article class="border-b border-base-content/15 pb-6">
-                <a
-                  href={item.href}
-                  class="block overflow-hidden transition-opacity duration-200 hover:opacity-90"
-                >
-                  <img
-                    src={item.imageUrl || picture1.src}
-                    alt={item.title}
-                    class="w-full h-[220px] lg:h-[250px] object-cover object-center"
-                    loading="lazy"
-                    transition:name={getTransitionName(item)}
-                  />
-                </a>
-                <a href={item.href} class="block mt-4">
-                  <h3 class="text-3xl lg:text-[40px] leading-[1.04] font-oswald font-thin hover:underline">
-                    {item.title}
-                  </h3>
-                </a>
-                {getCardLead(item) && (
-                  <p class="mt-3 text-base leading-relaxed text-base-content/75">
-                    {truncateText(getCardLead(item), 190)}
-                  </p>
-                )}
-                <p class="mt-4 text-xs font-inter uppercase tracking-[0.2em] text-base-content/55">
-                  {formatDate(item.createdAt)}
-                </p>
-              </article>
-            ))
-          }
-        </div>
+      <section class="mt-[2.2rem] border-t border-[#3028211f] pt-[1.6rem]">
+        {
+          editorialGridItems.length > 0 ? (
+            <div class="grid grid-cols-2 gap-x-4 gap-y-[1.4rem] lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
+              {editorialGridItems.map((item) => (
+                <article class="grid gap-[0.8rem]">
+                  <a
+                    href={item.href}
+                    class="block overflow-hidden bg-white/50 aspect-[1.02/1]"
+                    aria-label={item.title}
+                  >
+                    <img
+                      src={item.imageUrl || picture1.src}
+                      alt={item.title}
+                      class="block h-full w-full object-cover"
+                      loading="lazy"
+                      transition:name={getTransitionName(item)}
+                    />
+                  </a>
+
+                  <div class="grid gap-[0.55rem]">
+                    <p class="m-0">
+                      <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        {getPrimaryTag(item) || "Париж"}
+                      </span>
+                    </p>
+
+                    <a
+                      href={item.href}
+                      class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                    >
+                      <h3 class="m-0 text-[1.18rem] font-normal leading-[1.18]">
+                        {truncateText(item.title, 72)}
+                      </h3>
+                    </a>
+
+                    <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                      {formatDate(item.createdAt)}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <article class="bg-white/70 p-5 text-[1.05rem] font-light leading-[1.5]">
+              Больше материалов пока нет.
+            </article>
+          )
+        }
       </section>
-    </section>
+    </div>
   </main>
 </Layout>

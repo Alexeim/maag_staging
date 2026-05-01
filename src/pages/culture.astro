@@ -271,11 +271,15 @@ try {
     [...topIds, featuredInterview?.id].filter(Boolean),
   );
 
-  editorialSidebarItems = allCultureItems
-    .filter(
-      (item) => !excludedIds.has(item.id) && isHotContent(item) && !item.isNews,
-    )
-    .slice(0, 4);
+  const cultureHotContentItems = allCultureItems.filter(
+    (item) =>
+      normalizeCategory(item.category) === CULTURE_CATEGORY_KEY &&
+      !excludedIds.has(item.id) &&
+      isHotContent(item) &&
+      !item.isNews,
+  );
+
+  editorialSidebarItems = cultureHotContentItems.slice(0, 4);
 
   const sidebarIds = new Set(editorialSidebarItems.map((item) => item.id));
 
@@ -356,7 +360,7 @@ const featuredInterviewName =
                     </p>
                   )}
 
-                  <p class="mt-[0.4rem] font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]">
+                  <p class="hidden mt-[0.4rem] font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]">
                     {formatDate(primaryCultureArticle.createdAt)}
                   </p>
                 </div>
@@ -409,7 +413,7 @@ const featuredInterviewName =
                         </p>
                       )}
 
-                      <p class="m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                      <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
                         {formatDate(item.createdAt)}
                       </p>
                     </div>
@@ -509,7 +513,7 @@ const featuredInterviewName =
                     class:list={[
                       "block overflow-hidden bg-white/50 aspect-[1.02/1]",
                       item.contentType === "interview" &&
-                        "mx-auto w-full max-w-[12rem] aspect-square rounded-full bg-transparent",
+                        "w-full aspect-square rounded-full bg-transparent",
                     ]}
                     aria-label={item.title}
                   >
@@ -529,7 +533,7 @@ const featuredInterviewName =
                     class:list={[
                       "grid gap-[0.55rem]",
                       item.contentType === "interview" &&
-                        "mx-auto w-full max-w-[12rem]",
+                        "w-full text-left",
                     ]}
                   >
                     <p class="m-0">
@@ -547,7 +551,7 @@ const featuredInterviewName =
                       </h3>
                     </a>
 
-                    <p class="m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                    <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
                       {formatDate(item.createdAt)}
                     </p>
                   </div>
