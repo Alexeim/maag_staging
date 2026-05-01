@@ -59,9 +59,24 @@ const displayImage = imageUrl || picture3.src;
   {
     (date || category) && (
       <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mt-1">
-        {date && <span class:list={["text-xs", hideDate && "hidden"]}>{date}</span>}
-        {date && category && <span class:list={["text-black text-lg font-bold font-['Inter'] leading-none", hideDate && "hidden"]}>·</span>}
-        {category && <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">{category}</span>}
+        {date && (
+          <span class:list={["text-xs", hideDate && "hidden"]}>{date}</span>
+        )}
+        {date && category && (
+          <span
+            class:list={[
+              "text-black text-lg font-bold font-['Inter'] leading-none",
+              hideDate && "hidden",
+            ]}
+          >
+            ·
+          </span>
+        )}
+        {category && (
+          <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+            {category}
+          </span>
+        )}
       </div>
     )
   }
@@ -75,7 +90,7 @@ const displayImage = imageUrl || picture3.src;
   </h3>
   {
     lead && (
-      <p class="text-sm leading-relaxed text-base-content/75 font-oswald font-thin">
+      <p class="text-sm leading-relaxed text-base-content/75 font-oswald font-thin hidden">
         {lead}
       </p>
     )

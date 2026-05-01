@@ -60,15 +60,30 @@ const displayImage = imageUrl || picture1.src;
   {
     (date || category) && (
       <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mt-1">
-        {date && <span class:list={["text-xs", hideDate && "hidden"]}>{date}</span>}
-        {date && category && <span class:list={["text-black text-lg font-bold font-['Inter'] leading-none", hideDate && "hidden"]}>·</span>}
-        {category && <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">{category}</span>}
+        {date && (
+          <span class:list={["text-xs", hideDate && "hidden"]}>{date}</span>
+        )}
+        {date && category && (
+          <span
+            class:list={[
+              "text-black text-lg font-bold font-['Inter'] leading-none",
+              hideDate && "hidden",
+            ]}
+          >
+            ·
+          </span>
+        )}
+        {category && (
+          <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+            {category}
+          </span>
+        )}
       </div>
     )
   }
   <a href={href} class="block">
     <h3
-      class="text-lg leading-tight font-oswald mb-3 hover:underline transition-opacity duration-200 hover:opacity-90"
+      class="text-lg leading-tight font-oswald hover:underline transition-opacity duration-200 hover:opacity-90"
     >
       {title}
     </h3>

@@ -139,7 +139,7 @@ try {
   // Filter for news articles, limit to 5 for the landing page
   newsArticles = articles
     .filter((article) => Boolean(article.isNews))
-    .slice(0, 5);
+    .slice(0, 4);
 } catch (error) {
   console.error("Failed to fetch articles:", error);
 }
@@ -321,7 +321,7 @@ try {
               </a>
             </div>
             <div class="p-4 lg:p-0">
-              <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3">
+              <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em]">
                 <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
                   {getPrimaryTag(mainArticle) || "Новости"}
                 </span>
@@ -334,7 +334,7 @@ try {
               </div>
               <a
                 href={mainArticle.href}
-                class="block mb-3 transition-opacity duration-200 hover:opacity-90"
+                class="block transition-opacity duration-200 hover:opacity-90"
               >
                 <h2 class="text-3xl lg:text-5xl leading-tight font-thin font-oswald hover:underline">
                   {mainArticle.title}{" "}
@@ -473,4 +473,5 @@ try {
       }
     </aside>
   </div>
+  <hr class="h-px my-8 border-1" />
 </section>
