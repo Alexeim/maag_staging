@@ -1,136 +1,143 @@
 ---
 import locationIcon from "../../assets/images/calendar/location.svg?raw";
 import timeIcon from "../../assets/images/calendar/time.svg?raw";
-import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
 ---
 
-<div class="space-y-18 lg:space-y-24">
-  <div x-show="isLazyLoading" class="text-center">Загрузка событий...</div>
+<div>
+  <div x-show="isLazyLoading" class="text-center font-inter text-[0.9rem] text-[#7d726a]">
+    Загрузка событий...
+  </div>
 
   <div x-show="!isLazyLoading">
-    <!-- Main Event List -->
-    <div class="space-y-8 lg:space-y-14 border-b border-base-300 pb-10 mb-8">
+    <!-- Main events for selected date -->
+    <div>
       <h2
-        class="text-2xl sm:text-3xl lg:text-4xl font-inter font-semibold tracking-[0.04em] sm:tracking-[0.06em] uppercase"
+        class="m-0 font-old_standard text-[1.05rem] font-normal uppercase tracking-[0.5em] text-[#15110e]"
         x-text="selectedDate ? selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' }) : ''"
-      >
-      </h2>
-      <div class="space-y-10">
+      ></h2>
+
+      <div class="mt-6 space-y-5">
         <template x-if="filteredEvents.length === 0">
-          <p
-            class="text-neutral border border-base-300 bg-base-100 px-5 py-4 font-oswald tracking-[0.015em]"
-          >
+          <p class="font-inter text-[0.9rem] text-[#7d726a]">
             На эту дату событий не найдено.
           </p>
         </template>
+
         <template x-for="event in filteredEvents" :key="event.id">
-          <!-- Inlined EventListItem -->
-          <div
-            class="flex flex-col lg:flex-row gap-6 lg:gap-10 border border-base-300 bg-white/90 p-5 lg:p-6 shadow-[0_16px_40px_rgba(0,0,0,0.08)]"
-          >
-            <div class="w-full lg:w-[440px] flex-shrink-0">
+          <article class="grid overflow-hidden bg-white/80 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+            <a
+              :href="event.url"
+              class="block aspect-[4/3] overflow-hidden md:aspect-auto"
+              :aria-label="event.title"
+            >
               <img
-                x-bind:src="event.image"
+                :src="event.image"
                 alt="Event Image"
-                class="w-full h-56 sm:h-64 lg:h-full object-cover"
+                class="block h-full w-full object-cover"
               />
-            </div>
-            <div class="flex flex-col gap-5 w-full">
-              <div>
+            </a>
+
+            <div class="grid content-start gap-[0.55rem] p-5 lg:px-6 lg:py-5">
+              <p class="m-0 font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]"
+                x-text="event.dateRangeLabel">
+              </p>
+
+              <p class="m-0">
                 <span
-                  class="text-xs sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.25em] font-medium text-error font-inter"
-                  x-text="event.tag"></span>
+                  class="font-inter text-xs font-medium uppercase tracking-[0.25em] text-accent"
+                  x-text="event.tag"
+                ></span>
+              </p>
+
+              <a
+                :href="event.url"
+                class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+              >
                 <h3
-                  class="font-oswald text-xl sm:text-2xl mt-2 leading-tight tracking-[0.02em] font-medium"
+                  class="m-0 max-w-[14ch] font-old_standard text-[clamp(1.4rem,2.5vw,2rem)] font-normal leading-[1.06]"
                   x-text="event.title"
-                >
-                </h3>
-                <p
-                  class="font-oswald text-base sm:text-lg mt-3 sm:mt-4 text-base-content/90 tracking-[0.012em] font-light leading-7 sm:leading-8"
-                  x-text="event.description"
-                >
+                ></h3>
+              </a>
+
+              <p
+                class="m-0 font-inter text-[0.82rem] leading-[1.55] text-[#302821a0]"
+                x-text="event.description"
+              ></p>
+
+              <div class="mt-2 space-y-[0.35rem]">
+                <p class="m-0 flex items-center gap-2 font-inter text-[0.82rem] text-[#302821bd]">
+                  <span class="h-4 w-4 shrink-0" set:html={locationIcon} />
+                  <span x-text="event.location"></span>
+                </p>
+                <p class="m-0 flex items-center gap-2 font-inter text-[0.82rem] text-[#302821bd]">
+                  <span class="h-4 w-4 shrink-0" set:html={timeIcon} />
+                  <span x-text="event.time"></span>
                 </p>
               </div>
-              <div
-                class="text-base sm:text-lg font-semibold border border-base-300 bg-base-100/70 px-3 sm:px-4"
-              >
-                <div
-                  class="flex items-start gap-3 sm:gap-4 py-2 border-b border-base-300 font-inter"
-                >
-                  <span set:html={locationIcon} />
-                  <span class="text-neutral text-xs sm:text-sm break-words" x-text="event.location"
-                  ></span>
-                </div>
-                <div
-                  class="flex items-start gap-3 sm:gap-4 py-2 border-b border-base-300 font-inter"
-                >
-                  <span set:html={timeIcon} />
-                  <span class="text-neutral text-xs sm:text-sm break-words" x-text="event.time"></span>
-                </div>
-                <div class="flex items-start gap-3 sm:gap-4 py-2 font-inter">
-                  <span set:html={calendarIcon} />
-                  <span
-                    class="text-neutral text-xs sm:text-sm break-words"
-                    x-text="event.dateRangeLabel"></span>
-                </div>
-              </div>
-              <div class="mt-auto">
+
+              <div class="mt-3">
                 <a
                   :href="event.url"
-                  class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-normal font-oswald py-2 px-4 inline-flex items-center"
-                  x-text="'Подробнее'"></a>
+                  class="inline-block border border-[#30282133] px-4 py-2 font-inter text-[0.7rem] uppercase tracking-[0.22em] text-[#302821] transition-colors hover:border-[#302821] hover:bg-[#302821] hover:text-white"
+                >
+                  Подробнее
+                </a>
               </div>
             </div>
-          </div>
+          </article>
         </template>
       </div>
     </div>
 
-    <!-- Other events -->
-    <div class="space-y-8">
-      <h3
-        class="text-xl lg:text-2xl font-oswald font-semibold tracking-[0.03em] uppercase"
-      >
-        Еще в этот день
-      </h3>
-      <div class="flex gap-10 overflow-x-auto pb-4">
-        <template x-if="smallEvents.length === 0">
-          <p
-            class="text-neutral border border-base-300 bg-base-100 px-5 py-4 font-oswald tracking-[0.015em]"
-          >
-            Длительных событий на эту дату нет.
-          </p>
-        </template>
-        <template x-for="(event, index) in smallEvents" :key="index">
-          <!-- Inlined SmallEventCard -->
-          <a
-            :href="event.url"
-            class="bg-white border border-base-300 shadow-lg overflow-hidden w-[240px] sm:w-[265px] flex-shrink-0 transition-transform duration-300 hover:-translate-y-1"
-          >
-            <img
-              x-bind:src="event.image"
-              alt="Event Image"
-              class="w-full h-[170px] object-cover"
-            />
-            <div class="p-3">
-              <span
-                class="text-xs uppercase tracking-[0.25em] font-medium text-error font-inter"
-                x-text="event.tag"></span>
-              <h3
-                class="font-oswald text-base mt-1 leading-tight tracking-[0.02em] font-medium"
-                x-text="event.title"
+    <!-- Ongoing events (Ещё в этот день) -->
+    <template x-if="smallEvents.length > 0">
+      <div class="mt-10">
+        <h3 class="m-0 font-old_standard text-[1.05rem] font-normal uppercase tracking-[0.5em] text-[#15110e]">
+          Ещё в этот день
+        </h3>
+
+        <div class="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 lg:grid-cols-4 lg:gap-x-5">
+          <template x-for="(event, index) in smallEvents" :key="index">
+            <article class="grid gap-[0.8rem]">
+              <a
+                :href="event.url"
+                class="block aspect-[3/2] overflow-hidden"
+                :aria-label="event.title"
               >
-              </h3>
-              <div
-                class="flex items-center mt-2 text-xs text-neutral font-inter"
-              >
-                <span set:html={locationIcon} />
-                <span class="ml-2" x-text="event.location"></span>
+                <img
+                  :src="event.image"
+                  alt="Event Image"
+                  class="block h-full w-full object-cover"
+                />
+              </a>
+
+              <div class="grid gap-[0.45rem]">
+                <p class="m-0">
+                  <span
+                    class="font-inter text-xs font-medium uppercase tracking-[0.25em] text-accent"
+                    x-text="event.tag"
+                  ></span>
+                </p>
+
+                <a
+                  :href="event.url"
+                  class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                >
+                  <h4
+                    class="m-0 max-w-[11ch] font-old_standard text-[1.15rem] font-normal leading-[1.1]"
+                    x-text="event.title"
+                  ></h4>
+                </a>
+
+                <p class="m-0 flex items-center gap-2 font-inter text-[0.82rem] text-[#302821bd]">
+                  <span class="h-4 w-4 shrink-0" set:html={locationIcon} />
+                  <span x-text="event.location"></span>
+                </p>
               </div>
-            </div>
-          </a>
-        </template>
+            </article>
+          </template>
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </div>

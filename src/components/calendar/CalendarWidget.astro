@@ -1,55 +1,40 @@
 ---
-// This component is now controlled by Alpine.js from the parent page
+// This component is controlled by Alpine.js from the parent page
 ---
 
-<div class="bg-white/90 border border-base-300 p-4 sm:p-5 lg:p-8 w-full max-w-md shadow-[0_18px_40px_rgba(0,0,0,0.08)]">
+<div class="w-full max-w-[25.5rem]">
   <div x-show="isLazyLoading" class="text-center">Загрузка...</div>
 
   <div x-show="!isLazyLoading">
-    <div class="flex justify-between items-center mb-4 sm:mb-5 gap-2">
-      <button
-        @click="$dispatch('change-month', -1)"
-        class="w-9 h-9 border border-base-300 rounded-none flex items-center justify-center cursor-pointer transition-colors hover:bg-base-200"
-      >
-        <svg
-          width="8"
-          height="14"
-          viewBox="0 0 8 14"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          ><path
-            d="M7 13L1 7L7 1"
-            stroke="black"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"></path></svg
-        >
-      </button>
+    <div class="mb-6 flex items-center gap-4">
       <h3
-        class="font-semibold text-lg sm:text-xl lg:text-2xl text-base-content capitalize font-inter tracking-[0.03em] text-center"
+        class="m-0 font-inter text-[2.05rem] font-semibold capitalize text-[#302821]"
         x-text="`${monthName} ${year}`"
-      >
-      </h3>
-      <button
-        @click="$dispatch('change-month', 1)"
-        class="w-9 h-9 border border-base-300 rounded-none flex items-center justify-center cursor-pointer transition-colors hover:bg-base-200"
-      >
-        <svg
-          width="8"
-          height="14"
-          viewBox="0 0 8 14"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          ><path
-            d="M1 13L7 7L1 1"
-            stroke="black"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"></path></svg
+      ></h3>
+
+      <div class="ml-auto flex items-center gap-2">
+        <button
+          @click="$dispatch('change-month', -1)"
+          class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[#30282133] bg-white transition-colors hover:bg-[#f7f2ee]"
+          aria-label="Предыдущий месяц"
         >
-      </button>
+          <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 13L1 7L7 1" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <button
+          @click="$dispatch('change-month', 1)"
+          class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[#30282133] bg-white transition-colors hover:bg-[#f7f2ee]"
+          aria-label="Следующий месяц"
+        >
+          <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 13L7 7L1 1" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
     </div>
-    <div class="grid grid-cols-7 text-center text-neutral my-3 sm:my-4 font-inter text-[11px] sm:text-sm tracking-[0.06em] sm:tracking-[0.08em] uppercase">
+
+    <div class="mb-3 grid grid-cols-7 text-center font-inter text-[0.95rem] text-[#7d726a]">
       <div>Пн</div>
       <div>Вт</div>
       <div>Ср</div>
@@ -58,26 +43,23 @@
       <div>Сб</div>
       <div>Вс</div>
     </div>
-    <div class="grid grid-cols-7 text-center gap-y-1.5 sm:gap-y-2">
-      <template x-for="i in firstDayOfMonth">
-        <div></div>
-      </template>
-      <template x-for="day in daysInMonth">
-        <div class="relative">
-          <button
-            @click="$dispatch('date-selected', { day })"
+
+    <div class="grid grid-cols-7 gap-1.5">
+      <template x-for="cell in calendarDays" :key="cell.date.toISOString()">
+        <button
+          @click="$dispatch('date-selected', cell)"
+          class="flex aspect-square min-h-[52px] cursor-pointer items-center justify-center bg-[#f9f5f0] font-inter text-[1.05rem] transition-colors hover:bg-[#f0e9e1]"
+        >
+          <span
             :class="{
-              'bg-error text-error-content': isSameDay(selectedDate, new Date(Date.UTC(year, month, day))),
-              'hover:bg-gray-200': !isSameDay(selectedDate, new Date(Date.UTC(year, month, day)))
+              'bg-error text-error-content': hasEvent(cell),
+              'text-[#b5aaa2]': !cell.isCurrentMonth && !hasEvent(cell),
+              'text-[#302821]': cell.isCurrentMonth && !hasEvent(cell)
             }"
-            class="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 flex items-center justify-center mx-auto transition-colors cursor-pointer font-inter font-medium tracking-[0.02em]"
-            x-text="day"></button>
-          <div
-            x-show="hasEvent(day)"
-            class="absolute bottom-[3px] left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-error rounded-full"
-          >
-          </div>
-        </div>
+            class="flex h-12 w-12 items-center justify-center rounded-full"
+            x-text="cell.day"
+          ></span>
+        </button>
       </template>
     </div>
   </div>

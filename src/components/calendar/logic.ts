@@ -41,6 +41,12 @@ type NormalizedEvent = {
   url: string;
 };
 
+type CalendarDay = {
+  date: Date;
+  day: number;
+  isCurrentMonth: boolean;
+};
+
 const toDate = (value: unknown): Date | null => {
   if (!value) {
     return null;
@@ -175,6 +181,15 @@ const isOngoingDate = (date: Date, event: NormalizedEvent) => {
   return time > event.startDate.getTime() && time < event.endDate.getTime();
 };
 
+const getMonthBoundaryDates = (events: NormalizedEvent[], year: number, month: number) => {
+  return events
+    .flatMap((event) => [event.startDate, event.endDate])
+    .filter(
+      (date) => date.getUTCFullYear() === year && date.getUTCMonth() === month,
+    )
+    .sort((a, b) => a.getTime() - b.getTime());
+};
+
 export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[] } = {}) => ({
   // Raw bootstrap data
   imagePaths: initialState.imagePaths ?? {},
@@ -187,11 +202,12 @@ export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[
   monthName: "",
   daysInMonth: 0,
   firstDayOfMonth: 0,
+  calendarDays: [] as CalendarDay[],
 
   events: [] as NormalizedEvent[],
   filteredEvents: [] as NormalizedEvent[],
   smallEvents: [] as NormalizedEvent[],
-  filters: ["все"],
+  filters: [] as string[],
   activeFilter: "все",
 
   init() {
@@ -219,7 +235,7 @@ export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[
     this.month = this.selectedDate.getUTCMonth();
 
     const uniqueFilters = Array.from(new Set(this.events.map((event) => event.tag)));
-    this.filters = ["все", ...uniqueFilters];
+    this.filters = uniqueFilters;
 
     this.updateCalendarDisplay();
     this.updateFilteredEvents();
@@ -233,6 +249,49 @@ export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[
     });
     this.daysInMonth = new Date(Date.UTC(this.year, this.month + 1, 0)).getUTCDate();
     this.firstDayOfMonth = (firstDay.getUTCDay() + 6) % 7;
+    this.calendarDays = this.buildCalendarDays();
+  },
+
+  buildCalendarDays() {
+    const days: CalendarDay[] = [];
+    const previousMonthDate = new Date(Date.UTC(this.year, this.month, 0));
+    const previousMonthDays = previousMonthDate.getUTCDate();
+
+    for (let offset = this.firstDayOfMonth - 1; offset >= 0; offset -= 1) {
+      const day = previousMonthDays - offset;
+      days.push({
+        date: new Date(Date.UTC(this.year, this.month - 1, day)),
+        day,
+        isCurrentMonth: false,
+      });
+    }
+
+    for (let day = 1; day <= this.daysInMonth; day += 1) {
+      days.push({
+        date: new Date(Date.UTC(this.year, this.month, day)),
+        day,
+        isCurrentMonth: true,
+      });
+    }
+
+    const trailingDays = (7 - (days.length % 7)) % 7;
+    for (let day = 1; day <= trailingDays; day += 1) {
+      days.push({
+        date: new Date(Date.UTC(this.year, this.month + 1, day)),
+        day,
+        isCurrentMonth: false,
+      });
+    }
+
+    return days;
+  },
+
+  getDefaultDateForMonth(year: number, month: number) {
+    const monthBoundaryDates = getMonthBoundaryDates(this.events, year, month);
+    if (monthBoundaryDates.length > 0) {
+      return resetToUtcMidnight(new Date(monthBoundaryDates[0]));
+    }
+    return new Date(Date.UTC(year, month, 1));
   },
 
   updateFilteredEvents() {
@@ -269,15 +328,33 @@ export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[
       this.year += 1;
     }
     this.updateCalendarDisplay();
-  },
-
-  selectDate(day: number) {
-    this.selectedDate = new Date(Date.UTC(this.year, this.month, day));
+    this.selectedDate = this.getDefaultDateForMonth(this.year, this.month);
     this.updateFilteredEvents();
   },
 
-  hasEvent(day: number) {
-    const date = new Date(Date.UTC(this.year, this.month, day));
+  selectDate(value: number | CalendarDay) {
+    if (typeof value === "number") {
+      this.selectedDate = new Date(Date.UTC(this.year, this.month, value));
+      this.updateFilteredEvents();
+      return;
+    }
+
+    this.selectedDate = resetToUtcMidnight(new Date(value.date));
+    if (!value.isCurrentMonth) {
+      this.year = this.selectedDate.getUTCFullYear();
+      this.month = this.selectedDate.getUTCMonth();
+      this.updateCalendarDisplay();
+    }
+    this.updateFilteredEvents();
+  },
+
+  hasEvent(value: number | Date | CalendarDay) {
+    const date =
+      typeof value === "number"
+        ? new Date(Date.UTC(this.year, this.month, value))
+        : value instanceof Date
+          ? value
+          : value.date;
     return this.events.some((event) => isBoundaryDate(date, event));
   },
 

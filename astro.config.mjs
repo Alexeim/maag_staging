@@ -9,6 +9,10 @@ import node from "@astrojs/node";
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'hover',
+  },
   integrations: [alpinejs({ entrypoint: '/src/alpine-entrypoint.ts' }), compressor()],
   base: process.env.ASTRO_BASE_PATH || "/",
 

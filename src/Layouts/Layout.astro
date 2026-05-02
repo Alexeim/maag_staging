@@ -60,6 +60,7 @@ const {
     <!-- Mobile Menu -->
     <!-- Overlay -->
     <div
+      x-data="{}"
       x-show="$store.navbar.isOpen"
       x-cloak
       @click="$store.navbar.close()"
@@ -75,6 +76,7 @@ const {
 
     <!-- Panel -->
     <div
+      x-data="{}"
       id="mobile-menu"
       x-show="$store.navbar.isOpen"
       x-cloak
@@ -100,11 +102,6 @@ const {
           class="font-oswald uppercase tracking-[.46em] text-base font-normal"
         >
           <a href="/paris">Париж</a>
-        </li>
-        <li
-          class="font-oswald uppercase tracking-[.46em] text-base font-normal"
-        >
-          <a href="/building">Дети</a>
         </li>
         <li
           class="font-oswald uppercase tracking-[.46em] text-base font-normal"
