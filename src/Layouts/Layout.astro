@@ -27,7 +27,7 @@ const {
 ---
 
 <!doctype html>
-<html lang="en" data-theme="maag">
+<html lang="ru" data-theme="maag">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -87,7 +87,10 @@ const {
       x-transition:leave-end="translate-x-full"
     >
       <!-- Links -->
-      <ul class="flex flex-col gap-4 text-base-content" @click="$store.navbar.close()">
+      <ul
+        class="flex flex-col gap-4 text-base-content"
+        @click="$store.navbar.close()"
+      >
         <li
           class="font-oswald uppercase tracking-[.46em] text-base font-normal"
         >
