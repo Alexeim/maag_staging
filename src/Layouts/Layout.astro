@@ -31,7 +31,7 @@ const {
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content="Wrukspaces.dev" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -43,7 +43,7 @@ const {
     {useClientRouter && <ClientRouter />}
     <title>{title}</title>
   </head>
-  <body class="bg-base-200" x-data>
+  <body class="bg-base-200">
     <Header
       variant={navbarVariant}
       cultureText={navbarContent.items[0].label}
