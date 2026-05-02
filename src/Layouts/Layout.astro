@@ -37,13 +37,13 @@ const {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Oswald:wght@200..700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Oswald:wght@200..700&display=swap"
       rel="stylesheet"
     />
     {useClientRouter && <ClientRouter />}
     <title>{title}</title>
   </head>
-  <body class="bg-base-200" x-data="$lazy('layout')">
+  <body class="bg-base-200" x-data>
     <Header
       variant={navbarVariant}
       cultureText={navbarContent.items[0].label}
@@ -87,7 +87,7 @@ const {
       x-transition:leave-end="translate-x-full"
     >
       <!-- Links -->
-      <ul class="flex flex-col gap-4 text-base-content">
+      <ul class="flex flex-col gap-4 text-base-content" @click="$store.navbar.close()">
         <li
           class="font-oswald uppercase tracking-[.46em] text-base font-normal"
         >

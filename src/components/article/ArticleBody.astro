@@ -107,31 +107,31 @@ if (currentProseGroup.length > 0) {
     renderableGroups.map((group) => {
       if (group.type === "prose-group" && group.content) {
         return (
-          <div class="max-w-[826px] mx-auto">
-            <article class="prose lg:prose-xl max-w-full space-y-12">
+          <div class="max-w-full lg:max-w-[826px] mx-0 lg:mx-auto">
+            <article class="max-w-full space-y-12">
               {group.content.map((block) => {
                 switch (block.type) {
                   case "first-paragraph":
                     return (
-                      <p class="text-lg first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-3 font-oswald tracking-wide text-justify font-thin">
+                      <p class="text-lg first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-3 font-article-body text-justify">
                         {block.text}
                       </p>
                     );
                   case "paragraph":
                     return (
-                      <p class="text-lg font-oswald text-justify font-thin tracking-wide">
+                      <p class="text-lg font-article-body text-justify">
                         {block.text}
                       </p>
                     );
                   case "h2":
                     return (
-                      <h2 class="text-xl font-bold font-oswald tracking-wide">
+                      <h2 class="text-xl font-bold font-article-body">
                         {block.text}
                       </h2>
                     );
                   case "h3":
                     return (
-                      <h3 class="text-2xl font-bold font-oswald tracking-wide">
+                      <h3 class="text-2xl font-bold font-article-body">
                         {block.text}
                       </h3>
                     );
@@ -139,7 +139,7 @@ if (currentProseGroup.length > 0) {
                     return (
                       <div class="p-2 flex flex-col items-center justify-center gap-2">
                         <QuoteIcon class="w-8 h-8" />
-                        <blockquote class="text-3xl italic font-oswald pl-4 my-4 font-thin">
+                        <blockquote class="text-3xl italic font-article-body pl-4 my-4">
                           {block.text}
                         </blockquote>
                         <QuoteIcon class="w-8 h-8 rotate-180" />
@@ -154,7 +154,7 @@ if (currentProseGroup.length > 0) {
                           class="article-image"
                         />
                         {block.caption && (
-                          <figcaption class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2">
+                          <figcaption class="text-center font-article-body text-xs text-gray-500 mt-2">
                             {block.caption}
                           </figcaption>
                         )}
@@ -172,10 +172,10 @@ if (currentProseGroup.length > 0) {
                         ? hrefMap[block.linkedContentType]
                         : "#";
                     return (
-                      <p class="text-lg font-oswald text-justify font-thin">
+                      <p class="text-lg font-article-body text-justify">
                         <a
                           href={href}
-                          class="text-xl font-oswald tracking-wide font-semibold hover:underline"
+                          class="text-xl font-article-body font-semibold hover:underline"
                         >
                           {block.text || "Ссылка"}
                         </a>
@@ -186,12 +186,12 @@ if (currentProseGroup.length > 0) {
                     return (
                       <div class="space-y-4">
                         {block.question && (
-                          <p class="text-xl font-oswald tracking-wide font-semibold italic">
+                          <p class="text-xl font-article-body font-semibold italic">
                             {block.question}
                           </p>
                         )}
                         {block.answer && (
-                          <p class="text-lg font-oswald text-justify font-thin tracking-wide">
+                          <p class="text-lg font-article-body text-justify">
                             {block.answer}
                           </p>
                         )}
@@ -224,7 +224,7 @@ if (currentProseGroup.length > 0) {
                       class="article-image"
                     />
                     {twoColumnBlock.left.caption && (
-                      <figcaption class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2">
+                      <figcaption class="text-center font-article-body text-xs text-gray-500 mt-2">
                         {twoColumnBlock.left.caption}
                       </figcaption>
                     )}
@@ -232,13 +232,13 @@ if (currentProseGroup.length > 0) {
                 ) : twoColumnBlock.left.type === "quote" ? (
                   <div class="w-full max-w-[420px] flex flex-col items-center">
                     <QuoteIcon class="w-8 h-8" />
-                    <blockquote class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line">
+                    <blockquote class="mt-4 text-base lg:text-lg text-base-content/80 font-article-body italic whitespace-pre-line">
                       {twoColumnBlock.left.content}
                     </blockquote>
                     <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
                   </div>
                 ) : (
-                  <p class="text-lg font-oswald tracking-wide text-justify font-thin">
+                  <p class="text-lg font-article-body text-justify">
                     {twoColumnBlock.left.content}
                   </p>
                 )}
@@ -252,7 +252,7 @@ if (currentProseGroup.length > 0) {
                       class="article-image"
                     />
                     {twoColumnBlock.right.caption && (
-                      <figcaption class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2">
+                      <figcaption class="text-center font-article-body text-xs text-gray-500 mt-2">
                         {twoColumnBlock.right.caption}
                       </figcaption>
                     )}
@@ -260,13 +260,13 @@ if (currentProseGroup.length > 0) {
                 ) : twoColumnBlock.right.type === "quote" ? (
                   <div class="w-full max-w-[420px] flex flex-col items-center">
                     <QuoteIcon class="w-8 h-8" />
-                    <blockquote class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line">
+                    <blockquote class="mt-4 text-base lg:text-lg text-base-content/80 font-article-body italic whitespace-pre-line">
                       {twoColumnBlock.right.content}
                     </blockquote>
                     <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
                   </div>
                 ) : (
-                  <p class="text-lg font-oswald tracking-wide text-justify font-thin">
+                  <p class="text-lg font-article-body text-justify">
                     {twoColumnBlock.right.content}
                   </p>
                 )}
@@ -323,7 +323,7 @@ if (currentProseGroup.length > 0) {
             <p
               x-show="captions[current]"
               x-text="captions[current]"
-              class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2 px-4 min-h-[1rem]"
+              class="text-center font-article-body text-xs text-gray-500 mt-2 px-4 min-h-[1rem]"
             ></p>
             {slides.length > 1 && (
               <div class="flex justify-center gap-2 mt-4">

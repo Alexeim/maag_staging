@@ -1,5 +1,6 @@
 ---
 // src/components/article/ArticleAuthor.astro
+import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
 interface Props {
   name: string;
   avatarUrl?: string;
@@ -8,7 +9,7 @@ const { name, avatarUrl } = Astro.props;
 ---
 
 <div class="flex items-center gap-[17px]">
-  <div
+  <!-- <div
     class="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden"
   >
     <div
@@ -33,6 +34,11 @@ const { name, avatarUrl } = Astro.props;
         </div>
       </template>
     </div>
+  </div> -->
+  <AuthorIcon class="w-4 h-4" />
+  <div
+    class="h-8 flex flex-col items-center justify-center text-base lg:text-xl font-thin font-old_standard italic text-base-content leading-normal"
+  >
+    {name}
   </div>
-  <span class="text-base font-thin font-oswald text-base-content">{name}</span>
 </div>

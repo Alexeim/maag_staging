@@ -63,6 +63,16 @@
   font-family: "Oswald", sans-serif;
 }
 
+.font-old_standard {
+  font-family: "Old Standard TT", serif;
+}
+
+.font-article-body {
+  font-family: "Inter", sans-serif;
+  color: black;
+  letter-spacing: -0.5px;
+}
+
 /* Mobile Menu Styles */
 .mobile-menu-panel {
   position: fixed;
@@ -103,4 +113,3 @@ The custom implementation was removed in favor of standard DaisyUI buttons.
   margin-right: auto;
   object-fit: cover;
 }
-

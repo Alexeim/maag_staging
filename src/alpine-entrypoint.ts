@@ -14,22 +14,25 @@ export default (Alpine: Alpine) => {
   Alpine.store('navbar', navbarStore);
   Alpine.store('auth', authStore);
   Alpine.store('ui', createUiStore());
-
-  // Firebase Auth State Listener
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      // User is signed in, fetch their profile from our backend
-      try {
-        const profileData = await usersApi.get(user.uid);
-        Alpine.store('auth').setUser(user, profileData);
-      } catch (error) {
-        console.error("Failed to fetch user profile:", error);
-        // Still set the auth user even if profile fetch fails
-        Alpine.store('auth').setUser(user);
-      }
-    } else {
-      // User is signed out
-      Alpine.store('auth').clearUser();
-    }
-  });
 };
+
+// Firebase Auth State Listener - Register ONLY ONCE outside the lifecycle-linked export
+onAuthStateChanged(auth, async (user) => {
+  // Use a slight delay or wait for Alpine to be available if needed, 
+  // but since this is part of the entrypoint bundle, it's generally safe.
+  // We need a way to access the store without the local 'Alpine' variable.
+  // Fortunately, Alpine is usually global when using the integration.
+  const getStore = () => (window as any).Alpine?.store('auth');
+
+  if (user) {
+    try {
+      const profileData = await usersApi.get(user.uid);
+      getStore()?.setUser(user, profileData);
+    } catch (error) {
+      console.error("Failed to fetch user profile:", error);
+      getStore()?.setUser(user);
+    }
+  } else {
+    getStore()?.clearUser();
+  }
+});
