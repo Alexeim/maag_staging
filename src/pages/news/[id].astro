@@ -51,7 +51,7 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
 
 <Layout title={`${title} - Maag`} navbarVariant="default" useClientRouter={true}>
   <main class="bg-base-200 min-h-screen">
-    <div class="max-w-5xl mx-auto pt-14 pb-14 mb-12 flex flex-col gap-8">
+    <div class="max-w-5xl mx-auto pt-14 pb-14 mb-12 flex flex-col gap-8 px-4 lg:px-0">
       {error && <div class="text-red-500 text-center pt-20">{error}</div>}
       {!error && articleData && (
         <>

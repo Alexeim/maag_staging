@@ -65,7 +65,7 @@ const displayArticle = {
       {!error && articleData && (
         <>
           <!-- Header -->
-          <div class="pt-[50px] pb-[70px] flex flex-col items-center gap-[50px]">
+          <div class="pt-[50px] pb-[70px] flex flex-col items-center gap-[50px] px-4 lg:px-0">
             <div class="flex flex-col gap-4 max-w-[825px] w-full">
               <ArticleHeader
                 category={displayArticle.category}
@@ -95,7 +95,7 @@ const displayArticle = {
           </div>
 
           <!-- Tips content -->
-          <div class="max-w-[1400px] mx-auto px-14 pb-[100px]">
+          <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
             <TipsArticleBody contentBlocks={displayArticle.contentBlocks} />
           </div>
         </>
