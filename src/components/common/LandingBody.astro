@@ -5,6 +5,7 @@ import {
   interviewsApi,
   flippersApi,
   guidesApi,
+  visualStoriesApi,
   type InterviewResponse,
   type FlipperPayload,
 } from "@/lib/api/api";
@@ -170,7 +171,8 @@ const getTransitionName = (item: any) => {
     href.startsWith("/article/") ||
     href.startsWith("/news/") ||
     href.startsWith("/interviews/") ||
-    href.startsWith("/guide/")
+    href.startsWith("/guide/") ||
+    href.startsWith("/visual-story/")
   ) {
     // Use a dedicated namespace to avoid duplicate transition names
     // with MainLandingBlock on the same page.
@@ -190,15 +192,19 @@ const toContentHref = (item: any) => {
   if (item?.type === "guide" || item?.contentType === "guide") {
     return `/guide/${item.id}`;
   }
+  if (item?.type === "visual-story" || item?.contentType === "visual-story") {
+    return `/visual-story/${item.id}`;
+  }
   return `/${item?.isNews ? "news" : "article"}/${item.id}`;
 };
 
 try {
-  const [articles, flippers, interviews, guides] = await Promise.all([
+  const [articles, flippers, interviews, guides, visualStories] = await Promise.all([
     articlesApi.list(),
     flippersApi.list() as Promise<FlipperResponse[]>,
     interviewsApi.list() as Promise<InterviewResponse[]>,
     guidesApi.list(),
+    visualStoriesApi.list(),
   ]);
 
   console.log(`--- STEP 1: RAW DATA ---`);
@@ -222,6 +228,12 @@ try {
       ...guide,
       type: "guide",
       href: `/guide/${guide.id}`,
+    })),
+    ...visualStories.map((story) => ({
+      ...story,
+      type: "visual-story",
+      href: `/visual-story/${story.id}`,
+      imageUrl: story?.imageUrl || story?.slides?.[0]?.imageUrl || null,
     })),
   ].sort(
     (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
@@ -272,6 +284,12 @@ try {
       ...guide,
       type: "guide",
       href: toContentHref({ ...guide, type: "guide" }),
+    })),
+    ...visualStories.map((story) => ({
+      ...story,
+      type: "visual-story",
+      href: toContentHref({ ...story, type: "visual-story" }),
+      imageUrl: story?.imageUrl || story?.slides?.[0]?.imageUrl || undefined,
     })),
   ]
     .sort(

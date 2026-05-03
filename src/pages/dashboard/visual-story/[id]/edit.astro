@@ -1,0 +1,48 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import VisualStoryComposer from "@/components/dashboard/VisualStoryComposer.astro";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+import { visualStoriesApi } from "@/lib/api/api";
+
+const { id } = Astro.params;
+
+let story = null;
+try {
+  story = await visualStoriesApi.getById(id);
+} catch (error) {
+  console.error("Failed to fetch visual story", error);
+}
+
+const storyCreatorState = JSON.stringify({
+  categoryTags: {
+    culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
+  },
+  initialStory: story,
+  storyId: id,
+  isEditMode: true,
+  onSaveRedirect: "/dashboard/visual-stories",
+});
+---
+
+<DashboardLayout title="Редактировать визуальную историю" active="visual-stories">
+  {story ? (
+    <VisualStoryComposer
+      heading="Редактировать визуальную историю"
+      submitLabel="Обновить историю"
+      storyCreatorState={storyCreatorState}
+      cancelHref="/dashboard/visual-stories"
+      deleteStoryId={id}
+      deleteRedirect="/dashboard/visual-stories"
+    />
+  ) : (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Визуальная история не найдена</h2>
+      <p class="text-base-content/70">Возможно, материал был удалён или указан неверный идентификатор.</p>
+      <a href="/dashboard/visual-stories" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 mt-4 inline-block">
+        Вернуться к визуальным историям
+      </a>
+    </div>
+  )}
+</DashboardLayout>

@@ -1,0 +1,429 @@
+---
+import { ApiError, visualStoriesApi } from "@/lib/api/api";
+
+const { id } = Astro.params;
+
+let storyData: any;
+let error: string | null = null;
+
+try {
+  storyData = await visualStoriesApi.getById(id);
+} catch (e: any) {
+  if (e instanceof ApiError) {
+    error =
+      e.status === 404
+        ? "Визуальная история не найдена."
+        : `Ошибка загрузки: ${e.message}`;
+  } else {
+    error = `Ошибка загрузки: ${e.message}`;
+  }
+}
+
+const slides: Array<{ imageUrl: string; text: string }> = Array.isArray(
+  storyData?.slides,
+)
+  ? storyData.slides
+  : [];
+
+const title = storyData?.title || "Визуальная история";
+const lead = storyData?.lead || "";
+const category = storyData?.category || "";
+const authorName = storyData?.author
+  ? `${storyData.author.firstName ?? ""} ${storyData.author.lastName ?? ""}`.trim()
+  : "";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  culture: "Культура",
+  paris: "Париж",
+  hotContent: "Самое Читаемое",
+};
+const categoryLabel =
+  CATEGORY_LABELS[category] || category || "Визуальная история";
+
+const normalizeDate = (value: any): Date | null => {
+  if (!value) return null;
+  if (typeof value === "string") {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  if (typeof value === "object" && typeof value._seconds === "number") {
+    return new Date(value._seconds * 1000);
+  }
+  return null;
+};
+
+const createdAt = normalizeDate(storyData?.createdAt);
+const dateFormatted = createdAt
+  ? createdAt.toLocaleDateString("ru-RU", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : "";
+
+// Dedicated cover takes priority; fall back to first slide's image
+const heroImageUrl = storyData?.imageUrl || slides[0]?.imageUrl || "";
+---
+
+<!doctype html>
+<html lang="ru" data-theme="maag">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} — Maag</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&family=Oswald:wght@200..700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+
+      /* ── slider mechanics ─────────────────────────── */
+      .story {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .slider {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.5s ease;
+        will-change: transform;
+      }
+
+      .slide {
+        min-width: 100vw;
+        height: 100vh;
+        display: flex;
+      }
+
+      /* ── shared halves ────────────────────────────── */
+      .slide-image {
+        width: 50%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        flex-shrink: 0;
+      }
+
+      .slide-content {
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 60px 64px;
+        flex-shrink: 0;
+      }
+
+      /* ── hero slide ───────────────────────────────── */
+      .hero-category {
+        font-family: "Inter", sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+      }
+
+      .hero-title {
+        font-family: "Oswald", sans-serif;
+        font-size: clamp(2.4rem, 4vw, 4rem);
+        font-weight: 200;
+        line-height: 1.05;
+        margin: 28px 0 0;
+      }
+
+      .hero-lead {
+        font-family: "Oswald", sans-serif;
+        font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+        font-weight: 300;
+        line-height: 1.4;
+        letter-spacing: 0.01em;
+        margin: 28px 0 0;
+        opacity: 0.75;
+        max-width: 32rem;
+      }
+
+      .hero-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 36px;
+        font-family: "Inter", sans-serif;
+        font-size: 13px;
+        opacity: 0.55;
+      }
+
+      .hero-meta-dot {
+        font-size: 10px;
+        opacity: 0.4;
+      }
+
+      /* ── content slide text ───────────────────────── */
+      .slide-counter {
+        font-family: "Inter", sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        opacity: 0.35;
+        margin-bottom: auto;
+        padding-bottom: 0;
+        align-self: flex-end;
+      }
+
+      .slide-text-body {
+        flex: 1;
+        display: flex;
+        align-items: center;
+      }
+
+      .slide-text-body p {
+        font-family: "Oswald", sans-serif;
+        font-size: clamp(0.95rem, 1.4vw, 1.25rem);
+        font-weight: 200;
+        line-height: 1.35;
+        letter-spacing: 0.01em;
+        margin: 0;
+      }
+
+      /* ── nav ──────────────────────────────────────── */
+      .nav {
+        position: fixed;
+        right: 30px;
+        bottom: 30px;
+        display: flex;
+        gap: 10px;
+        z-index: 10;
+      }
+
+      .nav button {
+        background: transparent;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-family: "Oswald", sans-serif;
+        font-size: 16px;
+        font-weight: 300;
+        transition: opacity 0.2s;
+      }
+
+      .nav button:disabled {
+        opacity: 0.25;
+        cursor: default;
+      }
+
+      /* ── back link ────────────────────────────────── */
+      .back-link {
+        position: fixed;
+        left: 30px;
+        top: 30px;
+        z-index: 10;
+        font-family: "Inter", sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        text-decoration: none;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        opacity: 0.4;
+        transition: opacity 0.2s;
+      }
+
+      .back-link:hover {
+        opacity: 1;
+      }
+
+      /* ── mobile ───────────────────────────────────── */
+      @media (max-width: 900px) {
+        body {
+          overflow: auto;
+        }
+
+        .story {
+          height: auto;
+          min-height: 100vh;
+          padding-bottom: 92px;
+        }
+
+        .slider {
+          height: auto;
+        }
+
+        .slide {
+          min-width: 100vw;
+          height: auto;
+          min-height: 100vh;
+          flex-direction: column;
+        }
+
+        .slide-image {
+          width: 100%;
+          min-height: 52vh;
+        }
+
+        .slide-content {
+          width: 100%;
+          padding: 36px 28px;
+          justify-content: flex-start;
+        }
+
+        .slide-text-body p {
+          font-size: 1.5rem;
+          max-width: none;
+        }
+
+        .hero-title {
+          font-size: 2.2rem;
+        }
+
+        .nav {
+          right: 16px;
+          bottom: 16px;
+        }
+        .back-link {
+          left: 16px;
+          top: 16px;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="bg-base-100 text-base-content">
+    {
+      error ? (
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;">
+          <p style="font-family:sans-serif;opacity:0.5;">{error}</p>
+        </div>
+      ) : (
+        <main class="story">
+          <a href="/" class="back-link text-base-content">
+            ← Maag
+          </a>
+
+          <div class="slider" id="slider">
+            {/* ── Hero slide ──────────────────────────── */}
+            <section class="slide">
+              <div
+                class="slide-image bg-base-200"
+                style={
+                  heroImageUrl ? `background-image:url('${heroImageUrl}')` : ""
+                }
+              />
+              <div class="slide-content bg-base-100">
+                <p class="hero-category text-accent">{categoryLabel}</p>
+                <h1 class="hero-title text-base-content">{title}</h1>
+                {lead && <p class="hero-lead text-base-content">{lead}</p>}
+                {(authorName || dateFormatted) && (
+                  <div class="hero-meta text-base-content">
+                    {authorName && <span>{authorName}</span>}
+                    {authorName && dateFormatted && (
+                      <span class="hero-meta-dot">•</span>
+                    )}
+                    {dateFormatted && <span>{dateFormatted}</span>}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* ── Content slides ──────────────────────── */}
+            {slides.map((slide, i) => (
+              <section class="slide">
+                <div
+                  class="slide-image"
+                  style={`background-image:url('${slide.imageUrl}')`}
+                />
+                <div class="slide-content bg-base-100">
+                  <span class="slide-counter text-base-content">
+                    {String(i + 1).padStart(2, "0")} /{" "}
+                    {String(slides.length).padStart(2, "0")}
+                  </span>
+                  <div class="slide-text-body">
+                    <p class="text-base-content">{slide.text}</p>
+                  </div>
+                </div>
+              </section>
+            ))}
+          </div>
+
+          <div class="nav">
+            <button
+              id="prev-button"
+              type="button"
+              aria-label="Предыдущий слайд"
+              class="border border-base-content text-base-content"
+            >
+              ←
+            </button>
+            <button
+              id="next-button"
+              type="button"
+              aria-label="Следующий слайд"
+              class="border border-base-content text-base-content"
+            >
+              →
+            </button>
+          </div>
+        </main>
+      )
+    }
+
+    <script>
+      const slider = document.getElementById("slider");
+      const prevBtn = document.getElementById(
+        "prev-button",
+      ) as HTMLButtonElement | null;
+      const nextBtn = document.getElementById(
+        "next-button",
+      ) as HTMLButtonElement | null;
+      const total = document.querySelectorAll(".slide").length;
+
+      let index = 0;
+
+      const update = () => {
+        if (!slider || !prevBtn || !nextBtn) return;
+        slider.style.transform = `translateX(-${index * 100}vw)`;
+        prevBtn.disabled = index === 0;
+        nextBtn.disabled = index === total - 1;
+      };
+
+      prevBtn?.addEventListener("click", () => {
+        if (index > 0) {
+          index--;
+          update();
+        }
+      });
+      nextBtn?.addEventListener("click", () => {
+        if (index < total - 1) {
+          index++;
+          update();
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          if (index < total - 1) {
+            index++;
+            update();
+          }
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          if (index > 0) {
+            index--;
+            update();
+          }
+        }
+      });
+
+      update();
+    </script>
+  </body>
+</html>

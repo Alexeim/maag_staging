@@ -21,6 +21,8 @@ const components: Record<string, () => Promise<any>> = {
   tipsList: () => import('@/components/dashboard/tipsListLogic'),
   guideCreator: () => import('@/components/article/guideCreatorLogic'),
   guideList: () => import('@/components/dashboard/guideListLogic'),
+  visualStoryCreator: () => import('@/components/article/visualStoryCreatorLogic'),
+  visualStoryList: () => import('@/components/dashboard/visualStoryListLogic'),
 };
 
 export default function(Alpine: Alpine) {
@@ -228,6 +230,25 @@ export default function(Alpine: Alpine) {
       subscriptionEndDate: '',
       createSubscription() {},
       manageSubscription() {},
+      // --- Visual Story Creator defaults ---
+      story: {
+        title: '',
+        lead: '',
+        cardLead: '',
+        category: '',
+        tags: [],
+        techTags: [],
+        isHotContent: false,
+        isOnLanding: false,
+        slides: [],
+      },
+      storyId: null,
+      uploadingSlideIndex: null,
+      addSlide() {},
+      removeSlide() {},
+      handleSlideImageUpload() {},
+      saveStory() {},
+      deleteStory() {},
     };
   });
 }

@@ -444,3 +444,57 @@ export const authorsApi = {
     });
   },
 };
+
+export interface VisualStorySlide {
+  imageUrl: string;
+  text: string;
+}
+
+export interface VisualStoryPayload {
+  title: string;
+  authorId: string;
+  slides: VisualStorySlide[];
+  imageUrl?: string;
+  lead?: string;
+  cardLead?: string;
+  category?: string;
+  tags?: string[];
+  techTags?: string[];
+  isHotContent?: boolean;
+  isOnLanding?: boolean;
+}
+
+export interface VisualStoryResponse extends VisualStoryPayload {
+  id: string;
+  createdAt: string | Date;
+  author?: unknown;
+}
+
+export const visualStoriesApi = {
+  list(token?: string) {
+    return request<VisualStoryResponse[]>("/api/visual-stories", { token });
+  },
+  create(payload: VisualStoryPayload, token?: string) {
+    return request<VisualStoryResponse>("/api/visual-stories", {
+      method: "POST",
+      body: payload,
+      token,
+    });
+  },
+  getById(id: string, token?: string) {
+    return request<VisualStoryResponse>(`/api/visual-stories/${id}`, { token });
+  },
+  update(id: string, payload: VisualStoryPayload, token?: string) {
+    return request<VisualStoryResponse>(`/api/visual-stories/${id}`, {
+      method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+  delete(id: string, token?: string) {
+    return request<void>(`/api/visual-stories/${id}`, {
+      method: "DELETE",
+      token,
+    });
+  },
+};

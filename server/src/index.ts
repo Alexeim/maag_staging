@@ -8,6 +8,7 @@ import flipperRoutes from './routes/flipperRoutes'; // Import flipper routes
 import interviewRoutes from './routes/interviewRoutes'; // Import interview routes
 import authorRoutes from './routes/authorRoutes';
 import guideRoutes from './routes/guideRoutes';
+import visualStoryRoutes from './routes/visualStoryRoutes';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -46,6 +47,9 @@ app.use('/api/authors', authorRoutes);
 
 // Use the guide routes
 app.use('/api/guides', guideRoutes);
+
+// Use the visual story routes
+app.use('/api/visual-stories', visualStoryRoutes);
 
 // Test route to verify Firebase connection
 app.get('/api/test-firebase', async (req, res) => {

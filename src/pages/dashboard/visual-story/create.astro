@@ -1,0 +1,24 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import VisualStoryComposer from "@/components/dashboard/VisualStoryComposer.astro";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+
+const storyCreatorState = JSON.stringify({
+  categoryTags: {
+    culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
+  },
+  isEditMode: false,
+  onSaveRedirect: "/dashboard/visual-stories",
+});
+---
+
+<DashboardLayout title="Создать визуальную историю" active="create-visual-story">
+  <VisualStoryComposer
+    heading="Создать новую визуальную историю"
+    submitLabel="Сохранить историю"
+    storyCreatorState={storyCreatorState}
+    cancelHref="/dashboard/visual-stories"
+  />
+</DashboardLayout>

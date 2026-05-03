@@ -1,7 +1,7 @@
 ---
 import Layout from "../Layouts/Layout.astro";
 import picture1 from "../assets/images/culture.jpg";
-import { articlesApi, flippersApi, guidesApi } from "@/lib/api/api";
+import { articlesApi, flippersApi, guidesApi, visualStoriesApi } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
   paris: "Париж",
@@ -124,6 +124,9 @@ const toContentHref = (item: any) => {
   if (item?.contentType === "guide") {
     return `/guide/${item.id}`;
   }
+  if (item?.contentType === "visual-story") {
+    return `/visual-story/${item.id}`;
+  }
   return `/${item?.isNews ? "news" : "article"}/${item.id}`;
 };
 
@@ -150,7 +153,8 @@ const getTransitionName = (item: any) => {
     href.startsWith("/news/") ||
     href.startsWith("/interviews/") ||
     href.startsWith("/flippers/") ||
-    href.startsWith("/guide/")
+    href.startsWith("/guide/") ||
+    href.startsWith("/visual-story/")
   ) {
     return `main-article-image-${item.id}`;
   }
@@ -164,10 +168,11 @@ let editorialSidebarItems: any[] = [];
 let parisFeed: any[] = [];
 
 try {
-  const [articles, flippers, guides] = await Promise.all([
+  const [articles, flippers, guides, visualStories] = await Promise.all([
     articlesApi.list(),
     flippersApi.list(),
     guidesApi.list(),
+    visualStoriesApi.list(),
   ]);
 
   const allContent = [
@@ -186,6 +191,12 @@ try {
       ...guide,
       contentType: "guide",
       tags: normalizeTags(guide?.tags),
+    })),
+    ...visualStories.map((story) => ({
+      ...story,
+      contentType: "visual-story",
+      imageUrl: story?.imageUrl || story?.slides?.[0]?.imageUrl || null,
+      tags: normalizeTags(story?.tags),
     })),
   ];
 

@@ -1,0 +1,379 @@
+---
+import Button from "@/components/common/Button.astro";
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+import { CloudUpload } from "lucide-astro";
+
+interface Props {
+  heading: string;
+  submitLabel: string;
+  storyCreatorState: string;
+  cancelHref?: string;
+  deleteStoryId?: string | null;
+  deleteRedirect?: string;
+}
+
+const {
+  heading,
+  submitLabel,
+  storyCreatorState,
+  cancelHref,
+  deleteStoryId,
+  deleteRedirect = "/dashboard/visual-stories",
+} = Astro.props as Props;
+---
+
+<div
+  class="max-w-4xl mx-auto"
+  x-data={`$lazy('visualStoryCreator', ${storyCreatorState})`}
+>
+  <h1 class="text-3xl font-bold mb-6">{heading}</h1>
+
+  <!-- Basic info section -->
+  <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
+    <h2 class="text-xl font-semibold mb-4">Основная информация</h2>
+
+    <label class="block text-sm font-medium text-base-content mb-2">Заголовок</label>
+    <template x-if="isEditingTitle">
+      <div>
+        <input
+          type="text"
+          x-model="editingTitleText"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        />
+        <div class="flex justify-end gap-3 mt-3">
+          <Button variant="secondary" size="sm" @click="cancelEditTitle()">Отмена</Button>
+          <Button variant="primary" size="sm" @click="saveTitle()">Сохранить</Button>
+        </div>
+      </div>
+    </template>
+    <template x-if="!isEditingTitle">
+      <div class="flex justify-between items-center border border-base-300 rounded-lg px-4 py-3">
+        <h3 class="text-lg font-semibold" x-text="story.title || 'Введите заголовок...'"></h3>
+        <Button variant="outline" size="sm" @click="editTitle()">Редактировать</Button>
+      </div>
+    </template>
+
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-base-content mb-2">Вводка (лид)</label>
+      <textarea
+        x-model="story.lead"
+        rows="3"
+        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        placeholder="Краткое описание, которое отображается под заголовком..."
+      ></textarea>
+    </div>
+
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-base-content mb-2">Лид для карточки</label>
+      <textarea
+        x-model="story.cardLead"
+        rows="2"
+        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        placeholder="Короткий текст для карточек..."
+      ></textarea>
+    </div>
+
+    <!-- Author section -->
+    <div class="mt-6 space-y-3">
+      <label class="block text-sm font-medium text-base-content">Автор</label>
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          @click="useNewAuthor = false"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          :class="!useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          Выбрать из списка
+        </button>
+        <button
+          type="button"
+          @click="useNewAuthor = true"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          :class="useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          Новый автор
+        </button>
+      </div>
+
+      <div x-show="!useNewAuthor">
+        <select
+          x-model="selectedAuthorId"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+        >
+          <option value="">Выберите автора...</option>
+          <template x-for="author in authors" :key="author.id">
+            <option :value="author.id" x-text="getAuthorLabel(author)"></option>
+          </template>
+        </select>
+        <p x-show="authorsLoading" class="text-xs text-base-content/60 mt-1">Загружаем авторов...</p>
+      </div>
+
+      <div x-show="useNewAuthor" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input
+          type="text"
+          x-model="newAuthorFirstName"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+          placeholder="Имя автора"
+        />
+        <input
+          type="text"
+          x-model="newAuthorLastName"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+          placeholder="Фамилия автора"
+        />
+      </div>
+    </div>
+
+    <hr class="my-6" />
+
+    <!-- Category & flags -->
+    <label for="vs-category-select" class="block text-sm font-medium text-base-content mb-2">Категория</label>
+    <select
+      id="vs-category-select"
+      x-model="story.category"
+      @change="handleCategoryChange($event.target.value)"
+      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+    >
+      <option value="" disabled>Выберите категорию...</option>
+      <option value="culture">Культура</option>
+      <option value="paris">Париж</option>
+    </select>
+
+    <div class="mt-4 flex items-center gap-3">
+      <input
+        id="vs-hot-content"
+        type="checkbox"
+        x-model="story.isHotContent"
+        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+      />
+      <label for="vs-hot-content" class="text-sm font-medium text-base-content cursor-pointer">
+        Отметить как «Самое читаемое»
+      </label>
+    </div>
+
+    <div class="mt-4 flex items-center gap-3">
+      <input
+        id="vs-on-landing"
+        type="checkbox"
+        x-model="story.isOnLanding"
+        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+      />
+      <label for="vs-on-landing" class="text-sm font-medium text-base-content cursor-pointer">
+        Показывать на посадочной странице
+      </label>
+    </div>
+
+    <!-- Tags -->
+    <div class="mt-6">
+      <label class="block text-sm font-medium text-base-content mb-3">Теги</label>
+
+      <template x-if="getAvailableTags().length > 0">
+        <div class="flex flex-wrap gap-2">
+          <template x-for="tag in getAvailableTags()" :key="tag.value">
+            <button
+              type="button"
+              class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
+              :class="isTagSelected(tag.value) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+              @click="toggleTag(tag.value)"
+            >
+              <span x-text="tag.title"></span>
+            </button>
+          </template>
+        </div>
+      </template>
+
+      <template x-if="getAvailableTags().length === 0">
+        <p class="text-sm text-base-content/70">
+          Для выбранной категории пока нет готовых тегов — добавь свои.
+        </p>
+      </template>
+
+      <div class="mt-4 flex flex-col gap-2">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            x-model="newTagInput"
+            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+            placeholder="Добавь тег латиницей, например art-market"
+          />
+          <Button variant="outline" size="sm" type="button" @click="addCustomTag()">Добавить тег</Button>
+        </div>
+        <p class="text-xs text-base-content/60">
+          Техническое значение тега уходит в базу данных, поэтому используй латиницу.
+        </p>
+      </div>
+
+      <div class="mt-3 flex flex-col gap-3">
+        <template x-if="story.tags.length > 0">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Категорийные теги</p>
+            <div class="flex flex-wrap gap-2 mt-1">
+              <template x-for="tag in story.tags" :key="tag">
+                <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
+                  <span x-text="getTagLabel(tag)"></span>
+                  <button type="button" class="text-base-content/60 hover:text-base-content cursor-pointer" @click="removeTag(tag)">×</button>
+                </span>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <template x-if="story.techTags.length > 0">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Техтеги</p>
+            <div class="flex flex-wrap gap-2 mt-1">
+              <template x-for="tag in story.techTags" :key="`tech-${tag}`">
+                <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
+                  <span x-text="tag"></span>
+                  <button type="button" class="text-base-content/60 hover:text-base-content cursor-pointer" @click="removeTechTag(tag)">×</button>
+                </span>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+    <hr class="my-6" />
+
+    <!-- Cover image -->
+    <label class="block text-sm font-medium text-base-content mb-2">Обложка истории</label>
+    <div class="flex items-center" x-data="{ coverFileName: '' }">
+      <label
+        for="vs-cover-upload"
+        class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+      >
+        <CloudUpload />
+        Загрузить файл
+      </label>
+      <input
+        id="vs-cover-upload"
+        type="file"
+        class="hidden"
+        @change="handleCoverImageUpload($event); coverFileName = $event.target.files[0]?.name || ''"
+        accept="image/png, image/jpeg, image/webp"
+      />
+      <span
+        x-text="coverFileName ? coverFileName : (story.imageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+        class="ml-4 text-sm text-base-content/70"
+      ></span>
+    </div>
+    <div x-show="uploading && uploadingSlideIndex === null" class="mt-4">
+      <p class="text-sm">Загрузка: <span x-text="uploadProgress.toFixed(0) + '%'"></span></p>
+      <div class="w-full bg-base-200 rounded-full h-2 mt-1">
+        <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+      </div>
+    </div>
+    <div x-show="story.imageUrl && !(uploading && uploadingSlideIndex === null)" class="mt-4 space-y-2">
+      <p class="text-sm text-success">Обложка успешно загружена!</p>
+      <img
+        :src="story.imageUrl"
+        alt="Предпросмотр обложки"
+        class="rounded-md max-h-60 w-full object-cover"
+      />
+    </div>
+  </section>
+
+  <!-- Slides section -->
+  <section class="p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
+    <h2 class="text-xl font-semibold mb-2">Слайды</h2>
+    <p class="text-sm text-base-content/60 mb-6">
+      Каждый слайд — изображение слева и текст справа. На мобильных они стекаются вертикально.
+    </p>
+
+    <div class="space-y-6">
+      <template x-for="(slide, index) in story.slides" :key="index">
+        <div class="p-4 border border-base-300 rounded-lg bg-base-100 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold text-sm" x-text="'Слайд ' + (index + 1)"></h3>
+            <Button variant="error" size="sm" type="button" @click="removeSlide(index)">Удалить слайд</Button>
+          </div>
+
+          <!-- Image upload for slide -->
+          <div x-data="{ slideFileName: '' }">
+            <label class="block text-sm font-medium text-base-content mb-2">Изображение</label>
+            <div class="flex items-center gap-3">
+              <label
+                :for="'slide-img-' + index"
+                class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+              >
+                <CloudUpload />
+                Загрузить файл
+              </label>
+              <input
+                :id="'slide-img-' + index"
+                type="file"
+                class="hidden"
+                @change="handleSlideImageUpload($event, index); slideFileName = $event.target.files[0]?.name || ''"
+                accept="image/png, image/jpeg, image/webp"
+              />
+              <span
+                x-text="slideFileName || (slide.imageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+                class="text-sm text-base-content/70"
+              ></span>
+            </div>
+            <div x-show="uploading && uploadingSlideIndex === index" class="mt-3">
+              <p class="text-sm">Загрузка: <span x-text="uploadProgress.toFixed(0) + '%'"></span></p>
+              <div class="w-full bg-base-200 rounded-full h-2 mt-1">
+                <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+              </div>
+            </div>
+            <img
+              x-show="slide.imageUrl && !(uploading && uploadingSlideIndex === index)"
+              :src="slide.imageUrl"
+              alt="Слайд"
+              class="mt-3 rounded-md max-h-48 w-full object-cover"
+            />
+          </div>
+
+          <!-- Text for slide -->
+          <div>
+            <label class="block text-sm font-medium text-base-content mb-2">Текст слайда</label>
+            <textarea
+              x-model="slide.text"
+              rows="3"
+              class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+              placeholder="Короткий, образный текст — до 2–3 предложений..."
+            ></textarea>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <div class="mt-6 text-center">
+      <Button variant="primary" type="button" @click="addSlide()">+ Добавить слайд</Button>
+    </div>
+  </section>
+
+  <!-- Action buttons -->
+  <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex gap-2">
+      <template x-if="isEditMode && storyId">
+        <button
+          type="button"
+          class="cursor-pointer text-white bg-red-700 hover:bg-red-800 focus:ring-red-300 flex flex-row items-center justify-center px-4 py-2 rounded-lg"
+          @click={`deleteStory('${deleteRedirect}')`}
+        >
+          Удалить визуальную историю
+        </button>
+      </template>
+    </div>
+    <div class="flex justify-end gap-3">
+      {cancelHref && (
+        <a
+          href={cancelHref}
+          class="cursor-pointer text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-yellow-300 flex flex-row items-center justify-center px-4 py-2 rounded-lg"
+        >
+          Отмена
+        </a>
+      )}
+      <Button
+        variant="primary"
+        @click="saveStory()"
+        :disabled="isSaving"
+        :class="{'opacity-50 cursor-not-allowed': isSaving}"
+      >
+        {submitLabel}
+      </Button>
+    </div>
+  </div>
+</div>
