@@ -33,7 +33,7 @@ ENV PUBLIC_FIREBASE_MEASUREMENT_ID=$PUBLIC_FIREBASE_MEASUREMENT_ID
 RUN npm run build
 
 # Remove devDependencies for a clean node_modules
-RUN npm prune --production
+RUN npm prune --omit=dev
 
 # ---
 

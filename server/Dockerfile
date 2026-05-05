@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 # Keep only production dependencies for the final image
-RUN npm prune --production
+RUN npm prune --omit=dev
 
 # ---
 
