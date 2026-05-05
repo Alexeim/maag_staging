@@ -23,12 +23,11 @@ const {
 
 <div id="interview-box" class="w-full bg-white flex flex-col gap-6 lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px]">
   <a href={href} class="block w-[200px] h-[200px] rounded-full overflow-hidden flex-shrink-0">
-    <Image
-      src={imageUrl}
+    <img
+      src={typeof imageUrl === 'string' ? imageUrl : imageUrl.src}
       alt={`Фотография ${interviewee}`}
       class="w-full h-full object-cover object-center"
       loading="lazy"
-      inferSize={true}
       transition:name={transitionName}
     />
   </a>

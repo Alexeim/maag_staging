@@ -13,6 +13,14 @@ export default defineConfig({
     prefetchAll: true,
     defaultStrategy: 'hover',
   },
+  image: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "firebasestorage.googleapis.com",
+      },
+    ],
+  },
   integrations: [alpinejs({ entrypoint: '/src/alpine-entrypoint.ts' }), compressor()],
   base: process.env.ASTRO_BASE_PATH || "/",
 

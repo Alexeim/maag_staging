@@ -5,7 +5,7 @@ import type { ImageMetadata } from "astro";
 interface Props {
   src: ImageMetadata | string;
   alt: string;
-  caption: string;
+  caption?: string;
   transitionName?: string;
   transitionAliases?: string[];
   figureClass?: string; // Классы для внешнего контейнера figure/div
