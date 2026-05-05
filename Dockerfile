@@ -1,5 +1,5 @@
 # Stage 1: The "builder" stage to compile the project
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 
 # Copy package files and install ALL dependencies (including devDependencies)
@@ -38,7 +38,7 @@ RUN npm prune --production
 # ---
 
 # Stage 2: The final, clean stage for running the application
-FROM node:20-alpine
+FROM node:24-alpine
 WORKDIR /app
 
 # Copy only the necessary artifacts from the "builder" stage
