@@ -5,6 +5,7 @@ import {
   flippersApi,
   authorsApi,
 } from "@/lib/api/api";
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import {
   detectVideoProvider,
   getDirectVideoUrl as resolveVideoDirectUrl,
@@ -156,6 +157,9 @@ export default function interviewCreatorLogic(initialState = {}) {
     useNewAuthor: false,
     newAuthorFirstName: "",
     newAuthorLastName: "",
+    getRichTextInitialHtml(block) {
+      return getInitialRichTextHtml(block);
+    },
 
     isTagSelected(value: string) {
       return this.interview.tags.includes(value);
@@ -513,6 +517,8 @@ export default function interviewCreatorLogic(initialState = {}) {
       switch (type) {
         case "paragraph":
         case "first-paragraph":
+          newBlockData = { text: "", html: "" };
+          break;
         case "h2":
         case "h3":
         case "quote":

@@ -1,10 +1,12 @@
 ---
 import QuoteIcon from "../../assets/icons/quote.svg";
 import ArticleVideo from "./ArticleVideo.astro";
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
 
 interface Block {
   type: string;
   text?: string;
+  html?: string;
   url?: string;
   caption?: string;
   question?: string;
@@ -111,18 +113,24 @@ if (currentProseGroup.length > 0) {
             <article class="max-w-full space-y-12">
               {group.content.map((block) => {
                 switch (block.type) {
-                  case "first-paragraph":
+                  case "first-paragraph": {
+                    const html = getInitialRichTextHtml(block);
                     return (
-                      <p class="text-lg first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-3 font-article-body text-justify">
-                        {block.text}
-                      </p>
+                      <div
+                        class="article-rich-text article-rich-text--dropcap text-lg font-article-body text-justify"
+                        set:html={html}
+                      />
                     );
-                  case "paragraph":
+                  }
+                  case "paragraph": {
+                    const html = getInitialRichTextHtml(block);
                     return (
-                      <p class="text-lg font-article-body text-justify">
-                        {block.text}
-                      </p>
+                      <div
+                        class="article-rich-text text-lg font-article-body text-justify"
+                        set:html={html}
+                      />
                     );
+                  }
                   case "h2":
                     return (
                       <h2 class="text-xl font-bold font-article-body">
@@ -345,3 +353,21 @@ if (currentProseGroup.length > 0) {
     })
   }
 </div>
+
+<style>
+  .article-rich-text :global(p) {
+    margin: 0 0 1rem;
+  }
+
+  .article-rich-text :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .article-rich-text--dropcap :global(p:first-child::first-letter) {
+    float: left;
+    margin-right: 0.75rem;
+    font-size: 3rem;
+    line-height: 0.9;
+    font-weight: 700;
+  }
+</style>

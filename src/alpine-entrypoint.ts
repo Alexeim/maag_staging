@@ -3,6 +3,7 @@ import { navbarStore } from '@/stores/navbarStore';
 import { authStore } from '@/stores/authStore';
 import { createUiStore } from '@/stores/uiStore';
 import lazyLoadPlugin from '@/lib/alpine/plugins/lazyLoadPlugin';
+import blockRichTextEditor from '@/lib/alpine/blockRichTextEditor';
 import { auth } from '@/lib/firebase/client';
 import { onAuthStateChanged } from 'firebase/auth';
 import { usersApi } from "@/lib/api/api";
@@ -11,6 +12,7 @@ export default (Alpine: Alpine) => {
   console.log('Alpine entrypoint loaded!');
   
   Alpine.plugin(lazyLoadPlugin);
+  Alpine.data('blockRichTextEditor', blockRichTextEditor);
   Alpine.store('navbar', navbarStore);
   Alpine.store('auth', authStore);
   Alpine.store('ui', createUiStore());

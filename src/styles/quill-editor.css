@@ -1,0 +1,36 @@
+.rich-text-editor .ql-toolbar {
+  border-color: color-mix(in srgb, var(--color-base-content) 12%, transparent);
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+}
+
+.rich-text-editor .ql-container {
+  border-color: color-mix(in srgb, var(--color-base-content) 12%, transparent);
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+  background: var(--color-base-100);
+  color: var(--color-base-content);
+  font-size: 1rem;
+}
+
+.rich-text-editor .ql-editor {
+  min-height: 14rem;
+  font-family: inherit;
+  line-height: 1.75;
+}
+
+.rich-text-editor .ql-editor p {
+  margin-bottom: 1rem;
+}
+
+.rich-text-editor .ql-editor p:last-child {
+  margin-bottom: 0;
+}
+
+.rich-text-editor--dropcap .ql-editor p:first-child::first-letter {
+  float: left;
+  margin-right: 0.75rem;
+  font-size: 3rem;
+  line-height: 0.9;
+  font-weight: 700;
+}

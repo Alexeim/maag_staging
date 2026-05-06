@@ -1,5 +1,6 @@
 import { articlesApi, eventsApi, interviewsApi, flippersApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import {
   detectVideoProvider,
   getDirectVideoUrl as resolveVideoDirectUrl,
@@ -313,6 +314,9 @@ export default function articleCreatorLogic(initialState = {}) {
     newTagInput: "",
 
     categoryLabels,
+    getRichTextInitialHtml(block) {
+      return getInitialRichTextHtml(block);
+    },
     tipOptions: [
       { type: "location" as TipType, label: "Локация" },
       { type: "time" as TipType, label: "Время" },
@@ -850,6 +854,8 @@ export default function articleCreatorLogic(initialState = {}) {
       switch (type) {
         case "paragraph":
         case "first-paragraph":
+          newBlockData = { text: "", html: "" };
+          break;
         case "h2":
         case "h3":
         case "quote":

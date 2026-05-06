@@ -411,7 +411,18 @@ const {
               </div>
               <h3 class="text-lg font-semibold capitalize" x-text="editingBlock.type.replace('-', ' ')"></h3>
 
-              <template x-if="['paragraph', 'first-paragraph', 'h1', 'h2', 'h3', 'quote'].includes(editingBlock.type)">
+              <template x-if="['paragraph', 'first-paragraph'].includes(editingBlock.type)">
+                <div
+                  class="rich-text-editor"
+                  :class="{ 'rich-text-editor--dropcap': editingBlock.type === 'first-paragraph' }"
+                  x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml(editingBlock), placeholder: 'Введите текст абзаца...' })"
+                  @rich-text-change="editingBlock.html = $event.detail.html; editingBlock.text = $event.detail.text"
+                >
+                  <div x-ref="editor"></div>
+                </div>
+              </template>
+
+              <template x-if="['h1', 'h2', 'h3', 'quote'].includes(editingBlock.type)">
                 <textarea x-model="editingBlock.text" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" rows="5"></textarea>
               </template>
 
@@ -812,17 +823,27 @@ const {
                   <span>Перетащи, чтобы изменить порядок</span>
                 </div>
               </div>
-              <p
-                :class="{
-                  'text-base': block.type === 'paragraph',
-                  'text-lg first-letter:text-4xl first-letter:font-bold': block.type === 'first-paragraph',
-                  'text-3xl font-bold': block.type === 'h1',
-                  'text-2xl font-semibold': block.type === 'h2',
-                  'text-xl font-semibold': block.type === 'h3',
-                  'text-lg italic border-l-4 pl-4 my-4 border-base-300': block.type === 'quote'
-                }"
-                x-text="block.text"
-              ></p>
+              <template x-if="['paragraph', 'first-paragraph'].includes(block.type)">
+                <div
+                  :class="{
+                    'text-base': block.type === 'paragraph',
+                    'text-lg first-letter:text-4xl first-letter:font-bold': block.type === 'first-paragraph'
+                  }"
+                  x-html="getRichTextInitialHtml(block)"
+                ></div>
+              </template>
+
+              <template x-if="['h1', 'h2', 'h3', 'quote'].includes(block.type)">
+                <p
+                  :class="{
+                    'text-3xl font-bold': block.type === 'h1',
+                    'text-2xl font-semibold': block.type === 'h2',
+                    'text-xl font-semibold': block.type === 'h3',
+                    'text-lg italic border-l-4 pl-4 my-4 border-base-300': block.type === 'quote'
+                  }"
+                  x-text="block.text"
+                ></p>
+              </template>
 
               <template x-if="block.type === 'image'">
                 <figure>
