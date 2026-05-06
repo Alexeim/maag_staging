@@ -1,6 +1,6 @@
 ---
 import { Image } from "astro:assets";
-import maagLogo from "../../assets/logo/maaglogo.svg";
+import MaagLogo from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
 import { articlesApi, eventsApi, guidesApi } from "@/lib/api/api";
 
@@ -254,7 +254,7 @@ try {
       class="lg:col-span-3 px-0 lg:pr-4 lg:border-r lg:border-gray-300 lg:max-h-[980px]"
     >
       <h2
-        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
+        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old_standard"
       >
         Новости
       </h2>
@@ -278,9 +278,9 @@ try {
                     transition:name={`main-article-image-${newsItem.id}`}
                   />
                 </a>
-                <div class="flex-1 max-w-40">
+                <div class="flex-1 max-w-max">
                   <div class="mb-1">
-                    <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                       {getCategoryLabel(newsItem?.category) || "Новости"}
                     </span>
                   </div>
@@ -288,7 +288,7 @@ try {
                     href={`/news/${newsItem.id}`}
                     class="block bg-base-200 z-50 transition-opacity duration-200 hover:opacity-90"
                   >
-                    <h3 class="text-base font-bold font-oswald leading-tight hover:underline transition-opacity duration-200 hover:opacity-90">
+                    <h3 class="text-xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90">
                       {newsItem.title}
                     </h3>
                   </a>
@@ -303,7 +303,7 @@ try {
     {/* Main Column - WIDER */}
     <article class="lg:col-span-6 order-first lg:order-none relative">
       <h2
-        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
+        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old_standard"
       >
         Главное
       </h2>
@@ -322,7 +322,7 @@ try {
             </div>
             <div class="p-4 lg:p-0">
               <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em]">
-                <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mt-2">
                   {getPrimaryTag(mainArticle) || "Новости"}
                 </span>
                 <span class="hidden text-black text-lg font-bold font-['Inter']">
@@ -336,17 +336,13 @@ try {
                 href={mainArticle.href}
                 class="block transition-opacity duration-200 hover:opacity-90"
               >
-                <h2 class="text-3xl lg:text-5xl leading-tight font-thin font-oswald hover:underline">
+                <h2 class="text-3xl lg:text-[44px] font-normal font-old_standard tracking-[-0.04em] leading-[48px] hover:underline mt-1">
                   {mainArticle.title}{" "}
-                  <Image
-                    src={maagLogo}
-                    alt="MAAG"
-                    class="w-8 h-8 lg:w-6 lg:h-6 inline-block align-baseline"
-                  />
+                  <MaagLogo class="w-4 h-4 inline-block align-baseline" />
                 </h2>
               </a>
               {getCardLead(mainArticle) ? (
-                <p class="text-base lg:text-xl leading-relaxed text-black/80 font-oswald font-thin tracking-wide">
+                <p class="text-base lg:text-lg text-black/80 font-inter font-normal">
                   {getCardLead(mainArticle)}
                 </p>
               ) : null}
@@ -367,7 +363,7 @@ try {
       class="lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
     >
       <h2
-        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald"
+        class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old_standard"
       >
         Календарь
       </h2>
@@ -375,7 +371,7 @@ try {
         landingEvent ? (
           <a
             href={`/events/${landingEvent.id}`}
-            class="block bg-white rounded-xl shadow-lg overflow-hidden"
+            class="block bg-white overflow-hidden"
           >
             <div class="hidden p-4 lg:p-2 flex items-center gap-3">
               <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
@@ -405,8 +401,8 @@ try {
                 transition:name={`event-image-${landingEvent.id}`}
               />
             )}
-            <div class="p-4 lg:p-6">
-              <p class="text-xs font-medium uppercase tracking-[0.25em] text-error font-['Inter'] mb-2">
+            <div class="p-4 lg:py-6 lg:px-4">
+              <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                 {eventCategoryLabels[landingEvent.category] || "Событие"}
               </p>
               <h2 class="text-base lg:text-lg leading-tight font-oswald mb-4">
@@ -443,14 +439,14 @@ try {
             </div>
           </a>
         ) : (
-          <div class="bg-white rounded-xl shadow-lg">
+          <div class="bg-white">
             <div class="p-4 lg:p-2 flex items-center gap-3">
-              <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
+              {/* <div class="flex flex-col items-center gap-1 rounded-full bg-base-200 p-3">
                 <p class="text-2xl lg:text-2xl text-black/50 font-thin font-oswald">
                   --
                 </p>
-              </div>
-              <p class="text-[12px] font-oswald uppercase tracking-[0.15em]">
+              </div> */}
+              <p class="text-[18px] font-inter uppercase font-bold tracking-[0.15em] mt-1 mb-1">
                 Скоро
               </p>
             </div>
@@ -459,14 +455,16 @@ try {
               alt="Event placeholder"
               class="w-full h-auto lg:h-[240px] object-cover"
             />
-            <div class="p-4 lg:p-6">
-              <p class="text-xs font-medium uppercase tracking-[0.25em] text-error font-['Inter'] mb-2">
+            <div class="p-4 lg:py-6 lg:px-4">
+              <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                 Событие
               </p>
-              <h2 class="text-base lg:text-lg leading-tight font-oswald mb-4">
+              <h2 class="text-xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mt-1">
                 Скоро появится событие
               </h2>
-              <p class="text-sm text-gray-600">Следи за обновлениями</p>
+              <p class="text-base lg:text-sm text-black/80 font-inter font-normal">
+                Следи за обновлениями
+              </p>
             </div>
           </div>
         )

@@ -30,7 +30,7 @@ const {
 const displayImage = imageUrl || picture1.src;
 ---
 
-<div class="w-full flex flex-col gap-2">
+<div class="w-full flex flex-col justify-start gap-2">
   <div class="w-full aspect-[3/2] overflow-hidden">
     <a
       href={href}
@@ -74,7 +74,7 @@ const displayImage = imageUrl || picture1.src;
           </span>
         )}
         {category && (
-          <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+          <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
             {category}
           </span>
         )}
@@ -83,14 +83,14 @@ const displayImage = imageUrl || picture1.src;
   }
   <a href={href} class="block">
     <h3
-      class="text-lg leading-tight font-oswald hover:underline transition-opacity duration-200 hover:opacity-90"
+      class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90"
     >
       {title}
     </h3>
   </a>
   {
     lead && (
-      <p class="text-sm lg:text-base leading-relaxed text-base-content/75 font-oswald font-thin">
+      <p class="text-base lg:text-sm text-black/80 font-inter font-normal">
         {lead}
       </p>
     )

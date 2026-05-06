@@ -199,13 +199,14 @@ const toContentHref = (item: any) => {
 };
 
 try {
-  const [articles, flippers, interviews, guides, visualStories] = await Promise.all([
-    articlesApi.list(),
-    flippersApi.list() as Promise<FlipperResponse[]>,
-    interviewsApi.list() as Promise<InterviewResponse[]>,
-    guidesApi.list(),
-    visualStoriesApi.list(),
-  ]);
+  const [articles, flippers, interviews, guides, visualStories] =
+    await Promise.all([
+      articlesApi.list(),
+      flippersApi.list() as Promise<FlipperResponse[]>,
+      interviewsApi.list() as Promise<InterviewResponse[]>,
+      guidesApi.list(),
+      visualStoriesApi.list(),
+    ]);
 
   console.log(`--- STEP 1: RAW DATA ---`);
   console.log(
@@ -366,7 +367,7 @@ const interviewQuote = latestInterview?.mainQuote
     <div class="order-2 lg:order-none lg:col-span-9 flex flex-col">
       <div class="pl-0 pr-0">
         <h2
-          class="text-lg font-normal mb-5 uppercase tracking-[0.3em] font-oswald"
+          class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old_standard"
         >
           {CATEGORY_LABELS[CULTURE_CATEGORY_KEY]}
         </h2>
@@ -409,7 +410,7 @@ const interviewQuote = latestInterview?.mainQuote
                       )}
                     </p> */}
                     <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3">
-                      <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                         {getPrimaryTag(cultureHero) || "Новости"}
                       </span>
                       <span class="hidden text-black text-lg font-bold font-['Inter']">
@@ -423,12 +424,12 @@ const interviewQuote = latestInterview?.mainQuote
                       href={cultureHero.href}
                       class="block transition-opacity duration-200 hover:opacity-90"
                     >
-                      <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-oswald text-wrap break-words hover:underline transition-opacity duration-200 hover:opacity-90">
+                      <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90">
                         {cultureHero.title}
                       </h4>
                     </a>
                     {getCardLead(cultureHero) && (
-                      <p class="mt-3 text-base lg:text-lg leading-relaxed text-base-content/80 font-oswald break-words font-thin tracking-wide">
+                      <p class="text-base lg:text-sm text-black/80 font-inter font-normal">
                         {getCardLead(cultureHero)}
                       </p>
                     )}
@@ -510,7 +511,7 @@ const interviewQuote = latestInterview?.mainQuote
     >
       <div id="netlenka-container">
         <h3
-          class="text-lg font-normal mb-5 uppercase tracking-[0.3em] font-oswald"
+          class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old_standard"
         >
           {CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY]}
         </h3>
@@ -544,12 +545,12 @@ const interviewQuote = latestInterview?.mainQuote
     </div>
   </div>
   <div class="w-full">
-    <hr class="h-px my-4 border-1" />
+    <hr class="h-px my-8 border-1" />
   </div>
   {
     isLanding && (
       <div class="w-full flex flex-col px-4 lg:px-0 min-h-[200px]">
-        <h2 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-oswald">
+        <h2 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old_standard">
           {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
         </h2>
         <div class="w-full flex flex-col gap-8">
@@ -582,7 +583,7 @@ const interviewQuote = latestInterview?.mainQuote
                 </div>
                 <div class="w-full lg:w-2/5 pt-4 px-4 lg:pl-4">
                   <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3">
-                    <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                       {getPrimaryTag(parisHero) ||
                         CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
                     </span>
@@ -597,12 +598,12 @@ const interviewQuote = latestInterview?.mainQuote
                     href={parisHero.href}
                     class="block transition-opacity duration-200 hover:opacity-90"
                   >
-                    <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-oswald text-wrap break-words hover:underline transition-opacity duration-200 hover:opacity-90">
+                    <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90">
                       {parisHero.title}
                     </h4>
                   </a>
                   {getCardLead(parisHero) && (
-                    <p class="mt-3 text-base lg:text-lg leading-relaxed text-base-content/80 font-oswald break-words px-2 font-thin tracking-wide">
+                    <p class="text-base lg:text-sm text-black/80 font-inter font-normal">
                       {getCardLead(parisHero)}
                     </p>
                   )}

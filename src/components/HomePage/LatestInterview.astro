@@ -11,20 +11,26 @@ interface Props {
   transitionName?: string;
 }
 
-const { 
-  tag = "Интервью", 
-  interviewee = "Скоро здесь будет имя", 
-  quote = "Скоро здесь будет интересная цитата...", 
+const {
+  tag = "Интервью",
+  interviewee = "Скоро здесь будет имя",
+  quote = "Скоро здесь будет интересная цитата...",
   imageUrl = picture1,
   href = "#",
   transitionName,
 } = Astro.props;
 ---
 
-<div id="interview-box" class="w-full bg-white flex flex-col gap-6 lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px]">
-  <a href={href} class="block w-[200px] h-[200px] rounded-full overflow-hidden flex-shrink-0">
+<div
+  id="interview-box"
+  class="w-full bg-white flex flex-col gap-6 lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px]"
+>
+  <a
+    href={href}
+    class="block w-[200px] h-[200px] rounded-full overflow-hidden flex-shrink-0"
+  >
     <img
-      src={typeof imageUrl === 'string' ? imageUrl : imageUrl.src}
+      src={typeof imageUrl === "string" ? imageUrl : imageUrl.src}
       alt={`Фотография ${interviewee}`}
       class="w-full h-full object-cover object-center"
       loading="lazy"
@@ -33,9 +39,19 @@ const {
   </a>
   <div class="w-full lg:w-fit">
     <a href={href}>
-      <p class="text-xs font-medium uppercase tracking-[0.25em] text-error font-['Inter'] mb-3">{tag}</p>
-      <h4 class="text-base lg:text-lg leading-tight font-oswald">{interviewee}:</h4>
-      <p class="text-2xl lg:text-3xl leading-tight font-thin font-oswald text-wrap break-words hover:underline">
+      <p
+        class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mb-2"
+      >
+        {tag}
+      </p>
+      <h4
+        class="text-xl font-semibold font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90"
+      >
+        {interviewee}:
+      </h4>
+      <p
+        class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 italic"
+      >
         "{quote}"
       </p>
     </a>
