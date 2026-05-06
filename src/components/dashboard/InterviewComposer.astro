@@ -320,7 +320,7 @@ const {
                         :class="editingBlock.sourceType === 'embed' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
                         @click="editingBlock.sourceType = 'embed'; editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
                       >
-                        YouTube / Vimeo
+                        Ссылка / Embed
                       </button>
                     </div>
                   </div>
@@ -360,15 +360,27 @@ const {
                   </div>
 
                   <div x-show="editingBlock.sourceType === 'embed'" class="space-y-3">
-                    <label class="block text-sm font-medium">Ссылка на видео</label>
+                    <label class="block text-sm font-medium">Ссылка на видео или embed URL</label>
                     <input
                       type="url"
                       x-model="editingBlock.url"
                       @input="editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
                       class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-                      placeholder="https://www.youtube.com/watch?v=... или https://vimeo.com/..."
+                      placeholder="https://player.example.com/embed/123 или https://cdn.example.com/video.mp4"
                     />
-                    <p class="text-xs text-base-content/60">Поддерживаются только YouTube и Vimeo.</p>
+                    <p class="text-xs text-base-content/60">
+                      Поддерживаются YouTube/Vimeo, готовые embed-ссылки и прямые ссылки на видеофайлы.
+                    </p>
+                    <p class="text-xs text-base-content/50">
+                      Обычная страница с видео не подойдёт: нужна либо прямая ссылка на файл, либо готовая ссылка для встраивания.
+                    </p>
+                    <video
+                      x-show="getVideoDirectUrl(editingBlock.url)"
+                      :src="getVideoDirectUrl(editingBlock.url)"
+                      controls
+                      playsinline
+                      class="rounded-md max-h-48 w-full bg-black"
+                    ></video>
                     <div
                       x-show="getVideoEmbedUrl(editingBlock.url)"
                       class="w-full aspect-video rounded-md overflow-hidden bg-black"
@@ -660,6 +672,13 @@ const {
                     playsinline
                     class="rounded-md w-full max-h-64 bg-black"
                   ></video>
+                  <video
+                    x-show="block.sourceType === 'embed' && getVideoDirectUrl(block.url)"
+                    :src="getVideoDirectUrl(block.url)"
+                    controls
+                    playsinline
+                    class="rounded-md w-full max-h-64 bg-black"
+                  ></video>
                   <div
                     x-show="block.sourceType === 'embed' && getVideoEmbedUrl(block.url)"
                     class="w-full aspect-video rounded-md overflow-hidden bg-black"
@@ -673,7 +692,11 @@ const {
                     ></iframe>
                   </div>
                   <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">
-                    <span x-text="block.sourceType === 'upload' ? 'Загруженное видео' : 'Видео по ссылке'"></span>
+                    <span
+                      x-text="block.sourceType === 'upload'
+                        ? 'Загруженное видео'
+                        : (getVideoDirectUrl(block.url) ? 'Видео по прямой ссылке' : 'Встроенное видео')"
+                    ></span>
                   </p>
                   <figcaption x-show="block.caption" class="text-center text-sm text-base-content/60 mt-2" x-text="block.caption"></figcaption>
                 </figure>

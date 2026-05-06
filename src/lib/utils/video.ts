@@ -1,5 +1,12 @@
 export type VideoSourceType = "upload" | "embed";
-export type VideoProvider = "upload" | "youtube" | "vimeo" | "unknown";
+export type VideoProvider =
+  | "upload"
+  | "youtube"
+  | "vimeo"
+  | "file"
+  | "embed"
+  | "unknown";
+export type VideoRenderMode = "upload" | "file" | "embed" | "unknown";
 
 export interface VideoBlockData {
   type?: string;
@@ -23,6 +30,22 @@ const VIMEO_HOSTS = new Set([
   "player.vimeo.com",
 ]);
 
+const DIRECT_VIDEO_EXTENSIONS = [
+  ".mp4",
+  ".webm",
+  ".ogg",
+  ".ogv",
+  ".m4v",
+  ".mov",
+];
+
+const GENERIC_EMBED_HOST_PREFIXES = ["player.", "embed."];
+const GENERIC_EMBED_PATH_PATTERNS = [
+  /\/embed(?:\/|$)/i,
+  /\/player(?:\/|$)/i,
+  /\/video\/embed(?:\/|$)/i,
+];
+
 const safeParseUrl = (value?: string) => {
   if (typeof value !== "string") {
     return null;
@@ -37,6 +60,9 @@ const safeParseUrl = (value?: string) => {
     return null;
   }
 };
+
+const isHttpUrl = (parsed: URL | null) =>
+  Boolean(parsed && (parsed.protocol === "https:" || parsed.protocol === "http:"));
 
 const getYouTubeVideoId = (value?: string) => {
   const parsed = safeParseUrl(value);
@@ -86,13 +112,51 @@ export const detectVideoProvider = (
   if (sourceType === "upload") {
     return "upload";
   }
+  if (getDirectVideoUrl(value)) {
+    return "file";
+  }
   if (getYouTubeVideoId(value)) {
     return "youtube";
   }
   if (getVimeoVideoId(value)) {
     return "vimeo";
   }
+  if (getVideoEmbedUrl(value)) {
+    return "embed";
+  }
   return "unknown";
+};
+
+export const getDirectVideoUrl = (value?: string) => {
+  const parsed = safeParseUrl(value);
+  if (!isHttpUrl(parsed)) {
+    return null;
+  }
+
+  const pathname = parsed.pathname.toLowerCase();
+  const isDirectVideoFile = DIRECT_VIDEO_EXTENSIONS.some((extension) =>
+    pathname.endsWith(extension),
+  );
+
+  return isDirectVideoFile ? parsed.toString() : null;
+};
+
+const getGenericEmbedUrl = (value?: string) => {
+  const parsed = safeParseUrl(value);
+  if (!isHttpUrl(parsed) || getDirectVideoUrl(value)) {
+    return null;
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+  const pathname = parsed.pathname.toLowerCase();
+  const hasEmbedHost = GENERIC_EMBED_HOST_PREFIXES.some((prefix) =>
+    hostname.startsWith(prefix),
+  );
+  const hasEmbedPath = GENERIC_EMBED_PATH_PATTERNS.some((pattern) =>
+    pattern.test(pathname),
+  );
+
+  return hasEmbedHost || hasEmbedPath ? parsed.toString() : null;
 };
 
 export const getVideoEmbedUrl = (value?: string) => {
@@ -106,11 +170,27 @@ export const getVideoEmbedUrl = (value?: string) => {
     return `https://player.vimeo.com/video/${vimeoId}`;
   }
 
-  return null;
+  return getGenericEmbedUrl(value);
 };
 
 export const isSupportedVideoEmbedUrl = (value?: string) =>
   Boolean(getVideoEmbedUrl(value));
+
+export const getVideoRenderMode = (
+  value?: string,
+  sourceType?: string,
+): VideoRenderMode => {
+  if (sourceType === "upload") {
+    return "upload";
+  }
+  if (getDirectVideoUrl(value)) {
+    return "file";
+  }
+  if (getVideoEmbedUrl(value)) {
+    return "embed";
+  }
+  return "unknown";
+};
 
 export const normalizeVideoBlock = <T extends VideoBlockData>(block: T): T => {
   const sourceType: VideoSourceType =

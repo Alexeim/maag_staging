@@ -102,6 +102,13 @@ import QuoteIcon from "@/assets/icons/quote.svg";
                       playsinline
                       class="rounded-md w-full max-h-[620px] bg-black"
                     ></video>
+                    <video
+                      x-show="block.sourceType === 'embed' && getVideoDirectUrl(block.url)"
+                      :src="getVideoDirectUrl(block.url)"
+                      controls
+                      playsinline
+                      class="rounded-md w-full max-h-[620px] bg-black"
+                    ></video>
                     <div
                       x-show="block.sourceType === 'embed' && getVideoEmbedUrl(block.url)"
                       class="w-full aspect-video rounded-md overflow-hidden bg-black"

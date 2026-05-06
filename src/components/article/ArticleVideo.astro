@@ -1,5 +1,6 @@
 ---
 import {
+  getDirectVideoUrl,
   getVideoEmbedUrl,
   normalizeVideoBlock,
   type VideoBlockData,
@@ -11,6 +12,10 @@ interface Props {
 
 const { block } = Astro.props as Props;
 const normalizedBlock = normalizeVideoBlock(block);
+const directVideoUrl =
+  normalizedBlock.sourceType === "embed"
+    ? getDirectVideoUrl(normalizedBlock.url)
+    : null;
 const embedUrl =
   normalizedBlock.sourceType === "embed"
     ? getVideoEmbedUrl(normalizedBlock.url)
@@ -23,6 +28,14 @@ const embedUrl =
       normalizedBlock.sourceType === "upload" && normalizedBlock.url ? (
         <video
           src={normalizedBlock.url}
+          controls
+          playsinline
+          preload="metadata"
+          class="article-image w-full"
+        />
+      ) : directVideoUrl ? (
+        <video
+          src={directVideoUrl}
           controls
           playsinline
           preload="metadata"

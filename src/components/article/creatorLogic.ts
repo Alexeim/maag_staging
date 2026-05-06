@@ -2,7 +2,9 @@ import { articlesApi, eventsApi, interviewsApi, flippersApi, authorsApi } from "
 import { app } from "../../lib/firebase/client";
 import {
   detectVideoProvider,
+  getDirectVideoUrl as resolveVideoDirectUrl,
   getVideoEmbedUrl as resolveVideoEmbedUrl,
+  getVideoRenderMode as resolveVideoRenderMode,
   normalizeVideoBlock,
 } from "@/lib/utils/video";
 import {
@@ -271,6 +273,12 @@ export default function articleCreatorLogic(initialState = {}) {
     getVideoEmbedUrl(url: string) {
       return resolveVideoEmbedUrl(url);
     },
+    getVideoDirectUrl(url: string) {
+      return resolveVideoDirectUrl(url);
+    },
+    getVideoRenderMode(url: string, sourceType = "embed") {
+      return resolveVideoRenderMode(url, sourceType);
+    },
     normalizeEditableVideoBlock(block) {
       return normalizeVideoBlock(block);
     },
@@ -290,11 +298,12 @@ export default function articleCreatorLogic(initialState = {}) {
       }
       if (
         normalized.sourceType === "embed" &&
-        !resolveVideoEmbedUrl(normalized.url)
+        resolveVideoRenderMode(normalized.url, normalized.sourceType) ===
+          "unknown"
       ) {
         if (showToast) {
           window.Alpine?.store("ui")?.showToast?.(
-            "Поддерживаются только ссылки YouTube и Vimeo.",
+            "Нужна прямая ссылка на видеофайл или готовая ссылка для встраивания, а не обычная страница с видео.",
             "error",
           );
         }
