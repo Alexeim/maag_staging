@@ -372,12 +372,28 @@ const {
   <section class="p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
     <h2 class="text-xl font-semibold mb-4">Содержание новости</h2>
     <div class="space-y-4">
-      <template x-for="(block, index) in article.contentBlocks" :key="index">
+      <template x-for="(block, index) in article.contentBlocks" :key="block.id || index">
         <div
-          class="p-4 border border-base-300 rounded-lg bg-base-100 relative group"
+          class="p-4 border border-base-300 rounded-lg bg-base-100 relative group transition-colors"
+          :class="{
+            'cursor-grab': editingIndex === null,
+            'cursor-default': editingIndex !== null,
+            'opacity-60': draggedBlockId === block.id,
+            'border-primary ring-2 ring-primary/20': dragOverBlockId === block.id && draggedBlockId !== block.id
+          }"
+          :draggable="editingIndex === null"
+          @dragstart="startBlockDrag(index)"
+          @dragenter.prevent="setBlockDropTarget(index)"
+          @dragover.prevent="setBlockDropTarget(index)"
+          @drop.prevent="dropBlock(index)"
+          @dragend="resetBlockDrag()"
         >
           <template x-if="editingIndex === index">
             <div class="space-y-4">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-xs uppercase tracking-[0.2em] text-base-content/50" x-text="'Позиция: ' + ((block.position ?? index) + 1)"></p>
+                <p class="text-xs text-base-content/50">Во время редактирования перетаскивание выключено</p>
+              </div>
               <h3 class="text-lg font-semibold">Абзац</h3>
               <textarea
                 x-model="editingBlock.text"
@@ -394,6 +410,13 @@ const {
 
           <template x-if="editingIndex !== index">
             <div class="space-y-3">
+              <div class="flex items-center gap-3 pr-40">
+                <span class="text-base-content/40 select-none shrink-0" aria-hidden="true">⋮⋮</span>
+                <div class="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-base-content/60 min-w-0">
+                  <span x-text="'Позиция: ' + ((block.position ?? index) + 1)"></span>
+                  <span>Перетащи, чтобы изменить порядок</span>
+                </div>
+              </div>
               <p class="text-base" x-text="block.text"></p>
               <div
                 class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2"

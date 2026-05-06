@@ -1,6 +1,11 @@
 import { eventsApi } from "@/lib/api/api";
 import articleCreatorLogic from "@/components/article/creatorLogic";
 import { normalizeVideoBlock } from "@/lib/utils/video";
+import {
+  reindexContentBlocks,
+  sortAndNormalizeContentBlocks,
+  withBlockMeta,
+} from "@/lib/utils/contentBlocks";
 
 type EventCategory = "exhibition" | "concert" | "performance";
 type EventDateType = "single" | "duration";
@@ -145,8 +150,13 @@ export default function eventCreatorLogic(initialState = {}) {
       : Array.isArray(copy.content)
         ? copy.content
         : [];
-    copy.contentBlocks = contentBlocks.map((block: any) =>
-      block?.type === "video" ? normalizeVideoBlock(block) : block,
+    copy.contentBlocks = sortAndNormalizeContentBlocks(contentBlocks).map((block: any) =>
+      block?.type === "video"
+        ? withBlockMeta(
+            normalizeVideoBlock(block) as Record<string, unknown>,
+            Number(block.position) || 0,
+          )
+        : block,
     );
     copy.content = copy.contentBlocks;
     copy.tags = Array.isArray(copy.tags) ? copy.tags : [];
@@ -217,6 +227,9 @@ export default function eventCreatorLogic(initialState = {}) {
       if (onSaveRedirect) {
         this.onSaveRedirect = onSaveRedirect;
       }
+      this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
+        ? reindexContentBlocks(this.article.contentBlocks)
+        : [];
     },
 
     getAvailableTags() {
@@ -386,6 +399,16 @@ export default function eventCreatorLogic(initialState = {}) {
         this.isSaving = false;
         return;
       }
+
+      this.article.contentBlocks = reindexContentBlocks(this.article.contentBlocks).map(
+        (block: any) =>
+          block?.type === "video"
+            ? withBlockMeta(
+                normalizeVideoBlock(block) as Record<string, unknown>,
+                Number(block.position) || 0,
+              )
+            : block,
+      );
 
       try {
         const resolvedAuthorId = await this.resolveAuthorId();

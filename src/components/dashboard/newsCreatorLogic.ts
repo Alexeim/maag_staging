@@ -6,10 +6,19 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
+import {
+  reindexContentBlocks,
+  sortAndNormalizeContentBlocks,
+  withBlockMeta,
+} from "@/lib/utils/contentBlocks";
 
 const storage = getStorage(app);
 
-const createBlock = (type: string, data: Record<string, unknown>) => ({ type, ...data });
+const createBlock = (
+  type: string,
+  data: Record<string, unknown>,
+  position = 0,
+) => withBlockMeta({ type, ...data }, position);
 
 export default function newsCreatorLogic(initialState: Record<string, unknown> = {}) {
   const {
@@ -97,8 +106,8 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       : Array.isArray(copy.contentBlocks)
         ? copy.contentBlocks
         : [];
-    copy.contentBlocks = blocks;
-    copy.content = blocks;
+    copy.contentBlocks = sortAndNormalizeContentBlocks(blocks);
+    copy.content = copy.contentBlocks;
     copy.tags = normalizeTags(copy.tags, copy.category);
     copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
     copy.imageCaption = copy.imageCaption ?? "";
@@ -128,6 +137,8 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     showBlockOptions: false,
     editingIndex: null as number | null,
     editingBlock: null as any,
+    draggedBlockId: null as string | null,
+    dragOverBlockId: null as string | null,
 
     isEditingTitle: false,
     editingTitleText: "",
@@ -155,6 +166,9 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     getCategoryLabel(value?: string) {
       if (!value) return "Category";
       return this.categoryLabels[value] || value;
+    },
+    syncContentBlockOrder(blocks = this.article.contentBlocks) {
+      this.article.contentBlocks = reindexContentBlocks(blocks);
     },
     getAvailableTags() {
       if (!this.article?.category) return [];
@@ -298,7 +312,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.isNews = true;
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
-        ? this.article.contentBlocks
+        ? sortAndNormalizeContentBlocks(this.article.contentBlocks)
         : [];
       this.selectedAuthorId =
         typeof this.article.authorId === "string" ? this.article.authorId : "";
@@ -369,8 +383,13 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
 
     // Block management (paragraph only)
     openBlockSelector() {
-      const newBlock = createBlock("paragraph", { text: "" });
+      const newBlock = createBlock(
+        "paragraph",
+        { text: "" },
+        this.article.contentBlocks.length,
+      );
       this.article.contentBlocks.push(newBlock);
+      this.syncContentBlockOrder();
       this.editBlock(this.article.contentBlocks.length - 1);
     },
 
@@ -384,6 +403,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     updateBlock() {
       if (this.editingIndex !== null) {
         this.article.contentBlocks[this.editingIndex] = this.editingBlock;
+        this.syncContentBlockOrder();
         this.cancelEdit();
       }
     },
@@ -393,9 +413,58 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       this.editingBlock = null;
     },
 
+    startBlockDrag(index: number) {
+      if (this.editingIndex !== null || this.uploading) return;
+      const block = this.article.contentBlocks[index];
+      if (!block?.id) return;
+      this.draggedBlockId = block.id;
+      this.dragOverBlockId = block.id;
+    },
+
+    setBlockDropTarget(index: number) {
+      if (!this.draggedBlockId) return;
+      const block = this.article.contentBlocks[index];
+      if (!block?.id) return;
+      this.dragOverBlockId = block.id;
+    },
+
+    dropBlock(targetIndex: number) {
+      if (!this.draggedBlockId || this.editingIndex !== null) {
+        this.resetBlockDrag();
+        return;
+      }
+
+      const fromIndex = this.article.contentBlocks.findIndex(
+        (block: any) => block?.id === this.draggedBlockId,
+      );
+
+      if (fromIndex < 0 || fromIndex === targetIndex) {
+        this.resetBlockDrag();
+        return;
+      }
+
+      const reorderedBlocks = [...this.article.contentBlocks];
+      const [movedBlock] = reorderedBlocks.splice(fromIndex, 1);
+
+      if (!movedBlock) {
+        this.resetBlockDrag();
+        return;
+      }
+
+      reorderedBlocks.splice(targetIndex, 0, movedBlock);
+      this.syncContentBlockOrder(reorderedBlocks);
+      this.resetBlockDrag();
+    },
+
+    resetBlockDrag() {
+      this.draggedBlockId = null;
+      this.dragOverBlockId = null;
+    },
+
     deleteBlock(index: number) {
       const removeBlock = () => {
         this.article.contentBlocks.splice(index, 1);
+        this.syncContentBlockOrder();
       };
       const uiStore = (window as any).Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
@@ -428,6 +497,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
 
       const normalizedCategory = normalizeCategory(this.article.category) || "";
       this.article.category = normalizedCategory;
+      this.article.contentBlocks = reindexContentBlocks(this.article.contentBlocks);
       this.article.tags = normalizeTags(this.article.tags, this.article.category);
       this.article.techTags = normalizeTechTags(this.article.techTags);
 

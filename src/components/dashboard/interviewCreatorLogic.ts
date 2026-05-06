@@ -12,6 +12,11 @@ import {
   getVideoRenderMode as resolveVideoRenderMode,
   normalizeVideoBlock,
 } from "@/lib/utils/video";
+import {
+  reindexContentBlocks,
+  sortAndNormalizeContentBlocks,
+  withBlockMeta,
+} from "@/lib/utils/contentBlocks";
 import { app } from "../../lib/firebase/client";
 import {
   getStorage,
@@ -23,7 +28,8 @@ import {
 const storage = getStorage(app);
 
 // Helper to create a new block object
-const createBlock = (type, data) => ({ type, ...data });
+const createBlock = (type, data, position = 0) =>
+  withBlockMeta({ type, ...data }, position);
 
 export default function interviewCreatorLogic(initialState = {}) {
   const {
@@ -77,8 +83,13 @@ export default function interviewCreatorLogic(initialState = {}) {
     }
     const copy = JSON.parse(JSON.stringify(data));
     const blocks = Array.isArray(copy.content) ? copy.content : [];
-    copy.contentBlocks = blocks.map((block: any) =>
-      block?.type === "video" ? normalizeVideoBlock(block) : block,
+    copy.contentBlocks = sortAndNormalizeContentBlocks(blocks).map((block: any) =>
+      block?.type === "video"
+        ? withBlockMeta(
+            normalizeVideoBlock(block) as Record<string, unknown>,
+            Number(block.position) || 0,
+          )
+        : block,
     );
     copy.content = copy.contentBlocks;
     copy.tags = normalizeTags(copy.tags);
@@ -88,6 +99,18 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.mainQuote = copy.mainQuote ?? "";
     copy.isHotContent = Boolean(copy.isHotContent);
     return copy;
+  };
+
+  const normalizeEditableInterviewBlocks = (blocks?: unknown) => {
+    const reindexedBlocks = reindexContentBlocks(blocks);
+    return reindexedBlocks.map((block: any) =>
+      block?.type === "video"
+        ? withBlockMeta(
+            normalizeVideoBlock(block) as Record<string, unknown>,
+            Number(block.position) || 0,
+          )
+        : block,
+    );
   };
 
   return {
@@ -107,6 +130,8 @@ export default function interviewCreatorLogic(initialState = {}) {
     showBlockOptions: false,
     editingIndex: null,
     editingBlock: null,
+    draggedBlockId: null,
+    dragOverBlockId: null,
     isEditingTitle: false,
     editingTitleText: "",
     isEditingCaption: false,
@@ -134,6 +159,9 @@ export default function interviewCreatorLogic(initialState = {}) {
 
     isTagSelected(value: string) {
       return this.interview.tags.includes(value);
+    },
+    syncContentBlockOrder(blocks = this.interview.contentBlocks) {
+      this.interview.contentBlocks = reindexContentBlocks(blocks);
     },
     getVideoProvider(url: string, sourceType = "embed") {
       return detectVideoProvider(url, sourceType);
@@ -332,9 +360,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.interview.tags = this.interview.tags ?? [];
       this.interview.isHotContent = Boolean(this.interview.isHotContent);
       this.interview.contentBlocks = Array.isArray(this.interview.contentBlocks)
-        ? this.interview.contentBlocks.map((block: any) =>
-            block?.type === "video" ? normalizeVideoBlock(block) : block,
-          )
+        ? normalizeEditableInterviewBlocks(this.interview.contentBlocks)
         : [];
       this.selectedAuthorId =
         typeof this.interview.authorId === "string"
@@ -529,8 +555,13 @@ export default function interviewCreatorLogic(initialState = {}) {
           break;
       }
 
-      const newBlock = createBlock(type, newBlockData);
+      const newBlock = createBlock(
+        type,
+        newBlockData,
+        this.interview.contentBlocks.length,
+      );
       this.interview.contentBlocks.push(newBlock);
+      this.syncContentBlockOrder();
       this.showBlockOptions = false;
       this.editBlock(this.interview.contentBlocks.length - 1);
     },
@@ -552,6 +583,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           }
         }
         this.interview.contentBlocks[this.editingIndex] = this.editingBlock;
+        this.syncContentBlockOrder();
         this.cancelEdit();
       }
     },
@@ -561,9 +593,66 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.editingBlock = null;
     },
 
+    startBlockDrag(index) {
+      if (this.editingIndex !== null || this.uploading) {
+        return;
+      }
+      const block = this.interview.contentBlocks[index];
+      if (!block?.id) {
+        return;
+      }
+      this.draggedBlockId = block.id;
+      this.dragOverBlockId = block.id;
+    },
+
+    setBlockDropTarget(index) {
+      if (!this.draggedBlockId) {
+        return;
+      }
+      const block = this.interview.contentBlocks[index];
+      if (!block?.id) {
+        return;
+      }
+      this.dragOverBlockId = block.id;
+    },
+
+    dropBlock(targetIndex) {
+      if (!this.draggedBlockId || this.editingIndex !== null) {
+        this.resetBlockDrag();
+        return;
+      }
+
+      const fromIndex = this.interview.contentBlocks.findIndex(
+        (block) => block?.id === this.draggedBlockId,
+      );
+
+      if (fromIndex < 0 || fromIndex === targetIndex) {
+        this.resetBlockDrag();
+        return;
+      }
+
+      const reorderedBlocks = [...this.interview.contentBlocks];
+      const [movedBlock] = reorderedBlocks.splice(fromIndex, 1);
+
+      if (!movedBlock) {
+        this.resetBlockDrag();
+        return;
+      }
+
+      reorderedBlocks.splice(targetIndex, 0, movedBlock);
+      this.syncContentBlockOrder(reorderedBlocks);
+      this.resetBlockDrag();
+    },
+
+    resetBlockDrag() {
+      this.draggedBlockId = null;
+      this.dragOverBlockId = null;
+    },
+
     deleteBlock(index) {
       const removeBlock = () => {
         this.interview.contentBlocks.splice(index, 1);
+        this.syncContentBlockOrder();
       };
       const uiStore = window.Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
@@ -594,8 +683,8 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.isSaving = true;
 
       this.interview.tags = normalizeTags(this.interview.tags);
-      this.interview.contentBlocks = this.interview.contentBlocks.map((block: any) =>
-        block?.type === "video" ? normalizeVideoBlock(block) : block,
+      this.interview.contentBlocks = normalizeEditableInterviewBlocks(
+        this.interview.contentBlocks,
       );
 
       const hasInvalidVideoBlock = this.interview.contentBlocks.some(
