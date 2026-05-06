@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "quill/dist/quill.snow.css";
+@import "./quill-editor.css";
 
 [x-cloak] {
   display: none !important;
