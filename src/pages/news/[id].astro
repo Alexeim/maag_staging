@@ -56,7 +56,7 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
       {!error && articleData && (
         <>
           <h4
-            class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']"
+            class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mt-2"
           >
             {categoryLabel}
           </h4>
@@ -75,12 +75,12 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
               </div>
             )}
             <div class:list={["w-full pt-8", imageUrl ? "md:w-1/2" : ""]}>
-              <h3 class="text-2xl font-semibold font-oswald tracking-wider mb-4">
+              <h3 class="text-3xl lg:text-[36px] font-old_standard text-base-content w-full">
                 {title}
               </h3>
-              <hr class="text-gray-300 mb-8"></hr>
+              <hr class="text-gray-400 mt-2 mb-8"></hr>
               {mainParagraph && (
-                <p class="text-lg font-oswald text-justify font-thin tracking-wide">
+                <p class="text-lg font-article-body text-justify">
                   {mainParagraph}
                 </p>
               )}
@@ -91,7 +91,7 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
           {contentBlocks.length > 0 && (
             <div class="flex flex-col gap-6">
               {contentBlocks.map((block: any) => (
-                <p class="text-lg font-oswald text-justify font-thin tracking-wide">
+                <p class="text-lg font-article-body text-justify">
                   {block.text}
                 </p>
               ))}
@@ -104,7 +104,6 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
               name={authorName}
               avatarUrl={authorAvatar}
             />
-            <div>&middot;</div>
             <ArticleDate createdAt={articleData.createdAt} />
           </div>
         </>

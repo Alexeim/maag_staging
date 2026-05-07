@@ -85,12 +85,11 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
                 title={displayArticle.title}
                 lead={displayArticle.lead}
               />
-              <div class="flex flex-row items-center justify-start gap-4">
+              <div class="h-10 flex flex-row items-center justify-start gap-4">
                 <ArticleAuthor
                   name={displayArticle.authorName}
                   avatarUrl={displayArticle.authorAvatar}
                 />
-                <div>·</div>
                 <ArticleDate createdAt={articleData.createdAt} />
                 {/* <SocialShare readTime={displayArticle.readTime} /> */}
               </div>
@@ -105,7 +104,7 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
                 transitionAliases={transitionAliases}
                 figureClass="max-w-[1200px]"
                 imageClass="shadow-lg"
-                figcaptionClass="text-center font-oswald text-sm text-gray-500 mt-2"
+                figcaptionClass="text-center text-gray-500 mt-2"
               />
             )}
           </div>

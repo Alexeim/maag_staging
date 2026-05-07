@@ -92,7 +92,7 @@ import timeIcon from "../../assets/images/calendar/time.svg?raw";
     <!-- Ongoing events (Ещё в этот день) -->
     <template x-if="smallEvents.length > 0">
       <div class="mt-10">
-        <h3 class="m-0 font-old_standard text-[1.05rem] font-normal uppercase tracking-[0.5em] text-[#15110e]">
+        <h3 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
           Ещё в этот день
         </h3>
 
@@ -114,7 +114,7 @@ import timeIcon from "../../assets/images/calendar/time.svg?raw";
               <div class="grid gap-[0.45rem]">
                 <p class="m-0">
                   <span
-                    class="font-inter text-xs font-medium uppercase tracking-[0.25em] text-accent"
+                    class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']"
                     x-text="event.tag"
                   ></span>
                 </p>
@@ -124,7 +124,7 @@ import timeIcon from "../../assets/images/calendar/time.svg?raw";
                   class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                 >
                   <h4
-                    class="m-0 max-w-[11ch] font-old_standard text-[1.15rem] font-normal leading-[1.1]"
+                    class="m-0 max-w-[11ch] font-old_standard text-[1.15rem] font-normal"
                     x-text="event.title"
                   ></h4>
                 </a>

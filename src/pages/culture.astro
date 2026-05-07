@@ -196,13 +196,14 @@ let cultureFeed: any[] = [];
 let featuredInterview: any = null;
 
 try {
-  const [articles, interviews, flippers, guides, visualStories] = await Promise.all([
-    articlesApi.list(),
-    interviewsApi.list(),
-    flippersApi.list(),
-    guidesApi.list(),
-    visualStoriesApi.list(),
-  ]);
+  const [articles, interviews, flippers, guides, visualStories] =
+    await Promise.all([
+      articlesApi.list(),
+      interviewsApi.list(),
+      flippersApi.list(),
+      guidesApi.list(),
+      visualStoriesApi.list(),
+    ]);
 
   const allContent = [
     ...articles.map((article) => ({
@@ -321,16 +322,18 @@ const featuredInterviewName =
   title="Культура - Maag"
   useClientRouter={true}
 >
-  <main class="min-h-screen bg-base-200 font-oswald text-black">
+  <main class="min-h-screen bg-base-200 text-black">
     <div
       class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
     >
-      <h1 class="m-0 text-[1.05rem] font-medium uppercase tracking-[0.5em]">
+      <h1
+        class="text-3xl lg:text-[28px] font-old_standard font-normal tracking-[0.46em] text-base-content w-full mb-10"
+      >
         Культура
       </h1>
 
       <section
-        class="mt-6 grid gap-7 lg:grid-cols-[minmax(0,1fr)_14rem] lg:items-start"
+        class="grid gap-7 lg:grid-cols-[minmax(0,1fr)_14rem] lg:items-start"
       >
         <div class="grid gap-8">
           {
@@ -352,7 +355,7 @@ const featuredInterviewName =
 
                 <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                   <p class="m-0">
-                    <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                       {getPrimaryTag(primaryCultureArticle) || "Культура"}
                     </span>
                   </p>
@@ -361,13 +364,13 @@ const featuredInterviewName =
                     href={primaryCultureArticle.href}
                     class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                   >
-                    <h2 class="m-0 max-w-[11ch] text-[clamp(1.9rem,3.5vw,2.8rem)] font-normal leading-[1.04]">
+                    <h2 class="m-0 max-w-[11ch] text-[clamp(1.9rem,3.5vw,2.8rem)] font-normal font-old_standard tracking-[-0.02em] leading-[1.04]">
                       {truncateText(primaryCultureArticle.title, 96)}
                     </h2>
                   </a>
 
                   {getCardLead(primaryCultureArticle) && (
-                    <p class="m-0 text-base leading-[1.55] text-[#302821bd]">
+                    <p class="m-0 text-base text-black/60 font-inter font-normal">
                       {truncateText(getCardLead(primaryCultureArticle), 280)}
                     </p>
                   )}
@@ -405,7 +408,7 @@ const featuredInterviewName =
 
                     <div class="grid gap-[0.55rem]">
                       <p class="m-0">
-                        <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                           {getPrimaryTag(item) || "Культура"}
                         </span>
                       </p>
@@ -414,13 +417,13 @@ const featuredInterviewName =
                         href={item.href}
                         class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                       >
-                        <h3 class="m-0 text-[1.4rem] font-normal leading-[1.12]">
+                        <h3 class="m-0 text-[1.4rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.12]">
                           {truncateText(item.title, 88)}
                         </h3>
                       </a>
 
                       {getCardLead(item) && (
-                        <p class="m-0 text-[0.98rem] leading-[1.5] text-[#302821bd]">
+                        <p class="m-0 text-sm text-black/60 font-inter font-normal">
                           {truncateText(getCardLead(item), 120)}
                         </p>
                       )}
@@ -441,7 +444,7 @@ const featuredInterviewName =
             class="grid gap-4 border-t border-[#3028211f] pt-4 lg:border-t-0 lg:border-l lg:border-[#3028211f] lg:pt-0 lg:pl-[1.1rem]"
           >
             <p
-              class="m-0 text-[0.82rem] font-medium uppercase tracking-[0.38em]"
+              class="m-0 text-lg font-normal uppercase tracking-[0.3em] font-old_standard"
             >
               Нетленка
             </p>
@@ -466,7 +469,7 @@ const featuredInterviewName =
 
                     <div class="grid gap-[0.55rem]">
                       <p class="m-0">
-                        <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                           {getPrimaryTag(item) || "Культура"}
                         </span>
                       </p>
@@ -475,7 +478,7 @@ const featuredInterviewName =
                         href={item.href}
                         class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                       >
-                        <h3 class="m-0 text-base font-normal leading-[1.16]">
+                        <h3 class="m-0 text-base font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
                           {truncateText(item.title, 70)}
                         </h3>
                       </a>
@@ -544,12 +547,11 @@ const featuredInterviewName =
                   <div
                     class:list={[
                       "grid gap-[0.55rem]",
-                      item.contentType === "interview" &&
-                        "w-full text-left",
+                      item.contentType === "interview" && "w-full text-left",
                     ]}
                   >
                     <p class="m-0">
-                      <span class="text-xs font-medium uppercase tracking-[0.25em] text-accent font-['Inter']">
+                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                         {getPrimaryTag(item) || "Культура"}
                       </span>
                     </p>
@@ -558,7 +560,7 @@ const featuredInterviewName =
                       href={item.href}
                       class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                     >
-                      <h3 class="m-0 text-[1.18rem] font-normal leading-[1.18]">
+                      <h3 class="m-0 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
                         {truncateText(item.title, 72)}
                       </h3>
                     </a>
