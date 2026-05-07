@@ -307,7 +307,7 @@ const editorialGridItems = parisFeed;
                     href={primaryParisArticle.href}
                     class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                   >
-                    <h2 class="m-0 max-w-[11ch] text-[clamp(1.9rem,3.5vw,2.8rem)] font-normal font-old_standard tracking-[-0.02em] leading-[1.04]">
+                    <h2 class="m-0 text-[clamp(1.9rem,3.5vw,2.8rem)] font-normal font-old_standard tracking-[-0.02em] leading-[1.04]">
                       {truncateText(primaryParisArticle.title, 96)}
                     </h2>
                   </a>
@@ -332,9 +332,9 @@ const editorialGridItems = parisFeed;
 
           {
             secondaryStories.length > 0 && (
-              <div class="grid gap-4 sm:grid-cols-2">
+              <div class="grid gap-4 sm:grid-cols-2 sm:items-stretch">
                 {secondaryStories.map((item) => (
-                  <article class="grid gap-[0.8rem]">
+                  <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                     <a
                       href={item.href}
                       class="block aspect-[3/2] overflow-hidden"
@@ -349,7 +349,7 @@ const editorialGridItems = parisFeed;
                       />
                     </a>
 
-                    <div class="grid gap-[0.55rem]">
+                    <div class="grid h-full content-start gap-[0.55rem]">
                       <p class="m-0">
                         <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                           {getPrimaryTag(item) || "Париж"}
@@ -358,15 +358,15 @@ const editorialGridItems = parisFeed;
 
                       <a
                         href={item.href}
-                        class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                        class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                       >
-                        <h3 class="m-0 text-[1.4rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.12]">
+                        <h3 class="m-0 line-clamp-3 text-[1.4rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.12]">
                           {truncateText(item.title, 88)}
                         </h3>
                       </a>
 
                       {getCardLead(item) && (
-                        <p class="m-0 text-sm text-black/60 font-inter font-normal">
+                        <p class="m-0 line-clamp-3 text-sm text-black/60 font-inter font-normal">
                           {truncateText(getCardLead(item), 120)}
                         </p>
                       )}
@@ -427,7 +427,7 @@ const editorialGridItems = parisFeed;
             editorialGridItems.length > 0 ? (
               <div class="grid grid-cols-2 gap-x-4 gap-y-[1.4rem] lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
                 {editorialGridItems.map((item) => (
-                  <article class="grid gap-[0.8rem]">
+                  <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                     <a
                       href={item.href}
                       class="block overflow-hidden bg-white/50 aspect-[1.02/1]"
@@ -442,21 +442,21 @@ const editorialGridItems = parisFeed;
                       />
                     </a>
 
-                    <div class="grid gap-[0.55rem]">
+                    <div class="grid h-full content-start gap-[0.55rem]">
                       <p class="m-0">
                         <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                           {getPrimaryTag(item) || "Париж"}
                         </span>
                       </p>
 
-                      <a
-                        href={item.href}
-                        class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
-                      >
-                        <h3 class="m-0 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
-                          {truncateText(item.title, 72)}
-                        </h3>
-                      </a>
+                    <a
+                      href={item.href}
+                      class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                    >
+                      <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
+                        {truncateText(item.title, 72)}
+                      </h3>
+                    </a>
 
                       <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
                         {formatDate(item.createdAt)}

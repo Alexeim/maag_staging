@@ -414,15 +414,15 @@ const topCards = weeklyHighlights.slice(0, 4);
                     href={featuredEventCard.url}
                     class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                   >
-                    <h2 class="m-0 max-w-[11ch] font-old_standard text-[clamp(1.4rem,2.2vw,1.9rem)] font-normal leading-[1.04]">
+                    <h2 class="m-0 font-old_standard text-[clamp(1.4rem,2.2vw,1.9rem)] font-normal leading-[1.04]">
                       {featuredEventCard.title}
                     </h2>
                   </a>
 
-                  <p class="mt-[0.4rem] flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
+                  <div class="mt-[0.4rem] flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
                     <span class="h-4 w-4 shrink-0" set:html={locationIcon} />
                     <span>{featuredEventCard.address || "Место"}</span>
-                  </p>
+                  </div>
                 </div>
               </article>
             </div>
@@ -443,7 +443,7 @@ const topCards = weeklyHighlights.slice(0, 4);
 
             <div class="mt-8 grid grid-cols-2 gap-x-4 gap-y-6 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
               {topCards.map((event) => (
-                <article class="grid gap-[0.8rem]">
+                <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                   <a
                     href={event.url}
                     class="block aspect-[1.12/1] overflow-hidden lg:aspect-[3/2]"
@@ -456,7 +456,7 @@ const topCards = weeklyHighlights.slice(0, 4);
                     />
                   </a>
 
-                  <div class="grid gap-[0.55rem]">
+                  <div class="grid h-full grid-rows-[auto_auto_1fr_auto] gap-[0.55rem] content-start">
                     <p class="m-0 font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]">
                       {formatCardDateRange(event.startDate, event.endDate)}
                     </p>
@@ -471,15 +471,15 @@ const topCards = weeklyHighlights.slice(0, 4);
                       href={event.url}
                       class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                     >
-                      <h3 class="m-0 max-w-[11ch] font-old_standard text-[1.2rem] font-normal leading-[1.08] lg:text-[1.4rem] lg:leading-[1.12]">
+                      <h3 class="m-0 line-clamp-3 font-old_standard text-[1.2rem] font-normal leading-[1.08] lg:text-[1.4rem] lg:leading-[1.12]">
                         {event.title}
                       </h3>
                     </a>
 
-                    <p class="m-0 flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
+                    <div class="flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
                       <span class="h-4 w-4 shrink-0" set:html={locationIcon} />
                       <span>{event.address || "Место"}</span>
-                    </p>
+                    </div>
                   </div>
                 </article>
               ))}

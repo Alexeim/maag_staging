@@ -389,9 +389,9 @@ const featuredInterviewName =
 
           {
             secondaryStories.length > 0 && (
-              <div class="grid gap-4 sm:grid-cols-2">
+              <div class="grid gap-4 sm:grid-cols-2 sm:items-stretch">
                 {secondaryStories.map((item) => (
-                  <article class="grid gap-[0.8rem]">
+                  <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                     <a
                       href={item.href}
                       class="block aspect-[3/2] overflow-hidden"
@@ -406,7 +406,7 @@ const featuredInterviewName =
                       />
                     </a>
 
-                    <div class="grid gap-[0.55rem]">
+                    <div class="grid h-full content-start gap-[0.55rem]">
                       <p class="m-0">
                         <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                           {getPrimaryTag(item) || "Культура"}
@@ -415,15 +415,15 @@ const featuredInterviewName =
 
                       <a
                         href={item.href}
-                        class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                        class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                       >
-                        <h3 class="m-0 text-[1.4rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.12]">
+                        <h3 class="m-0 line-clamp-3 text-[1.4rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.12]">
                           {truncateText(item.title, 88)}
                         </h3>
                       </a>
 
                       {getCardLead(item) && (
-                        <p class="m-0 text-sm text-black/60 font-inter font-normal">
+                        <p class="m-0 line-clamp-3 text-sm text-black/60 font-inter font-normal">
                           {truncateText(getCardLead(item), 120)}
                         </p>
                       )}
@@ -519,7 +519,7 @@ const featuredInterviewName =
               {editorialGridItems.map((item) => (
                 <article
                   class:list={[
-                    "grid gap-[0.8rem]",
+                    "grid h-full grid-rows-[auto_1fr] gap-[0.8rem]",
                     item.contentType === "interview" && "content-start",
                   ]}
                 >
@@ -546,7 +546,7 @@ const featuredInterviewName =
 
                   <div
                     class:list={[
-                      "grid gap-[0.55rem]",
+                      "grid h-full content-start gap-[0.55rem]",
                       item.contentType === "interview" && "w-full text-left",
                     ]}
                   >
@@ -558,9 +558,9 @@ const featuredInterviewName =
 
                     <a
                       href={item.href}
-                      class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                      class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                     >
-                      <h3 class="m-0 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
+                      <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
                         {truncateText(item.title, 72)}
                       </h3>
                     </a>

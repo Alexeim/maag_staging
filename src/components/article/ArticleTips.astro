@@ -46,7 +46,7 @@ const preparedTips = tips
     <section class="max-w-[826px] mx-auto mt-12">
       <div class="border border-base-300 bg-white/85">
         {preparedTips.map((tip) => (
-          <div class="grid grid-cols-[auto_1fr] items-start gap-4 px-4 py-3 border-b border-base-300 last:border-b-0">
+          <div class="flex flex-row items-center justify-start gap-4 px-4 py-2 border-b border-base-300 last:border-b-0">
             <span class="mt-0.5" set:html={ICONS[tip.type]} />
             <p class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90">
               {tip.text}
