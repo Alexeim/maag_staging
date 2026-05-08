@@ -416,11 +416,62 @@ const editorialGridItems = parisFeed;
               </div>
             </article>
           </section>
+
+          <div class="grid gap-4 border-t border-[#3028211f] pt-4 mt-4">
+            <p
+              class="m-0 text-lg font-normal uppercase tracking-[0.3em] font-old_standard"
+            >
+              Нетленка
+            </p>
+
+            {
+              editorialSidebarItems.length > 0 ? (
+                editorialSidebarItems.map((item) => (
+                  <article class="grid gap-[0.65rem] border-b border-[#3028211a] pb-4">
+                    <a
+                      href={item.href}
+                      class="block aspect-[3/2] overflow-hidden"
+                      aria-label={item.title}
+                    >
+                      <img
+                        src={item.imageUrl || picture1.src}
+                        alt={item.title}
+                        class="block h-full w-full object-cover"
+                        loading="lazy"
+                        transition:name={getTransitionName(item)}
+                      />
+                    </a>
+
+                    <div class="grid gap-[0.55rem]">
+                      <p class="m-0">
+                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                          {getPrimaryTag(item) || "Париж"}
+                        </span>
+                      </p>
+
+                      <a
+                        href={item.href}
+                        class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                      >
+                        <h3 class="m-0 text-base font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
+                          {truncateText(item.title, 70)}
+                        </h3>
+                      </a>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p class="m-0 font-inter text-[0.88rem] leading-[1.5] text-[#3028219e]">
+                  Пока нет материалов для боковой колонки.
+                </p>
+              )
+            }
+          </div>
         </aside>
       </section>
 
       <section
-        class="mt-[2.2rem] border-t border-[#3028211f] pt-[1.6rem] grid gap-7 lg:grid-cols-[minmax(0,1fr)_14rem] lg:items-start"
+        class="mt-[2.2rem] border-t border-[#3028211f] pt-[1.6rem]"
       >
         <div>
           {
@@ -472,61 +523,6 @@ const editorialGridItems = parisFeed;
             )
           }
         </div>
-
-        <aside class="min-w-0">
-          <div
-            class="grid gap-4 border-t border-[#3028211f] pt-4 lg:border-t-0 lg:border-l lg:border-[#3028211f] lg:pt-0 lg:pl-[1.1rem]"
-          >
-            <p
-              class="m-0 text-lg font-normal uppercase tracking-[0.3em] font-old_standard"
-            >
-              Нетленка
-            </p>
-
-            {
-              editorialSidebarItems.length > 0 ? (
-                editorialSidebarItems.map((item) => (
-                  <article class="grid gap-[0.65rem] border-b border-[#3028211a] pb-4">
-                    <a
-                      href={item.href}
-                      class="block aspect-[3/2] overflow-hidden"
-                      aria-label={item.title}
-                    >
-                      <img
-                        src={item.imageUrl || picture1.src}
-                        alt={item.title}
-                        class="block h-full w-full object-cover"
-                        loading="lazy"
-                        transition:name={getTransitionName(item)}
-                      />
-                    </a>
-
-                    <div class="grid gap-[0.55rem]">
-                      <p class="m-0">
-                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryTag(item) || "Париж"}
-                        </span>
-                      </p>
-
-                      <a
-                        href={item.href}
-                        class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
-                      >
-                        <h3 class="m-0 text-base font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
-                          {truncateText(item.title, 70)}
-                        </h3>
-                      </a>
-                    </div>
-                  </article>
-                ))
-              ) : (
-                <p class="m-0 font-inter text-[0.88rem] leading-[1.5] text-[#3028219e]">
-                  Пока нет материалов для боковой колонки.
-                </p>
-              )
-            }
-          </div>
-        </aside>
       </section>
     </div>
   </main>
