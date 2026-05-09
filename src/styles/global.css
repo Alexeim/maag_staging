@@ -116,3 +116,18 @@ The custom implementation was removed in favor of standard DaisyUI buttons.
   margin-right: auto;
   object-fit: cover;
 }
+
+.linked-image-hover {
+  display: block;
+  overflow: hidden;
+}
+
+.linked-image-hover__media {
+  transition: transform 0.35s ease;
+  will-change: transform;
+}
+
+.linked-image-hover:hover .linked-image-hover__media,
+.linked-image-hover:focus-visible .linked-image-hover__media {
+  transform: scale(1.04);
+}

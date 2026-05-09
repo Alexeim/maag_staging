@@ -342,13 +342,13 @@ const featuredInterviewName =
               <article class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
                 <a
                   href={primaryCultureArticle.href}
-                  class="block aspect-[3/2] overflow-hidden"
+                  class="linked-image-hover aspect-[3/2]"
                   aria-label={primaryCultureArticle.title}
                 >
                   <img
                     src={primaryCultureArticle.imageUrl || picture1.src}
                     alt={primaryCultureArticle.title}
-                    class="block h-full w-full object-cover"
+                    class="linked-image-hover__media block h-full w-full object-cover"
                     loading="lazy"
                     transition:name={getTransitionName(primaryCultureArticle)}
                   />
@@ -395,13 +395,13 @@ const featuredInterviewName =
                   <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                     <a
                       href={item.href}
-                      class="block aspect-[3/2] overflow-hidden"
+                      class="linked-image-hover aspect-[3/2]"
                       aria-label={item.title}
                     >
                       <img
                         src={item.imageUrl || picture1.src}
                         alt={item.title}
-                        class="block h-full w-full object-cover"
+                        class="linked-image-hover__media block h-full w-full object-cover"
                         loading="lazy"
                         transition:name={getTransitionName(item)}
                       />
@@ -503,7 +503,7 @@ const featuredInterviewName =
                   <a
                     href={item.href}
                     class:list={[
-                      "block overflow-hidden bg-white/50 aspect-[1.02/1]",
+                      "linked-image-hover bg-white/50 aspect-[1.02/1]",
                       item.contentType === "interview" &&
                         "w-full aspect-square rounded-full bg-transparent",
                     ]}
@@ -513,7 +513,7 @@ const featuredInterviewName =
                       src={item.imageUrl || picture1.src}
                       alt={item.title}
                       class:list={[
-                        "block h-full w-full object-cover",
+                        "linked-image-hover__media block h-full w-full object-cover",
                         item.contentType === "interview" && "rounded-full",
                       ]}
                       loading="lazy"

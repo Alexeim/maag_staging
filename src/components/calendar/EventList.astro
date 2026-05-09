@@ -33,13 +33,13 @@ import timeIcon from "../../assets/images/calendar/time.svg?raw";
           >
             <a
               :href="event.url"
-              class="block aspect-[4/3] overflow-hidden md:aspect-auto"
+              class="linked-image-hover aspect-[4/3] md:aspect-auto"
               :aria-label="event.title"
             >
               <img
                 :src="event.image"
                 alt="Event Image"
-                class="block h-full w-full object-cover"
+                class="linked-image-hover__media block h-full w-full object-cover"
               />
             </a>
 
@@ -118,13 +118,13 @@ import timeIcon from "../../assets/images/calendar/time.svg?raw";
             <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
               <a
                 :href="event.url"
-                class="block aspect-[3/2] overflow-hidden"
+                class="linked-image-hover aspect-[3/2]"
                 :aria-label="event.title"
               >
                 <img
                   :src="event.image"
                   alt="Event Image"
-                  class="block h-full w-full object-cover"
+                  class="linked-image-hover__media block h-full w-full object-cover"
                 />
               </a>
 

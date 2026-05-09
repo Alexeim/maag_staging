@@ -27,12 +27,12 @@ const {
 >
   <a
     href={href}
-    class="block w-[200px] h-[200px] rounded-full overflow-hidden flex-shrink-0"
+    class="linked-image-hover w-[200px] h-[200px] rounded-full flex-shrink-0"
   >
     <img
       src={typeof imageUrl === "string" ? imageUrl : imageUrl.src}
       alt={`Фотография ${interviewee}`}
-      class="w-full h-full object-cover object-center"
+      class="linked-image-hover__media w-full h-full object-cover object-center"
       loading="lazy"
       transition:name={transitionName}
     />

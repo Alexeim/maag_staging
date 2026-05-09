@@ -285,13 +285,13 @@ const editorialGridItems = parisFeed;
               <article class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
                 <a
                   href={primaryParisArticle.href}
-                  class="block aspect-[3/2] overflow-hidden"
+                  class="linked-image-hover aspect-[3/2]"
                   aria-label={primaryParisArticle.title}
                 >
                   <img
                     src={primaryParisArticle.imageUrl || picture1.src}
                     alt={primaryParisArticle.title}
-                    class="block h-full w-full object-cover"
+                    class="linked-image-hover__media block h-full w-full object-cover"
                     loading="lazy"
                     transition:name={getTransitionName(primaryParisArticle)}
                   />
@@ -338,13 +338,13 @@ const editorialGridItems = parisFeed;
                   <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                     <a
                       href={item.href}
-                      class="block aspect-[3/2] overflow-hidden"
+                      class="linked-image-hover aspect-[3/2]"
                       aria-label={item.title}
                     >
                       <img
                         src={item.imageUrl || picture1.src}
                         alt={item.title}
-                        class="block h-full w-full object-cover"
+                        class="linked-image-hover__media block h-full w-full object-cover"
                         loading="lazy"
                         transition:name={getTransitionName(item)}
                       />
@@ -458,13 +458,13 @@ const editorialGridItems = parisFeed;
                   <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                     <a
                       href={item.href}
-                      class="block overflow-hidden bg-white/50 aspect-[1.02/1]"
+                      class="linked-image-hover bg-white/50 aspect-[1.02/1]"
                       aria-label={item.title}
                     >
                       <img
                         src={item.imageUrl || picture1.src}
                         alt={item.title}
-                        class="block h-full w-full object-cover"
+                        class="linked-image-hover__media block h-full w-full object-cover"
                         loading="lazy"
                         transition:name={getTransitionName(item)}
                       />

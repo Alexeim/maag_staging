@@ -382,12 +382,12 @@ const interviewQuote = latestInterview?.mainQuote
                     {cultureHero.imageUrl ? (
                       <a
                         href={cultureHero.href}
-                        class="block w-full h-full transition-opacity duration-200 hover:opacity-90"
+                        class="linked-image-hover w-full h-full"
                       >
                         <img
                           src={cultureHero.imageUrl}
                           alt={cultureHero.title}
-                          class="w-full h-full object-cover object-center"
+                          class="linked-image-hover__media w-full h-full object-cover object-center"
                           loading="lazy"
                           transition:name={getTransitionName(cultureHero)}
                         />
@@ -566,13 +566,13 @@ const interviewQuote = latestInterview?.mainQuote
                       <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
                         <a
                           href={parisHero.href}
-                          class="block w-full h-full transition-opacity duration-200 hover:opacity-90"
+                          class="linked-image-hover w-full h-full"
                           aria-label={parisHero.title}
                         >
                           <img
                             src={parisHero.imageUrl ?? picture1.src}
                             alt={parisHero.title}
-                            class="block h-full w-full object-cover object-center"
+                            class="linked-image-hover__media block h-full w-full object-cover object-center"
                             loading="lazy"
                             transition:name={getTransitionName(parisHero)}
                           />

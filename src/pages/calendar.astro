@@ -383,7 +383,7 @@ const topCards = weeklyHighlights.slice(0, 4);
               <article class="mx-auto grid max-w-[1052px] overflow-hidden bg-white lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
                 <a
                   href={featuredEventCard.url}
-                  class="block aspect-[3/2] overflow-hidden"
+                  class="linked-image-hover aspect-[3/2]"
                   aria-label={featuredEventCard.title}
                 >
                   <img
@@ -392,7 +392,7 @@ const topCards = weeklyHighlights.slice(0, 4);
                       featuredEventCard.fallbackImage.src
                     }
                     alt={featuredEventCard.title}
-                    class="block h-full w-full object-cover"
+                    class="linked-image-hover__media block h-full w-full object-cover"
                   />
                 </a>
 
@@ -446,13 +446,13 @@ const topCards = weeklyHighlights.slice(0, 4);
                 <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                   <a
                     href={event.url}
-                    class="block aspect-[1.12/1] overflow-hidden lg:aspect-[3/2]"
+                    class="linked-image-hover aspect-[1.12/1] lg:aspect-[3/2]"
                     aria-label={event.title}
                   >
                     <img
                       src={event.imageUrl ?? event.fallbackImage.src}
                       alt={event.title}
-                      class="block h-full w-full object-cover"
+                      class="linked-image-hover__media block h-full w-full object-cover"
                     />
                   </a>
 

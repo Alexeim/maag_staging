@@ -34,14 +34,14 @@ const displayImage = imageUrl || picture1.src;
   <div class="w-full aspect-[3/2] overflow-hidden">
     <a
       href={href}
-      class="block w-full h-full transition-opacity duration-200 hover:opacity-90"
+      class="linked-image-hover w-full h-full"
     >
       {
         imageUrl ? (
           <img
             src={displayImage}
             alt={title}
-            class="w-full h-full object-cover object-center"
+            class="linked-image-hover__media w-full h-full object-cover object-center"
             loading="lazy"
             transition:name={transitionName}
           />
@@ -49,7 +49,7 @@ const displayImage = imageUrl || picture1.src;
           <Image
             src={picture1}
             alt="Culture image"
-            class="w-full h-full object-cover object-center"
+            class="linked-image-hover__media w-full h-full object-cover object-center"
             loading="eager"
             transition:name={transitionName}
           />

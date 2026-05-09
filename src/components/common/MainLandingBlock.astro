@@ -269,12 +269,12 @@ try {
               <div class="flex items-start gap-4">
                 <a
                   href={`/news/${newsItem.id}`}
-                  class="block bg-base-200 z-50 transition-opacity duration-200 hover:opacity-90"
+                  class="linked-image-hover bg-base-200 z-50"
                 >
                   <Image
                     src={newsItem.imageUrl}
                     alt={`News image for ${newsItem.title}`}
-                    class="w-20 h-20 object-cover flex-shrink-0"
+                    class="linked-image-hover__media w-20 h-20 object-cover flex-shrink-0"
                     width={80}
                     height={80}
                     transition:name={`main-article-image-${newsItem.id}`}
@@ -313,11 +313,11 @@ try {
         mainArticle ? (
           <div>
             <div class="aspect-[3/2] overflow-hidden relative z-50">
-              <a href={mainArticle.href} class="block w-full h-full">
+              <a href={mainArticle.href} class="linked-image-hover w-full h-full">
                 <img
                   src={mainArticle.imageUrl}
                   alt={mainArticle.title}
-                  class="w-full h-full object-cover"
+                  class="linked-image-hover__media w-full h-full object-cover"
                   transition:name={`main-article-image-${mainArticle.id}`}
                 />
               </a>
@@ -373,7 +373,7 @@ try {
         landingEvent ? (
           <a
             href={`/events/${landingEvent.id}`}
-            class="block bg-white overflow-hidden"
+            class="linked-image-hover bg-white"
           >
             <div class="p-4 lg:p-2 flex items-center gap-3">
               <p class="text-[18px] font-inter uppercase font-bold tracking-[0.15em] mt-1 mb-1">
@@ -392,7 +392,7 @@ try {
               <img
                 src={landingEvent.imageUrl}
                 alt={landingEvent.title}
-                class="w-full h-auto lg:h-[240px] object-cover"
+                class="linked-image-hover__media w-full h-auto lg:h-[240px] object-cover"
                 loading="lazy"
                 transition:name={`event-image-${landingEvent.id}`}
               />
@@ -400,7 +400,7 @@ try {
               <Image
                 src={picture2}
                 alt="Event"
-                class="w-full h-auto lg:h-[240px] object-cover"
+                class="linked-image-hover__media w-full h-auto lg:h-[240px] object-cover"
                 transition:name={`event-image-${landingEvent.id}`}
               />
             )}
