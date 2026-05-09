@@ -47,7 +47,10 @@ const preparedTips = tips
       <div class="border border-base-300 bg-white/85">
         {preparedTips.map((tip) => (
           <div class="flex flex-row items-center justify-start gap-4 px-4 py-2 border-b border-base-300 last:border-b-0">
-            <span class="mt-0.5" set:html={ICONS[tip.type]} />
+            <span
+              class="mt-0.5 [&_path]:fill-accent [&_path]:stroke-accent"
+              set:html={ICONS[tip.type]}
+            />
             <p class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90">
               {tip.text}
             </p>

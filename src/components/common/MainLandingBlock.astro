@@ -192,9 +192,11 @@ const formatEventDate = (value: unknown) => {
     month: "long",
   });
   const monthGenitive = dayMonth.replace(/^\d+\s+/, "");
+  const weekday = date.toLocaleDateString("ru-RU", { weekday: "long" });
   return {
     day: date.getDate().toString().padStart(2, "0"),
     month: monthGenitive,
+    weekday,
   };
 };
 
@@ -379,6 +381,11 @@ try {
                 {(
                   formatEventDate(landingEvent.startDate)?.month || ""
                 ).toUpperCase()}
+                {formatEventDate(landingEvent.startDate)?.weekday ? (
+                  <span class="font-normal normal-case tracking-normal italic font-old_standard opacity-60 ml-2">
+                    {formatEventDate(landingEvent.startDate)?.weekday}
+                  </span>
+                ) : null}
               </p>
             </div>
             {landingEvent.imageUrl ? (
