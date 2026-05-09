@@ -1,8 +1,10 @@
 ---
 import Layout from "@/Layouts/Layout.astro";
-import ArticleDate from "@/components/article/ArticleDate.astro";
+import ArticleHeader from "@/components/article/ArticleHeader.astro";
 import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
-import NewsImage from "@/components/article/NewsImage.astro";
+import ArticleDate from "@/components/article/ArticleDate.astro";
+import ArticleImage from "@/components/article/ArticleImage.astro";
+import ArticleBody from "@/components/article/ArticleBody.astro";
 import { ApiError, articlesApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
@@ -31,80 +33,68 @@ try {
 }
 
 const rawCategory = articleData?.category ?? null;
-const categoryLabel = rawCategory
-  ? CATEGORY_LABELS[rawCategory] || rawCategory
-  : "Новости";
 
-const title = articleData?.title || "Новость";
-const mainParagraph = articleData?.lead || "";
-const authorName = articleData?.author
-  ? `${articleData.author.firstName} ${articleData.author.lastName}`
-  : "Автор";
-const authorAvatar = articleData?.author?.avatar;
-const imageUrl = articleData?.imageUrl;
-const imageCaption = articleData?.imageCaption || "";
-const contentBlocks = (articleData?.content || []).filter(
-  (block: any) => block.type === "paragraph"
-);
+const displayArticle = {
+  title: articleData?.title || "Новость",
+  lead: articleData?.lead || "",
+  category: rawCategory ? CATEGORY_LABELS[rawCategory] || rawCategory : "Новости",
+  authorName: articleData?.author
+    ? `${articleData.author.firstName} ${articleData.author.lastName}`
+    : "Автор",
+  authorAvatar: articleData?.author?.avatar,
+  imageUrl: articleData?.imageUrl,
+  imageCaption: articleData?.imageCaption || "",
+  contentBlocks: articleData?.content || [],
+};
+
 const transitionAliases = [`landing-body-main-article-image-${id}`];
 ---
 
-<Layout title={`${title} - Maag`} navbarVariant="default" useClientRouter={true}>
+<Layout
+  title={`${displayArticle.title} - Maag`}
+  navbarVariant="default"
+  includePreFooterCTA={false}
+  useClientRouter={true}
+>
   <main class="bg-base-200 min-h-screen">
-    <div class="max-w-5xl mx-auto pt-14 pb-14 mb-12 flex flex-col gap-8 px-4 lg:px-0">
-      {error && <div class="text-red-500 text-center pt-20">{error}</div>}
+    <div class="max-w-[1512px] mx-auto">
+      {error && <div class="text-red-500 text-center pt-40">{error}</div>}
       {!error && articleData && (
         <>
-          <h4
-            class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mt-2"
-          >
-            {categoryLabel}
-          </h4>
-
-          <!-- Two-column hero: image left, title + main paragraph right -->
-          <div class="flex flex-col md:flex-row items-start justify-center gap-6">
-            {imageUrl && (
-              <div class="w-full md:w-1/2">
-                <NewsImage
-                  src={imageUrl}
-                  alt={title}
-                  caption={imageCaption}
-                  transitionName={`main-article-image-${id}`}
-                  transitionAliases={transitionAliases}
+          <!-- Article Header Section -->
+          <div class="pt-[50px] pb-[70px] px-4 lg:px-0 flex flex-col items-center gap-[50px]">
+            <div class="flex flex-col gap-4 max-w-[825px] w-full">
+              <ArticleHeader
+                category={displayArticle.category}
+                title={displayArticle.title}
+                lead={displayArticle.lead}
+              />
+              <div class="h-10 flex flex-row items-center justify-start gap-4">
+                <ArticleAuthor
+                  name={displayArticle.authorName}
+                  avatarUrl={displayArticle.authorAvatar}
                 />
+                <ArticleDate createdAt={articleData.createdAt} />
               </div>
-            )}
-            <div class:list={["w-full pt-8", imageUrl ? "md:w-1/2" : ""]}>
-              <h3 class="text-3xl lg:text-[36px] font-old_standard text-base-content w-full">
-                {title}
-              </h3>
-              <hr class="text-gray-400 mt-2 mb-8"></hr>
-              {mainParagraph && (
-                <p class="text-lg font-article-body text-justify">
-                  {mainParagraph}
-                </p>
-              )}
             </div>
+
+            {displayArticle.imageUrl && (
+              <ArticleImage
+                src={displayArticle.imageUrl}
+                alt={displayArticle.title}
+                caption={displayArticle.imageCaption}
+                transitionName={`main-article-image-${id}`}
+                transitionAliases={transitionAliases}
+                figureClass="max-w-[1200px]"
+                imageClass="shadow-lg"
+                figcaptionClass="text-center text-gray-500 mt-2"
+              />
+            )}
           </div>
 
-          <!-- Content blocks (paragraphs) -->
-          {contentBlocks.length > 0 && (
-            <div class="flex flex-col gap-6">
-              {contentBlocks.map((block: any) => (
-                <p class="text-lg font-article-body text-justify">
-                  {block.text}
-                </p>
-              ))}
-            </div>
-          )}
-
-          <!-- Author + Date -->
-          <div class="flex flex-row items-center justify-start gap-4">
-            <ArticleAuthor
-              name={authorName}
-              avatarUrl={authorAvatar}
-            />
-            <ArticleDate createdAt={articleData.createdAt} />
+          <!-- Article Content -->
+          <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
+            <ArticleBody contentBlocks={displayArticle.contentBlocks} />
           </div>
         </>
       )}
