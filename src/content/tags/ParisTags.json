@@ -17,84 +17,28 @@
       "value": "place"
     },
     {
-      "title": "I",
-      "value": "district-1"
+      "title": "история",
+      "value": "story"
     },
     {
-      "title": "II",
-      "value": "district-2"
+      "title": "архитектура",
+      "value": "architecture"
     },
     {
-      "title": "III",
-      "value": "district-3"
+      "title": "событие",
+      "value": "parisEvent"
     },
     {
-      "title": "IV",
-      "value": "district-4"
+      "title": "рестораны",
+      "value": "restaurants"
     },
     {
-      "title": "V",
-      "value": "district-5"
+      "title": "еда",
+      "value": "food"
     },
     {
-      "title": "VI",
-      "value": "district-6"
-    },
-    {
-      "title": "VII",
-      "value": "district-7"
-    },
-    {
-      "title": "VIII",
-      "value": "district-8"
-    },
-    {
-      "title": "IX",
-      "value": "district-9"
-    },
-    {
-      "title": "X",
-      "value": "district-10"
-    },
-    {
-      "title": "XI",
-      "value": "district-11"
-    },
-    {
-      "title": "XII",
-      "value": "district-12"
-    },
-    {
-      "title": "XIII",
-      "value": "district-13"
-    },
-    {
-      "title": "XIV",
-      "value": "district-14"
-    },
-    {
-      "title": "XV",
-      "value": "district-15"
-    },
-    {
-      "title": "XVI",
-      "value": "district-16"
-    },
-    {
-      "title": "XVII",
-      "value": "district-17"
-    },
-    {
-      "title": "XVIII",
-      "value": "district-18"
-    },
-    {
-      "title": "XIX",
-      "value": "district-19"
-    },
-    {
-      "title": "XX",
-      "value": "district-20"
+      "title": "le saviez-vous?",
+      "value": "did_you_know"
     }
   ]
 }

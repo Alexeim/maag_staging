@@ -87,7 +87,7 @@ let eventData: any;
 let error: string | null = null;
 
 try {
-  eventData = await eventsApi.getById(id);
+  eventData = await eventsApi.getById(id!);
 } catch (e: any) {
   console.error(e);
   if (e instanceof ApiError) {
@@ -102,9 +102,6 @@ try {
 
 const startDate = toDate(eventData?.startDate);
 const endDate = toDate(eventData?.endDate);
-const tags = normalizeTags(eventData?.tags);
-const techTags = normalizeTags(eventData?.techTags);
-const allTags = [...tags, ...techTags];
 
 const displayEvent = {
   title: eventData?.title || "Событие",
@@ -138,31 +135,21 @@ const displayEvent = {
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}
       {!error && eventData && (
         <>
-          <div class="pt-[150px] pb-[70px] flex flex-col items-center gap-[56px]">
-            <div class="flex flex-col gap-8 max-w-[825px] w-full px-4">
+          <div class="pt-[50px] pb-[70px] px-4 lg:px-0 flex flex-col items-center gap-[50px]">
+            <div class="flex flex-col gap-4 max-w-[825px] w-full">
               <ArticleHeader
                 category={displayEvent.category}
                 title={displayEvent.title}
                 lead={displayEvent.lead}
               />
-              <div class="flex flex-row items-center justify-start gap-4">
+              <div class="h-10 flex flex-row items-center justify-start gap-4">
                 <ArticleAuthor
                   name={displayEvent.authorName}
                   avatarUrl={displayEvent.authorAvatar}
                 />
-                <div>·</div>
                 <ArticleDate createdAt={eventData.createdAt} />
               </div>
-              <div class="flex flex-wrap gap-2">
-                {allTags.map((tag) => (
-                  <span class="px-3 py-1 rounded-full bg-base-300 text-sm">{tag}</span>
-                ))}
-              </div>
-              {displayEvent.datesLabel && (
-                <div class="text-sm text-base-content/70 uppercase tracking-[0.2em]">
-                  {displayEvent.datesLabel}
-                </div>
-              )}
+              {/* tags hidden for now */}
             </div>
 
             {displayEvent.imageUrl && (
@@ -172,7 +159,8 @@ const displayEvent = {
                 caption={displayEvent.imageCaption}
                 transitionName={`event-image-${id}`}
                 figureClass="max-w-[1200px]"
-                imageClass="shadow-lg rounded-lg"
+                imageClass="shadow-lg"
+                figcaptionClass="text-center text-gray-500 mt-2"
               />
             )}
           </div>
