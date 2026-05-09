@@ -1,11 +1,16 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
-import ArticleHeader from "../../components/article/ArticleHeader.astro";
-import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
-import ArticleDate from "../../components/article/ArticleDate.astro";
-import ArticleImage from "../../components/article/ArticleImage.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
-import EventDetails from "../../components/article/EventDetails.astro";
+import picture1 from "../../assets/images/culture.jpg";
+import locationIcon from "../../assets/images/calendar/location.svg?raw";
+import {
+  Bookmark,
+  CalendarDays,
+  CalendarPlus,
+  Clock3,
+  MapPin,
+  Share2,
+} from "lucide-astro";
 import { ApiError, eventsApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
@@ -38,6 +43,12 @@ const toDate = (value: unknown): Date | null => {
     if (typeof maybeSeconds === "number") {
       return new Date(maybeSeconds * 1000);
     }
+    if (typeof (value as { toDate?: () => Date }).toDate === "function") {
+      const parsed = (value as { toDate: () => Date }).toDate();
+      return parsed instanceof Date && !Number.isNaN(parsed.getTime())
+        ? parsed
+        : null;
+    }
   }
   return null;
 };
@@ -60,9 +71,39 @@ const formatDateRange = (start: Date | null, end: Date | null): string | null =>
   return `${format(start)} — ${format(end)}`;
 };
 
+const formatShortDateRange = (start: Date | null, end: Date | null): string => {
+  if (!start) {
+    return "";
+  }
+  const format = (date: Date) =>
+    `${date.getUTCDate()} / ${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+
+  if (!end || start.getTime() === end.getTime()) {
+    return format(start);
+  }
+
+  return `${format(start)} — ${format(end)}`;
+};
+
+const formatCreatedAt = (value: unknown): string => {
+  const date = toDate(value);
+  if (!date) {
+    return "";
+  }
+  return date
+    .toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
+    .replace(" г.", "");
+};
+
 const formatTimeLabel = (event: any): string | null => {
   const mode =
-    event?.timeMode === "start" || event?.timeMode === "range" ? event.timeMode : "none";
+    event?.timeMode === "start" || event?.timeMode === "range"
+      ? event.timeMode
+      : "none";
   const start = typeof event?.startTime === "string" ? event.startTime.trim() : "";
   const end = typeof event?.endTime === "string" ? event.endTime.trim() : "";
   if (mode === "start" && start) {
@@ -74,6 +115,17 @@ const formatTimeLabel = (event: any): string | null => {
   return null;
 };
 
+const toDateKey = (date: Date | null): string => {
+  if (!date) {
+    return "";
+  }
+  return [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, "0"),
+    String(date.getUTCDate()).padStart(2, "0"),
+  ].join("-");
+};
+
 const normalizeTags = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
     return [];
@@ -83,7 +135,196 @@ const normalizeTags = (value: unknown): string[] => {
     .filter(Boolean);
 };
 
+const extractTextFromContent = (blocks: unknown): string => {
+  if (!Array.isArray(blocks)) {
+    return "";
+  }
+
+  return blocks
+    .flatMap((block: any) => {
+      const pieces: string[] = [];
+
+      if (typeof block?.text === "string") {
+        pieces.push(block.text);
+      }
+      if (typeof block?.question === "string") {
+        pieces.push(block.question);
+      }
+      if (typeof block?.answer === "string") {
+        pieces.push(block.answer);
+      }
+      if (block?.type === "two-columns") {
+        if (typeof block?.left?.content === "string") {
+          pieces.push(block.left.content);
+        }
+        if (typeof block?.right?.content === "string") {
+          pieces.push(block.right.content);
+        }
+      }
+
+      return pieces;
+    })
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+const estimateReadTime = (lead: unknown, blocks: unknown): number => {
+  const leadText = typeof lead === "string" ? lead.trim() : "";
+  const contentText = extractTextFromContent(blocks);
+  const fullText = [leadText, contentText].filter(Boolean).join(" ").trim();
+  if (!fullText) {
+    return 1;
+  }
+  const words = fullText.split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / 180));
+};
+
+const buildMapsUrl = (address: string): string | null => {
+  const normalized = address.trim();
+  if (!normalized) {
+    return null;
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(normalized)}`;
+};
+
+const buildMapsEmbedUrl = (address: string): string | null => {
+  const normalized = address.trim();
+  if (!normalized) {
+    return null;
+  }
+  return `https://www.google.com/maps?q=${encodeURIComponent(normalized)}&output=embed`;
+};
+
+const parseTime = (value: string | null | undefined): { hours: number; minutes: number } | null => {
+  if (!value) {
+    return null;
+  }
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) {
+    return null;
+  }
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (
+    !Number.isInteger(hours) ||
+    !Number.isInteger(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    return null;
+  }
+  return { hours, minutes };
+};
+
+const formatCalendarDateTime = (date: Date): string => {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+  return `${year}${month}${day}T${hours}${minutes}00Z`;
+};
+
+const formatCalendarDay = (date: Date): string => {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  return `${year}${month}${day}`;
+};
+
+const buildGoogleCalendarUrl = (
+  event: any,
+  start: Date | null,
+  end: Date | null,
+  title: string,
+  address: string,
+  lead: string,
+): string | null => {
+  if (!start) {
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: title,
+  });
+
+  if (lead.trim()) {
+    params.set("details", lead.trim());
+  }
+
+  if (address.trim()) {
+    params.set("location", address.trim());
+  }
+
+  const startTime = parseTime(event?.startTime);
+  const endTime = parseTime(event?.endTime);
+  const hasTimedSingleDayEvent =
+    (event?.timeMode === "start" || event?.timeMode === "range") &&
+    startTime &&
+    (!end || start.getTime() === end.getTime());
+
+  if (hasTimedSingleDayEvent) {
+    const startDateTime = new Date(
+      Date.UTC(
+        start.getUTCFullYear(),
+        start.getUTCMonth(),
+        start.getUTCDate(),
+        startTime.hours,
+        startTime.minutes,
+      ),
+    );
+
+    let endDateTime: Date;
+    if (event?.timeMode === "range" && endTime) {
+      endDateTime = new Date(
+        Date.UTC(
+          start.getUTCFullYear(),
+          start.getUTCMonth(),
+          start.getUTCDate(),
+          endTime.hours,
+          endTime.minutes,
+        ),
+      );
+      if (endDateTime.getTime() <= startDateTime.getTime()) {
+        endDateTime = new Date(startDateTime.getTime() + 2 * 60 * 60 * 1000);
+      }
+    } else {
+      endDateTime = new Date(startDateTime.getTime() + 2 * 60 * 60 * 1000);
+    }
+
+    params.set(
+      "dates",
+      `${formatCalendarDateTime(startDateTime)}/${formatCalendarDateTime(endDateTime)}`,
+    );
+  } else {
+    const allDayStart = new Date(
+      Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()),
+    );
+    const endBase = end ?? start;
+    const allDayEndExclusive = new Date(
+      Date.UTC(
+        endBase.getUTCFullYear(),
+        endBase.getUTCMonth(),
+        endBase.getUTCDate(),
+      ),
+    );
+    allDayEndExclusive.setUTCDate(allDayEndExclusive.getUTCDate() + 1);
+
+    params.set(
+      "dates",
+      `${formatCalendarDay(allDayStart)}/${formatCalendarDay(allDayEndExclusive)}`,
+    );
+  }
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+};
+
 let eventData: any;
+let relatedEvents: any[] = [];
 let error: string | null = null;
 
 try {
@@ -100,25 +341,94 @@ try {
   }
 }
 
+if (!error && eventData) {
+  try {
+    const allEvents = await eventsApi.list();
+    const currentStart = toDate(eventData?.startDate);
+    const currentDayKey = toDateKey(currentStart);
+
+    relatedEvents = allEvents
+      .map((item) => {
+        const itemStart = toDate(item?.startDate);
+        const itemEnd = toDate(item?.endDate);
+        if (!itemStart) {
+          return null;
+        }
+
+        return {
+          id: item.id,
+          title: item?.title || "Событие",
+          href: `/events/${item.id}`,
+          imageUrl:
+            typeof item?.imageUrl === "string" && item.imageUrl.trim().length > 0
+              ? item.imageUrl
+              : picture1.src,
+          address:
+            typeof item?.address === "string" && item.address.trim().length > 0
+              ? item.address.trim()
+              : "Место уточняется",
+          categoryLabel:
+            CATEGORY_LABELS[item?.category as keyof typeof CATEGORY_LABELS] ||
+            "Событие",
+          startDate: itemStart,
+          endDate: itemEnd,
+          startDayKey: toDateKey(itemStart),
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => Boolean(item))
+      .filter((item) => item.id !== id && item.startDayKey === currentDayKey)
+      .slice(0, 3);
+  } catch (relatedError) {
+    console.error("Failed to fetch related events for event page:", relatedError);
+  }
+}
+
 const startDate = toDate(eventData?.startDate);
 const endDate = toDate(eventData?.endDate);
+const address =
+  typeof eventData?.address === "string" && eventData.address.trim().length > 0
+    ? eventData.address.trim()
+    : "Место уточняется";
+const lead = typeof eventData?.lead === "string" ? eventData.lead : "";
+const readTime = estimateReadTime(lead, eventData?.content);
+const createdAtLabel = formatCreatedAt(eventData?.createdAt);
+const mapsUrl = buildMapsUrl(address);
+const mapsEmbedUrl = buildMapsEmbedUrl(address);
+const calendarUrl = buildGoogleCalendarUrl(
+  eventData,
+  startDate,
+  endDate,
+  eventData?.title || "Событие",
+  address,
+  lead,
+);
+const normalizedTags = normalizeTags(eventData?.tags);
+const topMetaTag =
+  normalizedTags[0] ||
+  CATEGORY_LABELS[eventData?.category as keyof typeof CATEGORY_LABELS] ||
+  "Событие";
 
 const displayEvent = {
   title: eventData?.title || "Событие",
-  lead: eventData?.lead || "",
-  category: eventData?.category ? CATEGORY_LABELS[eventData.category] || eventData.category : "Событие",
+  lead,
+  category:
+    eventData?.category && CATEGORY_LABELS[eventData.category]
+      ? CATEGORY_LABELS[eventData.category]
+      : "Событие",
   authorName: eventData?.author
     ? `${eventData.author.firstName} ${eventData.author.lastName}`
     : "MAAG",
-  authorAvatar: eventData?.author?.avatar,
-  imageUrl: eventData?.imageUrl,
-  imageCaption: eventData?.imageCaption || "",
-  imageAlt: eventData?.mainImage?.alt || "Изображение события",
-  contentBlocks: eventData?.content || [],
-  address:
-    typeof eventData?.address === "string" && eventData.address.trim().length > 0
-      ? eventData.address
-      : "Место уточняется",
+  imageUrl:
+    typeof eventData?.imageUrl === "string" && eventData.imageUrl.trim().length > 0
+      ? eventData.imageUrl
+      : picture1.src,
+  imageCaption:
+    typeof eventData?.imageCaption === "string" ? eventData.imageCaption : "",
+  imageAlt:
+    typeof eventData?.mainImage?.alt === "string" && eventData.mainImage.alt.trim()
+      ? eventData.mainImage.alt
+      : eventData?.title || "Изображение события",
+  contentBlocks: Array.isArray(eventData?.content) ? eventData.content : [],
   datesLabel: formatDateRange(startDate, endDate),
   timeLabel: formatTimeLabel(eventData),
 };
@@ -130,52 +440,254 @@ const displayEvent = {
   title={`${displayEvent.title} - Maag`}
   useClientRouter={true}
 >
-  <main class="bg-base-200 min-h-screen">
-    <div class="max-w-[1512px] mx-auto">
-      {error && <div class="text-red-500 text-center pt-40">{error}</div>}
+  <main class="min-h-screen bg-base-200 text-black">
+    <div class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]">
+      {error && <div class="pt-24 text-center text-red-400">{error}</div>}
+
       {!error && eventData && (
         <>
-          <div class="pt-[50px] pb-[70px] px-4 lg:px-0 flex flex-col items-center gap-[50px]">
-            <div class="flex flex-col gap-4 max-w-[825px] w-full">
-              <ArticleHeader
-                category={displayEvent.category}
-                title={displayEvent.title}
-                lead={displayEvent.lead}
-              />
-              <div class="h-10 flex flex-row items-center justify-start gap-4">
-                <ArticleAuthor
-                  name={displayEvent.authorName}
-                  avatarUrl={displayEvent.authorAvatar}
-                />
-                <ArticleDate createdAt={eventData.createdAt} />
+          <section class="grid gap-10 lg:grid-cols-12 lg:gap-8 lg:items-start">
+            <div class="grid gap-10 lg:col-span-9">
+              <article class="grid gap-8">
+                <div class="grid gap-6">
+                  <div class="grid gap-3">
+                    <p class="m-0 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                      {displayEvent.category}
+                    </p>
+
+                    <h1 class="m-0 max-w-[980px] font-old_standard text-3xl font-normal leading-[1.02] text-base-content lg:text-[52px]">
+                      {displayEvent.title}
+                    </h1>
+
+                    {displayEvent.lead && (
+                      <p class="m-0 max-w-[760px] font-article-body text-lg leading-[1.55] text-base-content/75 lg:text-xl">
+                        {displayEvent.lead}
+                      </p>
+                    )}
+                  </div>
+
+                  <div class="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-base-content/65 font-inter">
+                    <span class="uppercase tracking-[0.22em] text-accent">
+                      {topMetaTag}
+                    </span>
+                    <span class="h-1 w-1 rounded-full bg-base-content/30"></span>
+                    <span class="italic font-old_standard text-lg text-base-content/80">
+                      {displayEvent.authorName}
+                    </span>
+                    {createdAtLabel && (
+                      <>
+                        <span class="h-1 w-1 rounded-full bg-base-content/30"></span>
+                        <span>{createdAtLabel}</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div class="flex flex-wrap gap-4">
+                    <button
+                      type="button"
+                      class="inline-flex h-10 items-center gap-3 rounded-2xl border border-base-300 px-4 py-2 text-base-content transition-colors hover:bg-base-300"
+                    >
+                      <Share2 class="h-4 w-4" />
+                      <span class="text-sm font-['Inter']">Поделиться</span>
+                    </button>
+
+                    <div class="inline-flex h-10 items-center gap-3 rounded-2xl border border-base-300 px-4 py-2 text-base-content">
+                      <span class="text-base font-bold">{readTime}</span>
+                      <span class="text-sm font-['Inter']">Минут читать</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      class="inline-flex h-10 items-center justify-center rounded-2xl border border-base-300 px-4 py-2 text-base-content transition-colors hover:bg-base-300"
+                    >
+                      <Bookmark class="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <figure class="m-0">
+                  <img
+                    src={displayEvent.imageUrl}
+                    alt={displayEvent.imageAlt}
+                    class="block max-h-[720px] w-full object-cover"
+                    transition:name={`event-image-${id}`}
+                  />
+
+                  {displayEvent.imageCaption && (
+                    <figcaption class="mt-3 font-inter text-sm leading-[1.5] text-base-content/50">
+                      {displayEvent.imageCaption}
+                    </figcaption>
+                  )}
+                </figure>
+              </article>
+
+              <div class="border-t border-base-content/10 pt-10">
+                <div class="bg-white px-4 py-8 text-base-content lg:px-8 lg:py-10">
+                  <ArticleBody contentBlocks={displayEvent.contentBlocks} />
+                </div>
               </div>
-              {/* tags hidden for now */}
+
+              <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
+                  <div class="flex items-start gap-4">
+                    <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                    <div class="grid gap-1">
+                      <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
+                        Адрес
+                      </h2>
+                      <p class="m-0 font-oswald text-lg leading-tight">
+                        {address}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+
+                {displayEvent.datesLabel && (
+                  <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
+                    <div class="flex items-start gap-4">
+                      <CalendarDays class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                      <div class="grid gap-1">
+                        <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
+                          Даты
+                        </h2>
+                        <p class="m-0 font-oswald text-lg leading-tight">
+                          {displayEvent.datesLabel}
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+                )}
+
+                {displayEvent.timeLabel && (
+                  <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
+                    <div class="flex items-start gap-4">
+                      <Clock3 class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                      <div class="grid gap-1">
+                        <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
+                          Время
+                        </h2>
+                        <p class="m-0 font-oswald text-lg leading-tight">
+                          {displayEvent.timeLabel}
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+                )}
+              </section>
             </div>
 
-            {displayEvent.imageUrl && (
-              <ArticleImage
-                src={displayEvent.imageUrl}
-                alt={displayEvent.imageAlt}
-                caption={displayEvent.imageCaption}
-                transitionName={`event-image-${id}`}
-                figureClass="max-w-[1200px]"
-                imageClass="shadow-lg"
-                figcaptionClass="text-center text-gray-500 mt-2"
-              />
-            )}
-          </div>
+            <aside class="lg:col-span-3 lg:border-l lg:border-base-content/10 lg:pl-6">
+              <div class="grid gap-6 lg:sticky lg:top-8">
+                <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
+                  Ещё в этот день
+                </h2>
 
-          <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
-            <ArticleBody contentBlocks={displayEvent.contentBlocks} />
+                {relatedEvents.length > 0 ? (
+                  <div class="grid gap-8">
+                    {relatedEvents.map((item) => (
+                      <article class="grid gap-4">
+                        <a
+                          href={item.href}
+                          class="block aspect-[3/2] overflow-hidden"
+                          aria-label={item.title}
+                        >
+                          <img
+                            src={item.imageUrl}
+                            alt={item.title}
+                            class="block h-full w-full object-cover"
+                          />
+                        </a>
 
-            {displayEvent.datesLabel && (
-              <EventDetails
-                address={displayEvent.address}
-                dates={displayEvent.datesLabel}
-                time={displayEvent.timeLabel}
-              />
-            )}
-          </div>
+                        <div class="grid gap-[0.55rem]">
+                          <p class="m-0 font-inter text-lg font-bold uppercase text-black">
+                            {formatShortDateRange(item.startDate, item.endDate)}
+                          </p>
+
+                          <p class="m-0">
+                            <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                              {item.categoryLabel}
+                            </span>
+                          </p>
+
+                          <a
+                            href={item.href}
+                            class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                          >
+                            <h3 class="m-0 font-old_standard text-[1.3rem] font-normal leading-[1.12] text-base-content">
+                              {item.title}
+                            </h3>
+                          </a>
+
+                          <div class="mt-1 flex items-center gap-2 font-inter text-sm text-base-content/65">
+                            <span
+                              class="h-4 w-4 shrink-0 [&_path]:fill-[#302821bd]"
+                              set:html={locationIcon}
+                            />
+                            <span>{item.address}</span>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <p class="m-0 font-inter text-[0.9rem] leading-[1.6] text-base-content/60">
+                    Пока нет других событий на эту дату.
+                  </p>
+                )}
+              </div>
+            </aside>
+          </section>
+
+          <section class="mt-16 border-t border-base-content/10 pt-10">
+            <div class="grid gap-8 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-10 lg:items-start">
+              <div class="grid gap-4">
+                {mapsUrl ? (
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-white px-5 py-3 font-inter text-base text-base-content transition-opacity hover:opacity-90"
+                  >
+                    <MapPin class="h-5 w-5" />
+                    <span>Открыть в Google maps</span>
+                  </a>
+                ) : (
+                  <div class="inline-flex min-h-14 items-center gap-3 rounded-2xl border border-base-300 px-5 py-3 font-inter text-base text-base-content/75">
+                    <MapPin class="h-5 w-5" />
+                    <span>Адрес уточняется</span>
+                  </div>
+                )}
+
+                {calendarUrl && (
+                  <a
+                    href={calendarUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-white px-5 py-3 font-inter text-base text-base-content transition-opacity hover:opacity-90"
+                  >
+                    <CalendarPlus class="h-5 w-5" />
+                    <span>Добавить в календарь</span>
+                  </a>
+                )}
+              </div>
+
+              <div class="overflow-hidden border border-base-300 bg-white">
+                {mapsEmbedUrl ? (
+                  <iframe
+                    src={mapsEmbedUrl}
+                    class="h-[420px] w-full border-0"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    title={`Карта для события ${displayEvent.title}`}
+                  ></iframe>
+                ) : (
+                  <div class="flex h-[420px] items-center justify-center px-6 text-center font-inter text-base text-base-content/60">
+                    Карта появится, когда для события будет указан адрес.
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
         </>
       )}
     </div>
