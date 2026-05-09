@@ -554,56 +554,39 @@ const interviewQuote = latestInterview?.mainQuote
           {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
         </h2>
         <div class="w-full flex flex-col gap-8">
-          <div class="w-full bg-white flex flex-col gap-6 lg:flex-row-reverse lg:gap-8 items-start justify-start min-h-[100px]">
+          <article class="mx-auto grid max-w-[1052px] overflow-hidden bg-white lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
             {parisHero ? (
               <>
-                <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
-                  {parisHero.imageUrl ? (
-                    <a
-                      href={parisHero.href}
-                      class="block w-full h-full transition-opacity duration-200 hover:opacity-90"
-                    >
-                      <img
-                        src={parisHero.imageUrl}
-                        alt={parisHero.title}
-                        class="w-full h-full object-cover object-center"
-                        loading="lazy"
-                        transition:name={getTransitionName(parisHero)}
-                      />
-                    </a>
-                  ) : (
-                    <Image
-                      src={picture1}
-                      alt="Paris image"
-                      class="w-full h-auto lg:h-[470px] object-cover object-center"
-                      loading="eager"
-                      transition:name={getTransitionName(parisHero)}
-                    />
-                  )}
-                </div>
-                <div class="w-full lg:w-2/5 pt-4 px-4 lg:pl-4">
-                  <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3">
+                <a
+                  href={parisHero.href}
+                  class="block aspect-[3/2] overflow-hidden"
+                  aria-label={parisHero.title}
+                >
+                  <img
+                    src={parisHero.imageUrl ?? picture1.src}
+                    alt={parisHero.title}
+                    class="block h-full w-full object-cover"
+                    loading="lazy"
+                    transition:name={getTransitionName(parisHero)}
+                  />
+                </a>
+                <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                  <p class="m-0">
                     <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                       {getPrimaryTag(parisHero) ||
                         CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
                     </span>
-                    <span class="hidden text-black text-lg font-bold font-['Inter']">
-                      ·
-                    </span>
-                    <span class="hidden text-xs">
-                      {formatArticleDate(parisHero?.createdAt)}
-                    </span>
-                  </div>
+                  </p>
                   <a
                     href={parisHero.href}
-                    class="block transition-opacity duration-200 hover:opacity-90"
+                    class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                   >
-                    <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90">
+                    <h4 class="m-0 font-old_standard text-[clamp(1.4rem,2.2vw,1.9rem)] font-normal leading-[1.04]">
                       {parisHero.title}
                     </h4>
                   </a>
                   {getCardLead(parisHero) && (
-                    <p class="text-base lg:text-sm text-black/80 font-inter font-normal">
+                    <p class="text-sm text-black/60 font-inter font-normal">
                       {getCardLead(parisHero)}
                     </p>
                   )}
@@ -611,25 +594,27 @@ const interviewQuote = latestInterview?.mainQuote
               </>
             ) : (
               <>
-                <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
+                <div class="aspect-[3/2] overflow-hidden">
                   <Image
                     src={picture1}
                     alt="Paris image"
-                    class="w-full h-full object-cover object-center"
+                    class="block h-full w-full object-cover"
                     loading="eager"
                   />
                 </div>
-                <div class="w-full lg:w-2/5 pt-4 px-4 lg:pl-4">
-                  <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
-                    {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
+                <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                  <p class="m-0">
+                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                      {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
+                    </span>
                   </p>
-                  <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-oswald text-wrap break-words">
+                  <h4 class="m-0 font-old_standard text-[clamp(1.4rem,2.2vw,1.9rem)] font-normal leading-[1.04]">
                     Нет статей в категории
                   </h4>
                 </div>
               </>
             )}
-          </div>
+          </article>
 
           {parisCardRows.length > 0 ? (
             parisCardRows.map((row, rowIndex) => (

@@ -1,6 +1,7 @@
 ---
 import Layout from "../Layouts/Layout.astro";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
+import NetlenkaCard from "@/components/common/NetlenkaCard.astro";
 import picture1 from "../assets/images/culture.jpg";
 import {
   articlesApi,
@@ -452,38 +453,14 @@ const featuredInterviewName =
             {
               editorialSidebarItems.length > 0 ? (
                 editorialSidebarItems.map((item) => (
-                  <article class="grid gap-[0.65rem] border-b border-[#3028211a] pb-4">
-                    <a
-                      href={item.href}
-                      class="block aspect-[3/2] overflow-hidden"
-                      aria-label={item.title}
-                    >
-                      <img
-                        src={item.imageUrl || picture1.src}
-                        alt={item.title}
-                        class="block h-full w-full object-cover"
-                        loading="lazy"
-                        transition:name={getTransitionName(item)}
-                      />
-                    </a>
-
-                    <div class="grid gap-[0.55rem]">
-                      <p class="m-0">
-                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryTag(item) || "Культура"}
-                        </span>
-                      </p>
-
-                      <a
-                        href={item.href}
-                        class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
-                      >
-                        <h3 class="m-0 text-base font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
-                          {truncateText(item.title, 70)}
-                        </h3>
-                      </a>
-                    </div>
-                  </article>
+                  <NetlenkaCard
+                    title={item.title}
+                    category={getPrimaryTag(item) || "Культура"}
+                    imageUrl={item.imageUrl}
+                    href={item.href}
+                    transitionName={getTransitionName(item)}
+                    hideDate={true}
+                  />
                 ))
               ) : (
                 <p class="m-0 font-inter text-[0.88rem] leading-[1.5] text-[#3028219e]">
