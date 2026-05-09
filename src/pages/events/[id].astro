@@ -53,7 +53,10 @@ const toDate = (value: unknown): Date | null => {
   return null;
 };
 
-const formatDateRange = (start: Date | null, end: Date | null): string | null => {
+const formatDateRange = (
+  start: Date | null,
+  end: Date | null,
+): string | null => {
   if (!start) {
     return null;
   }
@@ -104,7 +107,8 @@ const formatTimeLabel = (event: any): string | null => {
     event?.timeMode === "start" || event?.timeMode === "range"
       ? event.timeMode
       : "none";
-  const start = typeof event?.startTime === "string" ? event.startTime.trim() : "";
+  const start =
+    typeof event?.startTime === "string" ? event.startTime.trim() : "";
   const end = typeof event?.endTime === "string" ? event.endTime.trim() : "";
   if (mode === "start" && start) {
     return `Начало в ${start}`;
@@ -196,7 +200,9 @@ const buildMapsEmbedUrl = (address: string): string | null => {
   return `https://www.google.com/maps?q=${encodeURIComponent(normalized)}&output=embed`;
 };
 
-const parseTime = (value: string | null | undefined): { hours: number; minutes: number } | null => {
+const parseTime = (
+  value: string | null | undefined,
+): { hours: number; minutes: number } | null => {
   if (!value) {
     return null;
   }
@@ -360,7 +366,8 @@ if (!error && eventData) {
           title: item?.title || "Событие",
           href: `/events/${item.id}`,
           imageUrl:
-            typeof item?.imageUrl === "string" && item.imageUrl.trim().length > 0
+            typeof item?.imageUrl === "string" &&
+            item.imageUrl.trim().length > 0
               ? item.imageUrl
               : picture1.src,
           address:
@@ -379,7 +386,10 @@ if (!error && eventData) {
       .filter((item) => item.id !== id && item.startDayKey === currentDayKey)
       .slice(0, 3);
   } catch (relatedError) {
-    console.error("Failed to fetch related events for event page:", relatedError);
+    console.error(
+      "Failed to fetch related events for event page:",
+      relatedError,
+    );
   }
 }
 
@@ -419,13 +429,15 @@ const displayEvent = {
     ? `${eventData.author.firstName} ${eventData.author.lastName}`
     : "MAAG",
   imageUrl:
-    typeof eventData?.imageUrl === "string" && eventData.imageUrl.trim().length > 0
+    typeof eventData?.imageUrl === "string" &&
+    eventData.imageUrl.trim().length > 0
       ? eventData.imageUrl
       : picture1.src,
   imageCaption:
     typeof eventData?.imageCaption === "string" ? eventData.imageCaption : "",
   imageAlt:
-    typeof eventData?.mainImage?.alt === "string" && eventData.mainImage.alt.trim()
+    typeof eventData?.mainImage?.alt === "string" &&
+    eventData.mainImage.alt.trim()
       ? eventData.mainImage.alt
       : eventData?.title || "Изображение события",
   contentBlocks: Array.isArray(eventData?.content) ? eventData.content : [],
@@ -441,32 +453,35 @@ const displayEvent = {
   useClientRouter={true}
 >
   <main class="min-h-screen bg-base-200 text-black">
-    <div class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]">
+    <div
+      class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
+    >
       {error && <div class="pt-24 text-center text-red-400">{error}</div>}
 
-      {!error && eventData && (
-        <>
-          <section class="grid gap-10 lg:grid-cols-12 lg:gap-8 lg:items-start">
-            <div class="grid gap-10 lg:col-span-9">
-              <article class="grid gap-8">
-                <div class="grid gap-6">
-                  <div class="grid gap-3">
-                    <p class="m-0 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {displayEvent.category}
-                    </p>
-
-                    <h1 class="m-0 max-w-[980px] font-old_standard text-3xl font-normal leading-[1.02] text-base-content lg:text-[52px]">
-                      {displayEvent.title}
-                    </h1>
-
-                    {displayEvent.lead && (
-                      <p class="m-0 max-w-[760px] font-article-body text-lg leading-[1.55] text-base-content/75 lg:text-xl">
-                        {displayEvent.lead}
+      {
+        !error && eventData && (
+          <>
+            <section class="grid gap-10 lg:grid-cols-12 lg:gap-8 lg:items-start">
+              <div class="grid gap-10 lg:col-span-9">
+                <article class="grid gap-8">
+                  <div class="grid gap-6">
+                    <div class="grid gap-3">
+                      <p class="m-0 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        {displayEvent.category}
                       </p>
-                    )}
-                  </div>
 
-                  <div class="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-base-content/65 font-inter">
+                      <h1 class="m-0 max-w-[980px] font-old_standard text-3xl font-normal leading-[1.02] text-base-content lg:text-[52px]">
+                        {displayEvent.title}
+                      </h1>
+
+                      {displayEvent.lead && (
+                        <p class="m-0 max-w-[760px] font-article-body text-lg leading-[1.55] text-base-content/75 lg:text-xl">
+                          {displayEvent.lead}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* <div class="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-base-content/65 font-inter">
                     <span class="uppercase tracking-[0.22em] text-accent">
                       {topMetaTag}
                     </span>
@@ -480,9 +495,9 @@ const displayEvent = {
                         <span>{createdAtLabel}</span>
                       </>
                     )}
-                  </div>
+                  </div> */}
 
-                  <div class="flex flex-wrap gap-4">
+                    {/* <div class="flex flex-wrap gap-4">
                     <button
                       type="button"
                       class="inline-flex h-10 items-center gap-3 rounded-2xl border border-base-300 px-4 py-2 text-base-content transition-colors hover:bg-base-300"
@@ -502,194 +517,198 @@ const displayEvent = {
                     >
                       <Bookmark class="h-4 w-4" />
                     </button>
+                  </div> */}
                   </div>
-                </div>
 
-                <figure class="m-0">
-                  <img
-                    src={displayEvent.imageUrl}
-                    alt={displayEvent.imageAlt}
-                    class="block max-h-[720px] w-full object-cover"
-                    transition:name={`event-image-${id}`}
-                  />
+                  <figure class="m-0">
+                    <img
+                      src={displayEvent.imageUrl}
+                      alt={displayEvent.imageAlt}
+                      class="block max-h-[720px] w-full object-cover"
+                      transition:name={`event-image-${id}`}
+                    />
 
-                  {displayEvent.imageCaption && (
-                    <figcaption class="mt-3 font-inter text-sm leading-[1.5] text-base-content/50">
-                      {displayEvent.imageCaption}
-                    </figcaption>
-                  )}
-                </figure>
-              </article>
-
-              <div class="border-t border-base-content/10 pt-10">
-                <div class="bg-white px-4 py-8 text-base-content lg:px-8 lg:py-10">
-                  <ArticleBody contentBlocks={displayEvent.contentBlocks} />
-                </div>
-              </div>
-
-              <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
-                  <div class="flex items-start gap-4">
-                    <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
-                    <div class="grid gap-1">
-                      <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
-                        Адрес
-                      </h2>
-                      <p class="m-0 font-oswald text-lg leading-tight">
-                        {address}
-                      </p>
-                    </div>
-                  </div>
+                    {displayEvent.imageCaption && (
+                      <figcaption class="mt-3 font-inter text-sm leading-[1.5] text-base-content/50">
+                        {displayEvent.imageCaption}
+                      </figcaption>
+                    )}
+                  </figure>
                 </article>
 
-                {displayEvent.datesLabel && (
+                <div class="border-t border-base-content/10 pt-10">
+                  <div class="bg-base-200 px-0 pb-8 pt-0 text-base-content flex items-start justify-start">
+                    <ArticleBody contentBlocks={displayEvent.contentBlocks} />
+                  </div>
+                </div>
+
+                <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
                     <div class="flex items-start gap-4">
-                      <CalendarDays class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                      <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
                       <div class="grid gap-1">
                         <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
-                          Даты
+                          Адрес
                         </h2>
                         <p class="m-0 font-oswald text-lg leading-tight">
-                          {displayEvent.datesLabel}
+                          {address}
                         </p>
                       </div>
                     </div>
                   </article>
-                )}
 
-                {displayEvent.timeLabel && (
-                  <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
-                    <div class="flex items-start gap-4">
-                      <Clock3 class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
-                      <div class="grid gap-1">
-                        <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
-                          Время
-                        </h2>
-                        <p class="m-0 font-oswald text-lg leading-tight">
-                          {displayEvent.timeLabel}
-                        </p>
+                  {displayEvent.datesLabel && (
+                    <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
+                      <div class="flex items-start gap-4">
+                        <CalendarDays class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                        <div class="grid gap-1">
+                          <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
+                            Даты
+                          </h2>
+                          <p class="m-0 font-oswald text-lg leading-tight">
+                            {displayEvent.datesLabel}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </article>
-                )}
-              </section>
-            </div>
+                    </article>
+                  )}
 
-            <aside class="lg:col-span-3 lg:border-l lg:border-base-content/10 lg:pl-6">
-              <div class="grid gap-6 lg:sticky lg:top-8">
-                <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
-                  Ещё в этот день
-                </h2>
-
-                {relatedEvents.length > 0 ? (
-                  <div class="grid gap-8">
-                    {relatedEvents.map((item) => (
-                      <article class="grid gap-4">
-                        <a
-                          href={item.href}
-                          class="block aspect-[3/2] overflow-hidden"
-                          aria-label={item.title}
-                        >
-                          <img
-                            src={item.imageUrl}
-                            alt={item.title}
-                            class="block h-full w-full object-cover"
-                          />
-                        </a>
-
-                        <div class="grid gap-[0.55rem]">
-                          <p class="m-0 font-inter text-lg font-bold uppercase text-black">
-                            {formatShortDateRange(item.startDate, item.endDate)}
+                  {displayEvent.timeLabel && (
+                    <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
+                      <div class="flex items-start gap-4">
+                        <Clock3 class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                        <div class="grid gap-1">
+                          <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
+                            Время
+                          </h2>
+                          <p class="m-0 font-oswald text-lg leading-tight">
+                            {displayEvent.timeLabel}
                           </p>
+                        </div>
+                      </div>
+                    </article>
+                  )}
+                </section>
+              </div>
 
-                          <p class="m-0">
-                            <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                              {item.categoryLabel}
-                            </span>
-                          </p>
+              <aside class="lg:col-span-3 lg:border-l lg:border-base-content/10 lg:pl-6">
+                <div class="grid gap-6 lg:sticky lg:top-8">
+                  <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
+                    Ещё в этот день
+                  </h2>
 
+                  {relatedEvents.length > 0 ? (
+                    <div class="grid gap-8">
+                      {relatedEvents.map((item) => (
+                        <article class="grid gap-4">
                           <a
                             href={item.href}
-                            class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                            class="block aspect-[3/2] overflow-hidden"
+                            aria-label={item.title}
                           >
-                            <h3 class="m-0 font-old_standard text-[1.3rem] font-normal leading-[1.12] text-base-content">
-                              {item.title}
-                            </h3>
+                            <img
+                              src={item.imageUrl}
+                              alt={item.title}
+                              class="block h-full w-full object-cover"
+                            />
                           </a>
 
-                          <div class="mt-1 flex items-center gap-2 font-inter text-sm text-base-content/65">
-                            <span
-                              class="h-4 w-4 shrink-0 [&_path]:fill-[#302821bd]"
-                              set:html={locationIcon}
-                            />
-                            <span>{item.address}</span>
+                          <div class="grid gap-[0.55rem]">
+                            <p class="m-0 font-inter text-lg font-bold uppercase text-black">
+                              {formatShortDateRange(
+                                item.startDate,
+                                item.endDate,
+                              )}
+                            </p>
+
+                            <p class="m-0">
+                              <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                {item.categoryLabel}
+                              </span>
+                            </p>
+
+                            <a
+                              href={item.href}
+                              class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                            >
+                              <h3 class="m-0 font-old_standard text-[1.3rem] font-normal leading-[1.12] text-base-content">
+                                {item.title}
+                              </h3>
+                            </a>
+
+                            <div class="mt-1 flex items-center gap-2 font-inter text-sm text-base-content/65">
+                              <span
+                                class="h-4 w-4 shrink-0 [&_path]:fill-[#302821bd]"
+                                set:html={locationIcon}
+                              />
+                              <span>{item.address}</span>
+                            </div>
                           </div>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                ) : (
-                  <p class="m-0 font-inter text-[0.9rem] leading-[1.6] text-base-content/60">
-                    Пока нет других событий на эту дату.
-                  </p>
-                )}
-              </div>
-            </aside>
-          </section>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <p class="m-0 font-inter text-[0.9rem] leading-[1.6] text-base-content/60">
+                      Пока нет других событий на эту дату.
+                    </p>
+                  )}
+                </div>
+              </aside>
+            </section>
 
-          <section class="mt-16 border-t border-base-content/10 pt-10">
-            <div class="grid gap-8 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-10 lg:items-start">
-              <div class="grid gap-4">
-                {mapsUrl ? (
-                  <a
-                    href={mapsUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-white px-5 py-3 font-inter text-base text-base-content transition-opacity hover:opacity-90"
-                  >
-                    <MapPin class="h-5 w-5" />
-                    <span>Открыть в Google maps</span>
-                  </a>
-                ) : (
-                  <div class="inline-flex min-h-14 items-center gap-3 rounded-2xl border border-base-300 px-5 py-3 font-inter text-base text-base-content/75">
-                    <MapPin class="h-5 w-5" />
-                    <span>Адрес уточняется</span>
-                  </div>
-                )}
+            <section class="mt-16 border-t border-base-content/10 pt-10">
+              <div class="grid gap-8 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-10 lg:items-start">
+                <div class="grid gap-4">
+                  {mapsUrl ? (
+                    <a
+                      href={mapsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-white px-5 py-3 font-inter text-base text-base-content transition-opacity hover:opacity-90"
+                    >
+                      <MapPin class="h-5 w-5" />
+                      <span>Открыть в Google maps</span>
+                    </a>
+                  ) : (
+                    <div class="inline-flex min-h-14 items-center gap-3 rounded-2xl border border-base-300 px-5 py-3 font-inter text-base text-base-content/75">
+                      <MapPin class="h-5 w-5" />
+                      <span>Адрес уточняется</span>
+                    </div>
+                  )}
 
-                {calendarUrl && (
-                  <a
-                    href={calendarUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-white px-5 py-3 font-inter text-base text-base-content transition-opacity hover:opacity-90"
-                  >
-                    <CalendarPlus class="h-5 w-5" />
-                    <span>Добавить в календарь</span>
-                  </a>
-                )}
-              </div>
+                  {calendarUrl && (
+                    <a
+                      href={calendarUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-white px-5 py-3 font-inter text-base text-base-content transition-opacity hover:opacity-90"
+                    >
+                      <CalendarPlus class="h-5 w-5" />
+                      <span>Добавить в календарь</span>
+                    </a>
+                  )}
+                </div>
 
-              <div class="overflow-hidden border border-base-300 bg-white">
-                {mapsEmbedUrl ? (
-                  <iframe
-                    src={mapsEmbedUrl}
-                    class="h-[420px] w-full border-0"
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
-                    title={`Карта для события ${displayEvent.title}`}
-                  ></iframe>
-                ) : (
-                  <div class="flex h-[420px] items-center justify-center px-6 text-center font-inter text-base text-base-content/60">
-                    Карта появится, когда для события будет указан адрес.
-                  </div>
-                )}
+                <div class="overflow-hidden border border-base-300 bg-white">
+                  {mapsEmbedUrl ? (
+                    <iframe
+                      src={mapsEmbedUrl}
+                      class="h-[420px] w-full border-0"
+                      loading="lazy"
+                      referrerpolicy="no-referrer-when-downgrade"
+                      title={`Карта для события ${displayEvent.title}`}
+                    />
+                  ) : (
+                    <div class="flex h-[420px] items-center justify-center px-6 text-center font-inter text-base text-base-content/60">
+                      Карта появится, когда для события будет указан адрес.
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </section>
-        </>
-      )}
+            </section>
+          </>
+        )
+      }
     </div>
   </main>
 </Layout>
