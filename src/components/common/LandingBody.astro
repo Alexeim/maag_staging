@@ -128,6 +128,7 @@ let cultureItems: any[] = [];
 let parisItems: any[] = [];
 let hotContentItems: any[] = [];
 let latestInterview: any = null;
+let allItemsSorted: any[] = [];
 
 const getDate = (timestamp: any): Date => {
   if (timestamp && typeof timestamp === "object" && timestamp._seconds) {
@@ -240,6 +241,8 @@ try {
     (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
   );
 
+  allItemsSorted = allItems;
+
   console.log(`--- STEP 2: COMBINED ---`);
   console.log(`Total items in allItems: ${allItems.length}`);
 
@@ -319,12 +322,20 @@ const parisHero =
 
 const parisCardItems = parisItems
   .filter((item) => (parisHero ? item.id !== parisHero.id : true))
-  .slice(0, 6);
+  .slice(0, 3);
 
-const parisCardRows = [
-  parisCardItems.slice(0, 3),
-  parisCardItems.slice(3, 6),
-].filter((row) => row.length > 0);
+const excludedIds = new Set(
+  [cultureHero?.id, parisHero?.id].filter(Boolean),
+);
+const carouselItems = allItemsSorted
+  .filter(
+    (item) =>
+      !isHotContent(item) &&
+      !item.isNews &&
+      !item.isOnLanding &&
+      !excludedIds.has(item.id),
+  )
+  .slice(0, 20);
 
 const extractQuoteOrAnswer = (interview: any) => {
   if (!interview || !Array.isArray(interview.content)) {
@@ -549,6 +560,7 @@ const interviewQuote = latestInterview?.mainQuote
   </div>
   {
     isLanding && (
+      <>
       <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[200px] gap-6 lg:gap-4">
         <div class="order-2 lg:order-none lg:col-span-9 flex flex-col">
           <div class="pl-0 pr-0">
@@ -634,31 +646,26 @@ const interviewQuote = latestInterview?.mainQuote
               </div>
 
               {
-                parisCardRows.length > 0 ? (
-                  parisCardRows.map((row, rowIndex) => (
-                    <div
-                      id={`paris-articles-box-${rowIndex + 1}`}
-                      class:list={[
-                        "w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 min-h-[100px]",
-                        rowIndex === 0 && "border-b border-base-content/15",
-                      ]}
-                    >
-                      {row.map((item) => (
-                        <ArticleCard
-                          key={item.id}
-                          isNetlenka={false}
-                          title={item.title}
-                          category={getCategoryLabel(item.category)}
-                          date={formatArticleDate(item.createdAt)}
-                          hideDate={true}
-                          lead={truncateText(getCardLead(item), 120) || undefined}
-                          transitionName={getTransitionName(item)}
-                          imageUrl={item.imageUrl}
-                          href={item.href}
-                        />
-                      ))}
-                    </div>
-                  ))
+                parisCardItems.length > 0 ? (
+                  <div
+                    id="paris-articles-box-1"
+                    class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 min-h-[100px] border-b border-base-content/15"
+                  >
+                    {parisCardItems.map((item) => (
+                      <ArticleCard
+                        key={item.id}
+                        isNetlenka={false}
+                        title={item.title}
+                        category={getCategoryLabel(item.category)}
+                        date={formatArticleDate(item.createdAt)}
+                        hideDate={true}
+                        lead={truncateText(getCardLead(item), 120) || undefined}
+                        transitionName={getTransitionName(item)}
+                        imageUrl={item.imageUrl}
+                        href={item.href}
+                      />
+                    ))}
+                  </div>
                 ) : (
                   <div
                     id="paris-articles-box-empty"
@@ -710,6 +717,54 @@ const interviewQuote = latestInterview?.mainQuote
           </section>
         </aside>
       </div>
+      {carouselItems.length > 0 && (
+        <>
+          <div class="w-full">
+            <hr class="h-px my-8 border-1" />
+          </div>
+          <div class="w-full overflow-hidden">
+            <div
+              class="articles-marquee-track flex gap-8 items-stretch py-8"
+              style="width: max-content;"
+            >
+              {[...carouselItems, ...carouselItems].map((item) => (
+                <div class="w-[320px] flex-shrink-0">
+                  <ArticleCard
+                    isNetlenka={false}
+                    title={item.title}
+                    category={getCategoryLabel(item.category)}
+                    date={formatArticleDate(item.createdAt)}
+                    hideDate={true}
+                    lead={truncateText(getCardLead(item), 120) || undefined}
+                    imageUrl={item.imageUrl}
+                    href={item.href}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+      </>
     )
   }
 </section>
+
+<style is:global>
+  @keyframes articles-marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .articles-marquee-track {
+    animation: articles-marquee-scroll 80s linear infinite;
+  }
+
+  .articles-marquee-track:hover {
+    animation-play-state: paused;
+  }
+</style>
