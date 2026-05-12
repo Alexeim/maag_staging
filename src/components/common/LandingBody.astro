@@ -324,9 +324,7 @@ const parisCardItems = parisItems
   .filter((item) => (parisHero ? item.id !== parisHero.id : true))
   .slice(0, 3);
 
-const excludedIds = new Set(
-  [cultureHero?.id, parisHero?.id].filter(Boolean),
-);
+const excludedIds = new Set([cultureHero?.id, parisHero?.id].filter(Boolean));
 const carouselItems = allItemsSorted
   .filter(
     (item) =>
@@ -561,19 +559,16 @@ const interviewQuote = latestInterview?.mainQuote
   {
     isLanding && (
       <>
-      <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[200px] gap-6 lg:gap-4">
-        <div class="order-2 lg:order-none lg:col-span-9 flex flex-col">
-          <div class="pl-0 pr-0">
-            <h2 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old_standard">
-              {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
-            </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[200px] gap-6 lg:gap-4">
+          <div class="order-2 lg:order-none lg:col-span-9 flex flex-col">
+            <div class="pl-0 pr-0">
+              <h2 class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old_standard">
+                {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
+              </h2>
 
-            <div class="w-full flex flex-col gap-8">
-              <div
-                class="w-full bg-white flex flex-col gap-5 lg:flex-row lg:gap-8 items-start justify-start min-h-[100px]"
-              >
-                {
-                  parisHero ? (
+              <div class="w-full flex flex-col gap-8">
+                <div class="w-full bg-white flex flex-col gap-5 lg:flex-row lg:gap-8 items-start justify-start min-h-[100px]">
+                  {parisHero ? (
                     <>
                       <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
                         <a
@@ -641,12 +636,10 @@ const interviewQuote = latestInterview?.mainQuote
                         </h4>
                       </div>
                     </>
-                  )
-                }
-              </div>
+                  )}
+                </div>
 
-              {
-                parisCardItems.length > 0 ? (
+                {parisCardItems.length > 0 ? (
                   <div
                     id="paris-articles-box-1"
                     class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 min-h-[100px] border-b border-base-content/15"
@@ -675,76 +668,73 @@ const interviewQuote = latestInterview?.mainQuote
                       Пока нет дополнительных материалов в разделе «Париж».
                     </p>
                   </div>
-                )
-              }
-            </div>
-          </div>
-        </div>
-
-        <aside
-          class="order-1 lg:order-none lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
-        >
-          <section class="grid gap-4">
-            <h3 class="m-0 text-lg font-normal uppercase tracking-[0.3em] font-old_standard">
-              Le saviez-vous?
-            </h3>
-
-            <article class="overflow-hidden bg-white">
-              <img
-                src={picture1.src}
-                alt="Le saviez-vous placeholder"
-                class="block h-auto w-full object-cover lg:h-[240px]"
-                loading="lazy"
-              />
-
-              <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
-                <p class="m-0">
-                  <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                    Париж
-                  </span>
-                </p>
-
-                <h4 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
-                  Неочевидный факт о городе скоро появится здесь
-                </h4>
-
-                <p class="m-0 text-sm text-black/60 font-inter font-normal">
-                  Пока это плейсхолдер: здесь будет короткий визуальный факт
-                  или наблюдение в духе карточки календаря, но без даты.
-                </p>
+                )}
               </div>
-            </article>
-          </section>
-        </aside>
-      </div>
-      {carouselItems.length > 0 && (
-        <>
-          <div class="w-full">
-            <hr class="h-px my-8 border-1" />
-          </div>
-          <div class="w-full overflow-hidden">
-            <div
-              class="articles-marquee-track flex gap-8 items-stretch py-8"
-              style="width: max-content;"
-            >
-              {[...carouselItems, ...carouselItems].map((item) => (
-                <div class="w-[320px] flex-shrink-0">
-                  <ArticleCard
-                    isNetlenka={false}
-                    title={item.title}
-                    category={getCategoryLabel(item.category)}
-                    date={formatArticleDate(item.createdAt)}
-                    hideDate={true}
-                    lead={truncateText(getCardLead(item), 120) || undefined}
-                    imageUrl={item.imageUrl}
-                    href={item.href}
-                  />
-                </div>
-              ))}
             </div>
           </div>
-        </>
-      )}
+
+          <aside class="order-1 lg:order-none lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0">
+            <section class="grid gap-4">
+              <h3 class="m-0 text-lg font-normal uppercase tracking-[0.3em] font-old_standard">
+                Le saviez-vous?
+              </h3>
+
+              <article class="overflow-hidden bg-white">
+                <img
+                  src={picture1.src}
+                  alt="Le saviez-vous placeholder"
+                  class="block h-auto w-full object-cover lg:h-[240px]"
+                  loading="lazy"
+                />
+
+                <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
+                  <p class="m-0">
+                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                      Париж
+                    </span>
+                  </p>
+
+                  <h4 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
+                    Неочевидный факт о городе скоро появится здесь
+                  </h4>
+
+                  <p class="m-0 text-sm text-black/60 font-inter font-normal">
+                    Пока это плейсхолдер: здесь будет короткий визуальный факт
+                    или наблюдение в духе карточки календаря, но без даты.
+                  </p>
+                </div>
+              </article>
+            </section>
+          </aside>
+        </div>
+        {carouselItems.length > 0 && (
+          <>
+            <div class="w-full">
+              <hr class="h-px my-8 border-1" />
+            </div>
+            <div class="w-full overflow-hidden">
+              <div
+                class="articles-marquee-track flex gap-8 items-stretch py-8"
+                style="width: max-content;"
+              >
+                {[...carouselItems, ...carouselItems].map((item) => (
+                  <div class="w-[320px] flex-shrink-0">
+                    <ArticleCard
+                      isNetlenka={false}
+                      title={item.title}
+                      category={getCategoryLabel(item.category)}
+                      date={formatArticleDate(item.createdAt)}
+                      hideDate={true}
+                      lead={truncateText(getCardLead(item), 120) || undefined}
+                      imageUrl={item.imageUrl}
+                      href={item.href}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </>
     )
   }
@@ -761,7 +751,7 @@ const interviewQuote = latestInterview?.mainQuote
   }
 
   .articles-marquee-track {
-    animation: articles-marquee-scroll 80s linear infinite;
+    animation: articles-marquee-scroll 270s linear infinite;
   }
 
   .articles-marquee-track:hover {

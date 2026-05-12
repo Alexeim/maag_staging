@@ -313,7 +313,10 @@ try {
         mainArticle ? (
           <div>
             <div class="aspect-[3/2] overflow-hidden relative z-50">
-              <a href={mainArticle.href} class="linked-image-hover w-full h-full">
+              <a
+                href={mainArticle.href}
+                class="linked-image-hover w-full h-full"
+              >
                 <img
                   src={mainArticle.imageUrl}
                   alt={mainArticle.title}
@@ -404,11 +407,11 @@ try {
                 transition:name={`event-image-${landingEvent.id}`}
               />
             )}
-            <div class="p-4 lg:py-6 lg:px-4">
+            <div class="px-2 py-4">
               <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                 {eventCategoryLabels[landingEvent.category] || "Событие"}
               </p>
-              <h2 class="text-xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mt-1">
+              <h2 class="text-xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mt-2">
                 {landingEvent.title}
               </h2>
             </div>
