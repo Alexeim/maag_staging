@@ -9,7 +9,9 @@ interface Props {
 }
 
 const navItems = [
-  { href: "/dashboard", label: "Статьи", id: "articles" },
+  { href: "/dashboard", label: "Статьи", id: "articles-overview" },
+  { href: "/dashboard/articles/culture", label: "Статьи Культура", id: "articles-culture" },
+  { href: "/dashboard/articles/paris", label: "Статьи Париж", id: "articles-paris" },
   { href: "/dashboard/events", label: "События", id: "events" },
   { href: "/dashboard/news", label: "Новости", id: "news" },
   { href: "/dashboard/flippers", label: "Листалки", id: "flippers" },
@@ -27,7 +29,7 @@ const navItems = [
   { href: "/dashboard/visual-story/create", label: "Создать визуальную историю", id: "create-visual-story" },
 ];
 
-const { title = "MAAG Dashboard", active = "articles" } = Astro.props as Props;
+const { title = "MAAG Dashboard", active = "articles-overview" } = Astro.props as Props;
 ---
 
 <!doctype html>

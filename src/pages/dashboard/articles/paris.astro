@@ -1,0 +1,13 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import ArticleCategoryList from "@/components/dashboard/ArticleCategoryList.astro";
+---
+
+<DashboardLayout title="Статьи Париж" active="articles-paris">
+  <ArticleCategoryList
+    title="Статьи Париж"
+    description="Управляй материалами раздела «Париж»."
+    categoryKey="paris"
+    emptyMessage="Пока нет статей в разделе «Париж»."
+  />
+</DashboardLayout>

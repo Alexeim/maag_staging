@@ -1,0 +1,239 @@
+---
+import { articlesApi } from "@/lib/api/api";
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+
+interface Props {
+  title: string;
+  description: string;
+  categoryKey: "culture" | "paris";
+  emptyMessage: string;
+}
+
+const { title, description, categoryKey, emptyMessage } = Astro.props as Props;
+
+const normalizeDate = (value: any) => {
+  if (!value) {
+    return null;
+  }
+  if (typeof value === "string") {
+    const cleaned = value
+      .replace(/\u202f/g, " ")
+      .replace(/\s+at\s+/i, " ")
+      .replace(/UTC([+-]\d{1,2})/, "GMT$1");
+    const parsed = new Date(cleaned);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed;
+    }
+    const fallback = new Date(value);
+    return Number.isNaN(fallback.getTime()) ? null : fallback;
+  }
+  if (typeof value === "number") {
+    return new Date(value);
+  }
+  if (typeof value === "object") {
+    if (typeof value.toDate === "function") {
+      return value.toDate();
+    }
+    const seconds =
+      "seconds" in value
+        ? value.seconds
+        : "_seconds" in value
+          ? value._seconds
+          : null;
+    if (seconds !== null) {
+      const nanos =
+        "nanoseconds" in value
+          ? value.nanoseconds
+          : "_nanoseconds" in value
+            ? value._nanoseconds
+            : 0;
+      const millis = seconds * 1000 + nanos / 1_000_000;
+      return new Date(millis);
+    }
+  }
+  return null;
+};
+
+const normalizeArticleCategory = (value: unknown) =>
+  String(value ?? "").trim().toLowerCase();
+
+const formatDashboardArticle = (
+  article: Awaited<ReturnType<typeof articlesApi.list>>[number],
+) => {
+  const createdAtDate = normalizeDate(article.createdAt);
+  const updatedAtDate = normalizeDate((article as any).updatedAt);
+
+  return {
+    ...article,
+    statusLabel: article.isHotContent ? "Самое читаемое" : "Обычная статья",
+    tagsLabel:
+      Array.isArray(article.tags) && article.tags.length > 0
+        ? article.tags.join(", ")
+        : "—",
+    createdAtFormatted: createdAtDate
+      ? createdAtDate.toLocaleDateString("ru-RU", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "—",
+    updatedAtFormatted: updatedAtDate
+      ? updatedAtDate.toLocaleDateString("ru-RU", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : null,
+  };
+};
+
+const escapeForJsSingleQuote = (value: string) =>
+  value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+
+let articlesRaw = [] as Awaited<ReturnType<typeof articlesApi.list>>;
+try {
+  articlesRaw = await articlesApi.list();
+} catch (error) {
+  console.error(`Failed to load ${categoryKey} articles`, error);
+}
+
+const articles = articlesRaw
+  .filter(
+    (article) =>
+      !((article as any).isNews) &&
+      (article as any).articleType !== "tips" &&
+      normalizeArticleCategory(article.category) === categoryKey,
+  )
+  .map(formatDashboardArticle);
+
+const articleListState = JSON.stringify({
+  apiBaseUrl: PUBLIC_API_BASE_URL,
+  articles: articles.map((article) => ({
+    id: article.id,
+    isHotContent: Boolean(article.isHotContent),
+  })),
+});
+---
+
+<div
+  class="bg-base-100 border border-base-300 rounded-xl p-6"
+  x-data={`$lazy('articleList', ${articleListState})`}
+>
+  <div class="flex flex-col gap-4 mb-6 md:flex-row md:items-end md:justify-between">
+    <div>
+      <h2 class="text-xl font-semibold">{title}</h2>
+      <p class="text-sm text-base-content/70 mt-1">
+        {description}
+      </p>
+    </div>
+
+    <label class="flex flex-col gap-2 text-sm text-base-content/70 md:min-w-64">
+      <span>Фильтр по `isHotContent`</span>
+      <select
+        x-model="hotFilter"
+        class="select select-bordered w-full bg-base-100"
+      >
+        <option value="all">Все статьи</option>
+        <option value="hot">Только hot content</option>
+        <option value="regular">Только не hot content</option>
+      </select>
+    </label>
+  </div>
+
+  {articles.length > 0 ? (
+    <>
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left rtl:text-right text-base-content">
+          <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+            <tr>
+              <th scope="col" class="px-6 py-3">
+                Заголовок
+              </th>
+              <th scope="col" class="px-6 py-3">
+                Статус / теги
+              </th>
+              <th scope="col" class="px-6 py-3 hidden md:table-cell">
+                Создана
+              </th>
+              <th scope="col" class="px-6 py-3">
+                <span class="sr-only">Действия</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {articles.map((article, index) => {
+              const isLast = index === articles.length - 1;
+
+              return (
+                <tr
+                  class:list={[
+                    "bg-base-100 hover:bg-base-200/50",
+                    !isLast && "border-b border-base-300",
+                  ]}
+                  x-show={`matchesFilter(hotFilter, ${article.isHotContent ? "true" : "false"})`}
+                >
+                  <th
+                    scope="row"
+                    class="px-6 py-4 font-medium text-base-content whitespace-nowrap"
+                  >
+                    <div
+                      class="font-semibold truncate max-w-xs"
+                      title={article.title}
+                    >
+                      {article.title}
+                    </div>
+                    <div
+                      class="text-xs text-base-content/60 mt-1 truncate"
+                      title={article.id}
+                    >
+                      ID: {article.id}
+                    </div>
+                  </th>
+                  <td class="px-6 py-4">
+                    <div class="flex flex-col gap-1">
+                      <span class="font-semibold">{article.statusLabel}</span>
+                      <span class="text-xs text-base-content/70">
+                        {article.tagsLabel}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 hidden md:table-cell">
+                    {article.createdAtFormatted}
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex justify-end gap-4">
+                      <a
+                        href={`/dashboard/article/${article.id}/edit`}
+                        class="font-medium text-primary hover:underline"
+                      >
+                        Редактировать
+                      </a>
+                      <button
+                        type="button"
+                        class="font-medium text-error hover:underline"
+                        @click={`handleDeleteClick('${article.id}', '${escapeForJsSingleQuote(article.title)}')`}
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div
+        x-show="getVisibleCount() === 0"
+        class="p-6 text-center text-sm text-base-content/70"
+      >
+        По текущему фильтру статей не найдено.
+      </div>
+    </>
+  ) : (
+    <div class="p-8 text-center text-base-content/70">
+      <p>{emptyMessage}</p>
+    </div>
+  )}
+</div>

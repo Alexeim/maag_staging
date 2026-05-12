@@ -1,0 +1,13 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import ArticleCategoryList from "@/components/dashboard/ArticleCategoryList.astro";
+---
+
+<DashboardLayout title="Статьи Культура" active="articles-culture">
+  <ArticleCategoryList
+    title="Статьи Культура"
+    description="Управляй материалами раздела «Культура»."
+    categoryKey="culture"
+    emptyMessage="Пока нет статей в разделе «Культура»."
+  />
+</DashboardLayout>

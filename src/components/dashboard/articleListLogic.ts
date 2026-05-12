@@ -2,11 +2,42 @@ import type { UiStore } from "@/stores/uiStore";
 
 declare const Alpine: any;
 
-export default (initialState: { apiBaseUrl: string }) => ({
+type ArticleFilter = "all" | "hot" | "regular";
+type SectionArticleMeta = { id: string; isHotContent?: boolean };
+
+const matchesArticleFilter = (
+  filter: ArticleFilter,
+  isHotContent: boolean,
+) => {
+  if (filter === "hot") {
+    return isHotContent;
+  }
+  if (filter === "regular") {
+    return !isHotContent;
+  }
+  return true;
+};
+
+export default (initialState: {
+  apiBaseUrl: string;
+  articles?: SectionArticleMeta[];
+}) => ({
   apiBase: initialState.apiBaseUrl,
+  hotFilter: "all" as ArticleFilter,
+  articles: initialState.articles ?? [],
 
   getUiStore(): UiStore | null {
     return Alpine.store("ui");
+  },
+
+  matchesFilter(filter: ArticleFilter, isHotContent: boolean) {
+    return matchesArticleFilter(filter, Boolean(isHotContent));
+  },
+
+  getVisibleCount() {
+    return this.articles.filter((article) =>
+      this.matchesFilter(this.hotFilter, Boolean(article.isHotContent)),
+    ).length;
   },
 
   notify(message: string, type: "success" | "error" = "success") {
