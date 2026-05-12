@@ -1,4 +1,4 @@
-import Quill from "quill";
+import Quill, { Delta } from "quill";
 import {
   normalizeStoredRichTextHtml,
   richTextHtmlToText,
@@ -7,6 +7,38 @@ import {
 interface RichTextEditorConfig {
   initialHtml?: string;
   placeholder?: string;
+}
+
+// Formats that carry cosmetic styles from external sources (email, web pages).
+// We strip these on paste so the page CSS controls appearance, not the source.
+const COSMETIC_FORMATS = new Set([
+  "background",
+  "color",
+  "font",
+  "size",
+  "script",
+  "align",
+]);
+
+function stripCosmeticFormats(_node: Node, delta: Delta): Delta {
+  return new Delta(
+    delta.ops
+      .filter((op) => {
+        // Reject embed ops (images, videos) — insert is an object for embeds, string for text
+        return typeof op.insert !== "object";
+      })
+      .map((op) => {
+        if (!op.attributes) return op;
+        const cleanAttrs = Object.fromEntries(
+          Object.entries(op.attributes).filter(
+            ([key]) => !COSMETIC_FORMATS.has(key),
+          ),
+        );
+        return Object.keys(cleanAttrs).length > 0
+          ? { ...op, attributes: cleanAttrs }
+          : { insert: op.insert };
+      }),
+  );
 }
 
 export default function blockRichTextEditor(
@@ -24,9 +56,13 @@ export default function blockRichTextEditor(
       // @ts-ignore Alpine ref is available at runtime.
       this.quill = new Quill(this.$refs.editor, {
         theme: "snow",
+        formats: ["bold", "italic", "underline", "link"],
         placeholder: config.placeholder || "Введите текст...",
         modules: {
-          clipboard: { matchVisual: false },
+          clipboard: {
+            matchVisual: false,
+            matchers: [[Node.ELEMENT_NODE, stripCosmeticFormats]],
+          },
           toolbar: [["bold", "italic", "underline"], ["link"], ["clean"]],
         },
       });

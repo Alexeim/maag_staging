@@ -11,6 +11,12 @@ const escapeHtml = (value: string) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
+// Matches any style="..." attribute — used to strip cosmetic inline styles
+// that email clients embed in pasted content.
+const STYLE_ATTR_RE = /\s+style="[^"]*"/g;
+
+const stripInlineStyles = (html: string) => html.replace(STYLE_ATTR_RE, "");
+
 export const normalizeStoredRichTextHtml = (value?: unknown) => {
   const html = typeof value === "string" ? value.trim() : "";
   if (!html || html === "<p><br></p>") {
@@ -36,7 +42,7 @@ export const plainTextToRichTextHtml = (value?: unknown) => {
 export const getInitialRichTextHtml = (block?: RichTextBlock | null) => {
   const html = normalizeStoredRichTextHtml(block?.html);
   if (html) {
-    return html;
+    return stripInlineStyles(html);
   }
   return plainTextToRichTextHtml(block?.text);
 };
