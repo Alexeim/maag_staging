@@ -16,6 +16,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const PARIS_CATEGORY_KEY = "paris";
 const HOT_CONTENT_CATEGORY_KEY = "hotContent";
+const MAX_EDITORIAL_GRID_ITEMS = 12;
 
 const normalizeCategory = (value?: string) => {
   if (!value) return null;
@@ -44,6 +45,10 @@ const TAG_LABEL_ALIASES: Record<string, string> = {
   books: "Книги",
   artMarket: "Арт-рынок",
   artmarket: "Арт-рынок",
+  architecture: "Архитектура",
+  museums: "Музеи",
+  tourism: "Туризм",
+  strike: "Забастовка",
   kids: "Дети",
   opera: "Опера",
   ballet: "Балет",
@@ -105,12 +110,9 @@ const normalizeTags = (value: unknown): string[] => {
 };
 
 const getPrimaryTag = (item: any): string => {
-  if (item?.isNews) {
-    return "Новости";
-  }
   const tags = normalizeTags(item?.tags);
   if (tags.length === 0) {
-    return "";
+    return item?.isNews ? "Новости" : "";
   }
   const firstTag = tags[0];
   const normalized = firstTag.toLowerCase();
@@ -168,8 +170,7 @@ const getTransitionName = (item: any) => {
 };
 
 let primaryParisArticle: any = null;
-let secondaryParisArticle: any = null;
-let tertiaryParisArticle: any = null;
+let secondaryStories: any[] = [];
 let editorialSidebarItems: any[] = [];
 let parisFeed: any[] = [];
 
@@ -213,7 +214,7 @@ try {
   const allParisItems = sortedContent
     .filter(
       (item) =>
-        normalizeCategory(item.category) === PARIS_CATEGORY_KEY && !item.isNews,
+        normalizeCategory(item.category) === PARIS_CATEGORY_KEY,
     )
     .map((item) => ({
       ...item,
@@ -229,19 +230,14 @@ try {
     primaryParisArticle ? item.id !== primaryParisArticle.id : true,
   );
 
-  secondaryParisArticle = topWithoutPrimary[0] ?? null;
-  tertiaryParisArticle = topWithoutPrimary[1] ?? null;
+  secondaryStories = topWithoutPrimary.slice(0, 4);
 
   const topIds = new Set(
-    [
-      primaryParisArticle?.id,
-      secondaryParisArticle?.id,
-      tertiaryParisArticle?.id,
-    ].filter(Boolean),
+    [primaryParisArticle?.id, ...secondaryStories.map((item) => item?.id)].filter(Boolean),
   );
 
   const parisHotContentItems = allParisItems.filter(
-    (item) => !topIds.has(item.id) && isHotContent(item) && !item.isNews,
+    (item) => !topIds.has(item.id) && isHotContent(item),
   );
 
   editorialSidebarItems = parisHotContentItems.slice(0, 4);
@@ -256,10 +252,8 @@ try {
   console.error("Failed to fetch paris page articles:", error);
 }
 
-const secondaryStories = [secondaryParisArticle, tertiaryParisArticle].filter(
-  Boolean,
-);
-const editorialGridItems = parisFeed;
+const editorialGridItems = parisFeed.slice(0, MAX_EDITORIAL_GRID_ITEMS);
+const editorialCarouselItems = parisFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
 ---
 
 <Layout
@@ -453,46 +447,98 @@ const editorialGridItems = parisFeed;
         <div>
           {
             editorialGridItems.length > 0 ? (
-              <div class="grid grid-cols-2 gap-x-4 gap-y-[1.4rem] lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
-                {editorialGridItems.map((item) => (
-                  <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
-                    <a
-                      href={item.href}
-                      class="linked-image-hover bg-white/50 aspect-[1.02/1]"
-                      aria-label={item.title}
+              <>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-[1.4rem] lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
+                  {editorialGridItems.map((item) => (
+                    <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
+                      <a
+                        href={item.href}
+                        class="linked-image-hover bg-white/50 aspect-[1.02/1]"
+                        aria-label={item.title}
+                      >
+                        <img
+                          src={item.imageUrl || picture1.src}
+                          alt={item.title}
+                          class="linked-image-hover__media block h-full w-full object-cover"
+                          loading="lazy"
+                          transition:name={getTransitionName(item)}
+                        />
+                      </a>
+
+                      <div class="grid h-full content-start gap-[0.55rem]">
+                        <p class="m-0">
+                          <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                            {getPrimaryTag(item) || "Париж"}
+                          </span>
+                        </p>
+
+                        <a
+                          href={item.href}
+                          class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                        >
+                          <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
+                            {truncateText(item.title, 72)}
+                          </h3>
+                        </a>
+
+                        <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                          {formatDate(item.createdAt)}
+                        </p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                {editorialCarouselItems.length > 0 && (
+                  <div class="mt-[2rem] overflow-hidden">
+                    <div
+                      class="rubric-marquee-track flex items-start gap-6 py-2"
+                      style="width: max-content;"
                     >
-                      <img
-                        src={item.imageUrl || picture1.src}
-                        alt={item.title}
-                        class="linked-image-hover__media block h-full w-full object-cover"
-                        loading="lazy"
-                        transition:name={getTransitionName(item)}
-                      />
-                    </a>
+                      {[...editorialCarouselItems, ...editorialCarouselItems].map((item) => (
+                        <div class="w-[240px] sm:w-[260px] lg:w-[280px] flex-shrink-0">
+                          <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
+                            <a
+                              href={item.href}
+                              class="linked-image-hover bg-white/50 aspect-[1.02/1]"
+                              aria-label={item.title}
+                            >
+                              <img
+                                src={item.imageUrl || picture1.src}
+                                alt={item.title}
+                                class="linked-image-hover__media block h-full w-full object-cover"
+                                loading="lazy"
+                                transition:name={getTransitionName(item)}
+                              />
+                            </a>
 
-                    <div class="grid h-full content-start gap-[0.55rem]">
-                      <p class="m-0">
-                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryTag(item) || "Париж"}
-                        </span>
-                      </p>
+                            <div class="grid h-full content-start gap-[0.55rem]">
+                              <p class="m-0">
+                                <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                  {getPrimaryTag(item) || "Париж"}
+                                </span>
+                              </p>
 
-                    <a
-                      href={item.href}
-                      class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
-                    >
-                      <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
-                        {truncateText(item.title, 72)}
-                      </h3>
-                    </a>
+                              <a
+                                href={item.href}
+                                class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                              >
+                                <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
+                                  {truncateText(item.title, 72)}
+                                </h3>
+                              </a>
 
-                      <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                        {formatDate(item.createdAt)}
-                      </p>
+                              <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                                {formatDate(item.createdAt)}
+                              </p>
+                            </div>
+                          </article>
+                        </div>
+                      ))}
                     </div>
-                  </article>
-                ))}
-              </div>
+                  </div>
+                )}
+              </>
             ) : (
               <article class="bg-white/70 p-5 text-[1.05rem] font-light leading-[1.5]">
                 Больше материалов пока нет.
@@ -504,3 +550,22 @@ const editorialGridItems = parisFeed;
     </div>
   </main>
 </Layout>
+
+<style is:global>
+  @keyframes rubric-marquee-scroll {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .rubric-marquee-track {
+    animation: rubric-marquee-scroll 240s linear infinite;
+  }
+
+  .rubric-marquee-track:hover {
+    animation-play-state: paused;
+  }
+</style>

@@ -1,13 +1,12 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import NewsComposer from "@/components/dashboard/NewsComposer.astro";
-import cultureTags from "@/content/tags/CultureTags.json";
-import parisTags from "@/content/tags/ParisTags.json";
+import newsTags from "@/content/tags/NewsTags.json";
 
 const newsCreatorState = JSON.stringify({
   categoryTags: {
-    culture: cultureTags.cultureTags,
-    paris: parisTags.parisTags,
+    culture: newsTags.newsTags,
+    paris: newsTags.newsTags,
   },
   isEditMode: false,
   onSaveRedirect: "/dashboard/news",

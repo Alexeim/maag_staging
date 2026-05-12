@@ -24,6 +24,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   books: "Книги",
   artMarket: "Арт-рынок",
   artmarket: "Арт-рынок",
+  architecture: "Архитектура",
+  museums: "Музеи",
+  tourism: "Туризм",
+  strike: "Забастовка",
   kids: "Дети",
   route: "Маршрут",
   address: "Адрес",
@@ -283,7 +287,7 @@ try {
                 <div class="flex-1 max-w-max">
                   <div class="mb-1">
                     <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {getCategoryLabel(newsItem?.category) || "Новости"}
+                      {getPrimaryTag(newsItem) || "Новости"}
                     </span>
                   </div>
                   <a

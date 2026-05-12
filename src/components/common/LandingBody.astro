@@ -44,6 +44,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   books: "Книги",
   artMarket: "Арт-рынок",
   artmarket: "Арт-рынок",
+  architecture: "Архитектура",
+  museums: "Музеи",
+  tourism: "Туризм",
+  strike: "Забастовка",
   kids: "Дети",
   opera: "Опера",
   dance: "Танец",
@@ -89,7 +93,6 @@ const getPrimaryTag = (item: any) => {
   if (item?.type === "interview" || item?.contentType === "interview") {
     return CATEGORY_LABELS.interview;
   }
-  if (item?.isNews) return "Новости";
   const rawTags = Array.isArray(item?.tags)
     ? item.tags
     : typeof item?.tags === "string"
@@ -99,6 +102,7 @@ const getPrimaryTag = (item: any) => {
     (tag: string) => typeof tag === "string" && tag.trim().length > 0,
   );
   if (firstTag) return getCategoryLabel(firstTag.trim());
+  if (item?.isNews) return "Новости";
   if (item?.isHotContent) return CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY];
   return getCategoryLabel(item?.category);
 };
@@ -743,10 +747,10 @@ const interviewQuote = latestInterview?.mainQuote
 <style is:global>
   @keyframes articles-marquee-scroll {
     from {
-      transform: translateX(0);
+      transform: translateX(-50%);
     }
     to {
-      transform: translateX(-50%);
+      transform: translateX(0);
     }
   }
 

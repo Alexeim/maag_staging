@@ -18,6 +18,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const CULTURE_CATEGORY_KEY = "culture";
 const HOT_CONTENT_CATEGORY_KEY = "hotContent";
+const MAX_EDITORIAL_GRID_ITEMS = 12;
 
 const normalizeCategory = (value?: string) => {
   if (!value) return null;
@@ -46,6 +47,10 @@ const TAG_LABEL_ALIASES: Record<string, string> = {
   books: "Книги",
   artMarket: "Арт-рынок",
   artmarket: "Арт-рынок",
+  architecture: "Архитектура",
+  museums: "Музеи",
+  tourism: "Туризм",
+  strike: "Забастовка",
   kids: "Дети",
   opera: "Опера",
   ballet: "Балет",
@@ -107,15 +112,12 @@ const normalizeTags = (value: unknown): string[] => {
 };
 
 const getPrimaryTag = (item: any): string => {
+  const tags = normalizeTags(item?.tags);
   if (item?.contentType === "interview") {
     return "Интервью";
   }
-  if (item?.isNews) {
-    return "Новости";
-  }
-  const tags = normalizeTags(item?.tags);
   if (tags.length === 0) {
-    return "";
+    return item?.isNews ? "Новости" : "";
   }
   const firstTag = tags[0];
   const normalized = firstTag.toLowerCase();
@@ -190,8 +192,7 @@ const extractInterviewQuote = (interview: any): string | null => {
 };
 
 let primaryCultureArticle: any = null;
-let secondaryCultureArticle: any = null;
-let tertiaryCultureArticle: any = null;
+let secondaryStories: any[] = [];
 let editorialSidebarItems: any[] = [];
 let cultureFeed: any[] = [];
 let featuredInterview: any = null;
@@ -244,8 +245,7 @@ try {
   const allCultureItems = sortedContent
     .filter(
       (item) =>
-        normalizeCategory(item.category) === CULTURE_CATEGORY_KEY &&
-        !item.isNews,
+        normalizeCategory(item.category) === CULTURE_CATEGORY_KEY,
     )
     .map((item) => ({
       ...item,
@@ -263,15 +263,10 @@ try {
     primaryCultureArticle ? item.id !== primaryCultureArticle.id : true,
   );
 
-  secondaryCultureArticle = topWithoutPrimary[0] ?? null;
-  tertiaryCultureArticle = topWithoutPrimary[1] ?? null;
+  secondaryStories = topWithoutPrimary.slice(0, 4);
 
   const topIds = new Set(
-    [
-      primaryCultureArticle?.id,
-      secondaryCultureArticle?.id,
-      tertiaryCultureArticle?.id,
-    ].filter(Boolean),
+    [primaryCultureArticle?.id, ...secondaryStories.map((item) => item?.id)].filter(Boolean),
   );
 
   featuredInterview =
@@ -289,8 +284,7 @@ try {
     (item) =>
       normalizeCategory(item.category) === CULTURE_CATEGORY_KEY &&
       !excludedIds.has(item.id) &&
-      isHotContent(item) &&
-      !item.isNews,
+      isHotContent(item),
   );
 
   editorialSidebarItems = cultureHotContentItems.slice(0, 4);
@@ -308,11 +302,8 @@ try {
 }
 
 const interviewQuote = extractInterviewQuote(featuredInterview);
-const secondaryStories = [
-  secondaryCultureArticle,
-  tertiaryCultureArticle,
-].filter(Boolean);
-const editorialGridItems = cultureFeed;
+const editorialGridItems = cultureFeed.slice(0, MAX_EDITORIAL_GRID_ITEMS);
+const editorialCarouselItems = cultureFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
 const featuredInterviewName =
   featuredInterview?.interviewee ?? featuredInterview?.title ?? "";
 ---
@@ -492,63 +483,132 @@ const featuredInterviewName =
       <section class="mt-[1.6rem] border-t border-[#3028211f] pt-[1.6rem]">
         {
           editorialGridItems.length > 0 ? (
-            <div class="grid grid-cols-2 gap-x-4 gap-y-[1.4rem] lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
-              {editorialGridItems.map((item) => (
-                <article
-                  class:list={[
-                    "grid h-full grid-rows-[auto_1fr] gap-[0.8rem]",
-                    item.contentType === "interview" && "content-start",
-                  ]}
-                >
-                  <a
-                    href={item.href}
+            <>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-[1.4rem] lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
+                {editorialGridItems.map((item) => (
+                  <article
                     class:list={[
-                      "linked-image-hover bg-white/50 aspect-[1.02/1]",
-                      item.contentType === "interview" &&
-                        "w-full aspect-square rounded-full bg-transparent",
-                    ]}
-                    aria-label={item.title}
-                  >
-                    <img
-                      src={item.imageUrl || picture1.src}
-                      alt={item.title}
-                      class:list={[
-                        "linked-image-hover__media block h-full w-full object-cover",
-                        item.contentType === "interview" && "rounded-full",
-                      ]}
-                      loading="lazy"
-                      transition:name={getTransitionName(item)}
-                    />
-                  </a>
-
-                  <div
-                    class:list={[
-                      "grid h-full content-start gap-[0.55rem]",
-                      item.contentType === "interview" && "w-full text-left",
+                      "grid h-full grid-rows-[auto_1fr] gap-[0.8rem]",
+                      item.contentType === "interview" && "content-start",
                     ]}
                   >
-                    <p class="m-0">
-                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                        {getPrimaryTag(item) || "Культура"}
-                      </span>
-                    </p>
-
                     <a
                       href={item.href}
-                      class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                      class:list={[
+                        "linked-image-hover bg-white/50 aspect-[1.02/1]",
+                        item.contentType === "interview" &&
+                          "w-full aspect-square rounded-full bg-transparent",
+                      ]}
+                      aria-label={item.title}
                     >
-                      <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
-                        {truncateText(item.title, 72)}
-                      </h3>
+                      <img
+                        src={item.imageUrl || picture1.src}
+                        alt={item.title}
+                        class:list={[
+                          "linked-image-hover__media block h-full w-full object-cover",
+                          item.contentType === "interview" && "rounded-full",
+                        ]}
+                        loading="lazy"
+                        transition:name={getTransitionName(item)}
+                      />
                     </a>
 
-                    <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                      {formatDate(item.createdAt)}
-                    </p>
+                    <div
+                      class:list={[
+                        "grid h-full content-start gap-[0.55rem]",
+                        item.contentType === "interview" && "w-full text-left",
+                      ]}
+                    >
+                      <p class="m-0">
+                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                          {getPrimaryTag(item) || "Культура"}
+                        </span>
+                      </p>
+
+                      <a
+                        href={item.href}
+                        class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                      >
+                        <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
+                          {truncateText(item.title, 72)}
+                        </h3>
+                      </a>
+
+                      <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                        {formatDate(item.createdAt)}
+                      </p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              {editorialCarouselItems.length > 0 && (
+                <div class="mt-[2rem] overflow-hidden">
+                  <div
+                    class="rubric-marquee-track flex items-start gap-6 py-2"
+                    style="width: max-content;"
+                  >
+                    {[...editorialCarouselItems, ...editorialCarouselItems].map((item) => (
+                      <div class="w-[240px] sm:w-[260px] lg:w-[280px] flex-shrink-0">
+                        <article
+                          class:list={[
+                            "grid h-full grid-rows-[auto_1fr] gap-[0.8rem]",
+                            item.contentType === "interview" && "content-start",
+                          ]}
+                        >
+                          <a
+                            href={item.href}
+                            class:list={[
+                              "linked-image-hover bg-white/50 aspect-[1.02/1]",
+                              item.contentType === "interview" &&
+                                "w-full aspect-square rounded-full bg-transparent",
+                            ]}
+                            aria-label={item.title}
+                          >
+                            <img
+                              src={item.imageUrl || picture1.src}
+                              alt={item.title}
+                              class:list={[
+                                "linked-image-hover__media block h-full w-full object-cover",
+                                item.contentType === "interview" && "rounded-full",
+                              ]}
+                              loading="lazy"
+                              transition:name={getTransitionName(item)}
+                            />
+                          </a>
+
+                          <div
+                            class:list={[
+                              "grid h-full content-start gap-[0.55rem]",
+                              item.contentType === "interview" && "w-full text-left",
+                            ]}
+                          >
+                            <p class="m-0">
+                              <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                {getPrimaryTag(item) || "Культура"}
+                              </span>
+                            </p>
+
+                            <a
+                              href={item.href}
+                              class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                            >
+                              <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
+                                {truncateText(item.title, 72)}
+                              </h3>
+                            </a>
+
+                            <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                              {formatDate(item.createdAt)}
+                            </p>
+                          </div>
+                        </article>
+                      </div>
+                    ))}
                   </div>
-                </article>
-              ))}
-            </div>
+                </div>
+              )}
+            </>
           ) : (
             <article class="bg-white/70 p-5 text-[1.05rem] font-light leading-[1.5]">
               Больше материалов пока нет.
@@ -559,3 +619,22 @@ const featuredInterviewName =
     </div>
   </main>
 </Layout>
+
+<style is:global>
+  @keyframes rubric-marquee-scroll {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .rubric-marquee-track {
+    animation: rubric-marquee-scroll 240s linear infinite;
+  }
+
+  .rubric-marquee-track:hover {
+    animation-play-state: paused;
+  }
+</style>
