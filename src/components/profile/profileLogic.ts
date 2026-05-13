@@ -1,5 +1,6 @@
 import { usersApi } from "@/lib/api/api";
 import { auth } from "@/lib/firebase/client";
+import { sendPasswordResetEmail } from "firebase/auth";
 import type { UiStore } from "@/stores/uiStore";
 import type { AuthStore } from "@/stores/authStore";
 
@@ -54,6 +55,24 @@ export default () => ({
     } catch (error) {
       console.error("Failed to save profile:", error);
       uiStore?.showToast?.("Не удалось сохранить изменения.", "error");
+    }
+  },
+
+  async changePassword() {
+    const uiStore = Alpine.store('ui') as UiStore;
+    const email = auth.currentUser?.email;
+
+    if (!email) {
+      uiStore?.showToast?.("Не удалось определить email.", "error");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      uiStore?.showToast?.("Письмо со ссылкой отправлено на " + email);
+    } catch (error) {
+      console.error("Failed to send password reset email:", error);
+      uiStore?.showToast?.("Не удалось отправить письмо.", "error");
     }
   },
 

@@ -65,16 +65,18 @@ export default function authModalLogic() {
           const userCredential = await createUserWithEmailAndPassword(auth, this.formData.email, this.formData.password);
           const user = userCredential.user;
 
-          await updateProfile(user, { 
-            displayName: `${this.formData.firstName} ${this.formData.lastName}`.trim() 
+          await updateProfile(user, {
+            displayName: `${this.formData.firstName} ${this.formData.lastName}`.trim()
           });
+
+          const token = await user.getIdToken();
 
           // Create user document in our Firestore database via our backend
           await usersApi.create({
             uid: user.uid,
             firstName: this.formData.firstName,
             lastName: this.formData.lastName,
-          });
+          }, token);
 
           window.Alpine.store('ui').showToast('Signup successful! Please log in.');
           window.Alpine.store('auth').switchTo('login');

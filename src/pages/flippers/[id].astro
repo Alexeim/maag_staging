@@ -13,93 +13,145 @@ const flipper = await flippersApi.getById(id);
 if (!flipper) {
   return Astro.redirect("/404");
 }
+
+const CATEGORY_LABELS: Record<string, string> = {
+  culture: "Культура",
+  paris: "Париж",
+  hotContent: "Самое Читаемое",
+  ballet: "Балет",
+  books: "Книги",
+  artMarket: "Арт-рынок",
+  artmarket: "Арт-рынок",
+  dance: "Танец",
+  music: "Музыка",
+  opera: "Опера",
+  theatre: "Театр",
+  theater: "Театр",
+  performance: "Спектакль",
+  performances: "Спектакль",
+  concert: "Концерт",
+  concerts: "Концерт",
+  exhibition: "Выставка",
+  exhibitions: "Выставка",
+  route: "Маршрут",
+  address: "Адрес",
+  notebook: "Записная книжка",
+  place: "Место",
+};
+
+const getFlipperCategory = () => {
+  const firstTag =
+    Array.isArray(flipper.tags) && flipper.tags.length > 0
+      ? flipper.tags[0]
+      : Array.isArray(flipper.techTags) && flipper.techTags.length > 0
+        ? flipper.techTags[0]
+        : flipper.category;
+
+  if (!firstTag || typeof firstTag !== "string") {
+    return "Листалка";
+  }
+
+  return CATEGORY_LABELS[firstTag] || firstTag;
+};
+
 const flipperState = JSON.stringify({
   activeSlide: 0,
   slides: flipper.carouselContent || [],
 });
 ---
 
-<Layout title={flipper.title} useClientRouter={true}>
-  <div class="container mx-auto px-4 py-8" x-data={flipperState}>
-    <div class="pt-[50px] pb-[70px] flex flex-col items-center gap-[50px]">
-      <div class="flex flex-col gap-4 max-w-[825px] w-full">
-        <ArticleHeader
-          category={flipper.techTags?.[0]}
-          title={flipper.title}
-          lead={flipper.lead}
-        />
-        <div class="flex flex-row items-center justify-start gap-4">
-          {
-            flipper.author && (
-              <ArticleAuthor
-                name={`${flipper.author.firstName} ${flipper.author.lastName}`}
-                avatarUrl={flipper.author.avatar}
-              />
-            )
-          }
-          {
-            flipper.author && flipper.createdAt && (
-              <div>·</div>
-            )
-          }
-          {flipper.createdAt && <ArticleDate createdAt={flipper.createdAt} />}
+<Layout
+  title={`${flipper.title} - Maag`}
+  navbarVariant="default"
+  includePreFooterCTA={false}
+  useClientRouter={true}
+>
+  <main class="bg-base-200 min-h-screen">
+    <div class="max-w-[1512px] mx-auto" x-data={flipperState}>
+      <div class="pt-[50px] pb-[70px] px-4 lg:px-0 flex flex-col items-center gap-[50px]">
+        <div class="flex flex-col gap-4 max-w-[825px] w-full">
+          <ArticleHeader
+            category={getFlipperCategory()}
+            title={flipper.title}
+            lead={flipper.lead}
+          />
+
+          <div class="min-h-10 flex flex-row flex-wrap items-center justify-start gap-4">
+            {
+              flipper.author && (
+                <ArticleAuthor
+                  name={`${flipper.author.firstName} ${flipper.author.lastName}`}
+                  avatarUrl={flipper.author.avatar}
+                />
+              )
+            }
+            {flipper.createdAt && <ArticleDate createdAt={flipper.createdAt} />}
+          </div>
+        </div>
+      </div>
+
+      <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
+        <div class="mx-auto w-full max-w-[1200px]">
+          <div class="relative overflow-hidden bg-white shadow-lg">
+            <div class="relative h-[360px] w-full sm:h-[460px] lg:h-[600px]">
+              <template x-for="(item, index) in slides" :key="index">
+                <div
+                  x-show="activeSlide === index"
+                  class="absolute inset-0 duration-700 ease-in-out"
+                  x-transition:enter="transition ease-in-out duration-700"
+                  x-transition:enter-start="opacity-0"
+                  x-transition:enter-end="opacity-100"
+                  x-transition:leave="transition ease-in-out duration-700"
+                  x-transition:leave-start="opacity-100"
+                  x-transition:leave-end="opacity-0"
+                >
+                  <img
+                    :src="item.imageUrl"
+                    class="block h-full w-full object-contain bg-white"
+                    :alt="item.caption || 'Carousel image'"
+                  />
+                </div>
+              </template>
+
+              <button
+                @click="activeSlide = (activeSlide - 1 + slides.length) % slides.length"
+                class="absolute top-1/2 left-2 -translate-y-1/2 p-3 transition cursor-pointer text-neutral-300 hover:text-neutral-400"
+                aria-label="Предыдущий слайд"
+              >
+                <ArrowLeft />
+              </button>
+              <button
+                @click="activeSlide = (activeSlide + 1) % slides.length"
+                class="absolute top-1/2 right-2 -translate-y-1/2 p-3 transition cursor-pointer text-neutral-300 hover:text-neutral-400"
+                aria-label="Следующий слайд"
+              >
+                <ArrowRight />
+              </button>
+            </div>
+          </div>
+
+          <div class="mx-auto mt-4 max-w-[825px]">
+            <p
+              class="text-center text-sm text-black/60 font-inter font-normal"
+              x-text="slides[activeSlide]?.caption || ''"
+            >
+            </p>
+          </div>
+
+          <hr class="my-4 border-base-300" />
+
+          <div class="mb-16 mt-2 flex justify-center gap-2">
+            <template x-for="(slide, index) in slides" :key="index">
+              <button
+                @click="activeSlide = index"
+                :class="{'bg-primary': activeSlide === index, 'bg-base-300': activeSlide !== index}"
+                class="h-3 w-3 rounded-full transition hover:bg-primary cursor-pointer"
+                :aria-label="`Перейти к слайду ${index + 1}`"
+              ></button>
+            </template>
+          </div>
         </div>
       </div>
     </div>
-
-    <div class="relative w-full max-w-[1200px] mx-auto">
-      <div class="overflow-hidden relative h-[600px] w-full">
-        <template x-for="(item, index) in slides" :key="index">
-          <div
-            x-show="activeSlide === index"
-            class="absolute inset-0 duration-700 ease-in-out"
-            x-transition:enter="transition ease-in-out duration-700"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in-out duration-700"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-          >
-            <img
-              :src="item.imageUrl"
-              class="w-full h-full object-contain rounded-lg"
-              :alt="item.caption || 'Carousel image'"
-            />
-          </div>
-        </template>
-
-        <button
-          @click="activeSlide = (activeSlide - 1 + slides.length) % slides.length"
-          class="absolute top-1/2 left-2 transform -translate-y-1/2 rounded-full p-3 transition cursor-pointer text-neutral-300 hover:text-neutral-400"
-        >
-          <ArrowLeft />
-        </button>
-        <button
-          @click="activeSlide = (activeSlide + 1) % slides.length"
-          class="absolute top-1/2 right-2 transform -translate-y-1/2 rounded-full p-3 transition cursor-pointer text-neutral-300 hover:text-neutral-400"
-        >
-          <ArrowRight />
-        </button>
-      </div>
-
-      <!-- Caption and dots moved here -->
-      <div class="mt-4 text-center">
-        <p
-          class="text-base-content font-oswald font-thin text-lg"
-          x-text="slides[activeSlide].caption"
-        >
-        </p>
-      </div>
-      <hr class="my-4 border-base-300" />
-      <div class="flex justify-center space-x-2 mt-2 mb-16">
-        <template x-for="(slide, index) in slides" :key="index">
-          <button
-            @click="activeSlide = index"
-            :class="{'bg-primary': activeSlide === index, 'bg-base-300': activeSlide !== index}"
-            class="w-3 h-3 rounded-full hover:bg-primary transition cursor-pointer"
-          ></button>
-        </template>
-      </div>
-    </div>
-  </div>
+  </main>
 </Layout>

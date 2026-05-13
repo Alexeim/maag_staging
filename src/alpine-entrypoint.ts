@@ -28,7 +28,8 @@ onAuthStateChanged(auth, async (user) => {
 
   if (user) {
     try {
-      const profileData = await usersApi.get(user.uid);
+      const token = await user.getIdToken();
+      const profileData = await usersApi.get(user.uid, token);
       getStore()?.setUser(user, profileData);
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
