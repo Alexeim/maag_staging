@@ -48,6 +48,9 @@ import Input from "@/components/common/Input.astro";
         <p class="text-sm text-center mt-4">
           Не зарегистрирован? <button type="button" @click="$store.auth.switchTo('signup')" class="text-primary hover:underline cursor-pointer">Тебе сюда</button>
         </p>
+        <p class="text-sm text-center mt-2">
+          <button type="button" @click="forgotPassword()" class="text-base-content/50 hover:text-primary hover:underline cursor-pointer">Забыл пароль?</button>
+        </p>
       </form>
     </template>
 

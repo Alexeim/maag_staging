@@ -1,9 +1,10 @@
 import { auth } from '@/lib/firebase/client';
 import { usersApi } from "@/lib/api/api";
-import { 
-  createUserWithEmailAndPassword, 
+import {
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 
 export default function authModalLogic() {
@@ -35,6 +36,20 @@ export default function authModalLogic() {
     handleInputChange(detail) {
       if (detail.name in this.formData) {
         this.formData[detail.name] = detail.value;
+      }
+    },
+
+    async forgotPassword() {
+      if (!this.formData.email) {
+        this.error = 'Введите email чтобы сбросить пароль.';
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, this.formData.email);
+        this.error = '';
+        window.Alpine.store('ui').showToast('Письмо отправлено на ' + this.formData.email);
+      } catch {
+        this.error = 'Не удалось отправить письмо. Проверьте email.';
       }
     },
 
