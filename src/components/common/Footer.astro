@@ -2,7 +2,7 @@
 // Footer for cultural media website about Paris
 ---
 
-<footer class="bg-white text-base-content">
+<footer class="bg-white text-base-content" x-data>
   <div class="mx-auto px-4 lg:px-12 py-12">
     {/* Main Footer Content */}
     <div
@@ -202,9 +202,11 @@
       <div
         class="flex flex-col lg:flex-row gap-4 sm:gap-6 text-sm text-black/80 font-inter font-normal"
       >
-        <a href="/dashboard" class="hover:text-accent transition-colors">
-          🚧 Для Администрации 🚧
-        </a>
+        <template x-if="$store.auth.profile?.role === 'admin'">
+          <a href="/dashboard" class="hover:text-accent transition-colors">
+            🚧 Для Администрации 🚧
+          </a>
+        </template>
         <a href="/profile" class="hover:text-accent transition-colors"
           >Личный кабинет</a
         >

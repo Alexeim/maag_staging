@@ -174,7 +174,7 @@ import { BadgeCheck } from "lucide-astro";
                     <div class="w-full lg:w-auto">
                       <button
                         @click="changePassword()"
-                        class="btn btn-primary w-full lg:w-auto"
+                        class="cursor-pointer bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary/50 p-2 rounded-lg text-xs"
                         >Поменять пароль</button
                       >
                     </div>
@@ -236,7 +236,9 @@ import { BadgeCheck } from "lucide-astro";
                 ><p class="text-green-500">
                   User found: <span x-text="Object.keys($store.auth.profile)"
                   ></span><br /><span x-text="$store.auth.user.displayName"
-                  ></span><br /><span x-text="$store.auth.profile.role"></span>
+                  ></span><br /><span
+                    :class="$store.auth.profile.role === 'admin' ? 'text-warning' : 'text-success'"
+                    x-text="$store.auth.profile.role"></span>
                 </p></template
               >
             </div>
