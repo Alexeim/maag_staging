@@ -1,13 +1,20 @@
 ---
-import Layout from '../Layouts/Layout.astro';
+import Layout from "../Layouts/Layout.astro";
 ---
 
 <Layout title="Подписка оформлена!">
-  <div class="min-h-screen flex items-center justify-center">
+  <div class="min-h-screen flex flex-col items-center justify-start">
+    <div class="h-52"></div>
     <div class="text-center">
-      <h1 class="text-4xl font-bold mb-4">Спасибо за подписку!</h1>
-      <p class="text-lg">Ваш платеж успешно обработан.</p>
-      <a href="/profile" class="btn btn-primary mt-8">Вернуться в профиль</a>
+      <h1 class="text-4xl font-bold font-old_standard mb-4">
+        Спасибо за подписку!
+      </h1>
+      <p class="text-lg mb-8">Ваш платеж успешно обработан.</p>
+      <a
+        href="/profile"
+        class="cursor-pointer bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary/50 text-xs p-2 rounded-xl"
+        >Вернуться в профиль</a
+      >
     </div>
   </div>
 </Layout>

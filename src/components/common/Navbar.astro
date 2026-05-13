@@ -142,7 +142,7 @@ const logoSrc = logo.src;
               class="flex items-center justify-center w-10 h-10 text-primary-content rounded-full font-bold text-lg hover:drop-shadow-lg transition-shadow"
               :class="$store.auth.profile?.role === 'admin' ? 'bg-error/50' : 'bg-primary'"
             >
-              <div x-text="$store.auth.initials"></div>
+              <div x-text="($store.auth.profile?.firstName?.[0] || '') + ($store.auth.profile?.lastName?.[0] || '')"></div>
             </a>
             <button
               @click.prevent="handleSignOut()"
