@@ -22,12 +22,12 @@ const {
 
 const navbarClasses = variant === "default" ? "bg-base-100" : "bg-transparent";
 const positionClasses =
-  variant === "default" ? "sticky top-0 z-50" : "absolute";
+  variant === "default" ? "sticky top-0 z-20" : "absolute";
 const colorClasses = "text-base-content";
 const borderClasses = "border-none";
 const headerScrollClasses =
   variant === "default"
-    ? "$store.navbar.isScrolled ? 'z-[80] shadow-[0_10px_30px_rgba(0,0,0,0.08)]' : 'z-50 shadow-none'"
+    ? "$store.navbar.isScrolled ? 'z-20 shadow-[0_10px_30px_rgba(0,0,0,0.08)]' : 'z-20 shadow-none'"
     : "";
 
 const logoSrc = logo.src;
@@ -140,7 +140,7 @@ const logoSrc = logo.src;
             <a
               href="/profile"
               class="flex items-center justify-center w-10 h-10 text-primary-content rounded-full font-bold text-lg hover:drop-shadow-lg transition-shadow"
-              :class="$store.auth.profile?.role === 'admin' ? 'bg-error/50' : 'bg-base'"
+              :class="$store.auth.profile?.role === 'admin' ? 'bg-error/50' : 'bg-primary'"
             >
               <div x-text="$store.auth.initials"></div>
             </a>

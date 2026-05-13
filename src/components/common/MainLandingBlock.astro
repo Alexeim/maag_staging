@@ -273,7 +273,7 @@ try {
               <div class="flex items-start gap-4">
                 <a
                   href={`/news/${newsItem.id}`}
-                  class="linked-image-hover bg-base-200 z-50"
+                  class="linked-image-hover bg-base-200 z-10"
                 >
                   <Image
                     src={newsItem.imageUrl}
@@ -292,7 +292,7 @@ try {
                   </div>
                   <a
                     href={`/news/${newsItem.id}`}
-                    class="block bg-base-200 z-50 transition-opacity duration-200 hover:opacity-90"
+                    class="block bg-base-200 z-10 transition-opacity duration-200 hover:opacity-90"
                   >
                     <h3 class="text-xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90">
                       {newsItem.title}
@@ -316,7 +316,7 @@ try {
       {
         mainArticle ? (
           <div>
-            <div class="aspect-[3/2] overflow-hidden relative z-50">
+            <div class="aspect-[3/2] overflow-hidden relative z-10">
               <a
                 href={mainArticle.href}
                 class="linked-image-hover w-full h-full"
@@ -382,7 +382,7 @@ try {
             href={`/events/${landingEvent.id}`}
             class="linked-image-hover bg-white"
           >
-            <div class="p-4 lg:p-2 flex items-center gap-3">
+            <div class="px-4 py-2 flex items-center gap-3">
               <p class="text-[18px] font-inter uppercase font-bold tracking-[0.15em] mt-1 mb-1">
                 {formatEventDate(landingEvent.startDate)?.day}{" "}
                 {(
@@ -411,7 +411,7 @@ try {
                 transition:name={`event-image-${landingEvent.id}`}
               />
             )}
-            <div class="px-2 py-4">
+            <div class="px-4 py-4">
               <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                 {eventCategoryLabels[landingEvent.category] || "Событие"}
               </p>
