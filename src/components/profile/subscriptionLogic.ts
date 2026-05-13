@@ -1,4 +1,5 @@
 import Alpine from 'alpinejs';
+import { auth } from '@/lib/firebase/client';
 
 // Define a type for the profile object for clarity
 interface UserProfile {
@@ -52,7 +53,10 @@ export default () => ({
     }
     
     try {
-      const response = await fetch(`${this.backendUrl}/api/users/${authStore.user.uid}`);
+      const token = await auth.currentUser?.getIdToken();
+      const response = await fetch(`${this.backendUrl}/api/users/${authStore.user.uid}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch user profile');
       }

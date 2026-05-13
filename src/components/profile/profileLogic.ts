@@ -1,6 +1,6 @@
 import { usersApi } from "@/lib/api/api";
 import { auth } from "@/lib/firebase/client";
-import { sendPasswordResetEmail } from "firebase/auth";
+import { sendPasswordResetEmail, updateProfile } from "firebase/auth";
 import type { UiStore } from "@/stores/uiStore";
 import type { AuthStore } from "@/stores/authStore";
 
@@ -39,15 +39,15 @@ export default () => ({
     }
 
     try {
-      const token = await currentUser.getIdToken(true); // Force refresh for security
-      
-      const updatedProfile = await usersApi.update(
-        currentUser.uid,
-        this.form,
-        token
-      );
-      
-      // THIS IS THE ORIGINAL, CORRECT WAY TO UPDATE THE STORE
+      const token = await currentUser.getIdToken(true);
+
+      const [updatedProfile] = await Promise.all([
+        usersApi.update(currentUser.uid, this.form, token),
+        updateProfile(currentUser, {
+          displayName: `${this.form.firstName} ${this.form.lastName}`.trim(),
+        }),
+      ]);
+
       authStore.setUser(authStore.user, updatedProfile);
 
       uiStore?.showToast?.("Изменения успешно сохранены!");
