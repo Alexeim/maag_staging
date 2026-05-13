@@ -102,6 +102,7 @@ const articles = articlesRaw
     (article) =>
       !((article as any).isNews) &&
       (article as any).articleType !== "tips" &&
+      (article as any).articleType !== "le_saviez_vous" &&
       normalizeArticleCategory(article.category) === categoryKey,
   )
   .map(formatDashboardArticle);

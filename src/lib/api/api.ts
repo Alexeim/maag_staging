@@ -129,7 +129,7 @@ export interface TipsItemBlock {
 export interface ArticlePayload {
   title: string;
   authorId: string;
-  articleType?: 'standard' | 'tips';
+  articleType?: 'standard' | 'tips' | 'le_saviez_vous';
   content: unknown[];
   tips?: Array<{ type: string; text: string }>;
   imageUrl?: string;

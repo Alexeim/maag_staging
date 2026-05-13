@@ -8,7 +8,7 @@ export interface Article {
   lead?: string; // Вводка — краткое описание под заголовком
   cardLead?: string;
   authorId: string;
-  articleType?: 'standard' | 'tips'; // Type of article layout
+  articleType?: 'standard' | 'tips' | 'le_saviez_vous'; // Type of article layout
   content: any[]; // Array of content blocks (e.g., { type: 'paragraph', text: '...' })
   tips?: Array<{ type: string; text: string }>;
   imageUrl?: string;
@@ -25,6 +25,18 @@ export interface Article {
 
 const db = getDb();
 const articlesCollection = db.collection('articles');
+
+const normalizeArticleType = (
+  value: unknown,
+): 'standard' | 'tips' | 'le_saviez_vous' => {
+  if (value === 'tips') {
+    return 'tips';
+  }
+  if (value === 'le_saviez_vous') {
+    return 'le_saviez_vous';
+  }
+  return 'standard';
+};
 
 const normalizeTips = (tips: unknown): Array<{ type: string; text: string }> => {
   if (!Array.isArray(tips)) {
@@ -96,7 +108,7 @@ export const createArticle = async (req: Request, res: Response) => {
       lead: lead || '',
       cardLead: cardLead || '',
       authorId,
-      articleType: articleType === 'tips' ? 'tips' : 'standard',
+      articleType: normalizeArticleType(articleType),
       content,
       tips: normalizedTips,
       imageUrl,
@@ -235,7 +247,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       lead: lead || '',
       cardLead: cardLead || '',
       authorId,
-      articleType: articleType === 'tips' ? 'tips' : 'standard',
+      articleType: normalizeArticleType(articleType),
       content,
       tips: normalizedTips,
       imageUrl,

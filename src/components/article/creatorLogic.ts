@@ -93,6 +93,10 @@ export default function articleCreatorLogic(initialState = {}) {
     articleId = null,
     isEditMode = false,
     onSaveRedirect = null,
+    createSuccessRedirect = null,
+    articleType = "standard",
+    editRouteBase = "/dashboard/article",
+    createRoute = "/dashboard/article/create",
     ...restInitialState
   } = initialState as {
     categoryTags?: Record<string, Array<{ title: string; value: string }>>;
@@ -100,6 +104,10 @@ export default function articleCreatorLogic(initialState = {}) {
     articleId?: string | null;
     isEditMode?: boolean;
     onSaveRedirect?: string | null;
+    createSuccessRedirect?: string | null;
+    articleType?: "standard" | "tips" | "le_saviez_vous";
+    editRouteBase?: string;
+    createRoute?: string;
   };
 
   const categoryLabels: Record<string, string> = {
@@ -261,6 +269,7 @@ export default function articleCreatorLogic(initialState = {}) {
       title: "",
       lead: "", // Вводка — краткое описание под заголовком
       cardLead: "",
+      articleType,
       imageUrl: "",
       imageCaption: "", // <-- Added caption for the main image
       // --- REFACTORED: from 'paragraphs' to 'contentBlocks' ---
@@ -311,6 +320,9 @@ export default function articleCreatorLogic(initialState = {}) {
     articleId,
     isEditMode,
     onSaveRedirect,
+    createSuccessRedirect,
+    editRouteBase,
+    createRoute,
     newTagInput: "",
 
     categoryLabels,
@@ -592,6 +604,9 @@ export default function articleCreatorLogic(initialState = {}) {
         article?: unknown;
         articleId?: string | null;
         isEditMode?: boolean;
+        editRouteBase?: string;
+        createRoute?: string;
+        createSuccessRedirect?: string | null;
       };
       let previewState: PreviewState | null = null;
 
@@ -667,6 +682,15 @@ export default function articleCreatorLogic(initialState = {}) {
             Object.assign(this.article, normalizedPreview);
           }
         }
+        if (typeof previewState.editRouteBase === "string" && previewState.editRouteBase) {
+          this.editRouteBase = previewState.editRouteBase;
+        }
+        if (typeof previewState.createRoute === "string" && previewState.createRoute) {
+          this.createRoute = previewState.createRoute;
+        }
+        if ("createSuccessRedirect" in previewState) {
+          this.createSuccessRedirect = previewState.createSuccessRedirect ?? null;
+        }
       } else if (previewState) {
         try {
           window.localStorage?.removeItem("articlePreview");
@@ -680,6 +704,7 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
       this.article.cardLead = this.article.cardLead ?? "";
+      this.article.articleType = this.article.articleType ?? articleType ?? "standard";
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isOnLanding = Boolean(this.article.isOnLanding);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
@@ -1017,8 +1042,8 @@ export default function articleCreatorLogic(initialState = {}) {
     returnToEdit() {
       const target =
         this.isEditMode && this.articleId
-          ? `/dashboard/article/${this.articleId}/edit`
-          : "/dashboard/article/create";
+          ? `${this.editRouteBase}/${this.articleId}/edit`
+          : this.createRoute;
       window.location.href = target;
     },
 
@@ -1028,6 +1053,9 @@ export default function articleCreatorLogic(initialState = {}) {
         article: this.article,
         articleId: this.articleId,
         isEditMode: this.isEditMode,
+        editRouteBase: this.editRouteBase,
+        createRoute: this.createRoute,
+        createSuccessRedirect: this.createSuccessRedirect,
       };
       localStorage.setItem("articlePreview", JSON.stringify(previewState));
       window.location.href = "/dashboard/article/preview";
@@ -1117,6 +1145,7 @@ export default function articleCreatorLogic(initialState = {}) {
           title: this.article.title,
           lead: this.article.lead,
           cardLead: this.article.cardLead,
+          articleType: this.article.articleType || articleType || "standard",
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
           authorId: resolvedAuthorId,
@@ -1140,7 +1169,8 @@ export default function articleCreatorLogic(initialState = {}) {
           const result = await articlesApi.create(payload);
           localStorage.removeItem("articlePreview");
           window.Alpine.store("ui").showToast("Статья успешно создана! Молодец!");
-          setTimeout(() => { globalThis.location.href = `/article/${result.id}`; }, 1500);
+          const redirectTo = this.createSuccessRedirect || `/article/${result.id}`;
+          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
         }
       } catch (error) {
         console.error("Проблемка сохранения:", error);

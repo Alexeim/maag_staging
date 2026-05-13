@@ -101,6 +101,9 @@ const isHotContentArticle = (article: any) =>
   Boolean(article?.isHotContent) ||
   normalizeCategory(article?.category) === "hotContent";
 
+const isLeSaviezVousArticle = (article: any) =>
+  article?.articleType === "le_saviez_vous";
+
 let mainArticle: any = null;
 let newsArticles: any[] = [];
 let landingEvent: any = null;
@@ -110,8 +113,11 @@ try {
     articlesApi.list(),
     guidesApi.list(),
   ]);
+  const standardArticles = articles.filter(
+    (article) => !isLeSaviezVousArticle(article),
+  );
   const landingContent = [
-    ...articles.map((article) => ({
+    ...standardArticles.map((article) => ({
       ...article,
       contentType: "article",
       href: toContentHref(article),
@@ -141,7 +147,7 @@ try {
     null;
 
   // Filter for news articles, limit to 5 for the landing page
-  newsArticles = articles
+  newsArticles = standardArticles
     .filter((article) => Boolean(article.isNews))
     .slice(0, 4);
 } catch (error) {

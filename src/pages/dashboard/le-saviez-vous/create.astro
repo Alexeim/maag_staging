@@ -1,0 +1,28 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import ArticleComposer from "@/components/dashboard/ArticleComposer.astro";
+import cultureTags from "@/content/tags/CultureTags.json";
+import parisTags from "@/content/tags/ParisTags.json";
+
+const articleCreatorState = JSON.stringify({
+  categoryTags: {
+    culture: cultureTags.cultureTags,
+    paris: parisTags.parisTags,
+  },
+  articleType: "le_saviez_vous",
+  isEditMode: false,
+  onSaveRedirect: "/dashboard/le-saviez-vous",
+  createSuccessRedirect: "/dashboard/le-saviez-vous",
+  editRouteBase: "/dashboard/le-saviez-vous",
+  createRoute: "/dashboard/le-saviez-vous/create",
+});
+---
+
+<DashboardLayout title="Создать Le saviez-vous" active="create-le-saviez-vous">
+  <ArticleComposer
+    heading="Создать Le saviez-vous"
+    submitLabel="Сохранить материал"
+    articleCreatorState={articleCreatorState}
+    cancelHref="/dashboard/le-saviez-vous"
+  />
+</DashboardLayout>

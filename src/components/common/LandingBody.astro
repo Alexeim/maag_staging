@@ -128,6 +128,9 @@ const isMainInCategoryItem = (item: any) =>
   item?.isMainInCategory === 1 ||
   item?.isMainInCategory === "1";
 
+const isLeSaviezVousArticle = (item: any) =>
+  item?.articleType === "le_saviez_vous";
+
 let cultureItems: any[] = [];
 let parisItems: any[] = [];
 let hotContentItems: any[] = [];
@@ -213,13 +216,17 @@ try {
       visualStoriesApi.list(),
     ]);
 
+  const standardArticles = articles.filter(
+    (article) => !isLeSaviezVousArticle(article),
+  );
+
   console.log(`--- STEP 1: RAW DATA ---`);
   console.log(
     `Loaded ${articles.length} articles, ${flippers.length} flippers, ${interviews.length} interviews.`,
   );
 
   const allItems = [
-    ...articles.map((article) => ({
+    ...standardArticles.map((article) => ({
       ...article,
       type: "article",
       href: `/article/${article.id}`,
@@ -271,7 +278,7 @@ try {
   console.log(`Items in parisItems after filtering: ${parisItems.length}`);
 
   hotContentItems = [
-    ...articles.map((article) => ({
+    ...standardArticles.map((article) => ({
       ...article,
       type: "article",
       href: toContentHref(article),
