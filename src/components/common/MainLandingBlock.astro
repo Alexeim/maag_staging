@@ -389,11 +389,17 @@ try {
             class="linked-image-hover bg-white"
           >
             <div class="px-4 py-2 flex items-center gap-3">
-              <p class="text-[18px] font-inter uppercase font-bold tracking-[0.15em] mt-1 mb-1">
-                {formatEventDate(landingEvent.startDate)?.day}{" "}
-                {(
-                  formatEventDate(landingEvent.startDate)?.month || ""
-                ).toUpperCase()}
+              <div class="w-fill flex flex-col items-center justify-center mt-2 mb-2">
+                <p class="text-5xl font-old_standard uppercase font-bold">
+                  {formatEventDate(landingEvent.startDate)?.day}
+                </p>
+                <p class="font-semibold font-inter text-black/70">
+                  {(
+                    formatEventDate(landingEvent.startDate)?.month || ""
+                  ).toUpperCase()}
+                </p>
+              </div>
+              <p>
                 {formatEventDate(landingEvent.startDate)?.weekday ? (
                   <span class="font-normal normal-case tracking-normal italic font-old_standard opacity-60 ml-2">
                     {formatEventDate(landingEvent.startDate)?.weekday}
@@ -421,7 +427,7 @@ try {
               <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                 {eventCategoryLabels[landingEvent.category] || "Событие"}
               </p>
-              <h2 class="text-xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mt-2">
+              <h2 class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mt-2">
                 {landingEvent.title}
               </h2>
             </div>
