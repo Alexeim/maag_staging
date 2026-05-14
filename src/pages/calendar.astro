@@ -174,6 +174,48 @@ const formatCardDateRange = (
   return `${fmt(start)} — ${fmt(end)}`;
 };
 
+const getMonthGenitive = (d: Date): string =>
+  new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", timeZone: "UTC" })
+    .formatToParts(d)
+    .find((p) => p.type === "month")?.value ?? "";
+
+const getDateParts = (
+  startIso: string,
+  endIso: string | null,
+): {
+  dateDay: string;
+  dateMonth: string;
+  dateWeekday: string;
+  dateYear: string;
+  dateEndDay: string | null;
+  dateEndMonth: string | null;
+  isDateRange: boolean;
+} => {
+  const start = toDate(startIso);
+  if (!start) {
+    return {
+      dateDay: "",
+      dateMonth: "",
+      dateWeekday: "",
+      dateYear: "",
+      dateEndDay: null,
+      dateEndMonth: null,
+      isDateRange: false,
+    };
+  }
+  const end = endIso ? toDate(endIso) : null;
+  const isRange = Boolean(end && end.getTime() !== start.getTime());
+  return {
+    dateDay: String(start.getUTCDate()),
+    dateMonth: getMonthGenitive(start),
+    dateWeekday: start.toLocaleDateString("ru-RU", { weekday: "long", timeZone: "UTC" }),
+    dateYear: String(start.getUTCFullYear()),
+    dateEndDay: isRange && end ? String(end.getUTCDate()) : null,
+    dateEndMonth: isRange && end ? getMonthGenitive(end) : null,
+    isDateRange: isRange,
+  };
+};
+
 const formatDateRange = (startIso: string, endIso: string | null): string => {
   const start = toDate(startIso);
   if (!start) {
@@ -364,6 +406,7 @@ const calendarState = JSON.stringify({
     categoryLabel: event.categoryLabel,
     dateLabel: formatCardDateRange(event.startDate, event.endDate),
     url: event.url,
+    ...getDateParts(event.startDate, event.endDate),
   })),
 }).replace(/</g, "\\u003c");
 
@@ -447,11 +490,23 @@ const topCards = weeklyHighlights.slice(0, 4);
                   </a>
 
                   <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
-                    <p
-                      class="m-0 font-inter text-xl uppercase text-black font-bold mb-4"
-                      x-text="getCurrentFeaturedEvent()?.dateLabel || ''"
-                    ></p>
-
+                    <div class="w-full flex items-start justify-start">
+                      <div class="w-fill flex flex-col items-center justify-center">
+                        <p
+                          class="mx-0 mt-4 font-old_standard text-7xl scale-y-125 uppercase text-black font-bold"
+                          x-text="getCurrentFeaturedEvent()?.dateDay || ''"
+                        ></p>
+                        <p
+                          class="m-0 font-inter text-2xl uppercase text-black/70 font-bold mb-4"
+                          x-text="getCurrentFeaturedEvent()?.dateMonth || ''"
+                        ></p>
+                        <p
+                          class="m-0 font-old_standard text-xl italic text-black/70 font-bold mb-4"
+                          x-text="getCurrentFeaturedEvent()?.dateWeekday || ''"
+                        ></p>
+                      </div>
+                    </div>
+                    <div class="border-b border-black/30"></div>
                     <p class="m-0">
                       <span
                         class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']"
