@@ -136,6 +136,7 @@ let parisItems: any[] = [];
 let hotContentItems: any[] = [];
 let latestInterview: any = null;
 let allItemsSorted: any[] = [];
+let leSaviezVousArticle: any = null;
 
 const getDate = (timestamp: any): Date => {
   if (timestamp && typeof timestamp === "object" && timestamp._seconds) {
@@ -219,6 +220,20 @@ try {
   const standardArticles = articles.filter(
     (article) => !isLeSaviezVousArticle(article),
   );
+  const leSaviezVousArticles = articles
+    .filter((article) => isLeSaviezVousArticle(article))
+    .sort(
+      (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
+    );
+
+  leSaviezVousArticle = leSaviezVousArticles[0] ?? null;
+
+  if (leSaviezVousArticle) {
+    leSaviezVousArticle = {
+      ...leSaviezVousArticle,
+      href: toContentHref(leSaviezVousArticle),
+    };
+  }
 
   console.log(`--- STEP 1: RAW DATA ---`);
   console.log(
@@ -690,31 +705,75 @@ const interviewQuote = latestInterview?.mainQuote
                 Le saviez-vous?
               </h3>
 
-              <article class="overflow-hidden bg-white">
-                <img
-                  src={picture1.src}
-                  alt="Le saviez-vous placeholder"
-                  class="block h-auto w-full object-cover lg:h-[240px]"
-                  loading="lazy"
-                />
+              {leSaviezVousArticle ? (
+                <article class="overflow-hidden bg-white">
+                  <a
+                    href={leSaviezVousArticle.href}
+                    class="block"
+                    aria-label={leSaviezVousArticle.title}
+                  >
+                    <img
+                      src={leSaviezVousArticle.imageUrl || picture1.src}
+                      alt={leSaviezVousArticle.title}
+                      class="block h-auto w-full object-cover lg:h-[240px]"
+                      loading="lazy"
+                    />
+                  </a>
 
-                <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
-                  <p class="m-0">
-                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      Париж
-                    </span>
-                  </p>
+                  <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
+                    <p class="m-0">
+                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        {getPrimaryTag(leSaviezVousArticle) ||
+                          CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
+                      </span>
+                    </p>
 
-                  <h4 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
-                    Неочевидный факт о городе скоро появится здесь
-                  </h4>
+                    <a
+                      href={leSaviezVousArticle.href}
+                      class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                    >
+                      <h4 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
+                        {leSaviezVousArticle.title}
+                      </h4>
+                    </a>
 
-                  <p class="m-0 text-sm text-black/60 font-inter font-normal">
-                    Пока это плейсхолдер: здесь будет короткий визуальный факт
-                    или наблюдение в духе карточки календаря, но без даты.
-                  </p>
-                </div>
-              </article>
+                    <p class="m-0 text-sm text-black/60 font-inter font-normal">
+                      {truncateText(
+                        getCardLead(leSaviezVousArticle) ||
+                          leSaviezVousArticle?.lead ||
+                          "",
+                        150,
+                      )}
+                    </p>
+                  </div>
+                </article>
+              ) : (
+                <article class="overflow-hidden bg-white">
+                  <img
+                    src={picture1.src}
+                    alt="Le saviez-vous placeholder"
+                    class="block h-auto w-full object-cover lg:h-[240px]"
+                    loading="lazy"
+                  />
+
+                  <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
+                    <p class="m-0">
+                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        Париж
+                      </span>
+                    </p>
+
+                    <h4 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
+                      Неочевидный факт о городе скоро появится здесь
+                    </h4>
+
+                    <p class="m-0 text-sm text-black/60 font-inter font-normal">
+                      Пока это плейсхолдер: здесь будет короткий визуальный факт
+                      или наблюдение в духе карточки календаря, но без даты.
+                    </p>
+                  </div>
+                </article>
+              )}
             </section>
           </aside>
         </div>
