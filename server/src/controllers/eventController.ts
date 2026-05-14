@@ -88,7 +88,7 @@ const normalizeCategory = (value: unknown): EventItem['category'] | null => {
 };
 
 const resetExclusiveEventFlag = async (
-  flag: 'isOnLanding' | 'isMainEvent',
+  flag: 'isOnLanding',
   excludeId?: string,
 ) => {
   const snapshot = await eventsCollection.where(flag, '==', true).get();
@@ -199,10 +199,6 @@ export const createEvent = async (req: Request, res: Response) => {
     if (isOnLanding) {
       await resetExclusiveEventFlag('isOnLanding');
     }
-    if (isMainEvent) {
-      await resetExclusiveEventFlag('isMainEvent');
-    }
-
     const docRef = await eventsCollection.add(newEvent);
 
     res.status(201).json({ id: docRef.id, ...newEvent });
@@ -363,10 +359,6 @@ export const updateEvent = async (req: Request, res: Response) => {
     if (landingFlag) {
       await resetExclusiveEventFlag('isOnLanding', id);
     }
-    if (mainEventFlag) {
-      await resetExclusiveEventFlag('isMainEvent', id);
-    }
-
     await eventsCollection.doc(id).update(payload);
 
     res.status(200).json({ id, ...eventDoc.data(), ...payload });

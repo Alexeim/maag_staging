@@ -214,6 +214,9 @@ export default function eventCreatorLogic(initialState = {}) {
           this.eventForm.category = normalized.category;
           this.eventForm.isOnLanding = Boolean(normalized.isOnLanding);
           this.eventForm.isMainEvent = Boolean(normalized.isMainEvent);
+          this.selectedAuthorId =
+            typeof normalized.authorId === "string" ? normalized.authorId : "";
+          this.ensureSelectedAuthorPresent();
         }
       }
 

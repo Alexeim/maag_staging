@@ -27,6 +27,16 @@ type IncomingEvent = {
   url?: string;
 };
 
+type FeaturedEvent = {
+  id: string;
+  title: string;
+  imageUrl: string;
+  address: string;
+  categoryLabel: string;
+  dateLabel: string;
+  url: string;
+};
+
 type NormalizedEvent = {
   id: string;
   title: string;
@@ -190,10 +200,19 @@ const getMonthBoundaryDates = (events: NormalizedEvent[], year: number, month: n
     .sort((a, b) => a.getTime() - b.getTime());
 };
 
-export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[] } = {}) => ({
+export default (
+  initialState: {
+    imagePaths?: ImagePaths;
+    events?: IncomingEvent[];
+    featuredEvents?: FeaturedEvent[];
+  } = {},
+) => ({
   // Raw bootstrap data
   imagePaths: initialState.imagePaths ?? {},
   rawEvents: Array.isArray(initialState.events) ? initialState.events : [],
+  featuredEvents: Array.isArray(initialState.featuredEvents)
+    ? initialState.featuredEvents
+    : [],
 
   // State
   selectedDate: null as Date | null,
@@ -209,6 +228,18 @@ export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[
   smallEvents: [] as NormalizedEvent[],
   filters: [] as string[],
   activeFilter: "все",
+  activeFeaturedIndex: 0,
+  isFeaturedEventVisible: true,
+  featuredEventTransitionTimer: null as ReturnType<typeof setTimeout> | null,
+  featuredAutoplayIntervalMs: 4500,
+  featuredAutoplayResumeDelayMs: 8000,
+  featuredAutoplayTimer: null as ReturnType<typeof setInterval> | null,
+  featuredAutoplayResumeTimer: null as ReturnType<typeof setTimeout> | null,
+  isFeaturedHovered: false,
+  isFeaturedFocused: false,
+  isFeaturedAutoplayPausedByUser: false,
+  prefersReducedMotion: false,
+  featuredVisibilityHandler: null as (() => void) | null,
 
   init() {
     const normalizeEvent = createEventNormalizer(this.imagePaths);
@@ -239,6 +270,159 @@ export default (initialState: { imagePaths?: ImagePaths; events?: IncomingEvent[
 
     this.updateCalendarDisplay();
     this.updateFilteredEvents();
+    this.activeFeaturedIndex = 0;
+    this.isFeaturedEventVisible = true;
+
+    if (typeof globalThis.matchMedia === "function") {
+      this.prefersReducedMotion = globalThis
+        .matchMedia("(prefers-reduced-motion: reduce)")
+        .matches;
+    }
+
+    if (typeof document !== "undefined") {
+      this.featuredVisibilityHandler = () => {
+        this.updateFeaturedAutoplayState();
+      };
+      document.addEventListener(
+        "visibilitychange",
+        this.featuredVisibilityHandler,
+      );
+    }
+
+    this.updateFeaturedAutoplayState();
+  },
+
+  destroy() {
+    this.stopFeaturedAutoplay();
+
+    if (this.featuredEventTransitionTimer) {
+      clearTimeout(this.featuredEventTransitionTimer);
+      this.featuredEventTransitionTimer = null;
+    }
+
+    if (this.featuredAutoplayResumeTimer) {
+      clearTimeout(this.featuredAutoplayResumeTimer);
+      this.featuredAutoplayResumeTimer = null;
+    }
+
+    if (
+      typeof document !== "undefined" &&
+      this.featuredVisibilityHandler
+    ) {
+      document.removeEventListener(
+        "visibilitychange",
+        this.featuredVisibilityHandler,
+      );
+      this.featuredVisibilityHandler = null;
+    }
+  },
+
+  getCurrentFeaturedEvent() {
+    return this.featuredEvents[this.activeFeaturedIndex] ?? null;
+  },
+
+  hasMultipleFeaturedEvents() {
+    return this.featuredEvents.length > 1;
+  },
+
+  canAutoplayFeaturedEvents() {
+    return (
+      this.hasMultipleFeaturedEvents() &&
+      !this.prefersReducedMotion &&
+      !this.isFeaturedHovered &&
+      !this.isFeaturedFocused &&
+      !this.isFeaturedAutoplayPausedByUser &&
+      (typeof document === "undefined" || document.visibilityState === "visible")
+    );
+  },
+
+  startFeaturedAutoplay() {
+    if (this.featuredAutoplayTimer || !this.canAutoplayFeaturedEvents()) {
+      return;
+    }
+
+    this.featuredAutoplayTimer = setInterval(() => {
+      this.nextFeaturedEvent(false);
+    }, this.featuredAutoplayIntervalMs);
+  },
+
+  stopFeaturedAutoplay() {
+    if (!this.featuredAutoplayTimer) {
+      return;
+    }
+
+    clearInterval(this.featuredAutoplayTimer);
+    this.featuredAutoplayTimer = null;
+  },
+
+  updateFeaturedAutoplayState() {
+    if (this.canAutoplayFeaturedEvents()) {
+      this.startFeaturedAutoplay();
+      return;
+    }
+
+    this.stopFeaturedAutoplay();
+  },
+
+  pauseFeaturedAutoplayTemporarily() {
+    this.isFeaturedAutoplayPausedByUser = true;
+    this.stopFeaturedAutoplay();
+
+    if (this.featuredAutoplayResumeTimer) {
+      clearTimeout(this.featuredAutoplayResumeTimer);
+    }
+
+    this.featuredAutoplayResumeTimer = setTimeout(() => {
+      this.isFeaturedAutoplayPausedByUser = false;
+      this.featuredAutoplayResumeTimer = null;
+      this.updateFeaturedAutoplayState();
+    }, this.featuredAutoplayResumeDelayMs);
+  },
+
+  setFeaturedHover(isHovered: boolean) {
+    this.isFeaturedHovered = isHovered;
+    this.updateFeaturedAutoplayState();
+  },
+
+  setFeaturedFocus(isFocused: boolean) {
+    this.isFeaturedFocused = isFocused;
+    this.updateFeaturedAutoplayState();
+  },
+
+  switchFeaturedEvent(direction: 1 | -1) {
+    if (this.featuredEvents.length < 2) {
+      return;
+    }
+
+    if (this.featuredEventTransitionTimer) {
+      clearTimeout(this.featuredEventTransitionTimer);
+      this.featuredEventTransitionTimer = null;
+    }
+
+    const nextIndex =
+      (this.activeFeaturedIndex + direction + this.featuredEvents.length) %
+      this.featuredEvents.length;
+
+    this.isFeaturedEventVisible = false;
+    this.featuredEventTransitionTimer = setTimeout(() => {
+      this.activeFeaturedIndex = nextIndex;
+      this.isFeaturedEventVisible = true;
+      this.featuredEventTransitionTimer = null;
+    }, 160);
+  },
+
+  prevFeaturedEvent(userInitiated = true) {
+    if (userInitiated) {
+      this.pauseFeaturedAutoplayTemporarily();
+    }
+    this.switchFeaturedEvent(-1);
+  },
+
+  nextFeaturedEvent(userInitiated = true) {
+    if (userInitiated) {
+      this.pauseFeaturedAutoplayTemporarily();
+    }
+    this.switchFeaturedEvent(1);
   },
 
   updateCalendarDisplay() {

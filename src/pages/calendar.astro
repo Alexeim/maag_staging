@@ -264,7 +264,7 @@ const upcomingOrCurrentEvents = normalizedEvents.filter((event) => {
   return end ? end.getTime() >= todayUtc.getTime() : false;
 });
 
-const currentMonthMainEvent = upcomingOrCurrentEvents.find((event) => {
+const currentMonthMainEvents = upcomingOrCurrentEvents.filter((event) => {
   if (!event.isMainEvent) {
     return false;
   }
@@ -276,12 +276,50 @@ const currentMonthMainEvent = upcomingOrCurrentEvents.find((event) => {
   );
 });
 
-const featuredMainEvent =
-  currentMonthMainEvent ??
-  upcomingOrCurrentEvents.find((event) => event.isMainEvent) ??
+const otherMainEvents = upcomingOrCurrentEvents.filter((event) => {
+  if (!event.isMainEvent) {
+    return false;
+  }
+  const start = toDate(event.startDate);
+  return !(
+    start &&
+    start.getUTCFullYear() === todayUtc.getUTCFullYear() &&
+    start.getUTCMonth() === todayUtc.getUTCMonth()
+  );
+});
+
+const fallbackFeaturedEvent =
   upcomingOrCurrentEvents[upcomingOrCurrentEvents.length - 1] ??
   normalizedEvents[normalizedEvents.length - 1] ??
   null;
+
+const featuredMainEventsSource =
+  currentMonthMainEvents.length > 0
+    ? [...currentMonthMainEvents, ...otherMainEvents]
+    : upcomingOrCurrentEvents.filter((event) => event.isMainEvent);
+
+const featuredEventCards =
+  featuredMainEventsSource.length > 0
+    ? featuredMainEventsSource.map((event, index) => ({
+        ...event,
+        dateRange: formatDateRange(event.startDate, event.endDate),
+        fallbackImage:
+          heroFallbackImages[index % heroFallbackImages.length] ?? baletImage,
+      }))
+    : fallbackFeaturedEvent
+      ? [
+          {
+            ...fallbackFeaturedEvent,
+            dateRange: formatDateRange(
+              fallbackFeaturedEvent.startDate,
+              fallbackFeaturedEvent.endDate,
+            ),
+            fallbackImage: heroFallbackImages[0] ?? baletImage,
+          },
+        ]
+      : [];
+
+const featuredEventIds = new Set(featuredEventCards.map((event) => event.id));
 
 const weeklyEvents = upcomingOrCurrentEvents.filter((event) => {
   const start = toDate(event.startDate);
@@ -296,13 +334,13 @@ const weeklyEvents = upcomingOrCurrentEvents.filter((event) => {
 });
 
 const upcomingWithoutMain = upcomingOrCurrentEvents.filter(
-  (event) => !featuredMainEvent || event.id !== featuredMainEvent.id,
+  (event) => !featuredEventIds.has(event.id),
 );
 
 const weeklyFallbackPool = (
   weeklyEvents.length >= 3 ? weeklyEvents : upcomingWithoutMain
 )
-  .filter((event) => !featuredMainEvent || event.id !== featuredMainEvent.id)
+  .filter((event) => !featuredEventIds.has(event.id))
   .slice(0, 4);
 
 const weeklyHighlights = weeklyFallbackPool.map((event, index) => ({
@@ -312,21 +350,21 @@ const weeklyHighlights = weeklyFallbackPool.map((event, index) => ({
     heroFallbackImages[(index + 1) % heroFallbackImages.length] ?? baletImage,
 }));
 
-const featuredEventCard = featuredMainEvent && {
-  ...featuredMainEvent,
-  dateRange: formatDateRange(
-    featuredMainEvent.startDate,
-    featuredMainEvent.endDate,
-  ),
-  fallbackImage: heroFallbackImages[0] ?? baletImage,
-};
-
 const calendarState = JSON.stringify({
   imagePaths: {
     theatreShowSrc: theatreShowImage.src,
     smallEventSrc: smallEventImage.src,
   },
   events: normalizedEvents,
+  featuredEvents: featuredEventCards.map((event) => ({
+    id: event.id,
+    title: event.title,
+    imageUrl: event.imageUrl ?? event.fallbackImage.src,
+    address: event.address || "Место",
+    categoryLabel: event.categoryLabel,
+    dateLabel: formatCardDateRange(event.startDate, event.endDate),
+    url: event.url,
+  })),
 }).replace(/</g, "\\u003c");
 
 const topCards = weeklyHighlights.slice(0, 4);
@@ -363,12 +401,20 @@ const topCards = weeklyHighlights.slice(0, 4);
         </h2>
 
         {
-          featuredEventCard ? (
-            <div class="relative mt-8">
+          featuredEventCards.length > 0 ? (
+            <div
+              class="relative mt-8"
+              @mouseenter="setFeaturedHover(true)"
+              @mouseleave="setFeaturedHover(false)"
+              @focusin="setFeaturedFocus(true)"
+              @focusout="if (!$event.relatedTarget || !$el.contains($event.relatedTarget)) setFeaturedFocus(false)"
+            >
               <button
                 type="button"
                 aria-label="Предыдущее"
                 class="absolute left-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[1.6rem] text-[#7d726a] md:flex cursor-pointer"
+                x-show="hasMultipleFeaturedEvents()"
+                @click.prevent="prevFeaturedEvent()"
               >
                 ←
               </button>
@@ -376,55 +422,60 @@ const topCards = weeklyHighlights.slice(0, 4);
                 type="button"
                 aria-label="Следующее"
                 class="absolute right-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[1.6rem] text-[#7d726a] md:flex cursor-pointer"
+                x-show="hasMultipleFeaturedEvents()"
+                @click.prevent="nextFeaturedEvent()"
               >
                 →
               </button>
 
-              <article class="mx-auto grid max-w-[1052px] overflow-hidden bg-white lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
-                <a
-                  href={featuredEventCard.url}
-                  class="linked-image-hover aspect-[3/2]"
-                  aria-label={featuredEventCard.title}
+              <div class="mx-auto max-w-[1052px] lg:min-h-[21rem]">
+                <article
+                  x-show="isFeaturedEventVisible && getCurrentFeaturedEvent()"
+                  x-transition.opacity.duration.220ms
+                  class="grid overflow-hidden bg-white lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]"
                 >
-                  <img
-                    src={
-                      featuredEventCard.imageUrl ??
-                      featuredEventCard.fallbackImage.src
-                    }
-                    alt={featuredEventCard.title}
-                    class="linked-image-hover__media block h-full w-full object-cover"
-                  />
-                </a>
-
-                <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
-                  <p class="m-0 font-inter text-xl uppercase text-black font-bold mb-4">
-                    {formatCardDateRange(
-                      featuredEventCard.startDate,
-                      featuredEventCard.endDate,
-                    )}
-                  </p>
-
-                  <p class="m-0">
-                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {featuredEventCard.categoryLabel}
-                    </span>
-                  </p>
-
                   <a
-                    href={featuredEventCard.url}
-                    class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                    :href="getCurrentFeaturedEvent()?.url || '#'"
+                    class="linked-image-hover aspect-[3/2]"
+                    :aria-label="getCurrentFeaturedEvent()?.title || 'Событие месяца'"
                   >
-                    <h2 class="m-0 font-old_standard text-[clamp(1.4rem,2.2vw,1.9rem)] font-normal leading-[1.04]">
-                      {featuredEventCard.title}
-                    </h2>
+                    <img
+                      :src="getCurrentFeaturedEvent()?.imageUrl || ''"
+                      :alt="getCurrentFeaturedEvent()?.title || 'Событие месяца'"
+                      class="linked-image-hover__media block h-full w-full object-cover"
+                    />
                   </a>
 
-                  <div class="mt-[0.4rem] flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
-                    <span class="h-4 w-4 shrink-0" set:html={locationIcon} />
-                    <span>{featuredEventCard.address || "Место"}</span>
+                  <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                    <p
+                      class="m-0 font-inter text-xl uppercase text-black font-bold mb-4"
+                      x-text="getCurrentFeaturedEvent()?.dateLabel || ''"
+                    ></p>
+
+                    <p class="m-0">
+                      <span
+                        class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']"
+                        x-text="getCurrentFeaturedEvent()?.categoryLabel || ''"
+                      ></span>
+                    </p>
+
+                    <a
+                      :href="getCurrentFeaturedEvent()?.url || '#'"
+                      class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                    >
+                      <h2
+                        class="m-0 font-old_standard text-[clamp(1.4rem,2.2vw,1.9rem)] font-normal leading-[1.04]"
+                        x-text="getCurrentFeaturedEvent()?.title || ''"
+                      ></h2>
+                    </a>
+
+                    <div class="mt-[0.4rem] flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
+                      <span class="h-4 w-4 shrink-0" set:html={locationIcon} />
+                      <span x-text="getCurrentFeaturedEvent()?.address || 'Место'"></span>
+                    </div>
                   </div>
-                </div>
-              </article>
+                </article>
+              </div>
             </div>
           ) : (
             <article class="mt-8 border border-[#3028211a] bg-white/70 p-5 text-[1.05rem] font-light leading-[1.5]">
