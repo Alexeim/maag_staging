@@ -250,10 +250,7 @@ try {
   );
 
   const allCultureItems = sortedContent
-    .filter(
-      (item) =>
-        normalizeCategory(item.category) === CULTURE_CATEGORY_KEY,
-    )
+    .filter((item) => normalizeCategory(item.category) === CULTURE_CATEGORY_KEY)
     .map((item) => ({
       ...item,
       href: toContentHref(item),
@@ -273,7 +270,10 @@ try {
   secondaryStories = topWithoutPrimary.slice(0, 4);
 
   const topIds = new Set(
-    [primaryCultureArticle?.id, ...secondaryStories.map((item) => item?.id)].filter(Boolean),
+    [
+      primaryCultureArticle?.id,
+      ...secondaryStories.map((item) => item?.id),
+    ].filter(Boolean),
   );
 
   featuredInterview =
@@ -331,9 +331,7 @@ const featuredInterviewName =
         Культура
       </h1>
 
-      <section
-        class="grid gap-7 lg:grid-cols-12 lg:gap-4 lg:items-start"
-      >
+      <section class="grid gap-7 lg:grid-cols-12 lg:gap-4 lg:items-start">
         <div class="grid gap-8 lg:col-span-9">
           {
             primaryCultureArticle ? (
@@ -363,7 +361,7 @@ const featuredInterviewName =
                     href={primaryCultureArticle.href}
                     class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                   >
-                    <h2 class="m-0 text-[clamp(1.9rem,3.5vw,2.8rem)] font-normal font-old_standard tracking-[-0.02em] leading-[1.04]">
+                    <h2 class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mb-2 [text-decoration-thickness:1px] underline-offset-[0.14em]">
                       {truncateText(primaryCultureArticle.title, 96)}
                     </h2>
                   </a>
@@ -536,7 +534,7 @@ const featuredInterviewName =
                         href={item.href}
                         class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                       >
-                        <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
+                        <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90">
                           {truncateText(item.title, 72)}
                         </h3>
                       </a>
@@ -555,63 +553,68 @@ const featuredInterviewName =
                     class="rubric-marquee-track flex items-start gap-6 py-2"
                     style="width: max-content;"
                   >
-                    {[...editorialCarouselItems, ...editorialCarouselItems].map((item) => (
-                      <div class="w-[240px] sm:w-[260px] lg:w-[280px] flex-shrink-0">
-                        <article
-                          class:list={[
-                            "grid h-full grid-rows-[auto_1fr] gap-[0.8rem]",
-                            item.contentType === "interview" && "content-start",
-                          ]}
-                        >
-                          <a
-                            href={item.href}
+                    {[...editorialCarouselItems, ...editorialCarouselItems].map(
+                      (item) => (
+                        <div class="w-[240px] sm:w-[260px] lg:w-[280px] flex-shrink-0">
+                          <article
                             class:list={[
-                              "linked-image-hover bg-white/50 aspect-[1.02/1]",
+                              "grid h-full grid-rows-[auto_1fr] gap-[0.8rem]",
                               item.contentType === "interview" &&
-                                "w-full aspect-square rounded-full bg-transparent",
-                            ]}
-                            aria-label={item.title}
-                          >
-                            <img
-                              src={item.imageUrl || picture1.src}
-                              alt={item.title}
-                              class:list={[
-                                "linked-image-hover__media block h-full w-full object-cover",
-                                item.contentType === "interview" && "rounded-full",
-                              ]}
-                              loading="lazy"
-                              transition:name={getTransitionName(item)}
-                            />
-                          </a>
-
-                          <div
-                            class:list={[
-                              "grid h-full content-start gap-[0.55rem]",
-                              item.contentType === "interview" && "w-full text-left",
+                                "content-start",
                             ]}
                           >
-                            <p class="m-0">
-                              <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                                {getPrimaryTag(item) || "Культура"}
-                              </span>
-                            </p>
-
                             <a
                               href={item.href}
-                              class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                              class:list={[
+                                "linked-image-hover bg-white/50 aspect-[1.02/1]",
+                                item.contentType === "interview" &&
+                                  "w-full aspect-square rounded-full bg-transparent",
+                              ]}
+                              aria-label={item.title}
                             >
-                              <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
-                                {truncateText(item.title, 72)}
-                              </h3>
+                              <img
+                                src={item.imageUrl || picture1.src}
+                                alt={item.title}
+                                class:list={[
+                                  "linked-image-hover__media block h-full w-full object-cover",
+                                  item.contentType === "interview" &&
+                                    "rounded-full",
+                                ]}
+                                loading="lazy"
+                                transition:name={getTransitionName(item)}
+                              />
                             </a>
 
-                            <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                              {formatDate(item.createdAt)}
-                            </p>
-                          </div>
-                        </article>
-                      </div>
-                    ))}
+                            <div
+                              class:list={[
+                                "grid h-full content-start gap-[0.55rem]",
+                                item.contentType === "interview" &&
+                                  "w-full text-left",
+                              ]}
+                            >
+                              <p class="m-0">
+                                <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                  {getPrimaryTag(item) || "Культура"}
+                                </span>
+                              </p>
+
+                              <a
+                                href={item.href}
+                                class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                              >
+                                <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90">
+                                  {truncateText(item.title, 72)}
+                                </h3>
+                              </a>
+
+                              <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                                {formatDate(item.createdAt)}
+                              </p>
+                            </div>
+                          </article>
+                        </div>
+                      ),
+                    )}
                   </div>
                 </div>
               )}

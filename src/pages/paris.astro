@@ -234,10 +234,7 @@ try {
   );
 
   const allParisItems = sortedContent
-    .filter(
-      (item) =>
-        normalizeCategory(item.category) === PARIS_CATEGORY_KEY,
-    )
+    .filter((item) => normalizeCategory(item.category) === PARIS_CATEGORY_KEY)
     .map((item) => ({
       ...item,
       href: toContentHref(item),
@@ -255,7 +252,10 @@ try {
   secondaryStories = topWithoutPrimary.slice(0, 4);
 
   const topIds = new Set(
-    [primaryParisArticle?.id, ...secondaryStories.map((item) => item?.id)].filter(Boolean),
+    [
+      primaryParisArticle?.id,
+      ...secondaryStories.map((item) => item?.id),
+    ].filter(Boolean),
   );
 
   const parisHotContentItems = allParisItems.filter(
@@ -324,7 +324,7 @@ const editorialCarouselItems = parisFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
                     href={primaryParisArticle.href}
                     class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                   >
-                    <h2 class="m-0 text-[clamp(1.9rem,3.5vw,2.8rem)] font-normal font-old_standard tracking-[-0.02em] leading-[1.04]">
+                    <h2 class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mb-2 [text-decoration-thickness:1px] underline-offset-[0.14em]">
                       {truncateText(primaryParisArticle.title, 96)}
                     </h2>
                   </a>
@@ -399,7 +399,9 @@ const editorialCarouselItems = parisFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
           }
         </div>
 
-        <aside class="min-w-0 border-t border-[#3028211f] pt-4 lg:col-span-3 lg:border-t-0 lg:border-l lg:border-[#3028211f] lg:pt-0 lg:pl-4">
+        <aside
+          class="min-w-0 border-t border-[#3028211f] pt-4 lg:col-span-3 lg:border-t-0 lg:border-l lg:border-[#3028211f] lg:pt-0 lg:pl-4"
+        >
           <section class="grid gap-4">
             <p
               class="m-0 text-lg font-normal uppercase tracking-[0.3em] font-old_standard"
@@ -407,74 +409,76 @@ const editorialCarouselItems = parisFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
               Le saviez-vous?
             </p>
 
-            {leSaviezVousArticle ? (
-              <article class="overflow-hidden bg-white">
-                <a
-                  href={leSaviezVousArticle.href}
-                  class="block"
-                  aria-label={leSaviezVousArticle.title}
-                >
+            {
+              leSaviezVousArticle ? (
+                <article class="overflow-hidden bg-white">
+                  <a
+                    href={leSaviezVousArticle.href}
+                    class="block"
+                    aria-label={leSaviezVousArticle.title}
+                  >
+                    <img
+                      src={leSaviezVousArticle.imageUrl || picture1.src}
+                      alt={leSaviezVousArticle.title}
+                      class="block h-auto w-full object-cover lg:h-[240px]"
+                      loading="lazy"
+                    />
+                  </a>
+
+                  <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
+                    <p class="m-0">
+                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        {getPrimaryTag(leSaviezVousArticle) || "Париж"}
+                      </span>
+                    </p>
+
+                    <a
+                      href={leSaviezVousArticle.href}
+                      class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                    >
+                      <h2 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
+                        {leSaviezVousArticle.title}
+                      </h2>
+                    </a>
+
+                    <p class="m-0 text-sm text-black/60 font-inter font-normal">
+                      {truncateText(
+                        getCardLead(leSaviezVousArticle) ||
+                          leSaviezVousArticle?.lead ||
+                          "",
+                        150,
+                      )}
+                    </p>
+                  </div>
+                </article>
+              ) : (
+                <article class="overflow-hidden bg-white">
                   <img
-                    src={leSaviezVousArticle.imageUrl || picture1.src}
-                    alt={leSaviezVousArticle.title}
+                    src={picture1.src}
+                    alt="Le saviez-vous placeholder"
                     class="block h-auto w-full object-cover lg:h-[240px]"
                     loading="lazy"
                   />
-                </a>
 
-                <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
-                  <p class="m-0">
-                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {getPrimaryTag(leSaviezVousArticle) || "Париж"}
-                    </span>
-                  </p>
+                  <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
+                    <p class="m-0">
+                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        Париж
+                      </span>
+                    </p>
 
-                  <a
-                    href={leSaviezVousArticle.href}
-                    class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
-                  >
                     <h2 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
-                      {leSaviezVousArticle.title}
+                      Неочевидный факт о городе скоро появится здесь
                     </h2>
-                  </a>
 
-                  <p class="m-0 text-sm text-black/60 font-inter font-normal">
-                    {truncateText(
-                      getCardLead(leSaviezVousArticle) ||
-                        leSaviezVousArticle?.lead ||
-                        "",
-                      150,
-                    )}
-                  </p>
-                </div>
-              </article>
-            ) : (
-              <article class="overflow-hidden bg-white">
-                <img
-                  src={picture1.src}
-                  alt="Le saviez-vous placeholder"
-                  class="block h-auto w-full object-cover lg:h-[240px]"
-                  loading="lazy"
-                />
-
-                <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
-                  <p class="m-0">
-                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      Париж
-                    </span>
-                  </p>
-
-                  <h2 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
-                    Неочевидный факт о городе скоро появится здесь
-                  </h2>
-
-                  <p class="m-0 text-sm text-black/60 font-inter font-normal">
-                    Пока это плейсхолдер: здесь будет короткий визуальный факт
-                    или наблюдение в духе карточки календаря, но без даты.
-                  </p>
-                </div>
-              </article>
-            )}
+                    <p class="m-0 text-sm text-black/60 font-inter font-normal">
+                      Пока это плейсхолдер: здесь будет короткий визуальный факт
+                      или наблюдение в духе карточки календаря, но без даты.
+                    </p>
+                  </div>
+                </article>
+              )
+            }
           </section>
 
           <div class="grid gap-4 border-t border-[#3028211f] pt-4 mt-4">
@@ -506,9 +510,7 @@ const editorialCarouselItems = parisFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
         </aside>
       </section>
 
-      <section
-        class="mt-[2.2rem] border-t border-[#3028211f] pt-[1.6rem]"
-      >
+      <section class="mt-[2.2rem] border-t border-[#3028211f] pt-[1.6rem]">
         <div>
           {
             editorialGridItems.length > 0 ? (
@@ -541,7 +543,7 @@ const editorialCarouselItems = parisFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
                           href={item.href}
                           class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                         >
-                          <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
+                          <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90">
                             {truncateText(item.title, 72)}
                           </h3>
                         </a>
@@ -560,7 +562,10 @@ const editorialCarouselItems = parisFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
                       class="rubric-marquee-track flex items-start gap-6 py-2"
                       style="width: max-content;"
                     >
-                      {[...editorialCarouselItems, ...editorialCarouselItems].map((item) => (
+                      {[
+                        ...editorialCarouselItems,
+                        ...editorialCarouselItems,
+                      ].map((item) => (
                         <div class="w-[240px] sm:w-[260px] lg:w-[280px] flex-shrink-0">
                           <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                             <a
@@ -588,7 +593,7 @@ const editorialCarouselItems = parisFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
                                 href={item.href}
                                 class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                               >
-                                <h3 class="m-0 line-clamp-3 text-[1.18rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.18]">
+                                <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90">
                                   {truncateText(item.title, 72)}
                                 </h3>
                               </a>
