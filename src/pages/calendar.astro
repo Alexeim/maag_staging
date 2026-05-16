@@ -500,7 +500,7 @@ const topCards = weeklyHighlights.slice(0, 4);
                   <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-8 lg:pt-[1.35rem] lg:pb-[1.1rem]">
                     <div class="mb-6 flex w-full items-start justify-start">
                       <template x-if="!getCurrentFeaturedEvent()?.isDateRange">
-                        <div class="flex flex-col items-center justify-center">
+                        <div class="flex flex-col items-start justify-center">
                           <p
                             class="mx-0 mt-4 font-old_standard text-7xl tracking-[-0.06em] uppercase text-black"
                             x-text="getCurrentFeaturedEvent()?.dateDay || ''"
