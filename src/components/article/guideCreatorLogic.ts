@@ -1,5 +1,12 @@
-import { guidesApi, eventsApi, interviewsApi, flippersApi, authorsApi } from "@/lib/api/api";
+import { guidesApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
+import {
+  RELATED_CONTENT_TYPE_OPTIONS,
+  createEmptyRelatedContent,
+  createEmptyRelatedContentLists,
+  fetchRelatedContentLists,
+  sanitizeRelatedContent,
+} from "@/lib/utils/relatedContent";
 import {
   detectVideoProvider,
   getDirectVideoUrl as resolveVideoDirectUrl,
@@ -203,6 +210,7 @@ export default function guideCreatorLogic(initialState = {}) {
     copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.cardLead = copy.cardLead ?? "";
+    copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     return copy;
   };
 
@@ -255,13 +263,14 @@ export default function guideCreatorLogic(initialState = {}) {
       isHotContent: false,
       isOnLanding: false,
       isMainInCategory: false,
+      relatedContent: createEmptyRelatedContent(),
     },
 
     contentListsLoading: false,
-    allArticles: [],
-    allEvents: [],
-    allInterviews: [],
-    allFlippers: [],
+    relatedContentLists: createEmptyRelatedContentLists(),
+    relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
+    selectedRelatedContentType: "article",
+    selectedRelatedContentId: "",
     authorsLoading: false,
     authors: [],
     selectedAuthorId: "",
@@ -549,20 +558,11 @@ export default function guideCreatorLogic(initialState = {}) {
     async fetchContentLists() {
       this.contentListsLoading = true;
       try {
-        const [articles, events, interviews, flippers] = await Promise.all([
-          guidesApi.list(),
-          eventsApi.list(),
-          interviewsApi.list(),
-          flippersApi.list(),
-        ]);
-        this.allArticles = articles;
-        this.allEvents = events;
-        this.allInterviews = interviews;
-        this.allFlippers = flippers;
+        this.relatedContentLists = await fetchRelatedContentLists();
       } catch (error) {
         console.error("Failed to fetch content lists:", error);
         window.Alpine?.store("ui")?.showToast?.(
-          "Не удалось загрузить списки контента для ссылок.",
+          "Не удалось загрузить списки контента.",
           "error",
         );
       } finally {
@@ -573,16 +573,67 @@ export default function guideCreatorLogic(initialState = {}) {
     getFilteredContentList(contentType) {
       switch (contentType) {
         case "article":
-          return this.allArticles;
+          return this.relatedContentLists.article;
         case "event":
-          return this.allEvents;
+          return this.relatedContentLists.event;
         case "interview":
-          return this.allInterviews;
+          return this.relatedContentLists.interview;
         case "flipper":
-          return this.allFlippers;
+          return this.relatedContentLists.flipper;
         default:
           return [];
       }
+    },
+    getAvailableRelatedContentItems() {
+      if (!this.selectedRelatedContentType) {
+        return [];
+      }
+      return this.relatedContentLists[this.selectedRelatedContentType] ?? [];
+    },
+    getSelectedEntityRelatedContent(type) {
+      return this.article?.relatedContent?.[type] ?? [];
+    },
+    getRelatedContentItemLabel(type, id) {
+      const item = (this.relatedContentLists[type] ?? []).find(
+        (entry) => entry.id === id,
+      );
+      return item?.title || id;
+    },
+    addRelatedContent() {
+      const type = this.selectedRelatedContentType;
+      const id = this.selectedRelatedContentId;
+
+      if (!type || !id) {
+        return;
+      }
+
+      const normalized = sanitizeRelatedContent(this.article.relatedContent);
+      const currentIds = normalized[type] ?? [];
+
+      if (this.articleId && type === "guide" && id === this.articleId) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Нельзя привязать текущий материал к самому себе.",
+          "error",
+        );
+        return;
+      }
+
+      if (currentIds.includes(id)) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Этот материал уже добавлен.",
+          "info",
+        );
+        return;
+      }
+
+      normalized[type] = [...currentIds, id];
+      this.article.relatedContent = normalized;
+      this.selectedRelatedContentId = "";
+    },
+    removeRelatedContent(type, id) {
+      const normalized = sanitizeRelatedContent(this.article.relatedContent);
+      normalized[type] = normalized[type].filter((itemId) => itemId !== id);
+      this.article.relatedContent = normalized;
     },
 
     init() {
@@ -687,6 +738,11 @@ export default function guideCreatorLogic(initialState = {}) {
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isOnLanding = Boolean(this.article.isOnLanding);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
+      this.article.relatedContent = sanitizeRelatedContent(
+        this.article.relatedContent,
+        "guide",
+        this.articleId,
+      );
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? normalizeContentBlocks(this.article.contentBlocks)
         : [];
@@ -1124,6 +1180,11 @@ export default function guideCreatorLogic(initialState = {}) {
           isHotContent: this.article.isHotContent,
           isOnLanding: this.article.isOnLanding,
           isMainInCategory: this.article.isMainInCategory,
+          relatedContent: sanitizeRelatedContent(
+            this.article.relatedContent,
+            "guide",
+            this.articleId,
+          ),
         };
 
         if (this.isEditMode && this.articleId) {

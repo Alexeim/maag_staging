@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
+import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
 
 export interface Guide {
   id?: string;
@@ -17,6 +18,7 @@ export interface Guide {
   isHotContent?: boolean;
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
+  relatedContent?: RelatedContent;
   createdAt: Date;
 }
 
@@ -68,6 +70,7 @@ export const createGuide = async (req: Request, res: Response) => {
       isHotContent = false,
       isOnLanding = false,
       isMainInCategory = false,
+      relatedContent,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -100,6 +103,7 @@ export const createGuide = async (req: Request, res: Response) => {
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
+      relatedContent: normalizeRelatedContent(relatedContent),
       createdAt: new Date(),
     };
 
@@ -200,6 +204,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       isHotContent = false,
       isOnLanding = false,
       isMainInCategory = false,
+      relatedContent,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -232,6 +237,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
+      relatedContent: normalizeRelatedContent(relatedContent),
       updatedAt: new Date(),
     };
 

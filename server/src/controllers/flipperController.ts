@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
+import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
 
 // Interface for Flipper structure
 export interface Flipper {
@@ -13,6 +14,7 @@ export interface Flipper {
   techTags?: string[];
   isHotContent?: boolean;
   carouselContent: { imageUrl: string; caption: string }[];
+  relatedContent?: RelatedContent;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -36,6 +38,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       techTags = [],
       isHotContent = false,
       carouselContent = [],
+      relatedContent,
     } = req.body;
 
     if (!title || !authorId) {
@@ -65,6 +68,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       techTags: normalizedTechTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       carouselContent,
+      relatedContent: normalizeRelatedContent(relatedContent),
       createdAt: new Date(),
     };
 
@@ -155,6 +159,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       techTags = [],
       isHotContent = false,
       carouselContent = [],
+      relatedContent,
     } = req.body;
 
     if (!title || !authorId) {
@@ -184,6 +189,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       techTags: normalizedTechTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       carouselContent,
+      relatedContent: normalizeRelatedContent(relatedContent),
       updatedAt: new Date(),
     };
 

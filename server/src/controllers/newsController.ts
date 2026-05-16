@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
+import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
 
 export interface NewsItem {
   id?: string;
@@ -16,6 +17,7 @@ export interface NewsItem {
   isHotContent?: boolean;
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
+  relatedContent?: RelatedContent;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -51,6 +53,7 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     isHotContent = false,
     isOnLanding = false,
     isMainInCategory = false,
+    relatedContent,
   } = body;
 
   return {
@@ -67,6 +70,7 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     isHotContent: Boolean(isHotContent) || category === 'hotContent',
     isOnLanding: Boolean(isOnLanding),
     isMainInCategory: Boolean(isMainInCategory),
+    relatedContent: normalizeRelatedContent(relatedContent),
   };
 };
 

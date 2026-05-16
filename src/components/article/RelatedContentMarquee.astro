@@ -1,0 +1,429 @@
+---
+import { getKnownTagLabel } from "@/content/tags/parisTags";
+
+interface ContentCardItem {
+  id: string;
+  title: string;
+  href: string;
+  imageUrl?: string | null;
+  createdAt?: unknown;
+  tags?: string[];
+  category?: string;
+  contentType: string;
+  isNews?: boolean;
+}
+
+interface Props {
+  relatedItems?: ContentCardItem[];
+  categoryItems?: ContentCardItem[];
+  fallbackImageSrc: string;
+}
+
+const {
+  relatedItems = [],
+  categoryItems = [],
+  fallbackImageSrc,
+} = Astro.props as Props;
+
+const TAG_LABEL_ALIASES: Record<string, string> = {
+  exhibition: "Выставка",
+  exhibitions: "Выставка",
+  concert: "Концерт",
+  concerts: "Концерт",
+  performance: "Спектакль",
+  performances: "Спектакль",
+  theatre: "Театр",
+  theater: "Театр",
+  theatres: "Театры",
+  theaters: "Театры",
+  culture: "Культура",
+  paris: "Париж",
+  books: "Книги",
+  artmarket: "Арт-рынок",
+  architecture: "Архитектура",
+  museums: "Музеи",
+  tourism: "Туризм",
+  strike: "Забастовка",
+  kids: "Дети",
+  opera: "Опера",
+  ballet: "Балет",
+  dance: "Танец",
+  music: "Музыка",
+  route: "Маршрут",
+  address: "Адрес",
+  notebook: "Записная книжка",
+  place: "Место",
+  interview: "Интервью",
+  news: "Новости",
+  guide: "Гид",
+  flipper: "Флиппер",
+  "visual-story": "Visual Story",
+  event: "Событие",
+  ...Object.fromEntries(
+    Array.from({ length: 20 }, (_, i) => [
+      `district-${i + 1}`,
+      `${i + 1}-й округ`,
+    ]),
+  ),
+};
+
+const normalizeTags = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
+    .filter(Boolean);
+};
+
+const toDate = (value: unknown): Date | null => {
+  if (!value) {
+    return null;
+  }
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  if (typeof value === "string" || typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "object") {
+    const maybeSeconds =
+      (value as { seconds?: number; _seconds?: number }).seconds ??
+      (value as { seconds?: number; _seconds?: number })._seconds;
+    if (typeof maybeSeconds === "number") {
+      const parsed = new Date(maybeSeconds * 1000);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+    if (typeof (value as { toDate?: () => Date }).toDate === "function") {
+      const parsed = (value as { toDate: () => Date }).toDate();
+      return parsed instanceof Date && !Number.isNaN(parsed.getTime())
+        ? parsed
+        : null;
+    }
+  }
+  return null;
+};
+
+const formatDate = (value: unknown) => {
+  const date = toDate(value);
+  if (!date) {
+    return "";
+  }
+  return date
+    .toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
+    .replace(" г.", "");
+};
+
+const truncateText = (text?: string, maxLength: number = 72) => {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  const truncated = text.slice(0, maxLength).trim();
+  const lastSpaceIndex = truncated.lastIndexOf(" ");
+  const safeText =
+    lastSpaceIndex > 0 ? truncated.slice(0, lastSpaceIndex) : truncated;
+  return `${safeText.trim()}...`;
+};
+
+const getPrimaryTag = (item: ContentCardItem): string => {
+  const tags = normalizeTags(item?.tags);
+  if (item?.contentType === "interview") {
+    return "Интервью";
+  }
+  if (tags.length === 0) {
+    if (item?.isNews) {
+      return "Новости";
+    }
+    const category = typeof item?.category === "string" ? item.category.trim() : "";
+    const normalizedCategory = category.toLowerCase();
+    return TAG_LABEL_ALIASES[normalizedCategory] ?? category;
+  }
+  const firstTag = tags[0];
+  const normalized = firstTag.toLowerCase();
+  return TAG_LABEL_ALIASES[normalized] ?? getKnownTagLabel(firstTag);
+};
+
+const getTransitionName = (item: ContentCardItem) => {
+  if (item.href.startsWith("/events/")) {
+    return `event-image-${item.id}`;
+  }
+  return `main-article-image-${item.id}`;
+};
+
+const hasRelatedItems = relatedItems.length > 0;
+const hasCategoryItems = categoryItems.length > 0;
+const hasAnyItems = hasRelatedItems || hasCategoryItems;
+
+type MarqueeEntry =
+  | { type: "item"; item: ContentCardItem }
+  | { type: "separator" };
+
+const marqueeEntries: MarqueeEntry[] = [
+  ...relatedItems.map((item) => ({ type: "item" as const, item })),
+  ...(hasRelatedItems && hasCategoryItems
+    ? [{ type: "separator" as const }]
+    : []),
+  ...categoryItems.map((item) => ({ type: "item" as const, item })),
+];
+
+const chunkEntries = <T,>(entries: T[], size: number): T[][] => {
+  const pages: T[][] = [];
+
+  for (let i = 0; i < entries.length; i += size) {
+    pages.push(entries.slice(i, i + size));
+  }
+
+  return pages;
+};
+
+const pages = chunkEntries(marqueeEntries, 4);
+---
+
+{
+  hasAnyItems && (
+    <section
+      class="related-carousel mt-[90px] border-t border-base-content/10 pt-10"
+      data-related-carousel-root
+      data-page-count={pages.length}
+    >
+      <div class="grid gap-5">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
+            Похожие материалы
+          </h2>
+
+          {hasRelatedItems && hasCategoryItems ? (
+            <div class="flex items-center gap-3 text-[11px] font-inter uppercase tracking-[0.22em] text-base-content/55">
+              <span>Related Content</span>
+              <span class="h-5 w-px bg-base-content/15"></span>
+              <span>Из той же категории</span>
+            </div>
+          ) : hasRelatedItems ? (
+            <div class="text-[11px] font-inter uppercase tracking-[0.22em] text-base-content/55">
+              Related Content
+            </div>
+          ) : (
+            <div class="text-[11px] font-inter uppercase tracking-[0.22em] text-base-content/55">
+              Из той же категории
+            </div>
+          )}
+        </div>
+
+        <div class="overflow-hidden">
+          <div
+            class="related-carousel__track flex transition-transform duration-700 ease-out"
+            data-related-carousel-track
+          >
+            {pages.map((page, pageIndex) => (
+              <div
+                class="related-carousel__page min-w-full flex-shrink-0"
+                data-related-carousel-page
+                aria-hidden={pageIndex === 0 ? "false" : "true"}
+              >
+                <div class="grid grid-cols-4 items-start justify-items-center gap-6">
+                  {page.map((entry, entryIndex) =>
+                    entry.type === "separator" ? (
+                      <div
+                        class="flex min-h-[360px] w-full max-w-[280px] items-center justify-center gap-4 border-x border-base-content/10 px-4"
+                        aria-hidden="true"
+                      >
+                        <div class="h-[220px] w-px bg-base-content/15"></div>
+                        <p class="m-0 max-w-[96px] text-[11px] font-inter uppercase tracking-[0.22em] text-base-content/45">
+                          Из той же категории
+                        </p>
+                      </div>
+                    ) : (
+                      <div
+                        class="min-w-0 w-full max-w-[280px]"
+                        key={`${entry.item.contentType}-${entry.item.id}-${pageIndex}-${entryIndex}`}
+                      >
+                        <article
+                          class:list={[
+                            "grid h-full grid-rows-[auto_1fr] gap-[0.8rem]",
+                            entry.item.contentType === "interview" && "content-start",
+                          ]}
+                        >
+                          <a
+                            href={entry.item.href}
+                            class:list={[
+                              "linked-image-hover bg-white/50 aspect-[1.02/1]",
+                              entry.item.contentType === "interview" &&
+                                "w-full aspect-square rounded-full bg-transparent",
+                            ]}
+                            aria-label={entry.item.title}
+                          >
+                            <img
+                              src={entry.item.imageUrl || fallbackImageSrc}
+                              alt={entry.item.title}
+                              class:list={[
+                                "linked-image-hover__media block h-full w-full object-cover",
+                                entry.item.contentType === "interview" &&
+                                  "rounded-full",
+                              ]}
+                              loading="lazy"
+                              transition:name={getTransitionName(entry.item)}
+                            />
+                          </a>
+
+                          <div
+                            class:list={[
+                              "grid h-full content-start gap-[0.55rem]",
+                              entry.item.contentType === "interview" &&
+                                "w-full text-left",
+                            ]}
+                          >
+                            <p class="m-0">
+                              <span class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
+                                {getPrimaryTag(entry.item) || "Материал"}
+                              </span>
+                            </p>
+
+                            <a
+                              href={entry.item.href}
+                              class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                            >
+                              <h3 class="font-old_standard text-2xl font-normal tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 hover:underline">
+                                {truncateText(entry.item.title)}
+                              </h3>
+                            </a>
+
+                            <p class="hidden m-0 font-inter text-xs uppercase tracking-[0.22em] text-base-content/55">
+                              {formatDate(entry.item.createdAt)}
+                            </p>
+                          </div>
+                        </article>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {pages.length > 1 && (
+          <div class="flex items-center justify-center gap-2 pt-2">
+            {pages.map((_, index) => (
+              <button
+                type="button"
+                class="related-carousel__dot h-2.5 w-2.5 rounded-full border border-base-content/30 bg-transparent transition-all duration-300"
+                data-related-carousel-dot
+                data-page-index={index}
+                aria-label={`Показать страницу ${index + 1}`}
+                aria-pressed={index === 0 ? "true" : "false"}
+              ></button>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<script is:inline>
+  const initRelatedCarousels = () => {
+    const roots = document.querySelectorAll("[data-related-carousel-root]");
+
+    roots.forEach((root) => {
+      if (!(root instanceof HTMLElement) || root.dataset.initialized === "true") {
+        return;
+      }
+
+      const track = root.querySelector("[data-related-carousel-track]");
+      const pages = Array.from(
+        root.querySelectorAll("[data-related-carousel-page]"),
+      );
+      const dots = Array.from(
+        root.querySelectorAll("[data-related-carousel-dot]"),
+      );
+      const pageCount = Number(root.dataset.pageCount || pages.length || 0);
+
+      if (!(track instanceof HTMLElement) || pageCount <= 1) {
+        root.dataset.initialized = "true";
+        return;
+      }
+
+      let currentPage = 0;
+      let autoplayId = 0;
+
+      const syncUi = () => {
+        track.style.transform = `translateX(-${currentPage * 100}%)`;
+
+        pages.forEach((page, index) => {
+          page.setAttribute("aria-hidden", index === currentPage ? "false" : "true");
+        });
+
+        dots.forEach((dot, index) => {
+          if (!(dot instanceof HTMLButtonElement)) {
+            return;
+          }
+
+          const isActive = index === currentPage;
+          dot.setAttribute("aria-pressed", isActive ? "true" : "false");
+          dot.classList.toggle("related-carousel__dot--active", isActive);
+        });
+      };
+
+      const scheduleNext = () => {
+        window.clearTimeout(autoplayId);
+        autoplayId = window.setTimeout(() => {
+          currentPage = (currentPage + 1) % pageCount;
+          syncUi();
+          scheduleNext();
+        }, 4500);
+      };
+
+      const goToPage = (pageIndex, shouldRestart = true) => {
+        currentPage = ((pageIndex % pageCount) + pageCount) % pageCount;
+        syncUi();
+
+        if (shouldRestart) {
+          scheduleNext();
+        }
+      };
+
+      dots.forEach((dot) => {
+        if (!(dot instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        dot.addEventListener("click", () => {
+          const pageIndex = Number(dot.dataset.pageIndex || 0);
+          goToPage(pageIndex);
+        });
+      });
+
+      root.addEventListener("mouseenter", () => {
+        window.clearTimeout(autoplayId);
+      });
+
+      root.addEventListener("mouseleave", () => {
+        scheduleNext();
+      });
+
+      root.dataset.initialized = "true";
+      syncUi();
+      scheduleNext();
+    });
+  };
+
+  initRelatedCarousels();
+  document.addEventListener("astro:page-load", initRelatedCarousels);
+</script>
+
+<style is:global>
+  .related-carousel__dot {
+    transform: scale(1);
+  }
+
+  .related-carousel__dot--active {
+    transform: scale(1.15);
+    background-color: rgb(var(--color-accent, 164 97 72) / 1);
+    border-color: rgb(var(--color-accent, 164 97 72) / 1);
+  }
+</style>

@@ -6,6 +6,7 @@ import {
   sortAndNormalizeContentBlocks,
   withBlockMeta,
 } from "@/lib/utils/contentBlocks";
+import { sanitizeRelatedContent } from "@/lib/utils/relatedContent";
 
 type EventCategory = "exhibition" | "concert" | "performance";
 type EventDateType = "single" | "duration";
@@ -166,6 +167,7 @@ export default function eventCreatorLogic(initialState = {}) {
     copy.imageCaption = typeof copy.imageCaption === "string" ? copy.imageCaption : "";
     copy.lead = copy.lead ?? "";
     copy.cardLead = copy.cardLead ?? "";
+    copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     return copy;
   };
 
@@ -186,6 +188,34 @@ export default function eventCreatorLogic(initialState = {}) {
     },
     categoryLabels: CATEGORY_LABELS,
     ...restInitial,
+    addRelatedContent() {
+      const type = this.selectedRelatedContentType;
+      const id = this.selectedRelatedContentId;
+
+      if (!type || !id) {
+        return;
+      }
+
+      const normalized = sanitizeRelatedContent(this.article.relatedContent);
+      if (this.eventId && type === "event" && id === this.eventId) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Нельзя привязать текущее событие к самому себе.",
+          "error",
+        );
+        return;
+      }
+      if (normalized[type].includes(id)) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Этот материал уже добавлен.",
+          "info",
+        );
+        return;
+      }
+
+      normalized[type] = [...normalized[type], id];
+      this.article.relatedContent = normalized;
+      this.selectedRelatedContentId = "";
+    },
 
     init() {
       baseLogic.init?.call(this);
@@ -201,6 +231,11 @@ export default function eventCreatorLogic(initialState = {}) {
           this.article.techTags = Array.isArray(normalized.techTags)
             ? normalized.techTags
             : [];
+          this.article.relatedContent = sanitizeRelatedContent(
+            normalized.relatedContent,
+            "event",
+            this.eventId,
+          );
           this.article.imageUrl = normalized.imageUrl;
           this.article.imageCaption = normalized.imageCaption ?? "";
           this.article.title = normalized.title ?? "";
@@ -230,6 +265,11 @@ export default function eventCreatorLogic(initialState = {}) {
       if (onSaveRedirect) {
         this.onSaveRedirect = onSaveRedirect;
       }
+      this.article.relatedContent = sanitizeRelatedContent(
+        this.article.relatedContent,
+        "event",
+        this.eventId,
+      );
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? reindexContentBlocks(this.article.contentBlocks)
         : [];
@@ -435,6 +475,11 @@ export default function eventCreatorLogic(initialState = {}) {
           endTime: timeMode === "range" ? endTime : null,
           isOnLanding: Boolean(this.eventForm.isOnLanding),
           isMainEvent: Boolean(this.eventForm.isMainEvent),
+          relatedContent: sanitizeRelatedContent(
+            this.article.relatedContent,
+            "event",
+            this.eventId,
+          ),
         };
 
         if (this.isEditMode && this.eventId) {

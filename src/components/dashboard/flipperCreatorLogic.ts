@@ -1,6 +1,13 @@
 import { flippersApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
+  RELATED_CONTENT_TYPE_OPTIONS,
+  createEmptyRelatedContent,
+  createEmptyRelatedContentLists,
+  fetchRelatedContentLists,
+  sanitizeRelatedContent,
+} from "@/lib/utils/relatedContent";
+import {
   getStorage,
   ref,
   uploadBytesResumable,
@@ -118,6 +125,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     copy.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
     copy.binaryForGuide = Boolean(copy.binaryForGuide);
     copy.techTags = normalizeTechTags(copy.techTags);
+    copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     return copy;
   };
 
@@ -134,11 +142,17 @@ export default function flipperCreatorLogic(initialState = {}) {
       binaryForGuide: false,
       techTags: [],
       carouselContent: [{ imageUrl: "", caption: "" }],
+      relatedContent: createEmptyRelatedContent(),
     },
     uploading: false,
     uploadProgress: 0,
     uploadingIndex: -1,
     isSaving: false,
+    contentListsLoading: false,
+    relatedContentLists: createEmptyRelatedContentLists(),
+    relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
+    selectedRelatedContentType: "article",
+    selectedRelatedContentId: "",
     flipperId,
     isEditMode,
     onSaveRedirect,
@@ -160,9 +174,15 @@ export default function flipperCreatorLogic(initialState = {}) {
           this.flipper.carouselContent = [{ imageUrl: "", caption: "" }];
         }
       }
+      this.flipper.relatedContent = sanitizeRelatedContent(
+        this.flipper.relatedContent,
+        "flipper",
+        this.flipperId,
+      );
       this.selectedAuthorId =
         typeof this.flipper.authorId === "string" ? this.flipper.authorId : "";
       this.ensureSelectedAuthorPresent();
+      this.fetchContentLists();
       this.loadAuthors();
     },
 
@@ -312,6 +332,67 @@ export default function flipperCreatorLogic(initialState = {}) {
       }
       return this.selectedAuthorId;
     },
+    async fetchContentLists() {
+      this.contentListsLoading = true;
+      try {
+        this.relatedContentLists = await fetchRelatedContentLists();
+      } catch (error) {
+        console.error("Failed to fetch content lists:", error);
+        window.Alpine?.store("ui")?.showToast?.(
+          "Не удалось загрузить списки контента.",
+          "error",
+        );
+      } finally {
+        this.contentListsLoading = false;
+      }
+    },
+    getAvailableRelatedContentItems() {
+      if (!this.selectedRelatedContentType) {
+        return [];
+      }
+      return this.relatedContentLists[this.selectedRelatedContentType] ?? [];
+    },
+    getSelectedEntityRelatedContent(type) {
+      return this.flipper?.relatedContent?.[type] ?? [];
+    },
+    getRelatedContentItemLabel(type, id) {
+      const item = (this.relatedContentLists[type] ?? []).find(
+        (entry) => entry.id === id,
+      );
+      return item?.title || id;
+    },
+    addRelatedContent() {
+      const type = this.selectedRelatedContentType;
+      const id = this.selectedRelatedContentId;
+
+      if (!type || !id) {
+        return;
+      }
+
+      const normalized = sanitizeRelatedContent(this.flipper.relatedContent);
+      if (this.flipperId && type === "flipper" && id === this.flipperId) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Нельзя привязать текущий флиппер к самому себе.",
+          "error",
+        );
+        return;
+      }
+      if (normalized[type].includes(id)) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Этот материал уже добавлен.",
+          "info",
+        );
+        return;
+      }
+      normalized[type] = [...normalized[type], id];
+      this.flipper.relatedContent = normalized;
+      this.selectedRelatedContentId = "";
+    },
+    removeRelatedContent(type, id) {
+      const normalized = sanitizeRelatedContent(this.flipper.relatedContent);
+      normalized[type] = normalized[type].filter((itemId) => itemId !== id);
+      this.flipper.relatedContent = normalized;
+    },
 
     addCarouselItem() {
       this.flipper.carouselContent.push({ imageUrl: "", caption: "" });
@@ -405,6 +486,11 @@ export default function flipperCreatorLogic(initialState = {}) {
           binaryForGuide: false,
           techTags: normalizeTechTags(this.flipper.techTags),
           isHotContent: Boolean(this.flipper.isHotContent),
+          relatedContent: sanitizeRelatedContent(
+            this.flipper.relatedContent,
+            "flipper",
+            this.flipperId,
+          ),
         };
 
         if (this.isEditMode && this.flipperId) {

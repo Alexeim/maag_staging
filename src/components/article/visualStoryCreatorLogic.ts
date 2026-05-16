@@ -1,6 +1,13 @@
 import { visualStoriesApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
+  RELATED_CONTENT_TYPE_OPTIONS,
+  createEmptyRelatedContent,
+  createEmptyRelatedContentLists,
+  fetchRelatedContentLists,
+  sanitizeRelatedContent,
+} from "@/lib/utils/relatedContent";
+import {
   getStorage,
   ref,
   uploadBytesResumable,
@@ -116,6 +123,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       isHotContent: false,
       isOnLanding: false,
       slides: [] as Array<{ imageUrl: string; text: string }>,
+      relatedContent: createEmptyRelatedContent(),
     },
 
     storyId,
@@ -140,6 +148,11 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     uploadProgress: 0,
     uploadingSlideIndex: null as number | null,
     isSaving: false,
+    contentListsLoading: false,
+    relatedContentLists: createEmptyRelatedContentLists(),
+    relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
+    selectedRelatedContentType: "article",
+    selectedRelatedContentId: "",
 
     getCategoryLabel(value?: string) {
       if (!value) return "Category";
@@ -377,6 +390,63 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     cancelEditTitle() {
       this.isEditingTitle = false;
     },
+    async fetchContentLists() {
+      this.contentListsLoading = true;
+      try {
+        this.relatedContentLists = await fetchRelatedContentLists();
+      } catch (error) {
+        console.error("Failed to fetch content lists:", error);
+        window.Alpine?.store("ui")?.showToast?.(
+          "Не удалось загрузить списки контента.",
+          "error",
+        );
+      } finally {
+        this.contentListsLoading = false;
+      }
+    },
+    getAvailableRelatedContentItems() {
+      if (!this.selectedRelatedContentType) return [];
+      return this.relatedContentLists[this.selectedRelatedContentType] ?? [];
+    },
+    getSelectedEntityRelatedContent(type) {
+      return this.story?.relatedContent?.[type] ?? [];
+    },
+    getRelatedContentItemLabel(type, id) {
+      const item = (this.relatedContentLists[type] ?? []).find(
+        (entry) => entry.id === id,
+      );
+      return item?.title || id;
+    },
+    addRelatedContent() {
+      const type = this.selectedRelatedContentType;
+      const id = this.selectedRelatedContentId;
+      if (!type || !id) return;
+
+      const normalized = sanitizeRelatedContent(this.story.relatedContent);
+      if (this.storyId && type === "visualStory" && id === this.storyId) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Нельзя привязать текущую visual story к самой себе.",
+          "error",
+        );
+        return;
+      }
+      if (normalized[type].includes(id)) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Этот материал уже добавлен.",
+          "info",
+        );
+        return;
+      }
+
+      normalized[type] = [...normalized[type], id];
+      this.story.relatedContent = normalized;
+      this.selectedRelatedContentId = "";
+    },
+    removeRelatedContent(type, id) {
+      const normalized = sanitizeRelatedContent(this.story.relatedContent);
+      normalized[type] = normalized[type].filter((itemId) => itemId !== id);
+      this.story.relatedContent = normalized;
+    },
 
     init() {
       if (initialStory) {
@@ -398,6 +468,11 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.isHotContent = Boolean(copy.isHotContent);
         this.story.isOnLanding = Boolean(copy.isOnLanding);
         this.story.slides = Array.isArray(copy.slides) ? copy.slides : [];
+        this.story.relatedContent = sanitizeRelatedContent(
+          copy.relatedContent,
+          "visualStory",
+          this.storyId,
+        );
         (this.story as any).author = copy.author;
         this.selectedAuthorId = typeof copy.authorId === "string" ? copy.authorId : "";
       }
@@ -410,6 +485,12 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       this.story.parisDistrict = normalizeParisDistrict(this.story.parisDistrict);
       this.story.binaryForGuide = Boolean(this.story.binaryForGuide);
       this.story.techTags = normalizeTechTags(this.story.techTags);
+      this.story.relatedContent = sanitizeRelatedContent(
+        this.story.relatedContent,
+        "visualStory",
+        this.storyId,
+      );
+      this.fetchContentLists();
       this.loadAuthors();
     },
 
@@ -463,6 +544,11 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           techTags: normalizeTechTags(this.story.techTags),
           isHotContent: this.story.isHotContent,
           isOnLanding: this.story.isOnLanding,
+          relatedContent: sanitizeRelatedContent(
+            this.story.relatedContent,
+            "visualStory",
+            this.storyId,
+          ),
         };
 
         if (this.isEditMode && this.storyId) {

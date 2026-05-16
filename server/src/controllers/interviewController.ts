@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
+import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
 
 // Interface for our Interview structure
 export interface Interview {
@@ -15,6 +16,7 @@ export interface Interview {
   imageUrl?: string;
   imageCaption?: string;
   tags?: string[];
+  relatedContent?: RelatedContent;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -40,6 +42,7 @@ export const createInterview = async (req: Request, res: Response) => {
       mainQuote,
       tags = [],
       isHotContent = false,
+      relatedContent,
     } = req.body;
 
     if (!title || !content || !authorId || !interviewee) {
@@ -62,6 +65,7 @@ export const createInterview = async (req: Request, res: Response) => {
       imageUrl,
       imageCaption,
       tags: normalizedTags,
+      relatedContent: normalizeRelatedContent(relatedContent),
       createdAt: new Date(),
     };
 
@@ -162,6 +166,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       mainQuote,
       tags = [],
       isHotContent = false,
+      relatedContent,
     } = req.body;
 
     if (!title || !content || !authorId || !interviewee) {
@@ -184,6 +189,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       imageUrl,
       imageCaption,
       tags: normalizedTags,
+      relatedContent: normalizeRelatedContent(relatedContent),
       updatedAt: new Date(),
     };
 

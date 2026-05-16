@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
+import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
 
 export interface EventItem {
   id?: string;
@@ -24,6 +25,7 @@ export interface EventItem {
   updatedAt?: Date;
   isOnLanding: boolean;
   isMainEvent?: boolean;
+  relatedContent?: RelatedContent;
 }
 
 const db = getDb();
@@ -126,6 +128,7 @@ export const createEvent = async (req: Request, res: Response) => {
       timeMode = 'none',
       startTime = null,
       endTime = null,
+      relatedContent,
     } = req.body;
 
     const isOnLanding = Boolean(req.body?.isOnLanding);
@@ -194,6 +197,7 @@ export const createEvent = async (req: Request, res: Response) => {
       createdAt: new Date(),
       isOnLanding,
       isMainEvent,
+      relatedContent: normalizeRelatedContent(relatedContent),
     };
 
     if (isOnLanding) {
@@ -287,6 +291,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       endTime = null,
       isOnLanding = false,
       isMainEvent = false,
+      relatedContent,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -354,6 +359,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       updatedAt: new Date(),
       isOnLanding: landingFlag,
       isMainEvent: mainEventFlag,
+      relatedContent: normalizeRelatedContent(relatedContent),
     };
 
     if (landingFlag) {

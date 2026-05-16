@@ -1,4 +1,5 @@
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+import type { RelatedContent } from "@/lib/utils/relatedContent";
 
 export type ApiQueryValue = string | number | boolean | undefined | null;
 
@@ -146,6 +147,7 @@ export interface ArticlePayload {
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
   isNews?: boolean;
+  relatedContent?: RelatedContent;
 }
 
 export interface ArticleResponse extends ArticlePayload {
@@ -168,6 +170,7 @@ export interface NewsPayload {
   isHotContent?: boolean;
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
+  relatedContent?: RelatedContent;
 }
 
 export interface NewsResponse extends NewsPayload {
@@ -197,6 +200,7 @@ export interface EventPayload {
   endTime?: string | null;
   isOnLanding: boolean;
   isMainEvent?: boolean;
+  relatedContent?: RelatedContent;
 }
 
 export interface EventResponse extends EventPayload {
@@ -245,6 +249,14 @@ export interface FlipperPayload {
   binaryForGuide?: boolean;
   isHotContent?: boolean;
   carouselContent: { imageUrl: string; caption: string }[];
+  relatedContent?: RelatedContent;
+}
+
+export interface FlipperResponse extends FlipperPayload {
+  id: string;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
+  author?: unknown;
 }
 
 export interface InterviewPayload {
@@ -259,6 +271,7 @@ export interface InterviewPayload {
   mainQuote?: string;
   tags?: string[];
   isHotContent?: boolean;
+  relatedContent?: RelatedContent;
 }
 
 export interface InterviewResponse extends InterviewPayload {
@@ -286,6 +299,7 @@ export interface GuidePayload {
   isHotContent?: boolean;
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
+  relatedContent?: RelatedContent;
 }
 
 export interface GuideResponse extends GuidePayload {
@@ -383,20 +397,20 @@ export const newsApi = {
 
 export const flippersApi = {
   list(token?: string) {
-    return request<any[]>("/api/flippers", { token });
+    return request<FlipperResponse[]>("/api/flippers", { token });
   },
   create(payload: FlipperPayload, token?: string) {
-    return request<any>("/api/flippers", {
+    return request<FlipperResponse>("/api/flippers", {
       method: "POST",
       body: payload,
       token,
     });
   },
   getById(id: string, token?: string) {
-    return request<any>(`/api/flippers/${id}`, { token });
+    return request<FlipperResponse>(`/api/flippers/${id}`, { token });
   },
   update(id: string, payload: FlipperPayload, token?: string) {
-    return request<any>(`/api/flippers/${id}`, {
+    return request<FlipperResponse>(`/api/flippers/${id}`, {
       method: "PUT",
       body: payload,
       token,
@@ -526,6 +540,7 @@ export interface VisualStoryPayload {
   binaryForGuide?: boolean;
   isHotContent?: boolean;
   isOnLanding?: boolean;
+  relatedContent?: RelatedContent;
 }
 
 export interface VisualStoryResponse extends VisualStoryPayload {

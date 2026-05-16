@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
+import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
 
 // Interface for our Article structure
 export interface Article {
@@ -20,6 +21,7 @@ export interface Article {
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
   isNews?: boolean;
+  relatedContent?: RelatedContent;
   createdAt: Date;
 }
 
@@ -86,6 +88,7 @@ export const createArticle = async (req: Request, res: Response) => {
       isOnLanding = false,
       isMainInCategory = false,
       isNews = false,
+      relatedContent,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -120,6 +123,7 @@ export const createArticle = async (req: Request, res: Response) => {
       isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
+      relatedContent: normalizeRelatedContent(relatedContent),
       createdAt: new Date(),
     };
 
@@ -225,6 +229,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       isOnLanding = false,
       isMainInCategory = false,
       isNews = false,
+      relatedContent,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -259,6 +264,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
+      relatedContent: normalizeRelatedContent(relatedContent),
       updatedAt: new Date(),
     };
 

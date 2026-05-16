@@ -2,6 +2,7 @@
 import Button from "@/components/common/Button.astro";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 import { CloudUpload } from "lucide-astro";
+import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 
 interface Props {
   heading: string;
@@ -367,6 +368,8 @@ const {
   </section>
 
   <!-- Action buttons -->
+  <RelatedContentEditor />
+
   <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex gap-2">
       <template x-if="isEditMode && storyId">

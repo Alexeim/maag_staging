@@ -7,6 +7,7 @@ import {
 } from "@/content/tags/parisTags";
 import locationIcon from "@/assets/icons/new/location.svg?raw";
 import timeIcon from "@/assets/icons/new/time.svg?raw";
+import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 
 interface Props {
   heading: string;
@@ -551,6 +552,8 @@ const allParisDistricts = parisDistrictTags;
       </Button>
     </div>
   </section>
+
+  <RelatedContentEditor />
 
   <!-- ── Кнопки действий ───────────────────────────────────────────────────── -->
   <div class="flex justify-between items-center gap-4 mt-4 pb-16">

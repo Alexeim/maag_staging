@@ -1,6 +1,7 @@
 ---
 import Button from "@/components/common/Button.astro";
 import { CloudUpload } from "lucide-astro";
+import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 
 interface Props {
   heading: string;
@@ -394,16 +395,41 @@ const {
                 <p class="text-xs uppercase tracking-[0.2em] text-base-content/50" x-text="'Позиция: ' + ((block.position ?? index) + 1)"></p>
                 <p class="text-xs text-base-content/50">Во время редактирования перетаскивание выключено</p>
               </div>
-              <h3 class="text-lg font-semibold">Абзац</h3>
-              <textarea
-                x-model="editingBlock.text"
-                class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-                rows="5"></textarea>
+              <h3 class="text-lg font-semibold capitalize" x-text="editingBlock.type === 'url-link' ? 'Ссылка на URL' : 'Абзац'"></h3>
+
+              <template x-if="editingBlock.type === 'paragraph'">
+                <textarea
+                  x-model="editingBlock.text"
+                  class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                  rows="5"></textarea>
+              </template>
+
+              <template x-if="editingBlock.type === 'url-link'">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium">Текст ссылки</label>
+                    <input
+                      type="text"
+                      x-model="editingBlock.text"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="Например: Купить билеты..."
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium">URL</label>
+                    <input
+                      type="url"
+                      x-model="editingBlock.url"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+              </template>
+
               <div class="flex justify-end gap-3">
                 <Button variant="secondary" @click="cancelEdit()">Отмена</Button>
-                <Button variant="primary" @click="updateBlock()"
-                  >Сохранить блок</Button
-                >
+                <Button variant="primary" @click="updateBlock()">Сохранить блок</Button>
               </div>
             </div>
           </template>
@@ -417,16 +443,20 @@ const {
                   <span>Перетащи, чтобы изменить порядок</span>
                 </div>
               </div>
-              <p class="text-base" x-text="block.text"></p>
+              <template x-if="block.type === 'paragraph'">
+                <p class="text-base" x-text="block.text"></p>
+              </template>
+              <template x-if="block.type === 'url-link'">
+                <p class="text-sm">
+                  <span class="font-medium" x-text="block.text || '(без текста)'"></span>
+                  <span class="text-base-content/50 ml-2" x-text="block.url"></span>
+                </p>
+              </template>
               <div
                 class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2"
               >
-                <Button variant="outline" size="sm" @click="editBlock(index)"
-                  >Редактировать</Button
-                >
-                <Button variant="error" size="sm" @click="deleteBlock(index)"
-                  >Удалить</Button
-                >
+                <Button variant="outline" size="sm" @click="editBlock(index)">Редактировать</Button>
+                <Button variant="error" size="sm" @click="deleteBlock(index)">Удалить</Button>
               </div>
             </div>
           </template>
@@ -434,14 +464,22 @@ const {
       </template>
     </div>
 
-    <div class="mt-6 text-center">
-      <Button variant="primary" @click="openBlockSelector()"
-        >+ Добавить абзац</Button
-      >
+    <div class="mt-6">
+      <template x-if="showBlockOptions">
+        <div class="grid grid-cols-2 gap-3 p-4 border border-base-300 rounded-lg bg-base-100">
+          <button @click="addBlock('paragraph')" class="btn btn-outline btn-sm justify-start">Абзац</button>
+          <button @click="addBlock('url-link')" class="btn btn-outline btn-sm justify-start">Ссылка на URL</button>
+        </div>
+      </template>
+      <div x-show="!showBlockOptions" class="text-center">
+        <Button variant="primary" @click="openBlockSelector()">+ Добавить блок</Button>
+      </div>
     </div>
   </section>
 
   <!-- Actions -->
+  <RelatedContentEditor />
+
   <div
     class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
   >

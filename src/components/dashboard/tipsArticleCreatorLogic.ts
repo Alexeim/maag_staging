@@ -1,6 +1,13 @@
 import { articlesApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
+  RELATED_CONTENT_TYPE_OPTIONS,
+  createEmptyRelatedContent,
+  createEmptyRelatedContentLists,
+  fetchRelatedContentLists,
+  sanitizeRelatedContent,
+} from "@/lib/utils/relatedContent";
+import {
   getStorage,
   ref,
   uploadBytesResumable,
@@ -72,6 +79,7 @@ const normalizeLoadedArticle = (data: any) => {
   copy.isHotContent = Boolean(copy.isHotContent);
   copy.isOnLanding = Boolean(copy.isOnLanding);
   copy.isMainInCategory = Boolean(copy.isMainInCategory);
+  copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
   return copy;
 };
 
@@ -127,6 +135,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       isOnLanding: false,
       isMainInCategory: false,
       contentBlocks: [] as any[],
+      relatedContent: createEmptyRelatedContent(),
       authorId: "" as string,  // populated from loaded article in edit mode
       author: null as any,     // populated from API response in edit mode
     },
@@ -144,6 +153,11 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     uploadProgress: 0,
     uploadingBlockIndex: null as number | null,
     isSaving: false,
+    contentListsLoading: false,
+    relatedContentLists: createEmptyRelatedContentLists(),
+    relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
+    selectedRelatedContentType: "article",
+    selectedRelatedContentId: "",
 
     // Author state
     authors: [] as any[],
@@ -191,6 +205,11 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       );
       this.article.binaryForGuide = Boolean((this.article as any).binaryForGuide);
       this.article.techTags = normalizeTags(this.article.techTags);
+      this.article.relatedContent = sanitizeRelatedContent(
+        (this.article as any).relatedContent,
+        "article",
+        this.articleId,
+      );
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? this.article.contentBlocks
         : [];
@@ -198,6 +217,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       this.selectedAuthorId =
         typeof this.article.authorId === "string" ? this.article.authorId : "";
 
+      this.fetchContentLists();
       this.loadAuthors();
     },
 
@@ -381,6 +401,54 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       if (!this.selectedAuthorId)
         throw new Error("Выбери автора из списка или создай нового.");
       return this.selectedAuthorId;
+    },
+    async fetchContentLists() {
+      this.contentListsLoading = true;
+      try {
+        this.relatedContentLists = await fetchRelatedContentLists();
+      } catch (e) {
+        console.error("Failed to fetch content lists:", e);
+        ui()?.showToast?.("Не удалось загрузить списки контента.", "error");
+      } finally {
+        this.contentListsLoading = false;
+      }
+    },
+    getAvailableRelatedContentItems() {
+      if (!this.selectedRelatedContentType) return [];
+      return this.relatedContentLists[this.selectedRelatedContentType] ?? [];
+    },
+    getSelectedEntityRelatedContent(type: string) {
+      return (this.article as any)?.relatedContent?.[type] ?? [];
+    },
+    getRelatedContentItemLabel(type: string, id: string) {
+      const item = (this.relatedContentLists as Record<string, any[]>)[type]?.find(
+        (entry) => entry.id === id,
+      );
+      return item?.title || id;
+    },
+    addRelatedContent() {
+      const type = this.selectedRelatedContentType;
+      const id = this.selectedRelatedContentId;
+      if (!type || !id) return;
+
+      const normalized = sanitizeRelatedContent((this.article as any).relatedContent);
+      if (this.articleId && type === "article" && id === this.articleId) {
+        ui()?.showToast?.("Нельзя привязать текущий материал к самому себе.", "error");
+        return;
+      }
+      if (normalized[type].includes(id)) {
+        ui()?.showToast?.("Этот материал уже добавлен.", "info");
+        return;
+      }
+
+      normalized[type] = [...normalized[type], id];
+      (this.article as any).relatedContent = normalized;
+      this.selectedRelatedContentId = "";
+    },
+    removeRelatedContent(type: string, id: string) {
+      const normalized = sanitizeRelatedContent((this.article as any).relatedContent);
+      normalized[type] = normalized[type].filter((itemId) => itemId !== id);
+      (this.article as any).relatedContent = normalized;
     },
 
     // ── Tips-item blocks ──────────────────────────────────────────────────────
@@ -572,6 +640,11 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           isOnLanding: Boolean(this.article.isOnLanding),
           isMainInCategory: Boolean(this.article.isMainInCategory),
           content: this.article.contentBlocks,
+          relatedContent: sanitizeRelatedContent(
+            (this.article as any).relatedContent,
+            "article",
+            this.articleId,
+          ),
         };
 
         if (this.isEditMode && this.articleId) {

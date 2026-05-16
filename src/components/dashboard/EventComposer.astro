@@ -3,6 +3,7 @@ import Button from "@/components/common/Button.astro";
 
 import { CloudUpload } from "lucide-astro";
 import QuoteIcon from "@/assets/icons/quote.svg";
+import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 
 interface Props {
   heading: string;
@@ -764,6 +765,29 @@ const {
                 </div>
               </template>
 
+              <template x-if="editingBlock.type === 'url-link'">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium">Текст ссылки</label>
+                    <input
+                      type="text"
+                      x-model="editingBlock.text"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="Например: Купить билеты..."
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium">URL</label>
+                    <input
+                      type="url"
+                      x-model="editingBlock.url"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+              </template>
+
               <template x-if="editingBlock.type === 'flipper'">
                 <div class="space-y-4">
                   <template x-for="(slide, slideIdx) in editingBlock.slides" :key="slideIdx">
@@ -938,6 +962,13 @@ const {
                 </div>
               </div>
 
+              <template x-if="block.type === 'url-link'">
+                <p class="text-sm text-base-content/70">
+                  <span class="font-medium text-base-content" x-text="block.text || '(без текста)'"></span>
+                  <span class="ml-2" x-text="block.url"></span>
+                </p>
+              </template>
+
               <template x-if="block.type === 'flipper'">
                 <div class="space-y-2">
                   <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Листалка</p>
@@ -980,6 +1011,11 @@ const {
             >Блок-ссылка</button
           >
           <button
+            @click="addBlock('url-link')"
+            class="btn btn-outline btn-sm justify-start"
+            >Ссылка на URL</button
+          >
+          <button
             @click="addBlock('flipper')"
             class="btn btn-outline btn-sm justify-start"
             >Листалка</button
@@ -992,6 +1028,8 @@ const {
       </div>
     </div>
   </section>
+
+  <RelatedContentEditor />
 
   <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex gap-2">

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
+import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
 
 export interface VisualStory {
   id?: string;
@@ -14,6 +15,7 @@ export interface VisualStory {
   techTags?: string[];
   isHotContent?: boolean;
   isOnLanding?: boolean;
+  relatedContent?: RelatedContent;
   createdAt: Date;
 }
 
@@ -34,6 +36,7 @@ export const createVisualStory = async (req: Request, res: Response) => {
       techTags = [],
       isHotContent = false,
       isOnLanding = false,
+      relatedContent,
     } = req.body;
 
     if (!title || !authorId) {
@@ -60,6 +63,7 @@ export const createVisualStory = async (req: Request, res: Response) => {
       techTags: Array.isArray(techTags) ? techTags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
       isHotContent: Boolean(isHotContent),
       isOnLanding: Boolean(isOnLanding),
+      relatedContent: normalizeRelatedContent(relatedContent),
       createdAt: new Date(),
     };
 
@@ -133,6 +137,7 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       techTags = [],
       isHotContent = false,
       isOnLanding = false,
+      relatedContent,
     } = req.body;
 
     if (!title || !authorId) {
@@ -157,6 +162,7 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       techTags: Array.isArray(techTags) ? techTags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
       isHotContent: Boolean(isHotContent),
       isOnLanding: Boolean(isOnLanding),
+      relatedContent: normalizeRelatedContent(relatedContent),
       updatedAt: new Date(),
     };
 

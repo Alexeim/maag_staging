@@ -9,6 +9,7 @@ import ideaIcon from "@/assets/icons/new/idea.svg?raw";
 import likeIcon from "@/assets/icons/new/like.svg?raw";
 import dislikeIcon from "@/assets/icons/new/dislike.svg?raw";
 import QuoteIcon from "@/assets/icons/quote.svg";
+import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 
 interface Props {
   heading: string;
@@ -1130,6 +1131,8 @@ const {
       </div>
     </div>
   </section>
+
+  <RelatedContentEditor />
 
   <div
     class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"

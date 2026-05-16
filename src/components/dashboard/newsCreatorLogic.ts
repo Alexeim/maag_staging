@@ -1,6 +1,13 @@
 import { newsApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
+  RELATED_CONTENT_TYPE_OPTIONS,
+  createEmptyRelatedContent,
+  createEmptyRelatedContentLists,
+  fetchRelatedContentLists,
+  sanitizeRelatedContent,
+} from "@/lib/utils/relatedContent";
+import {
   getStorage,
   ref,
   uploadBytesResumable,
@@ -113,6 +120,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     copy.imageCaption = copy.imageCaption ?? "";
     copy.lead = copy.lead ?? "";
     copy.cardLead = copy.cardLead ?? "";
+    copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     return copy;
   };
 
@@ -130,6 +138,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       isHotContent: false,
       isOnLanding: false,
       isMainInCategory: false,
+      relatedContent: createEmptyRelatedContent(),
     },
 
     showBlockOptions: false,
@@ -147,6 +156,11 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     uploading: false,
     uploadProgress: 0,
     isSaving: false,
+    contentListsLoading: false,
+    relatedContentLists: createEmptyRelatedContentLists(),
+    relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
+    selectedRelatedContentType: "article",
+    selectedRelatedContentId: "",
 
     categoryTags,
     articleId,
@@ -181,6 +195,62 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
         if (found) return found.title;
       }
       return value;
+    },
+    async fetchContentLists() {
+      this.contentListsLoading = true;
+      try {
+        this.relatedContentLists = await fetchRelatedContentLists();
+      } catch (error) {
+        console.error("Failed to fetch content lists:", error);
+        (window as any).Alpine?.store?.("ui")?.showToast?.(
+          "Не удалось загрузить списки контента.",
+          "error",
+        );
+      } finally {
+        this.contentListsLoading = false;
+      }
+    },
+    getAvailableRelatedContentItems() {
+      if (!this.selectedRelatedContentType) return [];
+      return this.relatedContentLists[this.selectedRelatedContentType] ?? [];
+    },
+    getSelectedEntityRelatedContent(type: string) {
+      return this.article?.relatedContent?.[type] ?? [];
+    },
+    getRelatedContentItemLabel(type: string, id: string) {
+      const item = (this.relatedContentLists as Record<string, any[]>)[type]?.find(
+        (entry) => entry.id === id,
+      );
+      return item?.title || id;
+    },
+    addRelatedContent() {
+      const type = this.selectedRelatedContentType;
+      const id = this.selectedRelatedContentId;
+      if (!type || !id) return;
+
+      const normalized = sanitizeRelatedContent(this.article.relatedContent);
+      if (this.articleId && type === "news" && id === this.articleId) {
+        (window as any).Alpine?.store?.("ui")?.showToast?.(
+          "Нельзя привязать текущую новость к самой себе.",
+          "error",
+        );
+        return;
+      }
+      if (normalized[type].includes(id)) {
+        (window as any).Alpine?.store?.("ui")?.showToast?.(
+          "Этот материал уже добавлен.",
+          "info",
+        );
+        return;
+      }
+      normalized[type] = [...normalized[type], id];
+      this.article.relatedContent = normalized;
+      this.selectedRelatedContentId = "";
+    },
+    removeRelatedContent(type: string, id: string) {
+      const normalized = sanitizeRelatedContent(this.article.relatedContent);
+      normalized[type] = normalized[type].filter((itemId) => itemId !== id);
+      this.article.relatedContent = normalized;
     },
     isTagSelected(value: string) {
       return this.article.tags.includes(value);
@@ -308,12 +378,18 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isOnLanding = Boolean(this.article.isOnLanding);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
+      this.article.relatedContent = sanitizeRelatedContent(
+        this.article.relatedContent,
+        "news",
+        this.articleId,
+      );
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? sortAndNormalizeContentBlocks(this.article.contentBlocks)
         : [];
       this.selectedAuthorId =
         typeof this.article.authorId === "string" ? this.article.authorId : "";
       this.ensureSelectedAuthorPresent();
+      this.fetchContentLists();
       this.loadAuthors();
     },
 
@@ -378,15 +454,30 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       );
     },
 
-    // Block management (paragraph only)
     openBlockSelector() {
+      this.showBlockOptions = true;
+    },
+
+    addBlock(type: string) {
+      let newBlockData: Record<string, unknown> = {};
+      switch (type) {
+        case "paragraph":
+          newBlockData = { text: "" };
+          break;
+        case "url-link":
+          newBlockData = { text: "", url: "" };
+          break;
+        default:
+          break;
+      }
       const newBlock = createBlock(
-        "paragraph",
-        { text: "" },
+        type,
+        newBlockData,
         this.article.contentBlocks.length,
       );
       this.article.contentBlocks.push(newBlock);
       this.syncContentBlockOrder();
+      this.showBlockOptions = false;
       this.editBlock(this.article.contentBlocks.length - 1);
     },
 
@@ -533,6 +624,11 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
           isHotContent: Boolean(this.article.isHotContent),
           isOnLanding: Boolean(this.article.isOnLanding),
           isMainInCategory: Boolean(this.article.isMainInCategory),
+          relatedContent: sanitizeRelatedContent(
+            this.article.relatedContent,
+            "news",
+            this.articleId,
+          ),
         };
 
         if (this.isEditMode && this.articleId) {
