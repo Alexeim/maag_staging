@@ -537,21 +537,40 @@ export default (
       return;
     }
 
-    const eventsForDate = this.events.filter((event) =>
-      isDateWithinRange(this.selectedDate as Date, event),
-    );
+    const isRange = this.hasCompletedRange() && this.rangeStartDate && this.rangeEndDate;
+
+    let eventsForDate: NormalizedEvent[];
+
+    if (isRange) {
+      const rangeStart = this.rangeStartDate!.getTime();
+      const rangeEnd = this.rangeEndDate!.getTime();
+      eventsForDate = this.events.filter(
+        (event) =>
+          event.startDate.getTime() <= rangeEnd &&
+          event.endDate.getTime() >= rangeStart,
+      );
+    } else {
+      eventsForDate = this.events.filter((event) =>
+        isDateWithinRange(this.selectedDate as Date, event),
+      );
+    }
 
     const filtered =
       this.activeFilter === "все"
         ? eventsForDate
         : eventsForDate.filter((event) => event.tag === this.activeFilter);
 
-    this.filteredEvents = filtered.filter((event) =>
-      isBoundaryDate(this.selectedDate as Date, event),
-    );
-    this.smallEvents = filtered
-      .filter((event) => isOngoingDate(this.selectedDate as Date, event))
-      .slice(0, 4);
+    if (isRange) {
+      this.filteredEvents = filtered;
+      this.smallEvents = [];
+    } else {
+      this.filteredEvents = filtered.filter((event) =>
+        isBoundaryDate(this.selectedDate as Date, event),
+      );
+      this.smallEvents = filtered
+        .filter((event) => isOngoingDate(this.selectedDate as Date, event))
+        .slice(0, 4);
+    }
   },
 
   changeMonth(direction: number) {
