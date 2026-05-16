@@ -1,8 +1,7 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import ArticleComposer from "@/components/dashboard/ArticleComposer.astro";
-import cultureTags from "@/content/tags/CultureTags.json";
-import parisTags from "@/content/tags/ParisTags.json";
+import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
 import { articlesApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
@@ -15,10 +14,8 @@ try {
 }
 
 const articleCreatorState = JSON.stringify({
-  categoryTags: {
-    culture: cultureTags.cultureTags,
-    paris: parisTags.parisTags,
-  },
+  categoryTags,
+  parisDistrictOptions: parisDistrictTags,
   initialArticle: article,
   articleId: id,
   articleType: "le_saviez_vous",

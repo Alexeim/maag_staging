@@ -3,6 +3,7 @@ import { Image } from "astro:assets";
 import MaagLogo from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
 import { articlesApi, eventsApi, guidesApi } from "@/lib/api/api";
+import { getKnownTagLabel } from "@/content/tags/parisTags";
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -74,7 +75,7 @@ const getPrimaryTag = (article: any) => {
   );
 
   if (firstTag) {
-    return getCategoryLabel(firstTag.trim());
+    return getKnownTagLabel(firstTag.trim()) || getCategoryLabel(firstTag.trim());
   }
 
   if (article?.isHotContent) {

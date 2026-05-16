@@ -2,6 +2,7 @@
 import Layout from "../Layouts/Layout.astro";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import NetlenkaCard from "@/components/common/NetlenkaCard.astro";
+import { getKnownTagLabel } from "@/content/tags/parisTags";
 import picture1 from "../assets/images/culture.jpg";
 import {
   articlesApi,
@@ -124,7 +125,7 @@ const getPrimaryTag = (item: any): string => {
   }
   const firstTag = tags[0];
   const normalized = firstTag.toLowerCase();
-  return TAG_LABEL_ALIASES[normalized] ?? firstTag;
+  return TAG_LABEL_ALIASES[normalized] ?? getKnownTagLabel(firstTag);
 };
 
 const getCardLead = (item: any): string => {

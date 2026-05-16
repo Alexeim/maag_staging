@@ -9,6 +9,7 @@ import {
   type InterviewResponse,
   type FlipperPayload,
 } from "@/lib/api/api";
+import { getKnownTagLabel } from "@/content/tags/parisTags";
 
 import NetlenkaCard from "./NetlenkaCard.astro";
 import ArticleCard from "./ArticleCard.astro";
@@ -101,7 +102,7 @@ const getPrimaryTag = (item: any) => {
   const firstTag = rawTags.find(
     (tag: string) => typeof tag === "string" && tag.trim().length > 0,
   );
-  if (firstTag) return getCategoryLabel(firstTag.trim());
+  if (firstTag) return getKnownTagLabel(firstTag.trim()) || getCategoryLabel(firstTag.trim());
   if (item?.isNews) return "Новости";
   if (item?.isHotContent) return CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY];
   return getCategoryLabel(item?.category);

@@ -3,6 +3,7 @@ import Layout from "../../Layouts/Layout.astro";
 import ArticleHeader from "../../components/article/ArticleHeader.astro";
 import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
+import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { flippersApi } from "../../lib/api/api";
 import ArrowLeft from "../../assets/svg/arrowLeft.svg";
 import ArrowRight from "../../assets/svg/arrowRight.svg";
@@ -51,7 +52,7 @@ const getFlipperCategory = () => {
     return "Листалка";
   }
 
-  return CATEGORY_LABELS[firstTag] || firstTag;
+  return CATEGORY_LABELS[firstTag] || getKnownTagLabel(firstTag);
 };
 
 const flipperState = JSON.stringify({

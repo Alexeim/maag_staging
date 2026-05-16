@@ -1,64 +1,84 @@
 {
   "parisDistricts": [
     {
-      "districtNumber": "I"
+      "title": "I",
+      "value": "district-1"
     },
     {
-      "districtNumber": "II"
+      "title": "II",
+      "value": "district-2"
     },
     {
-      "districtNumber": "III"
+      "title": "III",
+      "value": "district-3"
     },
     {
-      "districtNumber": "IV"
+      "title": "IV",
+      "value": "district-4"
     },
     {
-      "districtNumber": "V"
+      "title": "V",
+      "value": "district-5"
     },
     {
-      "districtNumber": "VI"
+      "title": "VI",
+      "value": "district-6"
     },
     {
-      "districtNumber": "VII"
+      "title": "VII",
+      "value": "district-7"
     },
     {
-      "districtNumber": "VIII"
+      "title": "VIII",
+      "value": "district-8"
     },
     {
-      "districtNumber": "IX"
+      "title": "IX",
+      "value": "district-9"
     },
     {
-      "districtNumber": "X"
+      "title": "X",
+      "value": "district-10"
     },
     {
-      "districtNumber": "XI"
+      "title": "XI",
+      "value": "district-11"
     },
     {
-      "districtNumber": "XII"
+      "title": "XII",
+      "value": "district-12"
     },
     {
-      "districtNumber": "XIII"
+      "title": "XIII",
+      "value": "district-13"
     },
     {
-      "districtNumber": "XIV"
+      "title": "XIV",
+      "value": "district-14"
     },
     {
-      "districtNumber": "XV"
+      "title": "XV",
+      "value": "district-15"
     },
     {
-      "districtNumber": "XVI"
+      "title": "XVI",
+      "value": "district-16"
     },
     {
-      "districtNumber": "XVII"
+      "title": "XVII",
+      "value": "district-17"
     },
     {
-      "districtNumber": "XVIII"
+      "title": "XVIII",
+      "value": "district-18"
     },
     {
-      "districtNumber": "XIX"
+      "title": "XIX",
+      "value": "district-19"
     },
     {
-      "districtNumber": "XX"
+      "title": "XX",
+      "value": "district-20"
     }
   ]
 }

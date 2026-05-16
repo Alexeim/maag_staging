@@ -8,6 +8,7 @@ import theatreShowImage from "../assets/images/calendar/theatre-show.png";
 import smallEventImage from "../assets/images/calendar/small-event.png";
 import locationIcon from "../assets/images/calendar/location.svg?raw";
 import picture1 from "../assets/images/culture.jpg";
+import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { eventsApi } from "@/lib/api/api";
 
 const EVENT_CATEGORY_LABELS: Record<string, string> = {
@@ -145,7 +146,7 @@ const resolveTagLabel = (rawTag: unknown, fallback: string): string => {
       return roman;
     }
   }
-  return TAG_LABEL_ALIASES[normalized] ?? trimmed;
+  return TAG_LABEL_ALIASES[normalized] ?? getKnownTagLabel(trimmed);
 };
 
 const formatShortDateRange = (

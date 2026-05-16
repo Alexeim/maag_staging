@@ -2,8 +2,7 @@
 import DashboardLayout from "../../../../Layouts/DashboardLayout.astro";
 import FlipperComposer from "../../../../components/dashboard/FlipperComposer.astro";
 import { flippersApi } from "../../../../lib/api/api";
-import cultureTags from "@/content/tags/CultureTags.json";
-import parisTags from "@/content/tags/ParisTags.json";
+import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
 
 const { id } = Astro.params;
 const flipper = await flippersApi.getById(id);
@@ -12,17 +11,13 @@ if (!flipper) {
   return Astro.redirect("/404");
 }
 
-const categoryTags = {
-  culture: cultureTags.cultureTags,
-  paris: parisTags.parisTags,
-};
-
 const creatorState = JSON.stringify({
   initialFlipper: flipper,
   flipperId: id,
   isEditMode: true,
   onSaveRedirect: "/dashboard/flippers",
   categoryTags,
+  parisDistrictOptions: parisDistrictTags,
 });
 ---
 

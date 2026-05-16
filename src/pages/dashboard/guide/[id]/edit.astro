@@ -1,8 +1,7 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import GuideComposer from "@/components/dashboard/GuideComposer.astro";
-import cultureTags from "@/content/tags/CultureTags.json";
-import parisTags from "@/content/tags/ParisTags.json";
+import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
 import { guidesApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
@@ -15,10 +14,8 @@ try {
 }
 
 const guideCreatorState = JSON.stringify({
-  categoryTags: {
-    culture: cultureTags.cultureTags,
-    paris: parisTags.parisTags,
-  },
+  categoryTags,
+  parisDistrictOptions: parisDistrictTags,
   initialArticle: guide,
   articleId: id,
   isEditMode: true,

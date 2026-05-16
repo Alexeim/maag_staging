@@ -1,14 +1,11 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import ArticleComposer from "@/components/dashboard/ArticleComposer.astro";
-import cultureTags from "@/content/tags/CultureTags.json";
-import parisTags from "@/content/tags/ParisTags.json";
+import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
 
 const articleCreatorState = JSON.stringify({
-  categoryTags: {
-    culture: cultureTags.cultureTags,
-    paris: parisTags.parisTags,
-  },
+  categoryTags,
+  parisDistrictOptions: parisDistrictTags,
   articleType: "le_saviez_vous",
   isEditMode: false,
   onSaveRedirect: "/dashboard/le-saviez-vous",

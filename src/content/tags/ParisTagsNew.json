@@ -1,0 +1,40 @@
+{
+  "parisSubCategories": [
+    {
+      "title": "маршрут",
+      "value": "route"
+    },
+    {
+      "title": "адрес",
+      "value": "address"
+    },
+    {
+      "title": "записная книжка",
+      "value": "notebook"
+    },
+    {
+      "title": "место",
+      "value": "place"
+    },
+    {
+      "title": "история",
+      "value": "story"
+    },
+    {
+      "title": "архитектура",
+      "value": "architecture"
+    },
+    {
+      "title": "событие",
+      "value": "parisEvent"
+    },
+    {
+      "title": "рестораны",
+      "value": "restaurants"
+    },
+    {
+      "title": "еда",
+      "value": "food"
+    }
+  ]
+}

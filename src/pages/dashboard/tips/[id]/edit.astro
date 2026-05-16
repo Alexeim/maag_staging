@@ -2,8 +2,7 @@
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import TipsArticleComposer from "@/components/dashboard/TipsArticleComposer.astro";
 import { articlesApi } from "@/lib/api/api";
-import cultureTags from "@/content/tags/CultureTags.json";
-import parisTags from "@/content/tags/ParisTags.json";
+import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
 
 const { id } = Astro.params;
 
@@ -17,10 +16,8 @@ if (id) {
 }
 
 const tipsCreatorState = JSON.stringify({
-  categoryTags: {
-    culture: cultureTags.cultureTags,
-    paris: parisTags.parisTags,
-  },
+  categoryTags,
+  parisDistrictOptions: parisDistrictTags,
   isEditMode: true,
   articleId: id,
   initialArticle: article,

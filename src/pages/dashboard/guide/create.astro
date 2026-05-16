@@ -1,14 +1,11 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import GuideComposer from "@/components/dashboard/GuideComposer.astro";
-import cultureTags from "@/content/tags/CultureTags.json";
-import parisTags from "@/content/tags/ParisTags.json";
+import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
 
 const guideCreatorState = JSON.stringify({
-  categoryTags: {
-    culture: cultureTags.cultureTags,
-    paris: parisTags.parisTags,
-  },
+  categoryTags,
+  parisDistrictOptions: parisDistrictTags,
   isEditMode: false,
   onSaveRedirect: "/dashboard/guides",
 });

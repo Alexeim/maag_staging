@@ -139,6 +139,9 @@ export interface ArticlePayload {
   category?: string;
   tags?: string[];
   techTags?: string[];
+  parisSubCategories?: string[];
+  parisDistrict?: string | null;
+  binaryForGuide?: boolean;
   isHotContent?: boolean;
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
@@ -214,6 +217,9 @@ export interface FlipperPayload {
   category?: string;
   tags?: string[];
   techTags?: string[];
+  parisSubCategories?: string[];
+  parisDistrict?: string | null;
+  binaryForGuide?: boolean;
   isHotContent?: boolean;
   carouselContent: { imageUrl: string; caption: string }[];
 }
@@ -251,6 +257,9 @@ export interface GuidePayload {
   category?: string;
   tags?: string[];
   techTags?: string[];
+  parisSubCategories?: string[];
+  parisDistrict?: string | null;
+  binaryForGuide?: boolean;
   isHotContent?: boolean;
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
@@ -460,6 +469,9 @@ export interface VisualStoryPayload {
   category?: string;
   tags?: string[];
   techTags?: string[];
+  parisSubCategories?: string[];
+  parisDistrict?: string | null;
+  binaryForGuide?: boolean;
   isHotContent?: boolean;
   isOnLanding?: boolean;
 }

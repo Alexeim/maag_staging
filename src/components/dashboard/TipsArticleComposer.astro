@@ -1,8 +1,10 @@
 ---
 import Button from "@/components/common/Button.astro";
 import { CloudUpload } from "lucide-astro";
-import cultureTags from "@/content/tags/CultureTags.json";
-import parisTags from "@/content/tags/ParisTags.json";
+import {
+  categoryTags,
+  parisDistrictTags,
+} from "@/content/tags/parisTags";
 import locationIcon from "@/assets/icons/new/location.svg?raw";
 import timeIcon from "@/assets/icons/new/time.svg?raw";
 
@@ -24,8 +26,9 @@ const {
   deleteRedirect = "/dashboard",
 } = Astro.props as Props;
 
-const allCultureTags = cultureTags.cultureTags;
-const allParisTags = parisTags.parisTags;
+const allCultureTags = categoryTags.culture;
+const allParisTags = categoryTags.paris;
+const allParisDistricts = parisDistrictTags;
 ---
 
 <div
@@ -139,6 +142,7 @@ const allParisTags = parisTags.parisTags;
     <label class="block text-sm font-medium text-base-content mb-2">Категория</label>
     <select
       x-model="article.category"
+      @change="handleCategoryChange($event.target.value)"
       class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
     >
       <option value="culture">Культура</option>
@@ -183,7 +187,10 @@ const allParisTags = parisTags.parisTags;
     <hr class="my-6" />
 
     <!-- Tags -->
-    <label class="block text-sm font-medium text-base-content mb-3">Теги</label>
+    <label
+      class="block text-sm font-medium text-base-content mb-3"
+      x-text="article.category === 'paris' ? 'Подкатегории Парижа' : 'Теги'"
+    ></label>
     <div class="flex flex-wrap gap-2">
       <template x-if="article.category === 'culture'">
         <template x-for={`tag in ${JSON.stringify(allCultureTags)}`} :key="tag.value">
@@ -224,18 +231,62 @@ const allParisTags = parisTags.parisTags;
       Техническое значение тега уходит в базу данных, поэтому используй латиницу.
     </p>
 
-    <div class="mt-3 flex flex-wrap gap-2">
-      <template x-for="tag in article.tags" :key="tag">
-        <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
-          <span x-text="tag"></span>
-          <button
-            type="button"
-            class="text-base-content/60 hover:text-base-content cursor-pointer"
-            @click="removeTag(tag)"
-          >×</button>
-        </span>
+    <div class="mt-3 flex flex-col gap-3">
+      <template x-if="getSelectedCategoryTags().length > 0">
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">
+            <span x-text="article.category === 'paris' ? 'Подкатегории Парижа' : 'Категорийные теги'"></span>
+          </p>
+          <div class="mt-1 flex flex-wrap gap-2">
+            <template x-for="tag in getSelectedCategoryTags()" :key="tag">
+              <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
+                <span x-text="getTagLabel(tag)"></span>
+                <button
+                  type="button"
+                  class="text-base-content/60 hover:text-base-content cursor-pointer"
+                  @click="removeTag(tag)"
+                >×</button>
+              </span>
+            </template>
+          </div>
+        </div>
+      </template>
+
+      <template x-if="article.techTags.length > 0">
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Техтеги</p>
+          <div class="mt-1 flex flex-wrap gap-2">
+            <template x-for="tag in article.techTags" :key="`tech-${tag}`">
+              <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
+                <span x-text="tag"></span>
+                <button
+                  type="button"
+                  class="text-base-content/60 hover:text-base-content cursor-pointer"
+                  @click="removeTechTag(tag)"
+                >×</button>
+              </span>
+            </template>
+          </div>
+        </div>
       </template>
     </div>
+
+    <template x-if="article.category === 'paris'">
+      <div class="mt-6">
+        <label class="block text-sm font-medium text-base-content mb-2">
+          Округ Парижа
+        </label>
+        <select
+          x-model="article.parisDistrict"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+        >
+          <option value="">Не указывать округ</option>
+          <template x-for={`district in ${JSON.stringify(allParisDistricts)}`} :key="district.value">
+            <option :value="district.value" x-text="district.title"></option>
+          </template>
+        </select>
+      </div>
+    </template>
 
     <hr class="my-6" />
 

@@ -89,6 +89,7 @@ type TipItem = { type: TipType; text: string };
 export default function articleCreatorLogic(initialState = {}) {
   const {
     categoryTags = {},
+    parisDistrictOptions = [],
     initialArticle = null,
     articleId = null,
     isEditMode = false,
@@ -100,6 +101,7 @@ export default function articleCreatorLogic(initialState = {}) {
     ...restInitialState
   } = initialState as {
     categoryTags?: Record<string, Array<{ title: string; value: string }>>;
+    parisDistrictOptions?: Array<{ title: string; value: string }>;
     initialArticle?: Record<string, unknown> | null;
     articleId?: string | null;
     isEditMode?: boolean;
@@ -137,6 +139,14 @@ export default function articleCreatorLogic(initialState = {}) {
     }
     return Object.fromEntries(tags.map((tag) => [tag.title, tag.value]));
   };
+
+  const buildParisDistrictMap = () =>
+    Object.fromEntries(
+      parisDistrictOptions.flatMap((district) => [
+        [district.value.toLowerCase(), district.value],
+        [district.title.toLowerCase(), district.value],
+      ]),
+    );
 
   const slugifyTag = (value: string) => {
     return value
@@ -193,6 +203,18 @@ export default function articleCreatorLogic(initialState = {}) {
     return normalized;
   };
 
+  const normalizeParisDistrict = (value?: unknown) => {
+    if (typeof value !== "string") {
+      return "";
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return "";
+    }
+    const districtMap = buildParisDistrictMap();
+    return districtMap[trimmed.toLowerCase()] || trimmed;
+  };
+
   const normalizeContentBlocks = (blocks?: unknown) => {
     const orderedBlocks = syncContentBlockOrder(blocks);
     return orderedBlocks.map((block) =>
@@ -226,6 +248,12 @@ export default function articleCreatorLogic(initialState = {}) {
     copy.contentBlocks = normalizeContentBlocks(blocks);
     copy.content = copy.contentBlocks;
     copy.tags = normalizeTags(copy.tags, copy.category);
+    copy.parisSubCategories = normalizeTags(
+      copy.parisSubCategories ?? (copy.category === "paris" ? copy.tags : []),
+      "paris",
+    );
+    copy.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
+    copy.binaryForGuide = Boolean(copy.binaryForGuide);
     copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
     copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
@@ -275,6 +303,9 @@ export default function articleCreatorLogic(initialState = {}) {
       // --- REFACTORED: from 'paragraphs' to 'contentBlocks' ---
       contentBlocks: [],
       tags: [],
+      parisSubCategories: [],
+      parisDistrict: "",
+      binaryForGuide: false,
       techTags: [],
       tips: [] as TipItem[],
       category: "", // <-- Added category
@@ -323,6 +354,7 @@ export default function articleCreatorLogic(initialState = {}) {
     createSuccessRedirect,
     editRouteBase,
     createRoute,
+    parisDistrictOptions,
     newTagInput: "",
 
     categoryLabels,
@@ -399,6 +431,14 @@ export default function articleCreatorLogic(initialState = {}) {
       }
       return this.categoryTags[this.article.category] || [];
     },
+    isParisCategory() {
+      return this.article?.category === "paris";
+    },
+    getSelectedCategoryTags() {
+      return this.isParisCategory()
+        ? this.article.parisSubCategories
+        : this.article.tags;
+    },
     getTagLabel(value: string) {
       const availableForCurrent = this.getAvailableTags();
       const match = availableForCurrent.find((tag) => tag.value === value);
@@ -415,27 +455,36 @@ export default function articleCreatorLogic(initialState = {}) {
       return value;
     },
     isTagSelected(value: string) {
-      return this.article.tags.includes(value);
+      return this.getSelectedCategoryTags().includes(value);
     },
     toggleTag(value: string) {
       const normalized = normalizeTags([value], this.article.category)[0] || value;
-      const idx = this.article.tags.indexOf(normalized);
+      const targetTags = this.getSelectedCategoryTags();
+      const idx = targetTags.indexOf(normalized);
       if (idx >= 0) {
-        this.article.tags.splice(idx, 1);
+        targetTags.splice(idx, 1);
       } else {
-        this.article.tags.push(normalized);
+        targetTags.push(normalized);
         // Ensure custom tech tag with the same value is removed to avoid duplicates
         const techIdx = this.article.techTags.indexOf(normalized);
         if (techIdx >= 0) {
           this.article.techTags.splice(techIdx, 1);
         }
       }
-      this.article.tags = normalizeTags(this.article.tags, this.article.category);
+      if (this.isParisCategory()) {
+        this.article.parisSubCategories = normalizeTags(
+          this.article.parisSubCategories,
+          "paris",
+        );
+      } else {
+        this.article.tags = normalizeTags(this.article.tags, this.article.category);
+      }
     },
     removeTag(value: string) {
-      const idx = this.article.tags.indexOf(value);
+      const targetTags = this.getSelectedCategoryTags();
+      const idx = targetTags.indexOf(value);
       if (idx >= 0) {
-        this.article.tags.splice(idx, 1);
+        targetTags.splice(idx, 1);
       }
     },
     addCustomTag() {
@@ -447,7 +496,7 @@ export default function articleCreatorLogic(initialState = {}) {
         );
         return;
       }
-      if (this.article.tags.includes(slug)) {
+      if (this.getSelectedCategoryTags().includes(slug)) {
         window.Alpine?.store("ui")?.showToast?.(
           "Такой тег уже выбран.",
           "info",
@@ -476,6 +525,11 @@ export default function articleCreatorLogic(initialState = {}) {
     handleCategoryChange(value: string) {
       this.article.category = value;
       this.article.tags = normalizeTags(this.article.tags, value);
+      this.article.parisSubCategories = normalizeTags(
+        this.article.parisSubCategories,
+        "paris",
+      );
+      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
       this.article.techTags = normalizeTechTags(this.article.techTags);
     },
     isTipSelected(type: TipType) {
@@ -700,6 +754,12 @@ export default function articleCreatorLogic(initialState = {}) {
       }
 
       this.article.tags = this.article.tags ?? [];
+      this.article.parisSubCategories = normalizeTags(
+        this.article.parisSubCategories,
+        "paris",
+      );
+      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
+      this.article.binaryForGuide = Boolean(this.article.binaryForGuide);
       this.article.techTags = this.article.techTags ?? [];
       this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
@@ -1094,6 +1154,11 @@ export default function articleCreatorLogic(initialState = {}) {
           : normalizedCategory;
       this.article.contentBlocks = reindexContentBlocks(this.article.contentBlocks);
       this.article.tags = normalizeTags(this.article.tags, this.article.category);
+      this.article.parisSubCategories = normalizeTags(
+        this.article.parisSubCategories,
+        "paris",
+      );
+      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
       this.article.techTags = normalizeTechTags(this.article.techTags);
       this.article.tips = normalizeTips(this.article.tips);
 
@@ -1114,8 +1179,9 @@ export default function articleCreatorLogic(initialState = {}) {
         return;
       }
 
+      const selectedCategoryTags = this.getSelectedCategoryTags();
       const hasTags =
-        Array.isArray(this.article.tags) && this.article.tags.length > 0;
+        Array.isArray(selectedCategoryTags) && selectedCategoryTags.length > 0;
       const hasTechTags =
         Array.isArray(this.article.techTags) &&
         this.article.techTags.length > 0;
@@ -1140,7 +1206,8 @@ export default function articleCreatorLogic(initialState = {}) {
 
       try {
         const resolvedAuthorId = await this.resolveAuthorId();
-        const tagsForDb = this.article.tags.map((tag) => this.getTagLabel(tag));
+        const tagsForDb = selectedCategoryTags.map((tag) => this.getTagLabel(tag));
+        const isParisCategory = this.isParisCategory();
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
@@ -1152,6 +1219,9 @@ export default function articleCreatorLogic(initialState = {}) {
           content: this.article.contentBlocks,
           category: this.article.category,
           tags: tagsForDb,
+          parisSubCategories: isParisCategory ? this.article.parisSubCategories : [],
+          parisDistrict: isParisCategory ? this.article.parisDistrict || null : null,
+          binaryForGuide: false,
           techTags: this.article.techTags,
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,

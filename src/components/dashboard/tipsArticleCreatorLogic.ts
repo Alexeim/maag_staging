@@ -32,6 +32,21 @@ const normalizeTags = (tags?: string[]) => {
   return result;
 };
 
+const normalizeCategoryTags = (
+  tags: string[] | undefined,
+  categoryTags: Record<string, Array<{ title: string; value: string }>>,
+  category?: string,
+) => {
+  if (!Array.isArray(tags)) return [];
+  const legacyMap: Record<string, string> = {};
+  if (category && categoryTags?.[category]) {
+    for (const tag of categoryTags[category]) {
+      legacyMap[tag.title] = tag.value;
+    }
+  }
+  return normalizeTags(tags.map((tag) => legacyMap[tag] || tag));
+};
+
 // Creates a blank tips-item block
 const createTipsItem = () => ({
   type: "tips-item",
@@ -69,12 +84,30 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     isEditMode = false,
     onSaveRedirect = null,
     categoryTags = {},
+    parisDistrictOptions = [],
   } = initialState as {
     initialArticle?: Record<string, unknown> | null;
     articleId?: string | null;
     isEditMode?: boolean;
     onSaveRedirect?: string | null;
-    categoryTags?: Record<string, string[]>;
+    categoryTags?: Record<string, Array<{ title: string; value: string }>>;
+    parisDistrictOptions?: Array<{ title: string; value: string }>;
+  };
+
+  const buildParisDistrictMap = () =>
+    Object.fromEntries(
+      parisDistrictOptions.flatMap((district) => [
+        [district.value.toLowerCase(), district.value],
+        [district.title.toLowerCase(), district.value],
+      ]),
+    );
+
+  const normalizeParisDistrict = (value?: unknown) => {
+    if (typeof value !== "string") return "";
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    const districtMap = buildParisDistrictMap();
+    return districtMap[trimmed.toLowerCase()] || trimmed;
   };
 
   return {
@@ -86,6 +119,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       imageCaption: "",
       category: "culture",
       tags: [] as string[],
+      parisSubCategories: [] as string[],
+      parisDistrict: "",
+      binaryForGuide: false,
       techTags: [] as string[],
       isHotContent: false,
       isOnLanding: false,
@@ -120,6 +156,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     // Tag state
     newTagInput: "",
     categoryTags,
+    parisDistrictOptions,
 
     articleId,
     isEditMode,
@@ -138,7 +175,22 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       if (typeof isEditMode === "boolean") this.isEditMode = isEditMode;
       if (onSaveRedirect) this.onSaveRedirect = onSaveRedirect;
 
-      this.article.tags = normalizeTags(this.article.tags);
+      this.article.tags = normalizeCategoryTags(
+        this.article.tags,
+        this.categoryTags,
+        this.article.category,
+      );
+      this.article.parisSubCategories = normalizeCategoryTags(
+        (this.article as any).parisSubCategories ??
+          (this.article.category === "paris" ? this.article.tags : []),
+        this.categoryTags,
+        "paris",
+      );
+      this.article.parisDistrict = normalizeParisDistrict(
+        (this.article as any).parisDistrict,
+      );
+      this.article.binaryForGuide = Boolean((this.article as any).binaryForGuide);
+      this.article.techTags = normalizeTags(this.article.techTags);
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? this.article.contentBlocks
         : [];
@@ -176,21 +228,58 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     },
 
     // ── Tags ─────────────────────────────────────────────────────────────────
+    getAvailableTags() {
+      if (!this.article?.category) return [];
+      return this.categoryTags[this.article.category] || [];
+    },
+    getTagLabel(value: string) {
+      for (const tags of Object.values(this.categoryTags)) {
+        const found = tags.find((tag) => tag.value === value);
+        if (found) return found.title;
+      }
+      return value;
+    },
+    isParisCategory() {
+      return this.article.category === "paris";
+    },
+    getSelectedCategoryTags() {
+      return this.isParisCategory()
+        ? this.article.parisSubCategories
+        : this.article.tags;
+    },
     isTagSelected(value: string) {
-      return this.article.tags.includes(value);
+      return this.getSelectedCategoryTags().includes(value);
     },
     toggleTag(value: string) {
-      const idx = this.article.tags.indexOf(value);
+      const targetTags = this.getSelectedCategoryTags();
+      const idx = targetTags.indexOf(value);
       if (idx >= 0) {
-        this.article.tags.splice(idx, 1);
+        targetTags.splice(idx, 1);
       } else {
-        this.article.tags.push(value);
+        targetTags.push(value);
+        const techIdx = this.article.techTags.indexOf(value);
+        if (techIdx >= 0) {
+          this.article.techTags.splice(techIdx, 1);
+        }
       }
-      this.article.tags = normalizeTags(this.article.tags);
+      if (this.isParisCategory()) {
+        this.article.parisSubCategories = normalizeCategoryTags(
+          this.article.parisSubCategories,
+          this.categoryTags,
+          "paris",
+        );
+      } else {
+        this.article.tags = normalizeCategoryTags(
+          this.article.tags,
+          this.categoryTags,
+          this.article.category,
+        );
+      }
     },
     removeTag(value: string) {
-      const idx = this.article.tags.indexOf(value);
-      if (idx >= 0) this.article.tags.splice(idx, 1);
+      const targetTags = this.getSelectedCategoryTags();
+      const idx = targetTags.indexOf(value);
+      if (idx >= 0) targetTags.splice(idx, 1);
     },
     addCustomTag() {
       const slug = slugifyTag(this.newTagInput);
@@ -201,14 +290,38 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         );
         return;
       }
-      if (this.article.tags.includes(slug)) {
-        ui()?.showToast?.("Такой тег уже есть.", "info");
+      if (this.getSelectedCategoryTags().includes(slug)) {
+        ui()?.showToast?.("Такой тег уже выбран.", "info");
         this.newTagInput = "";
         return;
       }
-      this.article.tags.push(slug);
-      this.article.tags = normalizeTags(this.article.tags);
+      if (this.article.techTags.includes(slug)) {
+        ui()?.showToast?.("Такой техтег уже есть.", "info");
+        this.newTagInput = "";
+        return;
+      }
+      this.article.techTags.push(slug);
+      this.article.techTags = normalizeTags(this.article.techTags);
       this.newTagInput = "";
+    },
+    removeTechTag(value: string) {
+      const idx = this.article.techTags.indexOf(value);
+      if (idx >= 0) this.article.techTags.splice(idx, 1);
+    },
+    handleCategoryChange(value: string) {
+      this.article.category = value;
+      this.article.tags = normalizeCategoryTags(
+        this.article.tags,
+        this.categoryTags,
+        value,
+      );
+      this.article.parisSubCategories = normalizeCategoryTags(
+        this.article.parisSubCategories,
+        this.categoryTags,
+        "paris",
+      );
+      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
+      this.article.techTags = normalizeTags(this.article.techTags);
     },
 
     // ── Authors ───────────────────────────────────────────────────────────────
@@ -408,7 +521,18 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       if (this.isSaving) return;
       this.isSaving = true;
 
-      this.article.tags = normalizeTags(this.article.tags);
+      this.article.tags = normalizeCategoryTags(
+        this.article.tags,
+        this.categoryTags,
+        this.article.category,
+      );
+      this.article.parisSubCategories = normalizeCategoryTags(
+        this.article.parisSubCategories,
+        this.categoryTags,
+        "paris",
+      );
+      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
+      this.article.techTags = normalizeTags(this.article.techTags);
 
       if (!this.article.title) {
         ui()?.showToast?.("Добавь заголовок.", "error");
@@ -420,14 +544,16 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         this.isSaving = false;
         return;
       }
-      if (this.article.tags.length === 0) {
-        ui()?.showToast?.("Добавь хотя бы один тег.", "error");
+      const selectedCategoryTags = this.getSelectedCategoryTags();
+      if (selectedCategoryTags.length === 0 && this.article.techTags.length === 0) {
+        ui()?.showToast?.("Добавь хотя бы один тег или техтег.", "error");
         this.isSaving = false;
         return;
       }
 
       try {
         const authorId = await this.resolveAuthorId();
+        const isParisCategory = this.isParisCategory();
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
@@ -437,7 +563,10 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
           category: this.article.category,
-          tags: this.article.tags,
+          tags: selectedCategoryTags.map((tag) => this.getTagLabel(tag)),
+          parisSubCategories: isParisCategory ? this.article.parisSubCategories : [],
+          parisDistrict: isParisCategory ? this.article.parisDistrict || null : null,
+          binaryForGuide: false,
           techTags: this.article.techTags,
           isHotContent: Boolean(this.article.isHotContent),
           isOnLanding: Boolean(this.article.isOnLanding),

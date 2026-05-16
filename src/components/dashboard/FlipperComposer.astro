@@ -121,7 +121,10 @@ const {
     </div>
 
     <div class="mt-6">
-      <label class="block text-sm font-medium text-base-content mb-3">Теги</label>
+      <label
+        class="block text-sm font-medium text-base-content mb-3"
+        x-text="flipper.category === 'paris' ? 'Подкатегории Парижа' : 'Теги'"
+      ></label>
       <template x-if="getAvailableTags().length > 0">
         <div class="flex flex-wrap gap-2">
           <template x-for="tag in getAvailableTags()" :key="tag.value">
@@ -146,11 +149,13 @@ const {
         <p class="text-xs text-base-content/60">Техническое значение тега уходит в базу данных, поэтому используй латиницу.</p>
       </div>
       <div class="mt-3 flex flex-col gap-3">
-        <template x-if="flipper.tags.length > 0">
+        <template x-if="getSelectedCategoryTags().length > 0">
           <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Категорийные теги</p>
+            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">
+              <span x-text="flipper.category === 'paris' ? 'Подкатегории Парижа' : 'Категорийные теги'"></span>
+            </p>
             <div class="flex flex-wrap gap-2 mt-1">
-              <template x-for="tag in flipper.tags" :key="tag">
+              <template x-for="tag in getSelectedCategoryTags()" :key="tag">
                 <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
                   <span x-text="getTagLabel(tag)"></span>
                   <button type="button" class="text-base-content/60 hover:text-base-content cursor-pointer" @click="removeTag(tag)">×</button>
@@ -174,6 +179,23 @@ const {
         </template>
       </div>
     </div>
+
+    <template x-if="flipper.category === 'paris'">
+      <div class="mt-6">
+        <label class="block text-sm font-medium text-base-content mb-2">
+          Округ Парижа
+        </label>
+        <select
+          x-model="flipper.parisDistrict"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+        >
+          <option value="">Не указывать округ</option>
+          <template x-for="district in parisDistrictOptions" :key="district.value">
+            <option :value="district.value" x-text="district.title"></option>
+          </template>
+        </select>
+      </div>
+    </template>
   </section>
 
   <section class="p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
