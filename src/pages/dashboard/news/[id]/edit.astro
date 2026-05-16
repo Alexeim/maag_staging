@@ -2,13 +2,13 @@
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import NewsComposer from "@/components/dashboard/NewsComposer.astro";
 import newsTags from "@/content/tags/NewsTags.json";
-import { articlesApi } from "@/lib/api/api";
+import { newsApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
 
 let article = null;
 try {
-  article = await articlesApi.getById(id!);
+  article = await newsApi.getById(id!);
 } catch (error) {
   console.error("Failed to fetch news article", error);
 }

@@ -154,6 +154,29 @@ export interface ArticleResponse extends ArticlePayload {
   author?: unknown;
 }
 
+export interface NewsPayload {
+  title: string;
+  authorId: string;
+  content: unknown[];
+  imageUrl?: string;
+  imageCaption?: string;
+  lead?: string;
+  cardLead?: string;
+  category?: string;
+  tags?: string[];
+  techTags?: string[];
+  isHotContent?: boolean;
+  isOnLanding?: boolean;
+  isMainInCategory?: boolean;
+}
+
+export interface NewsResponse extends NewsPayload {
+  id: string;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
+  author?: unknown;
+}
+
 export interface EventPayload {
   title: string;
   authorId: string;
@@ -323,6 +346,35 @@ export const articlesApi = {
   },
   delete(id: string, token?: string) {
     return request<void>(`/api/articles/${id}`, {
+      method: "DELETE",
+      token,
+    });
+  },
+};
+
+export const newsApi = {
+  list(token?: string) {
+    return request<NewsResponse[]>("/api/news", { token });
+  },
+  create(payload: NewsPayload, token?: string) {
+    return request<NewsResponse>("/api/news", {
+      method: "POST",
+      body: payload,
+      token,
+    });
+  },
+  getById(id: string, token?: string) {
+    return request<NewsResponse>(`/api/news/${id}`, { token });
+  },
+  update(id: string, payload: NewsPayload, token?: string) {
+    return request<NewsResponse>(`/api/news/${id}`, {
+      method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+  delete(id: string, token?: string) {
+    return request<void>(`/api/news/${id}`, {
       method: "DELETE",
       token,
     });

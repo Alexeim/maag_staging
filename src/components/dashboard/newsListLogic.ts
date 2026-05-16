@@ -33,7 +33,7 @@ export default (initialState: { apiBaseUrl: string }) => ({
 
   async confirmAndDelete(id: string) {
     try {
-      const response = await fetch(this.buildApiUrl(`/api/articles/${id}`), {
+      const response = await fetch(this.buildApiUrl(`/api/news/${id}`), {
         method: "DELETE",
       });
       if (!response.ok && response.status !== 204) {

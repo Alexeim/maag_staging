@@ -1,6 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
-import { articlesApi } from "@/lib/api/api";
+import { newsApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
 const normalizeDate = (value: any) => {
@@ -37,15 +37,14 @@ const normalizeDate = (value: any) => {
   return null;
 };
 
-let articlesRaw = [] as Awaited<ReturnType<typeof articlesApi.list>>;
+let newsRaw = [] as Awaited<ReturnType<typeof newsApi.list>>;
 try {
-  articlesRaw = await articlesApi.list();
+  newsRaw = await newsApi.list();
 } catch (error) {
-  console.error("Failed to load articles", error);
+  console.error("Failed to load news", error);
 }
 
-const newsItems = articlesRaw
-  .filter((a) => Boolean((a as any).isNews))
+const newsItems = newsRaw
   .map((article) => {
     const createdAtDate = normalizeDate(article.createdAt);
     return {

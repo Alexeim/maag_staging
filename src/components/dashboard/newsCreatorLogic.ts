@@ -1,4 +1,4 @@
-import { articlesApi, authorsApi } from "@/lib/api/api";
+import { newsApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
   getStorage,
@@ -113,7 +113,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     copy.imageCaption = copy.imageCaption ?? "";
     copy.lead = copy.lead ?? "";
     copy.cardLead = copy.cardLead ?? "";
-    copy.isNews = true;
     return copy;
   };
 
@@ -131,7 +130,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       isHotContent: false,
       isOnLanding: false,
       isMainInCategory: false,
-      isNews: true,
     },
 
     showBlockOptions: false,
@@ -310,7 +308,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isOnLanding = Boolean(this.article.isOnLanding);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
-      this.article.isNews = true;
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? sortAndNormalizeContentBlocks(this.article.contentBlocks)
         : [];
@@ -536,16 +533,15 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
           isHotContent: Boolean(this.article.isHotContent),
           isOnLanding: Boolean(this.article.isOnLanding),
           isMainInCategory: Boolean(this.article.isMainInCategory),
-          isNews: true,
         };
 
         if (this.isEditMode && this.articleId) {
-          await articlesApi.update(this.articleId, payload);
+          await newsApi.update(this.articleId, payload);
           (window as any).Alpine.store("ui").showToast("Новость обновлена!");
           const redirectTo = this.onSaveRedirect || `/dashboard/news/${this.articleId}/edit`;
           setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
         } else {
-          const result = await articlesApi.create(payload);
+          const result = await newsApi.create(payload);
           (window as any).Alpine.store("ui").showToast("Новость создана!");
           setTimeout(() => { globalThis.location.href = `/news/${result.id}`; }, 1500);
         }
@@ -565,7 +561,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
 
       const performDelete = async () => {
         try {
-          await articlesApi.delete(this.articleId!);
+          await newsApi.delete(this.articleId!);
           (window as any).Alpine.store("ui").showToast("Новость удалена");
           setTimeout(() => {
             window.location.href = redirectUrl || "/dashboard/news";

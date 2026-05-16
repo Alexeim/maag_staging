@@ -2,7 +2,7 @@
 import { Image } from "astro:assets";
 import MaagLogo from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
-import { articlesApi, eventsApi, guidesApi } from "@/lib/api/api";
+import { articlesApi, eventsApi, guidesApi, newsApi } from "@/lib/api/api";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -110,18 +110,28 @@ let newsArticles: any[] = [];
 let landingEvent: any = null;
 
 try {
-  const [articles, guides] = await Promise.all([
+  const [articles, guides, newsItemsRaw] = await Promise.all([
     articlesApi.list(),
     guidesApi.list(),
+    newsApi.list(),
   ]);
   const standardArticles = articles.filter(
     (article) => !isLeSaviezVousArticle(article),
   );
+  const newsItems = newsItemsRaw.map((item) => ({
+    ...item,
+    isNews: true,
+    contentType: "news",
+  }));
   const landingContent = [
     ...standardArticles.map((article) => ({
       ...article,
       contentType: "article",
       href: toContentHref(article),
+    })),
+    ...newsItems.map((item) => ({
+      ...item,
+      href: toContentHref(item),
     })),
     ...guides.map((guide) => ({
       ...guide,
@@ -148,8 +158,7 @@ try {
     null;
 
   // Filter for news articles, limit to 5 for the landing page
-  newsArticles = standardArticles
-    .filter((article) => Boolean(article.isNews))
+  newsArticles = newsItems
     .slice(0, 4);
 } catch (error) {
   console.error("Failed to fetch articles:", error);

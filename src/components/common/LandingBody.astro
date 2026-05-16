@@ -6,6 +6,7 @@ import {
   flippersApi,
   guidesApi,
   visualStoriesApi,
+  newsApi,
   type InterviewResponse,
   type FlipperPayload,
 } from "@/lib/api/api";
@@ -209,18 +210,25 @@ const toContentHref = (item: any) => {
 };
 
 try {
-  const [articles, flippers, interviews, guides, visualStories] =
+  const [articles, flippers, interviews, guides, visualStories, newsItemsRaw] =
     await Promise.all([
       articlesApi.list(),
       flippersApi.list() as Promise<FlipperResponse[]>,
       interviewsApi.list() as Promise<InterviewResponse[]>,
       guidesApi.list(),
       visualStoriesApi.list(),
+      newsApi.list(),
     ]);
 
   const standardArticles = articles.filter(
     (article) => !isLeSaviezVousArticle(article),
   );
+  const newsItems = newsItemsRaw.map((item) => ({
+    ...item,
+    type: "news",
+    contentType: "news",
+    isNews: true,
+  }));
   const leSaviezVousArticles = articles
     .filter((article) => isLeSaviezVousArticle(article))
     .sort(
@@ -246,6 +254,10 @@ try {
       ...article,
       type: "article",
       href: `/article/${article.id}`,
+    })),
+    ...newsItems.map((item) => ({
+      ...item,
+      href: `/news/${item.id}`,
     })),
     ...flippers.map((flipper) => ({
       ...flipper,
@@ -298,6 +310,10 @@ try {
       ...article,
       type: "article",
       href: toContentHref(article),
+    })),
+    ...newsItems.map((item) => ({
+      ...item,
+      href: toContentHref(item),
     })),
     ...interviews.map((interview) => ({
       ...interview,

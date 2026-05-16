@@ -9,6 +9,10 @@
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:firebase": "ts-node src/test-firebase-direct.ts",
+    "migrate:news:dry": "node scripts/migrateArticlesNewsToNewsCollection.js",
+    "migrate:news:copy": "node scripts/migrateArticlesNewsToNewsCollection.js --apply-copy",
+    "migrate:news:delete": "node scripts/migrateArticlesNewsToNewsCollection.js --apply-delete",
+    "migrate:news:cleanup-flags": "node scripts/migrateArticlesNewsToNewsCollection.js --cleanup-flags",
     "deploy:prod": "bash deploy.sh"
   },
   "keywords": [],

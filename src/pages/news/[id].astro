@@ -5,7 +5,7 @@ import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
 import ArticleImage from "@/components/article/ArticleImage.astro";
 import ArticleBody from "@/components/article/ArticleBody.astro";
-import { ApiError, articlesApi } from "@/lib/api/api";
+import { ApiError, newsApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
 
@@ -19,7 +19,7 @@ let articleData: any;
 let error: string | null = null;
 
 try {
-  articleData = await articlesApi.getById(id!);
+  articleData = await newsApi.getById(id!);
 } catch (e: any) {
   console.error(e);
   if (e instanceof ApiError) {

@@ -8,6 +8,7 @@ import {
   flippersApi,
   guidesApi,
   visualStoriesApi,
+  newsApi,
 } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -180,16 +181,23 @@ let parisFeed: any[] = [];
 let leSaviezVousArticle: any = null;
 
 try {
-  const [articles, flippers, guides, visualStories] = await Promise.all([
+  const [articles, flippers, guides, visualStories, newsItemsRaw] = await Promise.all([
     articlesApi.list(),
     flippersApi.list(),
     guidesApi.list(),
     visualStoriesApi.list(),
+    newsApi.list(),
   ]);
 
   const standardArticles = articles.filter(
     (article) => !isLeSaviezVousArticle(article),
   );
+  const newsItems = newsItemsRaw.map((item) => ({
+    ...item,
+    isNews: true,
+    contentType: "news",
+    tags: normalizeTags(item?.tags),
+  }));
   const leSaviezVousArticles = articles
     .filter((article) => isLeSaviezVousArticle(article))
     .sort(
@@ -211,6 +219,7 @@ try {
       contentType: "article",
       tags: normalizeTags(article?.tags),
     })),
+    ...newsItems,
     ...flippers.map((flipper) => ({
       ...flipper,
       contentType: "flipper",

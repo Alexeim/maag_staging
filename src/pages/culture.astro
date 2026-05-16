@@ -10,6 +10,7 @@ import {
   flippersApi,
   guidesApi,
   visualStoriesApi,
+  newsApi,
 } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -202,18 +203,25 @@ let cultureFeed: any[] = [];
 let featuredInterview: any = null;
 
 try {
-  const [articles, interviews, flippers, guides, visualStories] =
+  const [articles, interviews, flippers, guides, visualStories, newsItemsRaw] =
     await Promise.all([
       articlesApi.list(),
       interviewsApi.list(),
       flippersApi.list(),
       guidesApi.list(),
       visualStoriesApi.list(),
+      newsApi.list(),
     ]);
 
   const standardArticles = articles.filter(
     (article) => !isLeSaviezVousArticle(article),
   );
+  const newsItems = newsItemsRaw.map((item) => ({
+    ...item,
+    isNews: true,
+    contentType: "news",
+    tags: normalizeTags(item?.tags),
+  }));
 
   const allContent = [
     ...standardArticles.map((article) => ({
@@ -221,6 +229,7 @@ try {
       contentType: "article",
       tags: normalizeTags(article?.tags),
     })),
+    ...newsItems,
     ...interviews.map((interview) => ({
       ...interview,
       contentType: "interview",

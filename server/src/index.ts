@@ -9,6 +9,7 @@ import interviewRoutes from './routes/interviewRoutes'; // Import interview rout
 import authorRoutes from './routes/authorRoutes';
 import guideRoutes from './routes/guideRoutes';
 import visualStoryRoutes from './routes/visualStoryRoutes';
+import newsRoutes from './routes/newsRoutes';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -26,6 +27,9 @@ app.get('/api', (req, res) => {
 
 // Use the article routes
 app.use('/api/articles', articleRoutes);
+
+// Use the news routes
+app.use('/api/news', newsRoutes);
 
 // Use the event routes
 app.use('/api/events', eventRoutes);
