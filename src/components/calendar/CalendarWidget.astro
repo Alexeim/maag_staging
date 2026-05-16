@@ -10,7 +10,8 @@
       <h3
         class="m-0 font-inter text-[2.05rem] font-semibold capitalize text-[#302821]"
         x-text="`${monthName} ${year}`"
-      ></h3>
+      >
+      </h3>
 
       <div class="ml-auto flex items-center gap-2">
         <button
@@ -18,8 +19,19 @@
           class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[#30282133] bg-white transition-colors hover:bg-[#f7f2ee]"
           aria-label="Предыдущий месяц"
         >
-          <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 13L1 7L7 1" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          <svg
+            width="8"
+            height="14"
+            viewBox="0 0 8 14"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7 13L1 7L7 1"
+              stroke="black"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
           </svg>
         </button>
         <button
@@ -27,14 +39,27 @@
           class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[#30282133] bg-white transition-colors hover:bg-[#f7f2ee]"
           aria-label="Следующий месяц"
         >
-          <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 13L7 7L1 1" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          <svg
+            width="8"
+            height="14"
+            viewBox="0 0 8 14"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M1 13L7 7L1 1"
+              stroke="black"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
           </svg>
         </button>
       </div>
     </div>
 
-    <div class="mb-3 grid grid-cols-7 text-center font-inter text-[0.82rem] text-[#7d726a] sm:text-[0.95rem]">
+    <div
+      class="mb-3 grid grid-cols-7 text-center font-inter text-[0.82rem] text-[#7d726a] sm:text-[0.95rem]"
+    >
       <div>Пн</div>
       <div>Вт</div>
       <div>Ср</div>
@@ -59,11 +84,13 @@
               'left-0 right-0': isWithinSelectedRange(cell)
             }"
             class="pointer-events-none absolute top-1/2 h-10 -translate-y-1/2 bg-error/16 sm:h-11 md:h-12"
-          ></div>
+          >
+          </div>
 
           <div
             class="pointer-events-none absolute h-10 w-10 rounded-full bg-error/50 opacity-0 transition-opacity duration-150 group-hover:opacity-100 sm:h-11 sm:w-11 md:h-12 md:w-12"
-          ></div>
+          >
+          </div>
 
           <div
             :class="{
@@ -73,13 +100,16 @@
             }"
             class="relative z-10 flex h-10 w-10 items-center justify-center rounded-full sm:h-11 sm:w-11 md:h-12 md:w-12"
           >
-            <div class="relative flex h-full w-full items-center justify-center">
+            <div
+              class="relative flex h-full w-full items-center justify-center"
+            >
               <span x-text="cell.day"></span>
 
               <div
                 x-show="hasEvent(cell) && !isSelectedDate(cell) && !isRangeBoundary(cell)"
-                class="pointer-events-none absolute bottom-[0.05rem] h-1.5 w-1.5 rounded-full bg-error sm:bottom-[0.12rem] sm:h-[0.42rem] sm:w-[0.42rem] md:bottom-[0.2rem] md:h-2 md:w-2"
-              ></div>
+                class="pointer-events-none absolute bottom-[0.05rem] h-1.5 w-1.5 rounded-full bg-black/50 sm:bottom-[0.12rem] sm:h-[0.42rem] sm:w-[0.42rem] md:bottom-[0.2rem] md:h-2 md:w-2"
+              >
+              </div>
             </div>
           </div>
         </button>
