@@ -16,7 +16,7 @@ import timeIcon from "../../assets/images/calendar/time.svg?raw";
     <div>
       <h2
         class="m-0 font-old_standard text-[1.05rem] font-normal uppercase tracking-[0.5em] text-[#15110e]"
-        x-text="selectedDate ? selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' }) : ''"
+        x-text="getSelectedDateHeading()"
       >
       </h2>
 

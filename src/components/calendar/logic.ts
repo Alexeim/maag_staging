@@ -107,6 +107,44 @@ const formatRangeLabel = (start: Date, end: Date): string => {
   return `${format(start, !sameYear)} – ${format(end, true)}`;
 };
 
+const formatSelectedRangeHeading = (start: Date, end?: Date | null): string => {
+  const sameDay =
+    !end ||
+    (start.getUTCFullYear() === end.getUTCFullYear() &&
+      start.getUTCMonth() === end.getUTCMonth() &&
+      start.getUTCDate() === end.getUTCDate());
+
+  if (sameDay) {
+    return start.toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "long",
+      timeZone: "UTC",
+    });
+  }
+
+  const sameMonth =
+    start.getUTCFullYear() === end.getUTCFullYear() &&
+    start.getUTCMonth() === end.getUTCMonth();
+
+  if (sameMonth) {
+    const month = end.toLocaleDateString("ru-RU", {
+      month: "long",
+      timeZone: "UTC",
+    });
+    return `${start.getUTCDate()}–${end.getUTCDate()} ${month}`;
+  }
+
+  return `${start.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  })} – ${end.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  })}`;
+};
+
 const ensureString = (value: unknown, fallback: string): string => {
   if (typeof value === "string" && value.trim().length > 0) {
     return value.trim();
@@ -216,6 +254,8 @@ export default (
 
   // State
   selectedDate: null as Date | null,
+  rangeStartDate: null as Date | null,
+  rangeEndDate: null as Date | null,
   year: 0,
   month: 0,
   monthName: "",
@@ -261,6 +301,8 @@ export default (
     } else {
       this.selectedDate = resetToUtcMidnight(new Date(nearestUpcoming.startDate));
     }
+    this.rangeStartDate = this.selectedDate ? new Date(this.selectedDate) : null;
+    this.rangeEndDate = null;
 
     this.year = this.selectedDate.getUTCFullYear();
     this.month = this.selectedDate.getUTCMonth();
@@ -470,6 +512,16 @@ export default (
     return days;
   },
 
+  resolveCalendarDate(value: number | Date | CalendarDay) {
+    if (typeof value === "number") {
+      return new Date(Date.UTC(this.year, this.month, value));
+    }
+    if (value instanceof Date) {
+      return resetToUtcMidnight(new Date(value));
+    }
+    return resetToUtcMidnight(new Date(value.date));
+  },
+
   getDefaultDateForMonth(year: number, month: number) {
     const monthBoundaryDates = getMonthBoundaryDates(this.events, year, month);
     if (monthBoundaryDates.length > 0) {
@@ -513,18 +565,29 @@ export default (
     }
     this.updateCalendarDisplay();
     this.selectedDate = this.getDefaultDateForMonth(this.year, this.month);
+    this.rangeStartDate = this.selectedDate ? new Date(this.selectedDate) : null;
+    this.rangeEndDate = null;
     this.updateFilteredEvents();
   },
 
   selectDate(value: number | CalendarDay) {
-    if (typeof value === "number") {
-      this.selectedDate = new Date(Date.UTC(this.year, this.month, value));
-      this.updateFilteredEvents();
-      return;
+    const nextSelectedDate = this.resolveCalendarDate(value);
+
+    if (!this.rangeStartDate || this.rangeEndDate) {
+      this.rangeStartDate = new Date(nextSelectedDate);
+      this.rangeEndDate = null;
+    } else if (!this.isSameDay(this.rangeStartDate, nextSelectedDate)) {
+      if (nextSelectedDate.getTime() < this.rangeStartDate.getTime()) {
+        this.rangeEndDate = new Date(this.rangeStartDate);
+        this.rangeStartDate = new Date(nextSelectedDate);
+      } else {
+        this.rangeEndDate = new Date(nextSelectedDate);
+      }
     }
 
-    this.selectedDate = resetToUtcMidnight(new Date(value.date));
-    if (!value.isCurrentMonth) {
+    this.selectedDate = nextSelectedDate;
+
+    if (typeof value !== "number" && !value.isCurrentMonth) {
       this.year = this.selectedDate.getUTCFullYear();
       this.month = this.selectedDate.getUTCMonth();
       this.updateCalendarDisplay();
@@ -533,12 +596,7 @@ export default (
   },
 
   hasEvent(value: number | Date | CalendarDay) {
-    const date =
-      typeof value === "number"
-        ? new Date(Date.UTC(this.year, this.month, value))
-        : value instanceof Date
-          ? value
-          : value.date;
+    const date = this.resolveCalendarDate(value);
     return this.events.some((event) => isBoundaryDate(date, event));
   },
 
@@ -556,5 +614,51 @@ export default (
       date1.getUTCMonth() === date2.getUTCMonth() &&
       date1.getUTCDate() === date2.getUTCDate()
     );
+  },
+
+  hasCompletedRange() {
+    return Boolean(
+      this.rangeStartDate &&
+        this.rangeEndDate &&
+        !this.isSameDay(this.rangeStartDate, this.rangeEndDate),
+    );
+  },
+
+  isSelectedDate(value: number | Date | CalendarDay) {
+    if (this.hasCompletedRange()) {
+      return false;
+    }
+    return this.isSameDay(this.selectedDate, this.resolveCalendarDate(value));
+  },
+
+  isRangeStart(value: number | Date | CalendarDay) {
+    return this.isSameDay(this.rangeStartDate, this.resolveCalendarDate(value));
+  },
+
+  isRangeEnd(value: number | Date | CalendarDay) {
+    return this.isSameDay(this.rangeEndDate, this.resolveCalendarDate(value));
+  },
+
+  isRangeBoundary(value: number | Date | CalendarDay) {
+    return this.isRangeStart(value) || this.isRangeEnd(value);
+  },
+
+  isWithinSelectedRange(value: number | Date | CalendarDay) {
+    if (!this.hasCompletedRange() || !this.rangeStartDate || !this.rangeEndDate) {
+      return false;
+    }
+    const date = this.resolveCalendarDate(value);
+    const time = date.getTime();
+    return (
+      time > this.rangeStartDate.getTime() && time < this.rangeEndDate.getTime()
+    );
+  },
+
+  getSelectedDateHeading() {
+    if (!this.selectedDate) {
+      return "";
+    }
+
+    return formatSelectedRangeHeading(this.rangeStartDate ?? this.selectedDate, this.rangeEndDate);
   },
 });

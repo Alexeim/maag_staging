@@ -34,7 +34,7 @@
       </div>
     </div>
 
-    <div class="mb-3 grid grid-cols-7 text-center font-inter text-[0.95rem] text-[#7d726a]">
+    <div class="mb-3 grid grid-cols-7 text-center font-inter text-[0.82rem] text-[#7d726a] sm:text-[0.95rem]">
       <div>Пн</div>
       <div>Вт</div>
       <div>Ср</div>
@@ -44,21 +44,44 @@
       <div>Вс</div>
     </div>
 
-    <div class="grid grid-cols-7 gap-1.5">
+    <div class="grid grid-cols-7 gap-x-0 gap-y-1.5">
       <template x-for="cell in calendarDays" :key="cell.date.toISOString()">
         <button
+          type="button"
           @click="$dispatch('date-selected', cell)"
-          class="flex aspect-square min-h-[52px] cursor-pointer items-center justify-center bg-[#f9f5f0] font-inter text-[1.05rem] transition-colors hover:bg-[#f0e9e1]"
+          class="group relative flex aspect-square min-h-[42px] cursor-pointer items-center justify-center overflow-hidden bg-[#f9f5f0] font-inter text-[0.96rem] transition-colors sm:min-h-[48px] sm:text-[1.02rem] md:min-h-[52px] md:text-[1.05rem]"
         >
-          <span
+          <div
+            x-show="hasCompletedRange() && (isWithinSelectedRange(cell) || isRangeStart(cell) || isRangeEnd(cell))"
             :class="{
-              'bg-error text-error-content': hasEvent(cell),
-              'text-[#b5aaa2]': !cell.isCurrentMonth && !hasEvent(cell),
-              'text-[#302821]': cell.isCurrentMonth && !hasEvent(cell)
+              'left-1/2 right-0': isRangeStart(cell) && !isRangeEnd(cell),
+              'left-0 right-1/2': isRangeEnd(cell) && !isRangeStart(cell),
+              'left-0 right-0': isWithinSelectedRange(cell)
             }"
-            class="flex h-12 w-12 items-center justify-center rounded-full"
-            x-text="cell.day"
-          ></span>
+            class="pointer-events-none absolute top-1/2 h-10 -translate-y-1/2 bg-error/16 sm:h-11 md:h-12"
+          ></div>
+
+          <div
+            class="pointer-events-none absolute h-10 w-10 rounded-full bg-error/50 opacity-0 transition-opacity duration-150 group-hover:opacity-100 sm:h-11 sm:w-11 md:h-12 md:w-12"
+          ></div>
+
+          <div
+            :class="{
+              'bg-error text-error-content': isSelectedDate(cell) || isRangeBoundary(cell),
+              'text-[#b5aaa2]': !cell.isCurrentMonth && !isSelectedDate(cell) && !isRangeBoundary(cell),
+              'text-[#302821]': cell.isCurrentMonth && !isSelectedDate(cell) && !isRangeBoundary(cell)
+            }"
+            class="relative z-10 flex h-10 w-10 items-center justify-center rounded-full sm:h-11 sm:w-11 md:h-12 md:w-12"
+          >
+            <div class="relative flex h-full w-full items-center justify-center">
+              <span x-text="cell.day"></span>
+
+              <div
+                x-show="hasEvent(cell) && !isSelectedDate(cell) && !isRangeBoundary(cell)"
+                class="pointer-events-none absolute bottom-[0.05rem] h-1.5 w-1.5 rounded-full bg-error sm:bottom-[0.12rem] sm:h-[0.42rem] sm:w-[0.42rem] md:bottom-[0.2rem] md:h-2 md:w-2"
+              ></div>
+            </div>
+          </div>
         </button>
       </template>
     </div>
