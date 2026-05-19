@@ -31,6 +31,7 @@ const headerScrollClasses =
     : "";
 
 const logoSrc = logo.src;
+const currentPath = Astro.url.pathname;
 ---
 
 <header
@@ -67,21 +68,36 @@ const logoSrc = logo.src;
       >
         <ul class="flex items-center text-base-content whitespace-nowrap">
           <li
-            class="nav-item font-inter leading-[1.21] tracking-[0.29em] uppercase text-base font-normal hover:border-b hover:border-base-content pb-0.5"
+            class:list={[
+              "relative pb-0.5 font-inter leading-[1.21] tracking-[0.29em] uppercase text-base font-normal",
+              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-left after:transition-transform after:duration-[250ms] after:ease-in-out",
+              "hover:after:scale-x-100",
+              currentPath.startsWith("/culture") ? "after:scale-x-100" : "after:scale-x-0",
+            ]}
           >
-            <a href="/culture" class="">Культура</a>
+            <a href="/culture">Культура</a>
           </li>
           <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
           <li
-            class="nav-item font-inter leading-[1.21] tracking-[0.29em] uppercase text-base font-normal hover:border-b hover:border-base-content pb-0.5"
+            class:list={[
+              "relative pb-0.5 font-inter leading-[1.21] tracking-[0.29em] uppercase text-base font-normal",
+              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-left after:transition-transform after:duration-[250ms] after:ease-in-out",
+              "hover:after:scale-x-100",
+              currentPath.startsWith("/paris") ? "after:scale-x-100" : "after:scale-x-0",
+            ]}
           >
-            <a href="/paris" class="">Париж</a>
+            <a href="/paris">Париж</a>
           </li>
           <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
           <li
-            class="nav-item font-inter leading-[1.21] tracking-[0.29em] uppercase text-base font-normal hover:border-b hover:border-base-content pb-0.5"
+            class:list={[
+              "relative pb-0.5 font-inter leading-[1.21] tracking-[0.29em] uppercase text-base font-normal",
+              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-left after:transition-transform after:duration-[250ms] after:ease-in-out",
+              "hover:after:scale-x-100",
+              currentPath.startsWith("/calendar") ? "after:scale-x-100" : "after:scale-x-0",
+            ]}
           >
-            <a href="/calendar" class="">Календарь</a>
+            <a href="/calendar">Календарь</a>
           </li>
           <!-- <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
           <li
@@ -157,11 +173,3 @@ const logoSrc = logo.src;
   </nav>
 </header>
 
-<style>
-  .nav-item {
-    transition: none !important;
-  }
-  .nav-item:hover {
-    transition: none !important;
-  }
-</style>

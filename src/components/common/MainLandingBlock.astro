@@ -75,7 +75,9 @@ const getPrimaryTag = (article: any) => {
   );
 
   if (firstTag) {
-    return getKnownTagLabel(firstTag.trim()) || getCategoryLabel(firstTag.trim());
+    return (
+      getKnownTagLabel(firstTag.trim()) || getCategoryLabel(firstTag.trim())
+    );
   }
 
   if (article?.isHotContent) {
@@ -158,8 +160,7 @@ try {
     null;
 
   // Filter for news articles, limit to 5 for the landing page
-  newsArticles = newsItems
-    .slice(0, 4);
+  newsArticles = newsItems.slice(0, 4);
 } catch (error) {
   console.error("Failed to fetch articles:", error);
 }
@@ -399,23 +400,28 @@ try {
             class="linked-image-hover bg-white"
           >
             <div class="px-4 py-2 flex items-center gap-3">
-              <div class="w-fill flex flex-col items-center justify-center mt-2 mb-2">
-                <p class="text-5xl font-old_standard uppercase font-bold">
-                  {formatEventDate(landingEvent.startDate)?.day}
-                </p>
-                <p class="font-semibold font-inter text-black/70">
-                  {(
-                    formatEventDate(landingEvent.startDate)?.month || ""
-                  ).toUpperCase()}
-                </p>
+              <div class="w-fill flex flex-row gap-2 items-center justify-center mt-2 mb-1">
+                <div class="flex items-center justify-center h-full">
+                  <p class="text-6xl font-old_standard uppercase font-bold">
+                    {formatEventDate(landingEvent.startDate)?.day}
+                  </p>
+                </div>
+                <div class="h-full flex flex-col items-start justify-center">
+                  <p class="font-semibold font-inter text-black/70">
+                    {(
+                      formatEventDate(landingEvent.startDate)?.month || ""
+                    ).toUpperCase()}
+                  </p>
+                  <div class="w-full border-t border-black/50" />
+                  <p>
+                    {formatEventDate(landingEvent.startDate)?.weekday ? (
+                      <span class="font-normal normal-case tracking-normal italic font-old_standard opacity-60">
+                        {formatEventDate(landingEvent.startDate)?.weekday}
+                      </span>
+                    ) : null}
+                  </p>
+                </div>
               </div>
-              <p>
-                {formatEventDate(landingEvent.startDate)?.weekday ? (
-                  <span class="font-normal normal-case tracking-normal italic font-old_standard opacity-60 ml-2">
-                    {formatEventDate(landingEvent.startDate)?.weekday}
-                  </span>
-                ) : null}
-              </p>
             </div>
             {landingEvent.imageUrl ? (
               <img
