@@ -57,7 +57,7 @@ const currentPath = Astro.url.pathname;
     <div class="flex items-center relative">
       {
         showLogoInNav && (
-          <a class="cursor-pointer" href="/">
+          <a class="cursor-pointer transition-transform duration-200 ease-out hover:scale-105 inline-block" href="/">
             <img src={logo.src} alt="Maag logo" class="w-12 lg:w-16" />
           </a>
         )

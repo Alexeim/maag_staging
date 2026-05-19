@@ -34,6 +34,7 @@
   --color-warning-content: oklch(20% 0.05 80);
   --color-error: oklch(0.5626 0.2187 28.1);
   --color-error-content: oklch(1 0 0);
+  --color-maag-green: oklch(0.5936 0.1914 141.28);
 
   /* border radius */
   --radius-selector: 1rem;
@@ -68,6 +69,10 @@
 .font-old_standard {
   font-family: "Old Standard TT", serif;
   line-height: 1.1;
+}
+
+.font-great-vibes {
+  font-family: "Great Vibes", cursive;
 }
 
 .font-article-body {
