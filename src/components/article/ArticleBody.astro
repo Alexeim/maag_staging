@@ -290,7 +290,7 @@ if (currentProseGroup.length > 0) {
             class="w-full lg:max-w-[900px] my-12 px-4"
             x-data={`{ current: 0, total: ${slides.length}, captions: ${JSON.stringify(slides.map((s) => s.caption || ""))} }`}
           >
-            <div class="relative overflow-hidden h-[600px] bg-white">
+            <div class="relative overflow-hidden h-[320px] sm:h-[460px] lg:h-[600px] bg-white">
               <div
                 class="flex h-full transition-transform duration-500 ease-in-out"
                 :style="`transform: translateX(-${current * 100}%)`"
