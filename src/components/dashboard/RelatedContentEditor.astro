@@ -6,10 +6,8 @@ interface Props {
   className?: string;
 }
 
-const {
-  heading = "Related Content",
-  className = "mt-8",
-} = Astro.props as Props;
+const { heading = "Подвязка контента", className = "mt-8 mb-8" } =
+  Astro.props as Props;
 ---
 
 <section class={className}>
@@ -17,19 +15,21 @@ const {
     <div class="flex flex-col gap-2">
       <h2 class="m-0 text-xl font-semibold text-base-content">{heading}</h2>
       <p class="m-0 text-sm text-base-content/70">
-        Привяжи материалы по типам. В базу сохранится только массив ID для каждой коллекции.
+        Привяжи материалы по типам. В базу сохранится только массив ID для
+        каждой коллекции.
       </p>
-      <p
-        x-show="contentListsLoading"
-        class="m-0 text-sm text-base-content/60"
-      >
+      <p x-show="contentListsLoading" class="m-0 text-sm text-base-content/60">
         Загружаем списки контента...
       </p>
     </div>
 
-    <div class="mt-5 grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)_auto] lg:items-end">
+    <div
+      class="mt-5 grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)_auto] lg:items-end"
+    >
       <div>
-        <label class="mb-1 block text-sm font-medium text-base-content">Тип контента</label>
+        <label class="mb-1 block text-sm font-medium text-base-content"
+          >Тип контента</label
+        >
         <select
           x-model="selectedRelatedContentType"
           @change="selectedRelatedContentId = ''"
@@ -43,14 +43,19 @@ const {
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-base-content">Контент</label>
+        <label class="mb-1 block text-sm font-medium text-base-content"
+          >Контент</label
+        >
         <select
           x-model="selectedRelatedContentId"
           :disabled="!selectedRelatedContentType || contentListsLoading"
           class="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-sm text-base-content focus:border-primary focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           <option value="" disabled>Выберите материал...</option>
-          <template x-for="item in getAvailableRelatedContentItems()" :key="item.id">
+          <template
+            x-for="item in getAvailableRelatedContentItems()"
+            :key="item.id"
+          >
             <option :value="item.id" x-text="item.title || item.id"></option>
           </template>
         </select>
@@ -76,7 +81,11 @@ const {
           class="rounded-xl border border-base-300 bg-white p-4"
         >
           <div class="mb-3 flex items-center justify-between gap-3">
-            <h3 class="m-0 text-sm font-semibold uppercase tracking-[0.18em] text-base-content/65" x-text="type.label"></h3>
+            <h3
+              class="m-0 text-sm font-semibold uppercase tracking-[0.18em] text-base-content/65"
+              x-text="type.label"
+            >
+            </h3>
             <span
               class="rounded-full bg-base-200 px-2.5 py-1 text-xs text-base-content/70"
               x-text="getSelectedEntityRelatedContent(type.value).length + ' шт.'"
@@ -84,9 +93,17 @@ const {
           </div>
 
           <div class="grid gap-2">
-            <template x-for="contentId in getSelectedEntityRelatedContent(type.value)" :key="`${type.value}-${contentId}`">
-              <div class="flex items-center justify-between gap-3 rounded-lg border border-base-300 bg-base-100 px-3 py-2">
-                <span class="truncate text-sm text-base-content" x-text="getRelatedContentItemLabel(type.value, contentId)"></span>
+            <template
+              x-for="contentId in getSelectedEntityRelatedContent(type.value)"
+              :key="`${type.value}-${contentId}`"
+            >
+              <div
+                class="flex items-center justify-between gap-3 rounded-lg border border-base-300 bg-base-100 px-3 py-2"
+              >
+                <span
+                  class="truncate text-sm text-base-content"
+                  x-text="getRelatedContentItemLabel(type.value, contentId)"
+                ></span>
                 <Button
                   variant="error"
                   size="sm"
