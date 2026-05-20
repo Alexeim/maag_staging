@@ -50,15 +50,6 @@ export default function interviewCreatorLogic(initialState = {}) {
     onSaveRedirect?: string | null;
   };
 
-  const slugifyTag = (value: string) => {
-    return value
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
-  };
-
   const normalizeTags = (tags?: string[]) => {
     if (!Array.isArray(tags)) {
       return [];
@@ -149,7 +140,6 @@ export default function interviewCreatorLogic(initialState = {}) {
     interviewId,
     isEditMode,
     onSaveRedirect,
-    newTagInput: "",
 
     // State for managing content lists for link blocks
     contentListsLoading: false,
@@ -229,28 +219,6 @@ export default function interviewCreatorLogic(initialState = {}) {
         this.interview.tags.splice(idx, 1);
       }
     },
-    addCustomTag() {
-      const slug = slugifyTag(this.newTagInput);
-      if (!slug) {
-        window.Alpine?.store("ui")?.showToast?.(
-          "Введи тег латиницей — это значение уходит в базу данных.",
-          "error",
-        );
-        return;
-      }
-      if (this.interview.tags.includes(slug)) {
-        window.Alpine?.store("ui")?.showToast?.(
-          "Такой тег уже есть.",
-          "info",
-        );
-        this.newTagInput = "";
-        return;
-      }
-      this.interview.tags.push(slug);
-      this.interview.tags = normalizeTags(this.interview.tags);
-      this.newTagInput = "";
-    },
-
     async fetchContentLists() {
       this.contentListsLoading = true;
       try {

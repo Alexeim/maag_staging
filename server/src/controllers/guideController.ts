@@ -14,7 +14,6 @@ export interface Guide {
   imageCaption?: string;
   category?: string;
   tags?: string[];
-  techTags?: string[];
   isHotContent?: boolean;
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
@@ -66,7 +65,6 @@ export const createGuide = async (req: Request, res: Response) => {
       authorId,
       category,
       tags = [],
-      techTags = [],
       isHotContent = false,
       isOnLanding = false,
       isMainInCategory = false,
@@ -79,9 +77,6 @@ export const createGuide = async (req: Request, res: Response) => {
 
     const normalizedTags = Array.isArray(tags)
       ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
-      : [];
-    const normalizedTechTags = Array.isArray(techTags)
-      ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
     const normalizedTipsData = normalizeTips(tips);
     const legacyHotContent =
@@ -99,7 +94,6 @@ export const createGuide = async (req: Request, res: Response) => {
       imageCaption,
       category: persistedCategory,
       tags: normalizedTags,
-      techTags: normalizedTechTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
@@ -200,7 +194,6 @@ export const updateGuide = async (req: Request, res: Response) => {
       authorId,
       category,
       tags = [],
-      techTags = [],
       isHotContent = false,
       isOnLanding = false,
       isMainInCategory = false,
@@ -213,9 +206,6 @@ export const updateGuide = async (req: Request, res: Response) => {
 
     const normalizedTags = Array.isArray(tags)
       ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
-      : [];
-    const normalizedTechTags = Array.isArray(techTags)
-      ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
     const normalizedTipsData = normalizeTips(tips);
     const legacyHotContent =
@@ -233,7 +223,6 @@ export const updateGuide = async (req: Request, res: Response) => {
       imageCaption,
       category: persistedCategory,
       tags: normalizedTags,
-      techTags: normalizedTechTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),

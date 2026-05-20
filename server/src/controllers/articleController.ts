@@ -16,7 +16,6 @@ export interface Article {
   imageCaption?: string;
   category?: string; // <-- Added category
   tags?: string[];
-  techTags?: string[];
   isHotContent?: boolean;
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
@@ -83,7 +82,6 @@ export const createArticle = async (req: Request, res: Response) => {
       articleType = 'standard',
       category,
       tags = [],
-      techTags = [],
       isHotContent = false,
       isOnLanding = false,
       isMainInCategory = false,
@@ -97,9 +95,6 @@ export const createArticle = async (req: Request, res: Response) => {
 
     const normalizedTags = Array.isArray(tags)
       ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
-      : [];
-    const normalizedTechTags = Array.isArray(techTags)
-      ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
     const normalizedTips = normalizeTips(tips);
     const legacyHotContent =
@@ -118,7 +113,6 @@ export const createArticle = async (req: Request, res: Response) => {
       imageCaption,
       category: persistedCategory,
       tags: normalizedTags,
-      techTags: normalizedTechTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
@@ -224,7 +218,6 @@ export const updateArticle = async (req: Request, res: Response) => {
       articleType = 'standard',
       category,
       tags = [],
-      techTags = [],
       isHotContent = false,
       isOnLanding = false,
       isMainInCategory = false,
@@ -238,9 +231,6 @@ export const updateArticle = async (req: Request, res: Response) => {
 
     const normalizedTags = Array.isArray(tags)
       ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
-      : [];
-    const normalizedTechTags = Array.isArray(techTags)
-      ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
     const normalizedTips = normalizeTips(tips);
     const legacyHotContent =
@@ -259,7 +249,6 @@ export const updateArticle = async (req: Request, res: Response) => {
       imageCaption,
       category: persistedCategory,
       tags: normalizedTags,
-      techTags: normalizedTechTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),

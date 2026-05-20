@@ -11,7 +11,6 @@ export interface Flipper {
   authorId: string;
   category?: string;
   tags?: string[];
-  techTags?: string[];
   isHotContent?: boolean;
   carouselContent: { imageUrl: string; caption: string }[];
   relatedContent?: RelatedContent;
@@ -35,7 +34,6 @@ export const createFlipper = async (req: Request, res: Response) => {
       cardLead,
       category,
       tags = [],
-      techTags = [],
       isHotContent = false,
       carouselContent = [],
       relatedContent,
@@ -51,9 +49,6 @@ export const createFlipper = async (req: Request, res: Response) => {
     const normalizedTags = Array.isArray(tags)
       ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
-    const normalizedTechTags = Array.isArray(techTags)
-      ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
-      : [];
     const legacyHotContent =
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
@@ -65,7 +60,6 @@ export const createFlipper = async (req: Request, res: Response) => {
       cardLead: cardLead || '',
       category: persistedCategory,
       tags: normalizedTags,
-      techTags: normalizedTechTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       carouselContent,
       relatedContent: normalizeRelatedContent(relatedContent),
@@ -156,7 +150,6 @@ export const updateFlipper = async (req: Request, res: Response) => {
       cardLead,
       category,
       tags = [],
-      techTags = [],
       isHotContent = false,
       carouselContent = [],
       relatedContent,
@@ -172,9 +165,6 @@ export const updateFlipper = async (req: Request, res: Response) => {
     const normalizedTags = Array.isArray(tags)
       ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
-    const normalizedTechTags = Array.isArray(techTags)
-      ? techTags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
-      : [];
     const legacyHotContent =
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
@@ -186,7 +176,6 @@ export const updateFlipper = async (req: Request, res: Response) => {
       cardLead: cardLead || '',
       category: persistedCategory,
       tags: normalizedTags,
-      techTags: normalizedTechTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       carouselContent,
       relatedContent: normalizeRelatedContent(relatedContent),

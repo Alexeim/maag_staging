@@ -16,28 +16,6 @@ import {
 
 const storage = getStorage(app);
 
-const slugifyTag = (value: string) =>
-  value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-
-const normalizeTechTags = (tags?: string[]) => {
-  if (!Array.isArray(tags)) return [];
-  const deduped = new Set<string>();
-  const result: string[] = [];
-  for (const raw of tags) {
-    if (typeof raw !== "string") continue;
-    const slug = slugifyTag(raw);
-    if (!slug || deduped.has(slug)) continue;
-    deduped.add(slug);
-    result.push(slug);
-  }
-  return result;
-};
-
 const normalizeTags = (
   tags?: string[],
   categoryTags?: Record<string, Array<{ title: string; value: string }>>,
@@ -119,7 +97,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       parisSubCategories: [] as string[],
       parisDistrict: "",
       binaryForGuide: false,
-      techTags: [] as string[],
       isHotContent: false,
       isOnLanding: false,
       slides: [] as Array<{ imageUrl: string; text: string }>,
@@ -132,7 +109,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     categoryTags,
     parisDistrictOptions,
     categoryLabels,
-    newTagInput: "",
 
     authorsLoading: false,
     authors: [] as any[],
@@ -214,27 +190,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       if (idx >= 0) targetTags.splice(idx, 1);
     },
 
-    addCustomTag() {
-      const slug = slugifyTag(this.newTagInput);
-      if (!slug) {
-        window.Alpine?.store("ui")?.showToast?.("Введи тег латиницей.", "error");
-        return;
-      }
-      if (this.getSelectedCategoryTags().includes(slug) || this.story.techTags.includes(slug)) {
-        window.Alpine?.store("ui")?.showToast?.("Такой тег уже есть.", "info");
-        this.newTagInput = "";
-        return;
-      }
-      this.story.techTags.push(slug);
-      this.story.techTags = normalizeTechTags(this.story.techTags);
-      this.newTagInput = "";
-    },
-
-    removeTechTag(value: string) {
-      const idx = this.story.techTags.indexOf(value);
-      if (idx >= 0) this.story.techTags.splice(idx, 1);
-    },
-
     handleCategoryChange(value: string) {
       this.story.category = value;
       this.story.tags = normalizeTags(this.story.tags, this.categoryTags, value);
@@ -244,7 +199,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         "paris",
       );
       this.story.parisDistrict = normalizeParisDistrict(this.story.parisDistrict);
-      this.story.techTags = normalizeTechTags(this.story.techTags);
     },
 
     getAuthorLabel(author: any) {
@@ -464,7 +418,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         );
         this.story.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
         this.story.binaryForGuide = Boolean(copy.binaryForGuide);
-        this.story.techTags = Array.isArray(copy.techTags) ? copy.techTags : [];
         this.story.isHotContent = Boolean(copy.isHotContent);
         this.story.isOnLanding = Boolean(copy.isOnLanding);
         this.story.slides = Array.isArray(copy.slides) ? copy.slides : [];
@@ -484,7 +437,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       );
       this.story.parisDistrict = normalizeParisDistrict(this.story.parisDistrict);
       this.story.binaryForGuide = Boolean(this.story.binaryForGuide);
-      this.story.techTags = normalizeTechTags(this.story.techTags);
       this.story.relatedContent = sanitizeRelatedContent(
         this.story.relatedContent,
         "visualStory",
@@ -541,7 +493,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           parisSubCategories: isParisCategory ? this.story.parisSubCategories : [],
           parisDistrict: isParisCategory ? this.story.parisDistrict || null : null,
           binaryForGuide: false,
-          techTags: normalizeTechTags(this.story.techTags),
           isHotContent: this.story.isHotContent,
           isOnLanding: this.story.isOnLanding,
           relatedContent: sanitizeRelatedContent(

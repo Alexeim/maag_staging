@@ -12,7 +12,6 @@ export interface VisualStory {
   cardLead?: string;
   category?: string;
   tags?: string[];
-  techTags?: string[];
   isHotContent?: boolean;
   isOnLanding?: boolean;
   relatedContent?: RelatedContent;
@@ -33,7 +32,6 @@ export const createVisualStory = async (req: Request, res: Response) => {
       cardLead,
       category,
       tags = [],
-      techTags = [],
       isHotContent = false,
       isOnLanding = false,
       relatedContent,
@@ -60,7 +58,6 @@ export const createVisualStory = async (req: Request, res: Response) => {
       cardLead: cardLead || '',
       category: category || '',
       tags: Array.isArray(tags) ? tags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
-      techTags: Array.isArray(techTags) ? techTags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
       isHotContent: Boolean(isHotContent),
       isOnLanding: Boolean(isOnLanding),
       relatedContent: normalizeRelatedContent(relatedContent),
@@ -134,7 +131,6 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       cardLead,
       category,
       tags = [],
-      techTags = [],
       isHotContent = false,
       isOnLanding = false,
       relatedContent,
@@ -159,7 +155,6 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       cardLead: cardLead || '',
       category: category || '',
       tags: Array.isArray(tags) ? tags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
-      techTags: Array.isArray(techTags) ? techTags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
       isHotContent: Boolean(isHotContent),
       isOnLanding: Boolean(isOnLanding),
       relatedContent: normalizeRelatedContent(relatedContent),

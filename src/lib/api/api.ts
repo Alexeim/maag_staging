@@ -139,7 +139,6 @@ export interface ArticlePayload {
   cardLead?: string;
   category?: string;
   tags?: string[];
-  techTags?: string[];
   parisSubCategories?: string[];
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
@@ -166,7 +165,6 @@ export interface NewsPayload {
   cardLead?: string;
   category?: string;
   tags?: string[];
-  techTags?: string[];
   isHotContent?: boolean;
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
@@ -190,7 +188,6 @@ export interface EventPayload {
   cardLead?: string;
   category: 'exhibition' | 'concert' | 'performance';
   tags: string[];
-  techTags: string[];
   startDate: string | Date;
   endDate?: string | Date | null;
   dateType?: "single" | "duration";
@@ -243,7 +240,6 @@ export interface FlipperPayload {
   cardLead?: string;
   category?: string;
   tags?: string[];
-  techTags?: string[];
   parisSubCategories?: string[];
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
@@ -292,7 +288,6 @@ export interface GuidePayload {
   cardLead?: string;
   category?: string;
   tags?: string[];
-  techTags?: string[];
   parisSubCategories?: string[];
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
@@ -534,7 +529,6 @@ export interface VisualStoryPayload {
   cardLead?: string;
   category?: string;
   tags?: string[];
-  techTags?: string[];
   parisSubCategories?: string[];
   parisDistrict?: string | null;
   binaryForGuide?: boolean;

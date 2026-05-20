@@ -16,15 +16,6 @@ import {
 
 const storage = getStorage(app);
 
-const slugifyTag = (value: string) => {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-};
-
 export default function flipperCreatorLogic(initialState = {}) {
   const {
     initialFlipper = null,
@@ -75,20 +66,6 @@ export default function flipperCreatorLogic(initialState = {}) {
     return normalized;
   };
 
-  const normalizeTechTags = (tags?: string[]) => {
-    if (!Array.isArray(tags)) return [];
-    const deduped = new Set<string>();
-    const normalized: string[] = [];
-    for (const rawTag of tags) {
-      if (typeof rawTag !== "string") continue;
-      const slug = slugifyTag(rawTag);
-      if (!slug || deduped.has(slug)) continue;
-      deduped.add(slug);
-      normalized.push(slug);
-    }
-    return normalized;
-  };
-
   const normalizeParisDistrict = (value?: unknown) => {
     if (typeof value !== "string") {
       return "";
@@ -124,7 +101,6 @@ export default function flipperCreatorLogic(initialState = {}) {
     );
     copy.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
     copy.binaryForGuide = Boolean(copy.binaryForGuide);
-    copy.techTags = normalizeTechTags(copy.techTags);
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     return copy;
   };
@@ -140,7 +116,6 @@ export default function flipperCreatorLogic(initialState = {}) {
       parisSubCategories: [],
       parisDistrict: "",
       binaryForGuide: false,
-      techTags: [],
       carouselContent: [{ imageUrl: "", caption: "" }],
       relatedContent: createEmptyRelatedContent(),
     },
@@ -158,7 +133,6 @@ export default function flipperCreatorLogic(initialState = {}) {
     onSaveRedirect,
     categoryTags,
     parisDistrictOptions,
-    newTagInput: "",
     authorsLoading: false,
     authors: [],
     selectedAuthorId: "",
@@ -236,32 +210,6 @@ export default function flipperCreatorLogic(initialState = {}) {
         targetTags.splice(idx, 1);
       }
     },
-    addCustomTag() {
-      const slug = slugifyTag(this.newTagInput);
-      if (!slug) {
-        window.Alpine?.store("ui")?.showToast?.("Введи тег латиницей.", "error");
-        return;
-      }
-      if (this.getSelectedCategoryTags().includes(slug)) {
-        window.Alpine?.store("ui")?.showToast?.("Такой тег уже выбран.", "info");
-        this.newTagInput = "";
-        return;
-      }
-      if (this.flipper.techTags.includes(slug)) {
-        window.Alpine?.store("ui")?.showToast?.("Такой техтег уже есть.", "info");
-        this.newTagInput = "";
-        return;
-      }
-      this.flipper.techTags.push(slug);
-      this.flipper.techTags = normalizeTechTags(this.flipper.techTags);
-      this.newTagInput = "";
-    },
-    removeTechTag(value: string) {
-      const idx = this.flipper.techTags.indexOf(value);
-      if (idx >= 0) {
-        this.flipper.techTags.splice(idx, 1);
-      }
-    },
     handleCategoryChange(value: string) {
       this.flipper.category = value;
       this.flipper.tags = normalizeTags(this.flipper.tags, value);
@@ -270,7 +218,6 @@ export default function flipperCreatorLogic(initialState = {}) {
         "paris",
       );
       this.flipper.parisDistrict = normalizeParisDistrict(this.flipper.parisDistrict);
-      this.flipper.techTags = normalizeTechTags(this.flipper.techTags);
     },
     getAuthorLabel(author: any) {
       const firstName =
@@ -457,7 +404,6 @@ export default function flipperCreatorLogic(initialState = {}) {
         "paris",
       );
       this.flipper.parisDistrict = normalizeParisDistrict(this.flipper.parisDistrict);
-      this.flipper.techTags = normalizeTechTags(this.flipper.techTags);
 
       if (!this.flipper.title) {
         window.Alpine.store("ui").showToast("Заголовок обязателен.", "error");
@@ -484,7 +430,6 @@ export default function flipperCreatorLogic(initialState = {}) {
           parisSubCategories: isParisCategory ? this.flipper.parisSubCategories : [],
           parisDistrict: isParisCategory ? this.flipper.parisDistrict || null : null,
           binaryForGuide: false,
-          techTags: normalizeTechTags(this.flipper.techTags),
           isHotContent: Boolean(this.flipper.isHotContent),
           relatedContent: sanitizeRelatedContent(
             this.flipper.relatedContent,

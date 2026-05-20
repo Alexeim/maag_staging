@@ -44,9 +44,7 @@ const getFlipperCategory = () => {
   const firstTag =
     Array.isArray(flipper.tags) && flipper.tags.length > 0
       ? flipper.tags[0]
-      : Array.isArray(flipper.techTags) && flipper.techTags.length > 0
-        ? flipper.techTags[0]
-        : flipper.category;
+      : flipper.category;
 
   if (!firstTag || typeof firstTag !== "string") {
     return "Листалка";

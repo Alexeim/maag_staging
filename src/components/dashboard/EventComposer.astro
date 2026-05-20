@@ -272,21 +272,6 @@ const {
         </p>
       </template>
 
-      <div class="mt-4 flex flex-col gap-2">
-        <div class="flex flex-col sm:flex-row gap-2">
-          <input
-            type="text"
-            x-model="newTagInput"
-            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-            placeholder="Добавь тег латиницей, например photo-week"
-          />
-          <Button variant="outline" size="sm" type="button" @click="addCustomTag()">Добавить тег</Button>
-        </div>
-        <p class="text-xs text-base-content/60">
-          Сохраняем в базу как техтег латиницей, иначе потом не поймём.
-        </p>
-      </div>
-
       <div class="mt-3 flex flex-col gap-3">
         <template x-if="article.tags.length > 0">
           <div>
@@ -308,25 +293,6 @@ const {
           </div>
         </template>
 
-        <template x-if="article.techTags.length > 0">
-          <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Техтеги</p>
-            <div class="flex flex-wrap gap-2 mt-1">
-              <template x-for="tag in article.techTags" :key="`tech-${tag}`">
-                <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
-                  <span x-text="tag"></span>
-                  <button
-                    type="button"
-                    class="text-base-content/60 hover:text-base-content"
-                    @click="removeTechTag(tag)"
-                  >
-                    ×
-                  </button>
-                </span>
-              </template>
-            </div>
-          </div>
-        </template>
       </div>
     </div>
 

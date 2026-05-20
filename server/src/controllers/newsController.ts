@@ -13,7 +13,6 @@ export interface NewsItem {
   imageCaption?: string;
   category?: string;
   tags?: string[];
-  techTags?: string[];
   isHotContent?: boolean;
   isOnLanding?: boolean;
   isMainInCategory?: boolean;
@@ -49,7 +48,6 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     authorId,
     category,
     tags = [],
-    techTags = [],
     isHotContent = false,
     isOnLanding = false,
     isMainInCategory = false,
@@ -66,7 +64,6 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     imageCaption: typeof imageCaption === 'string' ? imageCaption : '',
     category: normalizeCategory(category),
     tags: normalizeStringArray(tags),
-    techTags: normalizeStringArray(techTags),
     isHotContent: Boolean(isHotContent) || category === 'hotContent',
     isOnLanding: Boolean(isOnLanding),
     isMainInCategory: Boolean(isMainInCategory),

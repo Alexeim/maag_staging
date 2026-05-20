@@ -161,7 +161,6 @@ export default function eventCreatorLogic(initialState = {}) {
     );
     copy.content = copy.contentBlocks;
     copy.tags = Array.isArray(copy.tags) ? copy.tags : [];
-    copy.techTags = Array.isArray(copy.techTags) ? copy.techTags : [];
     copy.title = typeof copy.title === "string" ? copy.title : "";
     copy.imageUrl = typeof copy.imageUrl === "string" ? copy.imageUrl : "";
     copy.imageCaption = typeof copy.imageCaption === "string" ? copy.imageCaption : "";
@@ -228,9 +227,6 @@ export default function eventCreatorLogic(initialState = {}) {
             ? normalized.contentBlocks
             : [];
           this.article.tags = Array.isArray(normalized.tags) ? normalized.tags : [];
-          this.article.techTags = Array.isArray(normalized.techTags)
-            ? normalized.techTags
-            : [];
           this.article.relatedContent = sanitizeRelatedContent(
             normalized.relatedContent,
             "event",
@@ -433,12 +429,8 @@ export default function eventCreatorLogic(initialState = {}) {
       }
 
       this.article.tags = this.article.tags ?? [];
-      this.article.techTags = this.article.techTags ?? [];
-      const hasTags = Array.isArray(this.article.tags) && this.article.tags.length > 0;
-      const hasTechTags = Array.isArray(this.article.techTags) && this.article.techTags.length > 0;
-
-      if (!hasTags && !hasTechTags) {
-        toast("Добавь хотя бы один тег или техтег.");
+      if (!Array.isArray(this.article.tags) || this.article.tags.length === 0) {
+        toast("Добавь хотя бы один тег.");
         this.isSaving = false;
         return;
       }
@@ -465,7 +457,6 @@ export default function eventCreatorLogic(initialState = {}) {
           cardLead: this.article.cardLead,
           category,
           tags: this.article.tags,
-          techTags: this.article.techTags,
           startDate: this.eventForm.startDate,
           endDate: normalizedEndDate,
           dateType: this.eventForm.dateType,

@@ -155,15 +155,6 @@ export default function articleCreatorLogic(initialState = {}) {
       ]),
     );
 
-  const slugifyTag = (value: string) => {
-    return value
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
-  };
-
   const normalizeTags = (tags?: string[], category?: string) => {
     if (!Array.isArray(tags)) {
       return [];
@@ -187,26 +178,6 @@ export default function articleCreatorLogic(initialState = {}) {
       }
     }
 
-    return normalized;
-  };
-
-  const normalizeTechTags = (tags?: string[]) => {
-    if (!Array.isArray(tags)) {
-      return [];
-    }
-    const deduped = new Set<string>();
-    const normalized: string[] = [];
-    for (const rawTag of tags) {
-      if (typeof rawTag !== "string") {
-        continue;
-      }
-      const slug = slugifyTag(rawTag);
-      if (!slug || deduped.has(slug)) {
-        continue;
-      }
-      deduped.add(slug);
-      normalized.push(slug);
-    }
     return normalized;
   };
 
@@ -261,7 +232,6 @@ export default function articleCreatorLogic(initialState = {}) {
     );
     copy.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
     copy.binaryForGuide = Boolean(copy.binaryForGuide);
-    copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
     copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.cardLead = copy.cardLead ?? "";
@@ -314,7 +284,6 @@ export default function articleCreatorLogic(initialState = {}) {
       parisSubCategories: [],
       parisDistrict: "",
       binaryForGuide: false,
-      techTags: [],
       tips: [] as TipItem[],
       category: "", // <-- Added category
       isHotContent: false,
@@ -364,7 +333,6 @@ export default function articleCreatorLogic(initialState = {}) {
     editRouteBase,
     createRoute,
     parisDistrictOptions,
-    newTagInput: "",
 
     categoryLabels,
     getRichTextInitialHtml(block) {
@@ -474,11 +442,6 @@ export default function articleCreatorLogic(initialState = {}) {
         targetTags.splice(idx, 1);
       } else {
         targetTags.push(normalized);
-        // Ensure custom tech tag with the same value is removed to avoid duplicates
-        const techIdx = this.article.techTags.indexOf(normalized);
-        if (techIdx >= 0) {
-          this.article.techTags.splice(techIdx, 1);
-        }
       }
       if (this.isParisCategory()) {
         this.article.parisSubCategories = normalizeTags(
@@ -496,41 +459,6 @@ export default function articleCreatorLogic(initialState = {}) {
         targetTags.splice(idx, 1);
       }
     },
-    addCustomTag() {
-      const slug = slugifyTag(this.newTagInput);
-      if (!slug) {
-        window.Alpine?.store("ui")?.showToast?.(
-          "Введи тег латиницей — это значение уходит в базу данных.",
-          "error",
-        );
-        return;
-      }
-      if (this.getSelectedCategoryTags().includes(slug)) {
-        window.Alpine?.store("ui")?.showToast?.(
-          "Такой тег уже выбран.",
-          "info",
-        );
-        this.newTagInput = "";
-        return;
-      }
-      if (this.article.techTags.includes(slug)) {
-        window.Alpine?.store("ui")?.showToast?.(
-          "Такой техтег уже есть.",
-          "info",
-        );
-        this.newTagInput = "";
-        return;
-      }
-      this.article.techTags.push(slug);
-      this.article.techTags = normalizeTechTags(this.article.techTags);
-      this.newTagInput = "";
-    },
-    removeTechTag(value: string) {
-      const idx = this.article.techTags.indexOf(value);
-      if (idx >= 0) {
-        this.article.techTags.splice(idx, 1);
-      }
-    },
     handleCategoryChange(value: string) {
       this.article.category = value;
       this.article.tags = normalizeTags(this.article.tags, value);
@@ -539,7 +467,6 @@ export default function articleCreatorLogic(initialState = {}) {
         "paris",
       );
       this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
-      this.article.techTags = normalizeTechTags(this.article.techTags);
     },
     isTipSelected(type: TipType) {
       return this.article.tips.some((tip: TipItem) => tip.type === type);
@@ -811,7 +738,6 @@ export default function articleCreatorLogic(initialState = {}) {
       );
       this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
       this.article.binaryForGuide = Boolean(this.article.binaryForGuide);
-      this.article.techTags = this.article.techTags ?? [];
       this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
       this.article.cardLead = this.article.cardLead ?? "";
@@ -1218,7 +1144,6 @@ export default function articleCreatorLogic(initialState = {}) {
         "paris",
       );
       this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
-      this.article.techTags = normalizeTechTags(this.article.techTags);
       this.article.tips = normalizeTips(this.article.tips);
 
       const hasInvalidVideoBlock = this.article.contentBlocks.some(
@@ -1239,15 +1164,9 @@ export default function articleCreatorLogic(initialState = {}) {
       }
 
       const selectedCategoryTags = this.getSelectedCategoryTags();
-      const hasTags =
-        Array.isArray(selectedCategoryTags) && selectedCategoryTags.length > 0;
-      const hasTechTags =
-        Array.isArray(this.article.techTags) &&
-        this.article.techTags.length > 0;
-
-      if (!hasTags && !hasTechTags) {
+      if (!Array.isArray(selectedCategoryTags) || selectedCategoryTags.length === 0) {
         window.Alpine.store("ui").showToast(
-          "Добавь хотя бы один тег или техтег — без них статья не сохранится.",
+          "Добавь хотя бы один тег — без него статья не сохранится.",
           "error",
         );
         this.isSaving = false;
@@ -1281,7 +1200,6 @@ export default function articleCreatorLogic(initialState = {}) {
           parisSubCategories: isParisCategory ? this.article.parisSubCategories : [],
           parisDistrict: isParisCategory ? this.article.parisDistrict || null : null,
           binaryForGuide: false,
-          techTags: this.article.techTags,
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,
           isOnLanding: this.article.isOnLanding,

@@ -64,14 +64,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     return Object.fromEntries(tags.map((tag) => [tag.title, tag.value]));
   };
 
-  const slugifyTag = (value: string) =>
-    value
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
-
   const normalizeTags = (tags?: string[], category?: string) => {
     if (!Array.isArray(tags)) return [];
     const legacyMap = buildLegacyTagMap(category);
@@ -90,20 +82,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     return normalized;
   };
 
-  const normalizeTechTags = (tags?: string[]) => {
-    if (!Array.isArray(tags)) return [];
-    const deduped = new Set<string>();
-    const normalized: string[] = [];
-    for (const rawTag of tags) {
-      if (typeof rawTag !== "string") continue;
-      const slug = slugifyTag(rawTag);
-      if (!slug || deduped.has(slug)) continue;
-      deduped.add(slug);
-      normalized.push(slug);
-    }
-    return normalized;
-  };
-
   const normalizeLoadedArticle = (data: any) => {
     if (!data || typeof data !== "object") return null;
     const copy = JSON.parse(JSON.stringify(data));
@@ -116,7 +94,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     copy.contentBlocks = sortAndNormalizeContentBlocks(blocks);
     copy.content = copy.contentBlocks;
     copy.tags = normalizeTags(copy.tags, copy.category);
-    copy.techTags = normalizeTechTags(copy.techTags ?? copy.customTags);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.lead = copy.lead ?? "";
     copy.cardLead = copy.cardLead ?? "";
@@ -133,7 +110,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       imageCaption: "",
       contentBlocks: [] as any[],
       tags: [] as string[],
-      techTags: [] as string[],
       category: "",
       isHotContent: false,
       isOnLanding: false,
@@ -166,7 +142,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     articleId,
     isEditMode,
     onSaveRedirect,
-    newTagInput: "",
     authorsLoading: false,
     authors: [],
     selectedAuthorId: "",
@@ -262,8 +237,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
         this.article.tags.splice(idx, 1);
       } else {
         this.article.tags.push(normalized);
-        const techIdx = this.article.techTags.indexOf(normalized);
-        if (techIdx >= 0) this.article.techTags.splice(techIdx, 1);
       }
       this.article.tags = normalizeTags(this.article.tags, this.article.category);
     },
@@ -271,32 +244,9 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       const idx = this.article.tags.indexOf(value);
       if (idx >= 0) this.article.tags.splice(idx, 1);
     },
-    addCustomTag() {
-      const slug = slugifyTag(this.newTagInput);
-      if (!slug) {
-        (window as any).Alpine?.store("ui")?.showToast?.(
-          "Введи тег латиницей — это значение уходит в базу данных.",
-          "error",
-        );
-        return;
-      }
-      if (this.article.tags.includes(slug) || this.article.techTags.includes(slug)) {
-        (window as any).Alpine?.store("ui")?.showToast?.("Такой тег уже есть.", "info");
-        this.newTagInput = "";
-        return;
-      }
-      this.article.techTags.push(slug);
-      this.article.techTags = normalizeTechTags(this.article.techTags);
-      this.newTagInput = "";
-    },
-    removeTechTag(value: string) {
-      const idx = this.article.techTags.indexOf(value);
-      if (idx >= 0) this.article.techTags.splice(idx, 1);
-    },
     handleCategoryChange(value: string) {
       this.article.category = value;
       this.article.tags = normalizeTags(this.article.tags, value);
-      this.article.techTags = normalizeTechTags(this.article.techTags);
     },
     getAuthorLabel(author: any) {
       const firstName =
@@ -372,7 +322,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       if (onSaveRedirect) this.onSaveRedirect = onSaveRedirect;
 
       this.article.tags = this.article.tags ?? [];
-      this.article.techTags = this.article.techTags ?? [];
       this.article.lead = this.article.lead ?? "";
       this.article.cardLead = this.article.cardLead ?? "";
       this.article.isHotContent = Boolean(this.article.isHotContent);
@@ -587,7 +536,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       this.article.category = normalizedCategory;
       this.article.contentBlocks = reindexContentBlocks(this.article.contentBlocks);
       this.article.tags = normalizeTags(this.article.tags, this.article.category);
-      this.article.techTags = normalizeTechTags(this.article.techTags);
 
       if (!this.article.category) {
         (window as any).Alpine.store("ui").showToast(
@@ -620,7 +568,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
           content: this.article.contentBlocks,
           category: this.article.category,
           tags: tagsForDb,
-          techTags: this.article.techTags,
           isHotContent: Boolean(this.article.isHotContent),
           isOnLanding: Boolean(this.article.isOnLanding),
           isMainInCategory: Boolean(this.article.isMainInCategory),

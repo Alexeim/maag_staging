@@ -13,7 +13,6 @@ export interface EventItem {
   imageCaption?: string;
   category: 'exhibition' | 'concert' | 'performance';
   tags: string[];
-  techTags: string[];
   startDate: Date;
   endDate?: Date | null;
   dateType?: 'single' | 'duration';
@@ -120,7 +119,6 @@ export const createEvent = async (req: Request, res: Response) => {
       cardLead,
       category,
       tags = [],
-      techTags = [],
       startDate,
       endDate = null,
       dateType = undefined,
@@ -174,7 +172,6 @@ export const createEvent = async (req: Request, res: Response) => {
     }
 
     const normalizedTags = normalizeStringArray(tags);
-    const normalizedTechTags = normalizeStringArray(techTags);
 
     const newEvent: Omit<EventItem, 'id'> = {
       title,
@@ -186,7 +183,6 @@ export const createEvent = async (req: Request, res: Response) => {
       imageCaption,
       category: normalizedCategory,
       tags: normalizedTags,
-      techTags: normalizedTechTags,
       startDate: normalizedStartDate,
       endDate: normalizedDateType === 'duration' ? normalizedEndDate : null,
       dateType: normalizedDateType,
@@ -281,7 +277,6 @@ export const updateEvent = async (req: Request, res: Response) => {
       cardLead,
       category,
       tags = [],
-      techTags = [],
       startDate,
       endDate = null,
       dateType = undefined,
@@ -334,7 +329,6 @@ export const updateEvent = async (req: Request, res: Response) => {
     }
 
     const normalizedTags = normalizeStringArray(tags);
-    const normalizedTechTags = normalizeStringArray(techTags);
     const landingFlag = Boolean(isOnLanding);
     const mainEventFlag = Boolean(isMainEvent);
 
@@ -348,7 +342,6 @@ export const updateEvent = async (req: Request, res: Response) => {
       imageCaption,
       category: normalizedCategory,
       tags: normalizedTags,
-      techTags: normalizedTechTags,
       startDate: normalizedStartDate,
       endDate: normalizedDateType === 'duration' ? normalizedEndDate : null,
       dateType: normalizedDateType,
