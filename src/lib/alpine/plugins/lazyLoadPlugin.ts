@@ -205,6 +205,7 @@ export default function(Alpine: Alpine) {
       newAuthorLastName: '',
       getCategoryLabel() { return 'Category'; },
       getAvailableTags() { return []; },
+      getSelectedCategoryTags() { return []; },
       getTagLabel(value: string) { return value; },
       getAuthorLabel() { return ''; },
       isTagSelected() { return false; },
