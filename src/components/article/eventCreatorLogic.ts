@@ -16,6 +16,8 @@ const EVENT_TAGS: Array<{ value: string; title: string }> = [
   { value: "dance", title: "Танец" },
   { value: "opera", title: "Опера" },
   { value: "classicalMusic", title: "Классическая музыка" },
+  { value: "concert", title: "Концерт" },
+  { value: "performance", title: "Спектакль" },
   { value: "cinema", title: "Кино" },
   { value: "theatre", title: "Театр" },
   { value: "exhibitions", title: "Выставки" },
