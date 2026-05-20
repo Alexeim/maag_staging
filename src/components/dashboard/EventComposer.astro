@@ -124,20 +124,6 @@ const {
 
     <hr class="my-6" />
 
-    <label class="block text-sm font-medium text-base-content mb-2">Категория</label>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      <template x-for="(label, value) in categoryLabels" :key="value">
-        <button
-          type="button"
-          class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer"
-          :class="eventForm.category === value ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
-          @click="setCategory(value)"
-        >
-          <span x-text="label"></span>
-        </button>
-      </template>
-    </div>
-
     <div class="mt-4 flex items-center gap-3">
       <input
         id="landing-flag"
@@ -251,48 +237,17 @@ const {
     <div class="mt-6">
       <label class="block text-sm font-medium text-base-content mb-3">Теги</label>
 
-      <template x-if="getAvailableTags().length > 0">
-        <div class="flex flex-wrap gap-2">
-          <template x-for="tag in getAvailableTags()" :key="tag.value">
-            <button
-              type="button"
-              class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
-              :class="isTagSelected(tag.value) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
-              @click="toggleTag(tag.value)"
-            >
-              <span x-text="tag.title"></span>
-            </button>
-          </template>
-        </div>
-      </template>
-
-      <template x-if="getAvailableTags().length === 0">
-        <p class="text-sm text-base-content/70">
-          Выбери категорию, тогда покажем готовые теги.
-        </p>
-      </template>
-
-      <div class="mt-3 flex flex-col gap-3">
-        <template x-if="article.tags.length > 0">
-          <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Категорийные теги</p>
-            <div class="flex flex-wrap gap-2 mt-1">
-              <template x-for="tag in article.tags" :key="tag">
-                <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
-                  <span x-text="getTagLabel(tag)"></span>
-                  <button
-                    type="button"
-                    class="text-base-content/60 hover:text-base-content cursor-pointer"
-                    @click="removeTag(tag)"
-                  >
-                    ×
-                  </button>
-                </span>
-              </template>
-            </div>
-          </div>
+      <div class="flex flex-wrap gap-2">
+        <template x-for="tag in getAvailableTags()" :key="tag.value">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
+            :class="isTagSelected(tag.value) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+            @click="toggleTag(tag.value)"
+          >
+            <span x-text="tag.title"></span>
+          </button>
         </template>
-
       </div>
     </div>
 

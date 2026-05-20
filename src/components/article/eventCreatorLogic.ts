@@ -8,35 +8,25 @@ import {
 } from "@/lib/utils/contentBlocks";
 import { sanitizeRelatedContent } from "@/lib/utils/relatedContent";
 
-type EventCategory = "exhibition" | "concert" | "performance";
 type EventDateType = "single" | "duration";
 type EventTimeMode = "none" | "start" | "range";
 
-const CATEGORY_LABELS: Record<EventCategory, string> = {
-  exhibition: "Выставка",
-  concert: "Концерт",
-  performance: "Спектакль",
-};
-
-const normalizeCategory = (value?: string | null): EventCategory | "" => {
-  if (!value) {
-    return "";
-  }
-  const trimmed = value.trim().toLowerCase();
-  if (trimmed === "выставка") {
-    return "exhibition";
-  }
-  if (trimmed === "концерт") {
-    return "concert";
-  }
-  if (trimmed === "спектакль") {
-    return "performance";
-  }
-  if ((Object.keys(CATEGORY_LABELS) as Array<EventCategory>).includes(value as EventCategory)) {
-    return value as EventCategory;
-  }
-  return "";
-};
+const EVENT_TAGS: Array<{ value: string; title: string }> = [
+  { value: "ballet", title: "Балет" },
+  { value: "dance", title: "Танец" },
+  { value: "opera", title: "Опера" },
+  { value: "classicalMusic", title: "Классическая музыка" },
+  { value: "cinema", title: "Кино" },
+  { value: "theatre", title: "Театр" },
+  { value: "exhibitions", title: "Выставки" },
+  { value: "festival", title: "Фестиваль" },
+  { value: "artMarket", title: "Арт-рынок" },
+  { value: "fashion", title: "Мода" },
+  { value: "meetup", title: "Встреча" },
+  { value: "visit", title: "Визит" },
+  { value: "excursion", title: "Экскурсия" },
+  { value: "kids", title: "Дети" },
+];
 
 const toDate = (value: unknown): Date | null => {
   if (!value) {
@@ -136,7 +126,6 @@ export default function eventCreatorLogic(initialState = {}) {
       return null;
     }
     const copy = JSON.parse(JSON.stringify(input));
-    copy.category = normalizeCategory(copy.category);
     copy.startDate = normalizeDate(copy.startDate);
     copy.endDate = normalizeDate(copy.endDate);
     copy.dateType = normalizeDateType(copy.dateType ?? (copy.endDate ? "duration" : "single"));
@@ -181,11 +170,9 @@ export default function eventCreatorLogic(initialState = {}) {
       timeMode: "none" as EventTimeMode,
       startTime: "",
       endTime: "",
-      category: "" as EventCategory | "",
       isOnLanding: false,
       isMainEvent: false,
     },
-    categoryLabels: CATEGORY_LABELS,
     ...restInitial,
     addRelatedContent() {
       const type = this.selectedRelatedContentType;
@@ -242,7 +229,6 @@ export default function eventCreatorLogic(initialState = {}) {
           this.eventForm.timeMode = normalized.timeMode;
           this.eventForm.startTime = normalized.startTime;
           this.eventForm.endTime = normalized.endTime;
-          this.eventForm.category = normalized.category;
           this.eventForm.isOnLanding = Boolean(normalized.isOnLanding);
           this.eventForm.isMainEvent = Boolean(normalized.isMainEvent);
           this.selectedAuthorId =
@@ -272,13 +258,11 @@ export default function eventCreatorLogic(initialState = {}) {
     },
 
     getAvailableTags() {
-      const buckets = Object.values(this.categoryTags || {});
-      return buckets.flat();
+      return EVENT_TAGS;
     },
 
-    setCategory(value: string) {
-      const normalized = normalizeCategory(value);
-      this.eventForm.category = normalized;
+    getTagLabel(value: string) {
+      return EVENT_TAGS.find((t) => t.value === value)?.title ?? value;
     },
 
     setStartDate(value: string) {
@@ -352,13 +336,6 @@ export default function eventCreatorLogic(initialState = {}) {
       const hasCover = Boolean(this.article.imageUrl);
       if (!hasCover) {
         toast("Загрузи обложку события — без неё никак.");
-        this.isSaving = false;
-        return;
-      }
-
-      const category = this.eventForm.category;
-      if (!category) {
-        toast("Выбери категорию события.");
         this.isSaving = false;
         return;
       }
@@ -455,7 +432,6 @@ export default function eventCreatorLogic(initialState = {}) {
           imageCaption: this.article.imageCaption,
           lead: this.article.lead,
           cardLead: this.article.cardLead,
-          category,
           tags: this.article.tags,
           startDate: this.eventForm.startDate,
           endDate: normalizedEndDate,

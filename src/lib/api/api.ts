@@ -186,7 +186,6 @@ export interface EventPayload {
   imageCaption?: string;
   lead?: string;
   cardLead?: string;
-  category: 'exhibition' | 'concert' | 'performance';
   tags: string[];
   startDate: string | Date;
   endDate?: string | Date | null;

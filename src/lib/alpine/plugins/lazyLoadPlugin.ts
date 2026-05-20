@@ -251,7 +251,6 @@ export default function(Alpine: Alpine) {
         timeMode: 'none',
         startTime: '',
         endTime: '',
-        category: '',
         isOnLanding: false,
         isMainEvent: false,
       },
@@ -259,7 +258,6 @@ export default function(Alpine: Alpine) {
       setEndDate() {},
       setDateType() {},
       setTimeMode() {},
-      setCategory() {},
       saveEvent() {},
       deleteEvent() {},
       // --- Event List defaults ---

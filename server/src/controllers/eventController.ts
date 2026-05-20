@@ -11,7 +11,6 @@ export interface EventItem {
   content: any[];
   imageUrl?: string;
   imageCaption?: string;
-  category: 'exhibition' | 'concert' | 'performance';
   tags: string[];
   startDate: Date;
   endDate?: Date | null;
@@ -74,20 +73,6 @@ const normalizeTime = (value: unknown): string | null => {
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(trimmed) ? trimmed : null;
 };
 
-const EVENT_CATEGORIES: Record<string, EventItem['category']> = {
-  exhibition: 'exhibition',
-  concert: 'concert',
-  performance: 'performance',
-};
-
-const normalizeCategory = (value: unknown): EventItem['category'] | null => {
-  if (typeof value !== 'string') {
-    return null;
-  }
-  const key = value.trim().toLowerCase();
-  return EVENT_CATEGORIES[key] ?? null;
-};
-
 const resetExclusiveEventFlag = async (
   flag: 'isOnLanding',
   excludeId?: string,
@@ -117,7 +102,6 @@ export const createEvent = async (req: Request, res: Response) => {
       authorId,
       lead,
       cardLead,
-      category,
       tags = [],
       startDate,
       endDate = null,
@@ -134,11 +118,6 @@ export const createEvent = async (req: Request, res: Response) => {
 
     if (!title || !content || !authorId) {
       return res.status(400).json({ message: 'Title, content, and authorId are required' });
-    }
-
-    const normalizedCategory = normalizeCategory(category);
-    if (!normalizedCategory) {
-      return res.status(400).json({ message: 'Unsupported event category' });
     }
 
     const normalizedStartDate = parseDate(startDate);
@@ -181,7 +160,6 @@ export const createEvent = async (req: Request, res: Response) => {
       content,
       imageUrl,
       imageCaption,
-      category: normalizedCategory,
       tags: normalizedTags,
       startDate: normalizedStartDate,
       endDate: normalizedDateType === 'duration' ? normalizedEndDate : null,
@@ -275,7 +253,6 @@ export const updateEvent = async (req: Request, res: Response) => {
       authorId,
       lead,
       cardLead,
-      category,
       tags = [],
       startDate,
       endDate = null,
@@ -291,11 +268,6 @@ export const updateEvent = async (req: Request, res: Response) => {
 
     if (!title || !content || !authorId) {
       return res.status(400).json({ message: 'Title, content, and authorId are required' });
-    }
-
-    const normalizedCategory = normalizeCategory(category);
-    if (!normalizedCategory) {
-      return res.status(400).json({ message: 'Unsupported event category' });
     }
 
     const normalizedStartDate = parseDate(startDate);
@@ -340,7 +312,6 @@ export const updateEvent = async (req: Request, res: Response) => {
       content,
       imageUrl,
       imageCaption,
-      category: normalizedCategory,
       tags: normalizedTags,
       startDate: normalizedStartDate,
       endDate: normalizedDateType === 'duration' ? normalizedEndDate : null,
