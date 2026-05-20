@@ -260,6 +260,10 @@ export default function(Alpine: Alpine) {
       setTimeMode() {},
       saveEvent() {},
       deleteEvent() {},
+      // --- Article List defaults ---
+      hotFilter: 'all',
+      matchesFilter() { return true; },
+      getVisibleCount() { return 0; },
       // --- Event List defaults ---
       apiBase: '',
       buildApiUrl() { return ''; },
