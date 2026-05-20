@@ -20,7 +20,7 @@ const EVENT_TAGS: Array<{ value: string; title: string }> = [
   { value: "performance", title: "Спектакль" },
   { value: "cinema", title: "Кино" },
   { value: "theatre", title: "Театр" },
-  { value: "exhibitions", title: "Выставки" },
+  { value: "exhibitions", title: "Выставка" },
   { value: "festival", title: "Фестиваль" },
   { value: "artMarket", title: "Арт-рынок" },
   { value: "fashion", title: "Мода" },
@@ -65,7 +65,9 @@ const toDate = (value: unknown): Date | null => {
 
     if (typeof (value as { toDate?: () => Date }).toDate === "function") {
       const parsed = (value as { toDate: () => Date }).toDate();
-      return parsed instanceof Date && !Number.isNaN(parsed.getTime()) ? parsed : null;
+      return parsed instanceof Date && !Number.isNaN(parsed.getTime())
+        ? parsed
+        : null;
     }
   }
 
@@ -130,7 +132,9 @@ export default function eventCreatorLogic(initialState = {}) {
     const copy = JSON.parse(JSON.stringify(input));
     copy.startDate = normalizeDate(copy.startDate);
     copy.endDate = normalizeDate(copy.endDate);
-    copy.dateType = normalizeDateType(copy.dateType ?? (copy.endDate ? "duration" : "single"));
+    copy.dateType = normalizeDateType(
+      copy.dateType ?? (copy.endDate ? "duration" : "single"),
+    );
     copy.timeMode = normalizeTimeMode(copy.timeMode);
     copy.startTime = normalizeTime(copy.startTime);
     copy.endTime = normalizeTime(copy.endTime);
@@ -142,19 +146,21 @@ export default function eventCreatorLogic(initialState = {}) {
       : Array.isArray(copy.content)
         ? copy.content
         : [];
-    copy.contentBlocks = sortAndNormalizeContentBlocks(contentBlocks).map((block: any) =>
-      block?.type === "video"
-        ? withBlockMeta(
-            normalizeVideoBlock(block) as Record<string, unknown>,
-            Number(block.position) || 0,
-          )
-        : block,
+    copy.contentBlocks = sortAndNormalizeContentBlocks(contentBlocks).map(
+      (block: any) =>
+        block?.type === "video"
+          ? withBlockMeta(
+              normalizeVideoBlock(block) as Record<string, unknown>,
+              Number(block.position) || 0,
+            )
+          : block,
     );
     copy.content = copy.contentBlocks;
     copy.tags = Array.isArray(copy.tags) ? copy.tags : [];
     copy.title = typeof copy.title === "string" ? copy.title : "";
     copy.imageUrl = typeof copy.imageUrl === "string" ? copy.imageUrl : "";
-    copy.imageCaption = typeof copy.imageCaption === "string" ? copy.imageCaption : "";
+    copy.imageCaption =
+      typeof copy.imageCaption === "string" ? copy.imageCaption : "";
     copy.lead = copy.lead ?? "";
     copy.cardLead = copy.cardLead ?? "";
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
@@ -215,7 +221,9 @@ export default function eventCreatorLogic(initialState = {}) {
           this.article.contentBlocks = Array.isArray(normalized.contentBlocks)
             ? normalized.contentBlocks
             : [];
-          this.article.tags = Array.isArray(normalized.tags) ? normalized.tags : [];
+          this.article.tags = Array.isArray(normalized.tags)
+            ? normalized.tags
+            : [];
           this.article.relatedContent = sanitizeRelatedContent(
             normalized.relatedContent,
             "event",
@@ -333,7 +341,8 @@ export default function eventCreatorLogic(initialState = {}) {
       if (this.isSaving) return;
       this.isSaving = true;
 
-      const toast = (msg: string) => (globalThis as any).Alpine.store("ui").showToast(msg, "error");
+      const toast = (msg: string) =>
+        (globalThis as any).Alpine.store("ui").showToast(msg, "error");
 
       const hasCover = Boolean(this.article.imageUrl);
       if (!hasCover) {
@@ -414,14 +423,15 @@ export default function eventCreatorLogic(initialState = {}) {
         return;
       }
 
-      this.article.contentBlocks = reindexContentBlocks(this.article.contentBlocks).map(
-        (block: any) =>
-          block?.type === "video"
-            ? withBlockMeta(
-                normalizeVideoBlock(block) as Record<string, unknown>,
-                Number(block.position) || 0,
-              )
-            : block,
+      this.article.contentBlocks = reindexContentBlocks(
+        this.article.contentBlocks,
+      ).map((block: any) =>
+        block?.type === "video"
+          ? withBlockMeta(
+              normalizeVideoBlock(block) as Record<string, unknown>,
+              Number(block.position) || 0,
+            )
+          : block,
       );
 
       try {
@@ -453,18 +463,29 @@ export default function eventCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.eventId) {
           await eventsApi.update(this.eventId, payload);
-          (globalThis as any).Alpine.store("ui").showToast("Событие обновлено, красота!");
-          const redirectTo = this.onSaveRedirect || `/dashboard/event/${this.eventId}/edit`;
-          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
+          (globalThis as any).Alpine.store("ui").showToast(
+            "Событие обновлено, красота!",
+          );
+          const redirectTo =
+            this.onSaveRedirect || `/dashboard/event/${this.eventId}/edit`;
+          setTimeout(() => {
+            globalThis.location.href = redirectTo;
+          }, 1500);
         } else {
           const result = await eventsApi.create(payload);
-          (globalThis as any).Alpine.store("ui").showToast("Событие создано, поехали!");
-          setTimeout(() => { globalThis.location.href = `/events/${result.id}`; }, 1500);
+          (globalThis as any).Alpine.store("ui").showToast(
+            "Событие создано, поехали!",
+          );
+          setTimeout(() => {
+            globalThis.location.href = `/events/${result.id}`;
+          }, 1500);
         }
       } catch (error) {
         console.error("Event save error:", error);
         const message =
-          error instanceof Error ? error.message : "Что-то пошло не так при сохранении события.";
+          error instanceof Error
+            ? error.message
+            : "Что-то пошло не так при сохранении события.";
         window.Alpine.store("ui").showToast(message, "error");
         this.isSaving = false;
       }
@@ -484,7 +505,10 @@ export default function eventCreatorLogic(initialState = {}) {
           }, 1500);
         } catch (error) {
           console.error(error);
-          window.Alpine.store("ui").showToast("Не получилось удалить событие.", "error");
+          window.Alpine.store("ui").showToast(
+            "Не получилось удалить событие.",
+            "error",
+          );
         }
       };
 
