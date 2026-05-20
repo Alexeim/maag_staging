@@ -35,6 +35,14 @@
     {
       "title": "музыка",
       "value": "music"
+    },
+    {
+      "title": "некролог",
+      "value": "nekrolog"
+    },
+    {
+      "title": "назначение",
+      "value": "naznachenie"
     }
   ]
 }

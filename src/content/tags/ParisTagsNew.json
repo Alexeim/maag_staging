@@ -35,6 +35,10 @@
     {
       "title": "еда",
       "value": "food"
+    },
+    {
+      "title": "мода",
+      "value": "fashion"
     }
   ]
 }
