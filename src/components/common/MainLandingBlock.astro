@@ -314,10 +314,10 @@ const formatArticleMeta = (article: any, fallbackCategory = "") => {
   return parts.join(" • ");
 };
 
-const selectNewsRailItems = (
+function selectNewsRailItems(
   newsItems: any[],
   newsRail: LandingNewsRailSelection | null,
-) => {
+) {
   if (!newsRail) {
     return [];
   }
@@ -330,10 +330,10 @@ const selectNewsRailItems = (
   return newsRail.ids
     .map((id) => itemsById.get(id))
     .filter(Boolean);
-};
+}
 
-const normalizeEvents = (events: any[]) =>
-  events
+function normalizeEvents(events: any[]) {
+  return events
     .map((event) => {
       const startDate = toDate(event?.startDate);
       const endDate = toDate(event?.endDate);
@@ -349,20 +349,21 @@ const normalizeEvents = (events: any[]) =>
       };
     })
     .filter(Boolean) as Array<{ startDate: Date; endDate: Date | null } & any>;
+}
 
-const selectNearestEvent = (events: any[]) => {
+function selectNearestEvent(events: any[]) {
   const now = new Date();
   return (
     normalizeEvents(events)
       .filter((event) => event.startDate.getTime() >= now.getTime())
       .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())[0] || null
   );
-};
+}
 
-const selectEventCard = (
+function selectEventCard(
   events: any[],
   eventCard: LandingEventCardSelection | null,
-) => {
+) {
   if (!eventCard) {
     return null;
   }
@@ -386,7 +387,7 @@ const selectEventCard = (
   }
 
   return selectNearestEvent(events);
-};
+}
 ---
 
 <section

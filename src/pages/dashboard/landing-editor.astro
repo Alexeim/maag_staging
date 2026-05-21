@@ -1,0 +1,420 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+import {
+  articlesApi,
+  editorialPlacementsApi,
+  eventsApi,
+  flippersApi,
+  guidesApi,
+  interviewsApi,
+  newsApi,
+  visualStoriesApi,
+  type LandingMainHeroType,
+  type LandingPlacementsResponse,
+} from "@/lib/api/api";
+
+const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
+  schemaVersion: 2,
+  mainHero: null,
+  newsRail: {
+    mode: "auto-latest",
+    limit: 4,
+  },
+  eventCard: {
+    mode: "auto-nearest",
+  },
+  cultureInterviewBlock: {
+    mode: "auto-latest",
+  },
+  updatedAt: null,
+  updatedBy: null,
+};
+
+const MAIN_HERO_TYPE_LABELS: Record<LandingMainHeroType, string> = {
+  article: "Статья",
+  guide: "Путеводитель",
+  interview: "Интервью",
+  flipper: "Листалка",
+  "visual-story": "Визуальная история",
+};
+
+const toDate = (value: unknown): Date | null => {
+  if (!value) {
+    return null;
+  }
+  if (value instanceof Date) {
+    return value;
+  }
+  if (typeof value === "string" || typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "object") {
+    const seconds =
+      (value as { seconds?: number }).seconds ??
+      (value as { _seconds?: number })._seconds;
+    const nanoseconds =
+      (value as { nanoseconds?: number }).nanoseconds ??
+      (value as { _nanoseconds?: number })._nanoseconds ??
+      0;
+    if (typeof seconds === "number") {
+      return new Date(seconds * 1000 + nanoseconds / 1_000_000);
+    }
+    if (typeof (value as { toDate?: () => Date }).toDate === "function") {
+      const parsed = (value as { toDate: () => Date }).toDate();
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+  }
+  return null;
+};
+
+const formatUpdatedAt = (value: unknown) => {
+  const date = toDate(value);
+  if (!date) {
+    return "—";
+  }
+
+  return date.toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+let landingPlacements = DEFAULT_LANDING_PLACEMENTS;
+let loadError = "";
+
+const contentTitleMaps = {
+  mainHero: new Map<string, string>(),
+  news: new Map<string, string>(),
+  events: new Map<string, string>(),
+  interviews: new Map<string, string>(),
+};
+
+try {
+  const [
+    placements,
+    articles,
+    guides,
+    interviews,
+    flippers,
+    visualStories,
+    newsItems,
+    events,
+  ] = await Promise.all([
+    editorialPlacementsApi.getLanding().catch(() => DEFAULT_LANDING_PLACEMENTS),
+    articlesApi.list(),
+    guidesApi.list(),
+    interviewsApi.list(),
+    flippersApi.list(),
+    visualStoriesApi.list(),
+    newsApi.list(),
+    eventsApi.list(),
+  ]);
+
+  landingPlacements = placements;
+
+  articles.forEach((item) => contentTitleMaps.mainHero.set(`article:${item.id}`, item.title));
+  guides.forEach((item) => contentTitleMaps.mainHero.set(`guide:${item.id}`, item.title));
+  interviews.forEach((item) => {
+    contentTitleMaps.mainHero.set(`interview:${item.id}`, item.title);
+    contentTitleMaps.interviews.set(item.id, item.title);
+  });
+  flippers.forEach((item) => contentTitleMaps.mainHero.set(`flipper:${item.id}`, item.title));
+  visualStories.forEach((item) =>
+    contentTitleMaps.mainHero.set(`visual-story:${item.id}`, item.title),
+  );
+  newsItems.forEach((item) => contentTitleMaps.news.set(item.id, item.title));
+  events.forEach((item) => contentTitleMaps.events.set(item.id, item.title));
+} catch (error) {
+  console.error("Failed to load landing editor overview:", error);
+  loadError =
+    error instanceof Error
+      ? error.message
+      : "Не удалось загрузить editorial slots landing.";
+}
+
+const mainHeroSummary = (() => {
+  if (!landingPlacements.mainHero) {
+    return {
+      modeLabel: "Пусто",
+      details: "Главный hero-slot сейчас пуст.",
+    };
+  }
+
+  const { type, id } = landingPlacements.mainHero.ref;
+  const title = contentTitleMaps.mainHero.get(`${type}:${id}`) || "Материал не найден";
+
+  return {
+    modeLabel: "Manual",
+    details: `${MAIN_HERO_TYPE_LABELS[type]}: ${title}`,
+  };
+})();
+
+const newsRailSummary = (() => {
+  if (!landingPlacements.newsRail) {
+    return {
+      modeLabel: "Пусто",
+      details: "Блок новостей сейчас пуст.",
+    };
+  }
+
+  if (landingPlacements.newsRail.mode === "auto-latest") {
+    return {
+      modeLabel: "Auto latest",
+      details: `Последние ${landingPlacements.newsRail.limit} новости.`,
+    };
+  }
+
+  const items = landingPlacements.newsRail.ids.map(
+    (id) => contentTitleMaps.news.get(id) || `Новость ${id}`,
+  );
+
+  return {
+    modeLabel: "Manual",
+    details: items.length > 0 ? items.join(" | ") : "Список новостей пуст.",
+  };
+})();
+
+const eventCardSummary = (() => {
+  if (!landingPlacements.eventCard) {
+    return {
+      modeLabel: "Пусто",
+      details: "Event card сейчас пустая.",
+    };
+  }
+
+  if (landingPlacements.eventCard.mode === "auto-nearest") {
+    return {
+      modeLabel: "Auto nearest",
+      details: "Автоматически показывается ближайшее событие.",
+    };
+  }
+
+  return {
+    modeLabel: "Manual",
+    details:
+      contentTitleMaps.events.get(landingPlacements.eventCard.id) ||
+      `Событие ${landingPlacements.eventCard.id}`,
+  };
+})();
+
+const cultureInterviewSummary = (() => {
+  if (!landingPlacements.cultureInterviewBlock) {
+    return {
+      modeLabel: "Пусто",
+      details: "Interview block в culture section landing сейчас пуст.",
+    };
+  }
+
+  if (landingPlacements.cultureInterviewBlock.mode === "auto-latest") {
+    return {
+      modeLabel: "Auto latest",
+      details: "Автоматически показывается последнее интервью.",
+    };
+  }
+
+  return {
+    modeLabel: "Manual",
+    details:
+      contentTitleMaps.interviews.get(landingPlacements.cultureInterviewBlock.id) ||
+      `Интервью ${landingPlacements.cultureInterviewBlock.id}`,
+  };
+})();
+
+const slotCards = [
+  {
+    title: "Main Hero",
+    description: "Большой блок «Главное» на landing.",
+    modeLabel: mainHeroSummary.modeLabel,
+    details: mainHeroSummary.details,
+  },
+  {
+    title: "News Rail",
+    description: "Блок новостей в main landing block.",
+    modeLabel: newsRailSummary.modeLabel,
+    details: newsRailSummary.details,
+  },
+  {
+    title: "Event Card",
+    description: "Карточка события в main landing block.",
+    modeLabel: eventCardSummary.modeLabel,
+    details: eventCardSummary.details,
+  },
+  {
+    title: "Culture Interview Block",
+    description: "Interview block в culture section именно на landing.",
+    modeLabel: cultureInterviewSummary.modeLabel,
+    details: cultureInterviewSummary.details,
+  },
+];
+
+const initialNewsRailState = (() => {
+  if (!landingPlacements.newsRail) {
+    return {
+      mode: "empty" as const,
+      limit: 4,
+      ids: [],
+    };
+  }
+
+  if (landingPlacements.newsRail.mode === "auto-latest") {
+    return {
+      mode: "auto-latest" as const,
+      limit: landingPlacements.newsRail.limit,
+      ids: [],
+    };
+  }
+
+  return {
+    mode: "manual" as const,
+    limit: 4,
+    ids: landingPlacements.newsRail.ids,
+  };
+})();
+
+const newsOptions = Array.from(contentTitleMaps.news.entries()).map(([id, title]) => ({
+  id,
+  title,
+}));
+---
+
+<DashboardLayout title="Редактор лендинга" active="landing-editor">
+  <section
+    class="grid gap-6"
+    x-data={`$lazy('landingEditor', ${JSON.stringify({
+      apiBaseUrl: PUBLIC_API_BASE_URL,
+      newsOptions,
+      initialNewsRail: initialNewsRailState,
+    })})`}
+  >
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h2 class="text-xl font-semibold">Редактор лендинга</h2>
+        <p class="text-sm text-base-content/70">
+          Управление editorial slots landing.
+        </p>
+      </div>
+
+      <div class="mt-4 grid gap-2 text-sm">
+        <p>
+          <span class="font-semibold">Schema:</span>
+          <span class="ml-2">{landingPlacements.schemaVersion}</span>
+        </p>
+        <p>
+          <span class="font-semibold">Слоты последний раз изменены:</span>
+          <span class="ml-2">{formatUpdatedAt(landingPlacements.updatedAt)}</span>
+        </p>
+      </div>
+
+      {loadError ? (
+        <p class="mt-4 text-sm text-error">{loadError}</p>
+      ) : null}
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-2">
+      {
+        slotCards.map((card) => (
+          <article class="bg-base-100 border border-base-300 rounded-xl p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h3 class="text-lg font-semibold">{card.title}</h3>
+                <p class="mt-1 text-sm text-base-content/70">{card.description}</p>
+              </div>
+              <span class="badge badge-outline">{card.modeLabel}</span>
+            </div>
+            <p class="mt-4 text-sm leading-6 text-base-content/80">{card.details}</p>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">News Rail Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Первый editable slot: блок новостей на landing.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="news-rail-mode" value="empty" x-model="newsRailMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="news-rail-mode" value="auto-latest" x-model="newsRailMode" />
+            <span class="text-sm">Auto latest</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="news-rail-mode" value="manual" x-model="newsRailMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="newsRailMode === 'auto-latest'" class="grid gap-2 max-w-xs">
+          <label for="news-rail-limit" class="text-sm font-medium">Количество новостей</label>
+          <select
+            id="news-rail-limit"
+            x-model="newsRailLimit"
+            class="select select-bordered w-full"
+          >
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+
+        <div x-show="newsRailMode === 'manual'" class="grid gap-3">
+          <p class="text-sm font-medium">Выбери новости вручную</p>
+
+          {newsOptions.length > 0 ? (
+            <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
+              {
+                newsOptions.map((item) => (
+                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      :checked={`isManualNewsSelected(${JSON.stringify(item.id)})`}
+                      @change={`toggleNewsItem(${JSON.stringify(item.id)})`}
+                    />
+                    <span class="text-sm leading-6">{item.title}</span>
+                  </label>
+                ))
+              }
+            </div>
+          ) : (
+            <p class="text-sm text-base-content/70">
+              Пока нет новостей для ручного выбора.
+            </p>
+          )}
+        </div>
+
+        <p x-show="newsError" class="text-sm text-error" x-text="newsError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveNewsRail()"
+            :disabled="newsSaving"
+          >
+            Сохранить news rail
+          </button>
+          <span x-show="newsSaving" class="text-sm text-base-content/70">
+            Сохраняем...
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+</DashboardLayout>
