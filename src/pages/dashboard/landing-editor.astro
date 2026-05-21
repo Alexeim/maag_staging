@@ -280,6 +280,36 @@ const newsOptions = Array.from(contentTitleMaps.news.entries()).map(([id, title]
   id,
   title,
 }));
+
+const eventOptions = Array.from(contentTitleMaps.events.entries()).map(([id, title]) => ({
+  id,
+  title,
+}));
+
+const interviewOptions = Array.from(contentTitleMaps.interviews.entries()).map(([id, title]) => ({
+  id,
+  title,
+}));
+
+const initialEventCardState = (() => {
+  if (!landingPlacements.eventCard) {
+    return { mode: "empty" as const, id: "" };
+  }
+  if (landingPlacements.eventCard.mode === "auto-nearest") {
+    return { mode: "auto-nearest" as const, id: "" };
+  }
+  return { mode: "manual" as const, id: landingPlacements.eventCard.id };
+})();
+
+const initialCultureInterviewState = (() => {
+  if (!landingPlacements.cultureInterviewBlock) {
+    return { mode: "empty" as const, id: "" };
+  }
+  if (landingPlacements.cultureInterviewBlock.mode === "auto-latest") {
+    return { mode: "auto-latest" as const, id: "" };
+  }
+  return { mode: "manual" as const, id: landingPlacements.cultureInterviewBlock.id };
+})();
 ---
 
 <DashboardLayout title="Редактор лендинга" active="landing-editor">
@@ -289,6 +319,10 @@ const newsOptions = Array.from(contentTitleMaps.news.entries()).map(([id, title]
       apiBaseUrl: PUBLIC_API_BASE_URL,
       newsOptions,
       initialNewsRail: initialNewsRailState,
+      eventOptions,
+      initialEventCard: initialEventCardState,
+      interviewOptions,
+      initialCultureInterview: initialCultureInterviewState,
     })})`}
   >
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
@@ -413,6 +447,109 @@ const newsOptions = Array.from(contentTitleMaps.news.entries()).map(([id, title]
           <span x-show="newsSaving" class="text-sm text-base-content/70">
             Сохраняем...
           </span>
+        </div>
+      </div>
+    </div>
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Event Card Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Карточка события на landing.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="event-card-mode" value="empty" x-model="eventCardMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="event-card-mode" value="auto-nearest" x-model="eventCardMode" />
+            <span class="text-sm">Auto nearest</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="event-card-mode" value="manual" x-model="eventCardMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="eventCardMode === 'manual'" class="grid gap-2 max-w-sm">
+          <label for="event-select" class="text-sm font-medium">Выбери событие</label>
+          <select id="event-select" x-model="selectedEventId" class="select select-bordered w-full">
+            <option value="">— выбери событие —</option>
+            {eventOptions.map((item) => (
+              <option value={item.id}>{item.title}</option>
+            ))}
+          </select>
+        </div>
+
+        <p x-show="eventError" class="text-sm text-error" x-text="eventError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveEventCard()"
+            :disabled="eventSaving"
+          >
+            Сохранить event card
+          </button>
+          <span x-show="eventSaving" class="text-sm text-base-content/70">Сохраняем...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Culture Interview Block Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Interview block в culture section на landing.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-interview-mode" value="empty" x-model="cultureInterviewMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-interview-mode" value="auto-latest" x-model="cultureInterviewMode" />
+            <span class="text-sm">Auto latest</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-interview-mode" value="manual" x-model="cultureInterviewMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="cultureInterviewMode === 'manual'" class="grid gap-2 max-w-sm">
+          <label for="interview-select" class="text-sm font-medium">Выбери интервью</label>
+          <select id="interview-select" x-model="selectedInterviewId" class="select select-bordered w-full">
+            <option value="">— выбери интервью —</option>
+            {interviewOptions.map((item) => (
+              <option value={item.id}>{item.title}</option>
+            ))}
+          </select>
+        </div>
+
+        <p x-show="cultureInterviewError" class="text-sm text-error" x-text="cultureInterviewError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveCultureInterview()"
+            :disabled="cultureInterviewSaving"
+          >
+            Сохранить culture interview
+          </button>
+          <span x-show="cultureInterviewSaving" class="text-sm text-base-content/70">Сохраняем...</span>
         </div>
       </div>
     </div>

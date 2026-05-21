@@ -242,7 +242,7 @@ const eventCategoryLabels: Record<string, string> = {
   performance: "Спектакль",
 };
 
-const toDate = (value: unknown): Date | null => {
+function toDate(value: unknown): Date | null {
   if (!value) {
     return null;
   }
@@ -272,7 +272,7 @@ const toDate = (value: unknown): Date | null => {
     }
   }
   return null;
-};
+}
 
 const formatEventDate = (value: unknown) => {
   const date = toDate(value);
