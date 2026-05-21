@@ -13,6 +13,7 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
+import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 
 const storage = getStorage(app);
 
@@ -116,6 +117,14 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     useNewAuthor: false,
     newAuthorFirstName: "",
     newAuthorLastName: "",
+    ...createLandingPlacementManager({
+      getEntityId() {
+        return this.storyId;
+      },
+      getMainHeroRef() {
+        return this.storyId ? { type: "visual-story", id: this.storyId } : null;
+      },
+    }),
 
     isEditingTitle: false,
     editingTitleText: "",
@@ -444,6 +453,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       );
       this.fetchContentLists();
       this.loadAuthors();
+      this.loadLandingPlacements();
     },
 
     async saveStory() {

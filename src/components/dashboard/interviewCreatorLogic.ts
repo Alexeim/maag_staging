@@ -29,6 +29,7 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
+import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 
 const storage = getStorage(app);
 
@@ -153,6 +154,15 @@ export default function interviewCreatorLogic(initialState = {}) {
     useNewAuthor: false,
     newAuthorFirstName: "",
     newAuthorLastName: "",
+    ...createLandingPlacementManager({
+      getEntityId() {
+        return this.interviewId;
+      },
+      getMainHeroRef() {
+        return this.interviewId ? { type: "interview", id: this.interviewId } : null;
+      },
+      supportsFeaturedInterviewInCulture: true,
+    }),
     getRichTextInitialHtml(block) {
       return getInitialRichTextHtml(block);
     },
@@ -394,6 +404,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.ensureSelectedAuthorPresent();
       this.fetchContentLists();
       this.loadAuthors();
+      this.loadLandingPlacements();
     },
 
     editTitle() {

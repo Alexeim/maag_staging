@@ -3,6 +3,7 @@ import Button from "@/components/common/Button.astro";
 import { CloudUpload } from "lucide-astro";
 import QuoteIcon from "@/assets/icons/quote.svg";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
+import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
 
 interface Props {
   heading: string;
@@ -236,6 +237,11 @@ const {
       </div>
     </div>
   </section>
+
+  <LandingPlacementPanel
+    allowMainHero={true}
+    allowFeaturedInterviewInCulture={true}
+  />
 
   <section class="p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
     <h2 class="text-xl font-semibold mb-4">Содержание интервью</h2>

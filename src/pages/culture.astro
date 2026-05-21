@@ -203,7 +203,14 @@ let cultureFeed: any[] = [];
 let featuredInterview: any = null;
 
 try {
-  const [articles, interviews, flippers, guides, visualStories, newsItemsRaw] =
+  const [
+    articles,
+    interviews,
+    flippers,
+    guides,
+    visualStories,
+    newsItemsRaw,
+  ] =
     await Promise.all([
       articlesApi.list(),
       interviewsApi.list(),

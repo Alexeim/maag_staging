@@ -2,6 +2,7 @@
 import Button from "@/components/common/Button.astro";
 import { CloudUpload } from "lucide-astro";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
+import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
 
 interface Props {
   heading?: string;
@@ -175,6 +176,8 @@ const {
       </div>
     </template>
   </section>
+
+  <LandingPlacementPanel allowMainHero={true} />
 
   <section class="p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
     <h2 class="text-xl font-semibold mb-4">Слайды листалки</h2>

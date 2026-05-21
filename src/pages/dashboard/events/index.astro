@@ -1,6 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
-import { eventsApi } from "@/lib/api/api";
+import { editorialPlacementsApi, eventsApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
 const normalizeDate = (value: unknown) => {
@@ -58,11 +58,21 @@ const formatRange = (start: Date | null, end: Date | null) => {
 };
 
 let events = [] as Awaited<ReturnType<typeof eventsApi.list>>;
+let featuredEventId: string | null = null;
 try {
-  events = await eventsApi.list();
+  const [eventsResponse, landingPlacements] = await Promise.all([
+    eventsApi.list(),
+    editorialPlacementsApi.getLanding().catch(() => null),
+  ]);
+  events = eventsResponse;
+  featuredEventId =
+    landingPlacements?.eventCard?.mode === "manual"
+      ? landingPlacements.eventCard.id
+      : null;
 } catch (error) {
   console.error("Failed to load events", error);
   events = [];
+  featuredEventId = null;
 }
 
 const decoratedEvents = events.map((event) => {
@@ -159,7 +169,7 @@ const decoratedEvents = events.map((event) => {
                     </div>
                   </td>
                   <td class="px-6 py-4 hidden md:table-cell">
-                    {eventItem.isOnLanding ? (
+                    {featuredEventId === eventItem.id ? (
                       <span class="badge badge-success badge-sm">on</span>
                     ) : (
                       <span class="badge badge-ghost badge-sm text-base-content/60">off</span>

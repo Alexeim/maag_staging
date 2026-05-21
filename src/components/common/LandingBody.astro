@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import {
   articlesApi,
+  editorialPlacementsApi,
   interviewsApi,
   flippersApi,
   guidesApi,
@@ -9,6 +10,7 @@ import {
   newsApi,
   type InterviewResponse,
   type FlipperPayload,
+  type LandingPlacementsResponse,
 } from "@/lib/api/api";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 
@@ -140,6 +142,23 @@ let latestInterview: any = null;
 let allItemsSorted: any[] = [];
 let leSaviezVousArticle: any = null;
 
+const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
+  schemaVersion: 2,
+  mainHero: null,
+  newsRail: {
+    mode: "auto-latest",
+    limit: 4,
+  },
+  eventCard: {
+    mode: "auto-nearest",
+  },
+  cultureInterviewBlock: {
+    mode: "auto-latest",
+  },
+  updatedAt: null,
+  updatedBy: null,
+};
+
 const getDate = (timestamp: any): Date => {
   if (timestamp && typeof timestamp === "object" && timestamp._seconds) {
     return new Date(timestamp._seconds * 1000);
@@ -209,8 +228,29 @@ const toContentHref = (item: any) => {
   return `/${item?.isNews ? "news" : "article"}/${item.id}`;
 };
 
+const getPlacementType = (item: any): string | null =>
+  item?.contentType || item?.type || null;
+
+const isPlacedMainHero = (
+  item: any,
+  landingPlacements: LandingPlacementsResponse,
+) =>
+  Boolean(
+    landingPlacements.mainHero?.ref &&
+      landingPlacements.mainHero.ref.id === item?.id &&
+      landingPlacements.mainHero.ref.type === getPlacementType(item),
+  );
+
 try {
-  const [articles, flippers, interviews, guides, visualStories, newsItemsRaw] =
+  const [
+    articles,
+    flippers,
+    interviews,
+    guides,
+    visualStories,
+    newsItemsRaw,
+    landingPlacements,
+  ] =
     await Promise.all([
       articlesApi.list(),
       flippersApi.list() as Promise<FlipperResponse[]>,
@@ -218,6 +258,7 @@ try {
       guidesApi.list(),
       visualStoriesApi.list(),
       newsApi.list(),
+      editorialPlacementsApi.getLanding().catch(() => DEFAULT_LANDING_PLACEMENTS),
     ]);
 
   const standardArticles = articles.filter(
@@ -290,7 +331,7 @@ try {
       normalizeCategory(item.category) === CULTURE_CATEGORY_KEY &&
       !isHotContent(item) &&
       !item.isNews &&
-      !item.isOnLanding,
+      !isPlacedMainHero(item, landingPlacements),
   );
 
   parisItems = allItems.filter(
@@ -298,7 +339,7 @@ try {
       normalizeCategory(item.category) === PARIS_CATEGORY_KEY &&
       !isHotContent(item) &&
       !item.isNews &&
-      !item.isOnLanding,
+      !isPlacedMainHero(item, landingPlacements),
   );
 
   console.log(`--- STEP 3: FILTERED ---`);
@@ -342,9 +383,24 @@ try {
     .sort(
       (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
     )
-    .filter((item) => isLandingHotContentItem(item))
+    .filter(
+      (item) =>
+        isLandingHotContentItem(item) &&
+        !isPlacedMainHero(item, landingPlacements) &&
+        item.id !==
+          (landingPlacements.cultureInterviewBlock?.mode === "manual"
+            ? landingPlacements.cultureInterviewBlock.id
+            : null),
+    )
     .slice(0, 4);
-  latestInterview = interviews[0] ?? null;
+  const cultureInterviewBlock = landingPlacements.cultureInterviewBlock;
+  latestInterview =
+    cultureInterviewBlock?.mode === "manual"
+      ? interviews.find((interview) => interview.id === cultureInterviewBlock.id) ??
+        null
+      : cultureInterviewBlock?.mode === "auto-latest"
+        ? interviews[0] ?? null
+        : null;
 } catch (error) {
   console.error("Failed to fetch data for LandingBody:", error);
 }
@@ -373,7 +429,6 @@ const carouselItems = allItemsSorted
     (item) =>
       !isHotContent(item) &&
       !item.isNews &&
-      !item.isOnLanding &&
       !excludedIds.has(item.id),
   )
   .slice(0, 20);

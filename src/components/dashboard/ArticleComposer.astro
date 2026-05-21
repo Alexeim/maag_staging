@@ -10,6 +10,7 @@ import likeIcon from "@/assets/icons/new/like.svg?raw";
 import dislikeIcon from "@/assets/icons/new/dislike.svg?raw";
 import QuoteIcon from "@/assets/icons/quote.svg";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
+import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
 
 interface Props {
   heading: string;
@@ -180,21 +181,6 @@ const {
         class="text-sm font-medium text-base-content cursor-pointer"
       >
         Отметить как «Самое читаемое»
-      </label>
-    </div>
-
-    <div class="mt-4 flex items-center gap-3">
-      <input
-        id="on-landing-flag"
-        type="checkbox"
-        x-model="article.isOnLanding"
-        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
-      />
-      <label
-        for="on-landing-flag"
-        class="text-sm font-medium text-base-content cursor-pointer"
-      >
-        Показывать как главную статью на посадочной странице
       </label>
     </div>
 
@@ -401,6 +387,8 @@ const {
       </div>
     </div>
   </section>
+
+  <LandingPlacementPanel allowMainHero={true} />
 
   <RelatedContentEditor />
 

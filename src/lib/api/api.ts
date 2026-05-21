@@ -206,6 +206,80 @@ export interface EventResponse extends EventPayload {
   author?: unknown;
 }
 
+export type LandingMainHeroType =
+  | "article"
+  | "guide"
+  | "interview"
+  | "flipper"
+  | "visual-story";
+
+export interface LandingMainHeroRef {
+  type: LandingMainHeroType;
+  id: string;
+}
+
+export interface LandingMainHeroSelection {
+  mode: "manual";
+  ref: LandingMainHeroRef;
+}
+
+export interface LandingNewsRailAutoSelection {
+  mode: "auto-latest";
+  limit: number;
+}
+
+export interface LandingNewsRailManualSelection {
+  mode: "manual";
+  ids: string[];
+}
+
+export type LandingNewsRailSelection =
+  | LandingNewsRailAutoSelection
+  | LandingNewsRailManualSelection;
+
+export interface LandingEventCardAutoSelection {
+  mode: "auto-nearest";
+}
+
+export interface LandingEventCardManualSelection {
+  mode: "manual";
+  id: string;
+}
+
+export type LandingEventCardSelection =
+  | LandingEventCardAutoSelection
+  | LandingEventCardManualSelection;
+
+export interface LandingCultureInterviewAutoSelection {
+  mode: "auto-latest";
+}
+
+export interface LandingCultureInterviewManualSelection {
+  mode: "manual";
+  id: string;
+}
+
+export type LandingCultureInterviewBlockSelection =
+  | LandingCultureInterviewAutoSelection
+  | LandingCultureInterviewManualSelection;
+
+export interface LandingPlacementsResponse {
+  schemaVersion: 2;
+  mainHero: LandingMainHeroSelection | null;
+  newsRail: LandingNewsRailSelection | null;
+  eventCard: LandingEventCardSelection | null;
+  cultureInterviewBlock: LandingCultureInterviewBlockSelection | null;
+  updatedAt?: string | Date | null;
+  updatedBy?: string | null;
+}
+
+export interface UpdateLandingPlacementsPayload {
+  mainHero?: LandingMainHeroSelection | null;
+  newsRail?: LandingNewsRailSelection | null;
+  eventCard?: LandingEventCardSelection | null;
+  cultureInterviewBlock?: LandingCultureInterviewBlockSelection | null;
+}
+
 export interface UserProfilePayload {
   uid: string;
   firstName: string;
@@ -566,6 +640,21 @@ export const visualStoriesApi = {
   delete(id: string, token?: string) {
     return request<void>(`/api/visual-stories/${id}`, {
       method: "DELETE",
+      token,
+    });
+  },
+};
+
+export const editorialPlacementsApi = {
+  getLanding(token?: string) {
+    return request<LandingPlacementsResponse>("/api/editorial-placements/landing", {
+      token,
+    });
+  },
+  updateLanding(payload: UpdateLandingPlacementsPayload, token?: string) {
+    return request<LandingPlacementsResponse>("/api/editorial-placements/landing", {
+      method: "PUT",
+      body: payload,
       token,
     });
   },

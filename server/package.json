@@ -13,6 +13,9 @@
     "migrate:news:copy": "node scripts/migrateArticlesNewsToNewsCollection.js --apply-copy",
     "migrate:news:delete": "node scripts/migrateArticlesNewsToNewsCollection.js --apply-delete",
     "migrate:news:cleanup-flags": "node scripts/migrateArticlesNewsToNewsCollection.js --cleanup-flags",
+    "migrate:landing:dry": "node scripts/removeLegacyIsOnLanding.js",
+    "migrate:landing:apply": "node scripts/removeLegacyIsOnLanding.js --apply",
+    "migrate:landing:seed": "node scripts/removeLegacyIsOnLanding.js --seed-landing-doc",
     "deploy:prod": "bash deploy.sh"
   },
   "keywords": [],

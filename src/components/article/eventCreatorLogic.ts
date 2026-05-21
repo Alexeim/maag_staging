@@ -7,6 +7,7 @@ import {
   withBlockMeta,
 } from "@/lib/utils/contentBlocks";
 import { sanitizeRelatedContent } from "@/lib/utils/relatedContent";
+import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 
 type EventDateType = "single" | "duration";
 type EventTimeMode = "none" | "start" | "range";
@@ -181,6 +182,12 @@ export default function eventCreatorLogic(initialState = {}) {
       isOnLanding: false,
       isMainEvent: false,
     },
+    ...createLandingPlacementManager({
+      getEntityId() {
+        return this.eventId;
+      },
+      supportsFeaturedEvent: true,
+    }),
     ...restInitial,
     addRelatedContent() {
       const type = this.selectedRelatedContentType;

@@ -3,6 +3,7 @@ import Button from "@/components/common/Button.astro";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 import { CloudUpload } from "lucide-astro";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
+import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
 
 interface Props {
   heading: string;
@@ -152,18 +153,6 @@ const {
       </label>
     </div>
 
-    <div class="mt-4 flex items-center gap-3">
-      <input
-        id="vs-on-landing"
-        type="checkbox"
-        x-model="story.isOnLanding"
-        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
-      />
-      <label for="vs-on-landing" class="text-sm font-medium text-base-content cursor-pointer">
-        Показывать на посадочной странице
-      </label>
-    </div>
-
     <!-- Tags -->
     <div class="mt-6">
       <label
@@ -261,6 +250,8 @@ const {
       />
     </div>
   </section>
+
+  <LandingPlacementPanel allowMainHero={true} />
 
   <!-- Slides section -->
   <section class="p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">

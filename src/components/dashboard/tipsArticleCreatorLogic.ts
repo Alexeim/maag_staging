@@ -13,6 +13,7 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
+import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 
 const storage = getStorage(app);
 
@@ -157,6 +158,14 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     useNewAuthor: false,
     newAuthorFirstName: "",
     newAuthorLastName: "",
+    ...createLandingPlacementManager({
+      getEntityId() {
+        return this.articleId;
+      },
+      getMainHeroRef() {
+        return this.articleId ? { type: "article", id: this.articleId } : null;
+      },
+    }),
 
     categoryTags,
     parisDistrictOptions,
@@ -207,6 +216,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
       this.fetchContentLists();
       this.loadAuthors();
+      this.loadLandingPlacements();
     },
 
     // ── Title editing ────────────────────────────────────────────────────────

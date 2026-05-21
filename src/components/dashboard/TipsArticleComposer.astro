@@ -8,6 +8,7 @@ import {
 import locationIcon from "@/assets/icons/new/location.svg?raw";
 import timeIcon from "@/assets/icons/new/time.svg?raw";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
+import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
 
 interface Props {
   heading: string;
@@ -160,17 +161,6 @@ const allParisDistricts = parisDistrictTags;
       />
       <label for="hot-content-flag" class="text-sm font-medium text-base-content cursor-pointer">
         Отметить как «Самое читаемое»
-      </label>
-    </div>
-    <div class="mt-4 flex items-center gap-3">
-      <input
-        id="on-landing-flag"
-        type="checkbox"
-        x-model="article.isOnLanding"
-        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
-      />
-      <label for="on-landing-flag" class="text-sm font-medium text-base-content cursor-pointer">
-        Показывать как главную статью на посадочной странице
       </label>
     </div>
     <div class="mt-4 flex items-center gap-3">
@@ -522,6 +512,8 @@ const allParisDistricts = parisDistrictTags;
       </Button>
     </div>
   </section>
+
+  <LandingPlacementPanel allowMainHero={true} />
 
   <RelatedContentEditor />
 

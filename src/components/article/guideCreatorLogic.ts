@@ -25,6 +25,7 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
+import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 
 const storage = getStorage(app);
 
@@ -246,6 +247,14 @@ export default function guideCreatorLogic(initialState = {}) {
     useNewAuthor: false,
     newAuthorFirstName: "",
     newAuthorLastName: "",
+    ...createLandingPlacementManager({
+      getEntityId() {
+        return this.articleId;
+      },
+      getMainHeroRef() {
+        return this.articleId ? { type: "guide", id: this.articleId } : null;
+      },
+    }),
 
     showBlockOptions: false,
 
@@ -678,6 +687,7 @@ export default function guideCreatorLogic(initialState = {}) {
 
       this.fetchContentLists();
       this.loadAuthors();
+      this.loadLandingPlacements();
     },
 
     editTitle() {

@@ -13,6 +13,7 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
+import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 
 const storage = getStorage(app);
 
@@ -139,6 +140,14 @@ export default function flipperCreatorLogic(initialState = {}) {
     useNewAuthor: false,
     newAuthorFirstName: "",
     newAuthorLastName: "",
+    ...createLandingPlacementManager({
+      getEntityId() {
+        return this.flipperId;
+      },
+      getMainHeroRef() {
+        return this.flipperId ? { type: "flipper", id: this.flipperId } : null;
+      },
+    }),
 
     init() {
       if (initialFlipper) {
@@ -158,6 +167,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       this.ensureSelectedAuthorPresent();
       this.fetchContentLists();
       this.loadAuthors();
+      this.loadLandingPlacements();
     },
 
     getAvailableTags() {

@@ -21,6 +21,7 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
+import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 
 const storage = getStorage(app);
 
@@ -304,6 +305,14 @@ export default function articleCreatorLogic(initialState = {}) {
     useNewAuthor: false,
     newAuthorFirstName: "",
     newAuthorLastName: "",
+    ...createLandingPlacementManager({
+      getEntityId() {
+        return this.articleId;
+      },
+      getMainHeroRef() {
+        return this.articleId ? { type: "article", id: this.articleId } : null;
+      },
+    }),
 
     // --- State for managing the block creation UI ---
     showBlockOptions: false,
@@ -759,6 +768,7 @@ export default function articleCreatorLogic(initialState = {}) {
 
       this.fetchContentLists();
       this.loadAuthors();
+      this.loadLandingPlacements();
     },
 
     // --- Title editing methods (unchanged) ---

@@ -10,6 +10,7 @@ import authorRoutes from './routes/authorRoutes';
 import guideRoutes from './routes/guideRoutes';
 import visualStoryRoutes from './routes/visualStoryRoutes';
 import newsRoutes from './routes/newsRoutes';
+import editorialPlacementsRoutes from './routes/editorialPlacementsRoutes';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -54,6 +55,9 @@ app.use('/api/guides', guideRoutes);
 
 // Use the visual story routes
 app.use('/api/visual-stories', visualStoryRoutes);
+
+// Use the editorial placements routes
+app.use('/api/editorial-placements', editorialPlacementsRoutes);
 
 // Test route to verify Firebase connection
 app.get('/api/test-firebase', async (req, res) => {

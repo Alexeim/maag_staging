@@ -1,0 +1,131 @@
+---
+interface Props {
+  allowMainHero?: boolean;
+  allowFeaturedEvent?: boolean;
+  allowFeaturedInterviewInCulture?: boolean;
+}
+
+const {
+  allowMainHero = false,
+  allowFeaturedEvent = false,
+  allowFeaturedInterviewInCulture = false,
+} = Astro.props as Props;
+---
+
+<section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-semibold">Размещение на landing</h2>
+      <p class="text-sm text-base-content/70 mt-1">
+        Здесь управляются глобальные editorial slots без старых checkbox-флагов.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="px-3 py-2 border text-sm cursor-pointer bg-base-100 border-base-300 text-base-content hover:bg-base-200"
+      @click="loadLandingPlacements()"
+      :disabled="placementLoading || placementSaving"
+    >
+      Обновить статусы
+    </button>
+  </div>
+
+  <p
+    x-show="!hasPlacementEntityId()"
+    class="mt-4 text-sm text-base-content/70"
+  >
+    Сначала сохрани материал. После первого сохранения здесь появятся действия для placement'ов.
+  </p>
+
+  <div x-show="hasPlacementEntityId()" class="mt-4 space-y-4">
+    <p x-show="placementLoading" class="text-sm text-base-content/70">
+      Загружаем текущие размещения...
+    </p>
+
+    <p x-show="placementError" class="text-sm text-error" x-text="placementError"></p>
+
+    <div class="grid gap-3 text-sm">
+      <p x-show="isCurrentMainHero()" class="text-success">
+        Этот материал сейчас стоит главным в блоке «Главное».
+      </p>
+      <p x-show="isCurrentFeaturedEvent()" class="text-success">
+        Это событие сейчас стоит в блоке «Календарь» на landing.
+      </p>
+      <p x-show="isCurrentFeaturedInterviewInCulture()" class="text-success">
+        Это интервью сейчас стоит в special block «Культура».
+      </p>
+    </div>
+
+    <div class="flex flex-wrap gap-3">
+      {allowMainHero && (
+        <>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="setAsMainHero()"
+            x-show="canSetAsMainHero() && !isCurrentMainHero()"
+            :disabled="placementSaving"
+          >
+            Сделать главным материалом landing
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="clearMainHero()"
+            x-show="isCurrentMainHero()"
+            :disabled="placementSaving"
+          >
+            Снять из главного материала
+          </button>
+        </>
+      )}
+
+      {allowFeaturedEvent && (
+        <>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="setAsFeaturedEvent()"
+            x-show="canSetAsFeaturedEvent() && !isCurrentFeaturedEvent()"
+            :disabled="placementSaving"
+          >
+            Поставить в блок события
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="clearFeaturedEvent()"
+            x-show="isCurrentFeaturedEvent()"
+            :disabled="placementSaving"
+          >
+            Снять из блока события
+          </button>
+        </>
+      )}
+
+      {allowFeaturedInterviewInCulture && (
+        <>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="setAsFeaturedInterviewInCulture()"
+            x-show="canSetAsFeaturedInterviewInCulture() && !isCurrentFeaturedInterviewInCulture()"
+            :disabled="placementSaving"
+          >
+            Поставить в блок интервью «Культура»
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="clearFeaturedInterviewInCulture()"
+            x-show="isCurrentFeaturedInterviewInCulture()"
+            :disabled="placementSaving"
+          >
+            Снять из блока интервью
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+</section>
