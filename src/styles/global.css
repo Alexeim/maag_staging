@@ -35,6 +35,7 @@
   --color-error: oklch(0.5626 0.2187 28.1);
   --color-error-content: oklch(1 0 0);
   --color-maag-green: oklch(0.5936 0.1914 141.28);
+  --color-calendar-range: oklch(0.8571 0.0376 80.6);
 
   /* border radius */
   --radius-selector: 1rem;
