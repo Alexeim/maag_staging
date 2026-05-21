@@ -296,21 +296,32 @@ const normalizeLandingPlacements = (
   }
 
   const mainHero = normalizeMainHeroSelection(value.mainHero);
-  const newsRail = normalizeNewsRailSelection(value.newsRail);
-  const eventCard =
-    normalizeEventCardSelection(value.eventCard) ??
-    normalizeEventCardSelection(value.featuredEventId);
-  const cultureInterviewBlock =
-    normalizeCultureInterviewBlockSelection(value.cultureInterviewBlock) ??
-    normalizeCultureInterviewBlockSelection(value.featuredInterviewInCultureId);
+
+  const newsRailRaw = 'newsRail' in value ? value.newsRail : undefined;
+  const newsRail = newsRailRaw === null
+    ? null
+    : (normalizeNewsRailSelection(newsRailRaw) ?? defaults.newsRail);
+
+  const eventCardRaw = 'eventCard' in value ? value.eventCard : undefined;
+  const eventCard = eventCardRaw === null
+    ? null
+    : (normalizeEventCardSelection(eventCardRaw)
+        ?? normalizeEventCardSelection(value.featuredEventId)
+        ?? defaults.eventCard);
+
+  const cultureInterviewRaw = 'cultureInterviewBlock' in value ? value.cultureInterviewBlock : undefined;
+  const cultureInterviewBlock = cultureInterviewRaw === null
+    ? null
+    : (normalizeCultureInterviewBlockSelection(cultureInterviewRaw)
+        ?? normalizeCultureInterviewBlockSelection(value.featuredInterviewInCultureId)
+        ?? defaults.cultureInterviewBlock);
 
   return {
     schemaVersion: 2,
     mainHero,
-    newsRail: newsRail ?? defaults.newsRail,
-    eventCard: eventCard ?? defaults.eventCard,
-    cultureInterviewBlock:
-      cultureInterviewBlock ?? defaults.cultureInterviewBlock,
+    newsRail,
+    eventCard,
+    cultureInterviewBlock,
     updatedAt:
       value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
     updatedBy: normalizeStringId(value.updatedBy),
