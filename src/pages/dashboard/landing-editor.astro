@@ -39,6 +39,28 @@ const MAIN_HERO_TYPE_LABELS: Record<LandingMainHeroType, string> = {
   "visual-story": "Визуальная история",
 };
 
+const ARTICLE_BUCKET_LABELS = {
+  culture: "Culture",
+  paris: "Paris",
+  tips: "Tips",
+} as const;
+
+const normalizeArticleBucket = (item: { articleType?: string; category?: string }) => {
+  if (item.articleType === "tips") {
+    return "tips" as const;
+  }
+
+  const normalizedCategory = item.category?.trim().toLowerCase();
+  if (normalizedCategory === "culture") {
+    return "culture" as const;
+  }
+  if (normalizedCategory === "paris") {
+    return "paris" as const;
+  }
+
+  return null;
+};
+
 const toDate = (value: unknown): Date | null => {
   if (!value) {
     return null;
@@ -93,6 +115,13 @@ const contentTitleMaps = {
   events: new Map<string, string>(),
   interviews: new Map<string, string>(),
 };
+const mainHeroArticleMeta = new Map<
+  string,
+  {
+    articleBucket: keyof typeof ARTICLE_BUCKET_LABELS;
+    articleBucketLabel: string;
+  }
+>();
 
 try {
   const [
@@ -117,7 +146,17 @@ try {
 
   landingPlacements = placements;
 
-  articles.forEach((item) => contentTitleMaps.mainHero.set(`article:${item.id}`, item.title));
+  articles.forEach((item) => {
+    const key = `article:${item.id}`;
+    const articleBucket = normalizeArticleBucket(item);
+    contentTitleMaps.mainHero.set(key, item.title);
+    if (articleBucket) {
+      mainHeroArticleMeta.set(key, {
+        articleBucket,
+        articleBucketLabel: ARTICLE_BUCKET_LABELS[articleBucket],
+      });
+    }
+  });
   guides.forEach((item) => contentTitleMaps.mainHero.set(`guide:${item.id}`, item.title));
   interviews.forEach((item) => {
     contentTitleMaps.mainHero.set(`interview:${item.id}`, item.title);
@@ -145,7 +184,7 @@ const mainHeroSummary = (() => {
     };
   }
 
-  const { type, id } = landingPlacements.mainHero.ref;
+  const { type, id } = landingPlacements.mainHero;
   const title = contentTitleMaps.mainHero.get(`${type}:${id}`) || "Материал не найден";
 
   return {
@@ -281,6 +320,39 @@ const newsOptions = Array.from(contentTitleMaps.news.entries()).map(([id, title]
   title,
 }));
 
+const mainHeroOptions = Array.from(contentTitleMaps.mainHero.entries())
+  .map(([key, title]) => {
+    const separatorIndex = key.indexOf(":");
+    const type = key.slice(0, separatorIndex) as LandingMainHeroType;
+    const id = key.slice(separatorIndex + 1);
+    return {
+      id: key,
+      title,
+      type,
+      typeLabel: MAIN_HERO_TYPE_LABELS[type],
+      entityId: id,
+      ...(type === "article" ? mainHeroArticleMeta.get(key) : {}),
+    };
+  })
+  .sort((left, right) => {
+    const typeComparison = left.typeLabel.localeCompare(right.typeLabel, "ru-RU");
+    if (typeComparison !== 0) {
+      return typeComparison;
+    }
+
+    if (left.type === "article" && right.type === "article") {
+      const bucketComparison = (left.articleBucketLabel || "").localeCompare(
+        right.articleBucketLabel || "",
+        "en",
+      );
+      if (bucketComparison !== 0) {
+        return bucketComparison;
+      }
+    }
+
+    return left.title.localeCompare(right.title, "ru-RU");
+  });
+
 const eventOptions = Array.from(contentTitleMaps.events.entries()).map(([id, title]) => ({
   id,
   title,
@@ -310,6 +382,17 @@ const initialCultureInterviewState = (() => {
   }
   return { mode: "manual" as const, id: landingPlacements.cultureInterviewBlock.id };
 })();
+
+const initialMainHeroState = (() => {
+  if (!landingPlacements.mainHero) {
+    return { mode: "empty" as const, key: "" };
+  }
+
+  return {
+    mode: "manual" as const,
+    key: `${landingPlacements.mainHero.type}:${landingPlacements.mainHero.id}`,
+  };
+})();
 ---
 
 <DashboardLayout title="Редактор лендинга" active="landing-editor">
@@ -317,6 +400,8 @@ const initialCultureInterviewState = (() => {
     class="grid gap-6"
     x-data={`$lazy('landingEditor', ${JSON.stringify({
       apiBaseUrl: PUBLIC_API_BASE_URL,
+      mainHeroOptions,
+      initialMainHero: initialMainHeroState,
       newsOptions,
       initialNewsRail: initialNewsRailState,
       eventOptions,
@@ -364,6 +449,119 @@ const initialCultureInterviewState = (() => {
           </article>
         ))
       }
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Main Hero Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Главный материал в блоке «Главное» на landing.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="main-hero-mode" value="empty" x-model="mainHeroMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="main-hero-mode" value="manual" x-model="mainHeroMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="mainHeroMode === 'manual'" class="grid gap-2 max-w-xl">
+          <div class="grid gap-2">
+            <p class="text-sm font-medium">Шаг 1. Выбери тип материала</p>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <template x-for="typeOption in getMainHeroTypeOptions()" :key="typeOption.value">
+                <button
+                  type="button"
+                  class="rounded-lg border px-4 py-3 text-left text-sm transition cursor-pointer"
+                  :class="selectedMainHeroType === typeOption.value
+                    ? 'border-primary bg-primary/10 text-base-content'
+                    : 'border-base-300 bg-base-100 text-base-content hover:bg-base-200'"
+                  @click="selectMainHeroType(typeOption.value)"
+                >
+                  <span class="font-medium" x-text="typeOption.label"></span>
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <div x-show="selectedMainHeroType === 'article'" class="grid gap-2">
+            <p class="text-sm font-medium">Шаг 2. Выбери раздел статьи</p>
+            <p class="text-sm text-base-content/70">
+              Статьи разделены отдельно на Culture, Paris и Tips.
+            </p>
+            <div class="grid gap-3 sm:grid-cols-3">
+              <template x-for="bucketOption in getMainHeroArticleBucketOptions()" :key="bucketOption.value">
+                <button
+                  type="button"
+                  class="rounded-xl border px-4 py-3 text-left transition cursor-pointer"
+                  :class="selectedMainHeroArticleBucket === bucketOption.value
+                    ? 'border-primary bg-primary/10 text-base-content'
+                    : 'border-base-300 bg-base-100 text-base-content hover:bg-base-200'"
+                  @click="selectMainHeroArticleBucket(bucketOption.value)"
+                >
+                  <span class="block text-sm font-semibold" x-text="bucketOption.label"></span>
+                  <span
+                    class="mt-1 inline-flex rounded-full bg-base-200 px-2 py-1 text-xs text-base-content/70"
+                    x-text="`${bucketOption.count} materials`"
+                  ></span>
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <div class="grid gap-2">
+            <label for="main-hero-select" class="text-sm font-medium">
+              <span x-show="selectedMainHeroType !== 'article'">Шаг 2. Выбери материал</span>
+              <span x-show="selectedMainHeroType === 'article'">Шаг 3. Выбери материал</span>
+            </label>
+            <p x-show="!selectedMainHeroType" class="text-sm text-base-content/70">
+              Сначала выбери тип материала, чтобы показать подходящий список.
+            </p>
+            <p
+              x-show="selectedMainHeroType === 'article' && !selectedMainHeroArticleBucket"
+              class="text-sm text-base-content/70"
+            >
+              Сначала выбери раздел статьи, чтобы сузить список материалов.
+            </p>
+            <select
+              id="main-hero-select"
+              x-model="selectedMainHeroKey"
+              class="select select-bordered w-full"
+              :disabled="!selectedMainHeroType || (selectedMainHeroType === 'article' && !selectedMainHeroArticleBucket)"
+            >
+              <option value="">
+                — выбери материал —
+              </option>
+              <template x-for="item in getFilteredMainHeroOptions()" :key="item.id">
+                <option :value="item.id" x-text="item.title"></option>
+              </template>
+            </select>
+          </div>
+        </div>
+
+        <p x-show="mainHeroError" class="text-sm text-error" x-text="mainHeroError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveMainHero()"
+            :disabled="mainHeroSaving"
+          >
+            Сохранить main hero
+          </button>
+          <span x-show="mainHeroSaving" class="text-sm text-base-content/70">
+            Сохраняем...
+          </span>
+        </div>
+      </div>
     </div>
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">

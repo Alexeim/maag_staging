@@ -3,13 +3,28 @@ import type { UiStore } from "@/stores/uiStore";
 
 declare const Alpine: any;
 
+const ARTICLE_BUCKET_ORDER = ["culture", "paris", "tips"];
+
 interface ContentOption {
   id: string;
   title: string;
 }
 
+interface MainHeroOption extends ContentOption {
+  type: string;
+  typeLabel: string;
+  entityId: string;
+  articleBucket?: string;
+  articleBucketLabel?: string;
+}
+
 interface LandingEditorInitialState {
   apiBaseUrl: string;
+  mainHeroOptions: MainHeroOption[];
+  initialMainHero: {
+    mode: "empty" | "manual";
+    key: string;
+  };
   newsOptions: ContentOption[];
   initialNewsRail: {
     mode: "empty" | "auto-latest" | "manual";
@@ -28,7 +43,33 @@ interface LandingEditorInitialState {
   };
 }
 
+const getMainHeroTypeFromKey = (key: string) => {
+  const separatorIndex = key.indexOf(":");
+  if (separatorIndex <= 0) {
+    return "";
+  }
+
+  return key.slice(0, separatorIndex);
+};
+
+const getMainHeroOptionByKey = (
+  key: string,
+  options: MainHeroOption[],
+) => options.find((item) => item.id === key) ?? null;
+
 export default (initialState: LandingEditorInitialState) => ({
+  mainHeroOptions: initialState.mainHeroOptions ?? [],
+  mainHeroMode: initialState.initialMainHero?.mode ?? "empty",
+  selectedMainHeroType: getMainHeroTypeFromKey(initialState.initialMainHero?.key ?? ""),
+  selectedMainHeroArticleBucket:
+    getMainHeroOptionByKey(
+      initialState.initialMainHero?.key ?? "",
+      initialState.mainHeroOptions ?? [],
+    )?.articleBucket ?? "",
+  selectedMainHeroKey: initialState.initialMainHero?.key ?? "",
+  mainHeroSaving: false,
+  mainHeroError: "",
+
   newsOptions: initialState.newsOptions ?? [],
   newsRailMode: initialState.initialNewsRail?.mode ?? "auto-latest",
   newsRailLimit: initialState.initialNewsRail?.limit ?? 4,
@@ -61,6 +102,107 @@ export default (initialState: LandingEditorInitialState) => ({
     }
   },
 
+  getMainHeroTypeOptions() {
+    const seenTypes = new Set<string>();
+
+    return this.mainHeroOptions
+      .filter((item: MainHeroOption) => {
+        if (seenTypes.has(item.type)) {
+          return false;
+        }
+
+        seenTypes.add(item.type);
+        return true;
+      })
+      .map((item: MainHeroOption) => ({
+        value: item.type,
+        label: item.typeLabel,
+      }));
+  },
+
+  getFilteredMainHeroOptions() {
+    if (!this.selectedMainHeroType) {
+      return [];
+    }
+
+    return this.mainHeroOptions.filter((item: MainHeroOption) => {
+      if (item.type !== this.selectedMainHeroType) {
+        return false;
+      }
+
+      if (this.selectedMainHeroType !== "article") {
+        return true;
+      }
+
+      if (!this.selectedMainHeroArticleBucket) {
+        return false;
+      }
+
+      return item.articleBucket === this.selectedMainHeroArticleBucket;
+    });
+  },
+
+  selectMainHeroType(type: string) {
+    this.selectedMainHeroType = type;
+    this.mainHeroError = "";
+    this.selectedMainHeroArticleBucket = "";
+
+    const selectedItemStillAvailable = this.getFilteredMainHeroOptions().some(
+      (item: MainHeroOption) => item.id === this.selectedMainHeroKey,
+    );
+
+    if (!selectedItemStillAvailable) {
+      this.selectedMainHeroKey = "";
+    }
+  },
+
+  getMainHeroArticleBucketOptions() {
+    if (this.selectedMainHeroType !== "article") {
+      return [];
+    }
+
+    const bucketMap = new Map<
+      string,
+      { value: string; label: string; count: number }
+    >();
+
+    this.mainHeroOptions.forEach((item: MainHeroOption) => {
+      if (item.type !== "article" || !item.articleBucket || !item.articleBucketLabel) {
+        return;
+      }
+
+      const existing = bucketMap.get(item.articleBucket);
+      if (existing) {
+        existing.count += 1;
+        return;
+      }
+
+      bucketMap.set(item.articleBucket, {
+        value: item.articleBucket,
+        label: item.articleBucketLabel,
+        count: 1,
+      });
+    });
+
+    return Array.from(bucketMap.values()).sort(
+      (left, right) =>
+        ARTICLE_BUCKET_ORDER.indexOf(left.value) - ARTICLE_BUCKET_ORDER.indexOf(right.value),
+    );
+  },
+
+  selectMainHeroArticleBucket(bucket: string) {
+    this.selectedMainHeroArticleBucket = bucket;
+    this.mainHeroError = "";
+
+    const selectedItemStillAvailable = this.getFilteredMainHeroOptions().some(
+      (item: MainHeroOption) => item.id === this.selectedMainHeroKey,
+    );
+
+    if (!selectedItemStillAvailable) {
+      this.selectedMainHeroKey = "";
+    }
+  },
+
   isManualNewsSelected(id: string) {
     return this.selectedNewsIds.includes(id);
   },
@@ -74,6 +216,53 @@ export default (initialState: LandingEditorInitialState) => ({
     }
 
     this.selectedNewsIds = [...this.selectedNewsIds, id];
+  },
+
+  async saveMainHero() {
+    this.mainHeroSaving = true;
+    this.mainHeroError = "";
+
+    try {
+      let mainHero: unknown = null;
+
+      if (this.mainHeroMode === "manual") {
+        if (!this.selectedMainHeroKey) {
+          throw new Error("Для ручного режима выбери материал.");
+        }
+
+        const separatorIndex = this.selectedMainHeroKey.indexOf(":");
+        if (separatorIndex <= 0) {
+          throw new Error("Не удалось распознать выбранный материал.");
+        }
+
+        const type = this.selectedMainHeroKey.slice(0, separatorIndex);
+        const id = this.selectedMainHeroKey.slice(separatorIndex + 1);
+
+        if (!id) {
+          throw new Error("Не удалось распознать идентификатор материала.");
+        }
+
+        mainHero = {
+          mode: "manual",
+          type,
+          id,
+        };
+      }
+
+      await editorialPlacementsApi.updateLanding({ mainHero });
+
+      this.notify("Главный материал landing обновлён.");
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to save main hero", error);
+      this.mainHeroError =
+        error instanceof Error
+          ? error.message
+          : "Не удалось сохранить главный материал landing.";
+      this.notify(this.mainHeroError, "error");
+    } finally {
+      this.mainHeroSaving = false;
+    }
   },
 
   async saveNewsRail() {
