@@ -171,7 +171,7 @@ const resolveTagLabel = (rawTag: unknown, fallback: string): string => {
   if (/^district[-\s_]?\d{1,2}$/i.test(normalized)) {
     return fallback;
   }
-  return TAG_LABEL_ALIASES[normalized] ?? trimmed;
+  return TAG_LABEL_ALIASES[normalized] ?? fallback;
 };
 
 const extractTextFromContent = (blocks: unknown): string => {
