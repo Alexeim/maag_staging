@@ -9,6 +9,7 @@ import ideaIcon from "@/assets/icons/new/idea.svg?raw";
 import likeIcon from "@/assets/icons/new/like.svg?raw";
 import dislikeIcon from "@/assets/icons/new/dislike.svg?raw";
 import QuoteIcon from "@/assets/icons/quote.svg";
+import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
 
@@ -389,6 +390,8 @@ const {
   </section>
 
   <LandingPlacementPanel allowMainHero={true} />
+
+  <ContentCollectionsEditor />
 
   <RelatedContentEditor />
 

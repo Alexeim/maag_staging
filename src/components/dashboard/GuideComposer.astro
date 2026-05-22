@@ -11,6 +11,7 @@ import dislikeIcon from "@/assets/icons/new/dislike.svg?raw";
 import QuoteIcon from "@/assets/icons/quote.svg";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
+import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
 
 interface Props {
   heading: string;
@@ -1070,6 +1071,7 @@ const {
 
   <LandingPlacementPanel allowMainHero={true} />
 
+  <ContentCollectionsEditor />
   <RelatedContentEditor />
 
   <div

@@ -1,0 +1,127 @@
+---
+import Button from "@/components/common/Button.astro";
+
+interface Props {
+  heading?: string;
+  className?: string;
+}
+
+const {
+  heading = "Content Collection",
+  className = "mt-8 mb-8",
+} = Astro.props as Props;
+---
+
+<section class={className}>
+  <div class="rounded-2xl border border-base-300 bg-base-100 p-5 lg:p-6">
+    <div class="flex flex-col gap-2">
+      <h2 class="m-0 text-xl font-semibold text-base-content">{heading}</h2>
+      <p class="m-0 text-sm text-base-content/70">
+        Один материал может быть привязан только к одной collection. Эта
+        collection будет использоваться как двусторонняя связка контента.
+      </p>
+      <p
+        x-show="contentCollectionsLoading"
+        class="m-0 text-sm text-base-content/60"
+      >
+        Загружаем content collections...
+      </p>
+    </div>
+
+    <div class="mt-5 rounded-xl border border-base-300 bg-white p-4">
+      <div class="mb-2 flex items-center justify-between gap-3">
+        <h3 class="m-0 text-sm font-semibold uppercase tracking-[0.18em] text-base-content/65">
+          Текущая collection
+        </h3>
+        <Button
+          x-show="contentCollection"
+          variant="error"
+          size="sm"
+          type="button"
+          @click="removeContentCollection()"
+        >
+          Снять
+        </Button>
+      </div>
+
+      <template x-if="contentCollection">
+        <div class="flex items-center justify-between gap-3 rounded-lg border border-base-300 bg-base-100 px-3 py-3">
+          <div class="min-w-0">
+            <p class="m-0 truncate text-sm font-medium text-base-content" x-text="contentCollection.title"></p>
+            <p class="m-0 truncate text-xs text-base-content/60" x-text="contentCollection.id"></p>
+          </div>
+        </div>
+      </template>
+
+      <template x-if="!contentCollection">
+        <p class="m-0 text-sm text-base-content/70">
+          Пока никакая collection не выбрана.
+        </p>
+      </template>
+    </div>
+
+    <div class="mt-5 flex flex-wrap gap-2">
+      <button
+        type="button"
+        @click="useNewContentCollection = false"
+        class="px-3 py-2 border text-sm cursor-pointer"
+        :class="!useNewContentCollection ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+      >
+        Выбрать существующую
+      </button>
+      <button
+        type="button"
+        @click="useNewContentCollection = true"
+        class="px-3 py-2 border text-sm cursor-pointer"
+        :class="useNewContentCollection ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+      >
+        Создать новую
+      </button>
+    </div>
+
+    <div x-show="!useNewContentCollection" class="mt-5">
+      <div>
+        <label class="mb-1 block text-sm font-medium text-base-content">
+          Существующая collection
+        </label>
+        <select
+          x-model="selectedContentCollectionId"
+          @change="assignSelectedContentCollection()"
+          :disabled="contentCollectionsLoading"
+          class="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-sm text-base-content focus:border-primary focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <option value="">Выберите collection...</option>
+          <template x-for="collection in availableContentCollections" :key="collection.id">
+            <option :value="collection.id" x-text="collection.title"></option>
+          </template>
+        </select>
+      </div>
+    </div>
+
+    <div x-show="useNewContentCollection" class="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+      <div>
+        <label class="mb-1 block text-sm font-medium text-base-content">
+          Название новой collection
+        </label>
+        <input
+          type="text"
+          x-model="newContentCollectionTitle"
+          class="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-sm text-base-content focus:border-primary focus:ring-primary"
+          placeholder="Например: Summer Paris Reads"
+        />
+      </div>
+
+      <div class="flex justify-end">
+        <Button
+          variant="primary"
+          type="button"
+          @click="createAndAssignContentCollection()"
+          :disabled="!newContentCollectionTitle.trim()"
+          :class="{ 'opacity-50 cursor-not-allowed': !newContentCollectionTitle.trim() }"
+        >
+          Создать и назначить
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>

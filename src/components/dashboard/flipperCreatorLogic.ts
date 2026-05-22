@@ -14,6 +14,8 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
+import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
+import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 
 const storage = getStorage(app);
 
@@ -119,6 +121,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       binaryForGuide: false,
       carouselContent: [{ imageUrl: "", caption: "" }],
       relatedContent: createEmptyRelatedContent(),
+      contentCollectionId: null as string | null,
     },
     uploading: false,
     uploadProgress: 0,
@@ -129,6 +132,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
     selectedRelatedContentType: "article",
     selectedRelatedContentId: "",
+    ...createContentCollectionEditorState("flipper"),
     flipperId,
     isEditMode,
     onSaveRedirect,
@@ -167,6 +171,8 @@ export default function flipperCreatorLogic(initialState = {}) {
       this.ensureSelectedAuthorPresent();
       this.fetchContentLists();
       this.loadAuthors();
+      this.syncCurrentContentCollection();
+      this.loadContentCollections();
       this.loadLandingPlacements();
     },
 
@@ -445,6 +451,9 @@ export default function flipperCreatorLogic(initialState = {}) {
             this.flipper.relatedContent,
             "flipper",
             this.flipperId,
+          ),
+          contentCollectionId: normalizeContentCollectionId(
+            this.flipper.contentCollectionId,
           ),
         };
 

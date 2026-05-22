@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
 import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
+import {
+  normalizeContentCollectionId,
+  syncSingleContentCollectionMembershipInTransaction,
+} from '../utils/contentCollections';
 
 export interface EventItem {
   id?: string;
@@ -23,10 +27,12 @@ export interface EventItem {
   updatedAt?: Date;
   isMainEvent?: boolean;
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
 }
 
 const db = getDb();
 const eventsCollection = db.collection('events');
+const contentCollectionsCollection = db.collection('contentCollections');
 
 const normalizeStringArray = (input: unknown): string[] => {
   if (!Array.isArray(input)) {
@@ -91,6 +97,7 @@ export const createEvent = async (req: Request, res: Response) => {
       startTime = null,
       endTime = null,
       relatedContent,
+      contentCollectionId,
     } = req.body;
     const isMainEvent = Boolean(req.body?.isMainEvent);
 
@@ -129,7 +136,8 @@ export const createEvent = async (req: Request, res: Response) => {
     }
 
     const normalizedTags = normalizeStringArray(tags);
-
+    const now = new Date();
+    const docRef = eventsCollection.doc();
     const newEvent: Omit<EventItem, 'id'> = {
       title,
       authorId,
@@ -146,11 +154,24 @@ export const createEvent = async (req: Request, res: Response) => {
       timeMode: normalizedTimeMode,
       startTime: normalizedTimeMode === 'none' ? null : normalizedStartTime,
       endTime: normalizedTimeMode === 'range' ? normalizedEndTime : null,
-      createdAt: new Date(),
+      createdAt: now,
       isMainEvent,
       relatedContent: normalizeRelatedContent(relatedContent),
+      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
     };
-    const docRef = await eventsCollection.add(newEvent);
+
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: null,
+        nextCollectionId: newEvent.contentCollectionId ?? null,
+        contentType: 'event',
+        materialId: docRef.id,
+        now,
+      });
+      transaction.set(docRef, newEvent);
+    });
 
     res.status(201).json({ id: docRef.id, ...newEvent });
   } catch (error) {
@@ -236,6 +257,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       endTime = null,
       isMainEvent = false,
       relatedContent,
+      contentCollectionId,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -274,6 +296,10 @@ export const updateEvent = async (req: Request, res: Response) => {
 
     const normalizedTags = normalizeStringArray(tags);
     const mainEventFlag = Boolean(isMainEvent);
+    const previousContentCollectionId = normalizeContentCollectionId(
+      eventDoc.data()?.contentCollectionId,
+    );
+    const now = new Date();
 
     const payload: Partial<EventItem> = {
       title,
@@ -291,11 +317,24 @@ export const updateEvent = async (req: Request, res: Response) => {
       timeMode: normalizedTimeMode,
       startTime: normalizedTimeMode === 'none' ? null : normalizedStartTime,
       endTime: normalizedTimeMode === 'range' ? normalizedEndTime : null,
-      updatedAt: new Date(),
+      updatedAt: now,
       isMainEvent: mainEventFlag,
       relatedContent: normalizeRelatedContent(relatedContent),
+      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
     };
-    await eventsCollection.doc(id).update(payload);
+
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: payload.contentCollectionId ?? null,
+        contentType: 'event',
+        materialId: id,
+        now,
+      });
+      transaction.update(eventsCollection.doc(id), payload);
+    });
 
     res.status(200).json({ id, ...eventDoc.data(), ...payload });
   } catch (error) {
@@ -315,6 +354,9 @@ export const deleteEvent = async (req: Request, res: Response) => {
 
     const eventData = eventDoc.data() as EventItem;
     const imageUrlsToDelete: string[] = [];
+    const previousContentCollectionId = normalizeContentCollectionId(
+      eventData.contentCollectionId,
+    );
 
     if (eventData.imageUrl) {
       imageUrlsToDelete.push(eventData.imageUrl);
@@ -333,7 +375,18 @@ export const deleteEvent = async (req: Request, res: Response) => {
       await Promise.all(imageUrlsToDelete.map(url => deleteFileFromStorage(url)));
     }
 
-    await eventsCollection.doc(id).delete();
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: null,
+        contentType: 'event',
+        materialId: id,
+        now: new Date(),
+      });
+      transaction.delete(eventsCollection.doc(id));
+    });
 
     res.status(204).send();
   } catch (error) {

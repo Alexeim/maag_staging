@@ -5,18 +5,18 @@ import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
 import ArticleImage from "@/components/article/ArticleImage.astro";
 import ArticleBody from "@/components/article/ArticleBody.astro";
-import RelatedContentMarquee from "@/components/article/RelatedContentMarquee.astro";
+import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import {
   ApiError,
   newsApi,
   articlesApi,
-  eventsApi,
-  flippersApi,
-  guidesApi,
-  interviewsApi,
-  visualStoriesApi,
 } from "@/lib/api/api";
+import {
+  buildContentCollectionItems,
+  fetchPublicContentPools,
+  toDate,
+} from "@/lib/utils/contentCollectionMarquee";
 
 const { id } = Astro.params;
 
@@ -60,104 +60,30 @@ const displayArticle = {
 
 const transitionAliases = [`landing-body-main-article-image-${id}`];
 
-const normalizeTags = (value: unknown): string[] => {
-  if (!Array.isArray(value)) return [];
-  return value.map((tag) => (typeof tag === "string" ? tag.trim() : "")).filter(Boolean);
-};
-
-const toDate = (value: unknown): Date | null => {
-  if (!value) return null;
-  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
-  if (typeof value === "string" || typeof value === "number") {
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  }
-  if (typeof value === "object") {
-    const maybeSeconds =
-      (value as { seconds?: number; _seconds?: number }).seconds ??
-      (value as { seconds?: number; _seconds?: number })._seconds;
-    if (typeof maybeSeconds === "number") {
-      const parsed = new Date(maybeSeconds * 1000);
-      return Number.isNaN(parsed.getTime()) ? null : parsed;
-    }
-    if (typeof (value as { toDate?: () => Date }).toDate === "function") {
-      const parsed = (value as { toDate: () => Date }).toDate();
-      return parsed instanceof Date && !Number.isNaN(parsed.getTime()) ? parsed : null;
-    }
-  }
-  return null;
-};
-
-const toContentHref = (item: any) => {
-  if (item?.contentType === "event") return `/events/${item.id}`;
-  if (item?.contentType === "interview") return `/interviews/${item.id}`;
-  if (item?.contentType === "flipper") return `/flippers/${item.id}`;
-  if (item?.contentType === "guide") return `/guide/${item.id}`;
-  if (item?.contentType === "visual-story") return `/visual-story/${item.id}`;
-  if (item?.contentType === "article" && item?.articleType === "tips") return `/tips/${item.id}`;
-  return `/${item?.isNews ? "news" : "article"}/${item.id}`;
-};
-
-let relatedContentItems: any[] = [];
+let collectionContentItems: any[] = [];
 let sameCategoryItems: any[] = [];
 
 if (!error && articleData) {
   try {
-    const [allArticlesRaw, allNewsRaw, allInterviewsRaw, allEventsRaw, allFlippersRaw, allGuidesRaw, allVisualStoriesRaw] = await Promise.all([
-      articlesApi.list(),
-      newsApi.list(),
-      interviewsApi.list(),
-      eventsApi.list(),
-      flippersApi.list(),
-      guidesApi.list(),
-      visualStoriesApi.list(),
-    ]);
-
-    const allArticles = allArticlesRaw.map((a) => ({ ...a, contentType: "article", tags: normalizeTags(a?.tags) }));
-    const allNews = allNewsRaw.map((a) => ({ ...a, isNews: true, contentType: "news", tags: normalizeTags(a?.tags) }));
-    const allInterviews = allInterviewsRaw.map((a) => ({ ...a, contentType: "interview", tags: normalizeTags(a?.tags) }));
-    const allEvents = allEventsRaw.map((a) => ({ ...a, contentType: "event", tags: normalizeTags(a?.tags) }));
-    const allFlippers = allFlippersRaw.map((a) => ({ ...a, contentType: "flipper", imageUrl: a?.carouselContent?.[0]?.imageUrl || null, tags: normalizeTags(a?.tags) }));
-    const allGuides = allGuidesRaw.map((a) => ({ ...a, contentType: "guide", tags: normalizeTags(a?.tags) }));
-    const allVisualStories = allVisualStoriesRaw.map((a) => ({ ...a, contentType: "visual-story", imageUrl: a?.imageUrl || a?.slides?.[0]?.imageUrl || null, tags: normalizeTags(a?.tags) }));
-
-    const articleMap = new Map(allArticles.map((i) => [i.id, i]));
-    const newsMap = new Map(allNews.map((i) => [i.id, i]));
-    const interviewMap = new Map(allInterviews.map((i) => [i.id, i]));
-    const eventMap = new Map(allEvents.map((i) => [i.id, i]));
-    const flipperMap = new Map(allFlippers.map((i) => [i.id, i]));
-    const guideMap = new Map(allGuides.map((i) => [i.id, i]));
-    const visualStoryMap = new Map(allVisualStories.map((i) => [i.id, i]));
-
-    const relatedContent = articleData?.relatedContent ?? {};
-    const relatedSequence = [
-      ...((Array.isArray(relatedContent.article) ? relatedContent.article : []).map((eid: string) => articleMap.get(eid))),
-      ...((Array.isArray(relatedContent.event) ? relatedContent.event : []).map((eid: string) => eventMap.get(eid))),
-      ...((Array.isArray(relatedContent.interview) ? relatedContent.interview : []).map((eid: string) => interviewMap.get(eid))),
-      ...((Array.isArray(relatedContent.guide) ? relatedContent.guide : []).map((eid: string) => guideMap.get(eid))),
-      ...((Array.isArray(relatedContent.news) ? relatedContent.news : []).map((eid: string) => newsMap.get(eid))),
-      ...((Array.isArray(relatedContent.flipper) ? relatedContent.flipper : []).map((eid: string) => flipperMap.get(eid))),
-      ...((Array.isArray(relatedContent.visualStory) ? relatedContent.visualStory : []).map((eid: string) => visualStoryMap.get(eid))),
-    ].filter((item): item is NonNullable<typeof item> => Boolean(item)).map((item) => ({ ...item, href: toContentHref(item) }));
-
-    const dedupedKeys = new Set<string>();
-    relatedContentItems = relatedSequence.filter((item) => {
-      const key = `${item.contentType}:${item.id}`;
-      if (dedupedKeys.has(key)) return false;
-      dedupedKeys.add(key);
-      return true;
+    const pools = await fetchPublicContentPools();
+    const allNews = pools.allNews;
+    collectionContentItems = await buildContentCollectionItems({
+      contentCollectionId: articleData?.contentCollectionId,
+      currentContentType: "news",
+      currentId: id,
+      pools,
     });
 
     const currentCategory = rawCategory?.toLowerCase() ?? null;
-    const relatedNewsIds = new Set(relatedContentItems.filter((i) => i.contentType === "news").map((i) => i.id));
+    const relatedNewsIds = new Set(collectionContentItems.filter((i) => i.contentType === "news").map((i) => i.id));
     sameCategoryItems = allNews
       .filter((i) => i.id !== id && !relatedNewsIds.has(i.id))
       .filter((i) => !currentCategory || i?.category?.toLowerCase() === currentCategory)
       .sort((a, b) => (toDate(b?.createdAt)?.getTime() ?? 0) - (toDate(a?.createdAt)?.getTime() ?? 0))
       .slice(0, 12)
-      .map((item) => ({ ...item, href: toContentHref(item) }));
+      .map((item) => ({ ...item }));
   } catch (e) {
-    console.error("Failed to fetch related content for news page:", e);
+    console.error("Failed to fetch collection content for news page:", e);
   }
 }
 ---
@@ -207,8 +133,8 @@ if (!error && articleData) {
           <!-- Article Content -->
           <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
             <ArticleBody contentBlocks={displayArticle.contentBlocks} />
-            <RelatedContentMarquee
-              relatedItems={relatedContentItems}
+            <ContentCollectionMarquee
+              collectionItems={collectionContentItems}
               categoryItems={sameCategoryItems}
               fallbackImageSrc={picture1.src}
             />

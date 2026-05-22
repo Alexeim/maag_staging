@@ -26,6 +26,8 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
+import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
+import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 
 const storage = getStorage(app);
 
@@ -233,6 +235,7 @@ export default function guideCreatorLogic(initialState = {}) {
       isHotContent: false,
       isMainInCategory: false,
       relatedContent: createEmptyRelatedContent(),
+      contentCollectionId: null as string | null,
     },
 
     contentListsLoading: false,
@@ -240,6 +243,7 @@ export default function guideCreatorLogic(initialState = {}) {
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
     selectedRelatedContentType: "article",
     selectedRelatedContentId: "",
+    ...createContentCollectionEditorState("article"),
     authorsLoading: false,
     authors: [],
     selectedAuthorId: "",
@@ -685,6 +689,8 @@ export default function guideCreatorLogic(initialState = {}) {
 
       this.fetchContentLists();
       this.loadAuthors();
+      this.syncCurrentContentCollection();
+      this.loadContentCollections();
       this.loadLandingPlacements();
     },
 
@@ -1109,6 +1115,9 @@ export default function guideCreatorLogic(initialState = {}) {
             this.article.relatedContent,
             "guide",
             this.articleId,
+          ),
+          contentCollectionId: normalizeContentCollectionId(
+            this.article.contentCollectionId,
           ),
         };
 

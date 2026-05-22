@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
 import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
+import {
+  normalizeContentCollectionId,
+  syncSingleContentCollectionMembershipInTransaction,
+} from '../utils/contentCollections';
 
 export interface VisualStory {
   id?: string;
@@ -14,11 +18,13 @@ export interface VisualStory {
   tags?: string[];
   isHotContent?: boolean;
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
   createdAt: Date;
 }
 
 const db = getDb();
 const collection = db.collection('visual-stories');
+const contentCollectionsCollection = db.collection('contentCollections');
 
 export const createVisualStory = async (req: Request, res: Response) => {
   try {
@@ -33,6 +39,7 @@ export const createVisualStory = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       relatedContent,
+      contentCollectionId,
     } = req.body;
 
     if (!title || !authorId) {
@@ -58,10 +65,27 @@ export const createVisualStory = async (req: Request, res: Response) => {
       tags: Array.isArray(tags) ? tags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
       isHotContent: Boolean(isHotContent),
       relatedContent: normalizeRelatedContent(relatedContent),
+      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       createdAt: new Date(),
     };
 
-    const docRef = await collection.add(newStory);
+    const now = new Date();
+    const docRef = collection.doc();
+    newStory.createdAt = now;
+
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: null,
+        nextCollectionId: newStory.contentCollectionId ?? null,
+        contentType: 'visualStory',
+        materialId: docRef.id,
+        now,
+      });
+      transaction.set(docRef, newStory);
+    });
+
     res.status(201).json({ id: docRef.id, ...newStory });
   } catch (error) {
     console.error('Error creating visual story:', error);
@@ -130,6 +154,7 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       relatedContent,
+      contentCollectionId,
     } = req.body;
 
     if (!title || !authorId) {
@@ -153,10 +178,28 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       tags: Array.isArray(tags) ? tags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
       isHotContent: Boolean(isHotContent),
       relatedContent: normalizeRelatedContent(relatedContent),
+      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       updatedAt: new Date(),
     };
 
-    await collection.doc(id).update(updated);
+    const previousContentCollectionId = normalizeContentCollectionId(
+      doc.data()?.contentCollectionId,
+    );
+    const now = updated.updatedAt;
+
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: updated.contentCollectionId ?? null,
+        contentType: 'visualStory',
+        materialId: id,
+        now,
+      });
+      transaction.update(collection.doc(id), updated);
+    });
+
     res.status(200).json({ id, ...doc.data(), ...updated });
   } catch (error) {
     console.error('Error updating visual story:', error);
@@ -174,6 +217,9 @@ export const deleteVisualStory = async (req: Request, res: Response) => {
     }
 
     const storyData = doc.data() as VisualStory;
+    const previousContentCollectionId = normalizeContentCollectionId(
+      storyData.contentCollectionId,
+    );
     const imageUrls: string[] = Array.isArray(storyData.slides)
       ? storyData.slides.map(s => s.imageUrl).filter(Boolean)
       : [];
@@ -182,7 +228,19 @@ export const deleteVisualStory = async (req: Request, res: Response) => {
       await Promise.all(imageUrls.map(url => deleteFileFromStorage(url)));
     }
 
-    await collection.doc(id).delete();
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: null,
+        contentType: 'visualStory',
+        materialId: id,
+        now: new Date(),
+      });
+      transaction.delete(collection.doc(id));
+    });
+
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting visual story:', error);

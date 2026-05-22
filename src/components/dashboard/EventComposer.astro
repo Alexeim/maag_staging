@@ -5,6 +5,7 @@ import { CloudUpload } from "lucide-astro";
 import QuoteIcon from "@/assets/icons/quote.svg";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
+import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
 
 interface Props {
   heading: string;
@@ -941,6 +942,7 @@ const {
     </div>
   </section>
 
+  <ContentCollectionsEditor />
   <RelatedContentEditor />
 
   <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

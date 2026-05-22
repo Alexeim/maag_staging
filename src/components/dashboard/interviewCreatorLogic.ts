@@ -22,6 +22,8 @@ import {
   sortAndNormalizeContentBlocks,
   withBlockMeta,
 } from "@/lib/utils/contentBlocks";
+import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
+import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 import { app } from "../../lib/firebase/client";
 import {
   getStorage,
@@ -124,6 +126,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       contentBlocks: [],
       tags: [],
       relatedContent: createEmptyRelatedContent(),
+      contentCollectionId: null as string | null,
     },
 
     showBlockOptions: false,
@@ -148,6 +151,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
     selectedRelatedContentType: "article",
     selectedRelatedContentId: "",
+    ...createContentCollectionEditorState("interview"),
     authorsLoading: false,
     authors: [],
     selectedAuthorId: "",
@@ -404,6 +408,8 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.ensureSelectedAuthorPresent();
       this.fetchContentLists();
       this.loadAuthors();
+      this.syncCurrentContentCollection();
+      this.loadContentCollections();
       this.loadLandingPlacements();
     },
 
@@ -751,12 +757,6 @@ export default function interviewCreatorLogic(initialState = {}) {
         this.isSaving = false;
         return;
       }
-      if (this.interview.tags.length === 0) {
-        window.Alpine.store("ui").showToast("Добавь хотя бы один тег.", "error");
-        this.isSaving = false;
-        return;
-      }
-
       try {
         const resolvedAuthorId = await this.resolveAuthorId();
         const payload = {
@@ -775,6 +775,9 @@ export default function interviewCreatorLogic(initialState = {}) {
             this.interview.relatedContent,
             "interview",
             this.interviewId,
+          ),
+          contentCollectionId: normalizeContentCollectionId(
+            this.interview.contentCollectionId,
           ),
         };
 

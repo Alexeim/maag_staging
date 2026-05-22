@@ -2,6 +2,7 @@
 import Button from "@/components/common/Button.astro";
 import { CloudUpload } from "lucide-astro";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
+import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
 
 interface Props {
   heading: string;
@@ -432,6 +433,7 @@ const {
   </section>
 
   <!-- Actions -->
+  <ContentCollectionsEditor />
   <RelatedContentEditor />
 
   <div

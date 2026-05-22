@@ -18,6 +18,8 @@ import {
   sortAndNormalizeContentBlocks,
   withBlockMeta,
 } from "@/lib/utils/contentBlocks";
+import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
+import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 
 const storage = getStorage(app);
 
@@ -114,6 +116,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       isHotContent: false,
       isMainInCategory: false,
       relatedContent: createEmptyRelatedContent(),
+      contentCollectionId: null as string | null,
     },
 
     showBlockOptions: false,
@@ -136,6 +139,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
     selectedRelatedContentType: "article",
     selectedRelatedContentId: "",
+    ...createContentCollectionEditorState("article"),
 
     categoryTags,
     articleId,
@@ -338,6 +342,8 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       this.ensureSelectedAuthorPresent();
       this.fetchContentLists();
       this.loadAuthors();
+      this.syncCurrentContentCollection();
+      this.loadContentCollections();
     },
 
     // Title editing
@@ -572,6 +578,9 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
             this.article.relatedContent,
             "news",
             this.articleId,
+          ),
+          contentCollectionId: normalizeContentCollectionId(
+            this.article.contentCollectionId,
           ),
         };
 

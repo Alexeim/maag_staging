@@ -1,6 +1,16 @@
-import { articlesApi, authorsApi } from "@/lib/api/api";
+import {
+  articlesApi,
+  authorsApi,
+  contentCollectionsApi,
+} from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
+import {
+  fetchContentCollections,
+  normalizeContentCollection,
+  normalizeContentCollectionId,
+  toContentCollectionOption,
+} from "@/lib/utils/contentCollections";
 import {
   RELATED_CONTENT_TYPE_OPTIONS,
   createEmptyRelatedContent,
@@ -237,6 +247,7 @@ export default function articleCreatorLogic(initialState = {}) {
     copy.imageCaption = copy.imageCaption ?? "";
     copy.cardLead = copy.cardLead ?? "";
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
+    copy.contentCollectionId = normalizeContentCollectionId(copy.contentCollectionId);
     return copy;
   };
 
@@ -290,6 +301,7 @@ export default function articleCreatorLogic(initialState = {}) {
       isHotContent: false,
       isMainInCategory: false,
       relatedContent: createEmptyRelatedContent(),
+      contentCollectionId: null as string | null,
     },
 
     // --- State for managing content lists for link blocks ---
@@ -298,6 +310,12 @@ export default function articleCreatorLogic(initialState = {}) {
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
     selectedRelatedContentType: "article",
     selectedRelatedContentId: "",
+    contentCollectionsLoading: false,
+    availableContentCollections: [] as Array<{ id: string; title: string }>,
+    contentCollection: null as { id: string; title: string } | null,
+    selectedContentCollectionId: "",
+    useNewContentCollection: false,
+    newContentCollectionTitle: "",
     authorsLoading: false,
     authors: [],
     selectedAuthorId: "",
@@ -558,6 +576,132 @@ export default function articleCreatorLogic(initialState = {}) {
       }
       return this.selectedAuthorId;
     },
+    syncCurrentContentCollection() {
+      const currentId = normalizeContentCollectionId(
+        this.article?.contentCollectionId,
+      );
+
+      if (!currentId) {
+        this.article.contentCollectionId = null;
+        this.contentCollection = null;
+        return;
+      }
+
+      const matchedCollection = this.availableContentCollections.find(
+        (collection) => collection.id === currentId,
+      );
+
+      this.article.contentCollectionId = currentId;
+      this.contentCollection = matchedCollection
+        ? { ...matchedCollection }
+        : { id: currentId, title: currentId };
+    },
+    async loadContentCollections() {
+      this.contentCollectionsLoading = true;
+      try {
+        const collections = await fetchContentCollections();
+        this.availableContentCollections = collections.map((collection) =>
+          toContentCollectionOption(collection),
+        );
+        this.syncCurrentContentCollection();
+      } catch (error) {
+        console.error("Failed to fetch content collections:", error);
+        window.Alpine?.store("ui")?.showToast?.(
+          "Не удалось загрузить content collections.",
+          "error",
+        );
+      } finally {
+        this.contentCollectionsLoading = false;
+      }
+    },
+    assignSelectedContentCollection() {
+      const collectionId = normalizeContentCollectionId(
+        this.selectedContentCollectionId,
+      );
+
+      if (!collectionId) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Сначала выбери collection из списка.",
+          "error",
+        );
+        return;
+      }
+
+      const selectedCollection = this.availableContentCollections.find(
+        (collection) => collection.id === collectionId,
+      );
+
+      if (!selectedCollection) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Выбранная collection не найдена.",
+          "error",
+        );
+        return;
+      }
+
+      this.article.contentCollectionId = selectedCollection.id;
+      this.contentCollection = { ...selectedCollection };
+      this.selectedContentCollectionId = "";
+      this.useNewContentCollection = false;
+      this.newContentCollectionTitle = "";
+    },
+    async createAndAssignContentCollection() {
+      const title = this.newContentCollectionTitle.trim();
+
+      if (!title) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Введи название новой collection.",
+          "error",
+        );
+        return;
+      }
+
+      try {
+        const createdCollection = await contentCollectionsApi.create({ title });
+        const normalizedCollection = normalizeContentCollection(createdCollection);
+
+        if (!normalizedCollection) {
+          throw new Error("Не удалось нормализовать созданную collection.");
+        }
+
+        const option = toContentCollectionOption(normalizedCollection);
+        const exists = this.availableContentCollections.some(
+          (collection) => collection.id === option.id,
+        );
+
+        this.availableContentCollections = exists
+          ? this.availableContentCollections.map((collection) =>
+              collection.id === option.id ? option : collection,
+            )
+          : [...this.availableContentCollections, option].sort((left, right) =>
+              left.title.localeCompare(right.title, "ru"),
+            );
+
+        this.article.contentCollectionId = option.id;
+        this.contentCollection = option;
+        this.selectedContentCollectionId = "";
+        this.useNewContentCollection = false;
+        this.newContentCollectionTitle = "";
+
+        window.Alpine?.store("ui")?.showToast?.(
+          "Новая collection создана и выбрана.",
+        );
+      } catch (error) {
+        console.error("Failed to create content collection:", error);
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Не удалось создать новую collection.";
+        window.Alpine?.store("ui")?.showToast?.(message, "error");
+      }
+    },
+    removeContentCollection() {
+      this.article.contentCollectionId = null;
+      this.contentCollection = null;
+      this.selectedContentCollectionId = "";
+      this.useNewContentCollection = false;
+      this.newContentCollectionTitle = "";
+    },
 
     async fetchContentLists() {
       this.contentListsLoading = true;
@@ -757,14 +901,19 @@ export default function articleCreatorLogic(initialState = {}) {
         "article",
         this.articleId,
       );
+      this.article.contentCollectionId = normalizeContentCollectionId(
+        this.article.contentCollectionId,
+      );
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? normalizeContentBlocks(this.article.contentBlocks)
         : [];
       this.selectedAuthorId =
         typeof this.article.authorId === "string" ? this.article.authorId : "";
       this.ensureSelectedAuthorPresent();
+      this.syncCurrentContentCollection();
 
       this.fetchContentLists();
+      this.loadContentCollections();
       this.loadAuthors();
       this.loadLandingPlacements();
     },
@@ -1211,6 +1360,9 @@ export default function articleCreatorLogic(initialState = {}) {
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,
           isMainInCategory: this.article.isMainInCategory,
+          contentCollectionId: normalizeContentCollectionId(
+            this.article.contentCollectionId,
+          ),
           relatedContent: sanitizeRelatedContent(
             this.article.relatedContent,
             "article",

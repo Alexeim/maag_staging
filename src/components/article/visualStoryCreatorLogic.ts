@@ -14,6 +14,8 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
+import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
+import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 
 const storage = getStorage(app);
 
@@ -101,6 +103,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       isHotContent: false,
       slides: [] as Array<{ imageUrl: string; text: string }>,
       relatedContent: createEmptyRelatedContent(),
+      contentCollectionId: null as string | null,
     },
 
     storyId,
@@ -137,6 +140,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
     selectedRelatedContentType: "article",
     selectedRelatedContentId: "",
+    ...createContentCollectionEditorState("story"),
 
     getCategoryLabel(value?: string) {
       if (!value) return "Category";
@@ -451,6 +455,8 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       );
       this.fetchContentLists();
       this.loadAuthors();
+      this.syncCurrentContentCollection();
+      this.loadContentCollections();
       this.loadLandingPlacements();
     },
 
@@ -506,6 +512,9 @@ export default function visualStoryCreatorLogic(initialState = {}) {
             this.story.relatedContent,
             "visualStory",
             this.storyId,
+          ),
+          contentCollectionId: normalizeContentCollectionId(
+            this.story.contentCollectionId,
           ),
         };
 

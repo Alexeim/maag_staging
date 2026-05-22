@@ -146,12 +146,35 @@ export interface ArticlePayload {
   isMainInCategory?: boolean;
   isNews?: boolean;
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
 }
 
 export interface ArticleResponse extends ArticlePayload {
   id: string;
   createdAt: string | Date;
+  updatedAt?: string | Date;
   author?: unknown;
+}
+
+export interface ContentCollectionContent {
+  article: string[];
+  event: string[];
+  flipper: string[];
+  guide: string[];
+  interview: string[];
+  news: string[];
+  visualStory: string[];
+}
+
+export interface ContentCollectionPayload {
+  title: string;
+}
+
+export interface ContentCollectionResponse extends ContentCollectionPayload {
+  id: string;
+  content: ContentCollectionContent;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface NewsPayload {
@@ -167,6 +190,7 @@ export interface NewsPayload {
   isHotContent?: boolean;
   isMainInCategory?: boolean;
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
 }
 
 export interface NewsResponse extends NewsPayload {
@@ -194,6 +218,7 @@ export interface EventPayload {
   endTime?: string | null;
   isMainEvent?: boolean;
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
 }
 
 export interface EventResponse extends EventPayload {
@@ -315,6 +340,7 @@ export interface FlipperPayload {
   isHotContent?: boolean;
   carouselContent: { imageUrl: string; caption: string }[];
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
 }
 
 export interface FlipperResponse extends FlipperPayload {
@@ -337,6 +363,7 @@ export interface InterviewPayload {
   tags?: string[];
   isHotContent?: boolean;
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
 }
 
 export interface InterviewResponse extends InterviewPayload {
@@ -363,6 +390,7 @@ export interface GuidePayload {
   isHotContent?: boolean;
   isMainInCategory?: boolean;
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
 }
 
 export interface GuideResponse extends GuidePayload {
@@ -583,6 +611,31 @@ export const authorsApi = {
   },
 };
 
+export const contentCollectionsApi = {
+  list(token?: string) {
+    return request<ContentCollectionResponse[]>("/api/content-collections", { token });
+  },
+  create(payload: ContentCollectionPayload, token?: string) {
+    return request<ContentCollectionResponse>("/api/content-collections", {
+      method: "POST",
+      body: payload,
+      token,
+    });
+  },
+  getById(id: string, token?: string) {
+    return request<ContentCollectionResponse>(`/api/content-collections/${id}`, {
+      token,
+    });
+  },
+  update(id: string, payload: ContentCollectionPayload, token?: string) {
+    return request<ContentCollectionResponse>(`/api/content-collections/${id}`, {
+      method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+};
+
 export interface VisualStorySlide {
   imageUrl: string;
   text: string;
@@ -602,6 +655,7 @@ export interface VisualStoryPayload {
   binaryForGuide?: boolean;
   isHotContent?: boolean;
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
 }
 
 export interface VisualStoryResponse extends VisualStoryPayload {

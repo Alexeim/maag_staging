@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
 import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
+import {
+  normalizeContentCollectionId,
+  syncSingleContentCollectionMembershipInTransaction,
+} from '../utils/contentCollections';
 
 export interface Guide {
   id?: string;
@@ -17,11 +21,13 @@ export interface Guide {
   isHotContent?: boolean;
   isMainInCategory?: boolean;
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
   createdAt: Date;
 }
 
 const db = getDb();
 const guidesCollection = db.collection('guides');
+const contentCollectionsCollection = db.collection('contentCollections');
 
 const normalizeTips = (tips: unknown): Array<{ type: string; text: string }> => {
   if (!Array.isArray(tips)) {
@@ -67,6 +73,7 @@ export const createGuide = async (req: Request, res: Response) => {
       isHotContent = false,
       isMainInCategory = false,
       relatedContent,
+      contentCollectionId,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -81,6 +88,8 @@ export const createGuide = async (req: Request, res: Response) => {
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
 
+    const now = new Date();
+    const docRef = guidesCollection.doc();
     const newGuide: Omit<Guide, 'id'> = {
       title,
       lead: lead || '',
@@ -95,10 +104,22 @@ export const createGuide = async (req: Request, res: Response) => {
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isMainInCategory: Boolean(isMainInCategory),
       relatedContent: normalizeRelatedContent(relatedContent),
-      createdAt: new Date(),
+      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
+      createdAt: now,
     };
 
-    const docRef = await guidesCollection.add(newGuide);
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: null,
+        nextCollectionId: newGuide.contentCollectionId ?? null,
+        contentType: 'guide',
+        materialId: docRef.id,
+        now,
+      });
+      transaction.set(docRef, newGuide);
+    });
 
     res.status(201).json({ id: docRef.id, ...newGuide });
   } catch (error) {
@@ -194,6 +215,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       isHotContent = false,
       isMainInCategory = false,
       relatedContent,
+      contentCollectionId,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -208,6 +230,10 @@ export const updateGuide = async (req: Request, res: Response) => {
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
 
+    const previousContentCollectionId = normalizeContentCollectionId(
+      guideDoc.data()?.contentCollectionId,
+    );
+    const now = new Date();
     const updatedGuide = {
       title,
       lead: lead || '',
@@ -222,10 +248,22 @@ export const updateGuide = async (req: Request, res: Response) => {
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isMainInCategory: Boolean(isMainInCategory),
       relatedContent: normalizeRelatedContent(relatedContent),
-      updatedAt: new Date(),
+      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
+      updatedAt: now,
     };
 
-    await guidesCollection.doc(id).update(updatedGuide);
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: updatedGuide.contentCollectionId ?? null,
+        contentType: 'guide',
+        materialId: id,
+        now,
+      });
+      transaction.update(guidesCollection.doc(id), updatedGuide);
+    });
 
     res.status(200).json({ id, ...guideDoc.data(), ...updatedGuide });
   } catch (error) {
@@ -249,6 +287,9 @@ export const deleteGuide = async (req: Request, res: Response) => {
 
     const guideData = guideDoc.data() as Guide;
     const imageUrlsToDelete: string[] = [];
+    const previousContentCollectionId = normalizeContentCollectionId(
+      guideData.contentCollectionId,
+    );
 
     if (guideData.imageUrl) {
       imageUrlsToDelete.push(guideData.imageUrl);
@@ -270,7 +311,18 @@ export const deleteGuide = async (req: Request, res: Response) => {
       await Promise.all(imageUrlsToDelete.map(url => deleteFileFromStorage(url)));
     }
 
-    await guidesCollection.doc(id).delete();
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: null,
+        contentType: 'guide',
+        materialId: id,
+        now: new Date(),
+      });
+      transaction.delete(guidesCollection.doc(id));
+    });
 
     res.status(204).send();
   } catch (error) {

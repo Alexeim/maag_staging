@@ -14,6 +14,8 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
+import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
+import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 
 const storage = getStorage(app);
 
@@ -126,6 +128,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       isMainInCategory: false,
       contentBlocks: [] as any[],
       relatedContent: createEmptyRelatedContent(),
+      contentCollectionId: null as string | null,
       authorId: "" as string,  // populated from loaded article in edit mode
       author: null as any,     // populated from API response in edit mode
     },
@@ -148,6 +151,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
     selectedRelatedContentType: "article",
     selectedRelatedContentId: "",
+    ...createContentCollectionEditorState("article"),
 
     // Author state
     authors: [] as any[],
@@ -214,6 +218,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
       this.fetchContentLists();
       this.loadAuthors();
+      this.syncCurrentContentCollection();
+      this.loadContentCollections();
       this.loadLandingPlacements();
     },
 
@@ -605,6 +611,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
             (this.article as any).relatedContent,
             "article",
             this.articleId,
+          ),
+          contentCollectionId: normalizeContentCollectionId(
+            this.article.contentCollectionId,
           ),
         };
 

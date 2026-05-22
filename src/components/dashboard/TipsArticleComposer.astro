@@ -9,6 +9,7 @@ import locationIcon from "@/assets/icons/new/location.svg?raw";
 import timeIcon from "@/assets/icons/new/time.svg?raw";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
+import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
 
 interface Props {
   heading: string;
@@ -515,6 +516,7 @@ const allParisDistricts = parisDistrictTags;
 
   <LandingPlacementPanel allowMainHero={true} />
 
+  <ContentCollectionsEditor />
   <RelatedContentEditor />
 
   <!-- ── Кнопки действий ───────────────────────────────────────────────────── -->

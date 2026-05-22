@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
 import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
+import {
+  normalizeContentCollectionId,
+  syncSingleContentCollectionMembershipInTransaction,
+} from '../utils/contentCollections';
 
 // Interface for our Interview structure
 export interface Interview {
@@ -17,12 +21,14 @@ export interface Interview {
   imageCaption?: string;
   tags?: string[];
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
   createdAt: Date;
   updatedAt?: Date;
 }
 
 const db = getDb();
 const interviewsCollection = db.collection('interviews');
+const contentCollectionsCollection = db.collection('contentCollections');
 
 /**
  * @description Create a new interview
@@ -43,6 +49,7 @@ export const createInterview = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       relatedContent,
+      contentCollectionId,
     } = req.body;
 
     if (!title || !content || !authorId || !interviewee) {
@@ -53,6 +60,8 @@ export const createInterview = async (req: Request, res: Response) => {
       ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
 
+    const now = new Date();
+    const docRef = interviewsCollection.doc();
     const newInterview: Omit<Interview, 'id'> = {
       title,
       authorId,
@@ -66,10 +75,22 @@ export const createInterview = async (req: Request, res: Response) => {
       imageCaption,
       tags: normalizedTags,
       relatedContent: normalizeRelatedContent(relatedContent),
-      createdAt: new Date(),
+      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
+      createdAt: now,
     };
 
-    const docRef = await interviewsCollection.add(newInterview);
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: null,
+        nextCollectionId: newInterview.contentCollectionId ?? null,
+        contentType: 'interview',
+        materialId: docRef.id,
+        now,
+      });
+      transaction.set(docRef, newInterview);
+    });
 
     res.status(201).json({ id: docRef.id, ...newInterview });
 
@@ -167,6 +188,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       relatedContent,
+      contentCollectionId,
     } = req.body;
 
     if (!title || !content || !authorId || !interviewee) {
@@ -177,6 +199,10 @@ export const updateInterview = async (req: Request, res: Response) => {
       ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
 
+    const previousContentCollectionId = normalizeContentCollectionId(
+      interviewDoc.data()?.contentCollectionId,
+    );
+    const now = new Date();
     const updatedInterview = {
       title,
       authorId,
@@ -190,10 +216,22 @@ export const updateInterview = async (req: Request, res: Response) => {
       imageCaption,
       tags: normalizedTags,
       relatedContent: normalizeRelatedContent(relatedContent),
-      updatedAt: new Date(),
+      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
+      updatedAt: now,
     };
 
-    await interviewsCollection.doc(id).update(updatedInterview);
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: updatedInterview.contentCollectionId ?? null,
+        contentType: 'interview',
+        materialId: id,
+        now,
+      });
+      transaction.update(interviewsCollection.doc(id), updatedInterview);
+    });
 
     res.status(200).json({ id, ...interviewDoc.data(), ...updatedInterview });
   } catch (error) {
@@ -217,6 +255,9 @@ export const deleteInterview = async (req: Request, res: Response) => {
 
     const interviewData = interviewDoc.data() as Interview;
     const imageUrlsToDelete: string[] = [];
+    const previousContentCollectionId = normalizeContentCollectionId(
+      interviewData.contentCollectionId,
+    );
 
     // Collect main image URL
     if (interviewData.imageUrl) {
@@ -239,7 +280,18 @@ export const deleteInterview = async (req: Request, res: Response) => {
     }
 
     // Delete the Firestore document
-    await interviewsCollection.doc(id).delete();
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: null,
+        contentType: 'interview',
+        materialId: id,
+        now: new Date(),
+      });
+      transaction.delete(interviewsCollection.doc(id));
+    });
 
     res.status(204).send();
   } catch (error) {

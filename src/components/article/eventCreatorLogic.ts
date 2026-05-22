@@ -8,6 +8,7 @@ import {
 } from "@/lib/utils/contentBlocks";
 import { sanitizeRelatedContent } from "@/lib/utils/relatedContent";
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
+import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 
 type EventDateType = "single" | "duration";
 type EventTimeMode = "none" | "start" | "range";
@@ -164,6 +165,7 @@ export default function eventCreatorLogic(initialState = {}) {
     copy.lead = copy.lead ?? "";
     copy.cardLead = copy.cardLead ?? "";
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
+    copy.contentCollectionId = normalizeContentCollectionId(copy.contentCollectionId);
     return copy;
   };
 
@@ -234,6 +236,7 @@ export default function eventCreatorLogic(initialState = {}) {
             "event",
             this.eventId,
           );
+          this.article.contentCollectionId = normalized.contentCollectionId;
           this.article.imageUrl = normalized.imageUrl;
           this.article.imageCaption = normalized.imageCaption ?? "";
           this.article.title = normalized.title ?? "";
@@ -461,6 +464,9 @@ export default function eventCreatorLogic(initialState = {}) {
             this.article.relatedContent,
             "event",
             this.eventId,
+          ),
+          contentCollectionId: normalizeContentCollectionId(
+            this.article.contentCollectionId,
           ),
         };
 

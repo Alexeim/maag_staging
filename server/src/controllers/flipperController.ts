@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
 import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
+import {
+  normalizeContentCollectionId,
+  syncSingleContentCollectionMembershipInTransaction,
+} from '../utils/contentCollections';
 
 // Interface for Flipper structure
 export interface Flipper {
@@ -14,12 +18,14 @@ export interface Flipper {
   isHotContent?: boolean;
   carouselContent: { imageUrl: string; caption: string }[];
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
   createdAt: Date;
   updatedAt?: Date;
 }
 
 const db = getDb();
 const flippersCollection = db.collection('flippers');
+const contentCollectionsCollection = db.collection('contentCollections');
 
 /**
  * @description Create a new flipper
@@ -37,6 +43,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       isHotContent = false,
       carouselContent = [],
       relatedContent,
+      contentCollectionId,
     } = req.body;
 
     if (!title || !authorId) {
@@ -63,10 +70,27 @@ export const createFlipper = async (req: Request, res: Response) => {
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       carouselContent,
       relatedContent: normalizeRelatedContent(relatedContent),
+      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       createdAt: new Date(),
     };
 
-    const docRef = await flippersCollection.add(newFlipper);
+    const now = new Date();
+    const docRef = flippersCollection.doc();
+    newFlipper.createdAt = now;
+
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: null,
+        nextCollectionId: newFlipper.contentCollectionId ?? null,
+        contentType: 'flipper',
+        materialId: docRef.id,
+        now,
+      });
+      transaction.set(docRef, newFlipper);
+    });
+
     res.status(201).json({ id: docRef.id, ...newFlipper });
 
   } catch (error) {
@@ -153,7 +177,13 @@ export const updateFlipper = async (req: Request, res: Response) => {
       isHotContent = false,
       carouselContent = [],
       relatedContent,
+      contentCollectionId,
     } = req.body;
+
+    const doc = await flippersCollection.doc(id).get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'Flipper not found' });
+    }
 
     if (!title || !authorId) {
       return res.status(400).json({ message: 'Заголовок и ID автора обязательны' });
@@ -179,10 +209,28 @@ export const updateFlipper = async (req: Request, res: Response) => {
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       carouselContent,
       relatedContent: normalizeRelatedContent(relatedContent),
+      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       updatedAt: new Date(),
     };
 
-    await flippersCollection.doc(id).update(updatedFlipper);
+    const previousContentCollectionId = normalizeContentCollectionId(
+      doc.data()?.contentCollectionId,
+    );
+    const now = updatedFlipper.updatedAt;
+
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: updatedFlipper.contentCollectionId ?? null,
+        contentType: 'flipper',
+        materialId: id,
+        now,
+      });
+      transaction.update(flippersCollection.doc(id), updatedFlipper);
+    });
+
     res.status(200).json({ id, ...updatedFlipper });
 
   } catch (error) {
@@ -206,6 +254,9 @@ export const deleteFlipper = async (req: Request, res: Response) => {
 
     const flipperData = doc.data() as Flipper;
     const imageUrlsToDelete: string[] = [];
+    const previousContentCollectionId = normalizeContentCollectionId(
+      flipperData.contentCollectionId,
+    );
 
     if (Array.isArray(flipperData.carouselContent)) {
       for (const item of flipperData.carouselContent) {
@@ -220,7 +271,19 @@ export const deleteFlipper = async (req: Request, res: Response) => {
       await Promise.all(imageUrlsToDelete.map(url => deleteFileFromStorage(url)));
     }
 
-    await flippersCollection.doc(id).delete();
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: null,
+        contentType: 'flipper',
+        materialId: id,
+        now: new Date(),
+      });
+      transaction.delete(flippersCollection.doc(id));
+    });
+
     res.status(204).send();
     
   } catch (error) {

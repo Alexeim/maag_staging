@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
 import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
+import {
+  normalizeContentCollectionId,
+  syncSingleContentCollectionMembershipInTransaction,
+} from '../utils/contentCollections';
 
 // Interface for our Article structure
 export interface Article {
@@ -20,11 +24,14 @@ export interface Article {
   isMainInCategory?: boolean;
   isNews?: boolean;
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 const db = getDb();
 const articlesCollection = db.collection('articles');
+const contentCollectionsCollection = db.collection('contentCollections');
 
 const normalizeArticleType = (
   value: unknown,
@@ -85,6 +92,7 @@ export const createArticle = async (req: Request, res: Response) => {
       isMainInCategory = false,
       isNews = false,
       relatedContent,
+      contentCollectionId,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -98,6 +106,10 @@ export const createArticle = async (req: Request, res: Response) => {
     const legacyHotContent =
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
+    const normalizedContentCollectionId =
+      normalizeContentCollectionId(contentCollectionId);
+    const now = new Date();
+    const docRef = articlesCollection.doc();
 
     const newArticle: Omit<Article, 'id'> = {
       title,
@@ -115,10 +127,22 @@ export const createArticle = async (req: Request, res: Response) => {
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
       relatedContent: normalizeRelatedContent(relatedContent),
-      createdAt: new Date(),
+      contentCollectionId: normalizedContentCollectionId,
+      createdAt: now,
     };
 
-    const docRef = await articlesCollection.add(newArticle);
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: null,
+        nextCollectionId: normalizedContentCollectionId,
+        contentType: 'article',
+        materialId: docRef.id,
+        now,
+      });
+      transaction.set(docRef, newArticle);
+    });
 
     res.status(201).json({ id: docRef.id, ...newArticle });
 
@@ -219,6 +243,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       isMainInCategory = false,
       isNews = false,
       relatedContent,
+      contentCollectionId,
     } = req.body;
 
     if (!title || !content || !authorId) {
@@ -232,6 +257,12 @@ export const updateArticle = async (req: Request, res: Response) => {
     const legacyHotContent =
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
+    const normalizedContentCollectionId =
+      normalizeContentCollectionId(contentCollectionId);
+    const previousContentCollectionId = normalizeContentCollectionId(
+      articleDoc.data()?.contentCollectionId,
+    );
+    const now = new Date();
 
     const updatedArticle = {
       title,
@@ -249,10 +280,22 @@ export const updateArticle = async (req: Request, res: Response) => {
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
       relatedContent: normalizeRelatedContent(relatedContent),
-      updatedAt: new Date(),
+      contentCollectionId: normalizedContentCollectionId,
+      updatedAt: now,
     };
 
-    await articlesCollection.doc(id).update(updatedArticle);
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: normalizedContentCollectionId,
+        contentType: 'article',
+        materialId: id,
+        now,
+      });
+      transaction.update(articlesCollection.doc(id), updatedArticle);
+    });
 
     res.status(200).json({ id, ...articleDoc.data(), ...updatedArticle });
   } catch (error) {
@@ -276,6 +319,9 @@ export const deleteArticle = async (req: Request, res: Response) => {
 
     const articleData = articleDoc.data() as Article;
     const imageUrlsToDelete: string[] = [];
+    const previousContentCollectionId = normalizeContentCollectionId(
+      articleData.contentCollectionId,
+    );
 
     // Collect main image URL
     if (articleData.imageUrl) {
@@ -301,8 +347,18 @@ export const deleteArticle = async (req: Request, res: Response) => {
       await Promise.all(imageUrlsToDelete.map(url => deleteFileFromStorage(url)));
     }
 
-    // Delete the Firestore document
-    await articlesCollection.doc(id).delete();
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: null,
+        contentType: 'article',
+        materialId: id,
+        now: new Date(),
+      });
+      transaction.delete(articlesCollection.doc(id));
+    });
 
     res.status(204).send();
   } catch (error) {

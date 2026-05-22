@@ -7,19 +7,18 @@ import ArticleImage from "../../components/article/ArticleImage.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import ArticleTips from "../../components/article/ArticleTips.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
-import RelatedContentMarquee from "@/components/article/RelatedContentMarquee.astro";
+import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import {
   ApiError,
   articlesApi,
-  eventsApi,
-  flippersApi,
-  guidesApi,
-  interviewsApi,
-  newsApi,
-  visualStoriesApi,
 } from "@/lib/api/api";
+import {
+  buildContentCollectionItems,
+  fetchPublicContentPools,
+  toDate,
+} from "@/lib/utils/contentCollectionMarquee";
 
 const { id } = Astro.params;
 
@@ -84,68 +83,8 @@ const normalizeCategory = (value?: string | null) => {
   return entry ? entry[0] : normalizedValue;
 };
 
-const normalizeTags = (value: unknown): string[] => {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-  return value
-    .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
-    .filter(Boolean);
-};
-
-const toDate = (value: unknown): Date | null => {
-  if (!value) {
-    return null;
-  }
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-  if (typeof value === "string" || typeof value === "number") {
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  }
-  if (typeof value === "object") {
-    const maybeSeconds =
-      (value as { seconds?: number; _seconds?: number }).seconds ??
-      (value as { seconds?: number; _seconds?: number })._seconds;
-    if (typeof maybeSeconds === "number") {
-      const parsed = new Date(maybeSeconds * 1000);
-      return Number.isNaN(parsed.getTime()) ? null : parsed;
-    }
-    if (typeof (value as { toDate?: () => Date }).toDate === "function") {
-      const parsed = (value as { toDate: () => Date }).toDate();
-      return parsed instanceof Date && !Number.isNaN(parsed.getTime())
-        ? parsed
-        : null;
-    }
-  }
-  return null;
-};
-
-const toContentHref = (item: any) => {
-  if (item?.contentType === "event") {
-    return `/events/${item.id}`;
-  }
-  if (item?.contentType === "interview") {
-    return `/interviews/${item.id}`;
-  }
-  if (item?.contentType === "flipper") {
-    return `/flippers/${item.id}`;
-  }
-  if (item?.contentType === "guide") {
-    return `/guide/${item.id}`;
-  }
-  if (item?.contentType === "visual-story") {
-    return `/visual-story/${item.id}`;
-  }
-  if (item?.contentType === "article" && item?.articleType === "tips") {
-    return `/tips/${item.id}`;
-  }
-  return `/${item?.isNews ? "news" : "article"}/${item.id}`;
-};
-
 const getPrimaryTag = (item: any): string => {
-  const tags = normalizeTags(item?.tags);
+  const tags = Array.isArray(item?.tags) ? item.tags : [];
   if (item?.contentType === "interview") {
     return "Интервью";
   }
@@ -163,7 +102,7 @@ const getPrimaryTag = (item: any): string => {
 };
 
 let articleData: any;
-let relatedContentItems: any[] = [];
+let collectionContentItems: any[] = [];
 let sameCategoryItems: any[] = [];
 let error: string | null = null;
 
@@ -215,109 +154,19 @@ const isStandardCategoryArticle = (item: any) =>
 
 if (!error && articleData) {
   try {
-    const [
-      allArticlesRaw,
-      allNewsRaw,
-      allInterviewsRaw,
-      allEventsRaw,
-      allFlippersRaw,
-      allGuidesRaw,
-      allVisualStoriesRaw,
-    ] = await Promise.all([
-      articlesApi.list(),
-      newsApi.list(),
-      interviewsApi.list(),
-      eventsApi.list(),
-      flippersApi.list(),
-      guidesApi.list(),
-      visualStoriesApi.list(),
-    ]);
-
-    const allArticles = allArticlesRaw
-      .map((article) => ({
-        ...article,
-        contentType: "article",
-        tags: normalizeTags(article?.tags),
-      }))
+    const pools = await fetchPublicContentPools();
+    const allArticles = pools.allArticles
       .filter((article) => article.id !== id);
-
-    const allNews = allNewsRaw.map((item) => ({
-      ...item,
-      isNews: true,
-      contentType: "news",
-      tags: normalizeTags(item?.tags),
-    }));
-
-    const allInterviews = allInterviewsRaw.map((item) => ({
-      ...item,
-      contentType: "interview",
-      tags: normalizeTags(item?.tags),
-    }));
-
-    const allEvents = allEventsRaw.map((item) => ({
-      ...item,
-      contentType: "event",
-      tags: normalizeTags(item?.tags),
-    }));
-
-    const allFlippers = allFlippersRaw.map((item) => ({
-      ...item,
-      contentType: "flipper",
-      imageUrl: item?.carouselContent?.[0]?.imageUrl || null,
-      tags: normalizeTags(item?.tags),
-    }));
-
-    const allGuides = allGuidesRaw.map((item) => ({
-      ...item,
-      contentType: "guide",
-      tags: normalizeTags(item?.tags),
-    }));
-
-    const allVisualStories = allVisualStoriesRaw.map((item) => ({
-      ...item,
-      contentType: "visual-story",
-      imageUrl: item?.imageUrl || item?.slides?.[0]?.imageUrl || null,
-      tags: normalizeTags(item?.tags),
-    }));
-
-    const relatedContent = articleData?.relatedContent ?? {};
-
-    const articleMap = new Map(allArticles.map((item) => [item.id, item]));
-    const newsMap = new Map(allNews.map((item) => [item.id, item]));
-    const interviewMap = new Map(allInterviews.map((item) => [item.id, item]));
-    const eventMap = new Map(allEvents.map((item) => [item.id, item]));
-    const flipperMap = new Map(allFlippers.map((item) => [item.id, item]));
-    const guideMap = new Map(allGuides.map((item) => [item.id, item]));
-    const visualStoryMap = new Map(allVisualStories.map((item) => [item.id, item]));
-
-    const relatedSequence = [
-      ...((Array.isArray(relatedContent.article) ? relatedContent.article : []).map((entryId: string) => articleMap.get(entryId))),
-      ...((Array.isArray(relatedContent.event) ? relatedContent.event : []).map((entryId: string) => eventMap.get(entryId))),
-      ...((Array.isArray(relatedContent.interview) ? relatedContent.interview : []).map((entryId: string) => interviewMap.get(entryId))),
-      ...((Array.isArray(relatedContent.guide) ? relatedContent.guide : []).map((entryId: string) => guideMap.get(entryId))),
-      ...((Array.isArray(relatedContent.news) ? relatedContent.news : []).map((entryId: string) => newsMap.get(entryId))),
-      ...((Array.isArray(relatedContent.flipper) ? relatedContent.flipper : []).map((entryId: string) => flipperMap.get(entryId))),
-      ...((Array.isArray(relatedContent.visualStory) ? relatedContent.visualStory : []).map((entryId: string) => visualStoryMap.get(entryId))),
-    ]
-      .filter((item): item is NonNullable<typeof item> => Boolean(item))
-      .map((item) => ({
-        ...item,
-        href: toContentHref(item),
-      }));
-
-    const dedupedRelatedKeys = new Set<string>();
-    relatedContentItems = relatedSequence.filter((item) => {
-      const key = `${item.contentType}:${item.id}`;
-      if (dedupedRelatedKeys.has(key)) {
-        return false;
-      }
-      dedupedRelatedKeys.add(key);
-      return true;
+    collectionContentItems = await buildContentCollectionItems({
+      contentCollectionId: articleData?.contentCollectionId,
+      currentContentType: "article",
+      currentId: id,
+      pools,
     });
 
     const currentCategory = normalizeCategory(articleData?.category);
     const relatedArticleIds = new Set(
-      relatedContentItems
+      collectionContentItems
         .filter((item) => item.contentType === "article")
         .map((item) => item.id),
     );
@@ -332,12 +181,9 @@ if (!error && articleData) {
         return rightDate - leftDate;
       })
       .slice(0, 12)
-      .map((item) => ({
-        ...item,
-        href: toContentHref(item),
-      }));
+      .map((item) => ({ ...item }));
   } catch (relatedError) {
-    console.error("Failed to fetch related content for article page:", relatedError);
+    console.error("Failed to fetch collection content for article page:", relatedError);
   }
 }
 ---
@@ -398,8 +244,8 @@ if (!error && articleData) {
               />
             )}
 
-            <RelatedContentMarquee
-              relatedItems={relatedContentItems}
+            <ContentCollectionMarquee
+              collectionItems={collectionContentItems}
               categoryItems={sameCategoryItems}
               fallbackImageSrc={picture1.src}
             />

@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
 import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
+import {
+  normalizeContentCollectionId,
+  syncSingleContentCollectionMembershipInTransaction,
+} from '../utils/contentCollections';
 
 export interface NewsItem {
   id?: string;
@@ -16,12 +20,14 @@ export interface NewsItem {
   isHotContent?: boolean;
   isMainInCategory?: boolean;
   relatedContent?: RelatedContent;
+  contentCollectionId?: string | null;
   createdAt: Date;
   updatedAt?: Date;
 }
 
 const db = getDb();
 const newsCollection = db.collection('news');
+const contentCollectionsCollection = db.collection('contentCollections');
 
 const normalizeStringArray = (value: unknown): string[] =>
   Array.isArray(value)
@@ -50,6 +56,7 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     isHotContent = false,
     isMainInCategory = false,
     relatedContent,
+    contentCollectionId,
   } = body;
 
   return {
@@ -65,6 +72,7 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     isHotContent: Boolean(isHotContent) || category === 'hotContent',
     isMainInCategory: Boolean(isMainInCategory),
     relatedContent: normalizeRelatedContent(relatedContent),
+    contentCollectionId: normalizeContentCollectionId(contentCollectionId),
   };
 };
 
@@ -97,12 +105,26 @@ export const createNews = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Title, content, and authorId are required' });
     }
 
+    const now = new Date();
+    const docRef = newsCollection.doc();
     const newNews: Omit<NewsItem, 'id'> = {
       ...payload,
-      createdAt: new Date(),
+      createdAt: now,
     };
 
-    const docRef = await newsCollection.add(newNews);
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: null,
+        nextCollectionId: payload.contentCollectionId ?? null,
+        contentType: 'news',
+        materialId: docRef.id,
+        now,
+      });
+      transaction.set(docRef, newNews);
+    });
+
     res.status(201).json({ id: docRef.id, ...newNews });
   } catch (error) {
     console.error('Error creating news:', error);
@@ -152,6 +174,10 @@ export const updateNews = async (req: Request, res: Response) => {
     }
 
     const payload = buildNewsPayload(req.body);
+    const previousContentCollectionId = normalizeContentCollectionId(
+      newsDoc.data()?.contentCollectionId,
+    );
+    const now = new Date();
 
     if (!payload.title || !payload.authorId || !payload.content) {
       return res.status(400).json({ message: 'Title, content, and authorId are required' });
@@ -159,10 +185,22 @@ export const updateNews = async (req: Request, res: Response) => {
 
     const updatedNews = {
       ...payload,
-      updatedAt: new Date(),
+      updatedAt: now,
     };
 
-    await newsCollection.doc(id).update(updatedNews);
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: payload.contentCollectionId ?? null,
+        contentType: 'news',
+        materialId: id,
+        now,
+      });
+      transaction.update(newsCollection.doc(id), updatedNews);
+    });
+
     res.status(200).json({ id, ...newsDoc.data(), ...updatedNews });
   } catch (error) {
     console.error('Error updating news:', error);
@@ -181,6 +219,9 @@ export const deleteNews = async (req: Request, res: Response) => {
 
     const newsData = newsDoc.data() as NewsItem;
     const imageUrlsToDelete: string[] = [];
+    const previousContentCollectionId = normalizeContentCollectionId(
+      newsData.contentCollectionId,
+    );
 
     if (newsData.imageUrl) {
       imageUrlsToDelete.push(newsData.imageUrl);
@@ -201,7 +242,19 @@ export const deleteNews = async (req: Request, res: Response) => {
       await Promise.all(imageUrlsToDelete.map((url) => deleteFileFromStorage(url)));
     }
 
-    await newsCollection.doc(id).delete();
+    await db.runTransaction(async (transaction) => {
+      await syncSingleContentCollectionMembershipInTransaction({
+        transaction,
+        collectionsCollection: contentCollectionsCollection,
+        previousCollectionId: previousContentCollectionId,
+        nextCollectionId: null,
+        contentType: 'news',
+        materialId: id,
+        now: new Date(),
+      });
+      transaction.delete(newsCollection.doc(id));
+    });
+
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting news:', error);
