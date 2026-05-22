@@ -1,13 +1,8 @@
 ---
 import Button from "@/components/common/Button.astro";
+import TipIcon from "@/components/article/TipIcon.astro";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 import { CloudUpload } from "lucide-astro";
-import locationIcon from "@/assets/icons/new/location.svg?raw";
-import timeIcon from "@/assets/icons/new/time.svg?raw";
-import moneyIcon from "@/assets/icons/new/money.svg?raw";
-import ideaIcon from "@/assets/icons/new/idea.svg?raw";
-import likeIcon from "@/assets/icons/new/like.svg?raw";
-import dislikeIcon from "@/assets/icons/new/dislike.svg?raw";
 import QuoteIcon from "@/assets/icons/quote.svg";
 import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
@@ -287,12 +282,36 @@ const {
               />
             </label>
             <span class="inline-flex items-center gap-2 text-sm font-inter text-base-content/80">
-              <span x-show="tip.type === 'location'" set:html={locationIcon}></span>
-              <span x-show="tip.type === 'time'" set:html={timeIcon}></span>
-              <span x-show="tip.type === 'money'" set:html={moneyIcon}></span>
-              <span x-show="tip.type === 'idea'" set:html={ideaIcon}></span>
-              <span x-show="tip.type === 'like'" set:html={likeIcon}></span>
-              <span x-show="tip.type === 'dislike'" set:html={dislikeIcon}></span>
+              <TipIcon
+                type="location"
+                class="h-5 w-5 shrink-0 text-accent"
+                x-show="tip.type === 'location'"
+              />
+              <TipIcon
+                type="time"
+                class="h-5 w-5 shrink-0 text-accent"
+                x-show="tip.type === 'time'"
+              />
+              <TipIcon
+                type="money"
+                class="h-5 w-5 shrink-0 text-accent"
+                x-show="tip.type === 'money'"
+              />
+              <TipIcon
+                type="idea"
+                class="h-5 w-5 shrink-0 text-accent"
+                x-show="tip.type === 'idea'"
+              />
+              <TipIcon
+                type="like"
+                class="h-5 w-5 shrink-0 text-accent"
+                x-show="tip.type === 'like'"
+              />
+              <TipIcon
+                type="dislike"
+                class="h-5 w-5 shrink-0 text-accent"
+                x-show="tip.type === 'dislike'"
+              />
               <span x-text="tip.label"></span>
             </span>
             <input

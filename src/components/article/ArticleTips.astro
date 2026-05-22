@@ -1,10 +1,5 @@
 ---
-import locationIcon from "@/assets/icons/new/location.svg?raw";
-import timeIcon from "@/assets/icons/new/time.svg?raw";
-import moneyIcon from "@/assets/icons/new/money.svg?raw";
-import ideaIcon from "@/assets/icons/new/idea.svg?raw";
-import likeIcon from "@/assets/icons/new/like.svg?raw";
-import dislikeIcon from "@/assets/icons/new/dislike.svg?raw";
+import TipIcon from "@/components/article/TipIcon.astro";
 
 interface Tip {
   type: string;
@@ -17,14 +12,29 @@ interface Props {
 
 const { tips = [] } = Astro.props as Props;
 
-const ICONS: Record<string, string> = {
-  location: locationIcon,
-  time: timeIcon,
-  money: moneyIcon,
-  idea: ideaIcon,
-  like: likeIcon,
-  dislike: dislikeIcon,
-};
+const ICONS = {
+  location: true,
+  time: true,
+  money: true,
+  idea: true,
+  like: true,
+  dislike: true,
+} as const;
+
+type TipType = keyof typeof ICONS;
+
+const sortTips = (tips: { type: TipType; text: string }[]) =>
+  [...tips].sort((left, right) => {
+    if (left.type === "like" && right.type === "dislike") {
+      return -1;
+    }
+
+    if (left.type === "dislike" && right.type === "like") {
+      return 1;
+    }
+
+    return 0;
+  });
 
 const preparedTips = tips
   .filter(
@@ -38,24 +48,28 @@ const preparedTips = tips
     type: tip.type.trim().toLowerCase(),
     text: tip.text.trim(),
   }))
-  .filter((tip) => Boolean(ICONS[tip.type]));
+  .filter((tip): tip is { type: TipType; text: string } => tip.type in ICONS);
+
+const orderedTips = sortTips(preparedTips);
 ---
 
 {
-  preparedTips.length > 0 && (
+  orderedTips.length > 0 && (
     <section class="max-w-[826px] mx-auto mt-12">
       <div class="border border-base-300 bg-white/85">
-        {preparedTips.map((tip) => (
-          <div class="flex flex-row items-center justify-start gap-4 px-4 py-2 border-b border-base-300 last:border-b-0">
-            <span
-              class="mt-0.5 [&_path]:fill-accent [&_path]:stroke-accent"
-              set:html={ICONS[tip.type]}
-            />
-            <p class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90">
-              {tip.text}
-            </p>
-          </div>
-        ))}
+        {orderedTips.map((tip) => {
+          return (
+            <div class="flex flex-row items-center justify-start gap-4 px-4 py-2 border-b border-base-300 last:border-b-0">
+              <TipIcon
+                type={tip.type}
+                class="mt-0.5 h-5 w-5 shrink-0 text-accent"
+              />
+              <p class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90">
+                {tip.text}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </section>
   )
