@@ -236,9 +236,9 @@ const isPlacedMainHero = (
   landingPlacements: LandingPlacementsResponse,
 ) =>
   Boolean(
-    landingPlacements.mainHero?.ref &&
-      landingPlacements.mainHero.ref.id === item?.id &&
-      landingPlacements.mainHero.ref.type === getPlacementType(item),
+    landingPlacements.mainHero &&
+      landingPlacements.mainHero.id === item?.id &&
+      landingPlacements.mainHero.type === getPlacementType(item),
   );
 
 try {

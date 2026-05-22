@@ -16,6 +16,8 @@
     "migrate:landing:dry": "node scripts/removeLegacyIsOnLanding.js",
     "migrate:landing:apply": "node scripts/removeLegacyIsOnLanding.js --apply",
     "migrate:landing:seed": "node scripts/removeLegacyIsOnLanding.js --seed-landing-doc",
+    "repair:landing-main-hero:dry": "node scripts/fixLandingMainHeroSchema.js",
+    "repair:landing-main-hero:apply": "node scripts/fixLandingMainHeroSchema.js --apply",
     "deploy:prod": "bash deploy.sh"
   },
   "keywords": [],

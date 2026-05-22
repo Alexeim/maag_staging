@@ -160,7 +160,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       getEntityId() {
         return this.articleId;
       },
-      getMainHeroRef() {
+      getMainHeroTarget() {
         return this.articleId ? { type: "article", id: this.articleId } : null;
       },
     }),

@@ -8,14 +8,10 @@ export type LandingMainHeroType =
   | 'flipper'
   | 'visual-story';
 
-export interface LandingMainHeroRef {
-  type: LandingMainHeroType;
-  id: string;
-}
-
 export interface LandingMainHeroSelection {
   mode: 'manual';
-  ref: LandingMainHeroRef;
+  type: LandingMainHeroType;
+  id: string;
 }
 
 export interface LandingNewsRailAutoSelection {
@@ -141,11 +137,12 @@ const isAllowedMainHeroType = (value: unknown): value is LandingMainHeroType =>
   value === 'flipper' ||
   value === 'visual-story';
 
-const normalizeMainHeroRef = (value: unknown): LandingMainHeroRef | null => {
+const normalizeMainHeroSelection = (value: unknown): LandingMainHeroSelection | null => {
   if (!value || typeof value !== 'object') {
     return null;
   }
 
+  const mode = (value as { mode?: unknown }).mode;
   const type = (value as { type?: unknown }).type;
   const id = normalizeStringId((value as { id?: unknown }).id);
 
@@ -153,35 +150,22 @@ const normalizeMainHeroRef = (value: unknown): LandingMainHeroRef | null => {
     return null;
   }
 
-  return { type, id };
-};
-
-const normalizeMainHeroSelection = (value: unknown): LandingMainHeroSelection | null => {
-  if (!value || typeof value !== 'object') {
-    return null;
-  }
-
-  const directLegacyRef = normalizeMainHeroRef(value);
-  if (directLegacyRef) {
+  if (mode === undefined) {
     return {
       mode: 'manual',
-      ref: directLegacyRef,
+      type,
+      id,
     };
   }
 
-  const mode = (value as { mode?: unknown }).mode;
   if (mode !== 'manual') {
-    return null;
-  }
-
-  const ref = normalizeMainHeroRef((value as { ref?: unknown }).ref);
-  if (!ref) {
     return null;
   }
 
   return {
     mode: 'manual',
-    ref,
+    type,
+    id,
   };
 };
 
@@ -378,8 +362,8 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
         }
 
         const exists = await assertDocumentExists(
-          MAIN_HERO_COLLECTIONS[normalizedMainHero.ref.type],
-          normalizedMainHero.ref.id,
+          MAIN_HERO_COLLECTIONS[normalizedMainHero.type],
+          normalizedMainHero.id,
         );
 
         if (!exists) {

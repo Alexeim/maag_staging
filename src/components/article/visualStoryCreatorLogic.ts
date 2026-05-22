@@ -120,7 +120,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       getEntityId() {
         return this.storyId;
       },
-      getMainHeroRef() {
+      getMainHeroTarget() {
         return this.storyId ? { type: "visual-story", id: this.storyId } : null;
       },
     }),

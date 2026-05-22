@@ -144,7 +144,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       getEntityId() {
         return this.flipperId;
       },
-      getMainHeroRef() {
+      getMainHeroTarget() {
         return this.flipperId ? { type: "flipper", id: this.flipperId } : null;
       },
     }),

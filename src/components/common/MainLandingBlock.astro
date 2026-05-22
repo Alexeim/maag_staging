@@ -220,11 +220,12 @@ try {
     return cat === "culture" || cat === "paris";
   };
 
-  const mainHeroRef = landingPlacements.mainHero?.ref ?? null;
-  const placedMainHero = mainHeroRef
+  const mainHeroSelection = landingPlacements.mainHero ?? null;
+  const placedMainHero = mainHeroSelection
     ? landingContent.find(
         (item) =>
-          item.id === mainHeroRef.id && item.contentType === mainHeroRef.type,
+          item.id === mainHeroSelection.id &&
+          item.contentType === mainHeroSelection.type,
       )
     : null;
 

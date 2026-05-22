@@ -308,7 +308,7 @@ export default function articleCreatorLogic(initialState = {}) {
       getEntityId() {
         return this.articleId;
       },
-      getMainHeroRef() {
+      getMainHeroTarget() {
         return this.articleId ? { type: "article", id: this.articleId } : null;
       },
     }),

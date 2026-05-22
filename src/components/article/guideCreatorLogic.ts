@@ -250,7 +250,7 @@ export default function guideCreatorLogic(initialState = {}) {
       getEntityId() {
         return this.articleId;
       },
-      getMainHeroRef() {
+      getMainHeroTarget() {
         return this.articleId ? { type: "guide", id: this.articleId } : null;
       },
     }),

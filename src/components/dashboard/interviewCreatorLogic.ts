@@ -158,7 +158,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       getEntityId() {
         return this.interviewId;
       },
-      getMainHeroRef() {
+      getMainHeroTarget() {
         return this.interviewId ? { type: "interview", id: this.interviewId } : null;
       },
       supportsFeaturedInterviewInCulture: true,

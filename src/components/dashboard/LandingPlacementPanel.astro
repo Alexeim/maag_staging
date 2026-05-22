@@ -46,6 +46,10 @@ const {
     <p x-show="placementError" class="text-sm text-error" x-text="placementError"></p>
 
     <div class="grid gap-3 text-sm">
+      <p class="text-base-content/70">
+        Текущий главный материал landing:
+        <span class="font-medium text-base-content" x-text="getCurrentMainHeroSummary()"></span>
+      </p>
       <p x-show="isCurrentMainHero()" class="text-success">
         Этот материал сейчас стоит главным в блоке «Главное».
       </p>

@@ -210,14 +210,13 @@ export type LandingMainHeroType =
   | "flipper"
   | "visual-story";
 
-export interface LandingMainHeroRef {
+export interface LandingMainHeroTarget {
   type: LandingMainHeroType;
   id: string;
 }
 
-export interface LandingMainHeroSelection {
+export interface LandingMainHeroSelection extends LandingMainHeroTarget {
   mode: "manual";
-  ref: LandingMainHeroRef;
 }
 
 export interface LandingNewsRailAutoSelection {
