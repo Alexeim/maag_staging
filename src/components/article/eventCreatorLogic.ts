@@ -140,7 +140,6 @@ export default function eventCreatorLogic(initialState = {}) {
     copy.startTime = normalizeTime(copy.startTime);
     copy.endTime = normalizeTime(copy.endTime);
     copy.address = typeof copy.address === "string" ? copy.address.trim() : "";
-    copy.isOnLanding = Boolean(copy.isOnLanding);
     copy.isMainEvent = Boolean(copy.isMainEvent);
     const contentBlocks = Array.isArray(copy.contentBlocks)
       ? copy.contentBlocks
@@ -179,7 +178,6 @@ export default function eventCreatorLogic(initialState = {}) {
       timeMode: "none" as EventTimeMode,
       startTime: "",
       endTime: "",
-      isOnLanding: false,
       isMainEvent: false,
     },
     ...createLandingPlacementManager({
@@ -246,7 +244,6 @@ export default function eventCreatorLogic(initialState = {}) {
           this.eventForm.timeMode = normalized.timeMode;
           this.eventForm.startTime = normalized.startTime;
           this.eventForm.endTime = normalized.endTime;
-          this.eventForm.isOnLanding = Boolean(normalized.isOnLanding);
           this.eventForm.isMainEvent = Boolean(normalized.isMainEvent);
           this.selectedAuthorId =
             typeof normalized.authorId === "string" ? normalized.authorId : "";
@@ -459,7 +456,6 @@ export default function eventCreatorLogic(initialState = {}) {
           timeMode,
           startTime: startTime || null,
           endTime: timeMode === "range" ? endTime : null,
-          isOnLanding: Boolean(this.eventForm.isOnLanding),
           isMainEvent: Boolean(this.eventForm.isMainEvent),
           relatedContent: sanitizeRelatedContent(
             this.article.relatedContent,

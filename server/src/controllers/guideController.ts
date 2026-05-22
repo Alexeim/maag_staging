@@ -15,7 +15,6 @@ export interface Guide {
   category?: string;
   tags?: string[];
   isHotContent?: boolean;
-  isOnLanding?: boolean;
   isMainInCategory?: boolean;
   relatedContent?: RelatedContent;
   createdAt: Date;
@@ -66,7 +65,6 @@ export const createGuide = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
-      isOnLanding = false,
       isMainInCategory = false,
       relatedContent,
     } = req.body;
@@ -95,7 +93,6 @@ export const createGuide = async (req: Request, res: Response) => {
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
-      isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
       relatedContent: normalizeRelatedContent(relatedContent),
       createdAt: new Date(),
@@ -195,7 +192,6 @@ export const updateGuide = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
-      isOnLanding = false,
       isMainInCategory = false,
       relatedContent,
     } = req.body;
@@ -224,7 +220,6 @@ export const updateGuide = async (req: Request, res: Response) => {
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
-      isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
       relatedContent: normalizeRelatedContent(relatedContent),
       updatedAt: new Date(),

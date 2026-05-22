@@ -135,7 +135,6 @@ export default function(Alpine: Alpine) {
         tips: [],
         category: '',
         isHotContent: false,
-        isOnLanding: false,
         isMainInCategory: false,
         relatedContent: {
           article: [],
@@ -309,7 +308,6 @@ export default function(Alpine: Alpine) {
         timeMode: 'none',
         startTime: '',
         endTime: '',
-        isOnLanding: false,
         isMainEvent: false,
       },
       setStartDate() {},
@@ -381,7 +379,6 @@ export default function(Alpine: Alpine) {
         category: '',
         tags: [],
         isHotContent: false,
-        isOnLanding: false,
         slides: [],
         relatedContent: {
           article: [],

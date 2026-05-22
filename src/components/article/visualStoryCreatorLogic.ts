@@ -99,7 +99,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       parisDistrict: "",
       binaryForGuide: false,
       isHotContent: false,
-      isOnLanding: false,
       slides: [] as Array<{ imageUrl: string; text: string }>,
       relatedContent: createEmptyRelatedContent(),
     },
@@ -428,7 +427,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
         this.story.binaryForGuide = Boolean(copy.binaryForGuide);
         this.story.isHotContent = Boolean(copy.isHotContent);
-        this.story.isOnLanding = Boolean(copy.isOnLanding);
         this.story.slides = Array.isArray(copy.slides) ? copy.slides : [];
         this.story.relatedContent = sanitizeRelatedContent(
           copy.relatedContent,
@@ -504,7 +502,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           parisDistrict: isParisCategory ? this.story.parisDistrict || null : null,
           binaryForGuide: false,
           isHotContent: this.story.isHotContent,
-          isOnLanding: this.story.isOnLanding,
           relatedContent: sanitizeRelatedContent(
             this.story.relatedContent,
             "visualStory",

@@ -13,7 +13,6 @@ export interface VisualStory {
   category?: string;
   tags?: string[];
   isHotContent?: boolean;
-  isOnLanding?: boolean;
   relatedContent?: RelatedContent;
   createdAt: Date;
 }
@@ -33,7 +32,6 @@ export const createVisualStory = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
-      isOnLanding = false,
       relatedContent,
     } = req.body;
 
@@ -59,7 +57,6 @@ export const createVisualStory = async (req: Request, res: Response) => {
       category: category || '',
       tags: Array.isArray(tags) ? tags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
       isHotContent: Boolean(isHotContent),
-      isOnLanding: Boolean(isOnLanding),
       relatedContent: normalizeRelatedContent(relatedContent),
       createdAt: new Date(),
     };
@@ -132,7 +129,6 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
-      isOnLanding = false,
       relatedContent,
     } = req.body;
 
@@ -156,7 +152,6 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       category: category || '',
       tags: Array.isArray(tags) ? tags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
       isHotContent: Boolean(isHotContent),
-      isOnLanding: Boolean(isOnLanding),
       relatedContent: normalizeRelatedContent(relatedContent),
       updatedAt: new Date(),
     };

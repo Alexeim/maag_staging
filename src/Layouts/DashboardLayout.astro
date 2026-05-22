@@ -9,30 +9,87 @@ interface Props {
 }
 
 const navItems = [
+  {
+    href: "/dashboard/landing-editor",
+    label: "Редактор лендинга",
+    id: "landing-editor",
+  },
   { href: "/dashboard", label: "Статьи", id: "articles-overview" },
-  { href: "/dashboard/articles/culture", label: "Статьи Культура", id: "articles-culture" },
-  { href: "/dashboard/articles/paris", label: "Статьи Париж", id: "articles-paris" },
+  {
+    href: "/dashboard/articles/culture",
+    label: "Статьи Культура",
+    id: "articles-culture",
+  },
+  {
+    href: "/dashboard/articles/paris",
+    label: "Статьи Париж",
+    id: "articles-paris",
+  },
   { href: "/dashboard/events", label: "События", id: "events" },
   { href: "/dashboard/news", label: "Новости", id: "news" },
-  { href: "/dashboard/landing-editor", label: "Редактор лендинга", id: "landing-editor" },
   { href: "/dashboard/flippers", label: "Листалки", id: "flippers" },
   { href: "/dashboard/interviews", label: "Интервью", id: "interviews" },
   { href: "/dashboard/tips", label: "Tips-статьи", id: "tips" },
-  { href: "/dashboard/le-saviez-vous", label: "Le saviez-vous", id: "le-saviez-vous" },
-  { href: "/dashboard/article/create", label: "Создать статью", id: "create-article" },
-  { href: "/dashboard/event/create", label: "Создать событие", id: "create-event" },
-  { href: "/dashboard/news/create", label: "Создать новость", id: "create-news" },
-  { href: "/dashboard/flippers/create", label: "Создать листалку", id: "create-flipper" },
-  { href: "/dashboard/interview/create", label: "Создать интервью", id: "create-interview" },
-  { href: "/dashboard/tips/create", label: "Создать tips-статью", id: "create-tips" },
-  { href: "/dashboard/le-saviez-vous/create", label: "Создать Le saviez-vous", id: "create-le-saviez-vous" },
+  {
+    href: "/dashboard/le-saviez-vous",
+    label: "Le saviez-vous",
+    id: "le-saviez-vous",
+  },
+  {
+    href: "/dashboard/article/create",
+    label: "Создать статью",
+    id: "create-article",
+  },
+  {
+    href: "/dashboard/event/create",
+    label: "Создать событие",
+    id: "create-event",
+  },
+  {
+    href: "/dashboard/news/create",
+    label: "Создать новость",
+    id: "create-news",
+  },
+  {
+    href: "/dashboard/flippers/create",
+    label: "Создать листалку",
+    id: "create-flipper",
+  },
+  {
+    href: "/dashboard/interview/create",
+    label: "Создать интервью",
+    id: "create-interview",
+  },
+  {
+    href: "/dashboard/tips/create",
+    label: "Создать tips-статью",
+    id: "create-tips",
+  },
+  {
+    href: "/dashboard/le-saviez-vous/create",
+    label: "Создать Le saviez-vous",
+    id: "create-le-saviez-vous",
+  },
   { href: "/dashboard/guides", label: "Путеводители", id: "guides" },
-  { href: "/dashboard/guide/create", label: "Создать путеводитель", id: "create-guide" },
-  { href: "/dashboard/visual-stories", label: "Визуальные истории", id: "visual-stories" },
-  { href: "/dashboard/visual-story/create", label: "Создать визуальную историю", id: "create-visual-story" },
+  {
+    href: "/dashboard/guide/create",
+    label: "Создать путеводитель",
+    id: "create-guide",
+  },
+  {
+    href: "/dashboard/visual-stories",
+    label: "Визуальные истории",
+    id: "visual-stories",
+  },
+  {
+    href: "/dashboard/visual-story/create",
+    label: "Создать визуальную историю",
+    id: "create-visual-story",
+  },
 ];
 
-const { title = "MAAG Dashboard", active = "articles-overview" } = Astro.props as Props;
+const { title = "MAAG Dashboard", active = "articles-overview" } =
+  Astro.props as Props;
 ---
 
 <!doctype html>
@@ -50,10 +107,14 @@ const { title = "MAAG Dashboard", active = "articles-overview" } = Astro.props a
   </head>
   <body class="bg-base-200 min-h-screen">
     <div class="flex min-h-screen">
-      <aside class="w-64 bg-base-100 border-r border-base-300 hidden lg:flex flex-col">
+      <aside
+        class="w-64 bg-base-100 border-r border-base-300 hidden lg:flex flex-col"
+      >
         <div class="px-6 py-6 border-b border-base-300">
-          <a href="/" class="block text-xl font-serif">MAAG</a>
-          <p class="mt-1 text-xs text-base-content/60 uppercase tracking-[0.3em]">
+          <a href="/dashboard/" class="block text-xl font-serif">MAAG</a>
+          <p
+            class="mt-1 text-xs text-base-content/60 uppercase tracking-[0.3em]"
+          >
             Dashboard
           </p>
         </div>
@@ -66,17 +127,25 @@ const { title = "MAAG Dashboard", active = "articles-overview" } = Astro.props a
                   "block px-4 py-2 rounded-md text-sm font-medium transition-colors",
                   active === item.id
                     ? "bg-primary text-primary-content"
-                    : "text-base-content/80 hover:bg-base-200"
+                    : "text-base-content/80 hover:bg-base-200",
                 ]}
               >
-                {item.label}
+                <p
+                  class:list={[
+                    item.id === "landing-editor" ? "font-bold text-lg" : "",
+                  ]}
+                >
+                  {item.label}
+                </p>
               </a>
             ))
           }
         </nav>
       </aside>
       <div class="flex-1 flex flex-col" x-data>
-        <header class="w-full bg-base-100 border-b border-base-300 px-4 sm:px-6 py-4 flex items-center justify-between">
+        <header
+          class="w-full bg-base-100 border-b border-base-300 px-4 sm:px-6 py-4 flex items-center justify-between"
+        >
           <h1 class="text-lg sm:text-xl font-semibold text-base-content">
             {title}
           </h1>

@@ -288,7 +288,6 @@ export default function articleCreatorLogic(initialState = {}) {
       tips: [] as TipItem[],
       category: "", // <-- Added category
       isHotContent: false,
-      isOnLanding: false,
       isMainInCategory: false,
       relatedContent: createEmptyRelatedContent(),
     },
@@ -752,7 +751,6 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.cardLead = this.article.cardLead ?? "";
       this.article.articleType = this.article.articleType ?? articleType ?? "standard";
       this.article.isHotContent = Boolean(this.article.isHotContent);
-      this.article.isOnLanding = Boolean(this.article.isOnLanding);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.relatedContent = sanitizeRelatedContent(
         this.article.relatedContent,
@@ -1212,7 +1210,6 @@ export default function articleCreatorLogic(initialState = {}) {
           binaryForGuide: false,
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,
-          isOnLanding: this.article.isOnLanding,
           isMainInCategory: this.article.isMainInCategory,
           relatedContent: sanitizeRelatedContent(
             this.article.relatedContent,

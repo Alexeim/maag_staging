@@ -14,7 +14,6 @@ export interface NewsItem {
   category?: string;
   tags?: string[];
   isHotContent?: boolean;
-  isOnLanding?: boolean;
   isMainInCategory?: boolean;
   relatedContent?: RelatedContent;
   createdAt: Date;
@@ -49,7 +48,6 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     category,
     tags = [],
     isHotContent = false,
-    isOnLanding = false,
     isMainInCategory = false,
     relatedContent,
   } = body;
@@ -65,7 +63,6 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     category: normalizeCategory(category),
     tags: normalizeStringArray(tags),
     isHotContent: Boolean(isHotContent) || category === 'hotContent',
-    isOnLanding: Boolean(isOnLanding),
     isMainInCategory: Boolean(isMainInCategory),
     relatedContent: normalizeRelatedContent(relatedContent),
   };

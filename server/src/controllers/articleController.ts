@@ -17,7 +17,6 @@ export interface Article {
   category?: string; // <-- Added category
   tags?: string[];
   isHotContent?: boolean;
-  isOnLanding?: boolean;
   isMainInCategory?: boolean;
   isNews?: boolean;
   relatedContent?: RelatedContent;
@@ -83,7 +82,6 @@ export const createArticle = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
-      isOnLanding = false,
       isMainInCategory = false,
       isNews = false,
       relatedContent,
@@ -114,7 +112,6 @@ export const createArticle = async (req: Request, res: Response) => {
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
-      isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
       relatedContent: normalizeRelatedContent(relatedContent),
@@ -219,7 +216,6 @@ export const updateArticle = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
-      isOnLanding = false,
       isMainInCategory = false,
       isNews = false,
       relatedContent,
@@ -250,7 +246,6 @@ export const updateArticle = async (req: Request, res: Response) => {
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
-      isOnLanding: Boolean(isOnLanding),
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
       relatedContent: normalizeRelatedContent(relatedContent),

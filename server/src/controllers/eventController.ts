@@ -21,7 +21,6 @@ export interface EventItem {
   endTime?: string | null;
   createdAt: Date;
   updatedAt?: Date;
-  isOnLanding: boolean;
   isMainEvent?: boolean;
   relatedContent?: RelatedContent;
 }
@@ -73,25 +72,6 @@ const normalizeTime = (value: unknown): string | null => {
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(trimmed) ? trimmed : null;
 };
 
-const resetExclusiveEventFlag = async (
-  flag: 'isOnLanding',
-  excludeId?: string,
-) => {
-  const snapshot = await eventsCollection.where(flag, '==', true).get();
-  if (snapshot.empty) {
-    return;
-  }
-
-  const batch = db.batch();
-  snapshot.docs.forEach(doc => {
-    if (excludeId && doc.id === excludeId) {
-      return;
-    }
-    batch.update(doc.ref, { [flag]: false, updatedAt: new Date() });
-  });
-  await batch.commit();
-};
-
 export const createEvent = async (req: Request, res: Response) => {
   try {
     const {
@@ -112,8 +92,6 @@ export const createEvent = async (req: Request, res: Response) => {
       endTime = null,
       relatedContent,
     } = req.body;
-
-    const isOnLanding = Boolean(req.body?.isOnLanding);
     const isMainEvent = Boolean(req.body?.isMainEvent);
 
     if (!title || !content || !authorId) {
@@ -169,14 +147,9 @@ export const createEvent = async (req: Request, res: Response) => {
       startTime: normalizedTimeMode === 'none' ? null : normalizedStartTime,
       endTime: normalizedTimeMode === 'range' ? normalizedEndTime : null,
       createdAt: new Date(),
-      isOnLanding,
       isMainEvent,
       relatedContent: normalizeRelatedContent(relatedContent),
     };
-
-    if (isOnLanding) {
-      await resetExclusiveEventFlag('isOnLanding');
-    }
     const docRef = await eventsCollection.add(newEvent);
 
     res.status(201).json({ id: docRef.id, ...newEvent });
@@ -261,7 +234,6 @@ export const updateEvent = async (req: Request, res: Response) => {
       timeMode = 'none',
       startTime = null,
       endTime = null,
-      isOnLanding = false,
       isMainEvent = false,
       relatedContent,
     } = req.body;
@@ -301,7 +273,6 @@ export const updateEvent = async (req: Request, res: Response) => {
     }
 
     const normalizedTags = normalizeStringArray(tags);
-    const landingFlag = Boolean(isOnLanding);
     const mainEventFlag = Boolean(isMainEvent);
 
     const payload: Partial<EventItem> = {
@@ -321,14 +292,9 @@ export const updateEvent = async (req: Request, res: Response) => {
       startTime: normalizedTimeMode === 'none' ? null : normalizedStartTime,
       endTime: normalizedTimeMode === 'range' ? normalizedEndTime : null,
       updatedAt: new Date(),
-      isOnLanding: landingFlag,
       isMainEvent: mainEventFlag,
       relatedContent: normalizeRelatedContent(relatedContent),
     };
-
-    if (landingFlag) {
-      await resetExclusiveEventFlag('isOnLanding', id);
-    }
     await eventsCollection.doc(id).update(payload);
 
     res.status(200).json({ id, ...eventDoc.data(), ...payload });

@@ -112,7 +112,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       tags: [] as string[],
       category: "",
       isHotContent: false,
-      isOnLanding: false,
       isMainInCategory: false,
       relatedContent: createEmptyRelatedContent(),
     },
@@ -325,7 +324,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       this.article.lead = this.article.lead ?? "";
       this.article.cardLead = this.article.cardLead ?? "";
       this.article.isHotContent = Boolean(this.article.isHotContent);
-      this.article.isOnLanding = Boolean(this.article.isOnLanding);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.relatedContent = sanitizeRelatedContent(
         this.article.relatedContent,
@@ -569,7 +567,6 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
           category: this.article.category,
           tags: tagsForDb,
           isHotContent: Boolean(this.article.isHotContent),
-          isOnLanding: Boolean(this.article.isOnLanding),
           isMainInCategory: Boolean(this.article.isMainInCategory),
           relatedContent: sanitizeRelatedContent(
             this.article.relatedContent,

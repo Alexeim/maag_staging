@@ -231,7 +231,6 @@ export default function guideCreatorLogic(initialState = {}) {
       tips: [] as TipItem[],
       category: "",
       isHotContent: false,
-      isOnLanding: false,
       isMainInCategory: false,
       relatedContent: createEmptyRelatedContent(),
     },
@@ -671,7 +670,6 @@ export default function guideCreatorLogic(initialState = {}) {
       this.article.lead = this.article.lead ?? "";
       this.article.cardLead = this.article.cardLead ?? "";
       this.article.isHotContent = Boolean(this.article.isHotContent);
-      this.article.isOnLanding = Boolean(this.article.isOnLanding);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.relatedContent = sanitizeRelatedContent(
         this.article.relatedContent,
@@ -1106,7 +1104,6 @@ export default function guideCreatorLogic(initialState = {}) {
           binaryForGuide: isParisCategory,
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,
-          isOnLanding: this.article.isOnLanding,
           isMainInCategory: this.article.isMainInCategory,
           relatedContent: sanitizeRelatedContent(
             this.article.relatedContent,

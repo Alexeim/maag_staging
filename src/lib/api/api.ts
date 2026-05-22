@@ -143,7 +143,6 @@ export interface ArticlePayload {
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
   isHotContent?: boolean;
-  isOnLanding?: boolean;
   isMainInCategory?: boolean;
   isNews?: boolean;
   relatedContent?: RelatedContent;
@@ -166,7 +165,6 @@ export interface NewsPayload {
   category?: string;
   tags?: string[];
   isHotContent?: boolean;
-  isOnLanding?: boolean;
   isMainInCategory?: boolean;
   relatedContent?: RelatedContent;
 }
@@ -194,7 +192,6 @@ export interface EventPayload {
   timeMode?: "none" | "start" | "range";
   startTime?: string | null;
   endTime?: string | null;
-  isOnLanding: boolean;
   isMainEvent?: boolean;
   relatedContent?: RelatedContent;
 }
@@ -365,7 +362,6 @@ export interface GuidePayload {
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
   isHotContent?: boolean;
-  isOnLanding?: boolean;
   isMainInCategory?: boolean;
   relatedContent?: RelatedContent;
 }
@@ -606,7 +602,6 @@ export interface VisualStoryPayload {
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
   isHotContent?: boolean;
-  isOnLanding?: boolean;
   relatedContent?: RelatedContent;
 }
 
