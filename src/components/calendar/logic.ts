@@ -108,6 +108,13 @@ const formatRangeLabel = (start: Date, end: Date): string => {
 };
 
 const formatSelectedRangeHeading = (start: Date, end?: Date | null): string => {
+  const formatMonthWithDay = (date: Date) =>
+    date.toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "long",
+      timeZone: "UTC",
+    });
+
   const sameDay =
     !end ||
     (start.getUTCFullYear() === end.getUTCFullYear() &&
@@ -115,11 +122,7 @@ const formatSelectedRangeHeading = (start: Date, end?: Date | null): string => {
       start.getUTCDate() === end.getUTCDate());
 
   if (sameDay) {
-    return start.toLocaleDateString("ru-RU", {
-      day: "numeric",
-      month: "long",
-      timeZone: "UTC",
-    });
+    return formatMonthWithDay(start);
   }
 
   const sameMonth =
@@ -127,22 +130,11 @@ const formatSelectedRangeHeading = (start: Date, end?: Date | null): string => {
     start.getUTCMonth() === end.getUTCMonth();
 
   if (sameMonth) {
-    const month = end.toLocaleDateString("ru-RU", {
-      month: "long",
-      timeZone: "UTC",
-    });
+    const month = formatMonthWithDay(end).replace(/^\d+\s+/, "");
     return `${start.getUTCDate()}–${end.getUTCDate()} ${month}`;
   }
 
-  return `${start.toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-  })} – ${end.toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-  })}`;
+  return `${formatMonthWithDay(start)} – ${formatMonthWithDay(end)}`;
 };
 
 const ensureString = (value: unknown, fallback: string): string => {
@@ -229,6 +221,9 @@ const isOngoingDate = (date: Date, event: NormalizedEvent) => {
   return time > event.startDate.getTime() && time < event.endDate.getTime();
 };
 
+const isSingleDayEvent = (event: NormalizedEvent) =>
+  event.startDate.getTime() === event.endDate.getTime();
+
 const getMonthBoundaryDates = (events: NormalizedEvent[], year: number, month: number) => {
   return events
     .flatMap((event) => [event.startDate, event.endDate])
@@ -266,6 +261,8 @@ export default (
   events: [] as NormalizedEvent[],
   filteredEvents: [] as NormalizedEvent[],
   smallEvents: [] as NormalizedEvent[],
+  rangeSpecificEvents: [] as NormalizedEvent[],
+  rangeFlexibleEvents: [] as NormalizedEvent[],
   filters: [] as string[],
   activeFilter: "все",
   activeFeaturedIndex: 0,
@@ -534,6 +531,8 @@ export default (
     if (!this.selectedDate) {
       this.filteredEvents = [];
       this.smallEvents = [];
+      this.rangeSpecificEvents = [];
+      this.rangeFlexibleEvents = [];
       return;
     }
 
@@ -563,7 +562,11 @@ export default (
     if (isRange) {
       this.filteredEvents = filtered;
       this.smallEvents = [];
+      this.rangeSpecificEvents = filtered.filter((event) => isSingleDayEvent(event));
+      this.rangeFlexibleEvents = filtered.filter((event) => !isSingleDayEvent(event));
     } else {
+      this.rangeSpecificEvents = [];
+      this.rangeFlexibleEvents = [];
       this.filteredEvents = filtered.filter((event) =>
         isBoundaryDate(this.selectedDate as Date, event),
       );
