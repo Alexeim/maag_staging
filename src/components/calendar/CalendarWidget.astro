@@ -74,10 +74,16 @@
         <button
           type="button"
           @click="$dispatch('date-selected', cell)"
-          class="group relative flex aspect-square min-h-[42px] cursor-pointer items-center justify-center overflow-hidden bg-[#f9f5f0] font-inter text-[0.96rem] transition-colors sm:min-h-[48px] sm:text-[1.02rem] md:min-h-[52px] md:text-[1.05rem]"
+          class="group relative flex aspect-square min-h-[42px] cursor-pointer items-center justify-center overflow-hidden font-inter text-[0.96rem] transition-colors sm:min-h-[48px] sm:text-[1.02rem] md:min-h-[52px] md:text-[1.05rem]"
         >
           <div
-            x-show="hasCompletedRange() && (isWithinSelectedRange(cell) || isRangeStart(cell) || isRangeEnd(cell))"
+            x-show="cell.isCurrentMonth"
+            class="pointer-events-none absolute inset-y-[1px] left-[3px] right-[3px] bg-[#f9f5f0]"
+          >
+          </div>
+
+          <div
+            x-show="cell.isCurrentMonth && hasCompletedRange() && (isWithinSelectedRange(cell) || isRangeStart(cell) || isRangeEnd(cell))"
             :class="{
               'left-1/2 right-0': isRangeStart(cell) && !isRangeEnd(cell),
               'left-0 right-1/2': isRangeEnd(cell) && !isRangeStart(cell),
@@ -88,14 +94,15 @@
           </div>
 
           <div
+            x-show="cell.isCurrentMonth"
             class="pointer-events-none absolute h-10 w-10 rounded-full bg-error/50 opacity-0 transition-opacity duration-150 group-hover:opacity-100 sm:h-11 sm:w-11 md:h-12 md:w-12"
           >
           </div>
 
           <div
             :class="{
-              'bg-error text-error-content': isSelectedDate(cell) || isRangeBoundary(cell),
-              'text-[#b5aaa2]': !cell.isCurrentMonth && !isSelectedDate(cell) && !isRangeBoundary(cell),
+              'bg-error text-error-content': cell.isCurrentMonth && (isSelectedDate(cell) || isRangeBoundary(cell)),
+              'text-[#b5aaa2]': !cell.isCurrentMonth,
               'text-[#302821]': cell.isCurrentMonth && !isSelectedDate(cell) && !isRangeBoundary(cell)
             }"
             class="relative z-10 flex h-10 w-10 items-center justify-center rounded-full sm:h-11 sm:w-11 md:h-12 md:w-12"
@@ -106,7 +113,7 @@
               <span x-text="cell.day"></span>
 
               <div
-                x-show="hasEvent(cell) && !isSelectedDate(cell) && !isRangeBoundary(cell)"
+                x-show="cell.isCurrentMonth && hasEvent(cell) && !isSelectedDate(cell) && !isRangeBoundary(cell)"
                 class="pointer-events-none absolute bottom-[0.05rem] h-1.5 w-1.5 rounded-full bg-black/50 sm:bottom-[0.12rem] sm:h-[0.42rem] sm:w-[0.42rem] md:bottom-[0.2rem] md:h-2 md:w-2"
               >
               </div>

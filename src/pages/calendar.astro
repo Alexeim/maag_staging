@@ -8,14 +8,7 @@ import baletImage from "../assets/images/calendar/balet.png";
 import theatreShowImage from "../assets/images/calendar/theatre-show.png";
 import smallEventImage from "../assets/images/calendar/small-event.png";
 import picture1 from "../assets/images/culture.jpg";
-import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { eventsApi } from "@/lib/api/api";
-
-const EVENT_CATEGORY_LABELS: Record<string, string> = {
-  exhibition: "Выставка",
-  concert: "Концерт",
-  performance: "Спектакль",
-};
 
 const TAG_LABEL_ALIASES: Record<string, string> = {
   exhibition: "Выставка",
@@ -44,43 +37,6 @@ const TAG_LABEL_ALIASES: Record<string, string> = {
   address: "Адрес",
   notebook: "Записная книжка",
   place: "Место",
-  ...Object.fromEntries(
-    Array.from({ length: 20 }, (_, i) => [
-      `district-${i + 1}`,
-      `${i + 1}-й округ`,
-    ]),
-  ),
-};
-
-const toRoman = (num: number): string => {
-  if (!Number.isFinite(num) || num <= 0) {
-    return "";
-  }
-  const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
-  const symbols = [
-    "M",
-    "CM",
-    "D",
-    "CD",
-    "C",
-    "XC",
-    "L",
-    "XL",
-    "X",
-    "IX",
-    "V",
-    "IV",
-    "I",
-  ];
-  let n = Math.floor(num);
-  let out = "";
-  for (let i = 0; i < values.length; i += 1) {
-    while (n >= values[i]) {
-      out += symbols[i];
-      n -= values[i];
-    }
-  }
-  return out;
 };
 
 const toDate = (value: unknown): Date | null => {
@@ -138,15 +94,10 @@ const resolveTagLabel = (rawTag: unknown, fallback: string): string => {
     return fallback;
   }
   const normalized = trimmed.toLowerCase();
-  const districtMatch = normalized.match(/^district[-\s_]?(\d{1,2})$/i);
-  if (districtMatch) {
-    const districtNum = Number(districtMatch[1]);
-    const roman = toRoman(districtNum);
-    if (roman) {
-      return roman;
-    }
+  if (/^district[-\s_]?\d{1,2}$/i.test(normalized)) {
+    return fallback;
   }
-  return TAG_LABEL_ALIASES[normalized] ?? getKnownTagLabel(trimmed);
+  return TAG_LABEL_ALIASES[normalized] ?? trimmed;
 };
 
 const formatShortDateRange = (
@@ -262,14 +213,11 @@ const normalizedEvents = eventsResponse
       endDate.setUTCHours(0, 0, 0, 0);
     }
     const category = typeof event?.category === "string" ? event.category : "";
-    const categoryLabel =
-      EVENT_CATEGORY_LABELS[category as keyof typeof EVENT_CATEGORY_LABELS] ||
-      "Событие";
     const primaryTag = resolveTagLabel(
       Array.isArray(event?.tags) && event.tags.length > 0
         ? event.tags[0]
         : null,
-      categoryLabel,
+      "Событие",
     );
 
     return {
@@ -287,7 +235,7 @@ const normalizedEvents = eventsResponse
       startTime: typeof event?.startTime === "string" ? event.startTime : null,
       endTime: typeof event?.endTime === "string" ? event.endTime : null,
       category,
-      categoryLabel,
+      categoryLabel: primaryTag,
       tagLabel: primaryTag,
       description: extractDescription(event?.content),
       isMainEvent: Boolean(event?.isMainEvent),

@@ -12,10 +12,33 @@ import { ApiError, eventsApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
 
-const CATEGORY_LABELS: Record<string, string> = {
+const TAG_LABEL_ALIASES: Record<string, string> = {
   exhibition: "Выставка",
+  exhibitions: "Выставки",
   concert: "Концерт",
+  concerts: "Концерты",
   performance: "Спектакль",
+  performances: "Спектакли",
+  theatre: "Театр",
+  theatres: "Театры",
+  theater: "Театр",
+  theaters: "Театры",
+  event: "Событие",
+  events: "События",
+  culture: "Культура",
+  paris: "Париж",
+  books: "Книги",
+  artMarket: "Арт-рынок",
+  artmarket: "Арт-рынок",
+  kids: "Дети",
+  opera: "Опера",
+  ballet: "Балет",
+  dance: "Танец",
+  music: "Музыка",
+  route: "Маршрут",
+  address: "Адрес",
+  notebook: "Записная книжка",
+  place: "Место",
 };
 
 const toDate = (value: unknown): Date | null => {
@@ -134,6 +157,21 @@ const normalizeTags = (value: unknown): string[] => {
   return value
     .map((item) => (typeof item === "string" ? item.trim() : ""))
     .filter(Boolean);
+};
+
+const resolveTagLabel = (rawTag: unknown, fallback: string): string => {
+  if (typeof rawTag !== "string") {
+    return fallback;
+  }
+  const trimmed = rawTag.trim();
+  if (!trimmed) {
+    return fallback;
+  }
+  const normalized = trimmed.toLowerCase();
+  if (/^district[-\s_]?\d{1,2}$/i.test(normalized)) {
+    return fallback;
+  }
+  return TAG_LABEL_ALIASES[normalized] ?? trimmed;
 };
 
 const extractTextFromContent = (blocks: unknown): string => {
@@ -371,9 +409,10 @@ if (!error && eventData) {
             typeof item?.address === "string" && item.address.trim().length > 0
               ? item.address.trim()
               : "Место уточняется",
-          categoryLabel:
-            CATEGORY_LABELS[item?.category as keyof typeof CATEGORY_LABELS] ||
+          categoryLabel: resolveTagLabel(
+            Array.isArray(item?.tags) && item.tags.length > 0 ? item.tags[0] : null,
             "Событие",
+          ),
           startDate: itemStart,
           endDate: itemEnd,
           startDayKey: toDateKey(itemStart),
@@ -411,17 +450,12 @@ const calendarUrl = buildGoogleCalendarUrl(
 );
 const normalizedTags = normalizeTags(eventData?.tags);
 const topMetaTag =
-  normalizedTags[0] ||
-  CATEGORY_LABELS[eventData?.category as keyof typeof CATEGORY_LABELS] ||
-  "Событие";
+  resolveTagLabel(normalizedTags[0], "Событие");
 
 const displayEvent = {
   title: eventData?.title || "Событие",
   lead,
-  category:
-    eventData?.category && CATEGORY_LABELS[eventData.category]
-      ? CATEGORY_LABELS[eventData.category]
-      : "Событие",
+  category: topMetaTag,
   authorName: eventData?.author
     ? `${eventData.author.firstName} ${eventData.author.lastName}`
     : "MAAG",

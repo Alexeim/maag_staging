@@ -92,6 +92,8 @@ const resetToUtcMidnight = (date: Date) => {
   return date;
 };
 
+const getTodayUtc = () => resetToUtcMidnight(new Date());
+
 const formatRangeLabel = (start: Date, end: Date): string => {
   const format = (date: Date, withYear = false) =>
     date.toLocaleDateString("ru-RU", {
@@ -289,7 +291,7 @@ export default (
       .filter((event): event is NormalizedEvent => Boolean(event))
       .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
 
-    const today = resetToUtcMidnight(new Date());
+    const today = getTodayUtc();
     const ongoingToday = this.events.some((event) => isDateWithinRange(today, event));
     const nearestUpcoming = this.events.find(
       (event) =>
@@ -521,6 +523,14 @@ export default (
   },
 
   getDefaultDateForMonth(year: number, month: number) {
+    const today = getTodayUtc();
+    if (
+      today.getUTCFullYear() === year &&
+      today.getUTCMonth() === month
+    ) {
+      return today;
+    }
+
     const monthBoundaryDates = getMonthBoundaryDates(this.events, year, month);
     if (monthBoundaryDates.length > 0) {
       return resetToUtcMidnight(new Date(monthBoundaryDates[0]));
