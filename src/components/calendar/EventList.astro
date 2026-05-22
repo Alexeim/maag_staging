@@ -211,8 +211,12 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
         <template x-if="!hasCompletedRange()">
           <div class="divide-y divide-[#30282115]">
             <template x-if="filteredEvents.length === 0">
-              <p class="py-8 font-inter text-[0.9rem] text-[#7d726a]">
-                На эту дату событий не найдено.
+              <p
+                class="py-8 font-inter text-[0.9rem] leading-[1.6] text-[#7d726a]"
+                x-text="smallEvents.length > 0
+                  ? 'На выбранный день отдельных событий не найдено. Ниже показаны события, которые продолжаются в эту дату. Можно также изменить дату или фильтры.'
+                  : 'На выбранный день событий не найдено. Попробуйте выбрать другую дату или изменить фильтры.'"
+              >
               </p>
             </template>
 

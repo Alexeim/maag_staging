@@ -224,6 +224,9 @@ const isOngoingDate = (date: Date, event: NormalizedEvent) => {
 const isSingleDayEvent = (event: NormalizedEvent) =>
   event.startDate.getTime() === event.endDate.getTime();
 
+const getUniqueFilters = (events: NormalizedEvent[]) =>
+  Array.from(new Set(events.map((event) => event.tag)));
+
 const getMonthBoundaryDates = (events: NormalizedEvent[], year: number, month: number) => {
   return events
     .flatMap((event) => [event.startDate, event.endDate])
@@ -264,6 +267,7 @@ export default (
   rangeSpecificEvents: [] as NormalizedEvent[],
   rangeFlexibleEvents: [] as NormalizedEvent[],
   filters: [] as string[],
+  availableEventsCount: 0,
   activeFilter: "все",
   activeFeaturedIndex: 0,
   isFeaturedEventVisible: true,
@@ -303,9 +307,6 @@ export default (
 
     this.year = this.selectedDate.getUTCFullYear();
     this.month = this.selectedDate.getUTCMonth();
-
-    const uniqueFilters = Array.from(new Set(this.events.map((event) => event.tag)));
-    this.filters = uniqueFilters;
 
     this.updateCalendarDisplay();
     this.updateFilteredEvents();
@@ -533,6 +534,8 @@ export default (
       this.smallEvents = [];
       this.rangeSpecificEvents = [];
       this.rangeFlexibleEvents = [];
+      this.filters = [];
+      this.availableEventsCount = 0;
       return;
     }
 
@@ -552,6 +555,13 @@ export default (
       eventsForDate = this.events.filter((event) =>
         isDateWithinRange(this.selectedDate as Date, event),
       );
+    }
+
+    this.availableEventsCount = eventsForDate.length;
+    this.filters = getUniqueFilters(eventsForDate);
+
+    if (this.activeFilter !== "все" && !this.filters.includes(this.activeFilter)) {
+      this.activeFilter = "все";
     }
 
     const filtered =
