@@ -1,5 +1,5 @@
 ---
-import { MapPin, CalendarDays, Clock3 } from "lucide-astro";
+import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
 
 interface Props {
   address: string;
@@ -12,7 +12,10 @@ const { address, dates, time = null } = Astro.props;
 <div class="max-w-[826px] mx-auto mt-[100px]">
   <div class="border-y border-base-300 bg-white divide-y divide-base-300">
     <div class="px-5 lg:px-8 py-6 lg:py-7 flex items-start gap-4">
-      <MapPin class="w-5 h-5 text-error mt-0.5 shrink-0" />
+      <EventMetaIcon
+        type="location"
+        class="w-5 h-5 text-error mt-0.5 shrink-0"
+      />
       <div class="space-y-1">
         <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-error">
           Адрес
@@ -22,7 +25,10 @@ const { address, dates, time = null } = Astro.props;
     </div>
 
     <div class="px-5 lg:px-8 py-6 lg:py-7 flex items-start gap-4">
-      <CalendarDays class="w-5 h-5 text-error mt-0.5 shrink-0" />
+      <EventMetaIcon
+        type="date"
+        class="w-5 h-5 text-error mt-0.5 shrink-0"
+      />
       <div class="space-y-1">
         <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-error">
           Даты
@@ -33,7 +39,10 @@ const { address, dates, time = null } = Astro.props;
 
     {time && (
       <div class="px-5 lg:px-8 py-6 lg:py-7 flex items-start gap-4">
-        <Clock3 class="w-5 h-5 text-error mt-0.5 shrink-0" />
+        <EventMetaIcon
+          type="time"
+          class="w-5 h-5 text-error mt-0.5 shrink-0"
+        />
         <div class="space-y-1">
           <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-error">
             Время

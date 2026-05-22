@@ -1,0 +1,36 @@
+---
+import { CalendarDays, Clock3, MapPin } from "lucide-astro";
+
+interface Props {
+  type: string;
+  class?: string;
+  strokeWidth?: number;
+}
+
+const {
+  type,
+  class: className,
+  strokeWidth = 1.75,
+  ...rest
+} = Astro.props as Props;
+
+const ICONS = {
+  location: MapPin,
+  time: Clock3,
+  date: CalendarDays,
+} as const;
+
+const normalizedType = type.trim().toLowerCase() as keyof typeof ICONS;
+const Icon = ICONS[normalizedType];
+---
+
+{
+  Icon && (
+    <Icon
+      {...rest}
+      class={className}
+      strokeWidth={strokeWidth}
+      aria-hidden="true"
+    />
+  )
+}

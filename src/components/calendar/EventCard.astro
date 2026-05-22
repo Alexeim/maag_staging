@@ -1,5 +1,5 @@
 ---
-import { MapPin } from "lucide-astro";
+import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
 
 interface Props {
   tag: string;
@@ -70,7 +70,7 @@ const resolvedImageSrc = (() => {
     <div
       class="flex items-start mt-3 sm:mt-4 text-sm sm:text-base font-inter tracking-[0.02em] font-light text-white/95"
     >
-      <MapPin class="w-4 h-4 shrink-0 mt-0.5" />
+      <EventMetaIcon type="location" class="w-4 h-4 shrink-0 mt-0.5" />
       <span class="ml-2 break-words">{location}</span>
     </div>
   </div>

@@ -3,10 +3,10 @@ import Layout from "../Layouts/Layout.astro";
 import FilterButtons from "../components/calendar/FilterButtons.astro";
 import CalendarWidget from "../components/calendar/CalendarWidget.astro";
 import EventList from "../components/calendar/EventList.astro";
+import EventMetaIcon from "../components/common/EventMetaIcon.astro";
 import baletImage from "../assets/images/calendar/balet.png";
 import theatreShowImage from "../assets/images/calendar/theatre-show.png";
 import smallEventImage from "../assets/images/calendar/small-event.png";
-import locationIcon from "../assets/images/calendar/location.svg?raw";
 import picture1 from "../assets/images/culture.jpg";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { eventsApi } from "@/lib/api/api";
@@ -575,7 +575,7 @@ const topCards = weeklyHighlights.slice(0, 4);
                     </a>
 
                     <div class="mt-[0.4rem] flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
-                      <span class="h-4 w-4 shrink-0" set:html={locationIcon} />
+                      <EventMetaIcon type="location" class="h-4 w-4 shrink-0" />
                       <span x-text="getCurrentFeaturedEvent()?.address || 'Место'"></span>
                     </div>
                   </div>
@@ -678,7 +678,7 @@ const topCards = weeklyHighlights.slice(0, 4);
                     </a>
 
                     <div class="flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
-                      <span class="h-4 w-4 shrink-0" set:html={locationIcon} />
+                      <EventMetaIcon type="location" class="h-4 w-4 shrink-0" />
                       <span>{event.address || "Место"}</span>
                     </div>
                   </div>

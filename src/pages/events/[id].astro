@@ -1,14 +1,11 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
+import EventMetaIcon from "../../components/common/EventMetaIcon.astro";
 import picture1 from "../../assets/images/culture.jpg";
-import locationIcon from "../../assets/images/calendar/location.svg?raw";
 import {
   Bookmark,
-  CalendarDays,
   CalendarPlus,
-  Clock3,
-  MapPin,
   Share2,
 } from "lucide-astro";
 import { ApiError, eventsApi } from "@/lib/api/api";
@@ -545,7 +542,10 @@ const displayEvent = {
                 <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
                     <div class="flex items-start gap-4">
-                      <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                      <EventMetaIcon
+                        type="location"
+                        class="mt-0.5 h-5 w-5 shrink-0 text-accent"
+                      />
                       <div class="grid gap-1">
                         <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
                           Адрес
@@ -560,7 +560,10 @@ const displayEvent = {
                   {displayEvent.datesLabel && (
                     <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
                       <div class="flex items-start gap-4">
-                        <CalendarDays class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                        <EventMetaIcon
+                          type="date"
+                          class="mt-0.5 h-5 w-5 shrink-0 text-accent"
+                        />
                         <div class="grid gap-1">
                           <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
                             Даты
@@ -576,7 +579,10 @@ const displayEvent = {
                   {displayEvent.timeLabel && (
                     <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
                       <div class="flex items-start gap-4">
-                        <Clock3 class="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                        <EventMetaIcon
+                          type="time"
+                          class="mt-0.5 h-5 w-5 shrink-0 text-accent"
+                        />
                         <div class="grid gap-1">
                           <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
                             Время
@@ -637,9 +643,9 @@ const displayEvent = {
                             </a>
 
                             <div class="mt-1 flex items-center gap-2 font-inter text-sm text-base-content/65">
-                              <span
-                                class="h-4 w-4 shrink-0 [&_path]:fill-[#302821bd]"
-                                set:html={locationIcon}
+                              <EventMetaIcon
+                                type="location"
+                                class="h-4 w-4 shrink-0 text-[#302821bd]"
                               />
                               <span>{item.address}</span>
                             </div>
@@ -666,12 +672,12 @@ const displayEvent = {
                       rel="noreferrer"
                       class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-white px-5 py-3 font-inter text-base text-base-content transition-opacity hover:opacity-90"
                     >
-                      <MapPin class="h-5 w-5" />
+                      <EventMetaIcon type="location" class="h-5 w-5" />
                       <span>Открыть в Google maps</span>
                     </a>
                   ) : (
                     <div class="inline-flex min-h-14 items-center gap-3 rounded-2xl border border-base-300 px-5 py-3 font-inter text-base text-base-content/75">
-                      <MapPin class="h-5 w-5" />
+                      <EventMetaIcon type="location" class="h-5 w-5" />
                       <span>Адрес уточняется</span>
                     </div>
                   )}

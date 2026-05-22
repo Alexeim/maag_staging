@@ -1,7 +1,5 @@
 ---
-import locationIcon from "../../assets/images/calendar/location.svg?raw";
-import timeIcon from "../../assets/images/calendar/time.svg?raw";
-import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
+import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
 ---
 
 <div>
@@ -81,7 +79,7 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
                 <p
                   class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                 >
-                  <span class="h-4 w-4 shrink-0" set:html={locationIcon} />
+                  <EventMetaIcon type="location" class="h-4 w-4 shrink-0" />
                   <span x-text="event.location"></span>
                 </p>
 
@@ -89,7 +87,7 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
                 <p
                   class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                 >
-                  <span class="h-4 w-4 shrink-0" set:html={timeIcon} />
+                  <EventMetaIcon type="time" class="h-4 w-4 shrink-0" />
                   <span x-text="event.time"></span>
                 </p>
 
@@ -99,7 +97,7 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
                     <p
                       class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                     >
-                      <span class="h-4 w-4 shrink-0" set:html={calendarIcon} />
+                      <EventMetaIcon type="date" class="h-4 w-4 shrink-0" />
                       <span
                         x-text="'до ' + event.endDate.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', timeZone: 'UTC'})"
                       ></span>
@@ -162,7 +160,7 @@ import calendarIcon from "../../assets/images/calendar/calendar.svg?raw";
                 <p
                   class="m-0 flex items-center gap-2 font-inter text-[0.82rem] text-[#302821bd]"
                 >
-                  <span class="h-4 w-4 shrink-0" set:html={locationIcon} />
+                  <EventMetaIcon type="location" class="h-4 w-4 shrink-0" />
                   <span x-text="event.location"></span>
                 </p>
               </div>
