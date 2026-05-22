@@ -98,6 +98,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.mainQuote = copy.mainQuote ?? "";
     copy.isHotContent = Boolean(copy.isHotContent);
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
+    copy.contentCollectionId = normalizeContentCollectionId(copy.contentCollectionId);
     return copy;
   };
 

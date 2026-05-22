@@ -30,6 +30,7 @@ export const createContentCollectionEditorState = (entityKey: string) => ({
     if (!currentId) {
       entity.contentCollectionId = null;
       this.contentCollection = null;
+      this.selectedContentCollectionId = "";
       return;
     }
 
@@ -38,6 +39,7 @@ export const createContentCollectionEditorState = (entityKey: string) => ({
     );
 
     entity.contentCollectionId = currentId;
+    this.selectedContentCollectionId = currentId;
     this.contentCollection = matchedCollection
       ? { ...matchedCollection }
       : { id: currentId, title: currentId };
@@ -92,7 +94,7 @@ export const createContentCollectionEditorState = (entityKey: string) => ({
 
     entity.contentCollectionId = selectedCollection.id;
     this.contentCollection = { ...selectedCollection };
-    this.selectedContentCollectionId = "";
+    this.selectedContentCollectionId = selectedCollection.id;
     this.useNewContentCollection = false;
     this.newContentCollectionTitle = "";
   },
@@ -134,8 +136,8 @@ export const createContentCollectionEditorState = (entityKey: string) => ({
           );
 
       entity.contentCollectionId = option.id;
+      this.selectedContentCollectionId = option.id;
       this.contentCollection = option;
-      this.selectedContentCollectionId = "";
       this.useNewContentCollection = false;
       this.newContentCollectionTitle = "";
 
