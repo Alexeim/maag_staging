@@ -187,7 +187,6 @@ export interface NewsPayload {
   cardLead?: string;
   category?: string;
   tags?: string[];
-  isHotContent?: boolean;
   isMainInCategory?: boolean;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
@@ -258,7 +257,7 @@ export type LandingNewsRailSelection =
   | LandingNewsRailAutoSelection
   | LandingNewsRailManualSelection;
 
-export type LandingNetlenkaItemType = LandingMainHeroType | "news";
+export type LandingNetlenkaItemType = LandingMainHeroType;
 
 export interface LandingNetlenkaItemTarget {
   type: LandingNetlenkaItemType;

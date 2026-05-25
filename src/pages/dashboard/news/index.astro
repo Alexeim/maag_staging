@@ -90,9 +90,7 @@ const newsItems = newsRaw
           <tbody>
             {newsItems.map((article, index) => {
               const isLast = index === newsItems.length - 1;
-              const categoryLabel = article.isHotContent
-                ? "Самое Читаемое"
-                : article.category || "—";
+              const categoryLabel = article.category || "—";
               const tagsLabel = Array.isArray(article.tags)
                 ? article.tags.join(", ")
                 : "—";

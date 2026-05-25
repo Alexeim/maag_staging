@@ -28,7 +28,7 @@ export type LandingNewsRailSelection =
   | LandingNewsRailAutoSelection
   | LandingNewsRailManualSelection;
 
-export type LandingNetlenkaItemType = LandingMainHeroType | 'news';
+export type LandingNetlenkaItemType = LandingMainHeroType;
 
 export interface LandingNetlenkaItemTarget {
   type: LandingNetlenkaItemType;
@@ -100,7 +100,6 @@ const MAIN_HERO_COLLECTIONS: Record<LandingMainHeroType, string> = {
 
 const NETLENKA_COLLECTIONS: Record<LandingNetlenkaItemType, string> = {
   ...MAIN_HERO_COLLECTIONS,
-  news: 'news',
 };
 
 const DEFAULT_NEWS_RAIL_LIMIT = 4;
@@ -170,7 +169,7 @@ const isAllowedMainHeroType = (value: unknown): value is LandingMainHeroType =>
 
 const isAllowedNetlenkaItemType = (
   value: unknown,
-): value is LandingNetlenkaItemType => value === 'news' || isAllowedMainHeroType(value);
+): value is LandingNetlenkaItemType => isAllowedMainHeroType(value);
 
 const normalizeMainHeroSelection = (value: unknown): LandingMainHeroSelection | null => {
   if (!value || typeof value !== 'object') {

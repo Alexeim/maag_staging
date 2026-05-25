@@ -17,7 +17,6 @@ export interface NewsItem {
   imageCaption?: string;
   category?: string;
   tags?: string[];
-  isHotContent?: boolean;
   isMainInCategory?: boolean;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
@@ -53,7 +52,6 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     authorId,
     category,
     tags = [],
-    isHotContent = false,
     isMainInCategory = false,
     relatedContent,
     contentCollectionId,
@@ -69,7 +67,6 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     imageCaption: typeof imageCaption === 'string' ? imageCaption : '',
     category: normalizeCategory(category),
     tags: normalizeStringArray(tags),
-    isHotContent: Boolean(isHotContent) || category === 'hotContent',
     isMainInCategory: Boolean(isMainInCategory),
     relatedContent: normalizeRelatedContent(relatedContent),
     contentCollectionId: normalizeContentCollectionId(contentCollectionId),
@@ -82,9 +79,13 @@ const withAuthor = async (newsDoc: FirebaseFirestore.QueryDocumentSnapshot | Fir
     return null;
   }
 
+  const { isHotContent: _ignoredHotContent, ...safeNewsData } = newsData as NewsItem & {
+    isHotContent?: unknown;
+  };
+
   let authorData = null;
-  if (newsData.authorId) {
-    const authorDoc = await db.collection('authors').doc(newsData.authorId).get();
+  if (safeNewsData.authorId) {
+    const authorDoc = await db.collection('authors').doc(safeNewsData.authorId).get();
     if (authorDoc.exists) {
       authorData = authorDoc.data();
     }
@@ -92,7 +93,7 @@ const withAuthor = async (newsDoc: FirebaseFirestore.QueryDocumentSnapshot | Fir
 
   return {
     id: newsDoc.id,
-    ...newsData,
+    ...safeNewsData,
     author: authorData,
   };
 };

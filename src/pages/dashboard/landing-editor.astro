@@ -46,7 +46,6 @@ const MAIN_HERO_TYPE_LABELS: Record<LandingMainHeroType, string> = {
 
 const NETLENKA_TYPE_LABELS: Record<LandingNetlenkaItemType, string> = {
   ...MAIN_HERO_TYPE_LABELS,
-  news: "Новость",
 };
 
 const ARTICLE_BUCKET_LABELS = {
@@ -193,7 +192,6 @@ try {
   });
   newsItems.forEach((item) => {
     contentTitleMaps.news.set(item.id, item.title);
-    contentTitleMaps.netlenka.set(`news:${item.id}`, item.title);
   });
   events.forEach((item) => contentTitleMaps.events.set(item.id, item.title));
 } catch (error) {

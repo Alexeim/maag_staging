@@ -73,10 +73,6 @@ const CULTURE_CATEGORY_KEY = "culture";
 const CULTURE_CATEGORY_LABEL = CATEGORY_LABELS[CULTURE_CATEGORY_KEY];
 const PARIS_CATEGORY_KEY = "paris";
 const HOT_CONTENT_CATEGORY_KEY = "hotContent";
-const LANDING_HOT_CONTENT_CATEGORY_KEYS = new Set([
-  CULTURE_CATEGORY_KEY,
-  PARIS_CATEGORY_KEY,
-]);
 
 const normalizeCategory = (value?: string) => {
   if (!value) return null;
@@ -118,14 +114,9 @@ const getCardLead = (item: any) => {
   return cardLead;
 };
 const isHotContent = (item: any) =>
-  Boolean(item?.isHotContent) ||
-  normalizeCategory(item?.category) === HOT_CONTENT_CATEGORY_KEY;
+  Boolean(item?.isHotContent);
 
-const isLandingHotContentItem = (item: any) =>
-  isHotContent(item) &&
-  LANDING_HOT_CONTENT_CATEGORY_KEYS.has(
-    normalizeCategory(item?.category) || "",
-  );
+const isLandingHotContentItem = (item: any) => isHotContent(item) && !item?.isNews;
 
 const isMainInCategoryItem = (item: any) =>
   item?.isMainInCategory === true ||
@@ -399,10 +390,6 @@ try {
       ...article,
       type: "article",
       href: toContentHref(article),
-    })),
-    ...newsItems.map((item) => ({
-      ...item,
-      href: toContentHref(item),
     })),
     ...interviews.map((interview) => ({
       ...interview,
