@@ -266,7 +266,7 @@ export default (initialState: LandingEditorInitialState) => ({
       return;
     }
 
-    this.selectedNetlenkaKeys = [...this.selectedNetlenkaKeys, key];
+    this.selectedNetlenkaKeys = [key, ...this.selectedNetlenkaKeys];
   },
 
   async saveMainHero() {

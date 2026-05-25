@@ -73,6 +73,9 @@ const normalizeArticleBucket = (item: { articleType?: string; category?: string 
 const isLeSaviezVousArticle = (item: { articleType?: string }) =>
   item.articleType === "le_saviez_vous";
 
+const isHotContentItem = (item: { isHotContent?: boolean }) =>
+  Boolean(item.isHotContent);
+
 const toDate = (value: unknown): Date | null => {
   if (!value) {
     return null;
@@ -128,6 +131,13 @@ const contentTitleMaps = {
   events: new Map<string, string>(),
   interviews: new Map<string, string>(),
 };
+const netlenkaOptionItems: Array<{
+  id: string;
+  title: string;
+  type: LandingNetlenkaItemType;
+  typeLabel: string;
+  createdAt: unknown;
+}> = [];
 const mainHeroArticleMeta = new Map<
   string,
   {
@@ -163,8 +173,15 @@ try {
     const key = `article:${item.id}`;
     const articleBucket = normalizeArticleBucket(item);
     contentTitleMaps.mainHero.set(key, item.title);
-    if (!isLeSaviezVousArticle(item)) {
+    if (isHotContentItem(item)) {
       contentTitleMaps.netlenka.set(key, item.title);
+      netlenkaOptionItems.push({
+        id: key,
+        title: item.title,
+        type: "article",
+        typeLabel: NETLENKA_TYPE_LABELS.article,
+        createdAt: item.createdAt,
+      });
     }
     if (articleBucket) {
       mainHeroArticleMeta.set(key, {
@@ -175,20 +192,56 @@ try {
   });
   guides.forEach((item) => {
     contentTitleMaps.mainHero.set(`guide:${item.id}`, item.title);
-    contentTitleMaps.netlenka.set(`guide:${item.id}`, item.title);
+    if (isHotContentItem(item)) {
+      contentTitleMaps.netlenka.set(`guide:${item.id}`, item.title);
+      netlenkaOptionItems.push({
+        id: `guide:${item.id}`,
+        title: item.title,
+        type: "guide",
+        typeLabel: NETLENKA_TYPE_LABELS.guide,
+        createdAt: item.createdAt,
+      });
+    }
   });
   interviews.forEach((item) => {
     contentTitleMaps.mainHero.set(`interview:${item.id}`, item.title);
-    contentTitleMaps.netlenka.set(`interview:${item.id}`, item.title);
+    if (isHotContentItem(item)) {
+      contentTitleMaps.netlenka.set(`interview:${item.id}`, item.title);
+      netlenkaOptionItems.push({
+        id: `interview:${item.id}`,
+        title: item.title,
+        type: "interview",
+        typeLabel: NETLENKA_TYPE_LABELS.interview,
+        createdAt: item.createdAt,
+      });
+    }
     contentTitleMaps.interviews.set(item.id, item.title);
   });
   flippers.forEach((item) => {
     contentTitleMaps.mainHero.set(`flipper:${item.id}`, item.title);
-    contentTitleMaps.netlenka.set(`flipper:${item.id}`, item.title);
+    if (isHotContentItem(item)) {
+      contentTitleMaps.netlenka.set(`flipper:${item.id}`, item.title);
+      netlenkaOptionItems.push({
+        id: `flipper:${item.id}`,
+        title: item.title,
+        type: "flipper",
+        typeLabel: NETLENKA_TYPE_LABELS.flipper,
+        createdAt: item.createdAt,
+      });
+    }
   });
   visualStories.forEach((item) => {
     contentTitleMaps.mainHero.set(`visual-story:${item.id}`, item.title);
-    contentTitleMaps.netlenka.set(`visual-story:${item.id}`, item.title);
+    if (isHotContentItem(item)) {
+      contentTitleMaps.netlenka.set(`visual-story:${item.id}`, item.title);
+      netlenkaOptionItems.push({
+        id: `visual-story:${item.id}`,
+        title: item.title,
+        type: "visual-story",
+        typeLabel: NETLENKA_TYPE_LABELS["visual-story"],
+        createdAt: item.createdAt,
+      });
+    }
   });
   newsItems.forEach((item) => {
     contentTitleMaps.news.set(item.id, item.title);
@@ -396,29 +449,24 @@ const initialNetlenkaRailState = (() => {
     };
   }
 
+  const availableNetlenkaKeys = new Set(netlenkaOptionItems.map((item) => item.id));
+
   return {
     mode: "manual" as const,
     limit: 4,
-    keys: landingPlacements.netlenkaRail.items.map((item) => `${item.type}:${item.id}`),
+    keys: landingPlacements.netlenkaRail.items
+      .map((item) => `${item.type}:${item.id}`)
+      .filter((key) => availableNetlenkaKeys.has(key)),
   };
 })();
 
-const netlenkaOptions = Array.from(contentTitleMaps.netlenka.entries())
-  .map(([key, title]) => {
-    const separatorIndex = key.indexOf(":");
-    const type = key.slice(0, separatorIndex) as LandingNetlenkaItemType;
-
-    return {
-      id: key,
-      title,
-      type,
-      typeLabel: NETLENKA_TYPE_LABELS[type],
-    };
-  })
+const netlenkaOptions = netlenkaOptionItems
+  .slice()
   .sort((left, right) => {
-    const typeComparison = left.typeLabel.localeCompare(right.typeLabel, "ru-RU");
-    if (typeComparison !== 0) {
-      return typeComparison;
+    const leftDate = toDate(left.createdAt)?.getTime() ?? 0;
+    const rightDate = toDate(right.createdAt)?.getTime() ?? 0;
+    if (leftDate !== rightDate) {
+      return rightDate - leftDate;
     }
 
     return left.title.localeCompare(right.title, "ru-RU");

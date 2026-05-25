@@ -277,6 +277,7 @@ const selectNetlenkaItems = (
 
   return netlenkaRail.items
     .map((item) => itemsByKey.get(`${item.type}:${item.id}`))
+    .filter((item) => Boolean(item) && isLandingHotContentItem(item))
     .filter(Boolean);
 };
 
@@ -324,11 +325,6 @@ try {
     };
   }
 
-  console.log(`--- STEP 1: RAW DATA ---`);
-  console.log(
-    `Loaded ${articles.length} articles, ${flippers.length} flippers, ${interviews.length} interviews.`,
-  );
-
   const allItems = [
     ...standardArticles.map((article) => ({
       ...article,
@@ -362,9 +358,6 @@ try {
 
   allItemsSorted = allItems;
 
-  console.log(`--- STEP 2: COMBINED ---`);
-  console.log(`Total items in allItems: ${allItems.length}`);
-
   cultureItems = allItems.filter(
     (item) =>
       normalizeCategory(item.category) === CULTURE_CATEGORY_KEY &&
@@ -381,12 +374,8 @@ try {
       !isPlacedMainHero(item, landingPlacements),
   );
 
-  console.log(`--- STEP 3: FILTERED ---`);
-  console.log(`Items in cultureItems after filtering: ${cultureItems.length}`);
-  console.log(`Items in parisItems after filtering: ${parisItems.length}`);
-
   const netlenkaCandidates = [
-    ...standardArticles.map((article) => ({
+    ...articles.map((article) => ({
       ...article,
       type: "article",
       href: toContentHref(article),

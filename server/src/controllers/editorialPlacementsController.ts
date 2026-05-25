@@ -437,6 +437,64 @@ const assertDocumentsExist = async (collectionName: string, ids: string[]) => {
   return existence.filter((entry) => !entry.exists).map((entry) => entry.id);
 };
 
+interface NetlenkaItemStatus extends LandingNetlenkaItemTarget {
+  exists: boolean;
+  isHotContent: boolean;
+}
+
+const getNetlenkaItemStatuses = async (
+  items: LandingNetlenkaItemTarget[],
+): Promise<NetlenkaItemStatus[]> => {
+  const uniqueItems = Array.from(
+    new Map(items.map((item) => [`${item.type}:${item.id}`, item])).values(),
+  );
+
+  return Promise.all(
+    uniqueItems.map(async (item) => {
+      const doc = await db.collection(NETLENKA_COLLECTIONS[item.type]).doc(item.id).get();
+      const data = doc.data();
+
+      return {
+        ...item,
+        exists: doc.exists,
+        isHotContent: doc.exists && data?.isHotContent === true,
+      };
+    }),
+  );
+};
+
+const sanitizeNetlenkaRailSelection = async (
+  netlenkaRail: LandingNetlenkaRailSelection | null,
+): Promise<LandingNetlenkaRailSelection | null> => {
+  if (!netlenkaRail || netlenkaRail.mode !== 'manual') {
+    return netlenkaRail;
+  }
+
+  const statuses = await getNetlenkaItemStatuses(netlenkaRail.items);
+  const allowedKeys = new Set(
+    statuses
+      .filter((item) => item.exists && item.isHotContent)
+      .map((item) => `${item.type}:${item.id}`),
+  );
+
+  const sanitizedItems = netlenkaRail.items.filter((item) =>
+    allowedKeys.has(`${item.type}:${item.id}`),
+  );
+
+  if (sanitizedItems.length === 0) {
+    return null;
+  }
+
+  if (sanitizedItems.length === netlenkaRail.items.length) {
+    return netlenkaRail;
+  }
+
+  return {
+    mode: 'manual',
+    items: sanitizedItems,
+  };
+};
+
 export const getLandingPlacements = async (_req: Request, res: Response) => {
   try {
     const landingDoc = await landingPlacementsRef.get();
@@ -444,7 +502,27 @@ export const getLandingPlacements = async (_req: Request, res: Response) => {
       return res.status(200).json(createDefaultLandingPlacements());
     }
 
-    return res.status(200).json(normalizeLandingPlacements(landingDoc.data()));
+    const normalizedPlacements = normalizeLandingPlacements(landingDoc.data());
+    const sanitizedNetlenkaRail = await sanitizeNetlenkaRailSelection(
+      normalizedPlacements.netlenkaRail,
+    );
+    const responsePayload = {
+      ...normalizedPlacements,
+      netlenkaRail: sanitizedNetlenkaRail,
+    };
+
+    if (JSON.stringify(sanitizedNetlenkaRail) !== JSON.stringify(normalizedPlacements.netlenkaRail)) {
+      await landingPlacementsRef.set(
+        {
+          ...responsePayload,
+          updatedAt: landingDoc.data()?.updatedAt ?? normalizedPlacements.updatedAt ?? null,
+          updatedBy: landingDoc.data()?.updatedBy ?? normalizedPlacements.updatedBy ?? null,
+        },
+        { merge: true },
+      );
+    }
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     console.error('Error getting landing placements:', error);
     return res
@@ -456,7 +534,11 @@ export const getLandingPlacements = async (_req: Request, res: Response) => {
 export const updateLandingPlacements = async (req: Request, res: Response) => {
   try {
     const currentDoc = await landingPlacementsRef.get();
-    const current = normalizeLandingPlacements(currentDoc.data());
+    const currentNormalized = normalizeLandingPlacements(currentDoc.data());
+    const current = {
+      ...currentNormalized,
+      netlenkaRail: await sanitizeNetlenkaRailSelection(currentNormalized.netlenkaRail),
+    };
     const payload = req.body && typeof req.body === 'object' ? req.body : {};
 
     let mainHero = current.mainHero;
@@ -522,21 +604,25 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
         }
 
         if (normalizedNetlenkaRail.mode === 'manual') {
-          const idsByType = new Map<LandingNetlenkaItemType, string[]>();
+          const statuses = await getNetlenkaItemStatuses(normalizedNetlenkaRail.items);
+          const missingItems = statuses
+            .filter((item) => !item.exists)
+            .map(({ type, id }) => ({ type, id }));
+          if (missingItems.length > 0) {
+            return res.status(404).json({
+              message: 'Referenced netlenka rail documents were not found',
+              missingItems,
+            });
+          }
 
-          normalizedNetlenkaRail.items.forEach((item) => {
-            const existingIds = idsByType.get(item.type) ?? [];
-            idsByType.set(item.type, [...existingIds, item.id]);
-          });
-
-          for (const [type, ids] of idsByType.entries()) {
-            const missingIds = await assertDocumentsExist(NETLENKA_COLLECTIONS[type], ids);
-            if (missingIds.length > 0) {
-              return res.status(404).json({
-                message: 'Referenced netlenka rail documents were not found',
-                missingItems: missingIds.map((id) => ({ type, id })),
-              });
-            }
+          const nonHotItems = statuses
+            .filter((item) => item.exists && !item.isHotContent)
+            .map(({ type, id }) => ({ type, id }));
+          if (nonHotItems.length > 0) {
+            return res.status(400).json({
+              message: 'Referenced netlenka rail documents must have isHotContent=true',
+              nonHotItems,
+            });
           }
         }
 
