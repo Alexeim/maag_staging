@@ -28,6 +28,27 @@ export type LandingNewsRailSelection =
   | LandingNewsRailAutoSelection
   | LandingNewsRailManualSelection;
 
+export type LandingNetlenkaItemType = LandingMainHeroType | 'news';
+
+export interface LandingNetlenkaItemTarget {
+  type: LandingNetlenkaItemType;
+  id: string;
+}
+
+export interface LandingNetlenkaRailAutoSelection {
+  mode: 'auto-latest';
+  limit: number;
+}
+
+export interface LandingNetlenkaRailManualSelection {
+  mode: 'manual';
+  items: LandingNetlenkaItemTarget[];
+}
+
+export type LandingNetlenkaRailSelection =
+  | LandingNetlenkaRailAutoSelection
+  | LandingNetlenkaRailManualSelection;
+
 export interface LandingEventCardAutoSelection {
   mode: 'auto-nearest';
 }
@@ -58,6 +79,7 @@ export interface LandingPlacementsDocument {
   schemaVersion: 2;
   mainHero: LandingMainHeroSelection | null;
   newsRail: LandingNewsRailSelection | null;
+  netlenkaRail: LandingNetlenkaRailSelection | null;
   eventCard: LandingEventCardSelection | null;
   cultureInterviewBlock: LandingCultureInterviewBlockSelection | null;
   updatedAt: Date | null;
@@ -76,6 +98,11 @@ const MAIN_HERO_COLLECTIONS: Record<LandingMainHeroType, string> = {
   'visual-story': 'visual-stories',
 };
 
+const NETLENKA_COLLECTIONS: Record<LandingNetlenkaItemType, string> = {
+  ...MAIN_HERO_COLLECTIONS,
+  news: 'news',
+};
+
 const DEFAULT_NEWS_RAIL_LIMIT = 4;
 const MAX_NEWS_RAIL_LIMIT = 12;
 
@@ -83,6 +110,10 @@ const createDefaultLandingPlacements = (): LandingPlacementsDocument => ({
   schemaVersion: 2,
   mainHero: null,
   newsRail: {
+    mode: 'auto-latest',
+    limit: DEFAULT_NEWS_RAIL_LIMIT,
+  },
+  netlenkaRail: {
     mode: 'auto-latest',
     limit: DEFAULT_NEWS_RAIL_LIMIT,
   },
@@ -136,6 +167,10 @@ const isAllowedMainHeroType = (value: unknown): value is LandingMainHeroType =>
   value === 'interview' ||
   value === 'flipper' ||
   value === 'visual-story';
+
+const isAllowedNetlenkaItemType = (
+  value: unknown,
+): value is LandingNetlenkaItemType => value === 'news' || isAllowedMainHeroType(value);
 
 const normalizeMainHeroSelection = (value: unknown): LandingMainHeroSelection | null => {
   if (!value || typeof value !== 'object') {
@@ -195,6 +230,78 @@ const normalizeNewsRailSelection = (value: unknown): LandingNewsRailSelection | 
     return {
       mode: 'manual',
       ids,
+    };
+  }
+
+  return null;
+};
+
+const normalizeNetlenkaItemTarget = (
+  value: unknown,
+): LandingNetlenkaItemTarget | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const type = (value as { type?: unknown }).type;
+  const id = normalizeStringId((value as { id?: unknown }).id);
+
+  if (!isAllowedNetlenkaItemType(type) || !id) {
+    return null;
+  }
+
+  return {
+    type,
+    id,
+  };
+};
+
+const normalizeNetlenkaItemTargets = (
+  value: unknown,
+): LandingNetlenkaItemTarget[] | null => {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const items = value
+    .map(normalizeNetlenkaItemTarget)
+    .filter((item): item is LandingNetlenkaItemTarget => Boolean(item));
+
+  const uniqueItems = Array.from(
+    new Map(items.map((item) => [`${item.type}:${item.id}`, item])).values(),
+  );
+
+  return uniqueItems;
+};
+
+const normalizeNetlenkaRailSelection = (
+  value: unknown,
+): LandingNetlenkaRailSelection | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const mode = (value as { mode?: unknown }).mode;
+
+  if (mode === 'auto-latest') {
+    const limit =
+      normalizePositiveLimit((value as { limit?: unknown }).limit) ??
+      DEFAULT_NEWS_RAIL_LIMIT;
+    return {
+      mode: 'auto-latest',
+      limit,
+    };
+  }
+
+  if (mode === 'manual') {
+    const items = normalizeNetlenkaItemTargets((value as { items?: unknown }).items);
+    if (!items || items.length === 0) {
+      return null;
+    }
+
+    return {
+      mode: 'manual',
+      items,
     };
   }
 
@@ -286,6 +393,11 @@ const normalizeLandingPlacements = (
     ? null
     : (normalizeNewsRailSelection(newsRailRaw) ?? defaults.newsRail);
 
+  const netlenkaRailRaw = 'netlenkaRail' in value ? value.netlenkaRail : undefined;
+  const netlenkaRail = netlenkaRailRaw === null
+    ? null
+    : (normalizeNetlenkaRailSelection(netlenkaRailRaw) ?? defaults.netlenkaRail);
+
   const eventCardRaw = 'eventCard' in value ? value.eventCard : undefined;
   const eventCard = eventCardRaw === null
     ? null
@@ -304,6 +416,7 @@ const normalizeLandingPlacements = (
     schemaVersion: 2,
     mainHero,
     newsRail,
+    netlenkaRail,
     eventCard,
     cultureInterviewBlock,
     updatedAt:
@@ -349,6 +462,7 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
 
     let mainHero = current.mainHero;
     let newsRail = current.newsRail;
+    let netlenkaRail = current.netlenkaRail;
     let eventCard = current.eventCard;
     let cultureInterviewBlock = current.cultureInterviewBlock;
 
@@ -396,6 +510,38 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
         }
 
         newsRail = normalizedNewsRail;
+      }
+    }
+
+    if ('netlenkaRail' in payload) {
+      if (payload.netlenkaRail === null) {
+        netlenkaRail = null;
+      } else {
+        const normalizedNetlenkaRail = normalizeNetlenkaRailSelection(payload.netlenkaRail);
+        if (!normalizedNetlenkaRail) {
+          return res.status(400).json({ message: 'Invalid netlenkaRail payload' });
+        }
+
+        if (normalizedNetlenkaRail.mode === 'manual') {
+          const idsByType = new Map<LandingNetlenkaItemType, string[]>();
+
+          normalizedNetlenkaRail.items.forEach((item) => {
+            const existingIds = idsByType.get(item.type) ?? [];
+            idsByType.set(item.type, [...existingIds, item.id]);
+          });
+
+          for (const [type, ids] of idsByType.entries()) {
+            const missingIds = await assertDocumentsExist(NETLENKA_COLLECTIONS[type], ids);
+            if (missingIds.length > 0) {
+              return res.status(404).json({
+                message: 'Referenced netlenka rail documents were not found',
+                missingItems: missingIds.map((id) => ({ type, id })),
+              });
+            }
+          }
+        }
+
+        netlenkaRail = normalizedNetlenkaRail;
       }
     }
 
@@ -455,6 +601,7 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
       schemaVersion: 2,
       mainHero,
       newsRail,
+      netlenkaRail,
       eventCard,
       cultureInterviewBlock,
       updatedAt: new Date(),

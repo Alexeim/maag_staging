@@ -8,6 +8,7 @@ import {
   guidesApi,
   visualStoriesApi,
   newsApi,
+  type LandingNetlenkaRailSelection,
   type InterviewResponse,
   type FlipperPayload,
   type LandingPlacementsResponse,
@@ -149,6 +150,10 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
     mode: "auto-latest",
     limit: 4,
   },
+  netlenkaRail: {
+    mode: "auto-latest",
+    limit: 4,
+  },
   eventCard: {
     mode: "auto-nearest",
   },
@@ -240,6 +245,49 @@ const isPlacedMainHero = (
       landingPlacements.mainHero.id === item?.id &&
       landingPlacements.mainHero.type === getPlacementType(item),
   );
+
+const getNetlenkaItemKey = (item: any) => {
+  const type = getPlacementType(item);
+  if (!type || !item?.id) {
+    return null;
+  }
+
+  return `${type}:${item.id}`;
+};
+
+const selectNetlenkaItems = (
+  items: any[],
+  netlenkaRail: LandingNetlenkaRailSelection | null,
+  landingPlacements: LandingPlacementsResponse,
+) => {
+  if (!netlenkaRail) {
+    return [];
+  }
+
+  if (netlenkaRail.mode === "auto-latest") {
+    return items
+      .filter(
+        (item) =>
+          isLandingHotContentItem(item) &&
+          !isPlacedMainHero(item, landingPlacements) &&
+          item.id !==
+            (landingPlacements.cultureInterviewBlock?.mode === "manual"
+              ? landingPlacements.cultureInterviewBlock.id
+              : null),
+      )
+      .slice(0, netlenkaRail.limit);
+  }
+
+  const itemsByKey = new Map(
+    items
+      .map((item) => [getNetlenkaItemKey(item), item] as const)
+      .filter(([key]) => Boolean(key)),
+  );
+
+  return netlenkaRail.items
+    .map((item) => itemsByKey.get(`${item.type}:${item.id}`))
+    .filter(Boolean);
+};
 
 try {
   const [
@@ -346,7 +394,7 @@ try {
   console.log(`Items in cultureItems after filtering: ${cultureItems.length}`);
   console.log(`Items in parisItems after filtering: ${parisItems.length}`);
 
-  hotContentItems = [
+  const netlenkaCandidates = [
     ...standardArticles.map((article) => ({
       ...article,
       type: "article",
@@ -382,17 +430,12 @@ try {
   ]
     .sort(
       (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
-    )
-    .filter(
-      (item) =>
-        isLandingHotContentItem(item) &&
-        !isPlacedMainHero(item, landingPlacements) &&
-        item.id !==
-          (landingPlacements.cultureInterviewBlock?.mode === "manual"
-            ? landingPlacements.cultureInterviewBlock.id
-            : null),
-    )
-    .slice(0, 4);
+    );
+  hotContentItems = selectNetlenkaItems(
+    netlenkaCandidates,
+    landingPlacements.netlenkaRail,
+    landingPlacements,
+  );
   const cultureInterviewBlock = landingPlacements.cultureInterviewBlock;
   latestInterview =
     cultureInterviewBlock?.mode === "manual"

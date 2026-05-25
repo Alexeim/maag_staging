@@ -1,4 +1,7 @@
-import { editorialPlacementsApi } from "@/lib/api/api";
+import {
+  editorialPlacementsApi,
+  type LandingNetlenkaItemTarget,
+} from "@/lib/api/api";
 import type { UiStore } from "@/stores/uiStore";
 
 declare const Alpine: any;
@@ -8,6 +11,11 @@ const ARTICLE_BUCKET_ORDER = ["culture", "paris", "tips"];
 interface ContentOption {
   id: string;
   title: string;
+}
+
+interface NetlenkaOption extends ContentOption {
+  type: string;
+  typeLabel: string;
 }
 
 interface MainHeroOption extends ContentOption {
@@ -30,6 +38,12 @@ interface LandingEditorInitialState {
     mode: "empty" | "auto-latest" | "manual";
     limit: number;
     ids: string[];
+  };
+  netlenkaOptions: NetlenkaOption[];
+  initialNetlenkaRail: {
+    mode: "empty" | "auto-latest" | "manual";
+    limit: number;
+    keys: string[];
   };
   eventOptions: ContentOption[];
   initialEventCard: {
@@ -57,6 +71,21 @@ const getMainHeroOptionByKey = (
   options: MainHeroOption[],
 ) => options.find((item) => item.id === key) ?? null;
 
+const parseContentKey = (key: string) => {
+  const separatorIndex = key.indexOf(":");
+  if (separatorIndex <= 0) {
+    return null;
+  }
+
+  const type = key.slice(0, separatorIndex);
+  const id = key.slice(separatorIndex + 1);
+  if (!id) {
+    return null;
+  }
+
+  return { type, id };
+};
+
 export default (initialState: LandingEditorInitialState) => ({
   mainHeroOptions: initialState.mainHeroOptions ?? [],
   mainHeroMode: initialState.initialMainHero?.mode ?? "empty",
@@ -76,6 +105,13 @@ export default (initialState: LandingEditorInitialState) => ({
   selectedNewsIds: [...(initialState.initialNewsRail?.ids ?? [])],
   newsSaving: false,
   newsError: "",
+
+  netlenkaOptions: initialState.netlenkaOptions ?? [],
+  netlenkaRailMode: initialState.initialNetlenkaRail?.mode ?? "auto-latest",
+  netlenkaRailLimit: initialState.initialNetlenkaRail?.limit ?? 4,
+  selectedNetlenkaKeys: [...(initialState.initialNetlenkaRail?.keys ?? [])],
+  netlenkaSaving: false,
+  netlenkaError: "",
 
   eventOptions: initialState.eventOptions ?? [],
   eventCardMode: initialState.initialEventCard?.mode ?? "auto-nearest",
@@ -218,6 +254,21 @@ export default (initialState: LandingEditorInitialState) => ({
     this.selectedNewsIds = [...this.selectedNewsIds, id];
   },
 
+  isManualNetlenkaSelected(key: string) {
+    return this.selectedNetlenkaKeys.includes(key);
+  },
+
+  toggleNetlenkaItem(key: string) {
+    if (this.isManualNetlenkaSelected(key)) {
+      this.selectedNetlenkaKeys = this.selectedNetlenkaKeys.filter(
+        (selectedKey: string) => selectedKey !== key,
+      );
+      return;
+    }
+
+    this.selectedNetlenkaKeys = [...this.selectedNetlenkaKeys, key];
+  },
+
   async saveMainHero() {
     this.mainHeroSaving = true;
     this.mainHeroError = "";
@@ -230,22 +281,15 @@ export default (initialState: LandingEditorInitialState) => ({
           throw new Error("Для ручного режима выбери материал.");
         }
 
-        const separatorIndex = this.selectedMainHeroKey.indexOf(":");
-        if (separatorIndex <= 0) {
+        const parsedKey = parseContentKey(this.selectedMainHeroKey);
+        if (!parsedKey) {
           throw new Error("Не удалось распознать выбранный материал.");
-        }
-
-        const type = this.selectedMainHeroKey.slice(0, separatorIndex);
-        const id = this.selectedMainHeroKey.slice(separatorIndex + 1);
-
-        if (!id) {
-          throw new Error("Не удалось распознать идентификатор материала.");
         }
 
         mainHero = {
           mode: "manual",
-          type,
-          id,
+          type: parsedKey.type,
+          id: parsedKey.id,
         };
       }
 
@@ -303,6 +347,56 @@ export default (initialState: LandingEditorInitialState) => ({
       this.notify(this.newsError, "error");
     } finally {
       this.newsSaving = false;
+    }
+  },
+
+  async saveNetlenkaRail() {
+    this.netlenkaSaving = true;
+    this.netlenkaError = "";
+
+    try {
+      let netlenkaRail: unknown = null;
+
+      if (this.netlenkaRailMode === "auto-latest") {
+        netlenkaRail = {
+          mode: "auto-latest",
+          limit: Number(this.netlenkaRailLimit) || 4,
+        };
+      }
+
+      if (this.netlenkaRailMode === "manual") {
+        if (this.selectedNetlenkaKeys.length === 0) {
+          throw new Error("Для ручного режима выбери хотя бы один материал.");
+        }
+
+        const items = this.selectedNetlenkaKeys.map((key: string) => {
+          const parsedKey = parseContentKey(key);
+          if (!parsedKey) {
+            throw new Error("Не удалось распознать один из выбранных материалов.");
+          }
+
+          return parsedKey;
+        }) as LandingNetlenkaItemTarget[];
+
+        netlenkaRail = {
+          mode: "manual",
+          items,
+        };
+      }
+
+      await editorialPlacementsApi.updateLanding({ netlenkaRail });
+
+      this.notify("Блок «Самое Читаемое» обновлён.");
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to save netlenka rail", error);
+      this.netlenkaError =
+        error instanceof Error
+          ? error.message
+          : "Не удалось сохранить блок «Самое Читаемое».";
+      this.notify(this.netlenkaError, "error");
+    } finally {
+      this.netlenkaSaving = false;
     }
   },
 

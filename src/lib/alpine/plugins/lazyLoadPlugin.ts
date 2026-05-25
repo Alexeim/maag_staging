@@ -192,6 +192,10 @@ export default function(Alpine: Alpine) {
           mode: 'auto-latest',
           limit: 4,
         },
+        netlenkaRail: {
+          mode: 'auto-latest',
+          limit: 4,
+        },
         eventCard: {
           mode: 'auto-nearest',
         },
@@ -218,6 +222,12 @@ export default function(Alpine: Alpine) {
       selectedNewsIds: [],
       newsSaving: false,
       newsError: '',
+      netlenkaOptions: [],
+      netlenkaRailMode: 'auto-latest',
+      netlenkaRailLimit: 4,
+      selectedNetlenkaKeys: [],
+      netlenkaSaving: false,
+      netlenkaError: '',
       eventOptions: [],
       eventCardMode: 'auto-nearest',
       selectedEventId: '',

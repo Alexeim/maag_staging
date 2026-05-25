@@ -258,6 +258,27 @@ export type LandingNewsRailSelection =
   | LandingNewsRailAutoSelection
   | LandingNewsRailManualSelection;
 
+export type LandingNetlenkaItemType = LandingMainHeroType | "news";
+
+export interface LandingNetlenkaItemTarget {
+  type: LandingNetlenkaItemType;
+  id: string;
+}
+
+export interface LandingNetlenkaRailAutoSelection {
+  mode: "auto-latest";
+  limit: number;
+}
+
+export interface LandingNetlenkaRailManualSelection {
+  mode: "manual";
+  items: LandingNetlenkaItemTarget[];
+}
+
+export type LandingNetlenkaRailSelection =
+  | LandingNetlenkaRailAutoSelection
+  | LandingNetlenkaRailManualSelection;
+
 export interface LandingEventCardAutoSelection {
   mode: "auto-nearest";
 }
@@ -288,6 +309,7 @@ export interface LandingPlacementsResponse {
   schemaVersion: 2;
   mainHero: LandingMainHeroSelection | null;
   newsRail: LandingNewsRailSelection | null;
+  netlenkaRail: LandingNetlenkaRailSelection | null;
   eventCard: LandingEventCardSelection | null;
   cultureInterviewBlock: LandingCultureInterviewBlockSelection | null;
   updatedAt?: string | Date | null;
@@ -297,6 +319,7 @@ export interface LandingPlacementsResponse {
 export interface UpdateLandingPlacementsPayload {
   mainHero?: LandingMainHeroSelection | null;
   newsRail?: LandingNewsRailSelection | null;
+  netlenkaRail?: LandingNetlenkaRailSelection | null;
   eventCard?: LandingEventCardSelection | null;
   cultureInterviewBlock?: LandingCultureInterviewBlockSelection | null;
 }

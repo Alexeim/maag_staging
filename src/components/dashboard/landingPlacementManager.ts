@@ -25,6 +25,10 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
     mode: "auto-latest",
     limit: 4,
   },
+  netlenkaRail: {
+    mode: "auto-latest",
+    limit: 4,
+  },
   eventCard: {
     mode: "auto-nearest",
   },

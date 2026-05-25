@@ -11,6 +11,7 @@ import {
   newsApi,
   visualStoriesApi,
   type LandingMainHeroType,
+  type LandingNetlenkaItemType,
   type LandingPlacementsResponse,
 } from "@/lib/api/api";
 
@@ -18,6 +19,10 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   schemaVersion: 2,
   mainHero: null,
   newsRail: {
+    mode: "auto-latest",
+    limit: 4,
+  },
+  netlenkaRail: {
     mode: "auto-latest",
     limit: 4,
   },
@@ -37,6 +42,11 @@ const MAIN_HERO_TYPE_LABELS: Record<LandingMainHeroType, string> = {
   interview: "Интервью",
   flipper: "Листалка",
   "visual-story": "Визуальная история",
+};
+
+const NETLENKA_TYPE_LABELS: Record<LandingNetlenkaItemType, string> = {
+  ...MAIN_HERO_TYPE_LABELS,
+  news: "Новость",
 };
 
 const ARTICLE_BUCKET_LABELS = {
@@ -60,6 +70,9 @@ const normalizeArticleBucket = (item: { articleType?: string; category?: string 
 
   return null;
 };
+
+const isLeSaviezVousArticle = (item: { articleType?: string }) =>
+  item.articleType === "le_saviez_vous";
 
 const toDate = (value: unknown): Date | null => {
   if (!value) {
@@ -112,6 +125,7 @@ let loadError = "";
 const contentTitleMaps = {
   mainHero: new Map<string, string>(),
   news: new Map<string, string>(),
+  netlenka: new Map<string, string>(),
   events: new Map<string, string>(),
   interviews: new Map<string, string>(),
 };
@@ -150,6 +164,9 @@ try {
     const key = `article:${item.id}`;
     const articleBucket = normalizeArticleBucket(item);
     contentTitleMaps.mainHero.set(key, item.title);
+    if (!isLeSaviezVousArticle(item)) {
+      contentTitleMaps.netlenka.set(key, item.title);
+    }
     if (articleBucket) {
       mainHeroArticleMeta.set(key, {
         articleBucket,
@@ -157,16 +174,27 @@ try {
       });
     }
   });
-  guides.forEach((item) => contentTitleMaps.mainHero.set(`guide:${item.id}`, item.title));
+  guides.forEach((item) => {
+    contentTitleMaps.mainHero.set(`guide:${item.id}`, item.title);
+    contentTitleMaps.netlenka.set(`guide:${item.id}`, item.title);
+  });
   interviews.forEach((item) => {
     contentTitleMaps.mainHero.set(`interview:${item.id}`, item.title);
+    contentTitleMaps.netlenka.set(`interview:${item.id}`, item.title);
     contentTitleMaps.interviews.set(item.id, item.title);
   });
-  flippers.forEach((item) => contentTitleMaps.mainHero.set(`flipper:${item.id}`, item.title));
-  visualStories.forEach((item) =>
-    contentTitleMaps.mainHero.set(`visual-story:${item.id}`, item.title),
-  );
-  newsItems.forEach((item) => contentTitleMaps.news.set(item.id, item.title));
+  flippers.forEach((item) => {
+    contentTitleMaps.mainHero.set(`flipper:${item.id}`, item.title);
+    contentTitleMaps.netlenka.set(`flipper:${item.id}`, item.title);
+  });
+  visualStories.forEach((item) => {
+    contentTitleMaps.mainHero.set(`visual-story:${item.id}`, item.title);
+    contentTitleMaps.netlenka.set(`visual-story:${item.id}`, item.title);
+  });
+  newsItems.forEach((item) => {
+    contentTitleMaps.news.set(item.id, item.title);
+    contentTitleMaps.netlenka.set(`news:${item.id}`, item.title);
+  });
   events.forEach((item) => contentTitleMaps.events.set(item.id, item.title));
 } catch (error) {
   console.error("Failed to load landing editor overview:", error);
@@ -215,6 +243,33 @@ const newsRailSummary = (() => {
   return {
     modeLabel: "Manual",
     details: items.length > 0 ? items.join(" | ") : "Список новостей пуст.",
+  };
+})();
+
+const netlenkaRailSummary = (() => {
+  if (!landingPlacements.netlenkaRail) {
+    return {
+      modeLabel: "Пусто",
+      details: "Блок «Самое Читаемое» сейчас пуст.",
+    };
+  }
+
+  if (landingPlacements.netlenkaRail.mode === "auto-latest") {
+    return {
+      modeLabel: "Auto latest",
+      details: `Последние ${landingPlacements.netlenkaRail.limit} материала(ов) из «Самое Читаемое».`,
+    };
+  }
+
+  const items = landingPlacements.netlenkaRail.items.map(({ type, id }) => {
+    const key = `${type}:${id}`;
+    const title = contentTitleMaps.netlenka.get(key) || `${NETLENKA_TYPE_LABELS[type]} ${id}`;
+    return `[${NETLENKA_TYPE_LABELS[type]}] ${title}`;
+  });
+
+  return {
+    modeLabel: "Manual",
+    details: items.length > 0 ? items.join(" | ") : "Список материалов пуст.",
   };
 })();
 
@@ -278,6 +333,12 @@ const slotCards = [
     details: newsRailSummary.details,
   },
   {
+    title: "Netlenka Rail",
+    description: "Блок «Самое Читаемое» в landing body.",
+    modeLabel: netlenkaRailSummary.modeLabel,
+    details: netlenkaRailSummary.details,
+  },
+  {
     title: "Event Card",
     description: "Карточка события в main landing block.",
     modeLabel: eventCardSummary.modeLabel,
@@ -319,6 +380,51 @@ const newsOptions = Array.from(contentTitleMaps.news.entries()).map(([id, title]
   id,
   title,
 }));
+
+const initialNetlenkaRailState = (() => {
+  if (!landingPlacements.netlenkaRail) {
+    return {
+      mode: "empty" as const,
+      limit: 4,
+      keys: [],
+    };
+  }
+
+  if (landingPlacements.netlenkaRail.mode === "auto-latest") {
+    return {
+      mode: "auto-latest" as const,
+      limit: landingPlacements.netlenkaRail.limit,
+      keys: [],
+    };
+  }
+
+  return {
+    mode: "manual" as const,
+    limit: 4,
+    keys: landingPlacements.netlenkaRail.items.map((item) => `${item.type}:${item.id}`),
+  };
+})();
+
+const netlenkaOptions = Array.from(contentTitleMaps.netlenka.entries())
+  .map(([key, title]) => {
+    const separatorIndex = key.indexOf(":");
+    const type = key.slice(0, separatorIndex) as LandingNetlenkaItemType;
+
+    return {
+      id: key,
+      title,
+      type,
+      typeLabel: NETLENKA_TYPE_LABELS[type],
+    };
+  })
+  .sort((left, right) => {
+    const typeComparison = left.typeLabel.localeCompare(right.typeLabel, "ru-RU");
+    if (typeComparison !== 0) {
+      return typeComparison;
+    }
+
+    return left.title.localeCompare(right.title, "ru-RU");
+  });
 
 const mainHeroOptions = Array.from(contentTitleMaps.mainHero.entries())
   .map(([key, title]) => {
@@ -404,6 +510,8 @@ const initialMainHeroState = (() => {
       initialMainHero: initialMainHeroState,
       newsOptions,
       initialNewsRail: initialNewsRailState,
+      netlenkaOptions,
+      initialNetlenkaRail: initialNetlenkaRailState,
       eventOptions,
       initialEventCard: initialEventCardState,
       interviewOptions,
@@ -648,6 +756,116 @@ const initialMainHeroState = (() => {
         </div>
       </div>
     </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Netlenka Rail Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Блок «Самое Читаемое» в правой колонке landing.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input
+              type="radio"
+              name="netlenka-rail-mode"
+              value="empty"
+              x-model="netlenkaRailMode"
+            />
+            <span class="text-sm">Empty</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input
+              type="radio"
+              name="netlenka-rail-mode"
+              value="auto-latest"
+              x-model="netlenkaRailMode"
+            />
+            <span class="text-sm">Auto latest</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input
+              type="radio"
+              name="netlenka-rail-mode"
+              value="manual"
+              x-model="netlenkaRailMode"
+            />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="netlenkaRailMode === 'auto-latest'" class="grid gap-2 max-w-xs">
+          <label for="netlenka-rail-limit" class="text-sm font-medium">
+            Количество материалов
+          </label>
+          <select
+            id="netlenka-rail-limit"
+            x-model="netlenkaRailLimit"
+            class="select select-bordered w-full"
+          >
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+
+        <div x-show="netlenkaRailMode === 'manual'" class="grid gap-3">
+          <p class="text-sm font-medium">
+            Выбери материалы вручную. Порядок выбора сохранится в rail.
+          </p>
+
+          {netlenkaOptions.length > 0 ? (
+            <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
+              {
+                netlenkaOptions.map((item) => (
+                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      :checked={`isManualNetlenkaSelected(${JSON.stringify(item.id)})`}
+                      @change={`toggleNetlenkaItem(${JSON.stringify(item.id)})`}
+                    />
+                    <span class="flex flex-col gap-1 text-sm leading-6">
+                      <span class="font-medium">{item.title}</span>
+                      <span class="text-xs uppercase tracking-[0.22em] text-base-content/55">
+                        {item.typeLabel}
+                      </span>
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          ) : (
+            <p class="text-sm text-base-content/70">
+              Пока нет материалов для ручного выбора.
+            </p>
+          )}
+        </div>
+
+        <p x-show="netlenkaError" class="text-sm text-error" x-text="netlenkaError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveNetlenkaRail()"
+            :disabled="netlenkaSaving"
+          >
+            Сохранить netlenka rail
+          </button>
+          <span x-show="netlenkaSaving" class="text-sm text-base-content/70">
+            Сохраняем...
+          </span>
+        </div>
+      </div>
+    </div>
+
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
         <h3 class="text-lg font-semibold">Event Card Controls</h3>
