@@ -65,7 +65,7 @@ const formatDashboardArticle = (
 
   return {
     ...article,
-    statusLabel: article.isHotContent ? "Самое читаемое" : "Обычная статья",
+    statusLabel: article.isHotContent ? "Самое Читаемое" : "Обычная статья",
     tagsLabel:
       Array.isArray(article.tags) && article.tags.length > 0
         ? article.tags.join(", ")
@@ -129,14 +129,14 @@ const articleListState = JSON.stringify({
     </div>
 
     <label class="flex flex-col gap-2 text-sm text-base-content/70 md:min-w-64">
-      <span>Фильтр по `isHotContent`</span>
+      <span>Фильтр по «Самое Читаемое»</span>
       <select
         x-model="hotFilter"
         class="select select-bordered w-full bg-base-100"
       >
         <option value="all">Все статьи</option>
-        <option value="hot">Только hot content</option>
-        <option value="regular">Только не hot content</option>
+        <option value="hot">Только «Самое Читаемое»</option>
+        <option value="regular">Только обычные статьи</option>
       </select>
     </label>
   </div>
