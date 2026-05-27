@@ -332,9 +332,7 @@ function selectNewsRailItems(
   }
 
   const itemsById = new Map(newsItems.map((item) => [item.id, item]));
-  return newsRail.ids
-    .map((id) => itemsById.get(id))
-    .filter(Boolean);
+  return newsRail.ids.map((id) => itemsById.get(id)).filter(Boolean);
 }
 
 function normalizeEvents(events: any[]) {
@@ -429,7 +427,7 @@ function selectEventCard(
                   />
                 </a>
                 <div class="flex-1 max-w-max">
-                  <div class="mb-1">
+                  <div class="mb-1 flex items-start">
                     <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                       {getPrimaryTag(newsItem) || "Новости"}
                     </span>
