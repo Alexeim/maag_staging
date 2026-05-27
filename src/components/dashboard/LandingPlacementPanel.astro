@@ -3,22 +3,43 @@ interface Props {
   allowMainHero?: boolean;
   allowFeaturedEvent?: boolean;
   allowFeaturedInterviewInCulture?: boolean;
+  featuredEventOnly?: boolean;
 }
 
 const {
   allowMainHero = false,
   allowFeaturedEvent = false,
   allowFeaturedInterviewInCulture = false,
+  featuredEventOnly = false,
 } = Astro.props as Props;
+
+const isFeaturedEventOnly =
+  featuredEventOnly &&
+  allowFeaturedEvent &&
+  !allowMainHero &&
+  !allowFeaturedInterviewInCulture;
 ---
 
 <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
   <div class="flex flex-wrap items-start justify-between gap-4">
     <div>
-      <h2 class="text-xl font-semibold">Размещение на landing</h2>
-      <p class="text-sm text-base-content/70 mt-1">
-        Здесь управляются глобальные editorial slots без старых checkbox-флагов.
-      </p>
+      {
+        isFeaturedEventOnly ? (
+          <>
+            <h2 class="text-xl font-semibold">Карточка события на landing</h2>
+            <p class="text-sm text-base-content/70 mt-1">
+              Здесь выбирается, какое событие показывать в календарной карточке на landing.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 class="text-xl font-semibold">Размещение на landing</h2>
+            <p class="text-sm text-base-content/70 mt-1">
+              Здесь управляются глобальные editorial slots без старых checkbox-флагов.
+            </p>
+          </>
+        )
+      }
     </div>
 
     <button
@@ -27,7 +48,7 @@ const {
       @click="loadLandingPlacements()"
       :disabled="placementLoading || placementSaving"
     >
-      Обновить статусы
+      {isFeaturedEventOnly ? "Обновить карточку" : "Обновить статусы"}
     </button>
   </div>
 
@@ -35,30 +56,53 @@ const {
     x-show="!hasPlacementEntityId()"
     class="mt-4 text-sm text-base-content/70"
   >
-    Сначала сохрани материал. После первого сохранения здесь появятся действия для placement'ов.
+    {
+      isFeaturedEventOnly
+        ? "Сначала сохрани событие. После первого сохранения здесь можно вручную назначить его в карточку события на landing."
+        : "Сначала сохрани материал. После первого сохранения здесь появятся действия для placement'ов."
+    }
   </p>
 
   <div x-show="hasPlacementEntityId()" class="mt-4 space-y-4">
     <p x-show="placementLoading" class="text-sm text-base-content/70">
-      Загружаем текущие размещения...
+      {isFeaturedEventOnly ? "Загружаем настройки карточки события..." : "Загружаем текущие размещения..."}
     </p>
 
     <p x-show="placementError" class="text-sm text-error" x-text="placementError"></p>
 
     <div class="grid gap-3 text-sm">
-      <p class="text-base-content/70">
-        Текущий главный материал landing:
-        <span class="font-medium text-base-content" x-text="getCurrentMainHeroSummary()"></span>
-      </p>
-      <p x-show="isCurrentMainHero()" class="text-success">
-        Этот материал сейчас стоит главным в блоке «Главное».
-      </p>
-      <p x-show="isCurrentFeaturedEvent()" class="text-success">
-        Это событие сейчас стоит в блоке «Календарь» на landing.
-      </p>
-      <p x-show="isCurrentFeaturedInterviewInCulture()" class="text-success">
-        Это интервью сейчас стоит в special block «Культура».
-      </p>
+      {
+        isFeaturedEventOnly ? (
+          <>
+            <p class="text-base-content/70">
+              Текущая карточка события на landing:
+              <span
+                class="font-medium text-base-content"
+                x-text="getCurrentFeaturedEventSummary()"
+              ></span>
+            </p>
+            <p x-show="isCurrentFeaturedEvent()" class="text-success">
+              Это событие сейчас вручную стоит в карточке «Календарь» на landing.
+            </p>
+          </>
+        ) : (
+          <>
+            <p class="text-base-content/70">
+              Текущий главный материал landing:
+              <span class="font-medium text-base-content" x-text="getCurrentMainHeroSummary()"></span>
+            </p>
+            <p x-show="isCurrentMainHero()" class="text-success">
+              Этот материал сейчас стоит главным в блоке «Главное».
+            </p>
+            <p x-show="isCurrentFeaturedEvent()" class="text-success">
+              Это событие сейчас стоит в блоке «Календарь» на landing.
+            </p>
+            <p x-show="isCurrentFeaturedInterviewInCulture()" class="text-success">
+              Это интервью сейчас стоит в special block «Культура».
+            </p>
+          </>
+        )
+      }
     </div>
 
     <div class="flex flex-wrap gap-3">
@@ -94,7 +138,7 @@ const {
             x-show="canSetAsFeaturedEvent() && !isCurrentFeaturedEvent()"
             :disabled="placementSaving"
           >
-            Поставить в блок события
+            {isFeaturedEventOnly ? "Поставить в карточку события" : "Поставить в блок события"}
           </button>
           <button
             type="button"
@@ -103,7 +147,7 @@ const {
             x-show="isCurrentFeaturedEvent()"
             :disabled="placementSaving"
           >
-            Снять из блока события
+            {isFeaturedEventOnly ? "Вернуть авто-выбор события" : "Снять из блока события"}
           </button>
         </>
       )}

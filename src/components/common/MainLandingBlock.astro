@@ -279,6 +279,12 @@ function toDate(value: unknown): Date | null {
   return null;
 }
 
+function resetToUtcMidnight(date: Date) {
+  const normalized = new Date(date);
+  normalized.setUTCHours(0, 0, 0, 0);
+  return normalized;
+}
+
 const formatEventDate = (value: unknown) => {
   const date = toDate(value);
   if (!date) {
@@ -349,17 +355,50 @@ function normalizeEvents(events: any[]) {
         ...event,
         startDate,
         endDate,
+        startDay: resetToUtcMidnight(startDate),
+        endDay: resetToUtcMidnight(endDate ?? startDate),
       };
     })
-    .filter(Boolean) as Array<{ startDate: Date; endDate: Date | null } & any>;
+    .filter(Boolean) as Array<
+      {
+        startDate: Date;
+        endDate: Date | null;
+        startDay: Date;
+        endDay: Date;
+      } & any
+    >;
 }
 
 function selectNearestEvent(events: any[]) {
-  const now = new Date();
+  const today = resetToUtcMidnight(new Date());
   return (
     normalizeEvents(events)
-      .filter((event) => event.startDate.getTime() >= now.getTime())
-      .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())[0] || null
+      .filter((event) => event.endDay.getTime() >= today.getTime())
+      .sort((a, b) => {
+        const aIsActiveToday =
+          a.startDay.getTime() <= today.getTime() &&
+          a.endDay.getTime() >= today.getTime();
+        const bIsActiveToday =
+          b.startDay.getTime() <= today.getTime() &&
+          b.endDay.getTime() >= today.getTime();
+
+        if (aIsActiveToday !== bIsActiveToday) {
+          return aIsActiveToday ? -1 : 1;
+        }
+
+        if (aIsActiveToday && bIsActiveToday) {
+          const aDistance = Math.abs(a.startDay.getTime() - today.getTime());
+          const bDistance = Math.abs(b.startDay.getTime() - today.getTime());
+
+          if (aDistance !== bDistance) {
+            return aDistance - bDistance;
+          }
+
+          return b.startDay.getTime() - a.startDay.getTime();
+        }
+
+        return a.startDay.getTime() - b.startDay.getTime();
+      })[0] || null
   );
 }
 

@@ -1,6 +1,7 @@
 import {
   articlesApi,
   editorialPlacementsApi,
+  eventsApi,
   flippersApi,
   guidesApi,
   interviewsApi,
@@ -80,6 +81,7 @@ export const createLandingPlacementManager = (
 ) => ({
   landingPlacements: { ...DEFAULT_LANDING_PLACEMENTS } as LandingPlacementsResponse,
   currentMainHeroTitle: "",
+  currentFeaturedEventTitle: "",
   placementLoading: false,
   placementSaving: false,
   placementError: "",
@@ -155,6 +157,23 @@ export const createLandingPlacementManager = (
     return `${typeLabel}: заголовок пока не загрузился.`;
   },
 
+  getCurrentFeaturedEventSummary() {
+    const eventCard = this.landingPlacements.eventCard ?? null;
+    if (!eventCard) {
+      return "Карточка события сейчас пустая.";
+    }
+
+    if (eventCard.mode === "auto-nearest") {
+      return "Автоматически показывается ближайшее событие.";
+    }
+
+    if (this.currentFeaturedEventTitle) {
+      return `Вручную выбрано: ${this.currentFeaturedEventTitle}`;
+    }
+
+    return `Вручную выбрано событие ${eventCard.id}.`;
+  },
+
   async syncCurrentMainHeroTitle() {
     const currentMainHero = this.landingPlacements.mainHero ?? null;
     if (!currentMainHero) {
@@ -171,6 +190,22 @@ export const createLandingPlacementManager = (
     }
   },
 
+  async syncCurrentFeaturedEventTitle() {
+    const eventCard = this.landingPlacements.eventCard ?? null;
+    if (!eventCard || eventCard.mode !== "manual") {
+      this.currentFeaturedEventTitle = "";
+      return;
+    }
+
+    try {
+      this.currentFeaturedEventTitle =
+        (await eventsApi.getById(eventCard.id)).title || "Событие не найдено";
+    } catch (error) {
+      console.error("Failed to load current featured event title:", error);
+      this.currentFeaturedEventTitle = "Не удалось загрузить название события";
+    }
+  },
+
   async loadLandingPlacements() {
     this.placementLoading = true;
     this.placementError = "";
@@ -178,6 +213,7 @@ export const createLandingPlacementManager = (
     try {
       this.landingPlacements = await editorialPlacementsApi.getLanding();
       await this.syncCurrentMainHeroTitle();
+      await this.syncCurrentFeaturedEventTitle();
     } catch (error) {
       console.error("Failed to load landing placements:", error);
       this.placementError =
@@ -199,6 +235,7 @@ export const createLandingPlacementManager = (
     try {
       this.landingPlacements = await editorialPlacementsApi.updateLanding(payload);
       await this.syncCurrentMainHeroTitle();
+      await this.syncCurrentFeaturedEventTitle();
       showToast(successMessage);
     } catch (error) {
       console.error("Failed to update landing placements:", error);
@@ -254,8 +291,8 @@ export const createLandingPlacementManager = (
 
   async clearFeaturedEvent() {
     await this.updateLandingPlacements(
-      { eventCard: null },
-      "Блок события на landing очищен.",
+      { eventCard: { mode: "auto-nearest" } },
+      "Карточка события на landing переведена в автоматический режим.",
     );
   },
 
