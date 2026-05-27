@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 
 import picture1 from "../../assets/images/culture.jpg";
+import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 
 interface ArticleCardProps {
   isNetlenka?: boolean;
@@ -13,6 +14,7 @@ interface ArticleCardProps {
   transitionName?: string;
   imageUrl?: string;
   href?: string;
+  paid?: boolean;
 }
 
 const {
@@ -25,9 +27,15 @@ const {
   transitionName,
   imageUrl,
   href = "#",
+  paid = false,
 } = Astro.props as ArticleCardProps;
 
 const displayImage = imageUrl || picture1.src;
+
+const trimmedTitle = title.trimEnd();
+const lastSpaceIndex = trimmedTitle.lastIndexOf(" ");
+const titleStart = lastSpaceIndex >= 0 ? trimmedTitle.slice(0, lastSpaceIndex) : "";
+const lastWord = lastSpaceIndex >= 0 ? trimmedTitle.slice(lastSpaceIndex + 1) : trimmedTitle;
 ---
 
 <div class="w-full flex flex-col justify-start gap-2">
@@ -85,7 +93,12 @@ const displayImage = imageUrl || picture1.src;
     <h3
       class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90"
     >
-      {title}
+      {paid ? (
+        <>
+          {titleStart && <>{titleStart}{" "}</>}
+          <span class="whitespace-nowrap">{lastWord}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+        </>
+      ) : title}
     </h3>
   </a>
   {

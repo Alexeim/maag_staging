@@ -23,6 +23,7 @@ export interface Article {
   isHotContent?: boolean;
   isMainInCategory?: boolean;
   isNews?: boolean;
+  paid?: boolean;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
   createdAt: Date;
@@ -91,6 +92,7 @@ export const createArticle = async (req: Request, res: Response) => {
       isHotContent = false,
       isMainInCategory = false,
       isNews = false,
+      paid = false,
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -126,6 +128,7 @@ export const createArticle = async (req: Request, res: Response) => {
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
+      paid: Boolean(paid),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizedContentCollectionId,
       createdAt: now,
@@ -242,6 +245,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       isHotContent = false,
       isMainInCategory = false,
       isNews = false,
+      paid = false,
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -279,6 +283,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
+      paid: Boolean(paid),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizedContentCollectionId,
       updatedAt: now,

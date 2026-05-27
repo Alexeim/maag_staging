@@ -17,6 +17,7 @@ export interface VisualStory {
   category?: string;
   tags?: string[];
   isHotContent?: boolean;
+  paid?: boolean;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
   createdAt: Date;
@@ -38,6 +39,7 @@ export const createVisualStory = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
+      paid = false,
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -64,6 +66,7 @@ export const createVisualStory = async (req: Request, res: Response) => {
       category: category || '',
       tags: Array.isArray(tags) ? tags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
       isHotContent: Boolean(isHotContent),
+      paid: Boolean(paid),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       createdAt: new Date(),
@@ -153,6 +156,7 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
+      paid = false,
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -177,6 +181,7 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       category: category || '',
       tags: Array.isArray(tags) ? tags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
       isHotContent: Boolean(isHotContent),
+      paid: Boolean(paid),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       updatedAt: new Date(),

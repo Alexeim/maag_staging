@@ -20,6 +20,7 @@ export interface Guide {
   tags?: string[];
   isHotContent?: boolean;
   isMainInCategory?: boolean;
+  paid?: boolean;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
   createdAt: Date;
@@ -72,6 +73,7 @@ export const createGuide = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       isMainInCategory = false,
+      paid = false,
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -103,6 +105,7 @@ export const createGuide = async (req: Request, res: Response) => {
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isMainInCategory: Boolean(isMainInCategory),
+      paid: Boolean(paid),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       createdAt: now,
@@ -214,6 +217,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       isMainInCategory = false,
+      paid = false,
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -247,6 +251,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isMainInCategory: Boolean(isMainInCategory),
+      paid: Boolean(paid),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       updatedAt: now,

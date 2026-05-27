@@ -2,6 +2,7 @@
 import Layout from "../Layouts/Layout.astro";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import NetlenkaCard from "@/components/common/NetlenkaCard.astro";
+import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import picture1 from "../assets/images/culture.jpg";
 import {
@@ -379,7 +380,8 @@ const featuredInterviewName =
                     class="text-current no-underline hover:underline"
                   >
                     <h2 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
-                      {truncateText(primaryCultureArticle.title, 96)}
+                      {truncateText(primaryCultureArticle.title, 96)}{" "}
+                      {primaryCultureArticle.paid && <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />}
                     </h2>
                   </a>
 
@@ -432,7 +434,8 @@ const featuredInterviewName =
                         class="block text-current no-underline hover:underline"
                       >
                         <h3 class="m-0 line-clamp-3 text-[1.4rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.12]">
-                          {truncateText(item.title, 88)}
+                          {truncateText(item.title, 88)}{" "}
+                          {item.paid && <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />}
                         </h3>
                       </a>
 
@@ -552,7 +555,8 @@ const featuredInterviewName =
                         class="block text-current no-underline hover:underline"
                       >
                         <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                          {truncateText(item.title, 72)}
+                          {truncateText(item.title, 72)}{" "}
+                          {item.paid && <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />}
                         </h3>
                       </a>
 
@@ -620,7 +624,8 @@ const featuredInterviewName =
                                 class="block text-current no-underline hover:underline"
                               >
                                 <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                                  {truncateText(item.title, 72)}
+                                  {truncateText(item.title, 72)}{" "}
+                                  {item.paid && <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />}
                                 </h3>
                               </a>
 

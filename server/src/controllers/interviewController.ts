@@ -16,6 +16,7 @@ export interface Interview {
   cardLead?: string;
   mainQuote?: string;
   isHotContent?: boolean;
+  paid?: boolean;
   content: any[]; // Array of content blocks
   imageUrl?: string;
   imageCaption?: string;
@@ -48,6 +49,7 @@ export const createInterview = async (req: Request, res: Response) => {
       mainQuote,
       tags = [],
       isHotContent = false,
+      paid = false,
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -70,6 +72,7 @@ export const createInterview = async (req: Request, res: Response) => {
       cardLead: cardLead || '',
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
+      paid: Boolean(paid),
       content,
       imageUrl,
       imageCaption,
@@ -187,6 +190,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       mainQuote,
       tags = [],
       isHotContent = false,
+      paid = false,
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -211,6 +215,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       cardLead: cardLead || '',
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
+      paid: Boolean(paid),
       content,
       imageUrl,
       imageCaption,

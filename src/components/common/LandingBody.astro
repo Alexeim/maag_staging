@@ -17,6 +17,7 @@ import { getKnownTagLabel } from "@/content/tags/parisTags";
 
 import NetlenkaCard from "./NetlenkaCard.astro";
 import ArticleCard from "./ArticleCard.astro";
+import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import LatestInterview from "../HomePage/LatestInterview.astro";
 
 import picture1 from "../../assets/images/culture.jpg";
@@ -482,6 +483,12 @@ const truncateText = (text: string | null, maxLength: number = 100) => {
 const interviewQuote = latestInterview?.mainQuote
   ? truncateText(latestInterview.mainQuote)
   : truncateText(extractQuoteOrAnswer(latestInterview));
+
+const splitTitle = (t: string) => {
+  const s = t.trimEnd();
+  const i = s.lastIndexOf(" ");
+  return { start: i >= 0 ? s.slice(0, i) : "", last: i >= 0 ? s.slice(i + 1) : s };
+};
 ---
 
 <section
@@ -551,7 +558,12 @@ const interviewQuote = latestInterview?.mainQuote
                       class="block transition-opacity duration-200 hover:opacity-90"
                     >
                       <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mb-2">
-                        {cultureHero.title}
+                        {cultureHero.paid ? (
+                          <>
+                            {splitTitle(cultureHero.title).start && <>{splitTitle(cultureHero.title).start}{" "}</>}
+                            <span class="whitespace-nowrap">{splitTitle(cultureHero.title).last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                          </>
+                        ) : cultureHero.title}
                       </h4>
                     </a>
                     {getCardLead(cultureHero) && (
@@ -602,6 +614,7 @@ const interviewQuote = latestInterview?.mainQuote
                     transitionName={getTransitionName(item)}
                     imageUrl={item.imageUrl}
                     href={item.href}
+                    paid={item.paid}
                   />
                 ))
               ) : (
@@ -722,7 +735,12 @@ const interviewQuote = latestInterview?.mainQuote
                           class="block transition-opacity duration-200 hover:opacity-90"
                         >
                           <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mb-2">
-                            {parisHero.title}
+                            {parisHero.paid ? (
+                              <>
+                                {splitTitle(parisHero.title).start && <>{splitTitle(parisHero.title).start}{" "}</>}
+                                <span class="whitespace-nowrap">{splitTitle(parisHero.title).last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                              </>
+                            ) : parisHero.title}
                           </h4>
                         </a>
 
@@ -773,6 +791,7 @@ const interviewQuote = latestInterview?.mainQuote
                         transitionName={getTransitionName(item)}
                         imageUrl={item.imageUrl}
                         href={item.href}
+                        paid={item.paid}
                       />
                     ))}
                   </div>
@@ -824,7 +843,12 @@ const interviewQuote = latestInterview?.mainQuote
                       class="text-current no-underline hover:underline"
                     >
                       <h4 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
-                        {leSaviezVousArticle.title}
+                        {leSaviezVousArticle.paid ? (
+                          <>
+                            {splitTitle(leSaviezVousArticle.title).start && <>{splitTitle(leSaviezVousArticle.title).start}{" "}</>}
+                            <span class="whitespace-nowrap">{splitTitle(leSaviezVousArticle.title).last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                          </>
+                        ) : leSaviezVousArticle.title}
                       </h4>
                     </a>
 
@@ -889,6 +913,7 @@ const interviewQuote = latestInterview?.mainQuote
                       lead={truncateText(getCardLead(item), 120) || undefined}
                       imageUrl={item.imageUrl}
                       href={item.href}
+                      paid={item.paid}
                     />
                   </div>
                 ))}

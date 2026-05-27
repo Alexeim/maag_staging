@@ -16,6 +16,7 @@ export interface Flipper {
   category?: string;
   tags?: string[];
   isHotContent?: boolean;
+  paid?: boolean;
   carouselContent: { imageUrl: string; caption: string }[];
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
@@ -41,6 +42,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
+      paid = false,
       carouselContent = [],
       relatedContent,
       contentCollectionId,
@@ -68,6 +70,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
+      paid: Boolean(paid),
       carouselContent,
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
@@ -175,6 +178,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
+      paid = false,
       carouselContent = [],
       relatedContent,
       contentCollectionId,
@@ -207,6 +211,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
+      paid: Boolean(paid),
       carouselContent,
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),

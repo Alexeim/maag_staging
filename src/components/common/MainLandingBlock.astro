@@ -1,6 +1,6 @@
 ---
 import { Image } from "astro:assets";
-import MaagLogo from "../../assets/logo/maaglogo.svg";
+import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
 import {
   articlesApi,
@@ -130,6 +130,12 @@ const isHotContentItem = (article: any) =>
 
 const isLeSaviezVousArticle = (article: any) =>
   article?.articleType === "le_saviez_vous";
+
+const splitTitle = (t: string) => {
+  const s = t.trimEnd();
+  const i = s.lastIndexOf(" ");
+  return { start: i >= 0 ? s.slice(0, i) : "", last: i >= 0 ? s.slice(i + 1) : s };
+};
 
 const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   schemaVersion: 2,
@@ -527,8 +533,12 @@ function selectEventCard(
                 class="block transition-opacity duration-200 hover:opacity-90"
               >
                 <h2 class="text-3xl lg:text-[44px] font-normal font-old_standard tracking-[-0.04em] leading-[48px] hover:underline mt-1 mb-2">
-                  {mainArticle.title}{" "}
-                  <MaagLogo class="w-4 h-4 inline-block align-baseline" />
+                  {mainArticle.paid ? (
+                    <>
+                      {splitTitle(mainArticle.title).start && <>{splitTitle(mainArticle.title).start}{" "}</>}
+                      <span class="whitespace-nowrap">{splitTitle(mainArticle.title).last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                    </>
+                  ) : mainArticle.title}
                 </h2>
               </a>
               {getCardLead(mainArticle) ? (

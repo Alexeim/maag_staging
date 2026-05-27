@@ -101,6 +101,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       parisDistrict: "",
       binaryForGuide: false,
       isHotContent: false,
+      paid: false,
       slides: [] as Array<{ imageUrl: string; text: string }>,
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
@@ -431,6 +432,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
         this.story.binaryForGuide = Boolean(copy.binaryForGuide);
         this.story.isHotContent = Boolean(copy.isHotContent);
+        this.story.paid = Boolean(copy.paid);
         this.story.slides = Array.isArray(copy.slides) ? copy.slides : [];
         this.story.relatedContent = sanitizeRelatedContent(
           copy.relatedContent,
@@ -508,6 +510,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           parisDistrict: isParisCategory ? this.story.parisDistrict || null : null,
           binaryForGuide: false,
           isHotContent: this.story.isHotContent,
+          paid: this.story.paid,
           relatedContent: sanitizeRelatedContent(
             this.story.relatedContent,
             "visualStory",

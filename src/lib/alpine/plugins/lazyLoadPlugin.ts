@@ -137,6 +137,7 @@ export default function(Alpine: Alpine) {
         category: '',
         isHotContent: false,
         isMainInCategory: false,
+        paid: false,
         contentCollectionId: null,
         relatedContent: {
           article: [],
@@ -156,6 +157,7 @@ export default function(Alpine: Alpine) {
         cardLead: '',
         mainQuote: '',
         isHotContent: false,
+        paid: false,
         imageUrl: '',
         imageCaption: '',
         contentBlocks: [],
@@ -416,6 +418,7 @@ export default function(Alpine: Alpine) {
         cardLead: '',
         category: '',
         tags: [],
+        paid: false,
         carouselContent: [],
         relatedContent: {
           article: [],
@@ -451,6 +454,7 @@ export default function(Alpine: Alpine) {
         category: '',
         tags: [],
         isHotContent: false,
+        paid: false,
         slides: [],
         relatedContent: {
           article: [],

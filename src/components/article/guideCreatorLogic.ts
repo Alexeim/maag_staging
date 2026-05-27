@@ -166,6 +166,7 @@ export default function guideCreatorLogic(initialState = {}) {
         ? ""
         : normalizedCategory;
     copy.isHotContent = isHotContentLegacy;
+    copy.paid = Boolean(copy.paid);
     const blocks = Array.isArray(copy.content)
       ? copy.content
       : Array.isArray(copy.contentBlocks)
@@ -234,6 +235,7 @@ export default function guideCreatorLogic(initialState = {}) {
       category: "",
       isHotContent: false,
       isMainInCategory: false,
+      paid: false,
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
     },
@@ -1111,6 +1113,7 @@ export default function guideCreatorLogic(initialState = {}) {
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,
           isMainInCategory: this.article.isMainInCategory,
+          paid: this.article.paid,
           relatedContent: sanitizeRelatedContent(
             this.article.relatedContent,
             "guide",

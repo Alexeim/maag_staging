@@ -243,6 +243,7 @@ export default function articleCreatorLogic(initialState = {}) {
     );
     copy.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
     copy.binaryForGuide = Boolean(copy.binaryForGuide);
+    copy.paid = Boolean(copy.paid);
     copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.cardLead = copy.cardLead ?? "";
@@ -300,6 +301,7 @@ export default function articleCreatorLogic(initialState = {}) {
       category: "", // <-- Added category
       isHotContent: false,
       isMainInCategory: false,
+      paid: false,
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
     },
@@ -1360,6 +1362,7 @@ export default function articleCreatorLogic(initialState = {}) {
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,
           isMainInCategory: this.article.isMainInCategory,
+          paid: this.article.paid,
           contentCollectionId: normalizeContentCollectionId(
             this.article.contentCollectionId,
           ),
