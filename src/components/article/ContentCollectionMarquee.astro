@@ -139,7 +139,8 @@ const getPrimaryTag = (item: ContentCardItem): string => {
     if (item?.isNews) {
       return "Новости";
     }
-    const category = typeof item?.category === "string" ? item.category.trim() : "";
+    const category =
+      typeof item?.category === "string" ? item.category.trim() : "";
     const normalizedCategory = category.toLowerCase();
     return TAG_LABEL_ALIASES[normalizedCategory] ?? category;
   }
@@ -181,145 +182,232 @@ const chunkEntries = <T,>(entries: T[], size: number): T[][] => {
   return pages;
 };
 
-const pages = chunkEntries(marqueeEntries, 4);
+const desktopPages = chunkEntries(marqueeEntries, 4);
+const mobileEntries = marqueeEntries.filter(
+  (entry): entry is Extract<MarqueeEntry, { type: "item" }> =>
+    entry.type === "item",
+);
+const mobilePages = chunkEntries(mobileEntries, 1);
 ---
 
 {
   hasAnyItems && (
-    <section
-      class="related-carousel mt-[90px] border-t border-base-content/10 pt-10"
-      data-related-carousel-root
-      data-page-count={pages.length}
-    >
-      <div class="grid gap-5">
-        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
-            Похожие материалы
-          </h2>
+    <section class="mt-[90px] overflow-x-hidden border-t border-base-content/10 pt-10">
+      <div class="grid min-w-0 gap-5">
+        <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
+          Похожие материалы
+        </h2>
 
-          {hasCollectionItems && hasCategoryItems ? (
-            <div class="flex items-center gap-3 text-[11px] font-inter uppercase tracking-[0.22em] text-base-content/55">
-              <span>Из той же collection</span>
-              <span class="h-5 w-px bg-base-content/15"></span>
-              <span>Из той же категории</span>
+        <div
+          class="related-carousel hidden min-w-0 w-full max-w-full lg:block"
+          data-related-carousel-root
+          data-page-count={desktopPages.length}
+        >
+          <div class="min-w-0 w-full max-w-full overflow-hidden">
+            <div
+              class="related-carousel__track flex w-full transition-transform duration-700 ease-out"
+              data-related-carousel-track
+            >
+              {desktopPages.map((page, pageIndex) => (
+                <div
+                  class="related-carousel__page min-w-full w-full max-w-full flex-shrink-0"
+                  data-related-carousel-page
+                  aria-hidden={pageIndex === 0 ? "false" : "true"}
+                >
+                  <div class="grid grid-cols-4 items-start justify-items-center gap-6">
+                    {page.map((entry, entryIndex) =>
+                      entry.type === "separator" ? (
+                        <div
+                          class="flex min-h-[360px] w-full max-w-[280px] items-center justify-center px-4"
+                          aria-hidden="true"
+                        >
+                          <div class="h-[220px] w-px bg-base-content/15" />
+                        </div>
+                      ) : (
+                        <div
+                          class="min-w-0 w-full max-w-[280px]"
+                          key={`${entry.item.contentType}-${entry.item.id}-${pageIndex}-${entryIndex}`}
+                        >
+                          <article
+                            class:list={[
+                              "grid h-full grid-rows-[auto_1fr] gap-[0.8rem]",
+                              entry.item.contentType === "interview" &&
+                                "content-start",
+                            ]}
+                          >
+                            <a
+                              href={entry.item.href}
+                              class:list={[
+                                "linked-image-hover bg-white/50 aspect-[1.02/1]",
+                                entry.item.contentType === "interview" &&
+                                  "w-full aspect-square rounded-full bg-transparent",
+                              ]}
+                              aria-label={entry.item.title}
+                            >
+                              <img
+                                src={entry.item.imageUrl || fallbackImageSrc}
+                                alt={entry.item.title}
+                                class:list={[
+                                  "linked-image-hover__media block h-full w-full object-cover",
+                                  entry.item.contentType === "interview" &&
+                                    "rounded-full",
+                                ]}
+                                loading="lazy"
+                                transition:name={getTransitionName(entry.item)}
+                              />
+                            </a>
+
+                            <div
+                              class:list={[
+                                "grid h-full content-start gap-[0.55rem]",
+                                entry.item.contentType === "interview" &&
+                                  "w-full text-left",
+                              ]}
+                            >
+                              <p class="m-0">
+                                <span class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
+                                  {getPrimaryTag(entry.item) || "Материал"}
+                                </span>
+                              </p>
+
+                              <a
+                                href={entry.item.href}
+                                class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                              >
+                                <h3 class="font-old_standard text-2xl font-normal tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 hover:underline">
+                                  {truncateText(entry.item.title)}
+                                </h3>
+                              </a>
+
+                              <p class="hidden m-0 font-inter text-xs uppercase tracking-[0.22em] text-base-content/55">
+                                {formatDate(entry.item.createdAt)}
+                              </p>
+                            </div>
+                          </article>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          ) : hasCollectionItems ? (
-            <div class="text-[11px] font-inter uppercase tracking-[0.22em] text-base-content/55">
-              Из той же collection
-            </div>
-          ) : (
-            <div class="text-[11px] font-inter uppercase tracking-[0.22em] text-base-content/55">
-              Из той же категории
+          </div>
+
+          {desktopPages.length > 1 && (
+            <div class="flex items-center justify-center gap-2 pt-2">
+              {desktopPages.map((_, index) => (
+                <button
+                  type="button"
+                  class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
+                  data-related-carousel-dot
+                  data-page-index={index}
+                  aria-label={`Показать страницу ${index + 1}`}
+                  aria-pressed={index === 0 ? "true" : "false"}
+                />
+              ))}
             </div>
           )}
         </div>
 
-        <div class="overflow-hidden">
-          <div
-            class="related-carousel__track flex transition-transform duration-700 ease-out"
-            data-related-carousel-track
-          >
-            {pages.map((page, pageIndex) => (
-              <div
-                class="related-carousel__page min-w-full flex-shrink-0"
-                data-related-carousel-page
-                aria-hidden={pageIndex === 0 ? "false" : "true"}
-              >
-                <div class="grid grid-cols-4 items-start justify-items-center gap-6">
-                  {page.map((entry, entryIndex) =>
-                    entry.type === "separator" ? (
-                      <div
-                        class="flex min-h-[360px] w-full max-w-[280px] items-center justify-center gap-4 border-x border-base-content/10 px-4"
-                        aria-hidden="true"
+        <div
+          class="related-carousel min-w-0 w-full max-w-full lg:hidden [touch-action:pan-y]"
+          data-related-carousel-root
+          data-related-carousel-swipe="true"
+          data-related-carousel-autoplay="false"
+          data-page-count={mobilePages.length}
+        >
+          <div class="min-w-0 w-full max-w-full overflow-hidden">
+            <div
+              class="related-carousel__track flex w-full transition-transform duration-700 ease-out"
+              data-related-carousel-track
+            >
+              {mobilePages.map((page, pageIndex) => (
+                <div
+                  class="related-carousel__page min-w-full w-full max-w-full flex-shrink-0"
+                  data-related-carousel-page
+                  aria-hidden={pageIndex === 0 ? "false" : "true"}
+                >
+                  <div class="mx-auto min-w-0 w-full max-w-[360px]">
+                    {page.map((entry, entryIndex) => (
+                      <article
+                        class:list={[
+                          "w-full",
+                          "grid h-full grid-rows-[auto_1fr] gap-4",
+                          entry.item.contentType === "interview" &&
+                            "content-start",
+                        ]}
+                        key={`${entry.item.contentType}-${entry.item.id}-mobile-${pageIndex}-${entryIndex}`}
                       >
-                        <div class="h-[220px] w-px bg-base-content/15"></div>
-                        <p class="m-0 max-w-[96px] text-[11px] font-inter uppercase tracking-[0.22em] text-base-content/45">
-                          Из той же категории
-                        </p>
-                      </div>
-                    ) : (
-                      <div
-                        class="min-w-0 w-full max-w-[280px]"
-                        key={`${entry.item.contentType}-${entry.item.id}-${pageIndex}-${entryIndex}`}
-                      >
-                        <article
+                        <a
+                          href={entry.item.href}
                           class:list={[
-                            "grid h-full grid-rows-[auto_1fr] gap-[0.8rem]",
-                            entry.item.contentType === "interview" && "content-start",
+                            "linked-image-hover block bg-white/50 aspect-[1.02/1]",
+                            entry.item.contentType === "interview" &&
+                              "mx-auto w-full max-w-[320px] aspect-square rounded-full bg-transparent",
+                          ]}
+                          aria-label={entry.item.title}
+                        >
+                          <img
+                            src={entry.item.imageUrl || fallbackImageSrc}
+                            alt={entry.item.title}
+                            class:list={[
+                              "linked-image-hover__media block h-full w-full object-cover",
+                              entry.item.contentType === "interview" &&
+                                "rounded-full",
+                            ]}
+                            loading="lazy"
+                          />
+                        </a>
+
+                        <div
+                          class:list={[
+                            "grid h-full content-start gap-3",
+                            entry.item.contentType === "interview" &&
+                              "w-full text-left",
                           ]}
                         >
+                          <p class="m-0">
+                            <span class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
+                              {getPrimaryTag(entry.item) || "Материал"}
+                            </span>
+                          </p>
+
                           <a
                             href={entry.item.href}
-                            class:list={[
-                              "linked-image-hover bg-white/50 aspect-[1.02/1]",
-                              entry.item.contentType === "interview" &&
-                                "w-full aspect-square rounded-full bg-transparent",
-                            ]}
-                            aria-label={entry.item.title}
+                            class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
                           >
-                            <img
-                              src={entry.item.imageUrl || fallbackImageSrc}
-                              alt={entry.item.title}
-                              class:list={[
-                                "linked-image-hover__media block h-full w-full object-cover",
-                                entry.item.contentType === "interview" &&
-                                  "rounded-full",
-                              ]}
-                              loading="lazy"
-                              transition:name={getTransitionName(entry.item)}
-                            />
+                            <h3 class="font-old_standard text-[28px] leading-[1] font-normal tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 hover:underline">
+                              {truncateText(entry.item.title)}
+                            </h3>
                           </a>
 
-                          <div
-                            class:list={[
-                              "grid h-full content-start gap-[0.55rem]",
-                              entry.item.contentType === "interview" &&
-                                "w-full text-left",
-                            ]}
-                          >
-                            <p class="m-0">
-                              <span class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
-                                {getPrimaryTag(entry.item) || "Материал"}
-                              </span>
-                            </p>
-
-                            <a
-                              href={entry.item.href}
-                              class="block text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
-                            >
-                              <h3 class="font-old_standard text-2xl font-normal tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 hover:underline">
-                                {truncateText(entry.item.title)}
-                              </h3>
-                            </a>
-
-                            <p class="hidden m-0 font-inter text-xs uppercase tracking-[0.22em] text-base-content/55">
-                              {formatDate(entry.item.createdAt)}
-                            </p>
-                          </div>
-                        </article>
-                      </div>
-                    ),
-                  )}
+                          <p class="m-0 font-inter text-[11px] uppercase tracking-[0.22em] text-base-content/55">
+                            {formatDate(entry.item.createdAt)}
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {pages.length > 1 && (
-          <div class="flex items-center justify-center gap-2 pt-2">
-            {pages.map((_, index) => (
-              <button
-                type="button"
-                class="related-carousel__dot h-2.5 w-2.5 rounded-full border border-base-content/30 bg-transparent transition-all duration-300"
-                data-related-carousel-dot
-                data-page-index={index}
-                aria-label={`Показать страницу ${index + 1}`}
-                aria-pressed={index === 0 ? "true" : "false"}
-              ></button>
-            ))}
-          </div>
-        )}
+          {mobilePages.length > 1 && (
+            <div class="flex items-center justify-center gap-2 pt-4">
+              {mobilePages.map((_, index) => (
+                <button
+                  type="button"
+                  class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
+                  data-related-carousel-dot
+                  data-page-index={index}
+                  aria-label={`Показать страницу ${index + 1}`}
+                  aria-pressed={index === 0 ? "true" : "false"}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   )
@@ -330,7 +418,10 @@ const pages = chunkEntries(marqueeEntries, 4);
     const roots = document.querySelectorAll("[data-related-carousel-root]");
 
     roots.forEach((root) => {
-      if (!(root instanceof HTMLElement) || root.dataset.initialized === "true") {
+      if (
+        !(root instanceof HTMLElement) ||
+        root.dataset.initialized === "true"
+      ) {
         return;
       }
 
@@ -342,6 +433,9 @@ const pages = chunkEntries(marqueeEntries, 4);
         root.querySelectorAll("[data-related-carousel-dot]"),
       );
       const pageCount = Number(root.dataset.pageCount || pages.length || 0);
+      const isSwipeEnabled = root.dataset.relatedCarouselSwipe === "true";
+      const isAutoplayEnabled =
+        root.dataset.relatedCarouselAutoplay !== "false";
 
       if (!(track instanceof HTMLElement) || pageCount <= 1) {
         root.dataset.initialized = "true";
@@ -350,12 +444,17 @@ const pages = chunkEntries(marqueeEntries, 4);
 
       let currentPage = 0;
       let autoplayId = 0;
+      let touchStartX = 0;
+      let touchStartY = 0;
 
       const syncUi = () => {
         track.style.transform = `translateX(-${currentPage * 100}%)`;
 
         pages.forEach((page, index) => {
-          page.setAttribute("aria-hidden", index === currentPage ? "false" : "true");
+          page.setAttribute(
+            "aria-hidden",
+            index === currentPage ? "false" : "true",
+          );
         });
 
         dots.forEach((dot, index) => {
@@ -365,36 +464,88 @@ const pages = chunkEntries(marqueeEntries, 4);
 
           const isActive = index === currentPage;
           dot.setAttribute("aria-pressed", isActive ? "true" : "false");
-          dot.classList.toggle("related-carousel__dot--active", isActive);
         });
       };
 
+      const goToPage = (pageIndex, shouldRestart = true) => {
+        currentPage = ((pageIndex % pageCount) + pageCount) % pageCount;
+        syncUi();
+
+        if (shouldRestart && isAutoplayEnabled) {
+          scheduleNext();
+        }
+      };
+
       const scheduleNext = () => {
+        if (!isAutoplayEnabled) {
+          return;
+        }
+
         window.clearTimeout(autoplayId);
         autoplayId = window.setTimeout(() => {
-          currentPage = (currentPage + 1) % pageCount;
-          syncUi();
+          goToPage(currentPage + 1, false);
           scheduleNext();
         }, 4500);
       };
 
-      dots.forEach((dot, index) => {
+      dots.forEach((dot) => {
         if (!(dot instanceof HTMLButtonElement)) {
           return;
         }
 
         dot.addEventListener("click", () => {
-          currentPage = index;
-          syncUi();
-          scheduleNext();
+          const pageIndex = Number(dot.dataset.pageIndex || 0);
+          goToPage(pageIndex);
         });
       });
 
-      root.addEventListener("mouseenter", () => window.clearTimeout(autoplayId));
+      if (isSwipeEnabled) {
+        root.addEventListener(
+          "touchstart",
+          (event) => {
+            const touch = event.touches[0];
+            if (!touch) {
+              return;
+            }
+
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            window.clearTimeout(autoplayId);
+          },
+          { passive: true },
+        );
+
+        root.addEventListener(
+          "touchend",
+          (event) => {
+            const touch = event.changedTouches[0];
+            if (!touch) {
+              return;
+            }
+
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+
+            if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+              goToPage(currentPage + (deltaX < 0 ? 1 : -1), false);
+              return;
+            }
+
+            scheduleNext();
+          },
+          { passive: true },
+        );
+      }
+
+      root.addEventListener("mouseenter", () =>
+        window.clearTimeout(autoplayId),
+      );
       root.addEventListener("mouseleave", scheduleNext);
 
       syncUi();
-      scheduleNext();
+      if (isAutoplayEnabled) {
+        scheduleNext();
+      }
       root.dataset.initialized = "true";
     });
   };
