@@ -134,7 +134,10 @@ const isLeSaviezVousArticle = (article: any) =>
 const splitTitle = (t: string) => {
   const s = t.trimEnd();
   const i = s.lastIndexOf(" ");
-  return { start: i >= 0 ? s.slice(0, i) : "", last: i >= 0 ? s.slice(i + 1) : s };
+  return {
+    start: i >= 0 ? s.slice(0, i) : "",
+    last: i >= 0 ? s.slice(i + 1) : s,
+  };
 };
 
 const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
@@ -366,13 +369,13 @@ function normalizeEvents(events: any[]) {
       };
     })
     .filter(Boolean) as Array<
-      {
-        startDate: Date;
-        endDate: Date | null;
-        startDay: Date;
-        endDay: Date;
-      } & any
-    >;
+    {
+      startDate: Date;
+      endDate: Date | null;
+      startDay: Date;
+      endDay: Date;
+    } & any
+  >;
 }
 
 function selectNearestEvent(events: any[]) {
@@ -535,14 +538,21 @@ function selectEventCard(
                 <h2 class="text-3xl lg:text-[44px] font-normal font-old_standard tracking-[-0.04em] leading-[48px] hover:underline mt-1 mb-2">
                   {mainArticle.paid ? (
                     <>
-                      {splitTitle(mainArticle.title).start && <>{splitTitle(mainArticle.title).start}{" "}</>}
-                      <span class="whitespace-nowrap">{splitTitle(mainArticle.title).last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                      {splitTitle(mainArticle.title).start && (
+                        <>{splitTitle(mainArticle.title).start} </>
+                      )}
+                      <span class="whitespace-nowrap">
+                        {splitTitle(mainArticle.title).last}{" "}
+                        <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                      </span>
                     </>
-                  ) : mainArticle.title}
+                  ) : (
+                    mainArticle.title
+                  )}
                 </h2>
               </a>
               {getCardLead(mainArticle) ? (
-                <p class="text-base lg:text-lg text-black/60 font-inter font-normal leading-[20px]">
+                <p class="text-base text-black/70 font-inter font-light leading-[20px]">
                   {getCardLead(mainArticle)}
                 </p>
               ) : null}
