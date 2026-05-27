@@ -620,7 +620,7 @@ const leSaviezSplit = splitTitle(leSaviezTrunc);
                       {[
                         ...editorialCarouselItems,
                         ...editorialCarouselItems,
-                      ].map((item) => (
+                      ].map((item, i) => (
                         <div class="w-[240px] sm:w-[260px] lg:w-[280px] flex-shrink-0">
                           <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                             <a
@@ -633,7 +633,7 @@ const leSaviezSplit = splitTitle(leSaviezTrunc);
                                 alt={item.title}
                                 class="linked-image-hover__media block h-full w-full object-cover"
                                 loading="lazy"
-                                transition:name={getTransitionName(item)}
+                                transition:name={i < editorialCarouselItems.length ? getTransitionName(item) : undefined}
                               />
                             </a>
 

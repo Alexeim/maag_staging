@@ -606,7 +606,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                     style="width: max-content;"
                   >
                     {[...editorialCarouselItems, ...editorialCarouselItems].map(
-                      (item) => (
+                      (item, i) => (
                         <div class="w-[240px] sm:w-[260px] lg:w-[280px] flex-shrink-0">
                           <article
                             class:list={[
@@ -633,7 +633,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                                     "rounded-full",
                                 ]}
                                 loading="lazy"
-                                transition:name={getTransitionName(item)}
+                                transition:name={i < editorialCarouselItems.length ? getTransitionName(item) : undefined}
                               />
                             </a>
 
