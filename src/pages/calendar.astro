@@ -340,6 +340,49 @@ const calendarState = JSON.stringify({
     @filter-changed.window="setFilter($event.detail.filter)"
   >
     <div
+      x-cloak
+      x-show="!$store.auth.isLoading && (!$store.auth.isLoggedIn || ($store.auth.isProfileLoaded && $store.auth.profile?.stripeSubscriptionStatus !== 'active' && $store.auth.profile?.stripeSubscriptionStatus !== 'trialing'))"
+      class="fixed inset-0 z-10 flex items-center justify-center pointer-events-none"
+    >
+      <div class="pointer-events-auto mx-4 max-w-sm bg-white p-10 text-center shadow-[0_8px_40px_rgba(0,0,0,0.12)]">
+        <p class="mb-3 font-inter text-xs font-bold uppercase tracking-[0.35em] text-accent">
+          Maag
+        </p>
+        <h2 class="mb-4 font-old_standard text-[1.75rem] font-normal leading-[1.1] text-black">
+          Только для подписчиков
+        </h2>
+        <p class="mb-8 font-inter text-[0.9rem] leading-relaxed text-black/60">
+          Календарь событий доступен по подписке. Оформите подписку, чтобы получить полный доступ к афише.
+        </p>
+
+        <div x-show="!$store.auth.isLoggedIn" class="flex flex-col gap-3">
+          <button
+            type="button"
+            @click="$store.auth.openAuthModal()"
+            class="w-full cursor-pointer bg-black py-3 font-inter text-sm font-bold uppercase tracking-[0.25em] text-white transition-opacity hover:opacity-75"
+          >
+            Войти
+          </button>
+          <a
+            href="/profile"
+            class="block w-full border border-black py-3 font-inter text-sm font-bold uppercase tracking-[0.25em] text-black no-underline transition-opacity hover:opacity-60"
+          >
+            Оформить подписку
+          </a>
+        </div>
+
+        <div x-show="$store.auth.isLoggedIn && $store.auth.isProfileLoaded">
+          <a
+            href="/profile"
+            class="block w-full bg-black py-3 font-inter text-sm font-bold uppercase tracking-[0.25em] text-white no-underline transition-opacity hover:opacity-75"
+          >
+            Оформить подписку
+          </a>
+        </div>
+      </div>
+    </div>
+    <div
+      :class="!$store.auth.isLoading && (!$store.auth.isLoggedIn || ($store.auth.isProfileLoaded && $store.auth.profile?.stripeSubscriptionStatus !== 'active' && $store.auth.profile?.stripeSubscriptionStatus !== 'trialing')) ? 'blur-sm pointer-events-none select-none' : ''"
       class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
     >
       <h1
