@@ -20,10 +20,7 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
       >
       </h2>
 
-      <div
-        class="mt-6"
-        :class="hasCompletedRange() ? 'mt-8' : 'mt-6'"
-      >
+      <div class="mt-6" :class="hasCompletedRange() ? 'mt-8' : 'mt-6'">
         <template x-if="hasCompletedRange()">
           <div class="space-y-10">
             <template x-if="filteredEvents.length === 0">
@@ -34,12 +31,17 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
 
             <template x-if="rangeSpecificEvents.length > 0">
               <section>
-                <h3 class="m-0 font-old_standard text-[1rem] font-normal uppercase tracking-[0.24em] text-[#15110e]">
+                <h3
+                  class="m-0 font-old_standard text-[1rem] font-normal uppercase tracking-[0.24em] text-[#15110e]"
+                >
                   Только в эти даты
                 </h3>
 
                 <div class="mt-6 divide-y divide-[#30282115]">
-                  <template x-for="event in rangeSpecificEvents" :key="event.id">
+                  <template
+                    x-for="event in rangeSpecificEvents"
+                    :key="event.id"
+                  >
                     <article class="flex flex-col gap-6 py-8 sm:flex-row">
                       <a
                         :href="event.url"
@@ -57,13 +59,12 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                         <p class="m-0">
                           <span
                             class="font-inter text-[0.68rem] font-bold uppercase tracking-[0.25em] text-accent"
-                            x-text="event.tag"
-                          ></span>
+                            x-text="event.tag"></span>
                         </p>
 
                         <a
                           :href="event.url"
-                          class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                          class="text-current no-underline hover:underline"
                         >
                           <h3
                             class="m-0 font-old_standard text-[1.5rem] font-normal leading-[1.08] lg:text-[1.9rem] lg:leading-[1.06]"
@@ -78,21 +79,15 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                         >
                         </p>
 
-                        <div>
-                          <a
-                            :href="event.url"
-                            class="inline-block border border-[#30282133] px-4 py-2 font-inter text-[0.7rem] uppercase tracking-[0.22em] text-[#302821] transition-colors hover:border-[#302821] hover:bg-[#302821] hover:text-white"
-                          >
-                            Подробнее
-                          </a>
-                        </div>
-
                         <div class="mt-auto pt-2">
                           <hr class="border-[#30282115]" />
                           <p
                             class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                           >
-                            <EventMetaIcon type="location" class="h-4 w-4 shrink-0" />
+                            <EventMetaIcon
+                              type="location"
+                              class="h-4 w-4 shrink-0"
+                            />
                             <span x-text="event.location"></span>
                           </p>
 
@@ -100,7 +95,10 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                           <p
                             class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                           >
-                            <EventMetaIcon type="time" class="h-4 w-4 shrink-0" />
+                            <EventMetaIcon
+                              type="time"
+                              class="h-4 w-4 shrink-0"
+                            />
                             <span x-text="event.time"></span>
                           </p>
 
@@ -108,7 +106,10 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                           <p
                             class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                           >
-                            <EventMetaIcon type="date" class="h-4 w-4 shrink-0" />
+                            <EventMetaIcon
+                              type="date"
+                              class="h-4 w-4 shrink-0"
+                            />
                             <span x-text="event.dateRangeLabel"></span>
                           </p>
                         </div>
@@ -121,12 +122,17 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
 
             <template x-if="rangeFlexibleEvents.length > 0">
               <section>
-                <h3 class="m-0 font-old_standard text-[1rem] font-normal uppercase tracking-[0.24em] text-[#15110e]">
+                <h3
+                  class="m-0 font-old_standard text-[1rem] font-normal uppercase tracking-[0.24em] text-[#15110e]"
+                >
                   Можно в любой день
                 </h3>
 
                 <div class="mt-6 divide-y divide-[#30282115]">
-                  <template x-for="event in rangeFlexibleEvents" :key="event.id">
+                  <template
+                    x-for="event in rangeFlexibleEvents"
+                    :key="event.id"
+                  >
                     <article class="flex flex-col gap-6 py-8 sm:flex-row">
                       <a
                         :href="event.url"
@@ -144,13 +150,12 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                         <p class="m-0">
                           <span
                             class="font-inter text-[0.68rem] font-bold uppercase tracking-[0.25em] text-accent"
-                            x-text="event.tag"
-                          ></span>
+                            x-text="event.tag"></span>
                         </p>
 
                         <a
                           :href="event.url"
-                          class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                          class="text-current no-underline hover:underline"
                         >
                           <h3
                             class="m-0 font-old_standard text-[1.5rem] font-normal leading-[1.08] lg:text-[1.9rem] lg:leading-[1.06]"
@@ -165,21 +170,15 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                         >
                         </p>
 
-                        <div>
-                          <a
-                            :href="event.url"
-                            class="inline-block border border-[#30282133] px-4 py-2 font-inter text-[0.7rem] uppercase tracking-[0.22em] text-[#302821] transition-colors hover:border-[#302821] hover:bg-[#302821] hover:text-white"
-                          >
-                            Подробнее
-                          </a>
-                        </div>
-
                         <div class="mt-auto pt-2">
                           <hr class="border-[#30282115]" />
                           <p
                             class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                           >
-                            <EventMetaIcon type="location" class="h-4 w-4 shrink-0" />
+                            <EventMetaIcon
+                              type="location"
+                              class="h-4 w-4 shrink-0"
+                            />
                             <span x-text="event.location"></span>
                           </p>
 
@@ -187,7 +186,10 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                           <p
                             class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                           >
-                            <EventMetaIcon type="time" class="h-4 w-4 shrink-0" />
+                            <EventMetaIcon
+                              type="time"
+                              class="h-4 w-4 shrink-0"
+                            />
                             <span x-text="event.time"></span>
                           </p>
 
@@ -195,7 +197,10 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                           <p
                             class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                           >
-                            <EventMetaIcon type="date" class="h-4 w-4 shrink-0" />
+                            <EventMetaIcon
+                              type="date"
+                              class="h-4 w-4 shrink-0"
+                            />
                             <span x-text="event.dateRangeLabel"></span>
                           </p>
                         </div>
@@ -238,13 +243,12 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                   <p class="m-0">
                     <span
                       class="font-inter text-[0.68rem] font-bold uppercase tracking-[0.25em] text-accent"
-                      x-text="event.tag"
-                    ></span>
+                      x-text="event.tag"></span>
                   </p>
 
                   <a
                     :href="event.url"
-                    class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                    class="text-current no-underline hover:underline"
                   >
                     <h3
                       class="m-0 font-old_standard text-[1.5rem] font-normal leading-[1.08] lg:text-[1.9rem] lg:leading-[1.06]"
@@ -258,15 +262,6 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                     x-text="event.description"
                   >
                   </p>
-
-                  <div>
-                    <a
-                      :href="event.url"
-                      class="inline-block border border-[#30282133] px-4 py-2 font-inter text-[0.7rem] uppercase tracking-[0.22em] text-[#302821] transition-colors hover:border-[#302821] hover:bg-[#302821] hover:text-white"
-                    >
-                      Подробнее
-                    </a>
-                  </div>
 
                   <div class="mt-auto pt-2">
                     <hr class="border-[#30282115]" />
@@ -285,7 +280,9 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                       <span x-text="event.time"></span>
                     </p>
 
-                    <template x-if="event.endDate.getTime() !== event.startDate.getTime()">
+                    <template
+                      x-if="event.endDate.getTime() !== event.startDate.getTime()"
+                    >
                       <div>
                         <hr class="border-[#30282115]" />
                         <p
@@ -344,7 +341,7 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
 
                 <a
                   :href="event.url"
-                  class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                  class="text-current no-underline hover:underline"
                 >
                   <h4
                     class="m-0 line-clamp-3 font-old_standard text-[1.15rem] font-normal leading-[1.16]"

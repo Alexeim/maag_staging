@@ -81,6 +81,12 @@
   letter-spacing: -0.5px;
 }
 
+a,
+a * {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.14em;
+}
+
 /* Mobile Menu Styles */
 .mobile-menu-panel {
   position: fixed;

@@ -470,7 +470,7 @@ const calendarState = JSON.stringify({
 
                     <a
                       :href="getCurrentFeaturedEvent()?.url || '#'"
-                      class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                      class="text-current no-underline hover:underline"
                     >
                       <h2
                         class="m-0 font-old_standard text-[clamp(1.4rem,2.2vw,1.9rem)] font-normal leading-[1.04]"
@@ -570,7 +570,7 @@ const calendarState = JSON.stringify({
 
                     <a
                       href={event.url}
-                      class="text-current no-underline hover:underline [text-decoration-thickness:1px] underline-offset-[0.14em]"
+                      class="text-current no-underline hover:underline"
                     >
                       <h3 class="m-0 line-clamp-3 font-old_standard text-[1.2rem] font-normal leading-[1.08] lg:text-[1.4rem] lg:leading-[1.12]">
                         {event.title}
