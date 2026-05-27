@@ -331,6 +331,17 @@ const editorialGridItems = cultureFeed.slice(0, MAX_EDITORIAL_GRID_ITEMS);
 const editorialCarouselItems = cultureFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
 const featuredInterviewName =
   featuredInterview?.interviewee ?? featuredInterview?.title ?? "";
+
+const splitTitle = (t: string) => {
+  const s = t.trimEnd();
+  const i = s.lastIndexOf(" ");
+  return { start: i >= 0 ? s.slice(0, i) : "", last: i >= 0 ? s.slice(i + 1) : s };
+};
+
+const primaryCultureTrunc = primaryCultureArticle
+  ? truncateText(primaryCultureArticle.title, 96)
+  : "";
+const primaryCultureSplit = splitTitle(primaryCultureTrunc);
 ---
 
 <Layout
@@ -380,8 +391,12 @@ const featuredInterviewName =
                     class="text-current no-underline hover:underline"
                   >
                     <h2 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
-                      {truncateText(primaryCultureArticle.title, 96)}{" "}
-                      {primaryCultureArticle.paid && <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />}
+                      {primaryCultureArticle.paid ? (
+                        <>
+                          {primaryCultureSplit.start && <>{primaryCultureSplit.start}{" "}</>}
+                          <span class="whitespace-nowrap">{primaryCultureSplit.last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                        </>
+                      ) : primaryCultureTrunc}
                     </h2>
                   </a>
 
@@ -434,8 +449,16 @@ const featuredInterviewName =
                         class="block text-current no-underline hover:underline"
                       >
                         <h3 class="m-0 line-clamp-3 text-[1.4rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.12]">
-                          {truncateText(item.title, 88)}{" "}
-                          {item.paid && <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />}
+                          {(() => {
+                            const t = truncateText(item.title, 88);
+                            const { start, last } = splitTitle(t);
+                            return item.paid ? (
+                              <>
+                                {start && <>{start}{" "}</>}
+                                <span class="whitespace-nowrap">{last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                              </>
+                            ) : t;
+                          })()}
                         </h3>
                       </a>
 
@@ -555,8 +578,16 @@ const featuredInterviewName =
                         class="block text-current no-underline hover:underline"
                       >
                         <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                          {truncateText(item.title, 72)}{" "}
-                          {item.paid && <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />}
+                          {(() => {
+                            const t = truncateText(item.title, 72);
+                            const { start, last } = splitTitle(t);
+                            return item.paid ? (
+                              <>
+                                {start && <>{start}{" "}</>}
+                                <span class="whitespace-nowrap">{last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                              </>
+                            ) : t;
+                          })()}
                         </h3>
                       </a>
 
