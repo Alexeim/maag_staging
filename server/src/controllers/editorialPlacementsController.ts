@@ -75,6 +75,22 @@ export type LandingCultureInterviewBlockSelection =
   | LandingCultureInterviewAutoSelection
   | LandingCultureInterviewManualSelection;
 
+export interface CalendarPageManualCardsSelection {
+  mode: 'manual';
+  ids: string[];
+}
+
+export interface CalendarPageSecondaryCardsAutoSelection {
+  mode: 'auto-current-week-single-day-priority';
+  limit: number;
+}
+
+export type CalendarPageMainCardsSelection = CalendarPageManualCardsSelection;
+
+export type CalendarPageSecondaryCardsSelection =
+  | CalendarPageManualCardsSelection
+  | CalendarPageSecondaryCardsAutoSelection;
+
 export interface LandingPlacementsDocument {
   schemaVersion: 2;
   mainHero: LandingMainHeroSelection | null;
@@ -86,9 +102,18 @@ export interface LandingPlacementsDocument {
   updatedBy: string | null;
 }
 
+export interface CalendarPagePlacementsDocument {
+  schemaVersion: 1;
+  mainCards: CalendarPageMainCardsSelection | null;
+  secondaryCards: CalendarPageSecondaryCardsSelection | null;
+  updatedAt: Date | null;
+  updatedBy: string | null;
+}
+
 const db = getDb();
 const placementsCollection = db.collection('editorialPlacements');
 const landingPlacementsRef = placementsCollection.doc('landing');
+const calendarPagePlacementsRef = placementsCollection.doc('calendarPage');
 
 const MAIN_HERO_COLLECTIONS: Record<LandingMainHeroType, string> = {
   article: 'articles',
@@ -104,6 +129,7 @@ const NETLENKA_COLLECTIONS: Record<LandingNetlenkaItemType, string> = {
 
 const DEFAULT_NEWS_RAIL_LIMIT = 4;
 const MAX_NEWS_RAIL_LIMIT = 12;
+const CALENDAR_PAGE_CARD_LIMIT = 4;
 
 const createDefaultLandingPlacements = (): LandingPlacementsDocument => ({
   schemaVersion: 2,
@@ -122,6 +148,14 @@ const createDefaultLandingPlacements = (): LandingPlacementsDocument => ({
   cultureInterviewBlock: {
     mode: 'auto-latest',
   },
+  updatedAt: null,
+  updatedBy: null,
+});
+
+const createDefaultCalendarPagePlacements = (): CalendarPagePlacementsDocument => ({
+  schemaVersion: 1,
+  mainCards: null,
+  secondaryCards: null,
   updatedAt: null,
   updatedBy: null,
 });
@@ -154,6 +188,19 @@ const normalizePositiveLimit = (value: unknown): number | null => {
 
   const normalized = Math.trunc(value);
   if (normalized <= 0 || normalized > MAX_NEWS_RAIL_LIMIT) {
+    return null;
+  }
+
+  return normalized;
+};
+
+const normalizeCalendarPageLimit = (value: unknown): number | null => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return null;
+  }
+
+  const normalized = Math.trunc(value);
+  if (normalized !== CALENDAR_PAGE_CARD_LIMIT) {
     return null;
   }
 
@@ -377,6 +424,59 @@ const normalizeCultureInterviewBlockSelection = (
   return null;
 };
 
+const normalizeCalendarManualCardsSelection = (
+  value: unknown,
+): CalendarPageManualCardsSelection | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const mode = (value as { mode?: unknown }).mode;
+  if (mode !== 'manual') {
+    return null;
+  }
+
+  const ids = normalizeStringIds((value as { ids?: unknown }).ids);
+  if (!ids || ids.length === 0 || ids.length > CALENDAR_PAGE_CARD_LIMIT) {
+    return null;
+  }
+
+  return {
+    mode: 'manual',
+    ids,
+  };
+};
+
+const normalizeCalendarSecondaryCardsSelection = (
+  value: unknown,
+): CalendarPageSecondaryCardsSelection | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const mode = (value as { mode?: unknown }).mode;
+
+  if (mode === 'manual') {
+    return normalizeCalendarManualCardsSelection(value);
+  }
+
+  if (
+    mode === 'auto-current-week-single-day-priority' ||
+    mode === 'auto-current-single-day-priority'
+  ) {
+    const limit =
+      normalizeCalendarPageLimit((value as { limit?: unknown }).limit) ??
+      CALENDAR_PAGE_CARD_LIMIT;
+
+    return {
+      mode: 'auto-current-week-single-day-priority',
+      limit,
+    };
+  }
+
+  return null;
+};
+
 const normalizeLandingPlacements = (
   value: FirebaseFirestore.DocumentData | undefined,
 ): LandingPlacementsDocument => {
@@ -418,6 +518,34 @@ const normalizeLandingPlacements = (
     netlenkaRail,
     eventCard,
     cultureInterviewBlock,
+    updatedAt:
+      value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
+    updatedBy: normalizeStringId(value.updatedBy),
+  };
+};
+
+const normalizeCalendarPagePlacements = (
+  value: FirebaseFirestore.DocumentData | undefined,
+): CalendarPagePlacementsDocument => {
+  const defaults = createDefaultCalendarPagePlacements();
+  if (!value || typeof value !== 'object') {
+    return defaults;
+  }
+
+  const mainCardsRaw = 'mainCards' in value ? value.mainCards : undefined;
+  const mainCards = mainCardsRaw === null
+    ? null
+    : (normalizeCalendarManualCardsSelection(mainCardsRaw) ?? defaults.mainCards);
+
+  const secondaryCardsRaw = 'secondaryCards' in value ? value.secondaryCards : undefined;
+  const secondaryCards = secondaryCardsRaw === null
+    ? null
+    : (normalizeCalendarSecondaryCardsSelection(secondaryCardsRaw) ?? defaults.secondaryCards);
+
+  return {
+    schemaVersion: 1,
+    mainCards,
+    secondaryCards,
     updatedAt:
       value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
     updatedBy: normalizeStringId(value.updatedBy),
@@ -528,6 +656,23 @@ export const getLandingPlacements = async (_req: Request, res: Response) => {
     return res
       .status(500)
       .json({ message: 'Server error while getting landing placements' });
+  }
+};
+
+export const getCalendarPagePlacements = async (_req: Request, res: Response) => {
+  try {
+    const calendarPageDoc = await calendarPagePlacementsRef.get();
+    if (!calendarPageDoc.exists) {
+      return res.status(200).json(createDefaultCalendarPagePlacements());
+    }
+
+    const normalizedPlacements = normalizeCalendarPagePlacements(calendarPageDoc.data());
+    return res.status(200).json(normalizedPlacements);
+  } catch (error) {
+    console.error('Error getting calendar page placements:', error);
+    return res
+      .status(500)
+      .json({ message: 'Server error while getting calendar page placements' });
   }
 };
 
@@ -700,5 +845,78 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
     return res
       .status(500)
       .json({ message: 'Server error while updating landing placements' });
+  }
+};
+
+export const updateCalendarPagePlacements = async (req: Request, res: Response) => {
+  try {
+    const currentDoc = await calendarPagePlacementsRef.get();
+    const current = normalizeCalendarPagePlacements(currentDoc.data());
+    const payload = req.body && typeof req.body === 'object' ? req.body : {};
+
+    let mainCards = current.mainCards;
+    let secondaryCards = current.secondaryCards;
+
+    if ('mainCards' in payload) {
+      if (payload.mainCards === null) {
+        mainCards = null;
+      } else {
+        const normalizedMainCards = normalizeCalendarManualCardsSelection(payload.mainCards);
+        if (!normalizedMainCards) {
+          return res.status(400).json({ message: 'Invalid mainCards payload' });
+        }
+
+        const missingIds = await assertDocumentsExist('events', normalizedMainCards.ids);
+        if (missingIds.length > 0) {
+          return res.status(404).json({
+            message: 'Referenced mainCards event documents were not found',
+            missingIds,
+          });
+        }
+
+        mainCards = normalizedMainCards;
+      }
+    }
+
+    if ('secondaryCards' in payload) {
+      if (payload.secondaryCards === null) {
+        secondaryCards = null;
+      } else {
+        const normalizedSecondaryCards = normalizeCalendarSecondaryCardsSelection(
+          payload.secondaryCards,
+        );
+        if (!normalizedSecondaryCards) {
+          return res.status(400).json({ message: 'Invalid secondaryCards payload' });
+        }
+
+        if (normalizedSecondaryCards.mode === 'manual') {
+          const missingIds = await assertDocumentsExist('events', normalizedSecondaryCards.ids);
+          if (missingIds.length > 0) {
+            return res.status(404).json({
+              message: 'Referenced secondaryCards event documents were not found',
+              missingIds,
+            });
+          }
+        }
+
+        secondaryCards = normalizedSecondaryCards;
+      }
+    }
+
+    const nextValue: CalendarPagePlacementsDocument = {
+      schemaVersion: 1,
+      mainCards,
+      secondaryCards,
+      updatedAt: new Date(),
+      updatedBy: null,
+    };
+
+    await calendarPagePlacementsRef.set(nextValue, { merge: true });
+    return res.status(200).json(nextValue);
+  } catch (error) {
+    console.error('Error updating calendar page placements:', error);
+    return res
+      .status(500)
+      .json({ message: 'Server error while updating calendar page placements' });
   }
 };

@@ -8,7 +8,12 @@ import baletImage from "../assets/images/calendar/balet.png";
 import theatreShowImage from "../assets/images/calendar/theatre-show.png";
 import smallEventImage from "../assets/images/calendar/small-event.png";
 import picture1 from "../assets/images/culture.jpg";
-import { eventsApi } from "@/lib/api/api";
+import {
+  editorialPlacementsApi,
+  eventsApi,
+  type CalendarPagePlacementsResponse,
+} from "@/lib/api/api";
+import { resolveAutoSecondaryEventIds } from "@/lib/utils/calendarPage";
 
 const TAG_LABEL_ALIASES: Record<string, string> = {
   exhibition: "Выставка",
@@ -194,9 +199,21 @@ const formatDateRange = (startIso: string, endIso: string | null): string => {
 };
 
 let eventsResponse: any[] = [];
+let calendarPagePlacements: CalendarPagePlacementsResponse = {
+  schemaVersion: 1,
+  mainCards: null,
+  secondaryCards: null,
+  updatedAt: null,
+  updatedBy: null,
+};
 
 try {
-  eventsResponse = await eventsApi.list();
+  const [events, placements] = await Promise.all([
+    eventsApi.list(),
+    editorialPlacementsApi.getCalendarPage().catch(() => calendarPagePlacements),
+  ]);
+  eventsResponse = events;
+  calendarPagePlacements = placements;
 } catch (error) {
   console.error("Failed to fetch events:", error);
 }
@@ -253,100 +270,41 @@ const now = new Date();
 const todayUtc = new Date(
   Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
 );
-const weekEndUtc = new Date(todayUtc);
-weekEndUtc.setUTCDate(weekEndUtc.getUTCDate() + 6);
+const normalizedEventMap = new Map(normalizedEvents.map((event) => [event.id, event]));
 
-const upcomingOrCurrentEvents = normalizedEvents.filter((event) => {
-  const end = toDate(event.endDate ?? event.startDate);
-  return end ? end.getTime() >= todayUtc.getTime() : false;
-});
+const resolveEventsByIds = (ids: string[] = []) =>
+  ids
+    .map((id) => normalizedEventMap.get(id))
+    .filter((event): event is NonNullable<typeof event> => Boolean(event));
 
-const currentMonthMainEvents = upcomingOrCurrentEvents.filter((event) => {
-  if (!event.isMainEvent) {
-    return false;
-  }
-  const start = toDate(event.startDate);
-  return (
-    start &&
-    start.getUTCFullYear() === todayUtc.getUTCFullYear() &&
-    start.getUTCMonth() === todayUtc.getUTCMonth()
-  );
-});
-
-const otherMainEvents = upcomingOrCurrentEvents.filter((event) => {
-  if (!event.isMainEvent) {
-    return false;
-  }
-  const start = toDate(event.startDate);
-  return !(
-    start &&
-    start.getUTCFullYear() === todayUtc.getUTCFullYear() &&
-    start.getUTCMonth() === todayUtc.getUTCMonth()
-  );
-});
-
-const fallbackFeaturedEvent =
-  upcomingOrCurrentEvents[upcomingOrCurrentEvents.length - 1] ??
-  normalizedEvents[normalizedEvents.length - 1] ??
-  null;
-
-const featuredMainEventsSource =
-  currentMonthMainEvents.length > 0
-    ? [...currentMonthMainEvents, ...otherMainEvents]
-    : upcomingOrCurrentEvents.filter((event) => event.isMainEvent);
-
-const featuredEventCards =
-  featuredMainEventsSource.length > 0
-    ? featuredMainEventsSource.map((event, index) => ({
-        ...event,
-        dateRange: formatDateRange(event.startDate, event.endDate),
-        fallbackImage:
-          heroFallbackImages[index % heroFallbackImages.length] ?? baletImage,
-      }))
-    : fallbackFeaturedEvent
-      ? [
-          {
-            ...fallbackFeaturedEvent,
-            dateRange: formatDateRange(
-              fallbackFeaturedEvent.startDate,
-              fallbackFeaturedEvent.endDate,
-            ),
-            fallbackImage: heroFallbackImages[0] ?? baletImage,
-          },
-        ]
-      : [];
-
-const featuredEventIds = new Set(featuredEventCards.map((event) => event.id));
-
-const weeklyEvents = upcomingOrCurrentEvents.filter((event) => {
-  const start = toDate(event.startDate);
-  const end = toDate(event.endDate ?? event.startDate);
-  if (!start || !end) {
-    return false;
-  }
-  return (
-    start.getTime() <= weekEndUtc.getTime() &&
-    end.getTime() >= todayUtc.getTime()
-  );
-});
-
-const upcomingWithoutMain = upcomingOrCurrentEvents.filter(
-  (event) => !featuredEventIds.has(event.id),
-);
-
-const weeklyFallbackPool = (
-  weeklyEvents.length >= 3 ? weeklyEvents : upcomingWithoutMain
-)
-  .filter((event) => !featuredEventIds.has(event.id))
-  .slice(0, 4);
-
-const weeklyHighlights = weeklyFallbackPool.map((event, index) => ({
+const buildCardPayload = (event: (typeof normalizedEvents)[number], index: number) => ({
   ...event,
   dateRange: formatDateRange(event.startDate, event.endDate),
   fallbackImage:
-    heroFallbackImages[(index + 1) % heroFallbackImages.length] ?? baletImage,
+    heroFallbackImages[index % heroFallbackImages.length] ?? baletImage,
   ...getDateParts(event.startDate, event.endDate),
-}));
+});
+
+const featuredEventCards =
+  calendarPagePlacements.mainCards?.mode === "manual"
+    ? resolveEventsByIds(calendarPagePlacements.mainCards.ids)
+        .slice(0, 4)
+        .map((event, index) => buildCardPayload(event, index))
+    : [];
+
+const secondaryCardEvents =
+  calendarPagePlacements.secondaryCards?.mode === "manual"
+    ? resolveEventsByIds(calendarPagePlacements.secondaryCards.ids).slice(0, 4)
+    : calendarPagePlacements.secondaryCards?.mode ===
+          "auto-current-week-single-day-priority"
+      ? resolveAutoSecondaryEventIds(normalizedEvents, 4, todayUtc)
+          .map((id) => normalizedEventMap.get(id))
+          .filter((event): event is NonNullable<typeof event> => Boolean(event))
+      : [];
+
+const topCards = secondaryCardEvents.map((event, index) =>
+  buildCardPayload(event, index + 1),
+);
 
 const calendarState = JSON.stringify({
   imagePaths: {
@@ -365,8 +323,6 @@ const calendarState = JSON.stringify({
     ...getDateParts(event.startDate, event.endDate),
   })),
 }).replace(/</g, "\\u003c");
-
-const topCards = weeklyHighlights.slice(0, 4);
 ---
 
 <Layout
@@ -392,15 +348,15 @@ const topCards = weeklyHighlights.slice(0, 4);
         Календарь
       </h1>
 
-      <section class="mt-6">
-        <h2
-          class="m-0 font-old_standard text-[1.05rem] font-normal uppercase tracking-[0.5em] text-black"
-        >
-          События месяца
-        </h2>
+      {
+        featuredEventCards.length > 0 && (
+          <section class="mt-6">
+            <h2
+              class="m-0 font-old_standard text-[1.05rem] font-normal uppercase tracking-[0.5em] text-black"
+            >
+              События месяца
+            </h2>
 
-        {
-          featuredEventCards.length > 0 ? (
             <div
               class="relative mt-8"
               @mouseenter="setFeaturedHover(true)"
@@ -530,13 +486,9 @@ const topCards = weeklyHighlights.slice(0, 4);
                 </article>
               </div>
             </div>
-          ) : (
-            <article class="mt-8 border border-[#3028211a] bg-white/70 p-5 text-[1.05rem] font-light leading-[1.5]">
-              Скоро здесь появятся события.
-            </article>
-          )
-        }
-      </section>
+          </section>
+        )
+      }
 
       {
         topCards.length > 0 && (

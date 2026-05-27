@@ -323,6 +323,36 @@ export interface UpdateLandingPlacementsPayload {
   cultureInterviewBlock?: LandingCultureInterviewBlockSelection | null;
 }
 
+export interface CalendarPageManualCardsSelection {
+  mode: "manual";
+  ids: string[];
+}
+
+export interface CalendarPageSecondaryCardsAutoSelection {
+  mode: "auto-current-week-single-day-priority";
+  limit: number;
+}
+
+export type CalendarPageMainCardsSelection =
+  | CalendarPageManualCardsSelection;
+
+export type CalendarPageSecondaryCardsSelection =
+  | CalendarPageManualCardsSelection
+  | CalendarPageSecondaryCardsAutoSelection;
+
+export interface CalendarPagePlacementsResponse {
+  schemaVersion: 1;
+  mainCards: CalendarPageMainCardsSelection | null;
+  secondaryCards: CalendarPageSecondaryCardsSelection | null;
+  updatedAt?: string | Date | null;
+  updatedBy?: string | null;
+}
+
+export interface UpdateCalendarPagePlacementsPayload {
+  mainCards?: CalendarPageMainCardsSelection | null;
+  secondaryCards?: CalendarPageSecondaryCardsSelection | null;
+}
+
 export interface UserProfilePayload {
   uid: string;
   firstName: string;
@@ -727,5 +757,23 @@ export const editorialPlacementsApi = {
       body: payload,
       token,
     });
+  },
+  getCalendarPage(token?: string) {
+    return request<CalendarPagePlacementsResponse>(
+      "/api/editorial-placements/calendar-page",
+      {
+        token,
+      }
+    );
+  },
+  updateCalendarPage(payload: UpdateCalendarPagePlacementsPayload, token?: string) {
+    return request<CalendarPagePlacementsResponse>(
+      "/api/editorial-placements/calendar-page",
+      {
+        method: "PUT",
+        body: payload,
+        token,
+      }
+    );
   },
 };

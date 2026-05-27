@@ -14,6 +14,11 @@ const navItems = [
     label: "Редактор лендинга",
     id: "landing-editor",
   },
+  {
+    href: "/dashboard/calendar-editor",
+    label: "Редактор календаря",
+    id: "calendar-editor",
+  },
   { href: "/dashboard", label: "Статьи", id: "articles-overview" },
   {
     href: "/dashboard/articles/culture",
@@ -132,7 +137,9 @@ const { title = "MAAG Dashboard", active = "articles-overview" } =
               >
                 <p
                   class:list={[
-                    item.id === "landing-editor" ? "font-bold text-lg" : "",
+                    item.id === "landing-editor" || item.id === "calendar-editor"
+                      ? "font-bold text-lg"
+                      : "",
                   ]}
                 >
                   {item.label}

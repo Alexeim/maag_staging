@@ -1,0 +1,399 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import {
+  editorialPlacementsApi,
+  eventsApi,
+  type CalendarPagePlacementsResponse,
+} from "@/lib/api/api";
+
+const DEFAULT_CALENDAR_PAGE_PLACEMENTS: CalendarPagePlacementsResponse = {
+  schemaVersion: 1,
+  mainCards: null,
+  secondaryCards: null,
+  updatedAt: null,
+  updatedBy: null,
+};
+
+const toDate = (value: unknown): Date | null => {
+  if (!value) {
+    return null;
+  }
+  if (value instanceof Date) {
+    return value;
+  }
+  if (typeof value === "string" || typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "object") {
+    const seconds =
+      (value as { seconds?: number }).seconds ??
+      (value as { _seconds?: number })._seconds;
+    const nanoseconds =
+      (value as { nanoseconds?: number }).nanoseconds ??
+      (value as { _nanoseconds?: number })._nanoseconds ??
+      0;
+    if (typeof seconds === "number") {
+      return new Date(seconds * 1000 + nanoseconds / 1_000_000);
+    }
+    if (typeof (value as { toDate?: () => Date }).toDate === "function") {
+      const parsed = (value as { toDate: () => Date }).toDate();
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+  }
+  return null;
+};
+
+const formatUpdatedAt = (value: unknown) => {
+  const date = toDate(value);
+  if (!date) {
+    return "—";
+  }
+
+  return date.toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const formatRange = (startValue: unknown, endValue: unknown) => {
+  const start = toDate(startValue);
+  if (!start) {
+    return "Дата уточняется";
+  }
+
+  const end = toDate(endValue) ?? start;
+  const formatter = (date: Date, withYear = true) =>
+    date.toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "short",
+      ...(withYear ? { year: "numeric" } : {}),
+    });
+
+  if (start.getTime() === end.getTime()) {
+    return formatter(start);
+  }
+
+  return `${formatter(start, false)} — ${formatter(end)}`;
+};
+
+let placements = DEFAULT_CALENDAR_PAGE_PLACEMENTS;
+let loadError = "";
+let events = [] as Awaited<ReturnType<typeof eventsApi.list>>;
+
+try {
+  const [placementsResponse, eventsResponse] = await Promise.all([
+    editorialPlacementsApi.getCalendarPage().catch(() => DEFAULT_CALENDAR_PAGE_PLACEMENTS),
+    eventsApi.list(),
+  ]);
+
+  placements = placementsResponse;
+  events = eventsResponse;
+} catch (error) {
+  console.error("Failed to load calendar editor overview:", error);
+  loadError =
+    error instanceof Error
+      ? error.message
+      : "Не удалось загрузить данные редактора календаря.";
+}
+
+const eventOptions = events
+  .map((event) => ({
+    id: event.id,
+    title: event.title,
+    dateLabel: formatRange(event.startDate, event.endDate),
+    sortValue: toDate(event.startDate)?.getTime() ?? Number.POSITIVE_INFINITY,
+  }))
+  .sort((left, right) => left.sortValue - right.sortValue || left.title.localeCompare(right.title, "ru-RU"))
+  .map(({ sortValue: _sortValue, ...event }) => event);
+
+const eventTitleMap = new Map(eventOptions.map((event) => [event.id, event.title]));
+
+const describeManualIds = (ids: string[]) => {
+  if (ids.length === 0) {
+    return "Список пуст.";
+  }
+
+  return ids
+    .map((id, index) => `${index + 1}. ${eventTitleMap.get(id) ?? `Событие ${id}`}`)
+    .join(" | ");
+};
+
+const mainCardsSummary = (() => {
+  if (!placements.mainCards) {
+    return {
+      modeLabel: "Пусто",
+      details: "Верхний блок календаря пуст.",
+    };
+  }
+
+  return {
+    modeLabel: "Manual",
+    details: describeManualIds(placements.mainCards.ids),
+  };
+})();
+
+const secondaryCardsSummary = (() => {
+  if (!placements.secondaryCards) {
+    return {
+      modeLabel: "Пусто",
+      details: "Нижний блок календаря пуст.",
+    };
+  }
+
+  if (placements.secondaryCards.mode === "manual") {
+    return {
+      modeLabel: "Manual",
+      details: describeManualIds(placements.secondaryCards.ids),
+    };
+  }
+
+  return {
+    modeLabel: "Auto week",
+    details:
+      "Current week first, single-day priority, then upcoming after the week by nearest startDate.",
+  };
+})();
+---
+
+<DashboardLayout title="Редактор календаря" active="calendar-editor">
+  <section
+    class="grid gap-6"
+    x-data={`$lazy('calendarEditor', ${JSON.stringify({
+      placements,
+      eventOptions,
+    })})`}
+  >
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h2 class="text-xl font-semibold">Редактор календаря</h2>
+        <p class="text-sm text-base-content/70">
+          Управление верхними и нижними карточками на странице календаря.
+        </p>
+      </div>
+
+      <div class="mt-4 grid gap-2 text-sm">
+        <p>
+          <span class="font-semibold">Слоты последний раз изменены:</span>
+          <span class="ml-2">{formatUpdatedAt(placements.updatedAt)}</span>
+        </p>
+      </div>
+
+      {loadError ? (
+        <p class="mt-4 text-sm text-error">{loadError}</p>
+      ) : null}
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-2">
+      <article class="bg-base-100 border border-base-300 rounded-xl p-6">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-semibold">Main Cards</h3>
+            <p class="mt-1 text-sm text-base-content/70">
+              Верхние 4 карточки календарной страницы.
+            </p>
+          </div>
+          <span class="badge badge-outline">{mainCardsSummary.modeLabel}</span>
+        </div>
+        <p class="mt-4 text-sm leading-6 text-base-content/80">{mainCardsSummary.details}</p>
+      </article>
+
+      <article class="bg-base-100 border border-base-300 rounded-xl p-6">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-semibold">Secondary Cards</h3>
+            <p class="mt-1 text-sm text-base-content/70">
+              Нижние 4 карточки под основным блоком календаря.
+            </p>
+          </div>
+          <span class="badge badge-outline">{secondaryCardsSummary.modeLabel}</span>
+        </div>
+        <p class="mt-4 text-sm leading-6 text-base-content/80">{secondaryCardsSummary.details}</p>
+      </article>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Main Cards Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Верхний блок поддерживает только empty или manual режим.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-2 max-w-xl">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="main-cards-mode" value="empty" x-model="mainCardsMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="main-cards-mode" value="manual" x-model="mainCardsMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="mainCardsMode === 'manual'" class="grid gap-4">
+          <div class="grid gap-3 lg:grid-cols-[minmax(0,24rem)_auto] lg:items-end">
+            <label class="grid gap-2">
+              <span class="text-sm font-medium">Добавить событие</span>
+              <select x-model="selectedMainCardIdToAdd" class="select select-bordered w-full">
+                <option value="">— выбери событие —</option>
+                <template x-for="item in getUnselectedMainEventOptions()" :key="item.id">
+                  <option :value="item.id" x-text="`${item.title} (${item.dateLabel})`"></option>
+                </template>
+              </select>
+            </label>
+
+            <button
+              type="button"
+              class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200"
+              @click="addMainCard()"
+            >
+              Добавить
+            </button>
+          </div>
+
+          <div class="grid gap-3">
+            <template x-if="selectedMainCardIds.length === 0">
+              <p class="text-sm text-base-content/70">Пока не выбрано ни одного события.</p>
+            </template>
+
+            <template x-for="(id, index) in selectedMainCardIds" :key="id">
+              <div class="flex flex-col gap-3 rounded-xl border border-base-300 p-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p class="text-sm font-semibold" x-text="`${index + 1}. ${getEventTitle(id)}`"></p>
+                  <p class="text-xs text-base-content/60 mt-1" x-text="getEventDateLabel(id)"></p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" class="btn btn-sm btn-ghost" @click="moveMainCard(id, -1)">↑</button>
+                  <button type="button" class="btn btn-sm btn-ghost" @click="moveMainCard(id, 1)">↓</button>
+                  <button type="button" class="btn btn-sm btn-ghost text-error" @click="removeMainCard(id)">Удалить</button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <p x-show="mainCardsError" class="text-sm text-error" x-text="mainCardsError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveMainCards()"
+            :disabled="mainCardsSaving"
+          >
+            Сохранить main cards
+          </button>
+          <span x-show="mainCardsSaving" class="text-sm text-base-content/70">
+            Сохраняем...
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Secondary Cards Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Нижний блок поддерживает empty, manual и auto current single-day priority режимы.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="secondary-cards-mode" value="empty" x-model="secondaryCardsMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="secondary-cards-mode" value="manual" x-model="secondaryCardsMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input
+              type="radio"
+              name="secondary-cards-mode"
+              value="auto-current-week-single-day-priority"
+              x-model="secondaryCardsMode"
+            />
+            <span class="text-sm">Auto week</span>
+          </label>
+        </div>
+
+        <div
+          x-show="secondaryCardsMode === 'auto-current-week-single-day-priority'"
+          class="rounded-xl border border-base-300 bg-base-200/50 p-4 text-sm leading-6 text-base-content/80"
+        >
+          Сначала события текущей недели, внутри них single-day выше duration. Если событий недели
+          меньше 4, блок добирается upcoming событиями после этой недели с тем же приоритетом и
+          сортировкой по ближайшему startDate.
+        </div>
+
+        <div x-show="secondaryCardsMode === 'manual'" class="grid gap-4">
+          <div class="grid gap-3 lg:grid-cols-[minmax(0,24rem)_auto] lg:items-end">
+            <label class="grid gap-2">
+              <span class="text-sm font-medium">Добавить событие</span>
+              <select x-model="selectedSecondaryCardIdToAdd" class="select select-bordered w-full">
+                <option value="">— выбери событие —</option>
+                <template x-for="item in getUnselectedSecondaryEventOptions()" :key="item.id">
+                  <option :value="item.id" x-text="`${item.title} (${item.dateLabel})`"></option>
+                </template>
+              </select>
+            </label>
+
+            <button
+              type="button"
+              class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200"
+              @click="addSecondaryCard()"
+            >
+              Добавить
+            </button>
+          </div>
+
+          <div class="grid gap-3">
+            <template x-if="selectedSecondaryCardIds.length === 0">
+              <p class="text-sm text-base-content/70">Пока не выбрано ни одного события.</p>
+            </template>
+
+            <template x-for="(id, index) in selectedSecondaryCardIds" :key="id">
+              <div class="flex flex-col gap-3 rounded-xl border border-base-300 p-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p class="text-sm font-semibold" x-text="`${index + 1}. ${getEventTitle(id)}`"></p>
+                  <p class="text-xs text-base-content/60 mt-1" x-text="getEventDateLabel(id)"></p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" class="btn btn-sm btn-ghost" @click="moveSecondaryCard(id, -1)">↑</button>
+                  <button type="button" class="btn btn-sm btn-ghost" @click="moveSecondaryCard(id, 1)">↓</button>
+                  <button type="button" class="btn btn-sm btn-ghost text-error" @click="removeSecondaryCard(id)">Удалить</button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <p x-show="secondaryCardsError" class="text-sm text-error" x-text="secondaryCardsError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveSecondaryCards()"
+            :disabled="secondaryCardsSaving"
+          >
+            Сохранить secondary cards
+          </button>
+          <span x-show="secondaryCardsSaving" class="text-sm text-base-content/70">
+            Сохраняем...
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+</DashboardLayout>
