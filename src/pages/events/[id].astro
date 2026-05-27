@@ -9,6 +9,11 @@ import {
   Share2,
 } from "lucide-astro";
 import { ApiError, eventsApi } from "@/lib/api/api";
+import {
+  buildContentCollectionItems,
+  fetchPublicContentPools,
+  type PublicContentCardItem,
+} from "@/lib/utils/contentCollectionMarquee";
 
 const { id } = Astro.params;
 
@@ -39,6 +44,12 @@ const TAG_LABEL_ALIASES: Record<string, string> = {
   address: "Адрес",
   notebook: "Записная книжка",
   place: "Место",
+  article: "Статья",
+  interview: "Интервью",
+  guide: "Гид",
+  news: "Новости",
+  flipper: "Флиппер",
+  "visual-story": "Visual Story",
 };
 
 const toDate = (value: unknown): Date | null => {
@@ -366,6 +377,7 @@ const buildGoogleCalendarUrl = (
 
 let eventData: any;
 let relatedEvents: any[] = [];
+let collectionContentItems: PublicContentCardItem[] = [];
 let error: string | null = null;
 
 try {
@@ -426,6 +438,20 @@ if (!error && eventData) {
       "Failed to fetch related events for event page:",
       relatedError,
     );
+  }
+}
+
+if (!error && eventData?.contentCollectionId) {
+  try {
+    const pools = await fetchPublicContentPools();
+    collectionContentItems = await buildContentCollectionItems({
+      contentCollectionId: eventData.contentCollectionId,
+      currentContentType: "event",
+      currentId: id!,
+      pools,
+    });
+  } catch (collectionError) {
+    console.error("Failed to fetch collection content for event page:", collectionError);
   }
 }
 
@@ -632,10 +658,52 @@ const displayEvent = {
               </div>
 
               <aside class="lg:col-span-3 lg:border-l lg:border-base-content/10 lg:pl-6">
-                <div class="grid gap-6 lg:sticky lg:top-8">
-                  <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
-                    Ещё события
-                  </h2>
+                <div class="grid gap-10 lg:sticky lg:top-8">
+                  {collectionContentItems.length > 0 && (
+                    <div class="grid gap-6">
+                      <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
+                        Из коллекции
+                      </h2>
+                      <div class="grid gap-8">
+                        {collectionContentItems.slice(0, 4).map((item) => (
+                          <article class="grid gap-4">
+                            <a
+                              href={item.href}
+                              class="block aspect-[3/2] overflow-hidden"
+                              aria-label={item.title}
+                            >
+                              <img
+                                src={item.imageUrl || picture1.src}
+                                alt={item.title}
+                                class="block h-full w-full object-cover"
+                                loading="lazy"
+                              />
+                            </a>
+                            <div class="grid gap-[0.55rem]">
+                              <p class="m-0">
+                                <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                  {resolveTagLabel(item.contentType, "Материал")}
+                                </span>
+                              </p>
+                              <a
+                                href={item.href}
+                                class="text-current no-underline hover:underline"
+                              >
+                                <h3 class="m-0 font-old_standard text-[1.3rem] font-normal leading-[1.12] text-base-content">
+                                  {item.title}
+                                </h3>
+                              </a>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div class="grid gap-6">
+                    <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
+                      Ещё события
+                    </h2>
 
                   {relatedEvents.length > 0 ? (
                     <div class="grid gap-8">
@@ -692,6 +760,7 @@ const displayEvent = {
                       Пока нет других событий на эту дату.
                     </p>
                   )}
+                  </div>
                 </div>
               </aside>
             </section>

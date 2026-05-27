@@ -123,6 +123,7 @@ export default function(Alpine: Alpine) {
       destroy() {},
       filteredEvents: [],
       smallEvents: [],
+      availableEventsCount: 0,
       // --- Article Creator properties ---
       article: {
         title: '',
