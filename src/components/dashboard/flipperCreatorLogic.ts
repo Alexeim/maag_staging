@@ -153,6 +153,11 @@ export default function flipperCreatorLogic(initialState = {}) {
       getMainHeroTarget() {
         return this.flipperId ? { type: "flipper", id: this.flipperId } : null;
       },
+      getCategoryHeroTarget() {
+        const cat = (this.flipper?.category || "").trim().toLowerCase();
+        if (!this.flipperId || (cat !== "culture" && cat !== "paris")) return null;
+        return { type: "flipper", id: this.flipperId, category: cat as "culture" | "paris" };
+      },
     }),
 
     init() {

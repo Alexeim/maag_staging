@@ -5,18 +5,27 @@ import {
   flippersApi,
   guidesApi,
   interviewsApi,
+  type CulturePagePlacementsResponse,
   type LandingMainHeroTarget,
   type LandingMainHeroType,
   type LandingPlacementsResponse,
+  type ParisPagePlacementsResponse,
   type UpdateLandingPlacementsPayload,
   visualStoriesApi,
 } from "@/lib/api/api";
+
+interface CategoryHeroTarget {
+  type: string;
+  id: string;
+  category: "culture" | "paris";
+}
 
 interface LandingPlacementManagerOptions {
   getEntityId(this: any): string | null;
   getMainHeroTarget?: ((this: any) => LandingMainHeroTarget | null) | null;
   supportsEventCard?: boolean;
   supportsCultureInterviewBlock?: boolean;
+  getCategoryHeroTarget?: ((this: any) => CategoryHeroTarget | null) | null;
 }
 
 const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
@@ -93,6 +102,8 @@ export const createLandingPlacementManager = (
   options: LandingPlacementManagerOptions,
 ) => ({
   landingPlacements: { ...DEFAULT_LANDING_PLACEMENTS } as LandingPlacementsResponse,
+  culturePagePlacements: null as CulturePagePlacementsResponse | null,
+  parisPagePlacements: null as ParisPagePlacementsResponse | null,
   currentMainHeroTitle: "",
   currentEventCardTitle: "",
   placementLoading: false,
@@ -224,7 +235,19 @@ export const createLandingPlacementManager = (
     this.placementError = "";
 
     try {
-      this.landingPlacements = await editorialPlacementsApi.getLanding();
+      const fetchPromises: Promise<any>[] = [editorialPlacementsApi.getLanding()];
+      if (options.getCategoryHeroTarget) {
+        fetchPromises.push(
+          editorialPlacementsApi.getCulturePage().catch(() => null),
+          editorialPlacementsApi.getParisPage().catch(() => null),
+        );
+      }
+      const [landing, culturePage, parisPage] = await Promise.all(fetchPromises);
+      this.landingPlacements = landing;
+      if (options.getCategoryHeroTarget) {
+        this.culturePagePlacements = culturePage ?? null;
+        this.parisPagePlacements = parisPage ?? null;
+      }
       await this.syncCurrentMainHeroTitle();
       await this.syncCurrentEventCardTitle();
     } catch (error) {
@@ -330,5 +353,151 @@ export const createLandingPlacementManager = (
       { cultureInterviewBlock: null },
       "Special block интервью в «Культуре» очищен.",
     );
+  },
+
+  getCategoryHeroTarget(): CategoryHeroTarget | null {
+    return options.getCategoryHeroTarget?.call(this) ?? null;
+  },
+
+  canSetAsCultureLandingHero() {
+    const t = this.getCategoryHeroTarget();
+    return Boolean(t && t.category === "culture" && t.type !== "interview" && t.id);
+  },
+
+  canSetAsParisLandingHero() {
+    const t = this.getCategoryHeroTarget();
+    return Boolean(t && t.category === "paris" && t.type !== "interview" && t.id);
+  },
+
+  isCurrentCultureLandingHero() {
+    const t = this.getCategoryHeroTarget();
+    if (!t || t.category !== "culture") return false;
+    const h = this.landingPlacements.cultureHero;
+    return Boolean(h?.mode === "manual" && h.type === t.type && h.id === t.id);
+  },
+
+  isCurrentParisLandingHero() {
+    const t = this.getCategoryHeroTarget();
+    if (!t || t.category !== "paris") return false;
+    const h = this.landingPlacements.parisHero;
+    return Boolean(h?.mode === "manual" && h.type === t.type && h.id === t.id);
+  },
+
+  canSetAsCulturePageHero() {
+    const t = this.getCategoryHeroTarget();
+    return Boolean(t && t.category === "culture" && t.id);
+  },
+
+  canSetAsParisPageHero() {
+    const t = this.getCategoryHeroTarget();
+    return Boolean(t && t.category === "paris" && t.id);
+  },
+
+  isCurrentCulturePageHero() {
+    const t = this.getCategoryHeroTarget();
+    if (!t || t.category !== "culture") return false;
+    const h = this.culturePagePlacements?.hero;
+    return Boolean(h?.mode === "manual" && h.type === t.type && h.id === t.id);
+  },
+
+  isCurrentParisPageHero() {
+    const t = this.getCategoryHeroTarget();
+    if (!t || t.category !== "paris") return false;
+    const h = this.parisPagePlacements?.hero;
+    return Boolean(h?.mode === "manual" && h.type === t.type && h.id === t.id);
+  },
+
+  async setCultureLandingHero() {
+    const t = this.getCategoryHeroTarget();
+    if (!t || t.category !== "culture" || t.type === "interview") return;
+    await this.updateLandingPlacements(
+      { cultureHero: { mode: "manual", type: t.type as any, id: t.id } },
+      "Материал поставлен hero «Культура» на landing.",
+    );
+  },
+
+  async clearCultureLandingHero() {
+    await this.updateLandingPlacements({ cultureHero: null }, "Hero «Культура» на landing очищен.");
+  },
+
+  async setParisLandingHero() {
+    const t = this.getCategoryHeroTarget();
+    if (!t || t.category !== "paris" || t.type === "interview") return;
+    await this.updateLandingPlacements(
+      { parisHero: { mode: "manual", type: t.type as any, id: t.id } },
+      "Материал поставлен hero «Париж» на landing.",
+    );
+  },
+
+  async clearParisLandingHero() {
+    await this.updateLandingPlacements({ parisHero: null }, "Hero «Париж» на landing очищен.");
+  },
+
+  async setCulturePageHero() {
+    const t = this.getCategoryHeroTarget();
+    if (!t || t.category !== "culture") return;
+    this.placementSaving = true;
+    this.placementError = "";
+    try {
+      this.culturePagePlacements = await editorialPlacementsApi.updateCulturePage({
+        hero: { mode: "manual", type: t.type as any, id: t.id },
+      });
+      showToast("Материал поставлен hero страницы /culture.");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Не удалось сохранить hero /culture.";
+      this.placementError = msg;
+      showToast(msg, "error");
+    } finally {
+      this.placementSaving = false;
+    }
+  },
+
+  async clearCulturePageHero() {
+    this.placementSaving = true;
+    this.placementError = "";
+    try {
+      this.culturePagePlacements = await editorialPlacementsApi.updateCulturePage({ hero: null });
+      showToast("Hero страницы /culture очищен.");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Не удалось очистить hero /culture.";
+      this.placementError = msg;
+      showToast(msg, "error");
+    } finally {
+      this.placementSaving = false;
+    }
+  },
+
+  async setParisPageHero() {
+    const t = this.getCategoryHeroTarget();
+    if (!t || t.category !== "paris") return;
+    this.placementSaving = true;
+    this.placementError = "";
+    try {
+      this.parisPagePlacements = await editorialPlacementsApi.updateParisPage({
+        hero: { mode: "manual", type: t.type as any, id: t.id },
+      });
+      showToast("Материал поставлен hero страницы /paris.");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Не удалось сохранить hero /paris.";
+      this.placementError = msg;
+      showToast(msg, "error");
+    } finally {
+      this.placementSaving = false;
+    }
+  },
+
+  async clearParisPageHero() {
+    this.placementSaving = true;
+    this.placementError = "";
+    try {
+      this.parisPagePlacements = await editorialPlacementsApi.updateParisPage({ hero: null });
+      showToast("Hero страницы /paris очищен.");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Не удалось очистить hero /paris.";
+      this.placementError = msg;
+      showToast(msg, "error");
+    } finally {
+      this.placementSaving = false;
+    }
   },
 });

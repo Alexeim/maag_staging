@@ -127,6 +127,11 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       getMainHeroTarget() {
         return this.storyId ? { type: "visual-story", id: this.storyId } : null;
       },
+      getCategoryHeroTarget() {
+        const cat = (this.story?.category || "").trim().toLowerCase();
+        if (!this.storyId || (cat !== "culture" && cat !== "paris")) return null;
+        return { type: "visual-story", id: this.storyId, category: cat as "culture" | "paris" };
+      },
     }),
 
     isEditingTitle: false,

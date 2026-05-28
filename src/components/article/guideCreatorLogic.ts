@@ -259,6 +259,11 @@ export default function guideCreatorLogic(initialState = {}) {
       getMainHeroTarget() {
         return this.articleId ? { type: "guide", id: this.articleId } : null;
       },
+      getCategoryHeroTarget() {
+        const cat = (this.article?.category || "").trim().toLowerCase();
+        if (!this.articleId || (cat !== "culture" && cat !== "paris")) return null;
+        return { type: "guide", id: this.articleId, category: cat as "culture" | "paris" };
+      },
     }),
 
     showBlockOptions: false,

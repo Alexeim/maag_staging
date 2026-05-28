@@ -167,6 +167,11 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       getMainHeroTarget() {
         return this.articleId ? { type: "article", id: this.articleId } : null;
       },
+      getCategoryHeroTarget() {
+        const cat = (this.article?.category || "").trim().toLowerCase();
+        if (!this.articleId || (cat !== "culture" && cat !== "paris")) return null;
+        return { type: "article", id: this.articleId, category: cat as "culture" | "paris" };
+      },
     }),
 
     categoryTags,

@@ -1,6 +1,7 @@
 ---
 import QuoteIcon from "../../assets/icons/quote.svg";
 import ArticleVideo from "./ArticleVideo.astro";
+import LinkToContent from "./LinkToContent.astro";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 
 interface Block {
@@ -188,6 +189,7 @@ if (currentProseGroup.length > 0) {
                           {block.text || "Ссылка"}
                         </a>
                       </p>
+                      <LinkToContent />
                     );
                   }
                   case "qa":

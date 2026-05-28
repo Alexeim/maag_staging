@@ -4,6 +4,8 @@ interface Props {
   allowEventCard?: boolean;
   allowCultureInterviewBlock?: boolean;
   featuredEventOnly?: boolean;
+  allowCategoryLandingHero?: boolean;
+  allowCategoryPageHero?: boolean;
 }
 
 const {
@@ -11,6 +13,8 @@ const {
   allowEventCard = false,
   allowCultureInterviewBlock = false,
   featuredEventOnly = false,
+  allowCategoryLandingHero = false,
+  allowCategoryPageHero = false,
 } = Astro.props as Props;
 
 const isFeaturedEventOnly =
@@ -100,6 +104,18 @@ const isFeaturedEventOnly =
             <p x-show="isCurrentCultureInterviewBlock()" class="text-success">
               Это интервью сейчас стоит в special block «Культура».
             </p>
+            <p x-show="isCurrentCultureLandingHero()" class="text-success">
+              Этот материал сейчас стоит hero блока «Культура» на landing.
+            </p>
+            <p x-show="isCurrentParisLandingHero()" class="text-success">
+              Этот материал сейчас стоит hero блока «Париж» на landing.
+            </p>
+            <p x-show="isCurrentCulturePageHero()" class="text-success">
+              Этот материал сейчас стоит hero страницы /culture.
+            </p>
+            <p x-show="isCurrentParisPageHero()" class="text-success">
+              Этот материал сейчас стоит hero страницы /paris.
+            </p>
           </>
         )
       }
@@ -171,6 +187,88 @@ const isFeaturedEventOnly =
             :disabled="placementSaving"
           >
             Снять из блока интервью
+          </button>
+        </>
+      )}
+
+      {allowCategoryLandingHero && (
+        <>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="setCultureLandingHero()"
+            x-show="canSetAsCultureLandingHero() && !isCurrentCultureLandingHero()"
+            :disabled="placementSaving"
+          >
+            Hero «Культура» на landing
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="clearCultureLandingHero()"
+            x-show="isCurrentCultureLandingHero()"
+            :disabled="placementSaving"
+          >
+            Снять hero «Культура» landing
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="setParisLandingHero()"
+            x-show="canSetAsParisLandingHero() && !isCurrentParisLandingHero()"
+            :disabled="placementSaving"
+          >
+            Hero «Париж» на landing
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="clearParisLandingHero()"
+            x-show="isCurrentParisLandingHero()"
+            :disabled="placementSaving"
+          >
+            Снять hero «Париж» landing
+          </button>
+        </>
+      )}
+
+      {allowCategoryPageHero && (
+        <>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="setCulturePageHero()"
+            x-show="canSetAsCulturePageHero() && !isCurrentCulturePageHero()"
+            :disabled="placementSaving"
+          >
+            Hero страницы /culture
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="clearCulturePageHero()"
+            x-show="isCurrentCulturePageHero()"
+            :disabled="placementSaving"
+          >
+            Снять hero /culture
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="setParisPageHero()"
+            x-show="canSetAsParisPageHero() && !isCurrentParisPageHero()"
+            :disabled="placementSaving"
+          >
+            Hero страницы /paris
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="clearParisPageHero()"
+            x-show="isCurrentParisPageHero()"
+            :disabled="placementSaving"
+          >
+            Снять hero /paris
           </button>
         </>
       )}
