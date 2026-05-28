@@ -96,12 +96,6 @@ const isHotContentItem = (item: { isHotContent?: boolean }) =>
 
 const normalizeCategoryKey = (value?: string) => value?.trim().toLowerCase() ?? "";
 
-const isMainInCategoryItem = (item: { isMainInCategory?: unknown }) =>
-  item.isMainInCategory === true ||
-  item.isMainInCategory === "true" ||
-  item.isMainInCategory === 1 ||
-  item.isMainInCategory === "1";
-
 const toDate = (value: unknown): Date | null => {
   if (!value) {
     return null;
@@ -316,7 +310,6 @@ try {
         createdAt: item.createdAt,
         category: normalizeCategoryKey(item.category),
         isHotContent: isHotContentItem(item),
-        isMainInCategory: item.isMainInCategory,
       })),
     ...guides.map((item) => ({
       id: `guide:${item.id}`,
@@ -326,7 +319,6 @@ try {
       createdAt: item.createdAt,
       category: normalizeCategoryKey(item.category),
       isHotContent: isHotContentItem(item),
-      isMainInCategory: item.isMainInCategory,
     })),
     ...flippers.map((item) => ({
       id: `flipper:${item.id}`,
@@ -336,7 +328,6 @@ try {
       createdAt: item.createdAt,
       category: normalizeCategoryKey(item.category),
       isHotContent: isHotContentItem(item),
-      isMainInCategory: item.isMainInCategory,
     })),
     ...visualStories.map((item) => ({
       id: `visual-story:${item.id}`,
@@ -346,7 +337,6 @@ try {
       createdAt: item.createdAt,
       category: normalizeCategoryKey(item.category),
       isHotContent: isHotContentItem(item),
-      isMainInCategory: item.isMainInCategory,
     })),
   ]
     .filter((item) => !item.isHotContent && item.id !== currentMainHeroKey)
@@ -364,38 +354,24 @@ try {
     (item) => item.category === "culture",
   );
   cultureHeroOptionItems.push(...cultureCandidates);
-  const cultureHeroOption =
-    (landingPlacements.cultureHero
-      ? cultureCandidates.find(
-          (item) =>
-            item.id === `${landingPlacements.cultureHero?.type}:${landingPlacements.cultureHero?.id}`,
-        )
-      : null) ??
-    cultureCandidates.find((item) => isMainInCategoryItem(item)) ??
-    cultureCandidates[0] ??
-    null;
+  const cultureHeroKey = landingPlacements.cultureHero
+    ? `${landingPlacements.cultureHero.type}:${landingPlacements.cultureHero.id}`
+    : null;
 
   cultureCardsOptionItems.push(
-    ...cultureCandidates.filter((item) => item.id !== cultureHeroOption?.id),
+    ...cultureCandidates.filter((item) => item.id !== cultureHeroKey),
   );
 
   const parisCandidates = categoryCardsCandidates.filter(
     (item) => item.category === "paris",
   );
   parisHeroOptionItems.push(...parisCandidates);
-  const parisHeroOption =
-    (landingPlacements.parisHero
-      ? parisCandidates.find(
-          (item) =>
-            item.id === `${landingPlacements.parisHero?.type}:${landingPlacements.parisHero?.id}`,
-        )
-      : null) ??
-    parisCandidates.find((item) => isMainInCategoryItem(item)) ??
-    parisCandidates[0] ??
-    null;
+  const parisHeroKey = landingPlacements.parisHero
+    ? `${landingPlacements.parisHero.type}:${landingPlacements.parisHero.id}`
+    : null;
 
   parisCardsOptionItems.push(
-    ...parisCandidates.filter((item) => item.id !== parisHeroOption?.id),
+    ...parisCandidates.filter((item) => item.id !== parisHeroKey),
   );
 } catch (error) {
   console.error("Failed to load landing editor overview:", error);
@@ -477,8 +453,8 @@ const netlenkaRailSummary = (() => {
 const cultureHeroSummary = (() => {
   if (!landingPlacements.cultureHero) {
     return {
-      modeLabel: "Fallback",
-      details: "Используется legacy fallback: main in category или первый свежий материал culture section.",
+      modeLabel: "Пусто",
+      details: "Culture hero slot пуст.",
     };
   }
 
@@ -521,8 +497,8 @@ const cultureCardsSummary = (() => {
 const parisHeroSummary = (() => {
   if (!landingPlacements.parisHero) {
     return {
-      modeLabel: "Fallback",
-      details: "Используется legacy fallback: main in category или первый свежий материал paris section.",
+      modeLabel: "Пусто",
+      details: "Paris hero slot пуст.",
     };
   }
 
@@ -1204,7 +1180,7 @@ const initialMainHeroState = (() => {
       <div class="flex flex-col gap-2">
         <h3 class="text-lg font-semibold">Culture Hero Controls</h3>
         <p class="text-sm text-base-content/70">
-          Главный материал culture section на landing. Если slot пустой, остаётся legacy fallback.
+          Главный материал culture section на landing.
         </p>
       </div>
 
@@ -1212,7 +1188,7 @@ const initialMainHeroState = (() => {
         <div class="grid gap-3 sm:grid-cols-2">
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
             <input type="radio" name="culture-hero-mode" value="empty" x-model="cultureHeroMode" />
-            <span class="text-sm">Fallback</span>
+            <span class="text-sm">Empty</span>
           </label>
 
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
@@ -1234,7 +1210,7 @@ const initialMainHeroState = (() => {
               — выбери материал —
             </option>
             {cultureHeroOptions.map((item) => (
-              <option value={item.id}>{item.title}</option>
+              <option value={item.id}>[{item.typeLabel}] {item.title}</option>
             ))}
           </select>
         </div>
@@ -1261,7 +1237,7 @@ const initialMainHeroState = (() => {
       <div class="flex flex-col gap-2">
         <h3 class="text-lg font-semibold">Paris Hero Controls</h3>
         <p class="text-sm text-base-content/70">
-          Главный материал paris section на landing. Если slot пустой, остаётся legacy fallback.
+          Главный материал paris section на landing.
         </p>
       </div>
 
@@ -1269,7 +1245,7 @@ const initialMainHeroState = (() => {
         <div class="grid gap-3 sm:grid-cols-2">
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
             <input type="radio" name="paris-hero-mode" value="empty" x-model="parisHeroMode" />
-            <span class="text-sm">Fallback</span>
+            <span class="text-sm">Empty</span>
           </label>
 
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
@@ -1291,7 +1267,7 @@ const initialMainHeroState = (() => {
               — выбери материал —
             </option>
             {parisHeroOptions.map((item) => (
-              <option value={item.id}>{item.title}</option>
+              <option value={item.id}>[{item.typeLabel}] {item.title}</option>
             ))}
           </select>
         </div>

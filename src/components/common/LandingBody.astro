@@ -344,21 +344,16 @@ const selectCategoryHero = (
   heroSelection: LandingPlacementsResponse["cultureHero"] | LandingPlacementsResponse["parisHero"],
 ) => {
   if (heroSelection?.mode === "manual") {
-    const manualHero = items.find(
-      (item) =>
-        item?.id === heroSelection.id &&
-        getPlacementType(item) === heroSelection.type,
+    return (
+      items.find(
+        (item) =>
+          item?.id === heroSelection.id &&
+          getPlacementType(item) === heroSelection.type,
+      ) ?? null
     );
-    if (manualHero) {
-      return manualHero;
-    }
   }
 
-  return (
-    items.find((item) => isMainInCategoryItem(item)) ??
-    items[0] ??
-    null
-  );
+  return null;
 };
 
 try {

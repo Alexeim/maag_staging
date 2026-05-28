@@ -1,7 +1,15 @@
 import {
   editorialPlacementsApi,
   type LandingCategoryCardsItemTarget,
+  type LandingCategoryCardsSelection,
+  type LandingCategoryHeroSelection,
+  type LandingCultureInterviewBlockSelection,
+  type LandingEventCardSelection,
+  type LandingMainHeroSelection,
+  type LandingMainHeroType,
   type LandingNetlenkaItemTarget,
+  type LandingNetlenkaRailSelection,
+  type LandingNewsRailSelection,
 } from "@/lib/api/api";
 import type { UiStore } from "@/stores/uiStore";
 
@@ -358,7 +366,7 @@ export default (initialState: LandingEditorInitialState) => ({
     this.mainHeroError = "";
 
     try {
-      let mainHero: unknown = null;
+      let mainHero: LandingMainHeroSelection | null = null;
 
       if (this.mainHeroMode === "manual") {
         if (!this.selectedMainHeroKey) {
@@ -372,7 +380,7 @@ export default (initialState: LandingEditorInitialState) => ({
 
         mainHero = {
           mode: "manual",
-          type: parsedKey.type,
+          type: parsedKey.type as LandingMainHeroType,
           id: parsedKey.id,
         };
       }
@@ -398,7 +406,7 @@ export default (initialState: LandingEditorInitialState) => ({
     this.cultureHeroError = "";
 
     try {
-      let cultureHero: unknown = null;
+      let cultureHero: LandingCategoryHeroSelection | null = null;
 
       if (this.cultureHeroMode === "manual") {
         if (!this.selectedCultureHeroKey) {
@@ -412,7 +420,7 @@ export default (initialState: LandingEditorInitialState) => ({
 
         cultureHero = {
           mode: "manual",
-          type: parsedKey.type,
+          type: parsedKey.type as LandingCategoryHeroSelection["type"],
           id: parsedKey.id,
         };
       }
@@ -438,7 +446,7 @@ export default (initialState: LandingEditorInitialState) => ({
     this.parisHeroError = "";
 
     try {
-      let parisHero: unknown = null;
+      let parisHero: LandingCategoryHeroSelection | null = null;
 
       if (this.parisHeroMode === "manual") {
         if (!this.selectedParisHeroKey) {
@@ -452,7 +460,7 @@ export default (initialState: LandingEditorInitialState) => ({
 
         parisHero = {
           mode: "manual",
-          type: parsedKey.type,
+          type: parsedKey.type as LandingCategoryHeroSelection["type"],
           id: parsedKey.id,
         };
       }
@@ -478,7 +486,7 @@ export default (initialState: LandingEditorInitialState) => ({
     this.newsError = "";
 
     try {
-      let newsRail: unknown = null;
+      let newsRail: LandingNewsRailSelection | null = null;
 
       if (this.newsRailMode === "auto-latest") {
         newsRail = {
@@ -519,7 +527,7 @@ export default (initialState: LandingEditorInitialState) => ({
     this.netlenkaError = "";
 
     try {
-      let netlenkaRail: unknown = null;
+      let netlenkaRail: LandingNetlenkaRailSelection | null = null;
 
       if (this.netlenkaRailMode === "auto-latest") {
         netlenkaRail = {
@@ -569,7 +577,7 @@ export default (initialState: LandingEditorInitialState) => ({
     this.cultureCardsError = "";
 
     try {
-      let cultureCards: unknown = null;
+      let cultureCards: LandingCategoryCardsSelection | null = null;
 
       if (this.cultureCardsMode === "auto-latest") {
         cultureCards = {
@@ -619,7 +627,7 @@ export default (initialState: LandingEditorInitialState) => ({
     this.parisCardsError = "";
 
     try {
-      let parisCards: unknown = null;
+      let parisCards: LandingCategoryCardsSelection | null = null;
 
       if (this.parisCardsMode === "auto-latest") {
         parisCards = {
@@ -669,7 +677,7 @@ export default (initialState: LandingEditorInitialState) => ({
     this.eventError = "";
 
     try {
-      let eventCard: unknown = null;
+      let eventCard: LandingEventCardSelection | null = null;
 
       if (this.eventCardMode === "auto-nearest") {
         eventCard = { mode: "auto-nearest" };
@@ -703,7 +711,7 @@ export default (initialState: LandingEditorInitialState) => ({
     this.cultureInterviewError = "";
 
     try {
-      let cultureInterviewBlock: unknown = null;
+      let cultureInterviewBlock: LandingCultureInterviewBlockSelection | null = null;
 
       if (this.cultureInterviewMode === "auto-latest") {
         cultureInterviewBlock = { mode: "auto-latest" };
