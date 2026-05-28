@@ -144,10 +144,99 @@ export interface CalendarPagePlacementsDocument {
   updatedBy: string | null;
 }
 
+export type SectionPageHeroType = LandingMainHeroType;
+
+export interface SectionPageHeroManualSelection {
+  mode: 'manual';
+  type: SectionPageHeroType;
+  id: string;
+}
+
+export interface SectionPageSecondaryStoriesAutoSelection {
+  mode: 'auto-latest';
+  limit: number;
+}
+
+export interface SectionPageSecondaryItemTarget {
+  type: SectionPageHeroType;
+  id: string;
+}
+
+export interface SectionPageSecondaryStoriesManualSelection {
+  mode: 'manual';
+  items: SectionPageSecondaryItemTarget[];
+}
+
+export type SectionPageSecondaryStoriesSelection =
+  | SectionPageSecondaryStoriesAutoSelection
+  | SectionPageSecondaryStoriesManualSelection;
+
+export interface SectionPageFeaturedInterviewAutoSelection {
+  mode: 'auto-latest';
+}
+
+export interface SectionPageFeaturedInterviewManualSelection {
+  mode: 'manual';
+  id: string;
+}
+
+export type SectionPageFeaturedInterviewSelection =
+  | SectionPageFeaturedInterviewAutoSelection
+  | SectionPageFeaturedInterviewManualSelection;
+
+export interface SectionPageSidebarRailAutoSelection {
+  mode: 'auto-hot';
+  limit: number;
+}
+
+export interface SectionPageSidebarRailManualSelection {
+  mode: 'manual';
+  items: SectionPageSecondaryItemTarget[];
+}
+
+export type SectionPageSidebarRailSelection =
+  | SectionPageSidebarRailAutoSelection
+  | SectionPageSidebarRailManualSelection;
+
+export interface SectionPageLeSaviezVousAutoSelection {
+  mode: 'auto-latest';
+}
+
+export interface SectionPageLeSaviezVousManualSelection {
+  mode: 'manual';
+  id: string;
+}
+
+export type SectionPageLeSaviezVousSelection =
+  | SectionPageLeSaviezVousAutoSelection
+  | SectionPageLeSaviezVousManualSelection;
+
+export interface CulturePagePlacementsDocument {
+  schemaVersion: 1;
+  hero: SectionPageHeroManualSelection | null;
+  secondaryStories: SectionPageSecondaryStoriesSelection | null;
+  featuredInterview: SectionPageFeaturedInterviewSelection | null;
+  sidebarRail: SectionPageSidebarRailSelection | null;
+  updatedAt: Date | null;
+  updatedBy: string | null;
+}
+
+export interface ParisPagePlacementsDocument {
+  schemaVersion: 1;
+  hero: SectionPageHeroManualSelection | null;
+  secondaryStories: SectionPageSecondaryStoriesSelection | null;
+  leSaviezVousFeature: SectionPageLeSaviezVousSelection | null;
+  sidebarRail: SectionPageSidebarRailSelection | null;
+  updatedAt: Date | null;
+  updatedBy: string | null;
+}
+
 const db = getDb();
 const placementsCollection = db.collection('editorialPlacements');
 const landingPlacementsRef = placementsCollection.doc('landing');
 const calendarPagePlacementsRef = placementsCollection.doc('calendarPage');
+const culturePagePlacementsRef = placementsCollection.doc('culturePage');
+const parisPagePlacementsRef = placementsCollection.doc('parisPage');
 
 const MAIN_HERO_COLLECTIONS: Record<LandingMainHeroType, string> = {
   article: 'articles',
@@ -173,6 +262,14 @@ const MAX_NEWS_RAIL_LIMIT = 12;
 const DEFAULT_CATEGORY_CARDS_LIMIT = 3;
 const MAX_CATEGORY_CARDS_LIMIT = 3;
 const CALENDAR_PAGE_CARD_LIMIT = 4;
+const DEFAULT_SECTION_PAGE_SECONDARY_LIMIT = 3;
+const MAX_SECTION_PAGE_SECONDARY_LIMIT = 6;
+const DEFAULT_SECTION_PAGE_SIDEBAR_LIMIT = 4;
+const MAX_SECTION_PAGE_SIDEBAR_LIMIT = 8;
+
+const SECTION_PAGE_HERO_COLLECTIONS: Record<SectionPageHeroType, string> = {
+  ...MAIN_HERO_COLLECTIONS,
+};
 
 const createDefaultLandingPlacements = (): LandingPlacementsDocument => ({
   schemaVersion: 4,
@@ -1287,5 +1384,411 @@ export const updateCalendarPagePlacements = async (req: Request, res: Response) 
     return res
       .status(500)
       .json({ message: 'Server error while updating calendar page placements' });
+  }
+};
+
+const createDefaultCulturePagePlacements = (): CulturePagePlacementsDocument => ({
+  schemaVersion: 1,
+  hero: null,
+  secondaryStories: { mode: 'auto-latest', limit: DEFAULT_SECTION_PAGE_SECONDARY_LIMIT },
+  featuredInterview: { mode: 'auto-latest' },
+  sidebarRail: { mode: 'auto-hot', limit: DEFAULT_SECTION_PAGE_SIDEBAR_LIMIT },
+  updatedAt: null,
+  updatedBy: null,
+});
+
+const createDefaultParisPagePlacements = (): ParisPagePlacementsDocument => ({
+  schemaVersion: 1,
+  hero: null,
+  secondaryStories: { mode: 'auto-latest', limit: DEFAULT_SECTION_PAGE_SECONDARY_LIMIT },
+  leSaviezVousFeature: { mode: 'auto-latest' },
+  sidebarRail: { mode: 'auto-hot', limit: DEFAULT_SECTION_PAGE_SIDEBAR_LIMIT },
+  updatedAt: null,
+  updatedBy: null,
+});
+
+const normalizeSectionPageLimit = (
+  value: unknown,
+  max: number,
+  defaultValue: number,
+): number => {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1) return defaultValue;
+  return Math.min(Math.round(parsed), max);
+};
+
+const normalizeSectionPageHeroSelection = (
+  value: unknown,
+): SectionPageHeroManualSelection | null => {
+  if (!value || typeof value !== 'object') return null;
+  const v = value as Record<string, unknown>;
+  if (v.mode !== 'manual') return null;
+  const type = v.type as string;
+  const id = v.id as string;
+  if (!type || !id || !SECTION_PAGE_HERO_COLLECTIONS[type as SectionPageHeroType]) return null;
+  return { mode: 'manual', type: type as SectionPageHeroType, id };
+};
+
+const normalizeSectionPageSecondaryStoriesSelection = (
+  value: unknown,
+): SectionPageSecondaryStoriesSelection | null => {
+  if (!value || typeof value !== 'object') return null;
+  const v = value as Record<string, unknown>;
+  if (v.mode === 'auto-latest') {
+    return {
+      mode: 'auto-latest',
+      limit: normalizeSectionPageLimit(
+        v.limit,
+        MAX_SECTION_PAGE_SECONDARY_LIMIT,
+        DEFAULT_SECTION_PAGE_SECONDARY_LIMIT,
+      ),
+    };
+  }
+  if (v.mode === 'manual') {
+    const rawItems = Array.isArray(v.items) ? v.items : [];
+    const items = rawItems
+      .map((item: unknown) => {
+        if (!item || typeof item !== 'object') return null;
+        const i = item as Record<string, unknown>;
+        const type = i.type as string;
+        const id = i.id as string;
+        if (!type || !id || !SECTION_PAGE_HERO_COLLECTIONS[type as SectionPageHeroType]) return null;
+        return { type: type as SectionPageHeroType, id };
+      })
+      .filter((item): item is SectionPageSecondaryItemTarget => item !== null);
+    return { mode: 'manual', items };
+  }
+  return null;
+};
+
+const normalizeSectionPageFeaturedInterviewSelection = (
+  value: unknown,
+): SectionPageFeaturedInterviewSelection | null => {
+  if (!value || typeof value !== 'object') return null;
+  const v = value as Record<string, unknown>;
+  if (v.mode === 'auto-latest') return { mode: 'auto-latest' };
+  if (v.mode === 'manual' && typeof v.id === 'string' && v.id) {
+    return { mode: 'manual', id: v.id };
+  }
+  return null;
+};
+
+const normalizeSectionPageSidebarRailSelection = (
+  value: unknown,
+): SectionPageSidebarRailSelection | null => {
+  if (!value || typeof value !== 'object') return null;
+  const v = value as Record<string, unknown>;
+  if (v.mode === 'auto-hot') {
+    return {
+      mode: 'auto-hot',
+      limit: normalizeSectionPageLimit(
+        v.limit,
+        MAX_SECTION_PAGE_SIDEBAR_LIMIT,
+        DEFAULT_SECTION_PAGE_SIDEBAR_LIMIT,
+      ),
+    };
+  }
+  if (v.mode === 'manual') {
+    const rawItems = Array.isArray(v.items) ? v.items : [];
+    const items = rawItems
+      .map((item: unknown) => {
+        if (!item || typeof item !== 'object') return null;
+        const i = item as Record<string, unknown>;
+        const type = i.type as string;
+        const id = i.id as string;
+        if (!type || !id || !SECTION_PAGE_HERO_COLLECTIONS[type as SectionPageHeroType]) return null;
+        return { type: type as SectionPageHeroType, id };
+      })
+      .filter((item): item is SectionPageSecondaryItemTarget => item !== null);
+    return { mode: 'manual', items };
+  }
+  return null;
+};
+
+const normalizeSectionPageLeSaviezVousSelection = (
+  value: unknown,
+): SectionPageLeSaviezVousSelection | null => {
+  if (!value || typeof value !== 'object') return null;
+  const v = value as Record<string, unknown>;
+  if (v.mode === 'auto-latest') return { mode: 'auto-latest' };
+  if (v.mode === 'manual' && typeof v.id === 'string' && v.id) {
+    return { mode: 'manual', id: v.id };
+  }
+  return null;
+};
+
+const normalizeCulturePagePlacements = (
+  value: FirebaseFirestore.DocumentData | undefined,
+): CulturePagePlacementsDocument => {
+  const defaults = createDefaultCulturePagePlacements();
+  if (!value || typeof value !== 'object') return defaults;
+
+  const heroRaw = 'hero' in value ? value.hero : undefined;
+  const hero = heroRaw === null
+    ? null
+    : (normalizeSectionPageHeroSelection(heroRaw) ?? defaults.hero);
+
+  const secondaryStoriesRaw = 'secondaryStories' in value ? value.secondaryStories : undefined;
+  const secondaryStories = secondaryStoriesRaw === null
+    ? null
+    : (normalizeSectionPageSecondaryStoriesSelection(secondaryStoriesRaw) ?? defaults.secondaryStories);
+
+  const featuredInterviewRaw = 'featuredInterview' in value ? value.featuredInterview : undefined;
+  const featuredInterview = featuredInterviewRaw === null
+    ? null
+    : (normalizeSectionPageFeaturedInterviewSelection(featuredInterviewRaw) ?? defaults.featuredInterview);
+
+  const sidebarRailRaw = 'sidebarRail' in value ? value.sidebarRail : undefined;
+  const sidebarRail = sidebarRailRaw === null
+    ? null
+    : (normalizeSectionPageSidebarRailSelection(sidebarRailRaw) ?? defaults.sidebarRail);
+
+  return {
+    schemaVersion: 1,
+    hero,
+    secondaryStories,
+    featuredInterview,
+    sidebarRail,
+    updatedAt: value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
+    updatedBy: normalizeStringId(value.updatedBy),
+  };
+};
+
+const normalizeParisPagePlacements = (
+  value: FirebaseFirestore.DocumentData | undefined,
+): ParisPagePlacementsDocument => {
+  const defaults = createDefaultParisPagePlacements();
+  if (!value || typeof value !== 'object') return defaults;
+
+  const heroRaw = 'hero' in value ? value.hero : undefined;
+  const hero = heroRaw === null
+    ? null
+    : (normalizeSectionPageHeroSelection(heroRaw) ?? defaults.hero);
+
+  const secondaryStoriesRaw = 'secondaryStories' in value ? value.secondaryStories : undefined;
+  const secondaryStories = secondaryStoriesRaw === null
+    ? null
+    : (normalizeSectionPageSecondaryStoriesSelection(secondaryStoriesRaw) ?? defaults.secondaryStories);
+
+  const leSaviezVousRaw = 'leSaviezVousFeature' in value ? value.leSaviezVousFeature : undefined;
+  const leSaviezVousFeature = leSaviezVousRaw === null
+    ? null
+    : (normalizeSectionPageLeSaviezVousSelection(leSaviezVousRaw) ?? defaults.leSaviezVousFeature);
+
+  const sidebarRailRaw = 'sidebarRail' in value ? value.sidebarRail : undefined;
+  const sidebarRail = sidebarRailRaw === null
+    ? null
+    : (normalizeSectionPageSidebarRailSelection(sidebarRailRaw) ?? defaults.sidebarRail);
+
+  return {
+    schemaVersion: 1,
+    hero,
+    secondaryStories,
+    leSaviezVousFeature,
+    sidebarRail,
+    updatedAt: value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
+    updatedBy: normalizeStringId(value.updatedBy),
+  };
+};
+
+export const getCulturePagePlacements = async (_req: Request, res: Response) => {
+  try {
+    const doc = await culturePagePlacementsRef.get();
+    if (!doc.exists) {
+      return res.status(200).json(createDefaultCulturePagePlacements());
+    }
+    return res.status(200).json(normalizeCulturePagePlacements(doc.data()));
+  } catch (error) {
+    console.error('Error getting culture page placements:', error);
+    return res.status(500).json({ message: 'Server error while getting culture page placements' });
+  }
+};
+
+export const updateCulturePagePlacements = async (req: Request, res: Response) => {
+  try {
+    const currentDoc = await culturePagePlacementsRef.get();
+    const current = normalizeCulturePagePlacements(currentDoc.data());
+    const payload = req.body && typeof req.body === 'object' ? req.body : {};
+
+    let { hero, secondaryStories, featuredInterview, sidebarRail } = current;
+
+    if ('hero' in payload) {
+      if (payload.hero === null) {
+        hero = null;
+      } else {
+        const normalized = normalizeSectionPageHeroSelection(payload.hero);
+        if (!normalized) return res.status(400).json({ message: 'Invalid hero payload' });
+        const exists = await assertDocumentExists(
+          SECTION_PAGE_HERO_COLLECTIONS[normalized.type],
+          normalized.id,
+        );
+        if (!exists) return res.status(404).json({ message: 'Referenced hero document not found' });
+        hero = normalized;
+      }
+    }
+
+    if ('secondaryStories' in payload) {
+      if (payload.secondaryStories === null) {
+        secondaryStories = null;
+      } else {
+        const normalized = normalizeSectionPageSecondaryStoriesSelection(payload.secondaryStories);
+        if (!normalized) return res.status(400).json({ message: 'Invalid secondaryStories payload' });
+        if (normalized.mode === 'manual') {
+          const missingIds = (
+            await Promise.all(
+              normalized.items.map(async (item) => {
+                const exists = await assertDocumentExists(SECTION_PAGE_HERO_COLLECTIONS[item.type], item.id);
+                return exists ? null : `${item.type}:${item.id}`;
+              }),
+            )
+          ).filter((id): id is string => id !== null);
+          if (missingIds.length > 0) {
+            return res.status(404).json({ message: 'Referenced secondaryStories documents not found', missingIds });
+          }
+        }
+        secondaryStories = normalized;
+      }
+    }
+
+    if ('featuredInterview' in payload) {
+      if (payload.featuredInterview === null) {
+        featuredInterview = null;
+      } else {
+        const normalized = normalizeSectionPageFeaturedInterviewSelection(payload.featuredInterview);
+        if (!normalized) return res.status(400).json({ message: 'Invalid featuredInterview payload' });
+        if (normalized.mode === 'manual') {
+          const exists = await assertDocumentExists('interviews', normalized.id);
+          if (!exists) return res.status(404).json({ message: 'Referenced interview not found' });
+        }
+        featuredInterview = normalized;
+      }
+    }
+
+    if ('sidebarRail' in payload) {
+      if (payload.sidebarRail === null) {
+        sidebarRail = null;
+      } else {
+        const normalized = normalizeSectionPageSidebarRailSelection(payload.sidebarRail);
+        if (!normalized) return res.status(400).json({ message: 'Invalid sidebarRail payload' });
+        sidebarRail = normalized;
+      }
+    }
+
+    const nextValue: CulturePagePlacementsDocument = {
+      schemaVersion: 1,
+      hero,
+      secondaryStories,
+      featuredInterview,
+      sidebarRail,
+      updatedAt: new Date(),
+      updatedBy: null,
+    };
+
+    await culturePagePlacementsRef.set(nextValue, { merge: true });
+    return res.status(200).json(nextValue);
+  } catch (error) {
+    console.error('Error updating culture page placements:', error);
+    return res.status(500).json({ message: 'Server error while updating culture page placements' });
+  }
+};
+
+export const getParisPagePlacements = async (_req: Request, res: Response) => {
+  try {
+    const doc = await parisPagePlacementsRef.get();
+    if (!doc.exists) {
+      return res.status(200).json(createDefaultParisPagePlacements());
+    }
+    return res.status(200).json(normalizeParisPagePlacements(doc.data()));
+  } catch (error) {
+    console.error('Error getting paris page placements:', error);
+    return res.status(500).json({ message: 'Server error while getting paris page placements' });
+  }
+};
+
+export const updateParisPagePlacements = async (req: Request, res: Response) => {
+  try {
+    const currentDoc = await parisPagePlacementsRef.get();
+    const current = normalizeParisPagePlacements(currentDoc.data());
+    const payload = req.body && typeof req.body === 'object' ? req.body : {};
+
+    let { hero, secondaryStories, leSaviezVousFeature, sidebarRail } = current;
+
+    if ('hero' in payload) {
+      if (payload.hero === null) {
+        hero = null;
+      } else {
+        const normalized = normalizeSectionPageHeroSelection(payload.hero);
+        if (!normalized) return res.status(400).json({ message: 'Invalid hero payload' });
+        const exists = await assertDocumentExists(
+          SECTION_PAGE_HERO_COLLECTIONS[normalized.type],
+          normalized.id,
+        );
+        if (!exists) return res.status(404).json({ message: 'Referenced hero document not found' });
+        hero = normalized;
+      }
+    }
+
+    if ('secondaryStories' in payload) {
+      if (payload.secondaryStories === null) {
+        secondaryStories = null;
+      } else {
+        const normalized = normalizeSectionPageSecondaryStoriesSelection(payload.secondaryStories);
+        if (!normalized) return res.status(400).json({ message: 'Invalid secondaryStories payload' });
+        if (normalized.mode === 'manual') {
+          const missingIds = (
+            await Promise.all(
+              normalized.items.map(async (item) => {
+                const exists = await assertDocumentExists(SECTION_PAGE_HERO_COLLECTIONS[item.type], item.id);
+                return exists ? null : `${item.type}:${item.id}`;
+              }),
+            )
+          ).filter((id): id is string => id !== null);
+          if (missingIds.length > 0) {
+            return res.status(404).json({ message: 'Referenced secondaryStories documents not found', missingIds });
+          }
+        }
+        secondaryStories = normalized;
+      }
+    }
+
+    if ('leSaviezVousFeature' in payload) {
+      if (payload.leSaviezVousFeature === null) {
+        leSaviezVousFeature = null;
+      } else {
+        const normalized = normalizeSectionPageLeSaviezVousSelection(payload.leSaviezVousFeature);
+        if (!normalized) return res.status(400).json({ message: 'Invalid leSaviezVousFeature payload' });
+        if (normalized.mode === 'manual') {
+          const exists = await assertDocumentExists('articles', normalized.id);
+          if (!exists) return res.status(404).json({ message: 'Referenced article not found' });
+        }
+        leSaviezVousFeature = normalized;
+      }
+    }
+
+    if ('sidebarRail' in payload) {
+      if (payload.sidebarRail === null) {
+        sidebarRail = null;
+      } else {
+        const normalized = normalizeSectionPageSidebarRailSelection(payload.sidebarRail);
+        if (!normalized) return res.status(400).json({ message: 'Invalid sidebarRail payload' });
+        sidebarRail = normalized;
+      }
+    }
+
+    const nextValue: ParisPagePlacementsDocument = {
+      schemaVersion: 1,
+      hero,
+      secondaryStories,
+      leSaviezVousFeature,
+      sidebarRail,
+      updatedAt: new Date(),
+      updatedBy: null,
+    };
+
+    await parisPagePlacementsRef.set(nextValue, { merge: true });
+    return res.status(200).json(nextValue);
+  } catch (error) {
+    console.error('Error updating paris page placements:', error);
+    return res.status(500).json({ message: 'Server error while updating paris page placements' });
   }
 };

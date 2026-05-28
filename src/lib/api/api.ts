@@ -391,6 +391,107 @@ export interface UpdateCalendarPagePlacementsPayload {
   secondaryCards?: CalendarPageSecondaryCardsSelection | null;
 }
 
+export type SectionPageHeroType = LandingMainHeroType;
+
+export interface SectionPageHeroManualSelection {
+  mode: "manual";
+  type: SectionPageHeroType;
+  id: string;
+}
+
+export interface SectionPageSecondaryStoriesAutoSelection {
+  mode: "auto-latest";
+  limit: number;
+}
+
+export interface SectionPageSecondaryItemTarget {
+  type: SectionPageHeroType;
+  id: string;
+}
+
+export interface SectionPageSecondaryStoriesManualSelection {
+  mode: "manual";
+  items: SectionPageSecondaryItemTarget[];
+}
+
+export type SectionPageSecondaryStoriesSelection =
+  | SectionPageSecondaryStoriesAutoSelection
+  | SectionPageSecondaryStoriesManualSelection;
+
+export interface SectionPageFeaturedInterviewAutoSelection {
+  mode: "auto-latest";
+}
+
+export interface SectionPageFeaturedInterviewManualSelection {
+  mode: "manual";
+  id: string;
+}
+
+export type SectionPageFeaturedInterviewSelection =
+  | SectionPageFeaturedInterviewAutoSelection
+  | SectionPageFeaturedInterviewManualSelection;
+
+export interface SectionPageSidebarRailAutoSelection {
+  mode: "auto-hot";
+  limit: number;
+}
+
+export interface SectionPageSidebarRailManualSelection {
+  mode: "manual";
+  items: SectionPageSecondaryItemTarget[];
+}
+
+export type SectionPageSidebarRailSelection =
+  | SectionPageSidebarRailAutoSelection
+  | SectionPageSidebarRailManualSelection;
+
+export interface SectionPageLeSaviezVousAutoSelection {
+  mode: "auto-latest";
+}
+
+export interface SectionPageLeSaviezVousManualSelection {
+  mode: "manual";
+  id: string;
+}
+
+export type SectionPageLeSaviezVousSelection =
+  | SectionPageLeSaviezVousAutoSelection
+  | SectionPageLeSaviezVousManualSelection;
+
+export interface CulturePagePlacementsResponse {
+  schemaVersion: 1;
+  hero: SectionPageHeroManualSelection | null;
+  secondaryStories: SectionPageSecondaryStoriesSelection | null;
+  featuredInterview: SectionPageFeaturedInterviewSelection | null;
+  sidebarRail: SectionPageSidebarRailSelection | null;
+  updatedAt?: string | Date | null;
+  updatedBy?: string | null;
+}
+
+export interface UpdateCulturePagePlacementsPayload {
+  hero?: SectionPageHeroManualSelection | null;
+  secondaryStories?: SectionPageSecondaryStoriesSelection | null;
+  featuredInterview?: SectionPageFeaturedInterviewSelection | null;
+  sidebarRail?: SectionPageSidebarRailSelection | null;
+}
+
+export interface ParisPagePlacementsResponse {
+  schemaVersion: 1;
+  hero: SectionPageHeroManualSelection | null;
+  secondaryStories: SectionPageSecondaryStoriesSelection | null;
+  leSaviezVousFeature: SectionPageLeSaviezVousSelection | null;
+  sidebarRail: SectionPageSidebarRailSelection | null;
+  updatedAt?: string | Date | null;
+  updatedBy?: string | null;
+}
+
+export interface UpdateParisPagePlacementsPayload {
+  hero?: SectionPageHeroManualSelection | null;
+  secondaryStories?: SectionPageSecondaryStoriesSelection | null;
+  leSaviezVousFeature?: SectionPageLeSaviezVousSelection | null;
+  sidebarRail?: SectionPageSidebarRailSelection | null;
+}
+
 export interface UserProfilePayload {
   uid: string;
   firstName: string;
@@ -812,6 +913,30 @@ export const editorialPlacementsApi = {
         body: payload,
         token,
       }
+    );
+  },
+  getCulturePage(token?: string) {
+    return request<CulturePagePlacementsResponse>(
+      "/api/editorial-placements/culture-page",
+      { token },
+    );
+  },
+  updateCulturePage(payload: UpdateCulturePagePlacementsPayload, token?: string) {
+    return request<CulturePagePlacementsResponse>(
+      "/api/editorial-placements/culture-page",
+      { method: "PUT", body: payload, token },
+    );
+  },
+  getParisPage(token?: string) {
+    return request<ParisPagePlacementsResponse>(
+      "/api/editorial-placements/paris-page",
+      { token },
+    );
+  },
+  updateParisPage(payload: UpdateParisPagePlacementsPayload, token?: string) {
+    return request<ParisPagePlacementsResponse>(
+      "/api/editorial-placements/paris-page",
+      { method: "PUT", body: payload, token },
     );
   },
 };
