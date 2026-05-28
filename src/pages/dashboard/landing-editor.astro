@@ -10,13 +10,14 @@ import {
   interviewsApi,
   newsApi,
   visualStoriesApi,
+  type LandingCategoryCardsItemType,
   type LandingMainHeroType,
   type LandingNetlenkaItemType,
   type LandingPlacementsResponse,
 } from "@/lib/api/api";
 
 const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
-  schemaVersion: 2,
+  schemaVersion: 4,
   mainHero: null,
   newsRail: {
     mode: "auto-latest",
@@ -25,6 +26,16 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   netlenkaRail: {
     mode: "auto-latest",
     limit: 4,
+  },
+  cultureHero: null,
+  cultureCards: {
+    mode: "auto-latest",
+    limit: 3,
+  },
+  parisHero: null,
+  parisCards: {
+    mode: "auto-latest",
+    limit: 3,
   },
   eventCard: {
     mode: "auto-nearest",
@@ -46,6 +57,13 @@ const MAIN_HERO_TYPE_LABELS: Record<LandingMainHeroType, string> = {
 
 const NETLENKA_TYPE_LABELS: Record<LandingNetlenkaItemType, string> = {
   ...MAIN_HERO_TYPE_LABELS,
+};
+
+const CATEGORY_CARDS_TYPE_LABELS: Record<LandingCategoryCardsItemType, string> = {
+  article: MAIN_HERO_TYPE_LABELS.article,
+  guide: MAIN_HERO_TYPE_LABELS.guide,
+  flipper: MAIN_HERO_TYPE_LABELS.flipper,
+  "visual-story": MAIN_HERO_TYPE_LABELS["visual-story"],
 };
 
 const ARTICLE_BUCKET_LABELS = {
@@ -75,6 +93,14 @@ const isLeSaviezVousArticle = (item: { articleType?: string }) =>
 
 const isHotContentItem = (item: { isHotContent?: boolean }) =>
   Boolean(item.isHotContent);
+
+const normalizeCategoryKey = (value?: string) => value?.trim().toLowerCase() ?? "";
+
+const isMainInCategoryItem = (item: { isMainInCategory?: unknown }) =>
+  item.isMainInCategory === true ||
+  item.isMainInCategory === "true" ||
+  item.isMainInCategory === 1 ||
+  item.isMainInCategory === "1";
 
 const toDate = (value: unknown): Date | null => {
   if (!value) {
@@ -138,6 +164,34 @@ const netlenkaOptionItems: Array<{
   typeLabel: string;
   createdAt: unknown;
 }> = [];
+const cultureCardsOptionItems: Array<{
+  id: string;
+  title: string;
+  type: LandingCategoryCardsItemType;
+  typeLabel: string;
+  createdAt: unknown;
+}> = [];
+const parisCardsOptionItems: Array<{
+  id: string;
+  title: string;
+  type: LandingCategoryCardsItemType;
+  typeLabel: string;
+  createdAt: unknown;
+}> = [];
+const cultureHeroOptionItems: Array<{
+  id: string;
+  title: string;
+  type: LandingCategoryCardsItemType;
+  typeLabel: string;
+  createdAt: unknown;
+}> = [];
+const parisHeroOptionItems: Array<{
+  id: string;
+  title: string;
+  type: LandingCategoryCardsItemType;
+  typeLabel: string;
+  createdAt: unknown;
+}> = [];
 const mainHeroArticleMeta = new Map<
   string,
   {
@@ -168,6 +222,9 @@ try {
   ]);
 
   landingPlacements = placements;
+  const currentMainHeroKey = landingPlacements.mainHero
+    ? `${landingPlacements.mainHero.type}:${landingPlacements.mainHero.id}`
+    : null;
 
   articles.forEach((item) => {
     const key = `article:${item.id}`;
@@ -247,6 +304,99 @@ try {
     contentTitleMaps.news.set(item.id, item.title);
   });
   events.forEach((item) => contentTitleMaps.events.set(item.id, item.title));
+
+  const categoryCardsCandidates = [
+    ...articles
+      .filter((item) => !isLeSaviezVousArticle(item))
+      .map((item) => ({
+        id: `article:${item.id}`,
+        title: item.title,
+        type: "article" as const,
+        typeLabel: CATEGORY_CARDS_TYPE_LABELS.article,
+        createdAt: item.createdAt,
+        category: normalizeCategoryKey(item.category),
+        isHotContent: isHotContentItem(item),
+        isMainInCategory: item.isMainInCategory,
+      })),
+    ...guides.map((item) => ({
+      id: `guide:${item.id}`,
+      title: item.title,
+      type: "guide" as const,
+      typeLabel: CATEGORY_CARDS_TYPE_LABELS.guide,
+      createdAt: item.createdAt,
+      category: normalizeCategoryKey(item.category),
+      isHotContent: isHotContentItem(item),
+      isMainInCategory: item.isMainInCategory,
+    })),
+    ...flippers.map((item) => ({
+      id: `flipper:${item.id}`,
+      title: item.title,
+      type: "flipper" as const,
+      typeLabel: CATEGORY_CARDS_TYPE_LABELS.flipper,
+      createdAt: item.createdAt,
+      category: normalizeCategoryKey(item.category),
+      isHotContent: isHotContentItem(item),
+      isMainInCategory: item.isMainInCategory,
+    })),
+    ...visualStories.map((item) => ({
+      id: `visual-story:${item.id}`,
+      title: item.title,
+      type: "visual-story" as const,
+      typeLabel: CATEGORY_CARDS_TYPE_LABELS["visual-story"],
+      createdAt: item.createdAt,
+      category: normalizeCategoryKey(item.category),
+      isHotContent: isHotContentItem(item),
+      isMainInCategory: item.isMainInCategory,
+    })),
+  ]
+    .filter((item) => !item.isHotContent && item.id !== currentMainHeroKey)
+    .sort((left, right) => {
+      const leftDate = toDate(left.createdAt)?.getTime() ?? 0;
+      const rightDate = toDate(right.createdAt)?.getTime() ?? 0;
+      if (leftDate !== rightDate) {
+        return rightDate - leftDate;
+      }
+
+      return left.title.localeCompare(right.title, "ru-RU");
+    });
+
+  const cultureCandidates = categoryCardsCandidates.filter(
+    (item) => item.category === "culture",
+  );
+  cultureHeroOptionItems.push(...cultureCandidates);
+  const cultureHeroOption =
+    (landingPlacements.cultureHero
+      ? cultureCandidates.find(
+          (item) =>
+            item.id === `${landingPlacements.cultureHero?.type}:${landingPlacements.cultureHero?.id}`,
+        )
+      : null) ??
+    cultureCandidates.find((item) => isMainInCategoryItem(item)) ??
+    cultureCandidates[0] ??
+    null;
+
+  cultureCardsOptionItems.push(
+    ...cultureCandidates.filter((item) => item.id !== cultureHeroOption?.id),
+  );
+
+  const parisCandidates = categoryCardsCandidates.filter(
+    (item) => item.category === "paris",
+  );
+  parisHeroOptionItems.push(...parisCandidates);
+  const parisHeroOption =
+    (landingPlacements.parisHero
+      ? parisCandidates.find(
+          (item) =>
+            item.id === `${landingPlacements.parisHero?.type}:${landingPlacements.parisHero?.id}`,
+        )
+      : null) ??
+    parisCandidates.find((item) => isMainInCategoryItem(item)) ??
+    parisCandidates[0] ??
+    null;
+
+  parisCardsOptionItems.push(
+    ...parisCandidates.filter((item) => item.id !== parisHeroOption?.id),
+  );
 } catch (error) {
   console.error("Failed to load landing editor overview:", error);
   loadError =
@@ -324,6 +474,94 @@ const netlenkaRailSummary = (() => {
   };
 })();
 
+const cultureHeroSummary = (() => {
+  if (!landingPlacements.cultureHero) {
+    return {
+      modeLabel: "Fallback",
+      details: "Используется legacy fallback: main in category или первый свежий материал culture section.",
+    };
+  }
+
+  const key = `${landingPlacements.cultureHero.type}:${landingPlacements.cultureHero.id}`;
+  return {
+    modeLabel: "Manual",
+    details:
+      contentTitleMaps.mainHero.get(key) ||
+      `${CATEGORY_CARDS_TYPE_LABELS[landingPlacements.cultureHero.type]} ${landingPlacements.cultureHero.id}`,
+  };
+})();
+
+const cultureCardsSummary = (() => {
+  if (!landingPlacements.cultureCards) {
+    return {
+      modeLabel: "Пусто",
+      details: "Карточки culture section на landing сейчас пусты.",
+    };
+  }
+
+  if (landingPlacements.cultureCards.mode === "auto-latest") {
+    return {
+      modeLabel: "Auto latest",
+      details: `Последние ${landingPlacements.cultureCards.limit} карточки в culture section, с исключением global main hero и hero рубрики.`,
+    };
+  }
+
+  const items = landingPlacements.cultureCards.items.map(({ type, id }) => {
+    const key = `${type}:${id}`;
+    const title = contentTitleMaps.mainHero.get(key) || `${CATEGORY_CARDS_TYPE_LABELS[type]} ${id}`;
+    return `[${CATEGORY_CARDS_TYPE_LABELS[type]}] ${title}`;
+  });
+
+  return {
+    modeLabel: "Manual",
+    details: items.length > 0 ? items.join(" | ") : "Список материалов пуст.",
+  };
+})();
+
+const parisHeroSummary = (() => {
+  if (!landingPlacements.parisHero) {
+    return {
+      modeLabel: "Fallback",
+      details: "Используется legacy fallback: main in category или первый свежий материал paris section.",
+    };
+  }
+
+  const key = `${landingPlacements.parisHero.type}:${landingPlacements.parisHero.id}`;
+  return {
+    modeLabel: "Manual",
+    details:
+      contentTitleMaps.mainHero.get(key) ||
+      `${CATEGORY_CARDS_TYPE_LABELS[landingPlacements.parisHero.type]} ${landingPlacements.parisHero.id}`,
+  };
+})();
+
+const parisCardsSummary = (() => {
+  if (!landingPlacements.parisCards) {
+    return {
+      modeLabel: "Пусто",
+      details: "Карточки paris section на landing сейчас пусты.",
+    };
+  }
+
+  if (landingPlacements.parisCards.mode === "auto-latest") {
+    return {
+      modeLabel: "Auto latest",
+      details: `Последние ${landingPlacements.parisCards.limit} карточки в paris section, с исключением global main hero и hero рубрики.`,
+    };
+  }
+
+  const items = landingPlacements.parisCards.items.map(({ type, id }) => {
+    const key = `${type}:${id}`;
+    const title = contentTitleMaps.mainHero.get(key) || `${CATEGORY_CARDS_TYPE_LABELS[type]} ${id}`;
+    return `[${CATEGORY_CARDS_TYPE_LABELS[type]}] ${title}`;
+  });
+
+  return {
+    modeLabel: "Manual",
+    details: items.length > 0 ? items.join(" | ") : "Список материалов пуст.",
+  };
+})();
+
 const eventCardSummary = (() => {
   if (!landingPlacements.eventCard) {
     return {
@@ -335,7 +573,8 @@ const eventCardSummary = (() => {
   if (landingPlacements.eventCard.mode === "auto-nearest") {
     return {
       modeLabel: "Auto nearest",
-      details: "Автоматически показывается ближайшее событие.",
+      details:
+        "Сначала single-day событие на сегодня по latest created, если его нет — последний созданный active range event, затем ближайшее upcoming событие.",
     };
   }
 
@@ -388,6 +627,30 @@ const slotCards = [
     description: "Блок «Самое Читаемое» в landing body.",
     modeLabel: netlenkaRailSummary.modeLabel,
     details: netlenkaRailSummary.details,
+  },
+  {
+    title: "Culture Hero",
+    description: "Главный материал culture section на landing.",
+    modeLabel: cultureHeroSummary.modeLabel,
+    details: cultureHeroSummary.details,
+  },
+  {
+    title: "Culture Cards",
+    description: "Три карточки под hero в culture section на landing.",
+    modeLabel: cultureCardsSummary.modeLabel,
+    details: cultureCardsSummary.details,
+  },
+  {
+    title: "Paris Hero",
+    description: "Главный материал paris section на landing.",
+    modeLabel: parisHeroSummary.modeLabel,
+    details: parisHeroSummary.details,
+  },
+  {
+    title: "Paris Cards",
+    description: "Три карточки под hero в paris section на landing.",
+    modeLabel: parisCardsSummary.modeLabel,
+    details: parisCardsSummary.details,
   },
   {
     title: "Event Card",
@@ -460,7 +723,133 @@ const initialNetlenkaRailState = (() => {
   };
 })();
 
+const initialCultureHeroState = (() => {
+  if (!landingPlacements.cultureHero) {
+    return { mode: "empty" as const, key: "" };
+  }
+
+  return {
+    mode: "manual" as const,
+    key: `${landingPlacements.cultureHero.type}:${landingPlacements.cultureHero.id}`,
+  };
+})();
+
+const initialCultureCardsState = (() => {
+  if (!landingPlacements.cultureCards) {
+    return {
+      mode: "empty" as const,
+      limit: 3,
+      keys: [],
+    };
+  }
+
+  if (landingPlacements.cultureCards.mode === "auto-latest") {
+    return {
+      mode: "auto-latest" as const,
+      limit: landingPlacements.cultureCards.limit,
+      keys: [],
+    };
+  }
+
+  const availableCultureCardKeys = new Set(cultureCardsOptionItems.map((item) => item.id));
+
+  return {
+    mode: "manual" as const,
+    limit: 3,
+    keys: landingPlacements.cultureCards.items
+      .map((item) => `${item.type}:${item.id}`)
+      .filter((key) => availableCultureCardKeys.has(key)),
+  };
+})();
+
+const initialParisHeroState = (() => {
+  if (!landingPlacements.parisHero) {
+    return { mode: "empty" as const, key: "" };
+  }
+
+  return {
+    mode: "manual" as const,
+    key: `${landingPlacements.parisHero.type}:${landingPlacements.parisHero.id}`,
+  };
+})();
+
+const initialParisCardsState = (() => {
+  if (!landingPlacements.parisCards) {
+    return {
+      mode: "empty" as const,
+      limit: 3,
+      keys: [],
+    };
+  }
+
+  if (landingPlacements.parisCards.mode === "auto-latest") {
+    return {
+      mode: "auto-latest" as const,
+      limit: landingPlacements.parisCards.limit,
+      keys: [],
+    };
+  }
+
+  const availableParisCardKeys = new Set(parisCardsOptionItems.map((item) => item.id));
+
+  return {
+    mode: "manual" as const,
+    limit: 3,
+    keys: landingPlacements.parisCards.items
+      .map((item) => `${item.type}:${item.id}`)
+      .filter((key) => availableParisCardKeys.has(key)),
+  };
+})();
+
 const netlenkaOptions = netlenkaOptionItems
+  .slice()
+  .sort((left, right) => {
+    const leftDate = toDate(left.createdAt)?.getTime() ?? 0;
+    const rightDate = toDate(right.createdAt)?.getTime() ?? 0;
+    if (leftDate !== rightDate) {
+      return rightDate - leftDate;
+    }
+
+    return left.title.localeCompare(right.title, "ru-RU");
+  });
+
+const cultureCardsOptions = cultureCardsOptionItems
+  .slice()
+  .sort((left, right) => {
+    const leftDate = toDate(left.createdAt)?.getTime() ?? 0;
+    const rightDate = toDate(right.createdAt)?.getTime() ?? 0;
+    if (leftDate !== rightDate) {
+      return rightDate - leftDate;
+    }
+
+    return left.title.localeCompare(right.title, "ru-RU");
+  });
+
+const cultureHeroOptions = cultureHeroOptionItems
+  .slice()
+  .sort((left, right) => {
+    const leftDate = toDate(left.createdAt)?.getTime() ?? 0;
+    const rightDate = toDate(right.createdAt)?.getTime() ?? 0;
+    if (leftDate !== rightDate) {
+      return rightDate - leftDate;
+    }
+
+    return left.title.localeCompare(right.title, "ru-RU");
+  });
+
+const parisCardsOptions = parisCardsOptionItems
+  .slice()
+  .sort((left, right) => {
+    const leftDate = toDate(left.createdAt)?.getTime() ?? 0;
+    const rightDate = toDate(right.createdAt)?.getTime() ?? 0;
+    if (leftDate !== rightDate) {
+      return rightDate - leftDate;
+    }
+
+    return left.title.localeCompare(right.title, "ru-RU");
+  });
+
+const parisHeroOptions = parisHeroOptionItems
   .slice()
   .sort((left, right) => {
     const leftDate = toDate(left.createdAt)?.getTime() ?? 0;
@@ -554,10 +943,18 @@ const initialMainHeroState = (() => {
       apiBaseUrl: PUBLIC_API_BASE_URL,
       mainHeroOptions,
       initialMainHero: initialMainHeroState,
+      cultureHeroOptions,
+      initialCultureHero: initialCultureHeroState,
+      parisHeroOptions,
+      initialParisHero: initialParisHeroState,
       newsOptions,
       initialNewsRail: initialNewsRailState,
       netlenkaOptions,
       initialNetlenkaRail: initialNetlenkaRailState,
+      cultureCardsOptions,
+      initialCultureCards: initialCultureCardsState,
+      parisCardsOptions,
+      initialParisCards: initialParisCardsState,
       eventOptions,
       initialEventCard: initialEventCardState,
       interviewOptions,
@@ -805,6 +1202,120 @@ const initialMainHeroState = (() => {
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Culture Hero Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Главный материал culture section на landing. Если slot пустой, остаётся legacy fallback.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-hero-mode" value="empty" x-model="cultureHeroMode" />
+            <span class="text-sm">Fallback</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-hero-mode" value="manual" x-model="cultureHeroMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="cultureHeroMode === 'manual'" class="grid gap-2 max-w-xl">
+          <label for="culture-hero-select" class="text-sm font-medium">
+            Выбери материал для culture hero
+          </label>
+          <select
+            id="culture-hero-select"
+            x-model="selectedCultureHeroKey"
+            class="select select-bordered w-full"
+          >
+            <option value="">
+              — выбери материал —
+            </option>
+            {cultureHeroOptions.map((item) => (
+              <option value={item.id}>{item.title}</option>
+            ))}
+          </select>
+        </div>
+
+        <p x-show="cultureHeroError" class="text-sm text-error" x-text="cultureHeroError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveCultureHero()"
+            :disabled="cultureHeroSaving"
+          >
+            Сохранить culture hero
+          </button>
+          <span x-show="cultureHeroSaving" class="text-sm text-base-content/70">
+            Сохраняем...
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Paris Hero Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Главный материал paris section на landing. Если slot пустой, остаётся legacy fallback.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="paris-hero-mode" value="empty" x-model="parisHeroMode" />
+            <span class="text-sm">Fallback</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="paris-hero-mode" value="manual" x-model="parisHeroMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="parisHeroMode === 'manual'" class="grid gap-2 max-w-xl">
+          <label for="paris-hero-select" class="text-sm font-medium">
+            Выбери материал для paris hero
+          </label>
+          <select
+            id="paris-hero-select"
+            x-model="selectedParisHeroKey"
+            class="select select-bordered w-full"
+          >
+            <option value="">
+              — выбери материал —
+            </option>
+            {parisHeroOptions.map((item) => (
+              <option value={item.id}>{item.title}</option>
+            ))}
+          </select>
+        </div>
+
+        <p x-show="parisHeroError" class="text-sm text-error" x-text="parisHeroError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveParisHero()"
+            :disabled="parisHeroSaving"
+          >
+            Сохранить paris hero
+          </button>
+          <span x-show="parisHeroSaving" class="text-sm text-base-content/70">
+            Сохраняем...
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
         <h3 class="text-lg font-semibold">Netlenka Rail Controls</h3>
         <p class="text-sm text-base-content/70">
           Блок «Самое Читаемое» в правой колонке landing.
@@ -960,6 +1471,186 @@ const initialMainHeroState = (() => {
             Сохранить event card
           </button>
           <span x-show="eventSaving" class="text-sm text-base-content/70">Сохраняем...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Culture Cards Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Три карточки под главным материалом в culture section на landing.
+          Блок автоматически исключает global main hero и текущий hero рубрики.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-cards-mode" value="empty" x-model="cultureCardsMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-cards-mode" value="auto-latest" x-model="cultureCardsMode" />
+            <span class="text-sm">Auto latest</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-cards-mode" value="manual" x-model="cultureCardsMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="cultureCardsMode === 'auto-latest'" class="grid gap-2 max-w-xs">
+          <label for="culture-cards-limit" class="text-sm font-medium">Количество карточек</label>
+          <select
+            id="culture-cards-limit"
+            x-model="cultureCardsLimit"
+            class="select select-bordered w-full"
+          >
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+
+        <div x-show="cultureCardsMode === 'manual'" class="grid gap-3">
+          <p class="text-sm font-medium">
+            Выбери карточки вручную. Порядок выбора сохранится в block.
+          </p>
+
+          {cultureCardsOptions.length > 0 ? (
+            <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
+              {
+                cultureCardsOptions.map((item) => (
+                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      :checked={`isManualCultureCardSelected(${JSON.stringify(item.id)})`}
+                      @change={`toggleCultureCardItem(${JSON.stringify(item.id)})`}
+                    />
+                    <span class="flex flex-col gap-1 text-sm leading-6">
+                      <span class="font-medium">{item.title}</span>
+                      <span class="text-xs uppercase tracking-[0.22em] text-base-content/55">
+                        {item.typeLabel}
+                      </span>
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          ) : (
+            <p class="text-sm text-base-content/70">
+              Пока нет материалов для ручного выбора.
+            </p>
+          )}
+        </div>
+
+        <p x-show="cultureCardsError" class="text-sm text-error" x-text="cultureCardsError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveCultureCards()"
+            :disabled="cultureCardsSaving"
+          >
+            Сохранить culture cards
+          </button>
+          <span x-show="cultureCardsSaving" class="text-sm text-base-content/70">
+            Сохраняем...
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Paris Cards Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Три карточки под главным материалом в paris section на landing.
+          Блок автоматически исключает global main hero и текущий hero рубрики.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="paris-cards-mode" value="empty" x-model="parisCardsMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="paris-cards-mode" value="auto-latest" x-model="parisCardsMode" />
+            <span class="text-sm">Auto latest</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="paris-cards-mode" value="manual" x-model="parisCardsMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="parisCardsMode === 'auto-latest'" class="grid gap-2 max-w-xs">
+          <label for="paris-cards-limit" class="text-sm font-medium">Количество карточек</label>
+          <select
+            id="paris-cards-limit"
+            x-model="parisCardsLimit"
+            class="select select-bordered w-full"
+          >
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+
+        <div x-show="parisCardsMode === 'manual'" class="grid gap-3">
+          <p class="text-sm font-medium">
+            Выбери карточки вручную. Порядок выбора сохранится в block.
+          </p>
+
+          {parisCardsOptions.length > 0 ? (
+            <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
+              {
+                parisCardsOptions.map((item) => (
+                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      :checked={`isManualParisCardSelected(${JSON.stringify(item.id)})`}
+                      @change={`toggleParisCardItem(${JSON.stringify(item.id)})`}
+                    />
+                    <span class="flex flex-col gap-1 text-sm leading-6">
+                      <span class="font-medium">{item.title}</span>
+                      <span class="text-xs uppercase tracking-[0.22em] text-base-content/55">
+                        {item.typeLabel}
+                      </span>
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          ) : (
+            <p class="text-sm text-base-content/70">
+              Пока нет материалов для ручного выбора.
+            </p>
+          )}
+        </div>
+
+        <p x-show="parisCardsError" class="text-sm text-error" x-text="parisCardsError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveParisCards()"
+            :disabled="parisCardsSaving"
+          >
+            Сохранить paris cards
+          </button>
+          <span x-show="parisCardsSaving" class="text-sm text-base-content/70">
+            Сохраняем...
+          </span>
         </div>
       </div>
     </div>

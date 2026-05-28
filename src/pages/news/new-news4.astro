@@ -1,0 +1,85 @@
+---
+import Layout from "@/Layouts/Layout.astro";
+import { Share2, Clock, MapPin } from "lucide-astro";
+
+const displayArticle = {
+  category: "paris",
+  title: "НЕДЕЛЯ МОДЫ: ПАРИЖ В ОЖИДАНИИ",
+  lead: "Основные локации и главные показы предстоящего сезона.",
+  cardLead: "В этом году дефиле пройдут в самых неожиданных местах города.",
+  authorName: "Коко Шанель",
+  createdAt: new Date(),
+  imageUrl: "https://images.unsplash.com/photo-1550246140-5119ae4790b8?q=80&w=2070&auto=format&fit=crop",
+  imageCaption: "Подготовка подиума в Тюильри.",
+  tags: ["Мода", "Париж", "Стиль"],
+  contentBlocks: [
+    { type: 'paragraph', text: 'Город готовится к приему тысяч гостей. Отели забронированы на 100%, а витрины магазинов на авеню Монтень превратились в арт-объекты.' },
+    { type: 'url-link', text: 'Расписание показов', url: 'https://fashionweek.fr' }
+  ]
+};
+
+const CATEGORY_LABELS: Record<string, string> = { culture: "Культура", paris: "Париж" };
+const categoryLabel = CATEGORY_LABELS[displayArticle.category] || "Новости";
+const formattedDate = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short' }).format(displayArticle.createdAt);
+---
+
+<Layout title="Minimal Sidebar - News Variant 4">
+  <main class="bg-base-200 min-h-screen">
+    <div class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-screen">
+      
+      <!-- Left Fixed Visual (on desktop) -->
+      <div class="lg:col-span-6 h-[50vh] lg:h-screen lg:sticky lg:top-0">
+         <img src={displayArticle.imageUrl} class="w-full h-full object-cover" alt="" />
+         <div class="absolute bottom-10 left-10 right-10 text-white drop-shadow-lg lg:hidden">
+            <h1 class="text-4xl font-old_standard font-bold uppercase">{displayArticle.title}</h1>
+         </div>
+      </div>
+
+      <!-- Right Content -->
+      <div class="lg:col-span-6 bg-base-100 p-8 lg:p-24 flex flex-col justify-center">
+         <div class="max-w-[550px]">
+            <div class="flex items-center gap-4 mb-10">
+               <span class="text-[10px] font-oswald tracking-[0.3em] uppercase bg-accent text-accent-content px-3 py-1">{categoryLabel}</span>
+               <span class="text-base-content/30 text-xs font-inter">{formattedDate}</span>
+            </div>
+
+            <h1 class="hidden lg:block text-6xl font-old_standard font-bold uppercase leading-none mb-8 tracking-tighter">
+               {displayArticle.title}
+            </h1>
+
+            <p class="text-2xl font-inter font-light text-base-content/80 mb-10 leading-tight">
+               {displayArticle.lead}
+            </p>
+
+            <div class="space-y-8 font-article-body text-base-content/90 text-lg leading-relaxed">
+               {displayArticle.cardLead && <p class="italic text-base-content/50 border-l-2 border-primary pl-6">{displayArticle.cardLead}</p>}
+               
+               {displayArticle.contentBlocks.map(block => (
+                 block.type === 'paragraph' ? (
+                   <p>{block.text}</p>
+                 ) : (
+                   <a href={block.url} target="_blank" class="flex items-center gap-4 group p-4 border border-base-content/10 hover:border-accent transition-colors">
+                      <div class="w-10 h-10 bg-base-200 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-colors">
+                         <MapPin class="w-4 h-4" />
+                      </div>
+                      <span class="font-oswald uppercase text-xs tracking-widest">{block.text}</span>
+                   </a>
+                 )
+               ))}
+            </div>
+
+            <div class="mt-16 pt-8 border-t border-base-content/5 flex items-center justify-between">
+               <div>
+                  <p class="text-[9px] uppercase font-oswald text-base-content/30 tracking-widest mb-1">Author</p>
+                  <p class="font-oswald uppercase text-sm">{displayArticle.authorName}</p>
+               </div>
+               <div class="flex gap-4">
+                  {displayArticle.tags.slice(0,2).map(tag => <span class="text-[9px] font-inter uppercase text-base-content/40 tracking-tighter">#{tag}</span>)}
+               </div>
+            </div>
+         </div>
+      </div>
+
+    </div>
+  </main>
+</Layout>

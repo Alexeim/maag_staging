@@ -49,6 +49,36 @@ export type LandingNetlenkaRailSelection =
   | LandingNetlenkaRailAutoSelection
   | LandingNetlenkaRailManualSelection;
 
+export type LandingCategoryCardsItemType = Exclude<
+  LandingMainHeroType,
+  'interview'
+>;
+
+export interface LandingCategoryCardsItemTarget {
+  type: LandingCategoryCardsItemType;
+  id: string;
+}
+
+export interface LandingCategoryHeroSelection {
+  mode: 'manual';
+  type: LandingCategoryCardsItemType;
+  id: string;
+}
+
+export interface LandingCategoryCardsAutoSelection {
+  mode: 'auto-latest';
+  limit: number;
+}
+
+export interface LandingCategoryCardsManualSelection {
+  mode: 'manual';
+  items: LandingCategoryCardsItemTarget[];
+}
+
+export type LandingCategoryCardsSelection =
+  | LandingCategoryCardsAutoSelection
+  | LandingCategoryCardsManualSelection;
+
 export interface LandingEventCardAutoSelection {
   mode: 'auto-nearest';
 }
@@ -92,10 +122,14 @@ export type CalendarPageSecondaryCardsSelection =
   | CalendarPageSecondaryCardsAutoSelection;
 
 export interface LandingPlacementsDocument {
-  schemaVersion: 2;
+  schemaVersion: 4;
   mainHero: LandingMainHeroSelection | null;
   newsRail: LandingNewsRailSelection | null;
   netlenkaRail: LandingNetlenkaRailSelection | null;
+  cultureHero: LandingCategoryHeroSelection | null;
+  cultureCards: LandingCategoryCardsSelection | null;
+  parisHero: LandingCategoryHeroSelection | null;
+  parisCards: LandingCategoryCardsSelection | null;
   eventCard: LandingEventCardSelection | null;
   cultureInterviewBlock: LandingCultureInterviewBlockSelection | null;
   updatedAt: Date | null;
@@ -127,12 +161,21 @@ const NETLENKA_COLLECTIONS: Record<LandingNetlenkaItemType, string> = {
   ...MAIN_HERO_COLLECTIONS,
 };
 
+const CATEGORY_CARDS_COLLECTIONS: Record<LandingCategoryCardsItemType, string> = {
+  article: MAIN_HERO_COLLECTIONS.article,
+  guide: MAIN_HERO_COLLECTIONS.guide,
+  flipper: MAIN_HERO_COLLECTIONS.flipper,
+  'visual-story': MAIN_HERO_COLLECTIONS['visual-story'],
+};
+
 const DEFAULT_NEWS_RAIL_LIMIT = 4;
 const MAX_NEWS_RAIL_LIMIT = 12;
+const DEFAULT_CATEGORY_CARDS_LIMIT = 3;
+const MAX_CATEGORY_CARDS_LIMIT = 3;
 const CALENDAR_PAGE_CARD_LIMIT = 4;
 
 const createDefaultLandingPlacements = (): LandingPlacementsDocument => ({
-  schemaVersion: 2,
+  schemaVersion: 4,
   mainHero: null,
   newsRail: {
     mode: 'auto-latest',
@@ -141,6 +184,16 @@ const createDefaultLandingPlacements = (): LandingPlacementsDocument => ({
   netlenkaRail: {
     mode: 'auto-latest',
     limit: DEFAULT_NEWS_RAIL_LIMIT,
+  },
+  cultureHero: null,
+  cultureCards: {
+    mode: 'auto-latest',
+    limit: DEFAULT_CATEGORY_CARDS_LIMIT,
+  },
+  parisHero: null,
+  parisCards: {
+    mode: 'auto-latest',
+    limit: DEFAULT_CATEGORY_CARDS_LIMIT,
   },
   eventCard: {
     mode: 'auto-nearest',
@@ -207,6 +260,19 @@ const normalizeCalendarPageLimit = (value: unknown): number | null => {
   return normalized;
 };
 
+const normalizeCategoryCardsLimit = (value: unknown): number | null => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return null;
+  }
+
+  const normalized = Math.trunc(value);
+  if (normalized <= 0 || normalized > MAX_CATEGORY_CARDS_LIMIT) {
+    return null;
+  }
+
+  return normalized;
+};
+
 const isAllowedMainHeroType = (value: unknown): value is LandingMainHeroType =>
   value === 'article' ||
   value === 'guide' ||
@@ -217,6 +283,14 @@ const isAllowedMainHeroType = (value: unknown): value is LandingMainHeroType =>
 const isAllowedNetlenkaItemType = (
   value: unknown,
 ): value is LandingNetlenkaItemType => isAllowedMainHeroType(value);
+
+const isAllowedCategoryCardsItemType = (
+  value: unknown,
+): value is LandingCategoryCardsItemType =>
+  value === 'article' ||
+  value === 'guide' ||
+  value === 'flipper' ||
+  value === 'visual-story';
 
 const normalizeMainHeroSelection = (value: unknown): LandingMainHeroSelection | null => {
   if (!value || typeof value !== 'object') {
@@ -342,6 +416,97 @@ const normalizeNetlenkaRailSelection = (
   if (mode === 'manual') {
     const items = normalizeNetlenkaItemTargets((value as { items?: unknown }).items);
     if (!items || items.length === 0) {
+      return null;
+    }
+
+    return {
+      mode: 'manual',
+      items,
+    };
+  }
+
+  return null;
+};
+
+const normalizeCategoryCardsItemTarget = (
+  value: unknown,
+): LandingCategoryCardsItemTarget | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const type = (value as { type?: unknown }).type;
+  const id = normalizeStringId((value as { id?: unknown }).id);
+
+  if (!isAllowedCategoryCardsItemType(type) || !id) {
+    return null;
+  }
+
+  return {
+    type,
+    id,
+  };
+};
+
+const normalizeCategoryHeroSelection = (
+  value: unknown,
+): LandingCategoryHeroSelection | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const mode = (value as { mode?: unknown }).mode;
+  const target = normalizeCategoryCardsItemTarget(value);
+
+  if (!target || (mode !== undefined && mode !== 'manual')) {
+    return null;
+  }
+
+  return {
+    mode: 'manual',
+    type: target.type,
+    id: target.id,
+  };
+};
+
+const normalizeCategoryCardsItemTargets = (
+  value: unknown,
+): LandingCategoryCardsItemTarget[] | null => {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const items = value
+    .map(normalizeCategoryCardsItemTarget)
+    .filter((item): item is LandingCategoryCardsItemTarget => Boolean(item));
+
+  return Array.from(
+    new Map(items.map((item) => [`${item.type}:${item.id}`, item])).values(),
+  );
+};
+
+const normalizeCategoryCardsSelection = (
+  value: unknown,
+): LandingCategoryCardsSelection | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const mode = (value as { mode?: unknown }).mode;
+
+  if (mode === 'auto-latest') {
+    const limit =
+      normalizeCategoryCardsLimit((value as { limit?: unknown }).limit) ??
+      DEFAULT_CATEGORY_CARDS_LIMIT;
+    return {
+      mode: 'auto-latest',
+      limit,
+    };
+  }
+
+  if (mode === 'manual') {
+    const items = normalizeCategoryCardsItemTargets((value as { items?: unknown }).items);
+    if (!items || items.length === 0 || items.length > MAX_CATEGORY_CARDS_LIMIT) {
       return null;
     }
 
@@ -497,6 +662,26 @@ const normalizeLandingPlacements = (
     ? null
     : (normalizeNetlenkaRailSelection(netlenkaRailRaw) ?? defaults.netlenkaRail);
 
+  const cultureHeroRaw = 'cultureHero' in value ? value.cultureHero : undefined;
+  const cultureHero = cultureHeroRaw === null
+    ? null
+    : (normalizeCategoryHeroSelection(cultureHeroRaw) ?? defaults.cultureHero);
+
+  const cultureCardsRaw = 'cultureCards' in value ? value.cultureCards : undefined;
+  const cultureCards = cultureCardsRaw === null
+    ? null
+    : (normalizeCategoryCardsSelection(cultureCardsRaw) ?? defaults.cultureCards);
+
+  const parisHeroRaw = 'parisHero' in value ? value.parisHero : undefined;
+  const parisHero = parisHeroRaw === null
+    ? null
+    : (normalizeCategoryHeroSelection(parisHeroRaw) ?? defaults.parisHero);
+
+  const parisCardsRaw = 'parisCards' in value ? value.parisCards : undefined;
+  const parisCards = parisCardsRaw === null
+    ? null
+    : (normalizeCategoryCardsSelection(parisCardsRaw) ?? defaults.parisCards);
+
   const eventCardRaw = 'eventCard' in value ? value.eventCard : undefined;
   const eventCard = eventCardRaw === null
     ? null
@@ -512,10 +697,14 @@ const normalizeLandingPlacements = (
         ?? defaults.cultureInterviewBlock);
 
   return {
-    schemaVersion: 2,
+    schemaVersion: 4,
     mainHero,
     newsRail,
     netlenkaRail,
+    cultureHero,
+    cultureCards,
+    parisHero,
+    parisCards,
     eventCard,
     cultureInterviewBlock,
     updatedAt:
@@ -570,6 +759,10 @@ interface NetlenkaItemStatus extends LandingNetlenkaItemTarget {
   isHotContent: boolean;
 }
 
+interface CategoryCardsItemStatus extends LandingCategoryCardsItemTarget {
+  exists: boolean;
+}
+
 const getNetlenkaItemStatuses = async (
   items: LandingNetlenkaItemTarget[],
 ): Promise<NetlenkaItemStatus[]> => {
@@ -586,6 +779,28 @@ const getNetlenkaItemStatuses = async (
         ...item,
         exists: doc.exists,
         isHotContent: doc.exists && data?.isHotContent === true,
+      };
+    }),
+  );
+};
+
+const getCategoryCardsItemStatuses = async (
+  items: LandingCategoryCardsItemTarget[],
+): Promise<CategoryCardsItemStatus[]> => {
+  const uniqueItems = Array.from(
+    new Map(items.map((item) => [`${item.type}:${item.id}`, item])).values(),
+  );
+
+  return Promise.all(
+    uniqueItems.map(async (item) => {
+      const doc = await db
+        .collection(CATEGORY_CARDS_COLLECTIONS[item.type])
+        .doc(item.id)
+        .get();
+
+      return {
+        ...item,
+        exists: doc.exists,
       };
     }),
   );
@@ -623,6 +838,38 @@ const sanitizeNetlenkaRailSelection = async (
   };
 };
 
+const sanitizeCategoryCardsSelection = async (
+  selection: LandingCategoryCardsSelection | null,
+): Promise<LandingCategoryCardsSelection | null> => {
+  if (!selection || selection.mode !== 'manual') {
+    return selection;
+  }
+
+  const statuses = await getCategoryCardsItemStatuses(selection.items);
+  const allowedKeys = new Set(
+    statuses
+      .filter((item) => item.exists)
+      .map((item) => `${item.type}:${item.id}`),
+  );
+
+  const sanitizedItems = selection.items.filter((item) =>
+    allowedKeys.has(`${item.type}:${item.id}`),
+  );
+
+  if (sanitizedItems.length === 0) {
+    return null;
+  }
+
+  if (sanitizedItems.length === selection.items.length) {
+    return selection;
+  }
+
+  return {
+    mode: 'manual',
+    items: sanitizedItems,
+  };
+};
+
 export const getLandingPlacements = async (_req: Request, res: Response) => {
   try {
     const landingDoc = await landingPlacementsRef.get();
@@ -634,12 +881,24 @@ export const getLandingPlacements = async (_req: Request, res: Response) => {
     const sanitizedNetlenkaRail = await sanitizeNetlenkaRailSelection(
       normalizedPlacements.netlenkaRail,
     );
+    const sanitizedCultureCards = await sanitizeCategoryCardsSelection(
+      normalizedPlacements.cultureCards,
+    );
+    const sanitizedParisCards = await sanitizeCategoryCardsSelection(
+      normalizedPlacements.parisCards,
+    );
     const responsePayload = {
       ...normalizedPlacements,
       netlenkaRail: sanitizedNetlenkaRail,
+      cultureCards: sanitizedCultureCards,
+      parisCards: sanitizedParisCards,
     };
 
-    if (JSON.stringify(sanitizedNetlenkaRail) !== JSON.stringify(normalizedPlacements.netlenkaRail)) {
+    if (
+      JSON.stringify(sanitizedNetlenkaRail) !== JSON.stringify(normalizedPlacements.netlenkaRail) ||
+      JSON.stringify(sanitizedCultureCards) !== JSON.stringify(normalizedPlacements.cultureCards) ||
+      JSON.stringify(sanitizedParisCards) !== JSON.stringify(normalizedPlacements.parisCards)
+    ) {
       await landingPlacementsRef.set(
         {
           ...responsePayload,
@@ -683,12 +942,18 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
     const current = {
       ...currentNormalized,
       netlenkaRail: await sanitizeNetlenkaRailSelection(currentNormalized.netlenkaRail),
+      cultureCards: await sanitizeCategoryCardsSelection(currentNormalized.cultureCards),
+      parisCards: await sanitizeCategoryCardsSelection(currentNormalized.parisCards),
     };
     const payload = req.body && typeof req.body === 'object' ? req.body : {};
 
     let mainHero = current.mainHero;
     let newsRail = current.newsRail;
     let netlenkaRail = current.netlenkaRail;
+    let cultureHero = current.cultureHero;
+    let cultureCards = current.cultureCards;
+    let parisHero = current.parisHero;
+    let parisCards = current.parisCards;
     let eventCard = current.eventCard;
     let cultureInterviewBlock = current.cultureInterviewBlock;
 
@@ -775,6 +1040,106 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
       }
     }
 
+    if ('cultureHero' in payload) {
+      if (payload.cultureHero === null) {
+        cultureHero = null;
+      } else {
+        const normalizedCultureHero = normalizeCategoryHeroSelection(payload.cultureHero);
+        if (!normalizedCultureHero) {
+          return res.status(400).json({ message: 'Invalid cultureHero payload' });
+        }
+
+        const exists = await assertDocumentExists(
+          CATEGORY_CARDS_COLLECTIONS[normalizedCultureHero.type],
+          normalizedCultureHero.id,
+        );
+
+        if (!exists) {
+          return res
+            .status(404)
+            .json({ message: 'Referenced cultureHero document was not found' });
+        }
+
+        cultureHero = normalizedCultureHero;
+      }
+    }
+
+    if ('cultureCards' in payload) {
+      if (payload.cultureCards === null) {
+        cultureCards = null;
+      } else {
+        const normalizedCultureCards = normalizeCategoryCardsSelection(payload.cultureCards);
+        if (!normalizedCultureCards) {
+          return res.status(400).json({ message: 'Invalid cultureCards payload' });
+        }
+
+        if (normalizedCultureCards.mode === 'manual') {
+          const statuses = await getCategoryCardsItemStatuses(normalizedCultureCards.items);
+          const missingItems = statuses
+            .filter((item) => !item.exists)
+            .map(({ type, id }) => ({ type, id }));
+          if (missingItems.length > 0) {
+            return res.status(404).json({
+              message: 'Referenced cultureCards documents were not found',
+              missingItems,
+            });
+          }
+        }
+
+        cultureCards = normalizedCultureCards;
+      }
+    }
+
+    if ('parisHero' in payload) {
+      if (payload.parisHero === null) {
+        parisHero = null;
+      } else {
+        const normalizedParisHero = normalizeCategoryHeroSelection(payload.parisHero);
+        if (!normalizedParisHero) {
+          return res.status(400).json({ message: 'Invalid parisHero payload' });
+        }
+
+        const exists = await assertDocumentExists(
+          CATEGORY_CARDS_COLLECTIONS[normalizedParisHero.type],
+          normalizedParisHero.id,
+        );
+
+        if (!exists) {
+          return res
+            .status(404)
+            .json({ message: 'Referenced parisHero document was not found' });
+        }
+
+        parisHero = normalizedParisHero;
+      }
+    }
+
+    if ('parisCards' in payload) {
+      if (payload.parisCards === null) {
+        parisCards = null;
+      } else {
+        const normalizedParisCards = normalizeCategoryCardsSelection(payload.parisCards);
+        if (!normalizedParisCards) {
+          return res.status(400).json({ message: 'Invalid parisCards payload' });
+        }
+
+        if (normalizedParisCards.mode === 'manual') {
+          const statuses = await getCategoryCardsItemStatuses(normalizedParisCards.items);
+          const missingItems = statuses
+            .filter((item) => !item.exists)
+            .map(({ type, id }) => ({ type, id }));
+          if (missingItems.length > 0) {
+            return res.status(404).json({
+              message: 'Referenced parisCards documents were not found',
+              missingItems,
+            });
+          }
+        }
+
+        parisCards = normalizedParisCards;
+      }
+    }
+
     if ('eventCard' in payload) {
       if (payload.eventCard === null) {
         eventCard = null;
@@ -828,10 +1193,14 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
     }
 
     const nextValue: LandingPlacementsDocument = {
-      schemaVersion: 2,
+      schemaVersion: 4,
       mainHero,
       newsRail,
       netlenkaRail,
+      cultureHero,
+      cultureCards,
+      parisHero,
+      parisCards,
       eventCard,
       cultureInterviewBlock,
       updatedAt: new Date(),

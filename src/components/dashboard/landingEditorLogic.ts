@@ -1,5 +1,6 @@
 import {
   editorialPlacementsApi,
+  type LandingCategoryCardsItemTarget,
   type LandingNetlenkaItemTarget,
 } from "@/lib/api/api";
 import type { UiStore } from "@/stores/uiStore";
@@ -14,6 +15,11 @@ interface ContentOption {
 }
 
 interface NetlenkaOption extends ContentOption {
+  type: string;
+  typeLabel: string;
+}
+
+interface CategoryCardsOption extends ContentOption {
   type: string;
   typeLabel: string;
 }
@@ -33,6 +39,16 @@ interface LandingEditorInitialState {
     mode: "empty" | "manual";
     key: string;
   };
+  cultureHeroOptions: CategoryCardsOption[];
+  initialCultureHero: {
+    mode: "empty" | "manual";
+    key: string;
+  };
+  parisHeroOptions: CategoryCardsOption[];
+  initialParisHero: {
+    mode: "empty" | "manual";
+    key: string;
+  };
   newsOptions: ContentOption[];
   initialNewsRail: {
     mode: "empty" | "auto-latest" | "manual";
@@ -41,6 +57,18 @@ interface LandingEditorInitialState {
   };
   netlenkaOptions: NetlenkaOption[];
   initialNetlenkaRail: {
+    mode: "empty" | "auto-latest" | "manual";
+    limit: number;
+    keys: string[];
+  };
+  cultureCardsOptions: CategoryCardsOption[];
+  initialCultureCards: {
+    mode: "empty" | "auto-latest" | "manual";
+    limit: number;
+    keys: string[];
+  };
+  parisCardsOptions: CategoryCardsOption[];
+  initialParisCards: {
     mode: "empty" | "auto-latest" | "manual";
     limit: number;
     keys: string[];
@@ -99,6 +127,18 @@ export default (initialState: LandingEditorInitialState) => ({
   mainHeroSaving: false,
   mainHeroError: "",
 
+  cultureHeroOptions: initialState.cultureHeroOptions ?? [],
+  cultureHeroMode: initialState.initialCultureHero?.mode ?? "empty",
+  selectedCultureHeroKey: initialState.initialCultureHero?.key ?? "",
+  cultureHeroSaving: false,
+  cultureHeroError: "",
+
+  parisHeroOptions: initialState.parisHeroOptions ?? [],
+  parisHeroMode: initialState.initialParisHero?.mode ?? "empty",
+  selectedParisHeroKey: initialState.initialParisHero?.key ?? "",
+  parisHeroSaving: false,
+  parisHeroError: "",
+
   newsOptions: initialState.newsOptions ?? [],
   newsRailMode: initialState.initialNewsRail?.mode ?? "auto-latest",
   newsRailLimit: initialState.initialNewsRail?.limit ?? 4,
@@ -112,6 +152,20 @@ export default (initialState: LandingEditorInitialState) => ({
   selectedNetlenkaKeys: [...(initialState.initialNetlenkaRail?.keys ?? [])],
   netlenkaSaving: false,
   netlenkaError: "",
+
+  cultureCardsOptions: initialState.cultureCardsOptions ?? [],
+  cultureCardsMode: initialState.initialCultureCards?.mode ?? "auto-latest",
+  cultureCardsLimit: initialState.initialCultureCards?.limit ?? 3,
+  selectedCultureCardKeys: [...(initialState.initialCultureCards?.keys ?? [])],
+  cultureCardsSaving: false,
+  cultureCardsError: "",
+
+  parisCardsOptions: initialState.parisCardsOptions ?? [],
+  parisCardsMode: initialState.initialParisCards?.mode ?? "auto-latest",
+  parisCardsLimit: initialState.initialParisCards?.limit ?? 3,
+  selectedParisCardKeys: [...(initialState.initialParisCards?.keys ?? [])],
+  parisCardsSaving: false,
+  parisCardsError: "",
 
   eventOptions: initialState.eventOptions ?? [],
   eventCardMode: initialState.initialEventCard?.mode ?? "auto-nearest",
@@ -269,6 +323,36 @@ export default (initialState: LandingEditorInitialState) => ({
     this.selectedNetlenkaKeys = [key, ...this.selectedNetlenkaKeys];
   },
 
+  isManualCultureCardSelected(key: string) {
+    return this.selectedCultureCardKeys.includes(key);
+  },
+
+  toggleCultureCardItem(key: string) {
+    if (this.isManualCultureCardSelected(key)) {
+      this.selectedCultureCardKeys = this.selectedCultureCardKeys.filter(
+        (selectedKey: string) => selectedKey !== key,
+      );
+      return;
+    }
+
+    this.selectedCultureCardKeys = [key, ...this.selectedCultureCardKeys];
+  },
+
+  isManualParisCardSelected(key: string) {
+    return this.selectedParisCardKeys.includes(key);
+  },
+
+  toggleParisCardItem(key: string) {
+    if (this.isManualParisCardSelected(key)) {
+      this.selectedParisCardKeys = this.selectedParisCardKeys.filter(
+        (selectedKey: string) => selectedKey !== key,
+      );
+      return;
+    }
+
+    this.selectedParisCardKeys = [key, ...this.selectedParisCardKeys];
+  },
+
   async saveMainHero() {
     this.mainHeroSaving = true;
     this.mainHeroError = "";
@@ -306,6 +390,86 @@ export default (initialState: LandingEditorInitialState) => ({
       this.notify(this.mainHeroError, "error");
     } finally {
       this.mainHeroSaving = false;
+    }
+  },
+
+  async saveCultureHero() {
+    this.cultureHeroSaving = true;
+    this.cultureHeroError = "";
+
+    try {
+      let cultureHero: unknown = null;
+
+      if (this.cultureHeroMode === "manual") {
+        if (!this.selectedCultureHeroKey) {
+          throw new Error("Для ручного режима выбери материал.");
+        }
+
+        const parsedKey = parseContentKey(this.selectedCultureHeroKey);
+        if (!parsedKey) {
+          throw new Error("Не удалось распознать выбранный материал.");
+        }
+
+        cultureHero = {
+          mode: "manual",
+          type: parsedKey.type,
+          id: parsedKey.id,
+        };
+      }
+
+      await editorialPlacementsApi.updateLanding({ cultureHero });
+
+      this.notify("Главный материал блока «Культура» на landing обновлён.");
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to save culture hero", error);
+      this.cultureHeroError =
+        error instanceof Error
+          ? error.message
+          : "Не удалось сохранить главный материал блока «Культура».";
+      this.notify(this.cultureHeroError, "error");
+    } finally {
+      this.cultureHeroSaving = false;
+    }
+  },
+
+  async saveParisHero() {
+    this.parisHeroSaving = true;
+    this.parisHeroError = "";
+
+    try {
+      let parisHero: unknown = null;
+
+      if (this.parisHeroMode === "manual") {
+        if (!this.selectedParisHeroKey) {
+          throw new Error("Для ручного режима выбери материал.");
+        }
+
+        const parsedKey = parseContentKey(this.selectedParisHeroKey);
+        if (!parsedKey) {
+          throw new Error("Не удалось распознать выбранный материал.");
+        }
+
+        parisHero = {
+          mode: "manual",
+          type: parsedKey.type,
+          id: parsedKey.id,
+        };
+      }
+
+      await editorialPlacementsApi.updateLanding({ parisHero });
+
+      this.notify("Главный материал блока «Париж» на landing обновлён.");
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to save paris hero", error);
+      this.parisHeroError =
+        error instanceof Error
+          ? error.message
+          : "Не удалось сохранить главный материал блока «Париж».";
+      this.notify(this.parisHeroError, "error");
+    } finally {
+      this.parisHeroSaving = false;
     }
   },
 
@@ -397,6 +561,106 @@ export default (initialState: LandingEditorInitialState) => ({
       this.notify(this.netlenkaError, "error");
     } finally {
       this.netlenkaSaving = false;
+    }
+  },
+
+  async saveCultureCards() {
+    this.cultureCardsSaving = true;
+    this.cultureCardsError = "";
+
+    try {
+      let cultureCards: unknown = null;
+
+      if (this.cultureCardsMode === "auto-latest") {
+        cultureCards = {
+          mode: "auto-latest",
+          limit: Number(this.cultureCardsLimit) || 3,
+        };
+      }
+
+      if (this.cultureCardsMode === "manual") {
+        if (this.selectedCultureCardKeys.length === 0) {
+          throw new Error("Для ручного режима выбери хотя бы один материал.");
+        }
+
+        const items = this.selectedCultureCardKeys.map((key: string) => {
+          const parsedKey = parseContentKey(key);
+          if (!parsedKey) {
+            throw new Error("Не удалось распознать один из выбранных материалов.");
+          }
+
+          return parsedKey;
+        }) as LandingCategoryCardsItemTarget[];
+
+        cultureCards = {
+          mode: "manual",
+          items,
+        };
+      }
+
+      await editorialPlacementsApi.updateLanding({ cultureCards });
+
+      this.notify("Карточки блока «Культура» на landing обновлены.");
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to save culture cards", error);
+      this.cultureCardsError =
+        error instanceof Error
+          ? error.message
+          : "Не удалось сохранить карточки блока «Культура».";
+      this.notify(this.cultureCardsError, "error");
+    } finally {
+      this.cultureCardsSaving = false;
+    }
+  },
+
+  async saveParisCards() {
+    this.parisCardsSaving = true;
+    this.parisCardsError = "";
+
+    try {
+      let parisCards: unknown = null;
+
+      if (this.parisCardsMode === "auto-latest") {
+        parisCards = {
+          mode: "auto-latest",
+          limit: Number(this.parisCardsLimit) || 3,
+        };
+      }
+
+      if (this.parisCardsMode === "manual") {
+        if (this.selectedParisCardKeys.length === 0) {
+          throw new Error("Для ручного режима выбери хотя бы один материал.");
+        }
+
+        const items = this.selectedParisCardKeys.map((key: string) => {
+          const parsedKey = parseContentKey(key);
+          if (!parsedKey) {
+            throw new Error("Не удалось распознать один из выбранных материалов.");
+          }
+
+          return parsedKey;
+        }) as LandingCategoryCardsItemTarget[];
+
+        parisCards = {
+          mode: "manual",
+          items,
+        };
+      }
+
+      await editorialPlacementsApi.updateLanding({ parisCards });
+
+      this.notify("Карточки блока «Париж» на landing обновлены.");
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to save paris cards", error);
+      this.parisCardsError =
+        error instanceof Error
+          ? error.message
+          : "Не удалось сохранить карточки блока «Париж».";
+      this.notify(this.parisCardsError, "error");
+    } finally {
+      this.parisCardsSaving = false;
     }
   },
 

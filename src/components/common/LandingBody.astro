@@ -8,6 +8,8 @@ import {
   guidesApi,
   visualStoriesApi,
   newsApi,
+  type LandingCategoryCardsSelection,
+  type LandingCategoryCardsItemTarget,
   type LandingNetlenkaRailSelection,
   type InterviewResponse,
   type FlipperPayload,
@@ -136,7 +138,7 @@ let allItemsSorted: any[] = [];
 let leSaviezVousArticle: any = null;
 
 const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
-  schemaVersion: 2,
+  schemaVersion: 4,
   mainHero: null,
   newsRail: {
     mode: "auto-latest",
@@ -145,6 +147,16 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   netlenkaRail: {
     mode: "auto-latest",
     limit: 4,
+  },
+  cultureHero: null,
+  cultureCards: {
+    mode: "auto-latest",
+    limit: 3,
+  },
+  parisHero: null,
+  parisCards: {
+    mode: "auto-latest",
+    limit: 3,
   },
   eventCard: {
     mode: "auto-nearest",
@@ -155,6 +167,8 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   updatedAt: null,
   updatedBy: null,
 };
+
+let landingPlacements = DEFAULT_LANDING_PLACEMENTS;
 
 const getDate = (timestamp: any): Date => {
   if (timestamp && typeof timestamp === "object" && timestamp._seconds) {
@@ -247,6 +261,19 @@ const getNetlenkaItemKey = (item: any) => {
   return `${type}:${item.id}`;
 };
 
+const getCategoryCardItemKey = (item: any) => {
+  const type = getPlacementType(item);
+  if (
+    !type ||
+    type === "interview" ||
+    !item?.id
+  ) {
+    return null;
+  }
+
+  return `${type}:${item.id}`;
+};
+
 const selectNetlenkaItems = (
   items: any[],
   netlenkaRail: LandingNetlenkaRailSelection | null,
@@ -282,6 +309,58 @@ const selectNetlenkaItems = (
     .filter(Boolean);
 };
 
+const selectCategoryCardItems = (
+  items: any[],
+  selection: LandingCategoryCardsSelection | null,
+  excludedIds: Set<string>,
+) => {
+  const availableItems = items.filter(
+    (item) => item?.id && !excludedIds.has(item.id),
+  );
+
+  if (!selection) {
+    return [];
+  }
+
+  if (selection.mode === "auto-latest") {
+    return availableItems.slice(0, selection.limit);
+  }
+
+  const itemsByKey = new Map(
+    availableItems
+      .map((item) => [getCategoryCardItemKey(item), item] as const)
+      .filter(([key]) => Boolean(key)),
+  );
+
+  return selection.items
+    .map((item: LandingCategoryCardsItemTarget) =>
+      itemsByKey.get(`${item.type}:${item.id}`),
+    )
+    .filter(Boolean);
+};
+
+const selectCategoryHero = (
+  items: any[],
+  heroSelection: LandingPlacementsResponse["cultureHero"] | LandingPlacementsResponse["parisHero"],
+) => {
+  if (heroSelection?.mode === "manual") {
+    const manualHero = items.find(
+      (item) =>
+        item?.id === heroSelection.id &&
+        getPlacementType(item) === heroSelection.type,
+    );
+    if (manualHero) {
+      return manualHero;
+    }
+  }
+
+  return (
+    items.find((item) => isMainInCategoryItem(item)) ??
+    items[0] ??
+    null
+  );
+};
+
 try {
   const [
     articles,
@@ -290,7 +369,7 @@ try {
     guides,
     visualStories,
     newsItemsRaw,
-    landingPlacements,
+    landingPlacementsResponse,
   ] =
     await Promise.all([
       articlesApi.list(),
@@ -301,6 +380,8 @@ try {
       newsApi.list(),
       editorialPlacementsApi.getLanding().catch(() => DEFAULT_LANDING_PLACEMENTS),
     ]);
+
+  landingPlacements = landingPlacementsResponse;
 
   const standardArticles = articles.filter(
     (article) => !isLeSaviezVousArticle(article),
@@ -425,23 +506,27 @@ try {
   console.error("Failed to fetch data for LandingBody:", error);
 }
 
-const cultureHero =
-  cultureItems.find((item) => isMainInCategoryItem(item)) ??
-  cultureItems[0] ??
-  null;
+const cultureHero = selectCategoryHero(
+  cultureItems,
+  landingPlacements.cultureHero,
+);
 
-const cultureCardItems = cultureItems
-  .filter((item) => (cultureHero ? item.id !== cultureHero.id : true))
-  .slice(0, 3);
+const cultureCardItems = selectCategoryCardItems(
+  cultureItems,
+  landingPlacements.cultureCards,
+  new Set([cultureHero?.id].filter(Boolean)),
+);
 
-const parisHero =
-  parisItems.find((item) => isMainInCategoryItem(item)) ??
-  parisItems[0] ??
-  null;
+const parisHero = selectCategoryHero(
+  parisItems,
+  landingPlacements.parisHero,
+);
 
-const parisCardItems = parisItems
-  .filter((item) => (parisHero ? item.id !== parisHero.id : true))
-  .slice(0, 3);
+const parisCardItems = selectCategoryCardItems(
+  parisItems,
+  landingPlacements.parisCards,
+  new Set([parisHero?.id].filter(Boolean)),
+);
 
 const excludedIds = new Set([cultureHero?.id, parisHero?.id].filter(Boolean));
 const carouselItems = allItemsSorted

@@ -1,0 +1,112 @@
+---
+import Layout from "@/Layouts/Layout.astro";
+import { Share2, Clock, MapPin, ExternalLink, ChevronRight } from "lucide-astro";
+
+const displayArticle = {
+  category: "culture",
+  title: "БРУНО БИШОФБЕРГЕР: ПАМЯТЬ О ВЕЛИКОМ ГАЛЕРЕИСТЕ",
+  lead: "Человек, изменивший правила игры на мировом арт-рынке.",
+  cardLead: "Его называли 'повелителем Баскии' и 'тенью Уорхола'. Рассказываем о наследии легендарного швейцарца.",
+  authorName: "Марсель Пруст",
+  createdAt: new Date(),
+  imageUrl: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=1887&auto=format&fit=crop",
+  imageCaption: "Инсталляция в одной из галерей Бишофбергера.",
+  tags: ["Арт-рынок", "Память", "Искусство"],
+  contentBlocks: [
+    { type: 'paragraph', text: 'Мир искусства понес невосполнимую утрату. Бруно Бишофбергер был не просто дилером, он был визионером, который умел разглядеть гениальность там, где другие видели хаос.' },
+    { type: 'url-link', text: 'Интервью с наследниками', url: 'https://artnews.com' },
+    { type: 'paragraph', text: 'Его дружба с Энди Уорхолом и поддержка Жана-Мишеля Баскии создали ту культурную среду, которую мы знаем сегодня. Он ушел тихо, оставив после себя одну из самых значимых коллекций современности.' }
+  ]
+};
+
+const CATEGORY_LABELS: Record<string, string> = { culture: "Культура", paris: "Париж" };
+const categoryLabel = CATEGORY_LABELS[displayArticle.category] || "Новости";
+const formattedDate = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }).format(displayArticle.createdAt);
+---
+
+<Layout title="Elegant Split - News Variant 3">
+  <main class="bg-base-100 min-h-screen">
+    
+    <!-- Large Header with background text -->
+    <header class="relative bg-base-200 py-16 lg:py-32 overflow-hidden border-b border-base-content/5">
+       <div class="absolute top-0 right-0 font-oswald text-[20vw] leading-none opacity-[0.03] pointer-events-none select-none -translate-y-1/4 translate-x-1/4 uppercase font-bold">
+          NEWS
+       </div>
+       <div class="max-w-[1200px] mx-auto px-6 relative z-10">
+          <div class="flex items-center gap-4 mb-8">
+             <span class="w-12 h-[1px] bg-accent"></span>
+             <span class="font-oswald uppercase tracking-[0.4em] text-xs text-base-content/50">{categoryLabel} • {formattedDate}</span>
+          </div>
+          <h1 class="text-5xl lg:text-8xl font-old_standard font-normal leading-[1] max-w-[1000px] mb-10 italic">
+             {displayArticle.title}
+          </h1>
+          <p class="text-xl lg:text-2xl font-inter font-light text-base-content/60 max-w-[700px] leading-relaxed">
+             {displayArticle.lead}
+          </p>
+       </div>
+    </header>
+
+    <div class="max-w-[1200px] mx-auto px-6 py-20">
+       <div class="grid grid-cols-1 lg:grid-cols-12 gap-20">
+          
+          <!-- Sticky Image side -->
+          <div class="lg:col-span-5">
+             <div class="lg:sticky lg:top-24">
+                <div class="relative group">
+                   <div class="absolute -inset-4 border border-base-content/10 scale-95 group-hover:scale-100 transition-transform duration-500"></div>
+                   <img src={displayArticle.imageUrl} class="w-full aspect-[4/5] object-cover relative z-10 shadow-xl" alt="" />
+                </div>
+                <div class="mt-12 flex flex-col gap-6">
+                   <div class="flex items-center gap-4">
+                      <div class="w-10 h-10 bg-primary flex items-center justify-center font-bold text-xs uppercase rounded-none">
+                         {displayArticle.authorName[0]}
+                      </div>
+                      <span class="font-oswald uppercase text-xs tracking-widest">{displayArticle.authorName}</span>
+                   </div>
+                   <div class="flex flex-wrap gap-2 pt-6 border-t border-base-content/5">
+                      {displayArticle.tags.map(tag => <span class="text-[10px] font-oswald uppercase text-base-content/40 tracking-widest">#{tag}</span>)}
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          <!-- Content side -->
+          <div class="lg:col-span-7">
+             <div class="prose prose-xl font-article-body text-base-content/80 leading-[1.6]">
+                {displayArticle.cardLead && (
+                  <p class="text-2xl text-base-content font-old_standard mb-16 pb-12 border-b-2 border-base-content/5">
+                    {displayArticle.cardLead}
+                  </p>
+                )}
+
+                <div class="space-y-12">
+                   {displayArticle.contentBlocks.map(block => (
+                     block.type === 'paragraph' ? (
+                       <p>{block.text}</p>
+                     ) : (
+                       <a href={block.url} target="_blank" class="not-prose flex items-center gap-6 group py-8 border-y border-base-content/5 hover:border-accent transition-colors">
+                          <div class="w-12 h-12 flex items-center justify-center bg-base-200 group-hover:bg-accent group-hover:text-white transition-colors">
+                             <ExternalLink class="w-5 h-5" />
+                          </div>
+                          <div class="flex flex-col">
+                             <span class="text-[10px] font-oswald uppercase tracking-widest text-base-content/40 mb-1">Related Resource</span>
+                             <span class="text-xl font-old_standard font-bold group-hover:text-accent transition-colors">{block.text}</span>
+                          </div>
+                       </a>
+                     )
+                   ))}
+                </div>
+             </div>
+
+             <div class="mt-24 flex justify-between items-center py-10 border-t border-base-content/5">
+                <button class="text-xs font-oswald uppercase tracking-[0.3em] flex items-center gap-2 hover:text-accent transition-colors">
+                   <Share2 class="w-4 h-4" /> Share Article
+                </button>
+                <p class="text-[9px] font-inter text-base-content/30 uppercase tracking-widest italic">{displayArticle.imageCaption}</p>
+             </div>
+          </div>
+
+       </div>
+    </div>
+  </main>
+</Layout>

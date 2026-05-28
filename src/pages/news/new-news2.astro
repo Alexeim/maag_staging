@@ -1,0 +1,97 @@
+---
+import Layout from "@/Layouts/Layout.astro";
+import { Share2, ExternalLink } from "lucide-astro";
+
+const displayArticle = {
+  category: "paris",
+  title: "РЕКОРДНЫЕ ТОРГИ: МОНЕ УШЕЛ ЗА 80 МЛН ЕВРО",
+  lead: "Самая высокая цена за работу импрессиониста в этом десятилетии.",
+  cardLead: "Анонимный покупатель из Азии приобрел шедевр после 15 минут ожесточенного торга.",
+  authorName: "Виктор Гюго",
+  createdAt: new Date(),
+  imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=2090&auto=format&fit=crop",
+  imageCaption: "Аукционный зал Christie's.",
+  tags: ["Аукцион", "Моне", "Инвестиции"],
+  contentBlocks: [
+    { type: 'paragraph', text: 'Торги собрали коллекционеров со всего мира. Лот стартовал с отметки в 35 миллионов евро.' },
+    { type: 'url-link', text: 'Список лотов аукциона', url: 'https://christies.com' },
+    { type: 'paragraph', text: 'Интрига сохранялась до последнего момента. Телефонный покупатель победил в финале.' }
+  ]
+};
+
+const CATEGORY_LABELS: Record<string, string> = { culture: "Культура", paris: "Париж" };
+const categoryLabel = CATEGORY_LABELS[displayArticle.category] || "Новости";
+const formattedDate = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }).format(displayArticle.createdAt);
+---
+
+<Layout title="Compact Classic - News Variant 2">
+  <main class="bg-base-100 min-h-screen py-12">
+    <div class="max-w-[900px] mx-auto px-4 border-x border-base-content/5">
+      
+      <!-- Compact Newspaper Header -->
+      <header class="text-center border-b border-base-content mb-10 pb-10">
+        <div class="flex justify-center gap-6 text-[10px] font-oswald uppercase tracking-[0.3em] mb-6 text-base-content/40">
+           <span>{categoryLabel}</span>
+           <span>•</span>
+           <span>{formattedDate}</span>
+        </div>
+        <h1 class="text-4xl lg:text-5xl font-old_standard font-bold uppercase leading-[1] mb-6 tracking-tight">
+          {displayArticle.title}
+        </h1>
+        {displayArticle.cardLead && (
+          <p class="text-lg lg:text-xl font-old_standard italic text-base-content/50 max-w-[600px] mx-auto">
+            {displayArticle.cardLead}
+          </p>
+        )}
+      </header>
+
+      <!-- Main Body -->
+      <div class="space-y-10">
+        <div class="grayscale hover:grayscale-0 transition-all duration-700">
+          <img src={displayArticle.imageUrl} alt="" class="w-full h-auto" />
+          <p class="mt-2 text-[10px] font-inter text-base-content/30 text-center uppercase tracking-widest">{displayArticle.imageCaption}</p>
+        </div>
+
+        <p class="text-xl font-old_standard leading-relaxed text-base-content/90 pb-8 border-b border-base-content/5">
+          {displayArticle.lead}
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-10">
+          <!-- Text -->
+          <div class="md:col-span-8 font-article-body text-base-content leading-relaxed space-y-6">
+            {displayArticle.contentBlocks.map(block => (
+              block.type === 'paragraph' ? (
+                <p>{block.text}</p>
+              ) : (
+                <div class="p-5 bg-base-200 border-l-2 border-base-content my-8">
+                   <h4 class="text-sm font-bold font-old_standard uppercase mb-2">{block.text}</h4>
+                   <a href={block.url} target="_blank" class="text-xs font-oswald uppercase text-accent flex items-center gap-1 hover:underline">
+                      Link <ExternalLink class="w-3 h-3" />
+                   </a>
+                </div>
+              )
+            ))}
+          </div>
+
+          <!-- Mini Sidebar -->
+          <div class="md:col-span-4 space-y-6 pt-2">
+             <div class="text-[10px] font-oswald uppercase tracking-widest pb-4 border-b border-base-content/5">
+                <p class="text-base-content/30 mb-1">Reported by</p>
+                <p class="text-base-content">{displayArticle.authorName}</p>
+             </div>
+             <div class="text-[10px] font-oswald uppercase tracking-widest pb-4 border-b border-base-content/5">
+                <p class="text-base-content/30 mb-2">Keywords</p>
+                <div class="flex flex-wrap gap-2">
+                   {displayArticle.tags.map(tag => <span class="italic text-base-content/60 underline underline-offset-2">#{tag}</span>)}
+                </div>
+             </div>
+             <button class="w-full py-2 border border-base-content/10 flex items-center justify-center gap-2 hover:bg-base-200 transition-colors">
+                <Share2 class="w-3 h-3 text-base-content/40" />
+                <span class="text-[9px] font-oswald uppercase tracking-widest">Share</span>
+             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

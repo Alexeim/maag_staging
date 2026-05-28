@@ -1,0 +1,83 @@
+---
+import Layout from "@/Layouts/Layout.astro";
+import { Share2, ArrowUpRight } from "lucide-astro";
+
+const displayArticle = {
+  category: "culture",
+  title: "Лувр открывает секретные залы: доступ к запасникам",
+  lead: "Впервые в истории музей открывает доступ к архивам итальянского Ренессанса.",
+  cardLead: "Программа 'Открытые горизонты' обещает стать главным событием года.",
+  authorName: "Александр Дюма",
+  createdAt: new Date(),
+  imageUrl: "https://images.unsplash.com/photo-1544413647-ad6717a26f9e?q=80&w=2070&auto=format&fit=crop",
+  imageCaption: "Вид на пирамиду Лувра.",
+  tags: ["Лувр", "Ренессанс", "Выставки"],
+  contentBlocks: [
+    { type: 'paragraph', text: 'Событие, которого ждали десятилетия, наконец свершилось. Дирекция Лувра официально подтвердила открытие залов.' },
+    { type: 'url-link', text: 'Забронировать билеты', url: 'https://louvre.fr' }
+  ]
+};
+
+const CATEGORY_LABELS: Record<string, string> = { culture: "Культура", paris: "Париж" };
+const categoryLabel = CATEGORY_LABELS[displayArticle.category] || "Новости";
+const formattedDate = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }).format(displayArticle.createdAt);
+---
+
+<Layout title="Compact Modern - News Variant 1">
+  <main class="bg-base-200 min-h-screen py-10 lg:py-16">
+    <div class="max-w-[1100px] mx-auto px-4 lg:px-6">
+      
+      <!-- Compact Header -->
+      <header class="mb-10">
+        <div class="flex items-center gap-3 mb-4 text-xs font-oswald uppercase tracking-widest text-accent font-bold">
+          <span>{categoryLabel}</span>
+          <span class="text-base-content/20">•</span>
+          <span class="text-base-content/40 font-normal">{formattedDate}</span>
+        </div>
+        <h1 class="text-4xl lg:text-6xl font-old_standard leading-[1.1] mb-6">{displayArticle.title}</h1>
+        <p class="text-lg lg:text-xl font-inter text-base-content/70 leading-snug max-w-[800px]">{displayArticle.lead}</p>
+      </header>
+
+      <!-- Tight Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div class="lg:col-span-8 space-y-8">
+          <div class="bg-base-300 shadow-sm">
+             <img src={displayArticle.imageUrl} alt="" class="w-full h-auto" />
+             {displayArticle.imageCaption && <p class="p-3 text-[10px] font-inter text-base-content/40 uppercase tracking-widest border-t border-base-content/5">{displayArticle.imageCaption}</p>}
+          </div>
+
+          <div class="prose prose-lg font-article-body text-base-content/90">
+            {displayArticle.cardLead && <p class="text-xl font-old_standard italic text-base-content/60 border-l-2 border-primary pl-6 py-1 mb-8">{displayArticle.cardLead}</p>}
+            
+            {displayArticle.contentBlocks.map(block => (
+              block.type === 'paragraph' ? (
+                <p class="mb-6 leading-relaxed">{block.text}</p>
+              ) : (
+                <a href={block.url} target="_blank" class="not-prose inline-flex items-center gap-2 bg-base-content text-base-100 px-6 py-3 font-oswald uppercase text-sm hover:bg-accent transition-colors mb-6">
+                  {block.text} <ArrowUpRight class="w-4 h-4" />
+                </a>
+              )
+            ))}
+          </div>
+        </div>
+
+        <!-- Compact Sidebar -->
+        <aside class="lg:col-span-4 lg:pl-10 space-y-8 lg:border-l border-base-content/5">
+           <div>
+              <p class="text-[10px] uppercase font-oswald text-base-content/30 mb-3">Автор</p>
+              <p class="font-oswald uppercase text-base tracking-wide">{displayArticle.authorName}</p>
+           </div>
+           <div>
+              <p class="text-[10px] uppercase font-oswald text-base-content/30 mb-3">Теги</p>
+              <div class="flex flex-wrap gap-2">
+                 {displayArticle.tags.map(tag => <span class="bg-base-100 px-2 py-1 text-[10px] font-inter uppercase text-base-content/60 border border-base-content/5">{tag}</span>)}
+              </div>
+           </div>
+           <button class="flex items-center gap-2 text-xs font-oswald uppercase tracking-widest text-base-content/40 hover:text-accent transition-colors pt-4 border-t border-base-content/5 w-full">
+              <Share2 class="w-4 h-4" /> Поделиться
+           </button>
+        </aside>
+      </div>
+    </div>
+  </main>
+</Layout>

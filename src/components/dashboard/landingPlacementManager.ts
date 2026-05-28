@@ -20,7 +20,7 @@ interface LandingPlacementManagerOptions {
 }
 
 const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
-  schemaVersion: 2,
+  schemaVersion: 4,
   mainHero: null,
   newsRail: {
     mode: "auto-latest",
@@ -29,6 +29,16 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   netlenkaRail: {
     mode: "auto-latest",
     limit: 4,
+  },
+  cultureHero: null,
+  cultureCards: {
+    mode: "auto-latest",
+    limit: 3,
+  },
+  parisHero: null,
+  parisCards: {
+    mode: "auto-latest",
+    limit: 3,
   },
   eventCard: {
     mode: "auto-nearest",

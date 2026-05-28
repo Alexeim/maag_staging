@@ -278,6 +278,36 @@ export type LandingNetlenkaRailSelection =
   | LandingNetlenkaRailAutoSelection
   | LandingNetlenkaRailManualSelection;
 
+export type LandingCategoryCardsItemType = Exclude<
+  LandingMainHeroType,
+  "interview"
+>;
+
+export interface LandingCategoryCardsItemTarget {
+  type: LandingCategoryCardsItemType;
+  id: string;
+}
+
+export interface LandingCategoryHeroSelection {
+  mode: "manual";
+  type: LandingCategoryCardsItemType;
+  id: string;
+}
+
+export interface LandingCategoryCardsAutoSelection {
+  mode: "auto-latest";
+  limit: number;
+}
+
+export interface LandingCategoryCardsManualSelection {
+  mode: "manual";
+  items: LandingCategoryCardsItemTarget[];
+}
+
+export type LandingCategoryCardsSelection =
+  | LandingCategoryCardsAutoSelection
+  | LandingCategoryCardsManualSelection;
+
 export interface LandingEventCardAutoSelection {
   mode: "auto-nearest";
 }
@@ -305,10 +335,14 @@ export type LandingCultureInterviewBlockSelection =
   | LandingCultureInterviewManualSelection;
 
 export interface LandingPlacementsResponse {
-  schemaVersion: 2;
+  schemaVersion: 4;
   mainHero: LandingMainHeroSelection | null;
   newsRail: LandingNewsRailSelection | null;
   netlenkaRail: LandingNetlenkaRailSelection | null;
+  cultureHero: LandingCategoryHeroSelection | null;
+  cultureCards: LandingCategoryCardsSelection | null;
+  parisHero: LandingCategoryHeroSelection | null;
+  parisCards: LandingCategoryCardsSelection | null;
   eventCard: LandingEventCardSelection | null;
   cultureInterviewBlock: LandingCultureInterviewBlockSelection | null;
   updatedAt?: string | Date | null;
@@ -319,6 +353,10 @@ export interface UpdateLandingPlacementsPayload {
   mainHero?: LandingMainHeroSelection | null;
   newsRail?: LandingNewsRailSelection | null;
   netlenkaRail?: LandingNetlenkaRailSelection | null;
+  cultureHero?: LandingCategoryHeroSelection | null;
+  cultureCards?: LandingCategoryCardsSelection | null;
+  parisHero?: LandingCategoryHeroSelection | null;
+  parisCards?: LandingCategoryCardsSelection | null;
   eventCard?: LandingEventCardSelection | null;
   cultureInterviewBlock?: LandingCultureInterviewBlockSelection | null;
 }

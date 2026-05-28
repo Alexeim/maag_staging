@@ -141,7 +141,7 @@ const splitTitle = (t: string) => {
 };
 
 const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
-  schemaVersion: 2,
+  schemaVersion: 4,
   mainHero: null,
   newsRail: {
     mode: "auto-latest",
@@ -150,6 +150,16 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   netlenkaRail: {
     mode: "auto-latest",
     limit: 4,
+  },
+  cultureHero: null,
+  cultureCards: {
+    mode: "auto-latest",
+    limit: 3,
+  },
+  parisHero: null,
+  parisCards: {
+    mode: "auto-latest",
+    limit: 3,
   },
   eventCard: {
     mode: "auto-nearest",
@@ -378,6 +388,17 @@ function normalizeEvents(events: any[]) {
   >;
 }
 
+function isSingleDayEvent(event: { startDay: Date; endDay: Date }) {
+  return event.startDay.getTime() === event.endDay.getTime();
+}
+
+function sortByCreatedAtDesc(left: any, right: any) {
+  return (
+    (toDate(right?.createdAt)?.getTime() ?? 0) -
+    (toDate(left?.createdAt)?.getTime() ?? 0)
+  );
+}
+
 function selectNearestEvent(events: any[]) {
   const today = resetToUtcMidnight(new Date());
   return (
@@ -411,6 +432,37 @@ function selectNearestEvent(events: any[]) {
   );
 }
 
+function selectAutoLandingEvent(events: any[]) {
+  const today = resetToUtcMidnight(new Date());
+  const normalizedEvents = normalizeEvents(events);
+
+  const singleDayEventsForToday = normalizedEvents
+    .filter(
+      (event) =>
+        isSingleDayEvent(event) && event.startDay.getTime() === today.getTime(),
+    )
+    .sort(sortByCreatedAtDesc);
+
+  if (singleDayEventsForToday[0]) {
+    return singleDayEventsForToday[0];
+  }
+
+  const activeRangeEvents = normalizedEvents
+    .filter(
+      (event) =>
+        !isSingleDayEvent(event) &&
+        event.startDay.getTime() <= today.getTime() &&
+        event.endDay.getTime() >= today.getTime(),
+    )
+    .sort(sortByCreatedAtDesc);
+
+  if (activeRangeEvents[0]) {
+    return activeRangeEvents[0];
+  }
+
+  return selectNearestEvent(events);
+}
+
 function selectEventCard(
   events: any[],
   eventCard: LandingEventCardSelection | null,
@@ -437,8 +489,34 @@ function selectEventCard(
     };
   }
 
-  return selectNearestEvent(events);
+  return selectAutoLandingEvent(events);
 }
+
+function getLandingEventDisplayDate(event: any) {
+  const startDate = toDate(event?.startDate);
+  if (!startDate) {
+    return null;
+  }
+
+  const startDay = resetToUtcMidnight(new Date(startDate));
+  const endDate = toDate(event?.endDate) ?? startDate;
+  const endDay = resetToUtcMidnight(new Date(endDate));
+  const today = resetToUtcMidnight(new Date());
+  const isRangeEvent =
+    event?.dateType === "duration" || startDay.getTime() !== endDay.getTime();
+
+  if (
+    isRangeEvent &&
+    startDay.getTime() <= today.getTime() &&
+    endDay.getTime() >= today.getTime()
+  ) {
+    return today;
+  }
+
+  return startDate;
+}
+
+const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
 ---
 
 <section
@@ -587,20 +665,20 @@ function selectEventCard(
               <div class="w-fill flex flex-row gap-2 items-center justify-center mt-2 mb-1">
                 <div class="flex items-center justify-center h-full">
                   <p class="text-6xl font-old_standard uppercase font-bold">
-                    {formatEventDate(landingEvent.startDate)?.day}
+                    {formatEventDate(landingEventDisplayDate)?.day}
                   </p>
                 </div>
                 <div class="h-full flex flex-col items-start justify-center">
                   <p class="font-semibold font-inter text-black/70">
                     {(
-                      formatEventDate(landingEvent.startDate)?.month || ""
+                      formatEventDate(landingEventDisplayDate)?.month || ""
                     ).toUpperCase()}
                   </p>
                   <div class="w-full border-t border-black/50" />
                   <p>
-                    {formatEventDate(landingEvent.startDate)?.weekday ? (
+                    {formatEventDate(landingEventDisplayDate)?.weekday ? (
                       <span class="font-normal normal-case tracking-normal italic font-old_standard opacity-60">
-                        {formatEventDate(landingEvent.startDate)?.weekday}
+                        {formatEventDate(landingEventDisplayDate)?.weekday}
                       </span>
                     ) : null}
                   </p>
