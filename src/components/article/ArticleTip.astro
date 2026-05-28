@@ -1,6 +1,6 @@
 ---
 import { Image } from "astro:assets";
-import locationIcon from "../../assets/icons/location.svg";
+import { MapPin } from "lucide-astro";
 import type { ImageMetadata } from "astro";
 
 interface Tip {
@@ -32,9 +32,7 @@ const { tip } = Astro.props;
     </div>
     <div class="flex flex-col gap-2">
       <div class="flex items-center gap-2">
-        <div class="w-7 h-7">
-          <Image src={locationIcon} alt="Location icon" />
-        </div>
+        <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} aria-hidden="true" />
         <span class="font-semibold text-neutral">{tip.location}</span>
       </div>
       <hr class="border-base-300" />

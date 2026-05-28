@@ -1,6 +1,5 @@
 ---
-import locationIcon from "@/assets/icons/new/location.svg?raw";
-import timeIcon from "@/assets/icons/new/time.svg?raw";
+import { Clock3, MapPin } from "lucide-astro";
 
 interface TipsItemBlock {
   type: "tips-item";
@@ -57,14 +56,14 @@ const items = contentBlocks.filter((b) => b != null && b.type === "tips-item");
           <div class="flex flex-col gap-1.5">
             {item.meta1 && (
               <p class="flex items-center gap-2 text-sm font-oswald tracking-wide text-base-content/70">
-                <span class="shrink-0 opacity-60" set:html={locationIcon} />
+                <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} aria-hidden="true" />
                 <span>{item.meta1}</span>
               </p>
               <hr class="text-gray-300" />
             )}
             {item.meta2 && (
               <p class="flex items-center gap-2 text-sm font-oswald tracking-wide text-base-content/70">
-                <span class="shrink-0 opacity-60" set:html={timeIcon} />
+                <Clock3 class="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} aria-hidden="true" />
                 {item.meta2IsLink && item.meta2Url ? (
                   <a
                     href={item.meta2Url}

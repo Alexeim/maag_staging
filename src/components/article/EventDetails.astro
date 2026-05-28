@@ -14,10 +14,10 @@ const { address, dates, time = null } = Astro.props;
     <div class="px-5 lg:px-8 py-6 lg:py-7 flex items-start gap-4">
       <EventMetaIcon
         type="location"
-        class="w-5 h-5 text-error mt-0.5 shrink-0"
+        class="w-5 h-5 text-accent mt-0.5 shrink-0"
       />
       <div class="space-y-1">
-        <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-error">
+        <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
           Адрес
         </h3>
         <p class="text-lg text-base-content font-oswald leading-tight">{address}</p>
@@ -27,10 +27,10 @@ const { address, dates, time = null } = Astro.props;
     <div class="px-5 lg:px-8 py-6 lg:py-7 flex items-start gap-4">
       <EventMetaIcon
         type="date"
-        class="w-5 h-5 text-error mt-0.5 shrink-0"
+        class="w-5 h-5 text-accent mt-0.5 shrink-0"
       />
       <div class="space-y-1">
-        <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-error">
+        <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
           Даты
         </h3>
         <p class="text-lg text-base-content font-oswald leading-tight">{dates}</p>
@@ -41,10 +41,10 @@ const { address, dates, time = null } = Astro.props;
       <div class="px-5 lg:px-8 py-6 lg:py-7 flex items-start gap-4">
         <EventMetaIcon
           type="time"
-          class="w-5 h-5 text-error mt-0.5 shrink-0"
+          class="w-5 h-5 text-accent mt-0.5 shrink-0"
         />
         <div class="space-y-1">
-          <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-error">
+          <h3 class="text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
             Время
           </h3>
           <p class="text-lg text-base-content font-oswald leading-tight">{time}</p>
