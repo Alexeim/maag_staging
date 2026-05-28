@@ -18,7 +18,9 @@ import ContentCollectionMarquee from "@/components/article/ContentCollectionMarq
 import picture1 from "@/assets/images/culture.jpg";
 import {
   buildContentCollectionItems,
+  buildLinkedContentLookup,
   fetchPublicContentPools,
+  type LinkedContentLookup,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
 
@@ -52,9 +54,11 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
 
 let collectionContentItems: any[] = [];
 let recentInterviewItems: any[] = [];
+let linkedContentLookup: LinkedContentLookup = {};
 
 try {
   const pools = await fetchPublicContentPools();
+  linkedContentLookup = buildLinkedContentLookup(pools);
   const allInterviews = pools.allInterviews;
   collectionContentItems = await buildContentCollectionItems({
     contentCollectionId: (interview as any)?.contentCollectionId,
@@ -110,7 +114,10 @@ try {
         }
 
         <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
-          <ArticleBody contentBlocks={Array.isArray(content) ? content : []} />
+          <ArticleBody
+            contentBlocks={Array.isArray(content) ? content : []}
+            linkedContentLookup={linkedContentLookup}
+          />
           <ContentCollectionMarquee
             collectionItems={collectionContentItems}
             categoryItems={recentInterviewItems}

@@ -16,7 +16,9 @@ import {
 } from "@/lib/api/api";
 import {
   buildContentCollectionItems,
+  buildLinkedContentLookup,
   fetchPublicContentPools,
+  type LinkedContentLookup,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
 
@@ -104,6 +106,7 @@ const getPrimaryTag = (item: any): string => {
 let articleData: any;
 let collectionContentItems: any[] = [];
 let sameCategoryItems: any[] = [];
+let linkedContentLookup: LinkedContentLookup = {};
 let error: string | null = null;
 
 try {
@@ -155,6 +158,7 @@ const isStandardCategoryArticle = (item: any) =>
 if (!error && articleData) {
   try {
     const pools = await fetchPublicContentPools();
+    linkedContentLookup = buildLinkedContentLookup(pools);
     const allArticles = pools.allArticles
       .filter((article) => article.id !== id);
     collectionContentItems = await buildContentCollectionItems({
@@ -233,7 +237,10 @@ if (!error && articleData) {
 
           <!-- Article Content -->
           <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
-            <ArticleBody contentBlocks={displayArticle.contentBlocks} />
+            <ArticleBody
+              contentBlocks={displayArticle.contentBlocks}
+              linkedContentLookup={linkedContentLookup}
+            />
             <ArticleTips tips={displayArticle.tips} />
             
             {/* Conditionally render EventDetails only if the data exists */}

@@ -11,7 +11,10 @@ import {
 import { ApiError, eventsApi } from "@/lib/api/api";
 import {
   buildContentCollectionItems,
+  buildLinkedContentLookup,
   fetchPublicContentPools,
+  hasLinkedContentBlocks,
+  type LinkedContentLookup,
   type PublicContentCardItem,
 } from "@/lib/utils/contentCollectionMarquee";
 
@@ -378,6 +381,7 @@ const buildGoogleCalendarUrl = (
 let eventData: any;
 let relatedEvents: any[] = [];
 let collectionContentItems: PublicContentCardItem[] = [];
+let linkedContentLookup: LinkedContentLookup = {};
 let error: string | null = null;
 
 try {
@@ -441,15 +445,23 @@ if (!error && eventData) {
   }
 }
 
-if (!error && eventData?.contentCollectionId) {
+if (
+  !error &&
+  eventData &&
+  (eventData.contentCollectionId || hasLinkedContentBlocks(eventData?.content))
+) {
   try {
     const pools = await fetchPublicContentPools();
-    collectionContentItems = await buildContentCollectionItems({
-      contentCollectionId: eventData.contentCollectionId,
-      currentContentType: "event",
-      currentId: id!,
-      pools,
-    });
+    linkedContentLookup = buildLinkedContentLookup(pools);
+
+    if (eventData.contentCollectionId) {
+      collectionContentItems = await buildContentCollectionItems({
+        contentCollectionId: eventData.contentCollectionId,
+        currentContentType: "event",
+        currentId: id!,
+        pools,
+      });
+    }
   } catch (collectionError) {
     console.error("Failed to fetch collection content for event page:", collectionError);
   }
@@ -595,7 +607,10 @@ const displayEvent = {
 
                 <div class="border-t border-base-content/10 pt-10">
                   <div class="bg-base-200 px-0 pb-8 pt-0 text-base-content flex items-start justify-start">
-                    <ArticleBody contentBlocks={displayEvent.contentBlocks} />
+                    <ArticleBody
+                      contentBlocks={displayEvent.contentBlocks}
+                      linkedContentLookup={linkedContentLookup}
+                    />
                   </div>
                 </div>
 

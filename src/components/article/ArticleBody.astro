@@ -3,6 +3,10 @@ import QuoteIcon from "../../assets/icons/quote.svg";
 import ArticleVideo from "./ArticleVideo.astro";
 import LinkToContent from "./LinkToContent.astro";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
+import {
+  getLinkedContentKey,
+  type LinkedContentLookup,
+} from "@/lib/utils/contentCollectionMarquee";
 
 interface Block {
   type: string;
@@ -51,9 +55,13 @@ interface RenderableBlock {
 
 interface Props {
   contentBlocks: (Block | TwoColumnBlock)[];
+  linkedContentLookup?: LinkedContentLookup;
 }
 
-const { contentBlocks } = Astro.props;
+const {
+  contentBlocks,
+  linkedContentLookup = {},
+} = Astro.props;
 
 const renderableGroups: RenderableBlock[] = [];
 let currentProseGroup: Block[] = [];
@@ -170,27 +178,14 @@ if (currentProseGroup.length > 0) {
                       </figure>
                     );
                   case "link": {
-                    const hrefMap = {
-                      article: `/article/${block.linkedContentId}`,
-                      event: `/events/${block.linkedContentId}`,
-                      interview: `/interviews/${block.linkedContentId}`,
-                      flipper: `/flippers/${block.linkedContentId}`,
-                    };
-                    const href =
-                      block.linkedContentType && block.linkedContentId
-                        ? hrefMap[block.linkedContentType]
-                        : "#";
-                    return (
-                      <p class="text-lg font-article-body text-justify">
-                        <a
-                          href={href}
-                          class="text-xl font-article-body font-semibold hover:underline"
-                        >
-                          {block.text || "Ссылка"}
-                        </a>
-                      </p>
-                      <LinkToContent />
-                    );
+                    const linkedItem =
+                      linkedContentLookup[
+                        getLinkedContentKey(
+                          block.linkedContentType,
+                          block.linkedContentId,
+                        )
+                      ];
+                    return linkedItem ? <LinkToContent item={linkedItem} /> : null;
                   }
                   case "qa":
                     return (

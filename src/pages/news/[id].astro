@@ -14,7 +14,9 @@ import {
 } from "@/lib/api/api";
 import {
   buildContentCollectionItems,
+  buildLinkedContentLookup,
   fetchPublicContentPools,
+  type LinkedContentLookup,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
 
@@ -62,10 +64,12 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
 
 let collectionContentItems: any[] = [];
 let sameCategoryItems: any[] = [];
+let linkedContentLookup: LinkedContentLookup = {};
 
 if (!error && articleData) {
   try {
     const pools = await fetchPublicContentPools();
+    linkedContentLookup = buildLinkedContentLookup(pools);
     const allNews = pools.allNews;
     collectionContentItems = await buildContentCollectionItems({
       contentCollectionId: articleData?.contentCollectionId,
@@ -132,7 +136,10 @@ if (!error && articleData) {
 
           <!-- Article Content -->
           <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
-            <ArticleBody contentBlocks={displayArticle.contentBlocks} />
+            <ArticleBody
+              contentBlocks={displayArticle.contentBlocks}
+              linkedContentLookup={linkedContentLookup}
+            />
             <ContentCollectionMarquee
               collectionItems={collectionContentItems}
               categoryItems={sameCategoryItems}

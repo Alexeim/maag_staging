@@ -20,7 +20,39 @@ export interface PublicContentCardItem {
   contentType: string;
   isNews?: boolean;
   articleType?: string;
+  lead?: string;
+  cardLead?: string;
+  interviewee?: string;
+  mainQuote?: string;
 }
+
+export type LinkedContentLookup = Record<string, PublicContentCardItem>;
+
+export const getLinkedContentKey = (contentType?: string, id?: string) => {
+  if (!contentType || !id) {
+    return "";
+  }
+
+  return `${contentType}:${id}`;
+};
+
+export const hasLinkedContentBlocks = (blocks: unknown): boolean => {
+  if (!Array.isArray(blocks)) {
+    return false;
+  }
+
+  return blocks.some(
+    (block) =>
+      block &&
+      typeof block === "object" &&
+      (block as { type?: string }).type === "link" &&
+      typeof (block as { linkedContentType?: unknown }).linkedContentType ===
+        "string" &&
+      typeof (block as { linkedContentId?: unknown }).linkedContentId ===
+        "string" &&
+      Boolean((block as { linkedContentId?: string }).linkedContentId?.trim()),
+  );
+};
 
 export interface PublicContentPools {
   allArticles: PublicContentCardItem[];
@@ -243,4 +275,28 @@ export const buildContentCollectionItems = async ({
     dedupedKeys.add(key);
     return true;
   });
+};
+
+export const buildLinkedContentLookup = (
+  pools: PublicContentPools,
+): LinkedContentLookup => {
+  const items = [
+    ...pools.allArticles,
+    ...pools.allNews,
+    ...pools.allInterviews,
+    ...pools.allEvents,
+    ...pools.allFlippers,
+    ...pools.allGuides,
+    ...pools.allVisualStories,
+  ];
+
+  return items.reduce<LinkedContentLookup>((lookup, item) => {
+    const key = getLinkedContentKey(item.contentType, item.id);
+
+    if (key) {
+      lookup[key] = item;
+    }
+
+    return lookup;
+  }, {});
 };

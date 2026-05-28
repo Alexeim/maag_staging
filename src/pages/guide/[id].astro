@@ -4,6 +4,12 @@ import ArticleBody from "../../components/article/ArticleBody.astro";
 import ArticleTips from "../../components/article/ArticleTips.astro";
 import GuideHero from "@/components/guide/GuideHero.astro";
 import { ApiError, guidesApi } from "@/lib/api/api";
+import {
+  buildLinkedContentLookup,
+  fetchPublicContentPools,
+  hasLinkedContentBlocks,
+  type LinkedContentLookup,
+} from "@/lib/utils/contentCollectionMarquee";
 
 const { id } = Astro.params;
 
@@ -15,6 +21,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 let guideData: any;
 let error: string | null = null;
+let linkedContentLookup: LinkedContentLookup = {};
 
 try {
   guideData = await guidesApi.getById(id);
@@ -48,6 +55,15 @@ const displayGuide = {
 };
 
 const transitionAliases = [`landing-body-main-article-image-${id}`];
+
+if (!error && hasLinkedContentBlocks(displayGuide.contentBlocks)) {
+  try {
+    const pools = await fetchPublicContentPools();
+    linkedContentLookup = buildLinkedContentLookup(pools);
+  } catch (linkedContentError) {
+    console.error("Failed to fetch linked content for guide page:", linkedContentError);
+  }
+}
 ---
 
 <Layout
@@ -76,7 +92,10 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
           />
 
           <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-14 pb-[100px]">
-            <ArticleBody contentBlocks={displayGuide.contentBlocks} />
+            <ArticleBody
+              contentBlocks={displayGuide.contentBlocks}
+              linkedContentLookup={linkedContentLookup}
+            />
             <ArticleTips tips={displayGuide.tips} />
           </div>
         </>

@@ -1,9 +1,81 @@
 ---
+import type { PublicContentCardItem } from "@/lib/utils/contentCollectionMarquee";
 
+const CONTENT_LABELS: Record<string, string> = {
+  article: "Статья",
+  news: "Новости",
+  event: "Событие",
+  interview: "Интервью",
+  flipper: "Флиппер",
+  guide: "Гид",
+  "visual-story": "Visual Story",
+};
+
+interface Props {
+  item: PublicContentCardItem;
+}
+
+const { item } = Astro.props as Props;
+
+const isInterview = item.contentType === "interview";
+const imageSrc = item.imageUrl || "";
+const lead = item.cardLead || item.lead || item.mainQuote || "";
+const label = item.category || CONTENT_LABELS[item.contentType] || "Материал";
 ---
 
-<div>
-  <div class="w-full h-px border border-accent"></div>
-  <div><p>helelelleel</p></div>
-  <div class="w-full h-px border border-accent"></div>
-</div>
+<article class="border-y border-base-content/15 py-4">
+  <a
+    href={item.href}
+    class="group flex items-start gap-4 text-current no-underline"
+    aria-label={item.title}
+  >
+    <div
+      class:list={[
+        "overflow-hidden bg-base-200 flex-shrink-0",
+        isInterview ? "h-24 w-24 rounded-full" : "h-24 w-24",
+      ]}
+    >
+      {
+        imageSrc ? (
+          <img
+            src={imageSrc}
+            alt={item.title}
+            class:list={[
+              "h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]",
+              isInterview && "rounded-full",
+            ]}
+            loading="lazy"
+          />
+        ) : (
+          <div
+            class:list={[
+              "h-full w-full bg-base-content/5",
+              isInterview && "rounded-full",
+            ]}
+            aria-hidden="true"
+          />
+        )
+      }
+    </div>
+
+    <div class="min-w-0 flex-1">
+      <p class="mb-1">
+        <span class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
+          {label}
+        </span>
+      </p>
+
+      <h3 class="font-old_standard text-xl leading-[1.05] font-normal tracking-[-0.02em] transition-opacity duration-200 group-hover:underline">
+        {item.title}
+      </h3>
+
+      {
+        lead && (
+          <p class="mt-2 line-clamp-3 font-inter text-sm leading-snug text-base-content/65">
+            {lead}
+          </p>
+        )
+      }
+    </div>
+  </a>
+</article>
