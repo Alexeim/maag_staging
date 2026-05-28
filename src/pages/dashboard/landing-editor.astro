@@ -970,7 +970,7 @@ const initialMainHeroState = (() => {
                 <h3 class="text-lg font-semibold">{card.title}</h3>
                 <p class="mt-1 text-sm text-base-content/70">{card.description}</p>
               </div>
-              <span class="badge badge-outline">{card.modeLabel}</span>
+              <span class="inline-flex items-center rounded-full border border-base-300 px-2.5 py-0.5 text-xs font-medium text-base-content/60">{card.modeLabel}</span>
             </div>
             <p class="mt-4 text-sm leading-6 text-base-content/80">{card.details}</p>
           </article>
@@ -1060,7 +1060,7 @@ const initialMainHeroState = (() => {
             <select
               id="main-hero-select"
               x-model="selectedMainHeroKey"
-              class="select select-bordered w-full"
+              class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="!selectedMainHeroType || (selectedMainHeroType === 'article' && !selectedMainHeroArticleBucket)"
             >
               <option value="">
@@ -1122,7 +1122,7 @@ const initialMainHeroState = (() => {
           <select
             id="news-rail-limit"
             x-model="newsRailLimit"
-            class="select select-bordered w-full"
+            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="1">1</option>
             <option value="2">2</option>
@@ -1204,7 +1204,7 @@ const initialMainHeroState = (() => {
           <select
             id="culture-hero-select"
             x-model="selectedCultureHeroKey"
-            class="select select-bordered w-full"
+            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="">
               — выбери материал —
@@ -1261,7 +1261,7 @@ const initialMainHeroState = (() => {
           <select
             id="paris-hero-select"
             x-model="selectedParisHeroKey"
-            class="select select-bordered w-full"
+            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="">
               — выбери материал —
@@ -1338,7 +1338,7 @@ const initialMainHeroState = (() => {
           <select
             id="netlenka-rail-limit"
             x-model="netlenkaRailLimit"
-            class="select select-bordered w-full"
+            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="1">1</option>
             <option value="2">2</option>
@@ -1427,7 +1427,7 @@ const initialMainHeroState = (() => {
 
         <div x-show="eventCardMode === 'manual'" class="grid gap-2 max-w-sm">
           <label for="event-select" class="text-sm font-medium">Выбери событие</label>
-          <select id="event-select" x-model="selectedEventId" class="select select-bordered w-full">
+          <select id="event-select" x-model="selectedEventId" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
             <option value="">— выбери событие —</option>
             {eventOptions.map((item) => (
               <option value={item.id}>{item.title}</option>
@@ -1483,7 +1483,7 @@ const initialMainHeroState = (() => {
           <select
             id="culture-cards-limit"
             x-model="cultureCardsLimit"
-            class="select select-bordered w-full"
+            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="1">1</option>
             <option value="2">2</option>
@@ -1573,7 +1573,7 @@ const initialMainHeroState = (() => {
           <select
             id="paris-cards-limit"
             x-model="parisCardsLimit"
-            class="select select-bordered w-full"
+            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="1">1</option>
             <option value="2">2</option>
@@ -1659,7 +1659,7 @@ const initialMainHeroState = (() => {
 
         <div x-show="cultureInterviewMode === 'manual'" class="grid gap-2 max-w-sm">
           <label for="interview-select" class="text-sm font-medium">Выбери интервью</label>
-          <select id="interview-select" x-model="selectedInterviewId" class="select select-bordered w-full">
+          <select id="interview-select" x-model="selectedInterviewId" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
             <option value="">— выбери интервью —</option>
             {interviewOptions.map((item) => (
               <option value={item.id}>{item.title}</option>
