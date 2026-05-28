@@ -46,6 +46,9 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   cultureInterviewBlock: {
     mode: "auto-latest",
   },
+  leSaviezVousFeature: {
+    mode: "auto-latest",
+  },
   updatedAt: null,
   updatedBy: null,
 };

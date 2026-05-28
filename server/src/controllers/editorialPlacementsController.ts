@@ -132,6 +132,7 @@ export interface LandingPlacementsDocument {
   parisCards: LandingCategoryCardsSelection | null;
   eventCard: LandingEventCardSelection | null;
   cultureInterviewBlock: LandingCultureInterviewBlockSelection | null;
+  leSaviezVousFeature: SectionPageLeSaviezVousSelection | null;
   updatedAt: Date | null;
   updatedBy: string | null;
 }
@@ -296,6 +297,9 @@ const createDefaultLandingPlacements = (): LandingPlacementsDocument => ({
     mode: 'auto-nearest',
   },
   cultureInterviewBlock: {
+    mode: 'auto-latest',
+  },
+  leSaviezVousFeature: {
     mode: 'auto-latest',
   },
   updatedAt: null,
@@ -793,6 +797,11 @@ const normalizeLandingPlacements = (
         ?? normalizeCultureInterviewBlockSelection(value.featuredInterviewInCultureId)
         ?? defaults.cultureInterviewBlock);
 
+  const leSaviezVousRaw = 'leSaviezVousFeature' in value ? value.leSaviezVousFeature : undefined;
+  const leSaviezVousFeature = leSaviezVousRaw === null
+    ? null
+    : (normalizeSectionPageLeSaviezVousSelection(leSaviezVousRaw) ?? defaults.leSaviezVousFeature);
+
   return {
     schemaVersion: 4,
     mainHero,
@@ -804,6 +813,7 @@ const normalizeLandingPlacements = (
     parisCards,
     eventCard,
     cultureInterviewBlock,
+    leSaviezVousFeature,
     updatedAt:
       value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
     updatedBy: normalizeStringId(value.updatedBy),
@@ -1053,6 +1063,7 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
     let parisCards = current.parisCards;
     let eventCard = current.eventCard;
     let cultureInterviewBlock = current.cultureInterviewBlock;
+    let leSaviezVousFeature = current.leSaviezVousFeature;
 
     if ('mainHero' in payload) {
       if (payload.mainHero === null) {
@@ -1289,6 +1300,26 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
       }
     }
 
+    if ('leSaviezVousFeature' in payload) {
+      if (payload.leSaviezVousFeature === null) {
+        leSaviezVousFeature = null;
+      } else {
+        const normalized = normalizeSectionPageLeSaviezVousSelection(payload.leSaviezVousFeature);
+        if (!normalized) {
+          return res.status(400).json({ message: 'Invalid leSaviezVousFeature payload' });
+        }
+
+        if (normalized.mode === 'manual') {
+          const exists = await assertDocumentExists('articles', normalized.id);
+          if (!exists) {
+            return res.status(404).json({ message: 'Referenced le saviez-vous article was not found' });
+          }
+        }
+
+        leSaviezVousFeature = normalized;
+      }
+    }
+
     const nextValue: LandingPlacementsDocument = {
       schemaVersion: 4,
       mainHero,
@@ -1300,6 +1331,7 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
       parisCards,
       eventCard,
       cultureInterviewBlock,
+      leSaviezVousFeature,
       updatedAt: new Date(),
       updatedBy: null,
     };

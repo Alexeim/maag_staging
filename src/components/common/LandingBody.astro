@@ -387,7 +387,15 @@ try {
       (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
     );
 
-  leSaviezVousArticle = leSaviezVousArticles[0] ?? null;
+  const leSaviezVousPlacement = landingPlacements.leSaviezVousFeature ?? null;
+  if (!leSaviezVousPlacement || leSaviezVousPlacement.mode === "auto-latest") {
+    leSaviezVousArticle = leSaviezVousArticles[0] ?? null;
+  } else if (leSaviezVousPlacement.mode === "manual") {
+    leSaviezVousArticle =
+      leSaviezVousArticles.find((a) => a.id === leSaviezVousPlacement.id) ?? null;
+  } else {
+    leSaviezVousArticle = null;
+  }
 
   if (leSaviezVousArticle) {
     leSaviezVousArticle = {

@@ -345,6 +345,7 @@ export interface LandingPlacementsResponse {
   parisCards: LandingCategoryCardsSelection | null;
   eventCard: LandingEventCardSelection | null;
   cultureInterviewBlock: LandingCultureInterviewBlockSelection | null;
+  leSaviezVousFeature: SectionPageLeSaviezVousSelection | null;
   updatedAt?: string | Date | null;
   updatedBy?: string | null;
 }
@@ -359,6 +360,7 @@ export interface UpdateLandingPlacementsPayload {
   parisCards?: LandingCategoryCardsSelection | null;
   eventCard?: LandingEventCardSelection | null;
   cultureInterviewBlock?: LandingCultureInterviewBlockSelection | null;
+  leSaviezVousFeature?: SectionPageLeSaviezVousSelection | null;
 }
 
 export interface CalendarPageManualCardsSelection {

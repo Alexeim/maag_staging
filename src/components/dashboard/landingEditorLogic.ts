@@ -10,6 +10,7 @@ import {
   type LandingNetlenkaItemTarget,
   type LandingNetlenkaRailSelection,
   type LandingNewsRailSelection,
+  type SectionPageLeSaviezVousSelection,
 } from "@/lib/api/api";
 import type { UiStore } from "@/stores/uiStore";
 
@@ -88,6 +89,11 @@ interface LandingEditorInitialState {
   };
   interviewOptions: ContentOption[];
   initialCultureInterview: {
+    mode: "empty" | "auto-latest" | "manual";
+    id: string;
+  };
+  leSaviezVousOptions: ContentOption[];
+  initialLeSaviezVous: {
     mode: "empty" | "auto-latest" | "manual";
     id: string;
   };
@@ -186,6 +192,12 @@ export default (initialState: LandingEditorInitialState) => ({
   selectedInterviewId: initialState.initialCultureInterview?.id ?? "",
   cultureInterviewSaving: false,
   cultureInterviewError: "",
+
+  leSaviezVousOptions: initialState.leSaviezVousOptions ?? [],
+  leSaviezVousMode: initialState.initialLeSaviezVous?.mode ?? "auto-latest",
+  selectedLeSaviezVousId: initialState.initialLeSaviezVous?.id ?? "",
+  leSaviezVousSaving: false,
+  leSaviezVousError: "",
 
   getUiStore(): UiStore | null {
     return Alpine.store("ui");
@@ -737,6 +749,40 @@ export default (initialState: LandingEditorInitialState) => ({
       this.notify(this.cultureInterviewError, "error");
     } finally {
       this.cultureInterviewSaving = false;
+    }
+  },
+
+  async saveLeSaviezVous() {
+    this.leSaviezVousSaving = true;
+    this.leSaviezVousError = "";
+
+    try {
+      let leSaviezVousFeature: SectionPageLeSaviezVousSelection | null = null;
+
+      if (this.leSaviezVousMode === "auto-latest") {
+        leSaviezVousFeature = { mode: "auto-latest" };
+      }
+
+      if (this.leSaviezVousMode === "manual") {
+        if (!this.selectedLeSaviezVousId) {
+          throw new Error("Для ручного режима выбери материал.");
+        }
+        leSaviezVousFeature = { mode: "manual", id: this.selectedLeSaviezVousId };
+      }
+
+      await editorialPlacementsApi.updateLanding({ leSaviezVousFeature });
+
+      this.notify("Le saviez-vous на landing обновлён.");
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to save le saviez-vous", error);
+      this.leSaviezVousError =
+        error instanceof Error
+          ? error.message
+          : "Не удалось сохранить le saviez-vous.";
+      this.notify(this.leSaviezVousError, "error");
+    } finally {
+      this.leSaviezVousSaving = false;
     }
   },
 });

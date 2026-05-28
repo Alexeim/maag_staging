@@ -122,6 +122,19 @@ const describeManualIds = (ids: string[]) => {
     .join(" | ");
 };
 
+const getBadgeClass = (modeLabel: string): string => {
+  if (modeLabel === "Пусто") {
+    return "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium bg-neutral-100 text-neutral-400 border-neutral-200";
+  }
+  if (modeLabel === "Manual") {
+    return "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium bg-blue-50 text-blue-500 border-blue-200";
+  }
+  if (modeLabel.startsWith("Auto")) {
+    return "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-600 border-emerald-200";
+  }
+  return "inline-flex items-center rounded-full border border-base-300 px-2.5 py-0.5 text-xs font-medium text-base-content/60";
+};
+
 const mainCardsSummary = (() => {
   if (!placements.mainCards) {
     return {
@@ -196,7 +209,7 @@ const secondaryCardsSummary = (() => {
               Верхние 4 карточки календарной страницы.
             </p>
           </div>
-          <span class="badge badge-outline">{mainCardsSummary.modeLabel}</span>
+          <span class={getBadgeClass(mainCardsSummary.modeLabel)}>{mainCardsSummary.modeLabel}</span>
         </div>
         <p class="mt-4 text-sm leading-6 text-base-content/80">{mainCardsSummary.details}</p>
       </article>
@@ -209,7 +222,7 @@ const secondaryCardsSummary = (() => {
               Нижние 4 карточки под основным блоком календаря.
             </p>
           </div>
-          <span class="badge badge-outline">{secondaryCardsSummary.modeLabel}</span>
+          <span class={getBadgeClass(secondaryCardsSummary.modeLabel)}>{secondaryCardsSummary.modeLabel}</span>
         </div>
         <p class="mt-4 text-sm leading-6 text-base-content/80">{secondaryCardsSummary.details}</p>
       </article>
@@ -240,7 +253,7 @@ const secondaryCardsSummary = (() => {
           <div class="grid gap-3 lg:grid-cols-[minmax(0,24rem)_auto] lg:items-end">
             <label class="grid gap-2">
               <span class="text-sm font-medium">Добавить событие</span>
-              <select x-model="selectedMainCardIdToAdd" class="select select-bordered w-full">
+              <select x-model="selectedMainCardIdToAdd" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer">
                 <option value="">— выбери событие —</option>
                 <template x-for="item in getUnselectedMainEventOptions()" :key="item.id">
                   <option :value="item.id" x-text="`${item.title} (${item.dateLabel})`"></option>
@@ -269,9 +282,9 @@ const secondaryCardsSummary = (() => {
                   <p class="text-xs text-base-content/60 mt-1" x-text="getEventDateLabel(id)"></p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <button type="button" class="btn btn-sm btn-ghost" @click="moveMainCard(id, -1)">↑</button>
-                  <button type="button" class="btn btn-sm btn-ghost" @click="moveMainCard(id, 1)">↓</button>
-                  <button type="button" class="btn btn-sm btn-ghost text-error" @click="removeMainCard(id)">Удалить</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" @click="moveMainCard(id, -1)">↑</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" @click="moveMainCard(id, 1)">↓</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-error border-base-300 hover:bg-red-50" @click="removeMainCard(id)">Удалить</button>
                 </div>
               </div>
             </template>
@@ -340,7 +353,7 @@ const secondaryCardsSummary = (() => {
           <div class="grid gap-3 lg:grid-cols-[minmax(0,24rem)_auto] lg:items-end">
             <label class="grid gap-2">
               <span class="text-sm font-medium">Добавить событие</span>
-              <select x-model="selectedSecondaryCardIdToAdd" class="select select-bordered w-full">
+              <select x-model="selectedSecondaryCardIdToAdd" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer">
                 <option value="">— выбери событие —</option>
                 <template x-for="item in getUnselectedSecondaryEventOptions()" :key="item.id">
                   <option :value="item.id" x-text="`${item.title} (${item.dateLabel})`"></option>
@@ -369,9 +382,9 @@ const secondaryCardsSummary = (() => {
                   <p class="text-xs text-base-content/60 mt-1" x-text="getEventDateLabel(id)"></p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <button type="button" class="btn btn-sm btn-ghost" @click="moveSecondaryCard(id, -1)">↑</button>
-                  <button type="button" class="btn btn-sm btn-ghost" @click="moveSecondaryCard(id, 1)">↓</button>
-                  <button type="button" class="btn btn-sm btn-ghost text-error" @click="removeSecondaryCard(id)">Удалить</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" @click="moveSecondaryCard(id, -1)">↑</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" @click="moveSecondaryCard(id, 1)">↓</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-error border-base-300 hover:bg-red-50" @click="removeSecondaryCard(id)">Удалить</button>
                 </div>
               </div>
             </template>

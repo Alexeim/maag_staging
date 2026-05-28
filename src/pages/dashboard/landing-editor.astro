@@ -43,6 +43,9 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   cultureInterviewBlock: {
     mode: "auto-latest",
   },
+  leSaviezVousFeature: {
+    mode: "auto-latest",
+  },
   updatedAt: null,
   updatedBy: null,
 };
@@ -143,6 +146,7 @@ const formatUpdatedAt = (value: unknown) => {
 
 let landingPlacements = DEFAULT_LANDING_PLACEMENTS;
 let loadError = "";
+let leSaviezVousItems: Array<{ id: string; title: string; createdAt: unknown }> = [];
 
 const contentTitleMaps = {
   mainHero: new Map<string, string>(),
@@ -299,6 +303,14 @@ try {
   });
   events.forEach((item) => contentTitleMaps.events.set(item.id, item.title));
 
+  leSaviezVousItems = articles
+    .filter((item) => isLeSaviezVousArticle(item))
+    .sort((a, b) => {
+      const aTime = toDate(a.createdAt)?.getTime() ?? 0;
+      const bTime = toDate(b.createdAt)?.getTime() ?? 0;
+      return bTime - aTime;
+    });
+
   const categoryCardsCandidates = [
     ...articles
       .filter((item) => !isLeSaviezVousArticle(item))
@@ -380,6 +392,19 @@ try {
       ? error.message
       : "Не удалось загрузить editorial slots landing.";
 }
+
+const getBadgeClass = (modeLabel: string): string => {
+  if (modeLabel === "Пусто") {
+    return "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium bg-neutral-100 text-neutral-400 border-neutral-200";
+  }
+  if (modeLabel === "Manual") {
+    return "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium bg-blue-50 text-blue-500 border-blue-200";
+  }
+  if (modeLabel.startsWith("Auto")) {
+    return "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-600 border-emerald-200";
+  }
+  return "inline-flex items-center rounded-full border border-base-300 px-2.5 py-0.5 text-xs font-medium text-base-content/60";
+};
 
 const mainHeroSummary = (() => {
   if (!landingPlacements.mainHero) {
@@ -639,6 +664,22 @@ const slotCards = [
     description: "Interview block в culture section именно на landing.",
     modeLabel: cultureInterviewSummary.modeLabel,
     details: cultureInterviewSummary.details,
+  },
+  {
+    title: "Le Saviez-Vous",
+    description: "Блок «Le saviez-vous?» в paris section на landing.",
+    modeLabel: (() => {
+      if (!landingPlacements.leSaviezVousFeature) return "Пусто";
+      if (landingPlacements.leSaviezVousFeature.mode === "auto-latest") return "Auto latest";
+      return "Manual";
+    })(),
+    details: (() => {
+      if (!landingPlacements.leSaviezVousFeature) return "Le saviez-vous slot пуст.";
+      if (landingPlacements.leSaviezVousFeature.mode === "auto-latest") return "Автоматически показывается последний le saviez-vous материал.";
+      const id = landingPlacements.leSaviezVousFeature.id;
+      const found = leSaviezVousItems.find((i) => i.id === id);
+      return found ? found.title : `Материал ${id}`;
+    })(),
   },
 ];
 
@@ -900,6 +941,21 @@ const initialCultureInterviewState = (() => {
   return { mode: "manual" as const, id: landingPlacements.cultureInterviewBlock.id };
 })();
 
+const leSaviezVousOptions = leSaviezVousItems.map((item) => ({
+  id: item.id,
+  title: item.title,
+}));
+
+const initialLeSaviezVousState = (() => {
+  if (!landingPlacements.leSaviezVousFeature) {
+    return { mode: "empty" as const, id: "" };
+  }
+  if (landingPlacements.leSaviezVousFeature.mode === "auto-latest") {
+    return { mode: "auto-latest" as const, id: "" };
+  }
+  return { mode: "manual" as const, id: landingPlacements.leSaviezVousFeature.id };
+})();
+
 const initialMainHeroState = (() => {
   if (!landingPlacements.mainHero) {
     return { mode: "empty" as const, key: "" };
@@ -935,6 +991,8 @@ const initialMainHeroState = (() => {
       initialEventCard: initialEventCardState,
       interviewOptions,
       initialCultureInterview: initialCultureInterviewState,
+      leSaviezVousOptions,
+      initialLeSaviezVous: initialLeSaviezVousState,
     })})`}
   >
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
@@ -970,7 +1028,7 @@ const initialMainHeroState = (() => {
                 <h3 class="text-lg font-semibold">{card.title}</h3>
                 <p class="mt-1 text-sm text-base-content/70">{card.description}</p>
               </div>
-              <span class="inline-flex items-center rounded-full border border-base-300 px-2.5 py-0.5 text-xs font-medium text-base-content/60">{card.modeLabel}</span>
+              <span class={getBadgeClass(card.modeLabel)}>{card.modeLabel}</span>
             </div>
             <p class="mt-4 text-sm leading-6 text-base-content/80">{card.details}</p>
           </article>
@@ -1679,6 +1737,55 @@ const initialMainHeroState = (() => {
             Сохранить culture interview
           </button>
           <span x-show="cultureInterviewSaving" class="text-sm text-base-content/70">Сохраняем...</span>
+        </div>
+      </div>
+    </div>
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Le Saviez-Vous Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Блок «Le saviez-vous?» в paris section на landing.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="le-saviez-vous-mode" value="empty" x-model="leSaviezVousMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="le-saviez-vous-mode" value="auto-latest" x-model="leSaviezVousMode" />
+            <span class="text-sm">Auto latest</span>
+          </label>
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="le-saviez-vous-mode" value="manual" x-model="leSaviezVousMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="leSaviezVousMode === 'manual'" class="grid gap-2 max-w-sm">
+          <label for="le-saviez-vous-select" class="text-sm font-medium">Выбери материал</label>
+          <select id="le-saviez-vous-select" x-model="selectedLeSaviezVousId" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            <option value="">— выбери материал —</option>
+            {leSaviezVousOptions.map((item) => (
+              <option value={item.id}>{item.title}</option>
+            ))}
+          </select>
+        </div>
+
+        <p x-show="leSaviezVousError" class="text-sm text-error" x-text="leSaviezVousError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveLeSaviezVous()"
+            :disabled="leSaviezVousSaving"
+          >
+            Сохранить le saviez-vous
+          </button>
+          <span x-show="leSaviezVousSaving" class="text-sm text-base-content/70">Сохраняем...</span>
         </div>
       </div>
     </div>
