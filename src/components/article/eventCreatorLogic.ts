@@ -184,7 +184,7 @@ export default function eventCreatorLogic(initialState = {}) {
       getEntityId() {
         return this.eventId;
       },
-      supportsFeaturedEvent: true,
+      supportsEventCard: true,
     }),
     ...restInitial,
     addRelatedContent() {

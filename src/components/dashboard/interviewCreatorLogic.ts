@@ -168,7 +168,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       getMainHeroTarget() {
         return this.interviewId ? { type: "interview", id: this.interviewId } : null;
       },
-      supportsFeaturedInterviewInCulture: true,
+      supportsCultureInterviewBlock: true,
     }),
     getRichTextInitialHtml(block) {
       return getInitialRichTextHtml(block);

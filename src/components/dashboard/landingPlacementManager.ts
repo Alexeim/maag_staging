@@ -15,8 +15,8 @@ import {
 interface LandingPlacementManagerOptions {
   getEntityId(this: any): string | null;
   getMainHeroTarget?: ((this: any) => LandingMainHeroTarget | null) | null;
-  supportsFeaturedEvent?: boolean;
-  supportsFeaturedInterviewInCulture?: boolean;
+  supportsEventCard?: boolean;
+  supportsCultureInterviewBlock?: boolean;
 }
 
 const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
@@ -91,7 +91,7 @@ export const createLandingPlacementManager = (
 ) => ({
   landingPlacements: { ...DEFAULT_LANDING_PLACEMENTS } as LandingPlacementsResponse,
   currentMainHeroTitle: "",
-  currentFeaturedEventTitle: "",
+  currentEventCardTitle: "",
   placementLoading: false,
   placementSaving: false,
   placementError: "",
@@ -113,13 +113,13 @@ export const createLandingPlacementManager = (
     return Boolean(options.getMainHeroTarget && this.getPlacementEntityId());
   },
 
-  canSetAsFeaturedEvent() {
-    return Boolean(options.supportsFeaturedEvent && this.getPlacementEntityId());
+  canSetAsEventCard() {
+    return Boolean(options.supportsEventCard && this.getPlacementEntityId());
   },
 
-  canSetAsFeaturedInterviewInCulture() {
+  canSetAsCultureInterviewBlock() {
     return Boolean(
-      options.supportsFeaturedInterviewInCulture && this.getPlacementEntityId(),
+      options.supportsCultureInterviewBlock && this.getPlacementEntityId(),
     );
   },
 
@@ -134,7 +134,7 @@ export const createLandingPlacementManager = (
     );
   },
 
-  isCurrentFeaturedEvent() {
+  isCurrentEventCard() {
     const entityId = this.getPlacementEntityId();
     return Boolean(
       entityId &&
@@ -143,7 +143,7 @@ export const createLandingPlacementManager = (
     );
   },
 
-  isCurrentFeaturedInterviewInCulture() {
+  isCurrentCultureInterviewBlock() {
     const entityId = this.getPlacementEntityId();
     return Boolean(
       entityId &&
@@ -167,7 +167,7 @@ export const createLandingPlacementManager = (
     return `${typeLabel}: заголовок пока не загрузился.`;
   },
 
-  getCurrentFeaturedEventSummary() {
+  getCurrentEventCardSummary() {
     const eventCard = this.landingPlacements.eventCard ?? null;
     if (!eventCard) {
       return "Карточка события сейчас пустая.";
@@ -177,8 +177,8 @@ export const createLandingPlacementManager = (
       return "Автоматически показывается ближайшее событие.";
     }
 
-    if (this.currentFeaturedEventTitle) {
-      return `Вручную выбрано: ${this.currentFeaturedEventTitle}`;
+    if (this.currentEventCardTitle) {
+      return `Вручную выбрано: ${this.currentEventCardTitle}`;
     }
 
     return `Вручную выбрано событие ${eventCard.id}.`;
@@ -200,19 +200,19 @@ export const createLandingPlacementManager = (
     }
   },
 
-  async syncCurrentFeaturedEventTitle() {
+  async syncCurrentEventCardTitle() {
     const eventCard = this.landingPlacements.eventCard ?? null;
     if (!eventCard || eventCard.mode !== "manual") {
-      this.currentFeaturedEventTitle = "";
+      this.currentEventCardTitle = "";
       return;
     }
 
     try {
-      this.currentFeaturedEventTitle =
+      this.currentEventCardTitle =
         (await eventsApi.getById(eventCard.id)).title || "Событие не найдено";
     } catch (error) {
-      console.error("Failed to load current featured event title:", error);
-      this.currentFeaturedEventTitle = "Не удалось загрузить название события";
+      console.error("Failed to load current event card title:", error);
+      this.currentEventCardTitle = "Не удалось загрузить название события";
     }
   },
 
@@ -223,7 +223,7 @@ export const createLandingPlacementManager = (
     try {
       this.landingPlacements = await editorialPlacementsApi.getLanding();
       await this.syncCurrentMainHeroTitle();
-      await this.syncCurrentFeaturedEventTitle();
+      await this.syncCurrentEventCardTitle();
     } catch (error) {
       console.error("Failed to load landing placements:", error);
       this.placementError =
@@ -245,7 +245,7 @@ export const createLandingPlacementManager = (
     try {
       this.landingPlacements = await editorialPlacementsApi.updateLanding(payload);
       await this.syncCurrentMainHeroTitle();
-      await this.syncCurrentFeaturedEventTitle();
+      await this.syncCurrentEventCardTitle();
       showToast(successMessage);
     } catch (error) {
       console.error("Failed to update landing placements:", error);
@@ -286,7 +286,7 @@ export const createLandingPlacementManager = (
     );
   },
 
-  async setAsFeaturedEvent() {
+  async setAsEventCard() {
     const entityId = this.getPlacementEntityId();
     if (!entityId) {
       showToast("Сначала сохрани событие, потом можно поставить его в slot.", "error");
@@ -299,14 +299,14 @@ export const createLandingPlacementManager = (
     );
   },
 
-  async clearFeaturedEvent() {
+  async clearEventCard() {
     await this.updateLandingPlacements(
       { eventCard: { mode: "auto-nearest" } },
       "Карточка события на landing переведена в автоматический режим.",
     );
   },
 
-  async setAsFeaturedInterviewInCulture() {
+  async setAsCultureInterviewBlock() {
     const entityId = this.getPlacementEntityId();
     if (!entityId) {
       showToast(
@@ -322,7 +322,7 @@ export const createLandingPlacementManager = (
     );
   },
 
-  async clearFeaturedInterviewInCulture() {
+  async clearCultureInterviewBlock() {
     await this.updateLandingPlacements(
       { cultureInterviewBlock: null },
       "Special block интервью в «Культуре» очищен.",

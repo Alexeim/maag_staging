@@ -1,23 +1,23 @@
 ---
 interface Props {
   allowMainHero?: boolean;
-  allowFeaturedEvent?: boolean;
-  allowFeaturedInterviewInCulture?: boolean;
+  allowEventCard?: boolean;
+  allowCultureInterviewBlock?: boolean;
   featuredEventOnly?: boolean;
 }
 
 const {
   allowMainHero = false,
-  allowFeaturedEvent = false,
-  allowFeaturedInterviewInCulture = false,
+  allowEventCard = false,
+  allowCultureInterviewBlock = false,
   featuredEventOnly = false,
 } = Astro.props as Props;
 
 const isFeaturedEventOnly =
   featuredEventOnly &&
-  allowFeaturedEvent &&
+  allowEventCard &&
   !allowMainHero &&
-  !allowFeaturedInterviewInCulture;
+  !allowCultureInterviewBlock;
 ---
 
 <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
@@ -78,10 +78,10 @@ const isFeaturedEventOnly =
               Текущая карточка события на landing:
               <span
                 class="font-medium text-base-content"
-                x-text="getCurrentFeaturedEventSummary()"
+                x-text="getCurrentEventCardSummary()"
               ></span>
             </p>
-            <p x-show="isCurrentFeaturedEvent()" class="text-success">
+            <p x-show="isCurrentEventCard()" class="text-success">
               Это событие сейчас вручную стоит в карточке «Календарь» на landing.
             </p>
           </>
@@ -94,10 +94,10 @@ const isFeaturedEventOnly =
             <p x-show="isCurrentMainHero()" class="text-success">
               Этот материал сейчас стоит главным в блоке «Главное».
             </p>
-            <p x-show="isCurrentFeaturedEvent()" class="text-success">
+            <p x-show="isCurrentEventCard()" class="text-success">
               Это событие сейчас стоит в блоке «Календарь» на landing.
             </p>
-            <p x-show="isCurrentFeaturedInterviewInCulture()" class="text-success">
+            <p x-show="isCurrentCultureInterviewBlock()" class="text-success">
               Это интервью сейчас стоит в special block «Культура».
             </p>
           </>
@@ -129,13 +129,13 @@ const isFeaturedEventOnly =
         </>
       )}
 
-      {allowFeaturedEvent && (
+      {allowEventCard && (
         <>
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="setAsFeaturedEvent()"
-            x-show="canSetAsFeaturedEvent() && !isCurrentFeaturedEvent()"
+            @click="setAsEventCard()"
+            x-show="canSetAsEventCard() && !isCurrentEventCard()"
             :disabled="placementSaving"
           >
             {isFeaturedEventOnly ? "Поставить в карточку события" : "Поставить в блок события"}
@@ -143,8 +143,8 @@ const isFeaturedEventOnly =
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="clearFeaturedEvent()"
-            x-show="isCurrentFeaturedEvent()"
+            @click="clearEventCard()"
+            x-show="isCurrentEventCard()"
             :disabled="placementSaving"
           >
             {isFeaturedEventOnly ? "Вернуть авто-выбор события" : "Снять из блока события"}
@@ -152,13 +152,13 @@ const isFeaturedEventOnly =
         </>
       )}
 
-      {allowFeaturedInterviewInCulture && (
+      {allowCultureInterviewBlock && (
         <>
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="setAsFeaturedInterviewInCulture()"
-            x-show="canSetAsFeaturedInterviewInCulture() && !isCurrentFeaturedInterviewInCulture()"
+            @click="setAsCultureInterviewBlock()"
+            x-show="canSetAsCultureInterviewBlock() && !isCurrentCultureInterviewBlock()"
             :disabled="placementSaving"
           >
             Поставить в блок интервью «Культура»
@@ -166,8 +166,8 @@ const isFeaturedEventOnly =
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="clearFeaturedInterviewInCulture()"
-            x-show="isCurrentFeaturedInterviewInCulture()"
+            @click="clearCultureInterviewBlock()"
+            x-show="isCurrentCultureInterviewBlock()"
             :disabled="placementSaving"
           >
             Снять из блока интервью

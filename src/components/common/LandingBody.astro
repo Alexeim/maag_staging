@@ -121,12 +121,6 @@ const isHotContent = (item: any) =>
 
 const isLandingHotContentItem = (item: any) => isHotContent(item) && !item?.isNews;
 
-const isMainInCategoryItem = (item: any) =>
-  item?.isMainInCategory === true ||
-  item?.isMainInCategory === "true" ||
-  item?.isMainInCategory === 1 ||
-  item?.isMainInCategory === "1";
-
 const isLeSaviezVousArticle = (item: any) =>
   item?.articleType === "le_saviez_vous";
 
