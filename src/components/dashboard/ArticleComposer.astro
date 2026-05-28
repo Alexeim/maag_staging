@@ -442,7 +442,7 @@ const {
               </div>
               <h3
                 class="text-lg font-semibold capitalize"
-                x-text="editingBlock.type.replace('-', ' ')"
+                x-text="getBlockTypeLabel(editingBlock.type)"
               >
               </h3>
 
@@ -899,14 +899,23 @@ const {
           </template>
 
           <template x-if="editingIndex !== index">
-            <div class="space-y-3">
-              <div class="flex items-center gap-3 pr-40">
+            <div class="space-y-4">
+              <div class="flex items-start gap-3 pr-40">
                 <span class="text-base-content/40 select-none shrink-0" aria-hidden="true">⋮⋮</span>
-                <div class="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-base-content/60 min-w-0">
-                  <span x-text="'Позиция: ' + ((block.position ?? index) + 1)"></span>
-                  <span>Перетащи, чтобы изменить порядок</span>
+                <div class="min-w-0 flex-1 space-y-2">
+                  <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-base-content/60">
+                    <span x-text="'Позиция: ' + ((block.position ?? index) + 1)"></span>
+                    <span>Перетащи, чтобы изменить порядок</span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span
+                      class="inline-flex items-center rounded-full border border-primary bg-primary px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-content shadow-sm"
+                      x-text="getBlockTypeLabel(block.type)"
+                    ></span>
+                  </div>
                 </div>
               </div>
+
               <template x-if="['paragraph', 'first-paragraph'].includes(block.type)">
                 <div
                   :class="{
@@ -931,13 +940,21 @@ const {
               </template>
 
               <template x-if="block.type === 'image'">
-                <figure>
+                <figure class="space-y-2">
                   <img
+                    x-show="block.url"
                     :src="block.url"
                     alt="Содержимое статьи"
                     class="rounded-md w-full object-cover"
                   />
+                  <div
+                    x-show="!block.url"
+                    class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-4 py-8 text-center text-sm text-base-content/60"
+                  >
+                    Изображение ещё не загружено
+                  </div>
                   <figcaption
+                    x-show="block.caption"
                     class="text-center text-sm text-base-content/60 mt-2"
                     x-text="block.caption"
                   >
@@ -988,8 +1005,20 @@ const {
                 </figure>
               </template>
 
-              <div x-show="block.type === 'two-columns'" class="flex flex-col lg:flex-row gap-4 w-full">
-                <div class="w-full lg:w-1/2 flex flex-col items-center">
+              <div x-show="block.type === 'two-columns'" class="space-y-3">
+                <div class="flex flex-wrap gap-2">
+                  <span
+                    class="inline-flex items-center rounded-full bg-base-200 px-3 py-1 text-xs text-base-content/70"
+                    x-text="'Левая колонка: ' + getColumnTypeLabel(block.left?.type)"
+                  ></span>
+                  <span
+                    class="inline-flex items-center rounded-full bg-base-200 px-3 py-1 text-xs text-base-content/70"
+                    x-text="'Правая колонка: ' + getColumnTypeLabel(block.right?.type)"
+                  ></span>
+                </div>
+                <div class="flex flex-col lg:flex-row gap-4 w-full">
+                <div class="w-full lg:w-1/2 flex flex-col items-center rounded-lg border border-base-300 bg-base-200/30 p-3">
+                  <p class="text-xs uppercase tracking-[0.2em] text-base-content/60 mb-2">Левая колонка</p>
                   <img
                     x-show="block.left?.type === 'image'"
                     :src="block.left?.content"
@@ -1011,7 +1040,8 @@ const {
                   </div>
                   <span x-show="block.left?.type === 'image' && block.left?.caption" x-text="block.left?.caption" class="text-xs text-base-content/60 mt-1"></span>
                 </div>
-                <div class="w-full lg:w-1/2 flex flex-col items-center">
+                <div class="w-full lg:w-1/2 flex flex-col items-center rounded-lg border border-base-300 bg-base-200/30 p-3">
+                  <p class="text-xs uppercase tracking-[0.2em] text-base-content/60 mb-2">Правая колонка</p>
                   <img
                     x-show="block.right?.type === 'image'"
                     :src="block.right?.content"
@@ -1033,10 +1063,29 @@ const {
                   </div>
                   <span x-show="block.right?.type === 'image' && block.right?.caption" x-text="block.right?.caption" class="text-xs text-base-content/60 mt-1"></span>
                 </div>
+                </div>
               </div>
 
+              <template x-if="block.type === 'link'">
+                <div class="rounded-lg border border-base-300 bg-base-200/40 p-4 space-y-2">
+                  <p
+                    class="text-xs uppercase tracking-[0.2em] text-base-content/60"
+                    x-text="getLinkedContentTypeLabel(block.linkedContentType)"
+                  ></p>
+                  <p
+                    class="text-sm font-medium text-base-content"
+                    x-text="getLinkedBlockTitle(block) || 'Контент не выбран'"
+                  ></p>
+                  <p
+                    x-show="block.linkedContentId"
+                    class="text-xs text-base-content/60 break-all"
+                    x-text="block.linkedContentId"
+                  ></p>
+                </div>
+              </template>
+
               <template x-if="block.type === 'url-link'">
-                <p class="text-sm text-base-content/70">
+                <p class="rounded-lg border border-base-300 bg-base-200/40 p-4 text-sm text-base-content/70">
                   <span class="font-medium text-base-content" x-text="block.text || '(без текста)'"></span>
                   <span class="ml-2" x-text="block.url"></span>
                 </p>

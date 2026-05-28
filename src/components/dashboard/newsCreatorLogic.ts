@@ -18,6 +18,14 @@ import {
   sortAndNormalizeContentBlocks,
   withBlockMeta,
 } from "@/lib/utils/contentBlocks";
+import {
+  getBlockSummary as buildBlockSummary,
+  getBlockTypeLabel as resolveBlockTypeLabel,
+  getColumnTypeLabel as resolveColumnTypeLabel,
+  getLinkedBlockTitle as resolveLinkedBlockTitle,
+  getLinkedContentTypeLabel as resolveLinkedContentTypeLabel,
+  truncatePreviewText,
+} from "@/lib/utils/contentBlockPreview";
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 
@@ -156,6 +164,39 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     getCategoryLabel(value?: string) {
       if (!value) return "Category";
       return this.categoryLabels[value] || value;
+    },
+    getBlockTypeLabel(type?: string) {
+      return resolveBlockTypeLabel(type);
+    },
+    getLinkedContentTypeLabel(type?: string) {
+      return resolveLinkedContentTypeLabel(type);
+    },
+    getColumnTypeLabel(type?: string) {
+      return resolveColumnTypeLabel(type);
+    },
+    getPreviewText(value?: string, maxLength = 120) {
+      return truncatePreviewText(value, maxLength);
+    },
+    getLinkedBlockTitle(block: Record<string, unknown>) {
+      return resolveLinkedBlockTitle(block, (currentBlock) => {
+        const contentType =
+          typeof currentBlock.linkedContentType === "string"
+            ? currentBlock.linkedContentType
+            : "";
+        const contentId =
+          typeof currentBlock.linkedContentId === "string"
+            ? currentBlock.linkedContentId
+            : "";
+        if (!contentType || !contentId) {
+          return "";
+        }
+        return this.getRelatedContentItemLabel(contentType, contentId);
+      });
+    },
+    getBlockSummary(block: Record<string, unknown>) {
+      return buildBlockSummary(block, {
+        resolveLinkedTitle: (currentBlock) => this.getLinkedBlockTitle(currentBlock),
+      });
     },
     syncContentBlockOrder(blocks = this.article.contentBlocks) {
       this.article.contentBlocks = reindexContentBlocks(blocks);

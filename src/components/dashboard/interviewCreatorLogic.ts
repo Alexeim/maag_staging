@@ -18,6 +18,14 @@ import {
   normalizeVideoBlock,
 } from "@/lib/utils/video";
 import {
+  getBlockSummary as buildBlockSummary,
+  getBlockTypeLabel as resolveBlockTypeLabel,
+  getColumnTypeLabel as resolveColumnTypeLabel,
+  getLinkedBlockTitle as resolveLinkedBlockTitle,
+  getLinkedContentTypeLabel as resolveLinkedContentTypeLabel,
+  truncatePreviewText,
+} from "@/lib/utils/contentBlockPreview";
+import {
   reindexContentBlocks,
   sortAndNormalizeContentBlocks,
   withBlockMeta,
@@ -172,6 +180,39 @@ export default function interviewCreatorLogic(initialState = {}) {
     }),
     getRichTextInitialHtml(block) {
       return getInitialRichTextHtml(block);
+    },
+    getBlockTypeLabel(type?: string) {
+      return resolveBlockTypeLabel(type);
+    },
+    getLinkedContentTypeLabel(type?: string) {
+      return resolveLinkedContentTypeLabel(type);
+    },
+    getColumnTypeLabel(type?: string) {
+      return resolveColumnTypeLabel(type);
+    },
+    getPreviewText(value?: string, maxLength = 120) {
+      return truncatePreviewText(value, maxLength);
+    },
+    getLinkedBlockTitle(block) {
+      return resolveLinkedBlockTitle(block, (currentBlock) => {
+        const contentType =
+          typeof currentBlock.linkedContentType === "string"
+            ? currentBlock.linkedContentType
+            : "";
+        const contentId =
+          typeof currentBlock.linkedContentId === "string"
+            ? currentBlock.linkedContentId
+            : "";
+        if (!contentType || !contentId) {
+          return "";
+        }
+        return this.getRelatedContentItemLabel(contentType, contentId);
+      });
+    },
+    getBlockSummary(block) {
+      return buildBlockSummary(block, {
+        resolveLinkedTitle: (currentBlock) => this.getLinkedBlockTitle(currentBlock),
+      });
     },
 
     isTagSelected(value: string) {
