@@ -22,6 +22,8 @@ const components: Record<string, () => Promise<any>> = {
   leSaviezVousList: () => import('@/components/dashboard/leSaviezVousListLogic'),
   landingEditor: () => import('@/components/dashboard/landingEditorLogic'),
   calendarEditor: () => import('@/components/dashboard/calendarEditorLogic'),
+  cultureEditor: () => import('@/components/dashboard/cultureEditorLogic'),
+  parisEditor: () => import('@/components/dashboard/parisEditorLogic'),
   guideCreator: () => import('@/components/article/guideCreatorLogic'),
   guideList: () => import('@/components/dashboard/guideListLogic'),
   visualStoryCreator: () => import('@/components/article/visualStoryCreatorLogic'),

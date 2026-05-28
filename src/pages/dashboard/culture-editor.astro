@@ -1,0 +1,377 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import {
+  articlesApi,
+  editorialPlacementsApi,
+  flippersApi,
+  guidesApi,
+  interviewsApi,
+  visualStoriesApi,
+  type CulturePagePlacementsResponse,
+  type SectionPageHeroType,
+} from "@/lib/api/api";
+
+const CONTENT_TYPE_LABELS: Record<SectionPageHeroType, string> = {
+  article: "Статья",
+  guide: "Путеводитель",
+  interview: "Интервью",
+  flipper: "Листалка",
+  "visual-story": "Визуальная история",
+};
+
+const DEFAULT_PLACEMENTS: CulturePagePlacementsResponse = {
+  schemaVersion: 1,
+  hero: null,
+  secondaryStories: { mode: "auto-latest", limit: 3 },
+  featuredInterview: { mode: "auto-latest" },
+  sidebarRail: { mode: "auto-hot", limit: 4 },
+  updatedAt: null,
+  updatedBy: null,
+};
+
+const toDate = (value: unknown): Date | null => {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value === "string" || typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "object") {
+    const seconds =
+      (value as { seconds?: number })?.seconds ??
+      (value as { _seconds?: number })?._seconds;
+    if (typeof seconds === "number") return new Date(seconds * 1000);
+  }
+  return null;
+};
+
+const formatUpdatedAt = (value: unknown) => {
+  const date = toDate(value);
+  if (!date) return "—";
+  return date.toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const normalizeCategoryKey = (value?: string) => value?.trim().toLowerCase() ?? "";
+
+let placements = DEFAULT_PLACEMENTS;
+let loadError = "";
+
+const heroOptions: Array<{ id: string; title: string; type: string; typeLabel: string }> = [];
+const interviewOptions: Array<{ id: string; title: string }> = [];
+
+try {
+  const [culturePagePlacements, articles, guides, flippers, visualStories, interviews] =
+    await Promise.all([
+      editorialPlacementsApi.getCulturePage().catch(() => DEFAULT_PLACEMENTS),
+      articlesApi.list(),
+      guidesApi.list(),
+      flippersApi.list(),
+      visualStoriesApi.list(),
+      interviewsApi.list(),
+    ]);
+
+  placements = culturePagePlacements;
+
+  articles
+    .filter(
+      (a) =>
+        normalizeCategoryKey(a.category) === "culture" &&
+        a.articleType !== "le_saviez_vous" &&
+        a.articleType !== "tips",
+    )
+    .forEach((a) => {
+      heroOptions.push({ id: `article:${a.id}`, title: a.title, type: "article", typeLabel: CONTENT_TYPE_LABELS.article });
+    });
+
+  guides
+    .filter((g) => normalizeCategoryKey(g.category) === "culture")
+    .forEach((g) => {
+      heroOptions.push({ id: `guide:${g.id}`, title: g.title, type: "guide", typeLabel: CONTENT_TYPE_LABELS.guide });
+    });
+
+  flippers
+    .filter((f) => normalizeCategoryKey(f.category) === "culture")
+    .forEach((f) => {
+      heroOptions.push({ id: `flipper:${f.id}`, title: f.title, type: "flipper", typeLabel: CONTENT_TYPE_LABELS.flipper });
+    });
+
+  visualStories
+    .filter((s) => normalizeCategoryKey(s.category) === "culture")
+    .forEach((s) => {
+      heroOptions.push({ id: `visual-story:${s.id}`, title: s.title, type: "visual-story", typeLabel: CONTENT_TYPE_LABELS["visual-story"] });
+    });
+
+  interviews.forEach((i) => {
+    heroOptions.push({ id: `interview:${i.id}`, title: i.title, type: "interview", typeLabel: CONTENT_TYPE_LABELS.interview });
+    interviewOptions.push({ id: i.id, title: i.title });
+  });
+
+  heroOptions.sort((a, b) => a.typeLabel.localeCompare(b.typeLabel, "ru-RU") || a.title.localeCompare(b.title, "ru-RU"));
+} catch (error) {
+  loadError = error instanceof Error ? error.message : "Не удалось загрузить данные.";
+}
+
+const initialHero = (() => {
+  if (!placements.hero) return { mode: "empty" as const, key: "" };
+  return { mode: "manual" as const, key: `${placements.hero.type}:${placements.hero.id}` };
+})();
+
+const initialFeaturedInterview = (() => {
+  if (!placements.featuredInterview) return { mode: "empty" as const, id: "" };
+  if (placements.featuredInterview.mode === "auto-latest") return { mode: "auto-latest" as const, id: "" };
+  return { mode: "manual" as const, id: placements.featuredInterview.id };
+})();
+
+const initialSecondaryStoriesMode = (() => {
+  if (!placements.secondaryStories) return "empty" as const;
+  return placements.secondaryStories.mode as "auto-latest";
+})();
+
+const initialSecondaryStoriesLimit =
+  placements.secondaryStories?.mode === "auto-latest"
+    ? placements.secondaryStories.limit
+    : 3;
+
+const initialSidebarMode = (() => {
+  if (!placements.sidebarRail) return "empty" as const;
+  return placements.sidebarRail.mode as "auto-hot";
+})();
+
+const initialSidebarLimit =
+  placements.sidebarRail?.mode === "auto-hot" ? placements.sidebarRail.limit : 4;
+---
+
+<DashboardLayout title="Редактор «Культура»" active="culture-editor">
+  <section
+    class="grid gap-6"
+    x-data={`$lazy('cultureEditor', ${JSON.stringify({
+      heroOptions,
+      initialHero,
+      interviewOptions,
+      initialFeaturedInterview,
+      initialSecondaryStoriesMode,
+      initialSecondaryStoriesLimit,
+      initialSidebarMode,
+      initialSidebarLimit,
+    })})`}
+  >
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h2 class="text-xl font-semibold">Редактор страницы «Культура»</h2>
+        <p class="text-sm text-base-content/70">Управление editorial slots на странице /culture.</p>
+      </div>
+      <div class="mt-4 text-sm">
+        <span class="font-semibold">Последнее изменение:</span>
+        <span class="ml-2">{formatUpdatedAt(placements.updatedAt)}</span>
+      </div>
+      {loadError && <p class="mt-4 text-sm text-error">{loadError}</p>}
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Hero Controls</h3>
+        <p class="text-sm text-base-content/70">Главный материал в верхней части страницы /culture.</p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-hero-mode" value="empty" x-model="heroMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-hero-mode" value="manual" x-model="heroMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="heroMode === 'manual'" class="grid gap-2 max-w-xl">
+          <label for="culture-hero-select" class="text-sm font-medium">Выбери материал</label>
+          <select
+            id="culture-hero-select"
+            x-model="selectedHeroKey"
+            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer"
+          >
+            <option value="">— выбери материал —</option>
+            {heroOptions.map((item) => (
+              <option value={item.id}>[{item.typeLabel}] {item.title}</option>
+            ))}
+          </select>
+        </div>
+
+        <p x-show="heroError" class="text-sm text-error" x-text="heroError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveHero()"
+            :disabled="heroSaving"
+          >
+            Сохранить hero
+          </button>
+          <span x-show="heroSaving" class="text-sm text-base-content/70">Сохраняем...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Featured Interview Controls</h3>
+        <p class="text-sm text-base-content/70">Блок интервью на странице /culture.</p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-interview-mode" value="empty" x-model="featuredInterviewMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-interview-mode" value="auto-latest" x-model="featuredInterviewMode" />
+            <span class="text-sm">Auto latest</span>
+          </label>
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-interview-mode" value="manual" x-model="featuredInterviewMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="featuredInterviewMode === 'manual'" class="grid gap-2 max-w-sm">
+          <label for="culture-interview-select" class="text-sm font-medium">Выбери интервью</label>
+          <select
+            id="culture-interview-select"
+            x-model="selectedInterviewId"
+            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer"
+          >
+            <option value="">— выбери интервью —</option>
+            {interviewOptions.map((item) => (
+              <option value={item.id}>{item.title}</option>
+            ))}
+          </select>
+        </div>
+
+        <p x-show="featuredInterviewError" class="text-sm text-error" x-text="featuredInterviewError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveFeaturedInterview()"
+            :disabled="featuredInterviewSaving"
+          >
+            Сохранить featured interview
+          </button>
+          <span x-show="featuredInterviewSaving" class="text-sm text-base-content/70">Сохраняем...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Secondary Stories Controls</h3>
+        <p class="text-sm text-base-content/70">Карточки под hero на странице /culture.</p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-secondary-mode" value="empty" x-model="secondaryStoriesMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-secondary-mode" value="auto-latest" x-model="secondaryStoriesMode" />
+            <span class="text-sm">Auto latest</span>
+          </label>
+        </div>
+
+        <div x-show="secondaryStoriesMode === 'auto-latest'" class="grid gap-2 max-w-xs">
+          <label for="culture-secondary-limit" class="text-sm font-medium">Количество карточек</label>
+          <select
+            id="culture-secondary-limit"
+            x-model="secondaryStoriesLimit"
+            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer"
+          >
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+
+        <p x-show="secondaryStoriesError" class="text-sm text-error" x-text="secondaryStoriesError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveSecondaryStories()"
+            :disabled="secondaryStoriesSaving"
+          >
+            Сохранить secondary stories
+          </button>
+          <span x-show="secondaryStoriesSaving" class="text-sm text-base-content/70">Сохраняем...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Sidebar Rail Controls</h3>
+        <p class="text-sm text-base-content/70">Блок «Самое читаемое» в правой колонке /culture.</p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-sidebar-mode" value="empty" x-model="sidebarMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-sidebar-mode" value="auto-hot" x-model="sidebarMode" />
+            <span class="text-sm">Auto hot</span>
+          </label>
+        </div>
+
+        <div x-show="sidebarMode === 'auto-hot'" class="grid gap-2 max-w-xs">
+          <label for="culture-sidebar-limit" class="text-sm font-medium">Количество материалов</label>
+          <select
+            id="culture-sidebar-limit"
+            x-model="sidebarLimit"
+            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer"
+          >
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+
+        <p x-show="sidebarError" class="text-sm text-error" x-text="sidebarError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveSidebarRail()"
+            :disabled="sidebarSaving"
+          >
+            Сохранить sidebar rail
+          </button>
+          <span x-show="sidebarSaving" class="text-sm text-base-content/70">Сохраняем...</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</DashboardLayout>
