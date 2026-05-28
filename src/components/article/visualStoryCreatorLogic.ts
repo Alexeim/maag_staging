@@ -19,6 +19,12 @@ import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 
 const storage = getStorage(app);
 
+const normalizeSlide = (slide?: Record<string, unknown>) => ({
+  imageUrl: typeof slide?.imageUrl === "string" ? slide.imageUrl : "",
+  text: typeof slide?.text === "string" ? slide.text : "",
+  caption: typeof slide?.caption === "string" ? slide.caption : "",
+});
+
 const normalizeTags = (
   tags?: string[],
   categoryTags?: Record<string, Array<{ title: string; value: string }>>,
@@ -95,6 +101,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       lead: "",
       cardLead: "",
       imageUrl: "",
+      imageCaption: "",
       category: "",
       tags: [] as string[],
       parisSubCategories: [] as string[],
@@ -102,7 +109,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       binaryForGuide: false,
       isHotContent: false,
       paid: false,
-      slides: [] as Array<{ imageUrl: string; text: string }>,
+      slides: [] as Array<{ imageUrl: string; text: string; caption: string }>,
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
     },
@@ -272,7 +279,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     },
 
     addSlide() {
-      this.story.slides.push({ imageUrl: "", text: "" });
+      this.story.slides.push({ imageUrl: "", text: "", caption: "" });
     },
 
     removeSlide(index: number) {
@@ -427,6 +434,8 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.lead = copy.lead || "";
         this.story.cardLead = copy.cardLead || "";
         this.story.imageUrl = copy.imageUrl || "";
+        this.story.imageCaption =
+          typeof copy.imageCaption === "string" ? copy.imageCaption : "";
         this.story.category = copy.category || "";
         this.story.tags = normalizeTags(copy.tags, this.categoryTags, copy.category);
         this.story.parisSubCategories = normalizeTags(
@@ -438,7 +447,9 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.binaryForGuide = Boolean(copy.binaryForGuide);
         this.story.isHotContent = Boolean(copy.isHotContent);
         this.story.paid = Boolean(copy.paid);
-        this.story.slides = Array.isArray(copy.slides) ? copy.slides : [];
+        this.story.slides = Array.isArray(copy.slides)
+          ? copy.slides.map((slide) => normalizeSlide(slide))
+          : [];
         this.story.relatedContent = sanitizeRelatedContent(
           copy.relatedContent,
           "visualStory",
@@ -507,8 +518,9 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           lead: this.story.lead,
           cardLead: this.story.cardLead,
           imageUrl: this.story.imageUrl || undefined,
+          imageCaption: this.story.imageCaption || "",
           authorId: resolvedAuthorId,
-          slides: this.story.slides,
+          slides: this.story.slides.map((slide) => normalizeSlide(slide)),
           category: this.story.category,
           tags: tagsForDb,
           parisSubCategories: isParisCategory ? this.story.parisSubCategories : [],

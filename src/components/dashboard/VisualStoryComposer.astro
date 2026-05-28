@@ -262,6 +262,15 @@ const {
         class="rounded-md max-h-60 w-full object-cover"
       />
     </div>
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-base-content mb-2">Подпись к обложке</label>
+      <textarea
+        x-model="story.imageCaption"
+        rows="2"
+        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        placeholder="Короткая подпись, которая появится по наведению на иконку..."
+      ></textarea>
+    </div>
   </section>
 
   <LandingPlacementPanel allowMainHero={true} allowCategoryLandingHero={true} allowCategoryPageHero={true} />
@@ -317,6 +326,16 @@ const {
               alt="Слайд"
               class="mt-3 rounded-md max-h-48 w-full object-cover"
             />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-base-content mb-2">Подпись к изображению</label>
+            <textarea
+              x-model="slide.caption"
+              rows="2"
+              class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+              placeholder="Подпись будет показана по hover/focus на иконке info..."
+            ></textarea>
           </div>
 
           <!-- Text for slide -->

@@ -10,8 +10,9 @@ export interface VisualStory {
   id?: string;
   title: string;
   authorId: string;
-  slides: Array<{ imageUrl: string; text: string }>;
+  slides: Array<{ imageUrl: string; text: string; caption?: string }>;
   imageUrl?: string;
+  imageCaption?: string;
   lead?: string;
   cardLead?: string;
   category?: string;
@@ -34,6 +35,7 @@ export const createVisualStory = async (req: Request, res: Response) => {
       authorId,
       slides = [],
       imageUrl,
+      imageCaption,
       lead,
       cardLead,
       category,
@@ -54,13 +56,18 @@ export const createVisualStory = async (req: Request, res: Response) => {
 
     const normalizedSlides = slides
       .filter((s: any) => s && typeof s === 'object' && s.imageUrl)
-      .map((s: any) => ({ imageUrl: String(s.imageUrl), text: String(s.text ?? '') }));
+      .map((s: any) => ({
+        imageUrl: String(s.imageUrl),
+        text: String(s.text ?? ''),
+        caption: String(s.caption ?? ''),
+      }));
 
     const newStory: Omit<VisualStory, 'id'> = {
       title,
       authorId,
       slides: normalizedSlides,
       ...(imageUrl ? { imageUrl } : {}),
+      imageCaption: String(imageCaption ?? ''),
       lead: lead || '',
       cardLead: cardLead || '',
       category: category || '',
@@ -151,6 +158,7 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       authorId,
       slides = [],
       imageUrl,
+      imageCaption,
       lead,
       cardLead,
       category,
@@ -168,7 +176,11 @@ export const updateVisualStory = async (req: Request, res: Response) => {
     const normalizedSlides = Array.isArray(slides)
       ? slides
           .filter((s: any) => s && typeof s === 'object' && s.imageUrl)
-          .map((s: any) => ({ imageUrl: String(s.imageUrl), text: String(s.text ?? '') }))
+          .map((s: any) => ({
+            imageUrl: String(s.imageUrl),
+            text: String(s.text ?? ''),
+            caption: String(s.caption ?? ''),
+          }))
       : [];
 
     const updated = {
@@ -176,6 +188,7 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       authorId,
       slides: normalizedSlides,
       ...(imageUrl ? { imageUrl } : {}),
+      imageCaption: String(imageCaption ?? ''),
       lead: lead || '',
       cardLead: cardLead || '',
       category: category || '',

@@ -832,6 +832,7 @@ export const contentCollectionsApi = {
 export interface VisualStorySlide {
   imageUrl: string;
   text: string;
+  caption?: string;
 }
 
 export interface VisualStoryPayload {
@@ -839,6 +840,7 @@ export interface VisualStoryPayload {
   authorId: string;
   slides: VisualStorySlide[];
   imageUrl?: string;
+  imageCaption?: string;
   lead?: string;
   cardLead?: string;
   category?: string;
