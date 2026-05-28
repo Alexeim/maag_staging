@@ -7,11 +7,13 @@ import { getKnownTagLabel } from "@/content/tags/parisTags";
 import picture1 from "../assets/images/culture.jpg";
 import {
   articlesApi,
+  editorialPlacementsApi,
   interviewsApi,
   flippersApi,
   guidesApi,
   visualStoriesApi,
   newsApi,
+  type CulturePagePlacementsResponse,
 } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -202,6 +204,7 @@ let secondaryStories: any[] = [];
 let editorialSidebarItems: any[] = [];
 let cultureFeed: any[] = [];
 let featuredInterview: any = null;
+let culturePagePlacements: CulturePagePlacementsResponse | null = null;
 
 try {
   const [
@@ -211,6 +214,7 @@ try {
     guides,
     visualStories,
     newsItemsRaw,
+    culturePagePlacementsResponse,
   ] =
     await Promise.all([
       articlesApi.list(),
@@ -219,7 +223,10 @@ try {
       guidesApi.list(),
       visualStoriesApi.list(),
       newsApi.list(),
+      editorialPlacementsApi.getCulturePage().catch(() => null),
     ]);
+
+  culturePagePlacements = culturePagePlacementsResponse;
 
   const standardArticles = articles.filter(
     (article) => !isLeSaviezVousArticle(article),
@@ -278,14 +285,35 @@ try {
     (item) => !isHotContent(item) && item.contentType !== "interview",
   );
 
-  primaryCultureArticle =
-    topItems.find((item) => isMainInCategoryItem(item)) ?? topItems[0] ?? null;
+  const heroPlacement = culturePagePlacements?.hero ?? null;
+  if (heroPlacement?.mode === "manual") {
+    primaryCultureArticle =
+      allCultureItems.find(
+        (item) => item.id === heroPlacement.id && item.contentType === heroPlacement.type,
+      ) ?? null;
+  } else {
+    // fallback during migration: isMainInCategory or first item
+    primaryCultureArticle =
+      topItems.find((item) => isMainInCategoryItem(item)) ?? topItems[0] ?? null;
+  }
 
   const topWithoutPrimary = topItems.filter((item) =>
     primaryCultureArticle ? item.id !== primaryCultureArticle.id : true,
   );
 
-  secondaryStories = topWithoutPrimary.slice(0, 4);
+  const secondaryPlacement = culturePagePlacements?.secondaryStories ?? null;
+  if (secondaryPlacement === null) {
+    secondaryStories = [];
+  } else if (secondaryPlacement.mode === "manual") {
+    const itemsByKey = new Map(
+      topItems.map((item) => [`${item.contentType}:${item.id}`, item]),
+    );
+    secondaryStories = secondaryPlacement.items
+      .map(({ type, id }) => itemsByKey.get(`${type}:${id}`))
+      .filter(Boolean);
+  } else {
+    secondaryStories = topWithoutPrimary.slice(0, secondaryPlacement.limit ?? 4);
+  }
 
   const topIds = new Set(
     [
@@ -294,12 +322,22 @@ try {
     ].filter(Boolean),
   );
 
-  featuredInterview =
-    allCultureItems.find(
-      (item) => item.contentType === "interview" && !topIds.has(item.id),
-    ) ??
-    allCultureItems.find((item) => item.contentType === "interview") ??
-    null;
+  const interviewPlacement = culturePagePlacements?.featuredInterview ?? null;
+  if (!culturePagePlacements || interviewPlacement?.mode === "auto-latest") {
+    featuredInterview =
+      allCultureItems.find(
+        (item) => item.contentType === "interview" && !topIds.has(item.id),
+      ) ??
+      allCultureItems.find((item) => item.contentType === "interview") ??
+      null;
+  } else if (interviewPlacement?.mode === "manual") {
+    featuredInterview =
+      allCultureItems.find(
+        (item) => item.contentType === "interview" && item.id === interviewPlacement.id,
+      ) ?? null;
+  } else {
+    featuredInterview = null;
+  }
 
   const excludedIds = new Set(
     [...topIds, featuredInterview?.id].filter(Boolean),

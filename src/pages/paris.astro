@@ -6,10 +6,12 @@ import { getKnownTagLabel } from "@/content/tags/parisTags";
 import picture1 from "../assets/images/culture.jpg";
 import {
   articlesApi,
+  editorialPlacementsApi,
   flippersApi,
   guidesApi,
   visualStoriesApi,
   newsApi,
+  type ParisPagePlacementsResponse,
 } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -180,15 +182,20 @@ let secondaryStories: any[] = [];
 let editorialSidebarItems: any[] = [];
 let parisFeed: any[] = [];
 let leSaviezVousArticle: any = null;
+let parisPagePlacements: ParisPagePlacementsResponse | null = null;
 
 try {
-  const [articles, flippers, guides, visualStories, newsItemsRaw] = await Promise.all([
-    articlesApi.list(),
-    flippersApi.list(),
-    guidesApi.list(),
-    visualStoriesApi.list(),
-    newsApi.list(),
-  ]);
+  const [articles, flippers, guides, visualStories, newsItemsRaw, parisPagePlacementsResponse] =
+    await Promise.all([
+      articlesApi.list(),
+      flippersApi.list(),
+      guidesApi.list(),
+      visualStoriesApi.list(),
+      newsApi.list(),
+      editorialPlacementsApi.getParisPage().catch(() => null),
+    ]);
+
+  parisPagePlacements = parisPagePlacementsResponse;
 
   const standardArticles = articles.filter(
     (article) => !isLeSaviezVousArticle(article),
@@ -205,7 +212,17 @@ try {
       (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
     );
 
-  leSaviezVousArticle = leSaviezVousArticles[0] ?? null;
+  const leSaviezVousFeaturePlacement = parisPagePlacements?.leSaviezVousFeature ?? null;
+  if (!parisPagePlacements || leSaviezVousFeaturePlacement?.mode === "auto-latest") {
+    leSaviezVousArticle = leSaviezVousArticles[0] ?? null;
+  } else if (leSaviezVousFeaturePlacement?.mode === "manual") {
+    leSaviezVousArticle =
+      articles.find(
+        (a) => isLeSaviezVousArticle(a) && a.id === leSaviezVousFeaturePlacement.id,
+      ) ?? null;
+  } else {
+    leSaviezVousArticle = null;
+  }
 
   if (leSaviezVousArticle) {
     leSaviezVousArticle = {
@@ -253,14 +270,35 @@ try {
 
   const topItems = allParisItems.filter((item) => !isHotContent(item));
 
-  primaryParisArticle =
-    topItems.find((item) => isMainInCategoryItem(item)) ?? topItems[0] ?? null;
+  const heroPlacement = parisPagePlacements?.hero ?? null;
+  if (heroPlacement?.mode === "manual") {
+    primaryParisArticle =
+      allParisItems.find(
+        (item) => item.id === heroPlacement.id && item.contentType === heroPlacement.type,
+      ) ?? null;
+  } else {
+    // fallback during migration: isMainInCategory or first item
+    primaryParisArticle =
+      topItems.find((item) => isMainInCategoryItem(item)) ?? topItems[0] ?? null;
+  }
 
   const topWithoutPrimary = topItems.filter((item) =>
     primaryParisArticle ? item.id !== primaryParisArticle.id : true,
   );
 
-  secondaryStories = topWithoutPrimary.slice(0, 4);
+  const secondaryPlacement = parisPagePlacements?.secondaryStories ?? null;
+  if (secondaryPlacement === null) {
+    secondaryStories = [];
+  } else if (secondaryPlacement.mode === "manual") {
+    const itemsByKey = new Map(
+      topItems.map((item) => [`${item.contentType}:${item.id}`, item]),
+    );
+    secondaryStories = secondaryPlacement.items
+      .map(({ type, id }) => itemsByKey.get(`${type}:${id}`))
+      .filter(Boolean);
+  } else {
+    secondaryStories = topWithoutPrimary.slice(0, secondaryPlacement.limit ?? 4);
+  }
 
   const topIds = new Set(
     [
