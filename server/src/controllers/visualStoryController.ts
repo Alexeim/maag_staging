@@ -10,72 +10,120 @@ export interface VisualStory {
   id?: string;
   title: string;
   authorId: string;
-  slides: Array<{ imageUrl: string; text: string; caption?: string }>;
+  slides: Array<{
+    imageUrl: string;
+    contentType?: 'text' | 'quote';
+    text: string;
+    caption?: string;
+    quote?: string;
+    quoteAuthor?: string;
+  }>;
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
   cardLead?: string;
   category?: string;
   tags?: string[];
+  parisSubCategories?: string[];
+  parisDistrict?: string | null;
   isHotContent?: boolean;
   paid?: boolean;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 const db = getDb();
 const collection = db.collection('visual-stories');
 const contentCollectionsCollection = db.collection('contentCollections');
 
+const normalizeStringArray = (value: unknown): string[] =>
+  Array.isArray(value)
+    ? value.map((item: unknown) => String(item).trim()).filter(Boolean)
+    : [];
+
+const normalizeCategory = (value: unknown): string => {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  const trimmed = value.trim();
+  return trimmed === 'hotContent' ? '' : trimmed;
+};
+
+const normalizeSlides = (slides: unknown): VisualStory['slides'] =>
+  Array.isArray(slides)
+    ? slides
+        .filter((slide: unknown) => slide && typeof slide === 'object' && (slide as Record<string, unknown>).imageUrl)
+        .map((slide: unknown) => {
+          const raw = slide as Record<string, unknown>;
+          return {
+            imageUrl: String(raw.imageUrl),
+            contentType: raw.contentType === 'quote' ? 'quote' : 'text',
+            text: String(raw.text ?? ''),
+            caption: String(raw.caption ?? ''),
+            quote: String(raw.quote ?? ''),
+            quoteAuthor: String(raw.quoteAuthor ?? ''),
+          };
+        })
+    : [];
+
+const buildVisualStoryPayload = (body: Record<string, unknown>) => {
+  const {
+    title,
+    authorId,
+    slides = [],
+    imageUrl,
+    imageCaption,
+    lead,
+    cardLead,
+    category,
+    tags = [],
+    parisSubCategories = [],
+    parisDistrict,
+    isHotContent = false,
+    paid = false,
+    relatedContent,
+    contentCollectionId,
+  } = body;
+
+  return {
+    title: typeof title === 'string' ? title : '',
+    authorId: typeof authorId === 'string' ? authorId : '',
+    slides: normalizeSlides(slides),
+    imageUrl: typeof imageUrl === 'string' ? imageUrl : '',
+    imageCaption: typeof imageCaption === 'string' ? imageCaption : '',
+    lead: typeof lead === 'string' ? lead : '',
+    cardLead: typeof cardLead === 'string' ? cardLead : '',
+    category: normalizeCategory(category),
+    tags: normalizeStringArray(tags),
+    parisSubCategories: normalizeStringArray(parisSubCategories),
+    parisDistrict:
+      typeof parisDistrict === 'string'
+        ? parisDistrict.trim() || null
+        : null,
+    isHotContent: Boolean(isHotContent),
+    paid: Boolean(paid),
+    relatedContent: normalizeRelatedContent(relatedContent),
+    contentCollectionId: normalizeContentCollectionId(contentCollectionId),
+  };
+};
+
 export const createVisualStory = async (req: Request, res: Response) => {
   try {
-    const {
-      title,
-      authorId,
-      slides = [],
-      imageUrl,
-      imageCaption,
-      lead,
-      cardLead,
-      category,
-      tags = [],
-      isHotContent = false,
-      paid = false,
-      relatedContent,
-      contentCollectionId,
-    } = req.body;
+    const payload = buildVisualStoryPayload(req.body);
 
-    if (!title || !authorId) {
+    if (!payload.title || !payload.authorId) {
       return res.status(400).json({ message: 'Title and authorId are required' });
     }
 
-    if (!Array.isArray(slides) || slides.length === 0) {
+    if (!payload.slides.length) {
       return res.status(400).json({ message: 'At least one slide is required' });
     }
 
-    const normalizedSlides = slides
-      .filter((s: any) => s && typeof s === 'object' && s.imageUrl)
-      .map((s: any) => ({
-        imageUrl: String(s.imageUrl),
-        text: String(s.text ?? ''),
-        caption: String(s.caption ?? ''),
-      }));
-
     const newStory: Omit<VisualStory, 'id'> = {
-      title,
-      authorId,
-      slides: normalizedSlides,
-      ...(imageUrl ? { imageUrl } : {}),
-      imageCaption: String(imageCaption ?? ''),
-      lead: lead || '',
-      cardLead: cardLead || '',
-      category: category || '',
-      tags: Array.isArray(tags) ? tags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
-      isHotContent: Boolean(isHotContent),
-      paid: Boolean(paid),
-      relatedContent: normalizeRelatedContent(relatedContent),
-      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
+      ...payload,
+      ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
       createdAt: new Date(),
     };
 
@@ -153,50 +201,15 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Visual story not found' });
     }
 
-    const {
-      title,
-      authorId,
-      slides = [],
-      imageUrl,
-      imageCaption,
-      lead,
-      cardLead,
-      category,
-      tags = [],
-      isHotContent = false,
-      paid = false,
-      relatedContent,
-      contentCollectionId,
-    } = req.body;
+    const payload = buildVisualStoryPayload(req.body);
 
-    if (!title || !authorId) {
+    if (!payload.title || !payload.authorId) {
       return res.status(400).json({ message: 'Title and authorId are required' });
     }
 
-    const normalizedSlides = Array.isArray(slides)
-      ? slides
-          .filter((s: any) => s && typeof s === 'object' && s.imageUrl)
-          .map((s: any) => ({
-            imageUrl: String(s.imageUrl),
-            text: String(s.text ?? ''),
-            caption: String(s.caption ?? ''),
-          }))
-      : [];
-
     const updated = {
-      title,
-      authorId,
-      slides: normalizedSlides,
-      ...(imageUrl ? { imageUrl } : {}),
-      imageCaption: String(imageCaption ?? ''),
-      lead: lead || '',
-      cardLead: cardLead || '',
-      category: category || '',
-      tags: Array.isArray(tags) ? tags.map((t: unknown) => String(t).trim()).filter(Boolean) : [],
-      isHotContent: Boolean(isHotContent),
-      paid: Boolean(paid),
-      relatedContent: normalizeRelatedContent(relatedContent),
-      contentCollectionId: normalizeContentCollectionId(contentCollectionId),
+      ...payload,
+      ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
       updatedAt: new Date(),
     };
 

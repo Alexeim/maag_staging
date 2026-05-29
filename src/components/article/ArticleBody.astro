@@ -2,6 +2,7 @@
 import QuoteIcon from "../../assets/icons/quote.svg";
 import ArticleVideo from "./ArticleVideo.astro";
 import LinkToContent from "./LinkToContent.astro";
+import ArticleColumnContent from "./ArticleColumnContent.astro";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import {
   getLinkedContentKey,
@@ -35,6 +36,13 @@ interface TwoColumnBlock extends Block {
   right: ColumnData;
 }
 
+interface ThreeColumnBlock extends Block {
+  type: "three-columns";
+  left: ColumnData;
+  center: ColumnData;
+  right: ColumnData;
+}
+
 interface FlipperSlide {
   imageUrl: string;
   caption?: string;
@@ -46,15 +54,16 @@ interface FlipperBlock extends Block {
 }
 
 interface RenderableBlock {
-  type: "prose-group" | "two-columns" | "flipper" | "video";
+  type: "prose-group" | "two-columns" | "three-columns" | "flipper" | "video";
   content?: Block[]; // for prose-group
   block?: TwoColumnBlock; // for two-columns
+  threeColumnBlock?: ThreeColumnBlock; // for three-columns
   flipper?: FlipperBlock; // for flipper
   video?: Block;
 }
 
 interface Props {
-  contentBlocks: (Block | TwoColumnBlock)[];
+  contentBlocks: (Block | TwoColumnBlock | ThreeColumnBlock)[];
   linkedContentLookup?: LinkedContentLookup;
 }
 
@@ -62,6 +71,11 @@ const {
   contentBlocks,
   linkedContentLookup = {},
 } = Astro.props;
+
+const proseRailClass = "max-w-full lg:max-w-[826px] mx-0 lg:mx-auto";
+const mediaRailClass = "w-full lg:max-w-[1200px] my-12 px-4 lg:px-0";
+const breakoutRailClass = "w-full lg:max-w-[1278px] my-12 px-4 lg:px-0";
+const wideBreakoutRailClass = "w-full lg:max-w-[1356px] my-12 px-4 lg:px-0";
 
 const renderableGroups: RenderableBlock[] = [];
 let currentProseGroup: Block[] = [];
@@ -78,6 +92,18 @@ for (const block of contentBlocks) {
     renderableGroups.push({
       type: "two-columns",
       block: block as TwoColumnBlock,
+    });
+  } else if (block.type === "three-columns") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "three-columns",
+      threeColumnBlock: block as ThreeColumnBlock,
     });
   } else if (block.type === "flipper") {
     if (currentProseGroup.length > 0) {
@@ -118,7 +144,7 @@ if (currentProseGroup.length > 0) {
     renderableGroups.map((group) => {
       if (group.type === "prose-group" && group.content) {
         return (
-          <div class="max-w-full lg:max-w-[826px] mx-0 lg:mx-auto">
+          <div class={proseRailClass}>
             <article class="max-w-full space-y-12">
               {group.content.map((block) => {
                 switch (block.type) {
@@ -211,70 +237,54 @@ if (currentProseGroup.length > 0) {
         );
       } else if (group.type === "video" && group.video) {
         return (
-          <div class="w-full lg:max-w-[900px] my-12 px-4">
+          <div class={mediaRailClass}>
             <ArticleVideo block={group.video} />
           </div>
         );
       } else if (group.type === "two-columns" && group.block) {
         const twoColumnBlock = group.block;
         return (
-          <div class="w-full lg:max-w-[900px] my-12 px-4">
+          <div class={breakoutRailClass}>
             <div class="flex flex-col lg:flex-row gap-8 items-center">
               <div class="w-full lg:w-1/2 flex justify-center">
-                {twoColumnBlock.left.type === "image" ? (
-                  <figure class="flex flex-col items-center">
-                    <img
-                      src={twoColumnBlock.left.content}
-                      alt={twoColumnBlock.left.caption || "Left column image"}
-                      class="article-image"
-                    />
-                    {twoColumnBlock.left.caption && (
-                      <figcaption class="text-center font-inter text-xs text-gray-500 mt-2">
-                        {twoColumnBlock.left.caption}
-                      </figcaption>
-                    )}
-                  </figure>
-                ) : twoColumnBlock.left.type === "quote" ? (
-                  <div class="w-full max-w-[420px] flex flex-col items-center">
-                    <QuoteIcon class="w-8 h-8" />
-                    <blockquote class="mt-4 text-base lg:text-lg text-base-content/80 font-article-body italic whitespace-pre-line">
-                      {twoColumnBlock.left.content}
-                    </blockquote>
-                    <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
-                  </div>
-                ) : (
-                  <p class="text-lg font-article-body text-justify">
-                    {twoColumnBlock.left.content}
-                  </p>
-                )}
+                <ArticleColumnContent
+                  column={twoColumnBlock.left}
+                  altLabel="Left column image"
+                  desktopTextAlign="end"
+                />
               </div>
               <div class="w-full lg:w-1/2 flex justify-center">
-                {twoColumnBlock.right.type === "image" ? (
-                  <figure class="flex flex-col items-center">
-                    <img
-                      src={twoColumnBlock.right.content}
-                      alt={twoColumnBlock.right.caption || "Right column image"}
-                      class="article-image"
-                    />
-                    {twoColumnBlock.right.caption && (
-                      <figcaption class="text-center font-inter text-xs text-gray-500 mt-2">
-                        {twoColumnBlock.right.caption}
-                      </figcaption>
-                    )}
-                  </figure>
-                ) : twoColumnBlock.right.type === "quote" ? (
-                  <div class="w-full max-w-[420px] flex flex-col items-center">
-                    <QuoteIcon class="w-8 h-8" />
-                    <blockquote class="mt-4 text-base lg:text-lg text-base-content/80 font-article-body italic whitespace-pre-line">
-                      {twoColumnBlock.right.content}
-                    </blockquote>
-                    <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
-                  </div>
-                ) : (
-                  <p class="text-lg font-article-body text-justify">
-                    {twoColumnBlock.right.content}
-                  </p>
-                )}
+                <ArticleColumnContent
+                  column={twoColumnBlock.right}
+                  altLabel="Right column image"
+                  desktopTextAlign="start"
+                />
+              </div>
+            </div>
+          </div>
+        );
+      } else if (group.type === "three-columns" && group.threeColumnBlock) {
+        const threeColumnBlock = group.threeColumnBlock;
+        return (
+          <div class={wideBreakoutRailClass}>
+            <div class="flex flex-col lg:flex-row gap-8 items-start">
+              <div class="w-full lg:w-1/3 flex justify-center">
+                <ArticleColumnContent
+                  column={threeColumnBlock.left}
+                  altLabel="Left column image"
+                />
+              </div>
+              <div class="w-full lg:w-1/3 flex justify-center">
+                <ArticleColumnContent
+                  column={threeColumnBlock.center}
+                  altLabel="Center column image"
+                />
+              </div>
+              <div class="w-full lg:w-1/3 flex justify-center">
+                <ArticleColumnContent
+                  column={threeColumnBlock.right}
+                  altLabel="Right column image"
+                />
               </div>
             </div>
           </div>
@@ -284,7 +294,7 @@ if (currentProseGroup.length > 0) {
         if (!slides || slides.length === 0) return null;
         return (
           <div
-            class="w-full lg:max-w-[900px] my-12 px-4"
+            class={breakoutRailClass}
             x-data={`{ current: 0, total: ${slides.length}, captions: ${JSON.stringify(slides.map((s) => s.caption || ""))} }`}
           >
             <div class="relative overflow-hidden h-[320px] sm:h-[460px] lg:h-[600px] bg-white">

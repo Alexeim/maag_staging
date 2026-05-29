@@ -1,0 +1,52 @@
+---
+import QuoteIcon from "../../assets/icons/quote.svg";
+
+interface ColumnData {
+  type: "image" | "text" | "quote";
+  content: string;
+  caption?: string;
+}
+
+interface Props {
+  column: ColumnData;
+  altLabel: string;
+  desktopTextAlign?: "start" | "end" | "center";
+}
+
+const { column, altLabel, desktopTextAlign = "center" } = Astro.props;
+const textAlignmentClass =
+  desktopTextAlign === "end"
+    ? "text-center lg:text-end"
+    : desktopTextAlign === "start"
+      ? "text-center lg:text-start"
+      : "text-center";
+---
+
+{
+  column.type === "image" ? (
+    <figure class="flex flex-col items-center">
+      <img
+        src={column.content}
+        alt={column.caption || altLabel}
+        class="article-image"
+      />
+      {column.caption && (
+        <figcaption class="text-center font-inter text-xs text-gray-500 mt-2">
+          {column.caption}
+        </figcaption>
+      )}
+    </figure>
+  ) : column.type === "quote" ? (
+    <div class="w-full max-w-[420px] flex flex-col items-center">
+      <QuoteIcon class="w-8 h-8" />
+      <blockquote class="mt-4 text-base lg:text-lg text-base-content/80 font-article-body italic whitespace-pre-line">
+        {column.content}
+      </blockquote>
+      <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+    </div>
+  ) : (
+    <p class={`text-lg font-article-body ${textAlignmentClass}`}>
+      {column.content}
+    </p>
+  )
+}

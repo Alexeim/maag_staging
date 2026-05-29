@@ -831,8 +831,11 @@ export const contentCollectionsApi = {
 
 export interface VisualStorySlide {
   imageUrl: string;
+  contentType?: "text" | "quote";
   text: string;
   caption?: string;
+  quote?: string;
+  quoteAuthor?: string;
 }
 
 export interface VisualStoryPayload {

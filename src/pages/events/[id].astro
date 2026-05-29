@@ -214,6 +214,17 @@ const extractTextFromContent = (blocks: unknown): string => {
           pieces.push(block.right.content);
         }
       }
+      if (block?.type === "three-columns") {
+        if (typeof block?.left?.content === "string") {
+          pieces.push(block.left.content);
+        }
+        if (typeof block?.center?.content === "string") {
+          pieces.push(block.center.content);
+        }
+        if (typeof block?.right?.content === "string") {
+          pieces.push(block.right.content);
+        }
+      }
 
       return pieces;
     })

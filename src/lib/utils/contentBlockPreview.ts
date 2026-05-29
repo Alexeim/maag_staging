@@ -10,6 +10,7 @@ export const BLOCK_TYPE_LABELS: Record<string, string> = {
   image: "Изображение",
   video: "Видео",
   "two-columns": "Две колонки",
+  "three-columns": "Три колонки",
   link: "Блок-ссылка",
   "url-link": "Ссылка на URL",
   flipper: "Листалка",
@@ -142,6 +143,8 @@ export const getBlockSummary = (
     }
     case "two-columns":
       return `Левая колонка: ${getColumnTypeLabel(block.left?.type)} · Правая колонка: ${getColumnTypeLabel(block.right?.type)}`;
+    case "three-columns":
+      return `Левая: ${getColumnTypeLabel(block.left?.type)} · Центральная: ${getColumnTypeLabel(block.center?.type)} · Правая: ${getColumnTypeLabel(block.right?.type)}`;
     case "link": {
       const contentTypeLabel = getLinkedContentTypeLabel(block.linkedContentType);
       const title = getLinkedBlockTitle(block, options.resolveLinkedTitle);

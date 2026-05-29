@@ -1,4 +1,8 @@
-import { visualStoriesApi, authorsApi } from "@/lib/api/api";
+import {
+  visualStoriesApi,
+  authorsApi,
+  type VisualStorySlide,
+} from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
   RELATED_CONTENT_TYPE_OPTIONS,
@@ -19,10 +23,14 @@ import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 
 const storage = getStorage(app);
 
-const normalizeSlide = (slide?: Record<string, unknown>) => ({
+const normalizeSlide = (slide?: Record<string, unknown>): VisualStorySlide => ({
   imageUrl: typeof slide?.imageUrl === "string" ? slide.imageUrl : "",
+  contentType: slide?.contentType === "quote" ? "quote" : "text",
   text: typeof slide?.text === "string" ? slide.text : "",
   caption: typeof slide?.caption === "string" ? slide.caption : "",
+  quote: typeof slide?.quote === "string" ? slide.quote : "",
+  quoteAuthor:
+    typeof slide?.quoteAuthor === "string" ? slide.quoteAuthor : "",
 });
 
 const normalizeTags = (
@@ -109,7 +117,14 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       binaryForGuide: false,
       isHotContent: false,
       paid: false,
-      slides: [] as Array<{ imageUrl: string; text: string; caption: string }>,
+      slides: [] as Array<{
+        imageUrl: string;
+        contentType: "text" | "quote";
+        text: string;
+        caption: string;
+        quote: string;
+        quoteAuthor: string;
+      }>,
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
     },
@@ -279,7 +294,14 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     },
 
     addSlide() {
-      this.story.slides.push({ imageUrl: "", text: "", caption: "" });
+      this.story.slides.push({
+        imageUrl: "",
+        contentType: "text",
+        text: "",
+        caption: "",
+        quote: "",
+        quoteAuthor: "",
+      });
     },
 
     removeSlide(index: number) {
@@ -448,7 +470,9 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.isHotContent = Boolean(copy.isHotContent);
         this.story.paid = Boolean(copy.paid);
         this.story.slides = Array.isArray(copy.slides)
-          ? copy.slides.map((slide) => normalizeSlide(slide))
+          ? copy.slides.map((slide: Record<string, unknown>) =>
+              normalizeSlide(slide),
+            )
           : [];
         this.story.relatedContent = sanitizeRelatedContent(
           copy.relatedContent,
@@ -502,6 +526,23 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       if (emptyImageSlide !== -1) {
         window.Alpine?.store("ui")?.showToast?.(
           `Слайд ${emptyImageSlide + 1} без изображения — загрузи картинку.`,
+          "error",
+        );
+        this.isSaving = false;
+        return;
+      }
+
+      const invalidContentSlide = this.story.slides.findIndex((slide) =>
+        slide.contentType === "quote"
+          ? !slide.quote.trim()
+          : !slide.text.trim(),
+      );
+      if (invalidContentSlide !== -1) {
+        const slide = this.story.slides[invalidContentSlide];
+        window.Alpine?.store("ui")?.showToast?.(
+          slide.contentType === "quote"
+            ? `Слайд ${invalidContentSlide + 1} без цитаты — добавь текст цитаты.`
+            : `Слайд ${invalidContentSlide + 1} без текста — добавь текст справа.`,
           "error",
         );
         this.isSaving = false;

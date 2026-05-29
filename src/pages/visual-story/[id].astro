@@ -1,5 +1,6 @@
 ---
 import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
+import QuoteIcon from "@/assets/icons/quote.svg";
 import logo from "@/assets/logo/logo.svg";
 import { ApiError, visualStoriesApi } from "@/lib/api/api";
 import { Info, MoveRight, MoveLeft } from "lucide-astro";
@@ -9,21 +10,41 @@ const { id } = Astro.params;
 let storyData: any;
 let error: string | null = null;
 
-try {
-  storyData = await visualStoriesApi.getById(id);
-} catch (e: any) {
-  if (e instanceof ApiError) {
-    error =
-      e.status === 404
-        ? "Визуальная история не найдена."
-        : `Ошибка загрузки: ${e.message}`;
-  } else {
-    error = `Ошибка загрузки: ${e.message}`;
+if (!id) {
+  error = "Не указан идентификатор визуальной истории.";
+} else {
+  try {
+    storyData = await visualStoriesApi.getById(id);
+  } catch (e: any) {
+    if (e instanceof ApiError) {
+      error =
+        e.status === 404
+          ? "Визуальная история не найдена."
+          : `Ошибка загрузки: ${e.message}`;
+    } else {
+      error = `Ошибка загрузки: ${e.message}`;
+    }
   }
 }
 
-const slides: Array<{ imageUrl: string; text: string; caption?: string }> =
-  Array.isArray(storyData?.slides) ? storyData.slides : [];
+const slides: Array<{
+  imageUrl: string;
+  contentType: "text" | "quote";
+  text: string;
+  caption?: string;
+  quote?: string;
+  quoteAuthor?: string;
+}> = Array.isArray(storyData?.slides)
+  ? storyData.slides.map((slide: any) => ({
+      imageUrl: typeof slide?.imageUrl === "string" ? slide.imageUrl : "",
+      contentType: slide?.contentType === "quote" ? "quote" : "text",
+      text: typeof slide?.text === "string" ? slide.text : "",
+      caption: typeof slide?.caption === "string" ? slide.caption : "",
+      quote: typeof slide?.quote === "string" ? slide.quote : "",
+      quoteAuthor:
+        typeof slide?.quoteAuthor === "string" ? slide.quoteAuthor : "",
+    }))
+  : [];
 
 const title = storyData?.title || "Визуальная история";
 const lead = storyData?.lead || "";
@@ -74,6 +95,7 @@ const heroImageCaption =
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title} — Maag</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -167,7 +189,7 @@ const heroImageCaption =
       }
 
       .image-caption-popover {
-        max-width: min(320px, calc(100vw - 64px));
+        max-width: min(520px, calc(100vw - 64px));
         padding: 12px 14px;
         border-radius: 0;
         background: rgba(0, 0, 0, 0.76);
@@ -225,8 +247,7 @@ const heroImageCaption =
       .hero-lead {
         font-family: "Inter", sans-serif;
         font-size: clamp(1.125rem, 1.7vw, 1.25rem);
-        font-weight: 400;
-        line-height: 1.7;
+        font-weight: 300;
         letter-spacing: -0.01em;
         margin: 12px 0 0;
         color: rgba(0, 0, 0, 0.8);
@@ -290,15 +311,60 @@ const heroImageCaption =
         align-items: center;
       }
 
-      .slide-text-body p {
+      .slide-text-body--quote {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .slide-text-body p,
+      .slide-quote-text {
         font-family: "Inter", sans-serif;
-        font-size: clamp(1.125rem, 1.6vw, 1.25rem);
-        font-weight: 400;
+        font-size: clamp(1.125rem, 1.7vw, 1.25rem);
+        font-weight: 300;
         line-height: 1.7;
         letter-spacing: -0.01em;
         margin: 0;
         color: rgba(0, 0, 0, 0.8);
-        max-width: 34rem;
+        max-width: 38rem;
+      }
+
+      .slide-quote {
+        width: 100%;
+        max-width: 32rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .slide-quote-icon {
+        width: 34px;
+        height: 34px;
+        color: var(--maag-accent);
+        flex-shrink: 0;
+      }
+
+      .slide-quote-icon--closing {
+        transform: rotate(180deg);
+      }
+
+      .slide-quote-text {
+        font-style: italic;
+        text-align: left;
+      }
+
+      .slide-quote-author {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        font-size: 0.8rem;
+        line-height: 1.2;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--maag-muted);
+        text-align: center;
       }
 
       /* ── nav ──────────────────────────────────────── */
@@ -401,7 +467,7 @@ const heroImageCaption =
         }
 
         .image-caption-popover {
-          max-width: min(280px, calc(100vw - 48px));
+          max-width: min(280px, calc(100vw - 28px));
         }
 
         .slide-content {
@@ -413,6 +479,16 @@ const heroImageCaption =
         .slide-text-body p {
           font-size: 1.125rem;
           max-width: none;
+        }
+
+        .slide-quote {
+          max-width: none;
+          gap: 12px;
+        }
+
+        .slide-text-body p,
+        .slide-quote-text {
+          font-size: 1.125rem;
         }
 
         .hero-title {
@@ -510,8 +586,28 @@ const heroImageCaption =
                     {String(i + 1).padStart(2, "0")} /{" "}
                     {String(slides.length).padStart(2, "0")}
                   </span>
-                  <div class="slide-text-body">
-                    <p class="text-base-content">{slide.text}</p>
+                  <div
+                    class:list={[
+                      "slide-text-body",
+                      slide.contentType === "quote" && "slide-text-body--quote",
+                    ]}
+                  >
+                    {slide.contentType === "quote" ? (
+                      <>
+                        <div class="slide-quote">
+                          <QuoteIcon class="slide-quote-icon" />
+                          <blockquote class="slide-quote-text">
+                            {slide.quote}
+                          </blockquote>
+                          <QuoteIcon class="slide-quote-icon slide-quote-icon--closing" />
+                        </div>
+                        {slide.quoteAuthor && (
+                          <p class="slide-quote-author">{slide.quoteAuthor}</p>
+                        )}
+                      </>
+                    ) : (
+                      <p class="text-base-content">{slide.text}</p>
+                    )}
                   </div>
                 </div>
               </section>

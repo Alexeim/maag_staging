@@ -797,7 +797,12 @@ export default function guideCreatorLogic(initialState = {}) {
             } else if (blockIndex !== null && this.editingBlock) {
               if (this.editingBlock.type === "image") {
                 this.editingBlock.url = downloadURL;
-              } else if (this.editingBlock.type === "two-columns" && column) {
+              } else if (
+                ["two-columns", "three-columns"].includes(
+                  this.editingBlock.type,
+                ) &&
+                column
+              ) {
                 this.editingBlock[column].content = downloadURL;
                 this.editingBlock[column].type = 'image';
               }
@@ -912,6 +917,13 @@ export default function guideCreatorLogic(initialState = {}) {
         case "two-columns":
           newBlockData = {
             left: { type: "text", content: "", caption: "" },
+            right: { type: "text", content: "", caption: "" },
+          };
+          break;
+        case "three-columns":
+          newBlockData = {
+            left: { type: "text", content: "", caption: "" },
+            center: { type: "text", content: "", caption: "" },
             right: { type: "text", content: "", caption: "" },
           };
           break;

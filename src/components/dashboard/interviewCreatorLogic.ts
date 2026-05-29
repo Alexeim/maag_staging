@@ -505,7 +505,11 @@ export default function interviewCreatorLogic(initialState = {}) {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
             if (isCover) {
               this.interview.imageUrl = downloadURL;
-            } else if (column && this.editingBlock?.type === "two-columns") {
+            } else if (
+              column &&
+              this.editingBlock &&
+              ["two-columns", "three-columns"].includes(this.editingBlock.type)
+            ) {
               this.editingBlock[column].content = downloadURL;
               this.editingBlock[column].type = "image";
             } else if (blockIndex !== null && this.editingIndex !== null && this.interview.contentBlocks[this.editingIndex]?.type === "image") {
@@ -620,6 +624,13 @@ export default function interviewCreatorLogic(initialState = {}) {
         case "two-columns":
           newBlockData = {
             left: { type: "text", content: "", caption: "" },
+            right: { type: "text", content: "", caption: "" },
+          };
+          break;
+        case "three-columns":
+          newBlockData = {
+            left: { type: "text", content: "", caption: "" },
+            center: { type: "text", content: "", caption: "" },
             right: { type: "text", content: "", caption: "" },
           };
           break;

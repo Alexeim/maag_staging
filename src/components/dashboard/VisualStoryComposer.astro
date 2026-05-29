@@ -280,7 +280,7 @@ const {
   <section class="p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
     <h2 class="text-xl font-semibold mb-2">Слайды</h2>
     <p class="text-sm text-base-content/60 mb-6">
-      Каждый слайд — изображение слева и текст справа. На мобильных они стекаются вертикально.
+      Каждый слайд — изображение слева и контент справа: обычный текст или цитата. На мобильных они стекаются вертикально.
     </p>
 
     <div class="space-y-6">
@@ -338,8 +338,32 @@ const {
             ></textarea>
           </div>
 
-          <!-- Text for slide -->
           <div>
+            <label class="block text-sm font-medium text-base-content mb-2">Тип контента справа</label>
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
+                :class="slide.contentType !== 'quote' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                @click="slide.contentType = 'text'"
+              >
+                Текст
+              </button>
+              <button
+                type="button"
+                class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
+                :class="slide.contentType === 'quote' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                @click="slide.contentType = 'quote'"
+              >
+                Цитата
+              </button>
+            </div>
+            <p class="mt-2 text-xs text-base-content/60">
+              Справа можно показать либо обычный текст, либо цитату с именем.
+            </p>
+          </div>
+
+          <div x-show="slide.contentType !== 'quote'">
             <label class="block text-sm font-medium text-base-content mb-2">Текст слайда</label>
             <textarea
               x-model="slide.text"
@@ -347,6 +371,27 @@ const {
               class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
               placeholder="Короткий, образный текст — до 2–3 предложений..."
             ></textarea>
+          </div>
+
+          <div x-show="slide.contentType === 'quote'" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-base-content mb-2">Имя</label>
+              <input
+                type="text"
+                x-model="slide.quoteAuthor"
+                class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                placeholder="Имя автора цитаты..."
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-base-content mb-2">Цитата</label>
+              <textarea
+                x-model="slide.quote"
+                rows="4"
+                class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                placeholder="Текст цитаты..."
+              ></textarea>
+            </div>
           </div>
         </div>
       </template>
