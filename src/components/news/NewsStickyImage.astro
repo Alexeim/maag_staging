@@ -1,0 +1,48 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  transitionName?: string;
+  transitionAliases?: string[];
+}
+
+const {
+  src,
+  alt,
+  caption = "",
+  transitionName,
+  transitionAliases = [],
+} = Astro.props as Props;
+---
+
+<figure class="grid gap-3">
+  <div class="overflow-hidden bg-base-100">
+    <img
+      src={src}
+      alt={alt}
+      class="block h-auto max-h-[70vh] w-full object-cover lg:h-[calc(100vh-150px)] lg:max-h-none"
+      transition:name={transitionName}
+    />
+  </div>
+
+  {
+    caption && (
+      <figcaption class="text-xs text-base-content/55 font-inter">
+        {caption}
+      </figcaption>
+    )
+  }
+
+  {
+    transitionAliases.map((alias) => (
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        class="fixed h-px w-px pointer-events-none -z-10 opacity-0"
+        transition:name={alias}
+      />
+    ))
+  }
+</figure>

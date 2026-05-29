@@ -1,0 +1,47 @@
+---
+import { ArrowUpRight } from "lucide-astro";
+
+interface NewsBlock {
+  type: string;
+  text?: string;
+  url?: string;
+}
+
+interface Props {
+  contentBlocks: NewsBlock[];
+}
+
+const { contentBlocks } = Astro.props as Props;
+---
+
+<div class="mx-auto flex w-full max-w-[720px] flex-col gap-8 lg:mx-0">
+  {
+    contentBlocks.map((block) => {
+      if (block.type === "paragraph" && block.text) {
+        return (
+          <p class="text-lg text-base-content/90 font-article-body">
+            {block.text}
+          </p>
+        );
+      }
+
+      if (block.type === "url-link" && block.url) {
+        return (
+          <a
+            href={block.url}
+            target="_blank"
+            rel="noreferrer"
+            class="group flex items-center justify-between gap-4 border border-base-content/10 bg-base-100 px-5 py-4 text-current no-underline transition-colors hover:border-accent"
+          >
+            <span class="text-sm uppercase tracking-[0.22em] text-base-content font-inter">
+              {block.text || block.url}
+            </span>
+            <ArrowUpRight class="h-5 w-5 shrink-0 text-accent transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </a>
+        );
+      }
+
+      return null;
+    })
+  }
+</div>
