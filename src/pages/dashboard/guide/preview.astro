@@ -5,6 +5,7 @@ import SocialShare from "@/components/article/SocialShare.astro";
 import Button from "@/components/common/Button.astro";
 import articleData from "@/content/articlePage/RU/Article.json";
 import QuoteIcon from "@/assets/icons/quote.svg";
+import { ChevronLeft, ChevronRight } from "lucide-astro";
 ---
 
 <DashboardLayout title="Предпросмотр путеводителя" active="guides">
@@ -202,14 +203,14 @@ import QuoteIcon from "@/assets/icons/quote.svg";
                         class="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-10 h-10 flex items-center justify-center transition cursor-pointer"
                         @click="current = (current - 1 + block.slides.length) % block.slides.length"
                         aria-label="Предыдущий слайд"
-                      >‹</button>
+                      ><ChevronLeft class="h-5 w-5" /></button>
                       <button
                         type="button"
                         x-show="block.slides?.length > 1"
                         class="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-10 h-10 flex items-center justify-center transition cursor-pointer"
                         @click="current = (current + 1) % block.slides.length"
                         aria-label="Следующий слайд"
-                      >›</button>
+                      ><ChevronRight class="h-5 w-5" /></button>
                     </div>
                     <div x-show="block.slides?.length > 1" class="flex justify-center gap-2 mt-4">
                       <template x-for="(slide, si) in block.slides" :key="'dot-' + si">

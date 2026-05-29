@@ -5,8 +5,7 @@ import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { flippersApi } from "../../lib/api/api";
-import ArrowLeft from "../../assets/svg/arrowLeft.svg";
-import ArrowRight from "../../assets/svg/arrowRight.svg";
+import { ChevronLeft, ChevronRight } from "lucide-astro";
 import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import {
@@ -147,14 +146,14 @@ try {
                 class="absolute top-1/2 left-2 -translate-y-1/2 p-3 transition cursor-pointer text-neutral-300 hover:text-neutral-400"
                 aria-label="Предыдущий слайд"
               >
-                <ArrowLeft />
+                <ChevronLeft class="h-6 w-6" />
               </button>
               <button
                 @click="activeSlide = (activeSlide + 1) % slides.length"
                 class="absolute top-1/2 right-2 -translate-y-1/2 p-3 transition cursor-pointer text-neutral-300 hover:text-neutral-400"
                 aria-label="Следующий слайд"
               >
-                <ArrowRight />
+                <ChevronRight class="h-6 w-6" />
               </button>
             </div>
           </div>

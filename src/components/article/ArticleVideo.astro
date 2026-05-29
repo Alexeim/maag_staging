@@ -22,8 +22,8 @@ const embedUrl =
     : null;
 ---
 
-<figure class="not-prose flex flex-col items-center">
-  <div class="w-full max-w-[826px] bg-base-200 overflow-hidden">
+<figure class="not-prose flex w-full flex-col items-center">
+  <div class="w-full bg-base-200 overflow-hidden">
     {
       normalizedBlock.sourceType === "upload" && normalizedBlock.url ? (
         <video
@@ -62,7 +62,7 @@ const embedUrl =
   </div>
   {
     normalizedBlock.caption && (
-      <figcaption class="text-center font-oswald tracking-wide text-xs text-gray-500 mt-2">
+      <figcaption class="w-full text-center font-oswald tracking-wide text-xs text-gray-500 mt-2">
         {normalizedBlock.caption}
       </figcaption>
     )
