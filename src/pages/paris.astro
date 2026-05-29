@@ -2,7 +2,7 @@
 import Layout from "../Layouts/Layout.astro";
 import NetlenkaCard from "@/components/common/NetlenkaCard.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
 import picture1 from "../assets/images/culture.jpg";
 import {
   articlesApi,
@@ -114,7 +114,7 @@ const normalizeTags = (value: unknown): string[] => {
   }
   return value
     .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
-    .filter(Boolean);
+    .filter((tag) => Boolean(tag) && !isLegacyParisTag(tag));
 };
 
 const getPrimaryTag = (item: any): string => {

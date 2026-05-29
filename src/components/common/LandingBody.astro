@@ -15,11 +15,12 @@ import {
   type FlipperPayload,
   type LandingPlacementsResponse,
 } from "@/lib/api/api";
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
 
 import NetlenkaCard from "./NetlenkaCard.astro";
 import ArticleCard from "./ArticleCard.astro";
 import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
+import MaagLogoMobile from "../../assets/logo/logo-mobile.svg";
 import LatestInterview from "../HomePage/LatestInterview.astro";
 
 import picture1 from "../../assets/images/culture.jpg";
@@ -103,9 +104,15 @@ const getPrimaryTag = (item: any) => {
       ? [item.tags]
       : [];
   const firstTag = rawTags.find(
-    (tag: string) => typeof tag === "string" && tag.trim().length > 0,
+    (tag: string) =>
+      typeof tag === "string" &&
+      tag.trim().length > 0 &&
+      !isLegacyParisTag(tag),
   );
-  if (firstTag) return getKnownTagLabel(firstTag.trim()) || getCategoryLabel(firstTag.trim());
+  if (firstTag)
+    return (
+      getKnownTagLabel(firstTag.trim()) || getCategoryLabel(firstTag.trim())
+    );
   if (item?.isNews) return "Новости";
   if (item?.isHotContent) return CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY];
   return getCategoryLabel(item?.category);
@@ -116,10 +123,10 @@ const getCardLead = (item: any) => {
     typeof item?.cardLead === "string" ? item.cardLead.trim() : "";
   return cardLead;
 };
-const isHotContent = (item: any) =>
-  Boolean(item?.isHotContent);
+const isHotContent = (item: any) => Boolean(item?.isHotContent);
 
-const isLandingHotContentItem = (item: any) => isHotContent(item) && !item?.isNews;
+const isLandingHotContentItem = (item: any) =>
+  isHotContent(item) && !item?.isNews;
 
 const isLeSaviezVousArticle = (item: any) =>
   item?.articleType === "le_saviez_vous";
@@ -242,8 +249,8 @@ const isPlacedMainHero = (
 ) =>
   Boolean(
     landingPlacements.mainHero &&
-      landingPlacements.mainHero.id === item?.id &&
-      landingPlacements.mainHero.type === getPlacementType(item),
+    landingPlacements.mainHero.id === item?.id &&
+    landingPlacements.mainHero.type === getPlacementType(item),
   );
 
 const getNetlenkaItemKey = (item: any) => {
@@ -257,11 +264,7 @@ const getNetlenkaItemKey = (item: any) => {
 
 const getCategoryCardItemKey = (item: any) => {
   const type = getPlacementType(item);
-  if (
-    !type ||
-    type === "interview" ||
-    !item?.id
-  ) {
+  if (!type || type === "interview" || !item?.id) {
     return null;
   }
 
@@ -335,7 +338,9 @@ const selectCategoryCardItems = (
 
 const selectCategoryHero = (
   items: any[],
-  heroSelection: LandingPlacementsResponse["cultureHero"] | LandingPlacementsResponse["parisHero"],
+  heroSelection:
+    | LandingPlacementsResponse["cultureHero"]
+    | LandingPlacementsResponse["parisHero"],
 ) => {
   if (heroSelection?.mode === "manual") {
     return (
@@ -359,16 +364,15 @@ try {
     visualStories,
     newsItemsRaw,
     landingPlacementsResponse,
-  ] =
-    await Promise.all([
-      articlesApi.list(),
-      flippersApi.list() as Promise<FlipperResponse[]>,
-      interviewsApi.list() as Promise<InterviewResponse[]>,
-      guidesApi.list(),
-      visualStoriesApi.list(),
-      newsApi.list(),
-      editorialPlacementsApi.getLanding().catch(() => DEFAULT_LANDING_PLACEMENTS),
-    ]);
+  ] = await Promise.all([
+    articlesApi.list(),
+    flippersApi.list() as Promise<FlipperResponse[]>,
+    interviewsApi.list() as Promise<InterviewResponse[]>,
+    guidesApi.list(),
+    visualStoriesApi.list(),
+    newsApi.list(),
+    editorialPlacementsApi.getLanding().catch(() => DEFAULT_LANDING_PLACEMENTS),
+  ]);
 
   landingPlacements = landingPlacementsResponse;
 
@@ -392,7 +396,8 @@ try {
     leSaviezVousArticle = leSaviezVousArticles[0] ?? null;
   } else if (leSaviezVousPlacement.mode === "manual") {
     leSaviezVousArticle =
-      leSaviezVousArticles.find((a) => a.id === leSaviezVousPlacement.id) ?? null;
+      leSaviezVousArticles.find((a) => a.id === leSaviezVousPlacement.id) ??
+      null;
   } else {
     leSaviezVousArticle = null;
   }
@@ -482,10 +487,9 @@ try {
       href: toContentHref({ ...story, type: "visual-story" }),
       imageUrl: story?.imageUrl || story?.slides?.[0]?.imageUrl || undefined,
     })),
-  ]
-    .sort(
-      (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
-    );
+  ].sort(
+    (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
+  );
   hotContentItems = selectNetlenkaItems(
     netlenkaCandidates,
     landingPlacements.netlenkaRail,
@@ -494,10 +498,11 @@ try {
   const cultureInterviewBlock = landingPlacements.cultureInterviewBlock;
   latestInterview =
     cultureInterviewBlock?.mode === "manual"
-      ? interviews.find((interview) => interview.id === cultureInterviewBlock.id) ??
-        null
+      ? (interviews.find(
+          (interview) => interview.id === cultureInterviewBlock.id,
+        ) ?? null)
       : cultureInterviewBlock?.mode === "auto-latest"
-        ? interviews[0] ?? null
+        ? (interviews[0] ?? null)
         : null;
 } catch (error) {
   console.error("Failed to fetch data for LandingBody:", error);
@@ -514,10 +519,7 @@ const cultureCardItems = selectCategoryCardItems(
   new Set([cultureHero?.id].filter(Boolean)),
 );
 
-const parisHero = selectCategoryHero(
-  parisItems,
-  landingPlacements.parisHero,
-);
+const parisHero = selectCategoryHero(parisItems, landingPlacements.parisHero);
 
 const parisCardItems = selectCategoryCardItems(
   parisItems,
@@ -528,10 +530,7 @@ const parisCardItems = selectCategoryCardItems(
 const excludedIds = new Set([cultureHero?.id, parisHero?.id].filter(Boolean));
 const carouselItems = allItemsSorted
   .filter(
-    (item) =>
-      !isHotContent(item) &&
-      !item.isNews &&
-      !excludedIds.has(item.id),
+    (item) => !isHotContent(item) && !item.isNews && !excludedIds.has(item.id),
   )
   .slice(0, 20);
 
@@ -569,7 +568,10 @@ const interviewQuote = latestInterview?.mainQuote
 const splitTitle = (t: string) => {
   const s = t.trimEnd();
   const i = s.lastIndexOf(" ");
-  return { start: i >= 0 ? s.slice(0, i) : "", last: i >= 0 ? s.slice(i + 1) : s };
+  return {
+    start: i >= 0 ? s.slice(0, i) : "",
+    last: i >= 0 ? s.slice(i + 1) : s,
+  };
 };
 ---
 
@@ -588,7 +590,7 @@ const splitTitle = (t: string) => {
         </h2>
         <div class="w-full flex flex-col gap-8">
           <div
-            class="w-full bg-white flex flex-col gap-5 lg:flex-row lg:gap-8 items-start justify-start min-h-[100px]"
+            class="w-full bg-white flex flex-col gap-0 lg:flex-row lg:gap-8 items-start justify-start min-h-[100px]"
           >
             {
               cultureHero ? (
@@ -617,7 +619,7 @@ const splitTitle = (t: string) => {
                       />
                     )}
                   </div>
-                  <div class="w-full lg:w-2/5 pt-3 px-4 lg:pl-2 lg:pr-6">
+                  <div class="w-full lg:w-2/5 pt-0 lg:pt-3 px-4 lg:pl-2 lg:pr-6">
                     {/* <p class="text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3">
                       {formatArticleMeta(
                         cultureHero,
@@ -642,10 +644,17 @@ const splitTitle = (t: string) => {
                       <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mb-2">
                         {cultureHero.paid ? (
                           <>
-                            {splitTitle(cultureHero.title).start && <>{splitTitle(cultureHero.title).start}{" "}</>}
-                            <span class="whitespace-nowrap">{splitTitle(cultureHero.title).last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                            {splitTitle(cultureHero.title).start && (
+                              <>{splitTitle(cultureHero.title).start} </>
+                            )}
+                            <span class="whitespace-nowrap">
+                              {splitTitle(cultureHero.title).last}{" "}
+                              <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                            </span>
                           </>
-                        ) : cultureHero.title}
+                        ) : (
+                          cultureHero.title
+                        )}
                       </h4>
                     </a>
                     {getCardLead(cultureHero) && (
@@ -732,9 +741,16 @@ const splitTitle = (t: string) => {
     >
       <div id="netlenka-container">
         <h3
-          class="text-lg font-normal mb-6 uppercase tracking-[0.3em] font-old_standard"
+          class="relative mb-6 h-[88px] overflow-visible text-black lg:h-[102px]"
         >
-          {CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY]}
+          <span
+            class="absolute bottom-0 left-0 font-old_standard text-lg font-normal uppercase leading-none tracking-[0.3em]"
+          >
+            ВЫБОР
+          </span>
+          <MaagLogoMobile
+            class="absolute left-[105px] top-[10px] w-[120px] max-w-none lg:left-[110px] lg:top-[23px] lg:w-[142px]"
+          />
         </h3>
         <div
           class="flex gap-6 overflow-x-auto lg:flex-col items-start lg:gap-6 lg:overflow-visible pb-2"
@@ -779,7 +795,7 @@ const splitTitle = (t: string) => {
               </h2>
 
               <div class="w-full flex flex-col gap-8">
-                <div class="w-full bg-white flex flex-col gap-5 lg:flex-row lg:gap-8 items-start justify-start min-h-[100px]">
+                <div class="w-full bg-white flex flex-col gap-0 lg:flex-row lg:gap-8 items-start justify-start min-h-[100px]">
                   {parisHero ? (
                     <>
                       <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
@@ -798,7 +814,7 @@ const splitTitle = (t: string) => {
                         </a>
                       </div>
 
-                      <div class="w-full lg:w-2/5 pt-3 px-4 lg:pl-2 lg:pr-6">
+                      <div class="w-full lg:w-2/5 pt-0 lg:pt-3 px-4 lg:pl-2 lg:pr-6">
                         <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3 mt-4">
                           <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                             {getPrimaryTag(parisHero) ||
@@ -819,10 +835,17 @@ const splitTitle = (t: string) => {
                           <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mb-2">
                             {parisHero.paid ? (
                               <>
-                                {splitTitle(parisHero.title).start && <>{splitTitle(parisHero.title).start}{" "}</>}
-                                <span class="whitespace-nowrap">{splitTitle(parisHero.title).last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                                {splitTitle(parisHero.title).start && (
+                                  <>{splitTitle(parisHero.title).start} </>
+                                )}
+                                <span class="whitespace-nowrap">
+                                  {splitTitle(parisHero.title).last}{" "}
+                                  <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                                </span>
                               </>
-                            ) : parisHero.title}
+                            ) : (
+                              parisHero.title
+                            )}
                           </h4>
                         </a>
 
@@ -927,10 +950,21 @@ const splitTitle = (t: string) => {
                       <h4 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
                         {leSaviezVousArticle.paid ? (
                           <>
-                            {splitTitle(leSaviezVousArticle.title).start && <>{splitTitle(leSaviezVousArticle.title).start}{" "}</>}
-                            <span class="whitespace-nowrap">{splitTitle(leSaviezVousArticle.title).last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                            {splitTitle(leSaviezVousArticle.title).start && (
+                              <>
+                                {
+                                  splitTitle(leSaviezVousArticle.title).start
+                                }{" "}
+                              </>
+                            )}
+                            <span class="whitespace-nowrap">
+                              {splitTitle(leSaviezVousArticle.title).last}{" "}
+                              <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                            </span>
                           </>
-                        ) : leSaviezVousArticle.title}
+                        ) : (
+                          leSaviezVousArticle.title
+                        )}
                       </h4>
                     </a>
 

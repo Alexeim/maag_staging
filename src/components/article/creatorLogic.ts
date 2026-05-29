@@ -25,6 +25,7 @@ import {
   getVideoRenderMode as resolveVideoRenderMode,
   normalizeVideoBlock,
 } from "@/lib/utils/video";
+import { isLegacyParisTag } from "@/content/tags/parisTags";
 import {
   getBlockSummary as buildBlockSummary,
   getBlockTypeLabel as resolveBlockTypeLabel,
@@ -188,6 +189,9 @@ export default function articleCreatorLogic(initialState = {}) {
       }
       const trimmed = rawTag.trim();
       if (!trimmed) {
+        continue;
+      }
+      if (category === "paris" && isLegacyParisTag(trimmed)) {
         continue;
       }
       const mapped = legacyMap[trimmed] || trimmed;

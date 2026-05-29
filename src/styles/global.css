@@ -67,6 +67,15 @@
   font-family: "Oswald", sans-serif;
 }
 
+.font-jost {
+  font-family: "Jost", sans-serif;
+}
+
+.font-navbar {
+  font-family: "Jost", sans-serif;
+  letter-spacing: 1px;
+}
+
 .font-old_standard {
   font-family: "Old Standard TT", serif;
   line-height: 1.1;
@@ -79,6 +88,7 @@
 .font-article-body {
   font-family: "Inter", sans-serif;
   letter-spacing: -0.5px;
+  font-weight: 300;
 }
 
 a,

@@ -35,6 +35,12 @@ const tagLabelEntries = allKnownTagOptions.flatMap((tag) => [
   [tag.title.toLowerCase(), tag.title],
 ]);
 
+const legacyParisTagValues = new Set([
+  "did_you_know",
+  "le saviez-vous?",
+  "le saviez vous?",
+]);
+
 export const knownTagLabels = Object.fromEntries(tagLabelEntries) as Record<
   string,
   string
@@ -46,4 +52,11 @@ export const getKnownTagLabel = (value?: string | null) => {
   }
   const normalized = value.trim().toLowerCase();
   return knownTagLabels[normalized] || value.trim();
+};
+
+export const isLegacyParisTag = (value?: string | null) => {
+  if (!value) {
+    return false;
+  }
+  return legacyParisTagValues.has(value.trim().toLowerCase());
 };

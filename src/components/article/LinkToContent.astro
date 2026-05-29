@@ -32,7 +32,7 @@ const label = item.category || CONTENT_LABELS[item.contentType] || "Матери
     <div
       class:list={[
         "overflow-hidden bg-base-200 flex-shrink-0",
-        isInterview ? "h-24 w-24 rounded-full" : "h-24 w-24",
+        isInterview ? "h-32 w-32 rounded-full" : "h-32 w-32",
       ]}
     >
       {
@@ -60,12 +60,16 @@ const label = item.category || CONTENT_LABELS[item.contentType] || "Матери
 
     <div class="min-w-0 flex-1">
       <p class="mb-1">
-        <span class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
+        <span
+          class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent"
+        >
           {label}
         </span>
       </p>
 
-      <h3 class="font-old_standard text-xl leading-[1.05] font-normal tracking-[-0.02em] transition-opacity duration-200 group-hover:underline">
+      <h3
+        class="font-old_standard text-3xl leading-[1.05] font-normal tracking-[-0.02em] transition-opacity duration-200 group-hover:underline"
+      >
         {item.title}
       </h3>
 

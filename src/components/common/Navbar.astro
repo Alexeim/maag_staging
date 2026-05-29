@@ -57,7 +57,10 @@ const currentPath = Astro.url.pathname;
     <div class="flex items-center relative">
       {
         showLogoInNav && (
-          <a class="cursor-pointer transition-transform duration-200 ease-out hover:scale-105 inline-block" href="/">
+          <a
+            class="cursor-pointer transition-transform duration-200 ease-out hover:scale-105 inline-block"
+            href="/"
+          >
             <img src={logo.src} alt="Maag logo" class="w-12 lg:w-16" />
           </a>
         )
@@ -66,13 +69,15 @@ const currentPath = Astro.url.pathname;
       <div
         class="hidden lg:flex absolute top-1/2 left-full -translate-y-1/2 ml-12"
       >
-        <ul class="flex items-center text-base-content whitespace-nowrap">
+        <ul class="flex items-center text-base-content/65 whitespace-nowrap">
           <li
             class:list={[
-              "relative pb-0.5 font-inter leading-[1.21] tracking-[0.29em] uppercase text-base font-normal",
-              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-left after:transition-transform after:duration-[250ms] after:ease-in-out",
+              "relative pb-0.5 font-navbar uppercase text-base font-normal",
+              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
               "hover:after:scale-x-100",
-              currentPath.startsWith("/culture") ? "after:scale-x-100" : "after:scale-x-0",
+              currentPath.startsWith("/culture")
+                ? "after:scale-x-100"
+                : "after:scale-x-0",
             ]}
           >
             <a href="/culture">Культура</a>
@@ -80,10 +85,12 @@ const currentPath = Astro.url.pathname;
           <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
           <li
             class:list={[
-              "relative pb-0.5 font-inter leading-[1.21] tracking-[0.29em] uppercase text-base font-normal",
-              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-left after:transition-transform after:duration-[250ms] after:ease-in-out",
+              "relative pb-0.5 font-navbar uppercase text-base font-normal",
+              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
               "hover:after:scale-x-100",
-              currentPath.startsWith("/paris") ? "after:scale-x-100" : "after:scale-x-0",
+              currentPath.startsWith("/paris")
+                ? "after:scale-x-100"
+                : "after:scale-x-0",
             ]}
           >
             <a href="/paris">Париж</a>
@@ -91,10 +98,12 @@ const currentPath = Astro.url.pathname;
           <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
           <li
             class:list={[
-              "relative pb-0.5 font-inter leading-[1.21] tracking-[0.29em] uppercase text-base font-normal",
-              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-left after:transition-transform after:duration-[250ms] after:ease-in-out",
+              "relative pb-0.5 font-navbar uppercase text-base font-normal",
+              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
               "hover:after:scale-x-100",
-              currentPath.startsWith("/calendar") ? "after:scale-x-100" : "after:scale-x-0",
+              currentPath.startsWith("/calendar")
+                ? "after:scale-x-100"
+                : "after:scale-x-0",
             ]}
           >
             <a href="/calendar">Календарь</a>
@@ -158,7 +167,10 @@ const currentPath = Astro.url.pathname;
               class="flex items-center justify-center w-10 h-10 text-primary-content rounded-full font-bold text-lg hover:drop-shadow-lg transition-shadow"
               :class="$store.auth.profile?.role === 'admin' ? 'bg-error/50' : 'bg-primary'"
             >
-              <div x-text="($store.auth.profile?.firstName?.[0] || '') + ($store.auth.profile?.lastName?.[0] || '')"></div>
+              <div
+                x-text="($store.auth.profile?.firstName?.[0] || '') + ($store.auth.profile?.lastName?.[0] || '')"
+              >
+              </div>
             </a>
             <button
               @click.prevent="handleSignOut()"
@@ -172,4 +184,3 @@ const currentPath = Astro.url.pathname;
     </div>
   </nav>
 </header>
-
