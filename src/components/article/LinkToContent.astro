@@ -23,7 +23,7 @@ const lead = item.cardLead || item.lead || item.mainQuote || "";
 const label = item.category || CONTENT_LABELS[item.contentType] || "Материал";
 ---
 
-<article class="border-y border-base-content/15 py-4">
+<article class="border-y border-base-content/30 py-4">
   <a
     href={item.href}
     class="group flex items-start gap-4 text-current no-underline"
@@ -32,7 +32,7 @@ const label = item.category || CONTENT_LABELS[item.contentType] || "Матери
     <div
       class:list={[
         "overflow-hidden bg-base-200 flex-shrink-0",
-        isInterview ? "h-32 w-32 rounded-full" : "h-32 w-32",
+        isInterview ? "h-36 w-36 rounded-full" : "h-36 w-36",
       ]}
     >
       {
