@@ -27,6 +27,7 @@ interface Block {
 interface ColumnData {
   type: "image" | "text" | "quote";
   content: string; // url for image, text for text
+  html?: string;
   caption?: string;
 }
 

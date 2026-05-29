@@ -1,9 +1,11 @@
 ---
 import QuoteIcon from "../../assets/icons/quote.svg";
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
 
 interface ColumnData {
   type: "image" | "text" | "quote";
   content: string;
+  html?: string;
   caption?: string;
 }
 
@@ -20,6 +22,10 @@ const textAlignmentClass =
     : desktopTextAlign === "start"
       ? "text-center lg:text-start"
       : "text-center";
+const columnRichTextHtml = getInitialRichTextHtml({
+  html: column.html,
+  text: column.content,
+});
 ---
 
 {
@@ -45,8 +51,9 @@ const textAlignmentClass =
       <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
     </div>
   ) : (
-    <p class={`text-lg font-article-body ${textAlignmentClass}`}>
-      {column.content}
-    </p>
+    <div
+      class={`article-rich-text text-lg font-article-body ${textAlignmentClass}`}
+      set:html={columnRichTextHtml}
+    />
   )
 }

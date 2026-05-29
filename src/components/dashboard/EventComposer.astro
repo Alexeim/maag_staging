@@ -503,14 +503,27 @@ const {
                         <option value="quote">Цитата</option>
                       </select>
 
-                      <template x-if="['text', 'quote'].includes(editingBlock.left.type)">
+                      <template x-if="editingBlock.left.type === 'text'">
                         <div>
-                          <label class="block text-sm font-medium" x-text="editingBlock.left.type === 'quote' ? 'Цитата' : 'Текст'"></label>
+                          <label class="block text-sm font-medium">Текст</label>
+                          <div
+                            class="rich-text-editor"
+                            x-data="blockRichTextEditor({ initialHtml: getColumnRichTextInitialHtml(editingBlock.left), placeholder: 'Введите текст колонки...' })"
+                            @rich-text-change="editingBlock.left.html = $event.detail.html; editingBlock.left.content = $event.detail.text"
+                          >
+                            <div x-ref="editor"></div>
+                          </div>
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.left.type === 'quote'">
+                        <div>
+                          <label class="block text-sm font-medium">Цитата</label>
                           <textarea
                             x-model="editingBlock.left.content"
                             class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
                             rows="5"></textarea>
-                          <p x-show="editingBlock.left.type === 'quote'" class="mt-2 text-xs text-base-content/60">
+                          <p class="mt-2 text-xs text-base-content/60">
                             Цитата отрендерится с красной кавычкой, курсивом и размером как у aside-текста.
                           </p>
                         </div>
@@ -576,14 +589,27 @@ const {
                         <option value="quote">Цитата</option>
                       </select>
 
-                      <template x-if="['text', 'quote'].includes(editingBlock.center.type)">
+                      <template x-if="editingBlock.center.type === 'text'">
                         <div>
-                          <label class="block text-sm font-medium" x-text="editingBlock.center.type === 'quote' ? 'Цитата' : 'Текст'"></label>
+                          <label class="block text-sm font-medium">Текст</label>
+                          <div
+                            class="rich-text-editor"
+                            x-data="blockRichTextEditor({ initialHtml: getColumnRichTextInitialHtml(editingBlock.center), placeholder: 'Введите текст колонки...' })"
+                            @rich-text-change="editingBlock.center.html = $event.detail.html; editingBlock.center.content = $event.detail.text"
+                          >
+                            <div x-ref="editor"></div>
+                          </div>
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.center.type === 'quote'">
+                        <div>
+                          <label class="block text-sm font-medium">Цитата</label>
                           <textarea
                             x-model="editingBlock.center.content"
                             class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
                             rows="5"></textarea>
-                          <p x-show="editingBlock.center.type === 'quote'" class="mt-2 text-xs text-base-content/60">
+                          <p class="mt-2 text-xs text-base-content/60">
                             Цитата отрендерится с красной кавычкой, курсивом и размером как у aside-текста.
                           </p>
                         </div>
@@ -652,14 +678,27 @@ const {
                         <option value="quote">Цитата</option>
                       </select>
 
-                      <template x-if="['text', 'quote'].includes(editingBlock.right.type)">
+                      <template x-if="editingBlock.right.type === 'text'">
                         <div>
-                          <label class="block text-sm font-medium" x-text="editingBlock.right.type === 'quote' ? 'Цитата' : 'Текст'"></label>
+                          <label class="block text-sm font-medium">Текст</label>
+                          <div
+                            class="rich-text-editor"
+                            x-data="blockRichTextEditor({ initialHtml: getColumnRichTextInitialHtml(editingBlock.right), placeholder: 'Введите текст колонки...' })"
+                            @rich-text-change="editingBlock.right.html = $event.detail.html; editingBlock.right.content = $event.detail.text"
+                          >
+                            <div x-ref="editor"></div>
+                          </div>
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.right.type === 'quote'">
+                        <div>
+                          <label class="block text-sm font-medium">Цитата</label>
                           <textarea
                             x-model="editingBlock.right.content"
                             class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
                             rows="5"></textarea>
-                          <p x-show="editingBlock.right.type === 'quote'" class="mt-2 text-xs text-base-content/60">
+                          <p class="mt-2 text-xs text-base-content/60">
                             Цитата отрендерится с красной кавычкой, курсивом и размером как у aside-текста.
                           </p>
                         </div>
@@ -933,11 +972,11 @@ const {
                     :alt="block.left?.caption || 'Левая колонка'"
                     class="rounded-md max-h-32 object-cover"
                   />
-                  <p
+                  <div
                     x-show="block.left?.type === 'text'"
-                    x-text="block.left?.content"
-                    class="text-sm text-base-content/80"
-                  ></p>
+                    x-html="getColumnRichTextInitialHtml(block.left)"
+                    class="article-rich-text text-sm text-base-content/80"
+                  ></div>
                   <div x-show="block.left?.type === 'quote'" class="w-full max-w-[420px]">
                     <QuoteIcon class="w-8 h-8" />
                     <blockquote
@@ -956,11 +995,11 @@ const {
                     :alt="block.center?.caption || 'Центральная колонка'"
                     class="rounded-md max-h-32 object-cover"
                   />
-                  <p
+                  <div
                     x-show="block.center?.type === 'text'"
-                    x-text="block.center?.content"
-                    class="text-sm text-base-content/80"
-                  ></p>
+                    x-html="getColumnRichTextInitialHtml(block.center)"
+                    class="article-rich-text text-sm text-base-content/80"
+                  ></div>
                   <div x-show="block.center?.type === 'quote'" class="w-full max-w-[420px]">
                     <QuoteIcon class="w-8 h-8" />
                     <blockquote
@@ -979,11 +1018,11 @@ const {
                     :alt="block.right?.caption || 'Правая колонка'"
                     class="rounded-md max-h-32 object-cover"
                   />
-                  <p
+                  <div
                     x-show="block.right?.type === 'text'"
-                    x-text="block.right?.content"
-                    class="text-sm text-base-content/80"
-                  ></p>
+                    x-html="getColumnRichTextInitialHtml(block.right)"
+                    class="article-rich-text text-sm text-base-content/80"
+                  ></div>
                   <div x-show="block.right?.type === 'quote'" class="w-full max-w-[420px]">
                     <QuoteIcon class="w-8 h-8" />
                     <blockquote

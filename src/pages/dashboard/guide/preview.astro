@@ -140,7 +140,7 @@ import QuoteIcon from "@/assets/icons/quote.svg";
                         <img :src="block.left?.content" :alt="block.left?.caption || 'Left column image'" class="article-image" />
                         <figcaption x-show="block.left?.caption" class="text-center text-sm text-gray-500 mt-2" x-text="block.left?.caption"></figcaption>
                       </figure>
-                      <p x-show="block.left?.type === 'text'" class="text-lg font-oswald text-justify font-thin" x-text="block.left?.content"></p>
+                      <div x-show="block.left?.type === 'text'" class="article-rich-text text-lg font-article-body" x-html="getColumnRichTextInitialHtml(block.left)"></div>
                       <div x-show="block.left?.type === 'quote'" class="w-full max-w-[420px]">
                         <QuoteIcon class="w-8 h-8" />
                         <blockquote x-text="block.left?.content" class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"></blockquote>
@@ -152,7 +152,7 @@ import QuoteIcon from "@/assets/icons/quote.svg";
                         <img :src="block.center?.content" :alt="block.center?.caption || 'Center column image'" class="article-image" />
                         <figcaption x-show="block.center?.caption" class="text-center text-sm text-gray-500 mt-2" x-text="block.center?.caption"></figcaption>
                       </figure>
-                      <p x-show="block.center?.type === 'text'" class="text-lg font-oswald text-justify font-thin" x-text="block.center?.content"></p>
+                      <div x-show="block.center?.type === 'text'" class="article-rich-text text-lg font-article-body" x-html="getColumnRichTextInitialHtml(block.center)"></div>
                       <div x-show="block.center?.type === 'quote'" class="w-full max-w-[420px]">
                         <QuoteIcon class="w-8 h-8" />
                         <blockquote x-text="block.center?.content" class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"></blockquote>
@@ -164,7 +164,7 @@ import QuoteIcon from "@/assets/icons/quote.svg";
                         <img :src="block.right?.content" :alt="block.right?.caption || 'Right column image'" class="article-image" />
                         <figcaption x-show="block.right?.caption" class="text-center text-sm text-gray-500 mt-2" x-text="block.right?.caption"></figcaption>
                       </figure>
-                      <p x-show="block.right?.type === 'text'" class="text-lg font-oswald text-justify font-thin" x-text="block.right?.content"></p>
+                      <div x-show="block.right?.type === 'text'" class="article-rich-text text-lg font-article-body" x-html="getColumnRichTextInitialHtml(block.right)"></div>
                       <div x-show="block.right?.type === 'quote'" class="w-full max-w-[420px]">
                         <QuoteIcon class="w-8 h-8" />
                         <blockquote x-text="block.right?.content" class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"></blockquote>

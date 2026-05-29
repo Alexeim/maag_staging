@@ -1,5 +1,6 @@
 import { guidesApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import {
   RELATED_CONTENT_TYPE_OPTIONS,
   createEmptyRelatedContent,
@@ -310,6 +311,12 @@ export default function guideCreatorLogic(initialState = {}) {
         return "Category";
       }
       return this.categoryLabels[value] || value;
+    },
+    getColumnRichTextInitialHtml(column) {
+      return getInitialRichTextHtml({
+        html: column?.html,
+        text: column?.content,
+      });
     },
     getBlockTypeLabel(type?: string) {
       return resolveBlockTypeLabel(type);
@@ -916,15 +923,15 @@ export default function guideCreatorLogic(initialState = {}) {
           break;
         case "two-columns":
           newBlockData = {
-            left: { type: "text", content: "", caption: "" },
-            right: { type: "text", content: "", caption: "" },
+            left: { type: "text", content: "", html: "", caption: "" },
+            right: { type: "text", content: "", html: "", caption: "" },
           };
           break;
         case "three-columns":
           newBlockData = {
-            left: { type: "text", content: "", caption: "" },
-            center: { type: "text", content: "", caption: "" },
-            right: { type: "text", content: "", caption: "" },
+            left: { type: "text", content: "", html: "", caption: "" },
+            center: { type: "text", content: "", html: "", caption: "" },
+            right: { type: "text", content: "", html: "", caption: "" },
           };
           break;
         case "link":

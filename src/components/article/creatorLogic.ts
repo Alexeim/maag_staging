@@ -383,6 +383,12 @@ export default function articleCreatorLogic(initialState = {}) {
     getRichTextInitialHtml(block) {
       return getInitialRichTextHtml(block);
     },
+    getColumnRichTextInitialHtml(column) {
+      return getInitialRichTextHtml({
+        html: column?.html,
+        text: column?.content,
+      });
+    },
     tipOptions: [
       { type: "location" as TipType, label: "Локация" },
       { type: "time" as TipType, label: "Время" },
@@ -1155,15 +1161,15 @@ export default function articleCreatorLogic(initialState = {}) {
           break;
         case "two-columns":
           newBlockData = {
-            left: { type: "text", content: "", caption: "" },
-            right: { type: "text", content: "", caption: "" },
+            left: { type: "text", content: "", html: "", caption: "" },
+            right: { type: "text", content: "", html: "", caption: "" },
           };
           break;
         case "three-columns":
           newBlockData = {
-            left: { type: "text", content: "", caption: "" },
-            center: { type: "text", content: "", caption: "" },
-            right: { type: "text", content: "", caption: "" },
+            left: { type: "text", content: "", html: "", caption: "" },
+            center: { type: "text", content: "", html: "", caption: "" },
+            right: { type: "text", content: "", html: "", caption: "" },
           };
           break;
         case "link":
