@@ -9,14 +9,23 @@ interface Props {
   createdAt: string | Date | { toDate: () => Date } | { _seconds: number };
 }
 
-const { category, title, lead = "", authorName, createdAt } = Astro.props as Props;
+const {
+  category,
+  title,
+  lead = "",
+  authorName,
+  createdAt,
+} = Astro.props as Props;
 
 let date: Date;
 
 if (typeof createdAt === "object" && createdAt !== null) {
   if ("toDate" in createdAt && typeof createdAt.toDate === "function") {
     date = createdAt.toDate();
-  } else if ("_seconds" in createdAt && typeof createdAt._seconds === "number") {
+  } else if (
+    "_seconds" in createdAt &&
+    typeof createdAt._seconds === "number"
+  ) {
     date = new Date(createdAt._seconds * 1000);
   } else {
     date = new Date(createdAt as any);
@@ -37,10 +46,14 @@ const formattedDate = !Number.isNaN(date.getTime())
 ---
 
 <header class="flex w-full max-w-[980px] flex-col gap-5">
-  <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+  <p
+    class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']"
+  >
     {category}
   </p>
-  <h1 class="text-3xl leading-tight font-old_standard text-base-content lg:text-[56px]">
+  <h1
+    class="text-3xl leading-tight font-old_standard text-base-content lg:text-[46px]"
+  >
     {title}
   </h1>
 
@@ -52,10 +65,14 @@ const formattedDate = !Number.isNaN(date.getTime())
     )
   }
 
-  <div class="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-base-content/10 pt-5">
+  <div
+    class="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-base-content/10 pt-5"
+  >
     <div class="flex items-center gap-3">
       <AuthorIcon class="h-4 w-4" />
-      <span class="text-base font-thin italic text-base-content font-old_standard lg:text-xl">
+      <span
+        class="text-base font-thin italic text-base-content font-old_standard lg:text-xl"
+      >
         {authorName}
       </span>
     </div>

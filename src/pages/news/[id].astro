@@ -5,10 +5,7 @@ import NewsContent from "@/components/news/NewsContent.astro";
 import NewsHeader from "@/components/news/NewsHeader.astro";
 import NewsStickyImage from "@/components/news/NewsStickyImage.astro";
 import picture1 from "@/assets/images/culture.jpg";
-import {
-  ApiError,
-  newsApi,
-} from "@/lib/api/api";
+import { ApiError, newsApi } from "@/lib/api/api";
 import {
   buildContentCollectionItems,
   fetchPublicContentPools,
@@ -63,11 +60,22 @@ if (!error && articleData) {
     });
 
     const currentCategory = articleData?.category?.toLowerCase?.() ?? null;
-    const relatedNewsIds = new Set(collectionContentItems.filter((i) => i.contentType === "news").map((i) => i.id));
+    const relatedNewsIds = new Set(
+      collectionContentItems
+        .filter((i) => i.contentType === "news")
+        .map((i) => i.id),
+    );
     sameCategoryItems = allNews
       .filter((i) => i.id !== id && !relatedNewsIds.has(i.id))
-      .filter((i) => !currentCategory || i?.category?.toLowerCase() === currentCategory)
-      .sort((a, b) => (toDate(b?.createdAt)?.getTime() ?? 0) - (toDate(a?.createdAt)?.getTime() ?? 0))
+      .filter(
+        (i) =>
+          !currentCategory || i?.category?.toLowerCase() === currentCategory,
+      )
+      .sort(
+        (a, b) =>
+          (toDate(b?.createdAt)?.getTime() ?? 0) -
+          (toDate(a?.createdAt)?.getTime() ?? 0),
+      )
       .slice(0, 12)
       .map((item) => ({ ...item }));
   } catch (e) {
@@ -85,20 +93,20 @@ if (!error && articleData) {
   <main class="bg-base-200 min-h-screen">
     <div class="max-w-[1512px] mx-auto px-4 lg:px-8">
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}
-      {!error && articleData && (
-        <>
-          <div class="pb-[100px] pt-[50px]">
-            <NewsHeader
-              category={displayArticle.category}
-              title={displayArticle.title}
-              lead={displayArticle.lead}
-              authorName={displayArticle.authorName}
-              createdAt={articleData.createdAt}
-            />
+      {
+        !error && articleData && (
+          <>
+            <div class="pb-[100px] pt-[50px]">
+              <NewsHeader
+                category={displayArticle.category}
+                title={displayArticle.title}
+                lead={displayArticle.lead}
+                authorName={displayArticle.authorName}
+                createdAt={articleData.createdAt}
+              />
 
-            <section class="mt-10 grid grid-cols-1 items-start gap-10 lg:mt-14 lg:grid-cols-12 lg:gap-12">
-              {
-                displayArticle.imageUrl ? (
+              <section class="mt-2 grid grid-cols-1 items-start gap-10 lg:mt-6 lg:grid-cols-12 lg:gap-12">
+                {displayArticle.imageUrl ? (
                   <div class="self-start lg:col-span-5 lg:sticky lg:top-[110px]">
                     <NewsStickyImage
                       src={displayArticle.imageUrl}
@@ -108,29 +116,29 @@ if (!error && articleData) {
                       transitionAliases={transitionAliases}
                     />
                   </div>
-                ) : null
-              }
+                ) : null}
 
-              <div
-                class:list={[
-                  "lg:min-w-0",
-                  displayArticle.imageUrl
-                    ? "lg:col-span-7"
-                    : "lg:col-span-8 lg:col-start-3",
-                ]}
-              >
-                <NewsContent contentBlocks={displayArticle.contentBlocks} />
-              </div>
-            </section>
+                <div
+                  class:list={[
+                    "lg:min-w-0",
+                    displayArticle.imageUrl
+                      ? "lg:col-span-7"
+                      : "lg:col-span-8 lg:col-start-3",
+                  ]}
+                >
+                  <NewsContent contentBlocks={displayArticle.contentBlocks} />
+                </div>
+              </section>
 
-            <ContentCollectionMarquee
-              collectionItems={collectionContentItems}
-              categoryItems={sameCategoryItems}
-              fallbackImageSrc={picture1.src}
-            />
-          </div>
-        </>
-      )}
+              <ContentCollectionMarquee
+                collectionItems={collectionContentItems}
+                categoryItems={sameCategoryItems}
+                fallbackImageSrc={picture1.src}
+              />
+            </div>
+          </>
+        )
+      }
     </div>
   </main>
 </Layout>

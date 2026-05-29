@@ -17,11 +17,11 @@ const {
 ---
 
 <figure class="grid gap-3">
-  <div class="overflow-hidden bg-base-100">
+  <div class="overflow-hidden bg-base-100 lg:flex lg:justify-center">
     <img
       src={src}
       alt={alt}
-      class="block h-auto max-h-[70vh] w-full object-cover lg:h-[calc(100vh-150px)] lg:max-h-none"
+      class="block h-auto max-h-[70vh] w-full object-cover lg:w-auto lg:max-w-full lg:max-h-[calc((100vh-150px)*0.75)] lg:object-contain"
       transition:name={transitionName}
     />
   </div>
