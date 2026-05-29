@@ -185,15 +185,21 @@ let leSaviezVousArticle: any = null;
 let parisPagePlacements: ParisPagePlacementsResponse | null = null;
 
 try {
-  const [articles, flippers, guides, visualStories, newsItemsRaw, parisPagePlacementsResponse] =
-    await Promise.all([
-      articlesApi.list(),
-      flippersApi.list(),
-      guidesApi.list(),
-      visualStoriesApi.list(),
-      newsApi.list(),
-      editorialPlacementsApi.getParisPage().catch(() => null),
-    ]);
+  const [
+    articles,
+    flippers,
+    guides,
+    visualStories,
+    newsItemsRaw,
+    parisPagePlacementsResponse,
+  ] = await Promise.all([
+    articlesApi.list(),
+    flippersApi.list(),
+    guidesApi.list(),
+    visualStoriesApi.list(),
+    newsApi.list(),
+    editorialPlacementsApi.getParisPage().catch(() => null),
+  ]);
 
   parisPagePlacements = parisPagePlacementsResponse;
 
@@ -212,13 +218,18 @@ try {
       (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
     );
 
-  const leSaviezVousFeaturePlacement = parisPagePlacements?.leSaviezVousFeature ?? null;
-  if (!parisPagePlacements || leSaviezVousFeaturePlacement?.mode === "auto-latest") {
+  const leSaviezVousFeaturePlacement =
+    parisPagePlacements?.leSaviezVousFeature ?? null;
+  if (
+    !parisPagePlacements ||
+    leSaviezVousFeaturePlacement?.mode === "auto-latest"
+  ) {
     leSaviezVousArticle = leSaviezVousArticles[0] ?? null;
   } else if (leSaviezVousFeaturePlacement?.mode === "manual") {
     leSaviezVousArticle =
       articles.find(
-        (a) => isLeSaviezVousArticle(a) && a.id === leSaviezVousFeaturePlacement.id,
+        (a) =>
+          isLeSaviezVousArticle(a) && a.id === leSaviezVousFeaturePlacement.id,
       ) ?? null;
   } else {
     leSaviezVousArticle = null;
@@ -274,12 +285,16 @@ try {
   if (heroPlacement?.mode === "manual") {
     primaryParisArticle =
       allParisItems.find(
-        (item) => item.id === heroPlacement.id && item.contentType === heroPlacement.type,
+        (item) =>
+          item.id === heroPlacement.id &&
+          item.contentType === heroPlacement.type,
       ) ?? null;
   } else {
     // fallback during migration: isMainInCategory or first item
     primaryParisArticle =
-      topItems.find((item) => isMainInCategoryItem(item)) ?? topItems[0] ?? null;
+      topItems.find((item) => isMainInCategoryItem(item)) ??
+      topItems[0] ??
+      null;
   }
 
   const topWithoutPrimary = topItems.filter((item) =>
@@ -297,7 +312,10 @@ try {
       .map(({ type, id }) => itemsByKey.get(`${type}:${id}`))
       .filter(Boolean);
   } else {
-    secondaryStories = topWithoutPrimary.slice(0, secondaryPlacement.limit ?? 4);
+    secondaryStories = topWithoutPrimary.slice(
+      0,
+      secondaryPlacement.limit ?? 4,
+    );
   }
 
   const topIds = new Set(
@@ -329,7 +347,10 @@ const editorialCarouselItems = parisFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
 const splitTitle = (t: string) => {
   const s = t.trimEnd();
   const i = s.lastIndexOf(" ");
-  return { start: i >= 0 ? s.slice(0, i) : "", last: i >= 0 ? s.slice(i + 1) : s };
+  return {
+    start: i >= 0 ? s.slice(0, i) : "",
+    last: i >= 0 ? s.slice(i + 1) : s,
+  };
 };
 
 const primaryParisTrunc = primaryParisArticle
@@ -354,7 +375,7 @@ const leSaviezSplit = splitTitle(leSaviezTrunc);
       class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
     >
       <h1
-        class="text-3xl lg:text-[28px] font-old_standard font-normal uppercase tracking-[0.46em] text-base-content w-full mb-10"
+        class="text-3xl lg:text-[28px] font-old_standard font-semibold uppercase tracking-[0.46em] text-base-content w-full mb-10"
       >
         Париж
       </h1>
@@ -392,10 +413,17 @@ const leSaviezSplit = splitTitle(leSaviezTrunc);
                     <h2 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
                       {primaryParisArticle.paid ? (
                         <>
-                          {primaryParisSplit.start && <>{primaryParisSplit.start}{" "}</>}
-                          <span class="whitespace-nowrap">{primaryParisSplit.last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                          {primaryParisSplit.start && (
+                            <>{primaryParisSplit.start} </>
+                          )}
+                          <span class="whitespace-nowrap">
+                            {primaryParisSplit.last}{" "}
+                            <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                          </span>
                         </>
-                      ) : primaryParisTrunc}
+                      ) : (
+                        primaryParisTrunc
+                      )}
                     </h2>
                   </a>
 
@@ -453,10 +481,15 @@ const leSaviezSplit = splitTitle(leSaviezTrunc);
                             const { start, last } = splitTitle(t);
                             return item.paid ? (
                               <>
-                                {start && <>{start}{" "}</>}
-                                <span class="whitespace-nowrap">{last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                                {start && <>{start} </>}
+                                <span class="whitespace-nowrap">
+                                  {last}{" "}
+                                  <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                                </span>
                               </>
-                            ) : t;
+                            ) : (
+                              t
+                            );
                           })()}
                         </h3>
                       </a>
@@ -518,10 +551,15 @@ const leSaviezSplit = splitTitle(leSaviezTrunc);
                       <h2 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
                         {leSaviezVousArticle.paid ? (
                           <>
-                            {leSaviezSplit.start && <>{leSaviezSplit.start}{" "}</>}
-                            <span class="whitespace-nowrap">{leSaviezSplit.last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                            {leSaviezSplit.start && <>{leSaviezSplit.start} </>}
+                            <span class="whitespace-nowrap">
+                              {leSaviezSplit.last}{" "}
+                              <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                            </span>
                           </>
-                        ) : leSaviezTrunc}
+                        ) : (
+                          leSaviezTrunc
+                        )}
                       </h2>
                     </a>
 
@@ -633,10 +671,15 @@ const leSaviezSplit = splitTitle(leSaviezTrunc);
                               const { start, last } = splitTitle(t);
                               return item.paid ? (
                                 <>
-                                  {start && <>{start}{" "}</>}
-                                  <span class="whitespace-nowrap">{last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                                  {start && <>{start} </>}
+                                  <span class="whitespace-nowrap">
+                                    {last}{" "}
+                                    <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                                  </span>
                                 </>
-                              ) : t;
+                              ) : (
+                                t
+                              );
                             })()}
                           </h3>
                         </a>
@@ -671,7 +714,11 @@ const leSaviezSplit = splitTitle(leSaviezTrunc);
                                 alt={item.title}
                                 class="linked-image-hover__media block h-full w-full object-cover"
                                 loading="lazy"
-                                transition:name={i < editorialCarouselItems.length ? getTransitionName(item) : undefined}
+                                transition:name={
+                                  i < editorialCarouselItems.length
+                                    ? getTransitionName(item)
+                                    : undefined
+                                }
                               />
                             </a>
 
@@ -688,7 +735,9 @@ const leSaviezSplit = splitTitle(leSaviezTrunc);
                               >
                                 <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
                                   {truncateText(item.title, 72)}{" "}
-                                  {item.paid && <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />}
+                                  {item.paid && (
+                                    <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                                  )}
                                 </h3>
                               </a>
 

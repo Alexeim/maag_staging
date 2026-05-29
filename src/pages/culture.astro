@@ -215,16 +215,15 @@ try {
     visualStories,
     newsItemsRaw,
     culturePagePlacementsResponse,
-  ] =
-    await Promise.all([
-      articlesApi.list(),
-      interviewsApi.list(),
-      flippersApi.list(),
-      guidesApi.list(),
-      visualStoriesApi.list(),
-      newsApi.list(),
-      editorialPlacementsApi.getCulturePage().catch(() => null),
-    ]);
+  ] = await Promise.all([
+    articlesApi.list(),
+    interviewsApi.list(),
+    flippersApi.list(),
+    guidesApi.list(),
+    visualStoriesApi.list(),
+    newsApi.list(),
+    editorialPlacementsApi.getCulturePage().catch(() => null),
+  ]);
 
   culturePagePlacements = culturePagePlacementsResponse;
 
@@ -289,12 +288,16 @@ try {
   if (heroPlacement?.mode === "manual") {
     primaryCultureArticle =
       allCultureItems.find(
-        (item) => item.id === heroPlacement.id && item.contentType === heroPlacement.type,
+        (item) =>
+          item.id === heroPlacement.id &&
+          item.contentType === heroPlacement.type,
       ) ?? null;
   } else {
     // fallback during migration: isMainInCategory or first item
     primaryCultureArticle =
-      topItems.find((item) => isMainInCategoryItem(item)) ?? topItems[0] ?? null;
+      topItems.find((item) => isMainInCategoryItem(item)) ??
+      topItems[0] ??
+      null;
   }
 
   const topWithoutPrimary = topItems.filter((item) =>
@@ -312,7 +315,10 @@ try {
       .map(({ type, id }) => itemsByKey.get(`${type}:${id}`))
       .filter(Boolean);
   } else {
-    secondaryStories = topWithoutPrimary.slice(0, secondaryPlacement.limit ?? 4);
+    secondaryStories = topWithoutPrimary.slice(
+      0,
+      secondaryPlacement.limit ?? 4,
+    );
   }
 
   const topIds = new Set(
@@ -333,7 +339,8 @@ try {
   } else if (interviewPlacement?.mode === "manual") {
     featuredInterview =
       allCultureItems.find(
-        (item) => item.contentType === "interview" && item.id === interviewPlacement.id,
+        (item) =>
+          item.contentType === "interview" && item.id === interviewPlacement.id,
       ) ?? null;
   } else {
     featuredInterview = null;
@@ -373,7 +380,10 @@ const featuredInterviewName =
 const splitTitle = (t: string) => {
   const s = t.trimEnd();
   const i = s.lastIndexOf(" ");
-  return { start: i >= 0 ? s.slice(0, i) : "", last: i >= 0 ? s.slice(i + 1) : s };
+  return {
+    start: i >= 0 ? s.slice(0, i) : "",
+    last: i >= 0 ? s.slice(i + 1) : s,
+  };
 };
 
 const primaryCultureTrunc = primaryCultureArticle
@@ -393,7 +403,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
       class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
     >
       <h1
-        class="text-3xl lg:text-[28px] font-old_standard font-normal uppercase tracking-[0.46em] text-base-content w-full mb-10"
+        class="text-3xl lg:text-[28px] font-old_standard font-semibold uppercase tracking-[0.46em] text-base-content w-full mb-10"
       >
         Культура
       </h1>
@@ -431,10 +441,17 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                     <h2 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
                       {primaryCultureArticle.paid ? (
                         <>
-                          {primaryCultureSplit.start && <>{primaryCultureSplit.start}{" "}</>}
-                          <span class="whitespace-nowrap">{primaryCultureSplit.last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                          {primaryCultureSplit.start && (
+                            <>{primaryCultureSplit.start} </>
+                          )}
+                          <span class="whitespace-nowrap">
+                            {primaryCultureSplit.last}{" "}
+                            <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                          </span>
                         </>
-                      ) : primaryCultureTrunc}
+                      ) : (
+                        primaryCultureTrunc
+                      )}
                     </h2>
                   </a>
 
@@ -492,10 +509,15 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                             const { start, last } = splitTitle(t);
                             return item.paid ? (
                               <>
-                                {start && <>{start}{" "}</>}
-                                <span class="whitespace-nowrap">{last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                                {start && <>{start} </>}
+                                <span class="whitespace-nowrap">
+                                  {last}{" "}
+                                  <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                                </span>
                               </>
-                            ) : t;
+                            ) : (
+                              t
+                            );
                           })()}
                         </h3>
                       </a>
@@ -621,10 +643,15 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                             const { start, last } = splitTitle(t);
                             return item.paid ? (
                               <>
-                                {start && <>{start}{" "}</>}
-                                <span class="whitespace-nowrap">{last}{" "}<MaagLogoPaid class="w-4 h-4 inline-block align-baseline" /></span>
+                                {start && <>{start} </>}
+                                <span class="whitespace-nowrap">
+                                  {last}{" "}
+                                  <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                                </span>
                               </>
-                            ) : t;
+                            ) : (
+                              t
+                            );
                           })()}
                         </h3>
                       </a>
@@ -671,7 +698,11 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                                     "rounded-full",
                                 ]}
                                 loading="lazy"
-                                transition:name={i < editorialCarouselItems.length ? getTransitionName(item) : undefined}
+                                transition:name={
+                                  i < editorialCarouselItems.length
+                                    ? getTransitionName(item)
+                                    : undefined
+                                }
                               />
                             </a>
 
@@ -694,7 +725,9 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                               >
                                 <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
                                   {truncateText(item.title, 72)}{" "}
-                                  {item.paid && <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />}
+                                  {item.paid && (
+                                    <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                                  )}
                                 </h3>
                               </a>
 

@@ -307,6 +307,7 @@ const heroImageCaption =
         right: 30px;
         bottom: 30px;
         display: flex;
+        align-items: center;
         gap: 10px;
         z-index: 10;
       }
@@ -339,12 +340,10 @@ const heroImageCaption =
 
       /* ── back link ────────────────────────────────── */
       .back-link {
-        position: fixed;
-        left: 30px;
-        top: 30px;
-        z-index: 10;
         text-decoration: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         transition: transform 0.2s ease-out;
       }
 
@@ -432,10 +431,6 @@ const heroImageCaption =
           right: 16px;
           bottom: 16px;
         }
-        .back-link {
-          left: 16px;
-          top: 16px;
-        }
       }
     </style>
   </head>
@@ -448,10 +443,6 @@ const heroImageCaption =
         </div>
       ) : (
         <main class="story">
-          <a href="/" class="back-link">
-            <img src={logo.src} alt="Maag logo" class="w-10" />
-          </a>
-
           <div class="slider" id="slider">
             {/* ── Hero slide ──────────────────────────── */}
             <section class="slide">
@@ -528,6 +519,9 @@ const heroImageCaption =
           </div>
 
           <div class="nav">
+            <a href="/" class="back-link" aria-label="На главную">
+              <img src={logo.src} alt="Maag logo" class="w-10" />
+            </a>
             <button
               id="prev-button"
               type="button"
