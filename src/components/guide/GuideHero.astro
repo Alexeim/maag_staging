@@ -39,18 +39,18 @@ const imageSrc = imageUrl
   : null;
 ---
 
-<section class="w-full px-4 pt-8 pb-12 sm:px-6 lg:px-10 lg:pt-12 lg:pb-16">
-  <div class="overflow-hidden">
+<section class="w-full px-4 sm:px-6 lg:px-10">
+  <div class="h-[calc(100svh-80px)] overflow-hidden lg:h-[calc(100svh-90px)]">
     <div
       class:list={[
-        "grid items-stretch",
+        "grid h-full items-stretch",
         imageUrl
           ? "lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]"
           : "grid-cols-1",
       ]}
     >
       <div
-        class="flex min-h-[420px] flex-col justify-center px-6 py-10 text-center text-base-content sm:px-10 lg:min-h-[760px] lg:px-16 xl:px-24"
+        class="flex h-full flex-col justify-center px-6 py-10 text-center text-base-content sm:px-10 lg:px-16 xl:px-24"
       >
         <p
           class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm"
@@ -64,7 +64,7 @@ const imageSrc = imageUrl
         </h1>
         {
           lead && (
-            <p class="mx-auto mt-10 max-w-[34rem] font-article-body text-lg font-light leading-[1.4] tracking-[0.01em] text-base-content/80 sm:text-xl lg:text-2xl">
+            <p class="mx-auto mt-10 max-w-[34rem] font-article-body text-lg font-light text-base-content">
               {lead}
             </p>
           )
@@ -81,7 +81,7 @@ const imageSrc = imageUrl
       {
         imageUrl && (
           <div class="flex h-full flex-col bg-white">
-            <div class="min-h-[320px] flex-1 lg:min-h-[760px]">
+            <div class="h-full">
               {typeof imageUrl === "string" ? (
                 <img
                   src={imageUrl}
@@ -108,7 +108,7 @@ const imageSrc = imageUrl
       }
     </div>
   </div>
-  <hr class="mt-4 w-full border-t border-neutral-200" />
+  <hr class="mt-10 w-full border-t border-neutral-200 lg:mt-16" />
 
   {
     transitionAliases.map((alias) => (
