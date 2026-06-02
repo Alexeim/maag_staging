@@ -1,20 +1,9 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
-import {
-  interviewsApi,
-  articlesApi,
-  eventsApi,
-  flippersApi,
-  guidesApi,
-  newsApi,
-  visualStoriesApi,
-} from "../../lib/api/api";
-import ArticleHeader from "../../components/article/ArticleHeader.astro";
-import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
-import ArticleImage from "@/components/article/ArticleImage.astro";
-import ArticleDate from "../../components/article/ArticleDate.astro";
+import { interviewsApi } from "../../lib/api/api";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
+import InterviewHero from "@/components/interview/InterviewHero.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import {
   buildContentCollectionItems,
@@ -42,11 +31,9 @@ if (!interview) {
 const {
   title,
   author,
-  interviewee,
   content,
   imageUrl,
   imageCaption,
-  tags,
   lead,
 } = interview;
 const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
@@ -86,44 +73,30 @@ try {
 >
   <main class="bg-base-200 min-h-screen">
     <div class="max-w-[1512px] mx-auto">
-      <div
-        class="pt-[50px] pb-[70px] flex flex-col items-center gap-[50px] px-4 lg:px-0"
-      >
-        <div class="flex flex-col gap-4 max-w-[825px] w-full">
-          <ArticleHeader category={"Интервью"} title={title} lead={lead} />
-          <div class="flex flex-row items-center justify-start gap-4">
-            <ArticleAuthor name={authorName} avatarUrl={author?.avatar} />
-            <div>·</div>
-            <ArticleDate createdAt={interview.createdAt} />
-          </div>
-        </div>
+      <InterviewHero
+        category="Интервью"
+        title={title}
+        lead={lead}
+        authorName={authorName}
+        authorAvatar={author?.avatar}
+        createdAt={interview.createdAt}
+        imageUrl={imageUrl}
+        imageAlt={imageCaption || title}
+        imageCaption={imageCaption}
+        transitionName={`main-article-image-${id}`}
+        transitionAliases={transitionAliases}
+      />
 
-        {
-          imageUrl && (
-            <ArticleImage
-              src={imageUrl}
-              alt={imageCaption || title}
-              caption={imageCaption}
-              transitionName={`main-article-image-${id}`}
-              transitionAliases={transitionAliases}
-              figureClass="max-w-[1200px]"
-              imageClass="shadow-lg"
-              figcaptionClass="text-center font-oswald text-sm text-gray-500 mt-2"
-            />
-          )
-        }
-
-        <div class="w-full px-4 lg:px-14 pb-[100px]">
-          <ArticleBody
-            contentBlocks={Array.isArray(content) ? content : []}
-            linkedContentLookup={linkedContentLookup}
-          />
-          <ContentCollectionMarquee
-            collectionItems={collectionContentItems}
-            categoryItems={recentInterviewItems}
-            fallbackImageSrc={picture1.src}
-          />
-        </div>
+      <div class="px-4 pb-[100px] pt-10 sm:px-6 lg:px-14 lg:pt-16">
+        <ArticleBody
+          contentBlocks={Array.isArray(content) ? content : []}
+          linkedContentLookup={linkedContentLookup}
+        />
+        <ContentCollectionMarquee
+          collectionItems={collectionContentItems}
+          categoryItems={recentInterviewItems}
+          fallbackImageSrc={picture1.src}
+        />
       </div>
     </div>
   </main>
