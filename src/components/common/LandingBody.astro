@@ -576,8 +576,11 @@ const splitTitle = (t: string) => {
 ---
 
 <section
-  class="w-full max-w-[1440px] mx-auto px-4 lg:px-8 bg-base-200 mt-0 pb-12 overflow-hidden"
+  class="relative w-full max-w-[1440px] mx-auto px-4 pt-8 lg:px-8 bg-base-200 mt-0 pb-12 overflow-x-hidden overflow-y-visible"
 >
+  <div class="w-full mb-8">
+    <hr class="h-px border-1" />
+  </div>
   <div
     class="grid grid-cols-1 lg:grid-cols-12 min-h-[200px] gap-6 lg:gap-4 mb-0 lg:mb-6"
   >
@@ -737,19 +740,17 @@ const splitTitle = (t: string) => {
       <div class="flex flex-row"></div>
     </div>
     <div
-      class="order-1 lg:order-none lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
+      class="relative z-10 order-1 lg:order-none lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
     >
-      <div id="netlenka-container">
-        <h3
-          class="relative mb-6 h-[88px] overflow-visible text-black lg:h-[102px]"
-        >
+      <div id="netlenka-container" class="relative z-10">
+        <h3 class="relative z-10 mb-6 overflow-visible text-black">
           <span
-            class="absolute bottom-0 left-0 font-old_standard text-lg font-semibold uppercase leading-none tracking-[0.3em]"
+            class="relative z-[1] block font-old_standard text-lg font-semibold uppercase leading-none tracking-[0.3em]"
           >
             ВЫБОР
           </span>
           <MaagLogoMobile
-            class="absolute left-[105px] top-[10px] w-[120px] max-w-none lg:left-[110px] lg:top-[23px] lg:w-[142px]"
+            class="pointer-events-none absolute z-20 left-[105px] top-[-57px] w-[120px] max-w-none lg:left-[110px] lg:top-[-57px] lg:w-[142px]"
           />
         </h3>
         <div
