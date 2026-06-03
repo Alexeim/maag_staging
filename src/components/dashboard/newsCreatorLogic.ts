@@ -28,6 +28,7 @@ import {
 } from "@/lib/utils/contentBlockPreview";
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
+import { compressImage } from "@/lib/images/compressImage";
 
 const storage = getStorage(app);
 
@@ -413,13 +414,14 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     },
 
     // Image upload
-    handleImageUpload(event: Event) {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (!file) return;
+    async handleImageUpload(event: Event) {
+      const raw = (event.target as HTMLInputElement).files?.[0];
+      if (!raw) return;
 
       this.uploading = true;
       this.uploadProgress = 0;
 
+      const file = await compressImage(raw);
       const storageRef = ref(storage, `articles/${Date.now()}-${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
 

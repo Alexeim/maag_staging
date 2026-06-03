@@ -37,6 +37,7 @@ import {
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
+import { compressImage } from "@/lib/images/compressImage";
 
 const storage = getStorage(app);
 
@@ -773,13 +774,14 @@ export default function guideCreatorLogic(initialState = {}) {
       this.isEditingCaption = false;
     },
 
-    handleImageUpload(event, isCover = true, blockIndex = null, column = null) {
-      const file = event.target.files[0];
-      if (!file) return;
+    async handleImageUpload(event, isCover = true, blockIndex = null, column = null) {
+      const raw = event.target.files[0];
+      if (!raw) return;
 
       this.uploading = true;
       this.uploadProgress = 0;
 
+      const file = await compressImage(raw);
       const storageRef = ref(storage, `guides/${Date.now()}-${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -864,13 +866,14 @@ export default function guideCreatorLogic(initialState = {}) {
       );
     },
 
-    handleFlipperSlideUpload(event, slideIndex: number) {
-      const file = event.target.files[0];
-      if (!file) return;
+    async handleFlipperSlideUpload(event, slideIndex: number) {
+      const raw = event.target.files[0];
+      if (!raw) return;
 
       this.uploading = true;
       this.uploadProgress = 0;
 
+      const file = await compressImage(raw);
       const storageRef = ref(storage, `guides/${Date.now()}-${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
 

@@ -20,6 +20,7 @@ import {
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
+import { compressImage } from "@/lib/images/compressImage";
 
 const storage = getStorage(app);
 
@@ -314,14 +315,15 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       }
     },
 
-    handleCoverImageUpload(event: Event) {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (!file) return;
+    async handleCoverImageUpload(event: Event) {
+      const raw = (event.target as HTMLInputElement).files?.[0];
+      if (!raw) return;
 
       this.uploading = true;
       this.uploadingSlideIndex = null;
       this.uploadProgress = 0;
 
+      const file = await compressImage(raw);
       const storageRef = ref(storage, `visual-stories/${Date.now()}-${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -345,14 +347,15 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       );
     },
 
-    handleSlideImageUpload(event: Event, slideIndex: number) {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (!file) return;
+    async handleSlideImageUpload(event: Event, slideIndex: number) {
+      const raw = (event.target as HTMLInputElement).files?.[0];
+      if (!raw) return;
 
       this.uploading = true;
       this.uploadingSlideIndex = slideIndex;
       this.uploadProgress = 0;
 
+      const file = await compressImage(raw);
       const storageRef = ref(storage, `visual-stories/${Date.now()}-${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
 

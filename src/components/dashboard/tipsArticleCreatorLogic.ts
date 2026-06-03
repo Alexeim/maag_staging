@@ -16,6 +16,7 @@ import {
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
+import { compressImage } from "@/lib/images/compressImage";
 
 const storage = getStorage(app);
 
@@ -489,9 +490,10 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       });
     },
 
-    _uploadFile(file: File, folder: string, onSuccess: (url: string) => void) {
+    async _uploadFile(raw: File, folder: string, onSuccess: (url: string) => void) {
       this.uploading = true;
       this.uploadProgress = 0;
+      const file = await compressImage(raw);
       const storageRef = ref(storage, `${folder}/${Date.now()}-${file.name}`);
       const task = uploadBytesResumable(storageRef, file);
 

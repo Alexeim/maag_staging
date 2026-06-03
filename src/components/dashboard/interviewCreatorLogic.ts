@@ -40,6 +40,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
+import { compressImage } from "@/lib/images/compressImage";
 
 const storage = getStorage(app);
 
@@ -487,13 +488,14 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.isEditingCaption = false;
     },
 
-    handleImageUpload(event, isCover = true, blockIndex = null, column = null) {
-      const file = event.target.files[0];
-      if (!file) return;
+    async handleImageUpload(event, isCover = true, blockIndex = null, column = null) {
+      const raw = event.target.files[0];
+      if (!raw) return;
 
       this.uploading = true;
       this.uploadProgress = 0;
 
+      const file = await compressImage(raw);
       const storageRef = ref(storage, `interviews/${Date.now()}-${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -568,13 +570,14 @@ export default function interviewCreatorLogic(initialState = {}) {
     },
 
     // Uploads a slide image for a flipper block being edited
-    handleFlipperSlideUpload(event, slideIndex: number) {
-      const file = event.target.files[0];
-      if (!file) return;
+    async handleFlipperSlideUpload(event, slideIndex: number) {
+      const raw = event.target.files[0];
+      if (!raw) return;
 
       this.uploading = true;
       this.uploadProgress = 0;
 
+      const file = await compressImage(raw);
       const storageRef = ref(storage, `interviews/${Date.now()}-${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
 

@@ -16,6 +16,7 @@ import {
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
+import { compressImage } from "@/lib/images/compressImage";
 
 const storage = getStorage(app);
 
@@ -370,12 +371,13 @@ export default function flipperCreatorLogic(initialState = {}) {
     removeCarouselItem(index: number) {
       this.flipper.carouselContent.splice(index, 1);
     },
-    handleImageUpload(event, index) {
-      const file = event.target.files[0];
-      if (!file) return;
+    async handleImageUpload(event, index) {
+      const raw = event.target.files[0];
+      if (!raw) return;
       this.uploading = true;
       this.uploadingIndex = index;
       this.uploadProgress = 0;
+      const file = await compressImage(raw);
       const storageRef = ref(storage, `flippers/${Date.now()}-${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
       uploadTask.on("state_changed", (snapshot) => {
