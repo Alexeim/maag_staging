@@ -36,8 +36,8 @@ import Input from "@/components/common/Input.astro";
       <form @submit.prevent="handleSubmit">
         <h2 class="text-2xl font-bold mb-6 text-center">Войти</h2>
         <div class="space-y-4">
-          <Input type="email" name="email" placeholder="Email" :value="formData.email" required />
-          <Input type="password" name="password" placeholder="Password" :value="formData.password" required />
+          <Input type="email" name="email" placeholder="Почта" :value="formData.email" required />
+          <Input type="password" name="password" placeholder="Пароль" :value="formData.password" required />
         </div>
         <div class="mt-6">
           <Button type="submit" class="w-full" :disabled="isLoading">
@@ -61,9 +61,9 @@ import Input from "@/components/common/Input.astro";
         <div class="space-y-4">
           <Input type="text" name="firstName" placeholder="Имя" :value="formData.firstName" required />
           <Input type="text" name="lastName" placeholder="Фамилия" :value="formData.lastName" required />
-          <Input type="email" name="email" placeholder="Email" :value="formData.email" required />
-          <Input type="password" name="password" placeholder="Password" :value="formData.password" required />
-          <Input type="password" name="confirmPassword" placeholder="Подтвердить Password" :value="formData.confirmPassword" required />
+          <Input type="email" name="email" placeholder="Почта" :value="formData.email" required />
+          <Input type="password" name="password" placeholder="Пароль" :value="formData.password" required />
+          <Input type="password" name="confirmPassword" placeholder="Подтвердить пароль" :value="formData.confirmPassword" required />
         </div>
         <div class="mt-6">
           <Button type="submit" class="w-full" :disabled="isLoading">

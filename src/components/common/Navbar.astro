@@ -121,7 +121,7 @@ const currentPath = Astro.url.pathname;
     <!-- Mobile Controls -->
     <div x-data="{}" class="flex items-center gap-4 lg:hidden">
       <button type="button" class="p-2">
-        <img src={searchIcon.src} alt="Search" class="h-5 w-5" />
+        <img src={searchIcon.src} alt="Поиск" class="h-5 w-5" />
       </button>
       <button
         type="button"
@@ -130,14 +130,14 @@ const currentPath = Astro.url.pathname;
         aria-controls="mobile-menu"
         x-bind:aria-expanded="$store.navbar.isOpen"
       >
-        <img src={burgerIcon.src} alt="Toggle navigation" class="h-5 w-5" />
+        <img src={burgerIcon.src} alt="Открыть меню" class="h-5 w-5" />
       </button>
     </div>
 
     <!-- Right Side -->
     <div class="hidden lg:flex items-center gap-[19px]">
       <button class="p-2">
-        <img src={searchIcon.src} alt="Search" class="h-5 w-5" />
+        <img src={searchIcon.src} alt="Поиск" class="h-5 w-5" />
       </button>
       <button class="p-2">
         <Instagram class="h-6 w-6" />

@@ -1,0 +1,260 @@
+---
+import Layout from "../../Layouts/Layout.astro";
+
+interface LegalFrontmatter {
+  title: string;
+  description: string;
+  updatedAt: string;
+  effectiveDate?: string;
+}
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface MarkdownDocument {
+  frontmatter: LegalFrontmatter;
+  Content: any;
+  getHeadings(): Heading[];
+}
+
+interface Props {
+  markdownDocument: MarkdownDocument;
+}
+
+const { markdownDocument } = Astro.props;
+const { frontmatter, Content } = markdownDocument;
+const headings = markdownDocument
+  .getHeadings()
+  .filter((heading) => heading.depth >= 2 && heading.depth <= 3);
+---
+
+<Layout
+  navbarVariant="default"
+  includePreFooterCTA={false}
+  title={`${frontmatter.title} | Maag France`}
+  useClientRouter={true}
+>
+  <main class="min-h-screen bg-base-200 text-base-content">
+    <div class="mx-auto w-full max-w-[1400px] px-4 pb-20 pt-10 lg:px-10 lg:pb-28 lg:pt-14">
+      <section class="pb-10 lg:pb-14">
+        <div class="max-w-[62rem]">
+          <p class="font-inter text-xs font-bold uppercase tracking-[0.28em] text-accent">
+            Документы
+          </p>
+          <h1 class="mt-5 font-old_standard text-[2.8rem] leading-[1.02] text-base-content lg:text-[4.1rem]">
+            {frontmatter.title}
+          </h1>
+          <p class="mt-6 max-w-[46rem] font-inter text-base leading-[1.8] text-base-content/72 lg:text-lg">
+            {frontmatter.description}
+          </p>
+          <div class="mt-6 flex flex-col gap-2 font-inter text-xs uppercase tracking-[0.22em] text-base-content/55 lg:flex-row lg:gap-6">
+            <span>Обновлено: {frontmatter.updatedAt}</span>
+            {frontmatter.effectiveDate && (
+              <span>Действует с: {frontmatter.effectiveDate}</span>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <div class="border-t border-base-content/15 pt-5 lg:hidden">
+        <details class="border border-base-content/10 bg-white/55">
+          <summary class="flex cursor-pointer list-none items-center justify-between px-5 py-4 font-old_standard text-[1.15rem] uppercase tracking-[0.16em] text-base-content">
+            Содержание
+            <span class="font-inter text-[0.65rem] uppercase tracking-[0.22em] text-base-content/50">
+              Открыть
+            </span>
+          </summary>
+          <nav class="border-t border-base-content/10 px-3 py-3">
+            <ul class="space-y-1">
+              {headings.map((heading) => (
+                <li>
+                  <a
+                    href={`#${heading.slug}`}
+                    class:list={[
+                      "block border-l border-transparent px-3 py-2 font-inter text-sm leading-[1.45] text-base-content/68 transition-colors hover:border-base-content/20 hover:bg-black/[0.025] hover:text-base-content",
+                      heading.depth === 3 && "pl-6 text-xs uppercase tracking-[0.16em] text-base-content/52",
+                    ]}
+                  >
+                    {heading.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </details>
+      </div>
+
+      <div class="mt-6 grid gap-x-12 gap-y-8 lg:mt-0 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
+        <aside class="hidden lg:sticky lg:top-[116px] lg:block lg:self-start">
+          <div class="border-t border-base-content/15 pt-4">
+            <div class="border border-base-content/10 bg-white/55">
+              <div class="border-b border-base-content/10 px-5 py-4">
+                <h2 class="font-old_standard text-[1.25rem] uppercase tracking-[0.16em] text-base-content">
+                  Содержание
+                </h2>
+              </div>
+              <nav class="px-3 py-3">
+                <ul class="space-y-1">
+                  {headings.map((heading) => (
+                    <li>
+                      <a
+                        href={`#${heading.slug}`}
+                        class:list={[
+                          "block border-l border-transparent px-3 py-2 font-inter text-sm leading-[1.45] text-base-content/68 transition-colors hover:border-base-content/20 hover:bg-black/[0.025] hover:text-base-content",
+                          heading.depth === 3 && "pl-6 text-xs uppercase tracking-[0.16em] text-base-content/52",
+                        ]}
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </aside>
+
+        <section class="border-t border-base-content/15 pt-4">
+          <div class="border border-base-content/10 bg-white/55 px-5 py-6 lg:px-8 lg:py-8">
+            <div class="legal-prose">
+              <Content />
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style is:global>
+  .legal-prose {
+    color: rgb(0 0 0 / 0.84);
+    font-family: "Inter", sans-serif;
+    font-size: 1rem;
+    line-height: 1.85;
+  }
+
+  .legal-prose > * + * {
+    margin-top: 1rem;
+  }
+
+  .legal-prose h2,
+  .legal-prose h3 {
+    color: rgb(0 0 0);
+    font-family: "Old Standard TT", serif;
+    line-height: 1.1;
+  }
+
+  .legal-prose h2 {
+    border-top: 1px solid rgb(0 0 0 / 0.12);
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    font-size: 2rem;
+    font-weight: 400;
+  }
+
+  .legal-prose h3 {
+    margin-top: 1.75rem;
+    font-size: 1.45rem;
+    font-weight: 400;
+  }
+
+  .legal-prose p,
+  .legal-prose li {
+    color: rgb(0 0 0 / 0.78);
+  }
+
+  .legal-prose ul,
+  .legal-prose ol {
+    margin-left: 1.25rem;
+    padding-left: 0.25rem;
+  }
+
+  .legal-prose ul {
+    list-style: disc;
+  }
+
+  .legal-prose ol {
+    list-style: decimal;
+  }
+
+  .legal-prose li + li {
+    margin-top: 0.45rem;
+  }
+
+  .legal-prose a {
+    color: rgb(0 0 0);
+    text-decoration: underline;
+    text-decoration-color: rgb(0 0 0 / 0.24);
+    text-underline-offset: 0.28em;
+    transition: color 180ms ease, text-decoration-color 180ms ease;
+  }
+
+  .legal-prose a:hover {
+    color: var(--color-accent);
+    text-decoration-color: var(--color-accent);
+  }
+
+  .legal-prose blockquote {
+    margin: 1.5rem 0;
+    border-left: 2px solid rgb(0 0 0 / 0.18);
+    background: rgb(255 255 255 / 0.6);
+    padding: 1rem 1.25rem;
+    font-family: "Old Standard TT", serif;
+    font-size: 1.25rem;
+    line-height: 1.45;
+    color: rgb(0 0 0 / 0.9);
+  }
+
+  .legal-prose strong {
+    color: rgb(0 0 0);
+    font-weight: 600;
+  }
+
+  .legal-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .legal-prose thead th {
+    border-bottom: 1px solid rgb(0 0 0 / 0.18);
+    border-top: 1px solid rgb(0 0 0 / 0.18);
+    padding: 0.75rem 0.85rem;
+    text-align: left;
+    font-family: "Inter", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(0 0 0 / 0.62);
+    vertical-align: top;
+  }
+
+  .legal-prose tbody td {
+    border-bottom: 1px solid rgb(0 0 0 / 0.1);
+    padding: 0.9rem 0.85rem;
+    vertical-align: top;
+    color: rgb(0 0 0 / 0.76);
+  }
+
+  .legal-prose hr {
+    display: none;
+  }
+
+  @media (max-width: 1023px) {
+    .legal-prose h2 {
+      font-size: 1.7rem;
+      margin-top: 2rem;
+      padding-top: 1.15rem;
+    }
+
+    .legal-prose h3 {
+      font-size: 1.25rem;
+    }
+  }
+</style>
