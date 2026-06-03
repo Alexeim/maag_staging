@@ -13,15 +13,29 @@ interface Props {
   column: ColumnData;
   altLabel: string;
   desktopTextAlign?: "start" | "end" | "center";
+  imageLayout?: "natural" | "fixed-height";
 }
 
-const { column, altLabel, desktopTextAlign = "center" } = Astro.props;
+const {
+  column,
+  altLabel,
+  desktopTextAlign = "center",
+  imageLayout = "natural",
+} = Astro.props;
 const textAlignmentClass =
   desktopTextAlign === "end"
     ? "text-center lg:text-end"
     : desktopTextAlign === "start"
       ? "text-center lg:text-start"
       : "text-center";
+const imageWrapperClass =
+  imageLayout === "fixed-height"
+    ? "flex h-[620px] w-full items-center justify-center"
+    : "flex w-full items-center justify-center";
+const imageClass =
+  imageLayout === "fixed-height"
+    ? "max-h-full max-w-full object-contain"
+    : "h-auto w-full object-contain";
 const columnRichTextHtml = getInitialRichTextHtml({
   html: column.html,
   text: column.content,
@@ -30,12 +44,14 @@ const columnRichTextHtml = getInitialRichTextHtml({
 
 {
   column.type === "image" ? (
-    <figure class="flex flex-col items-center">
-      <img
-        src={column.content}
-        alt={column.caption || altLabel}
-        class="article-image"
-      />
+    <figure class="w-full flex flex-col items-center">
+      <div class={imageWrapperClass}>
+        <img
+          src={column.content}
+          alt={column.caption || altLabel}
+          class={imageClass}
+        />
+      </div>
       {column.caption && (
         <figcaption class="text-center font-inter text-xs text-gray-500 mt-2">
           {column.caption}
