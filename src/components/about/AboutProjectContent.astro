@@ -1,0 +1,222 @@
+---
+import { Image } from "astro:assets";
+
+import heroImage from "../../assets/images/culture.jpg";
+
+const createMockAvatar = (
+  label: string,
+  startColor: string,
+  endColor: string,
+) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="${label}">
+      <defs>
+        <linearGradient id="avatarGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+          <stop offset="0%" stop-color="${startColor}" />
+          <stop offset="100%" stop-color="${endColor}" />
+        </linearGradient>
+      </defs>
+      <rect width="240" height="240" rx="120" fill="url(#avatarGradient)" />
+      <circle cx="120" cy="92" r="40" fill="rgba(255,255,255,0.88)" />
+      <path d="M52 196c14-36 40-54 68-54s54 18 68 54" fill="rgba(255,255,255,0.88)" />
+      <text
+        x="120"
+        y="222"
+        text-anchor="middle"
+        font-family="Inter, Arial, sans-serif"
+        font-size="24"
+        letter-spacing="6"
+        fill="rgba(255,255,255,0.95)"
+      >
+        ${label}
+      </text>
+    </svg>
+  `)}`;
+
+const teamMembers = [
+  {
+    role: "Редакция культуры",
+    title: "Команда обзоров и рецензий",
+    note: "Следим за тем, что действительно стоит вашего времени сегодня и что не потеряет актуальности завтра.",
+    avatar: createMockAvatar("MF", "#b36a5e", "#d6b18a"),
+  },
+  {
+    role: "Париж и маршруты",
+    title: "Команда городских гидов",
+    note: "Собираем город не по открыткам, а по живому опыту: где быть, куда свернуть и что не пропустить.",
+    avatar: createMockAvatar("PF", "#607a63", "#b8c4a1"),
+  },
+  {
+    role: "Афиша и дети",
+    title: "Команда practical picks",
+    note: "Ищем спектакли, выставки и семейные сценарии, которые работают в реальной жизни, а не только на бумаге.",
+    avatar: createMockAvatar("AF", "#6f6478", "#b6a5ba"),
+  },
+];
+---
+
+<main class="min-h-screen bg-base-200 text-base-content">
+  <div
+    class="mx-auto w-full max-w-[1400px] px-4 pb-20 pt-10 lg:px-10 lg:pb-28 lg:pt-14"
+  >
+    <section class="pb-12 lg:pb-16">
+      <h1
+        class="font-old_standard text-[2.8rem] font-semibold uppercase tracking-[0.32em] text-base-content lg:text-4xl"
+      >
+        О проекте
+      </h1>
+    </section>
+
+    <section class="border-t border-base-content/15 py-2">
+      <div class="mb-8">
+        <span
+          class="font-old_standard text-sm uppercase tracking-[0.42em] text-base-content/70"
+        >
+          Идея
+        </span>
+      </div>
+
+      <div
+        class="grid gap-x-8 gap-y-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.92fr)_minmax(0,0.95fr)] lg:items-start lg:gap-x-10 lg:gap-y-5"
+      >
+        <div
+          class="space-y-6 font-old_standard text-[2rem] text-base-content lg:text-2xl"
+        >
+          <p class="text-4xl">
+            Что делать в Париже прямо сейчас? А через месяц?
+          </p>
+          <p>
+            Чем живёт мировая культурная столица сегодня и что будет актуально
+            завтра?
+          </p>
+        </div>
+
+        <div class="overflow-hidden bg-black/5">
+          <Image
+            src={heroImage}
+            alt="Культурная сцена Парижа"
+            class="h-full w-full object-cover"
+          />
+        </div>
+
+        <div
+          class="space-y-5 font-article-content text-base-content/78 lg:text-base"
+        >
+          <p>
+            Какие выставки стоит увидеть обязательно, а какие можно смело
+            пропустить и почему? На какой спектакль нужно попасть любой ценой,
+            кого увидеть на сцене и где найти билеты даже в последний момент?
+          </p>
+          <p>
+            Чем занять детей? Где заесть культурные впечатления, где
+            остановиться и как составить маршрут так, чтобы не упустить самого
+            интересного, не важно, есть ли у вас на Париж всего два дня или
+            целая жизнь.
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="mt-10 max-w-[64rem] space-y-5 font-article-content text-base-content/85 mb-10"
+      >
+        <p>
+          На сайте <span class="font-semibold">Maag France</span> вы найдёте анонсы
+          культурных событий, рецензии, интервью, репортажи и путеводители - самую
+          актуальную и полную информацию о жизни Парижа, отобранную нашей командой
+          профессиональных журналистов и местных жителей.
+        </p>
+        <p>
+          <span class="font-semibold">Maag France</span> - независимое французское
+          издание о культуре и жизни Парижа на русском языке. Наши материалы - результат
+          редакционной работы.
+        </p>
+      </div>
+    </section>
+
+    <section class="border-t border-base-content/15 py-2 mb-12">
+      <div class="mb-12">
+        <span
+          class="font-old_standard text-sm uppercase tracking-[0.42em] text-base-content/70"
+        >
+          Команда
+        </span>
+      </div>
+
+      <div class="grid gap-x-10 gap-y-6 lg:grid-cols-2 lg:gap-x-16 lg:gap-y-20">
+        {
+          teamMembers.map((member, index) => (
+            <article
+              class:list={[
+                "flex flex-col gap-4 sm:flex-row sm:items-start",
+                index === 2 &&
+                  "lg:col-span-2 lg:max-w-[52rem] lg:justify-self-center",
+              ]}
+            >
+              <img
+                src={member.avatar}
+                alt={`Mock portrait for ${member.title}`}
+                class="h-20 w-20 shrink-0 rounded-full object-cover"
+              />
+              <div>
+                <p class="font-inter text-xs font-bold uppercase tracking-[0.28em] text-accent">
+                  {member.role}
+                </p>
+                <h2 class="mt-3 font-old_standard text-[2rem] leading-[1.05] text-base-content lg:text-xl">
+                  {member.title}
+                </h2>
+                <p class="mt-4 max-w-[32rem] font-old_standard text-[1.9rem] italic leading-[1.18] text-base-content/92 lg:text-2xl">
+                  {member.note}
+                </p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="border-t border-base-content/15 py-2">
+      <div class="mb-8">
+        <span
+          class="font-old_standard text-sm uppercase tracking-[0.42em] text-base-content/70"
+        >
+          Контакты
+        </span>
+      </div>
+
+      <div
+        class="grid gap-x-8 gap-y-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:items-start lg:gap-x-8 lg:gap-y-5"
+      >
+        <div
+          class="max-w-[56rem] font-old_standard text-[1.9rem] leading-[1.32] text-base-content lg:text-4xl"
+        >
+          Если вы хотите присоединиться к нашей команде, поддержать проект,
+          стать партнёром или рекламодателем -{" "}
+          <a
+            href="mailto:editors@maag-france.com"
+            class="underline decoration-base-content/35 underline-offset-8 transition-colors hover:text-accent hover:decoration-accent"
+          >
+            пишите сюда
+          </a>
+          .
+        </div>
+
+        <div
+          class="space-y-3 border border-base-content/10 bg-white/60 p-6 font-inter text-sm uppercase tracking-[0.22em] text-base-content/65"
+        >
+          <p>Редакция</p>
+          <a
+            href="mailto:editors@maag-france.com"
+            class="block text-base font-semibold normal-case tracking-normal text-base-content hover:text-accent"
+          >
+            editors@maag-france.com
+          </a>
+          <p
+            class="pt-4 text-[0.72rem] leading-[1.7] normal-case tracking-normal text-base-content/55"
+          >
+            Ответим по вопросам редакции, партнёрств, рекламы и сотрудничества.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
