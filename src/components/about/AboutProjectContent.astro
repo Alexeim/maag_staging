@@ -2,6 +2,8 @@
 import { Image } from "astro:assets";
 
 import heroImage from "../../assets/images/culture.jpg";
+import alexeyMakarovImage from "../../assets/team/AM.jpeg";
+import dmitryMakarovImage from "../../assets/team/dm.jpg";
 
 const createMockAvatar = (
   label: string,
@@ -35,22 +37,22 @@ const createMockAvatar = (
 
 const teamMembers = [
   {
-    role: "Редакция культуры",
-    title: "Команда обзоров и рецензий",
+    role: "Редакция",
+    title: "Мария Сидельникова",
     note: "Следим за тем, что действительно стоит вашего времени сегодня и что не потеряет актуальности завтра.",
     avatar: createMockAvatar("MF", "#b36a5e", "#d6b18a"),
   },
   {
-    role: "Париж и маршруты",
-    title: "Команда городских гидов",
+    role: "CEO",
+    title: "Алексей Макаров",
     note: "Собираем город не по открыткам, а по живому опыту: где быть, куда свернуть и что не пропустить.",
-    avatar: createMockAvatar("PF", "#607a63", "#b8c4a1"),
+    avatar: alexeyMakarovImage.src,
   },
   {
-    role: "Афиша и дети",
-    title: "Команда practical picks",
+    role: "CTO",
+    title: "Дмитрий Макаров",
     note: "Ищем спектакли, выставки и семейные сценарии, которые работают в реальной жизни, а не только на бумаге.",
-    avatar: createMockAvatar("AF", "#6f6478", "#b6a5ba"),
+    avatar: dmitryMakarovImage.src,
   },
 ];
 ---
