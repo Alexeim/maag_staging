@@ -1,6 +1,6 @@
 ---
-import { Image } from "astro:assets";
 import picture3 from "../../assets/images/article_content/par.jpeg";
+import LazyImage from "./LazyImage.astro";
 
 interface NetlenkaCardProps {
   title?: string;
@@ -24,7 +24,7 @@ const {
   href = "#",
 } = Astro.props as NetlenkaCardProps;
 
-const displayImage = imageUrl || picture3.src;
+const imageLoading: 'lazy' | 'eager' = imageUrl ? 'lazy' : 'eager';
 ---
 
 <div
@@ -35,25 +35,13 @@ const displayImage = imageUrl || picture3.src;
       href={href}
       class="linked-image-hover w-full h-full"
     >
-      {
-        imageUrl ? (
-          <img
-            src={displayImage}
-            alt={title}
-            class="linked-image-hover__media w-full h-full object-cover object-center"
-            loading="lazy"
-            transition:name={transitionName}
-          />
-        ) : (
-          <Image
-            src={picture3}
-            alt="Hot content image"
-            class="linked-image-hover__media w-full h-full object-cover object-center"
-            loading="eager"
-            transition:name={transitionName}
-          />
-        )
-      }
+      <LazyImage
+        src={imageUrl || picture3}
+        alt={imageUrl ? title : "Hot content image"}
+        class="linked-image-hover__media w-full h-full object-cover object-center"
+        loading={imageLoading}
+        transitionName={transitionName}
+      />
     </a>
   </div>
   {

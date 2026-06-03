@@ -1,0 +1,79 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata | string;
+  alt: string;
+  class?: string;
+  width?: number;
+  height?: number;
+  loading?: 'eager' | 'lazy';
+  transitionName?: string;
+}
+
+const {
+  src,
+  alt,
+  class: className = '',
+  width,
+  height,
+  loading = 'lazy',
+  transitionName,
+} = Astro.props;
+
+const isRemote = typeof src === 'string';
+
+// Reveals image once loaded — handles cached images (complete) and fresh fetches (load event)
+const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('load', () => $el.style.opacity='1')";
+---
+
+{
+  loading === 'lazy' ? (
+    isRemote ? (
+      <img
+        src={src as string}
+        alt={alt}
+        class={`opacity-0 transition-opacity duration-300 ${className}`}
+        width={width}
+        height={height}
+        loading="lazy"
+        x-data=""
+        x-init={xInit}
+        transition:name={transitionName}
+      />
+    ) : (
+      <Image
+        src={src as ImageMetadata}
+        alt={alt}
+        class={className}
+        width={width}
+        height={height}
+        loading="lazy"
+        transition:name={transitionName}
+      />
+    )
+  ) : (
+    isRemote ? (
+      <img
+        src={src as string}
+        alt={alt}
+        class={className}
+        width={width}
+        height={height}
+        loading="eager"
+        transition:name={transitionName}
+      />
+    ) : (
+      <Image
+        src={src as ImageMetadata}
+        alt={alt}
+        class={className}
+        width={width}
+        height={height}
+        loading="eager"
+        transition:name={transitionName}
+      />
+    )
+  )
+}

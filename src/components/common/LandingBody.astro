@@ -19,6 +19,7 @@ import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
 
 import NetlenkaCard from "./NetlenkaCard.astro";
 import ArticleCard from "./ArticleCard.astro";
+import LazyImage from "./LazyImage.astro";
 import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import MaagLogoMobile from "../../assets/logo/logo-mobile.svg";
 import LatestInterview from "../HomePage/LatestInterview.astro";
@@ -604,12 +605,11 @@ const splitTitle = (t: string) => {
                         href={cultureHero.href}
                         class="linked-image-hover w-full h-full"
                       >
-                        <img
+                        <LazyImage
                           src={cultureHero.imageUrl}
                           alt={cultureHero.title}
                           class="linked-image-hover__media w-full h-full object-cover object-center"
-                          loading="lazy"
-                          transition:name={getTransitionName(cultureHero)}
+                          transitionName={getTransitionName(cultureHero)}
                         />
                       </a>
                     ) : (
@@ -805,12 +805,11 @@ const splitTitle = (t: string) => {
                           class="linked-image-hover w-full h-full"
                           aria-label={parisHero.title}
                         >
-                          <img
-                            src={parisHero.imageUrl ?? picture1.src}
+                          <LazyImage
+                            src={parisHero.imageUrl ?? picture1}
                             alt={parisHero.title}
                             class="linked-image-hover__media block h-full w-full object-cover object-center"
-                            loading="lazy"
-                            transition:name={getTransitionName(parisHero)}
+                            transitionName={getTransitionName(parisHero)}
                           />
                         </a>
                       </div>
@@ -928,11 +927,10 @@ const splitTitle = (t: string) => {
                     class="block"
                     aria-label={leSaviezVousArticle.title}
                   >
-                    <img
-                      src={leSaviezVousArticle.imageUrl || picture1.src}
+                    <LazyImage
+                      src={leSaviezVousArticle.imageUrl || picture1}
                       alt={leSaviezVousArticle.title}
                       class="block h-auto w-full object-cover lg:h-[240px]"
-                      loading="lazy"
                     />
                   </a>
 
@@ -981,11 +979,10 @@ const splitTitle = (t: string) => {
                 </article>
               ) : (
                 <article class="overflow-hidden bg-white">
-                  <img
-                    src={picture1.src}
+                  <LazyImage
+                    src={picture1}
                     alt="Le saviez-vous placeholder"
                     class="block h-auto w-full object-cover lg:h-[240px]"
-                    loading="lazy"
                   />
 
                   <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">

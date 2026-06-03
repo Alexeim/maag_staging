@@ -1,8 +1,7 @@
 ---
-import { Image } from "astro:assets";
-
 import picture1 from "../../assets/images/culture.jpg";
 import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
+import LazyImage from "./LazyImage.astro";
 
 interface ArticleCardProps {
   isNetlenka?: boolean;
@@ -30,7 +29,7 @@ const {
   paid = false,
 } = Astro.props as ArticleCardProps;
 
-const displayImage = imageUrl || picture1.src;
+const imageLoading: 'lazy' | 'eager' = imageUrl ? 'lazy' : 'eager';
 
 const trimmedTitle = title.trimEnd();
 const lastSpaceIndex = trimmedTitle.lastIndexOf(" ");
@@ -43,25 +42,13 @@ const lastWord =
 <div class="w-full flex flex-col justify-start gap-2">
   <div class="w-full aspect-[3/2] overflow-hidden">
     <a href={href} class="linked-image-hover w-full h-full">
-      {
-        imageUrl ? (
-          <img
-            src={displayImage}
-            alt={title}
-            class="linked-image-hover__media w-full h-full object-cover object-center"
-            loading="lazy"
-            transition:name={transitionName}
-          />
-        ) : (
-          <Image
-            src={picture1}
-            alt="Culture image"
-            class="linked-image-hover__media w-full h-full object-cover object-center"
-            loading="eager"
-            transition:name={transitionName}
-          />
-        )
-      }
+      <LazyImage
+        src={imageUrl || picture1}
+        alt={imageUrl ? title : "Culture image"}
+        class="linked-image-hover__media w-full h-full object-cover object-center"
+        loading={imageLoading}
+        transitionName={transitionName}
+      />
     </a>
   </div>
   {

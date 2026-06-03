@@ -690,7 +690,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
                 src={landingEvent.imageUrl}
                 alt={landingEvent.title}
                 class="linked-image-hover__media w-full h-auto lg:h-[240px] object-cover"
-                loading="lazy"
+                loading="eager"
                 transition:name={`event-image-${landingEvent.id}`}
               />
             ) : (
