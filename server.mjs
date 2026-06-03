@@ -13,7 +13,9 @@ app.use(
   expressStaticGzip(join(__dirname, './dist/client'), {
     enableBrotli: true,
     orderPreference: ['br', 'gz'],
+    index: false,
     serveStatic: {
+      index: false,
       maxAge: '1y',
       immutable: true,
     },
