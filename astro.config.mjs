@@ -21,7 +21,11 @@ export default defineConfig({
       },
     ],
   },
-  integrations: [alpinejs({ entrypoint: '/src/alpine-entrypoint.ts' }), compressor()],
+  integrations: [
+    alpinejs({ entrypoint: '/src/alpine-entrypoint.ts' }),
+    compressor({ gzip: true, brotli: true }),
+  ],
+  compressHTML: true,
   base: process.env.ASTRO_BASE_PATH || "/",
 
   vite: {
@@ -34,6 +38,6 @@ export default defineConfig({
   },
 
   adapter: node({
-    mode: "standalone",
+    mode: "middleware",
   }),
 });

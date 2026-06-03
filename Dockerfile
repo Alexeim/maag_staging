@@ -45,6 +45,7 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/server.mjs ./server.mjs
 
 # Set runtime environment variables
 ENV HOST=0.0.0.0
@@ -52,4 +53,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 # The command to run the server
-CMD ["node", "./dist/server/entry.mjs"]
+CMD ["node", "./server.mjs"]
