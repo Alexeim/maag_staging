@@ -1,5 +1,7 @@
 ---
 import "../styles/global.css";
+import "../styles/quill-editor.css";
+import "quill/dist/quill.snow.css";
 import Toast from "@/components/common/Toast.astro";
 import ConfirmationModal from "@/components/common/ConfirmationModal.astro";
 
@@ -115,9 +117,17 @@ const { title = "MAAG Dashboard", active = "articles-overview" } =
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      rel="preload"
+      as="style"
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jost:ital,wght@0,100..900;1,100..900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Oswald:wght@200..700&display=swap"
-      rel="stylesheet"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jost:ital,wght@0,100..900;1,100..900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Oswald:wght@200..700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <title>{title}</title>
   </head>
   <body class="bg-base-200 min-h-screen">
