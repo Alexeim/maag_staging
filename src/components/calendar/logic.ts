@@ -256,6 +256,8 @@ export default (
   selectedDate: null as Date | null,
   rangeStartDate: null as Date | null,
   rangeEndDate: null as Date | null,
+  hoverDate: null as Date | null,
+  isRangeSelecting: false,
   year: 0,
   month: 0,
   monthName: "",
@@ -309,6 +311,9 @@ export default (
 
     this.year = this.selectedDate.getUTCFullYear();
     this.month = this.selectedDate.getUTCMonth();
+
+    // Restore saved selection (persists across Astro view transitions)
+    this.restoreSelectionFromStorage();
 
     this.updateCalendarDisplay();
     this.updateFilteredEvents();
@@ -605,27 +610,41 @@ export default (
       this.year += 1;
     }
     this.updateCalendarDisplay();
-    this.selectedDate = this.getDefaultDateForMonth(this.year, this.month);
-    this.rangeStartDate = this.selectedDate ? new Date(this.selectedDate) : null;
-    this.rangeEndDate = null;
+    this.isRangeSelecting = false;
+    this.hoverDate = null;
     this.updateFilteredEvents();
+    this.saveSelectionToStorage();
   },
 
   selectDate(value: number | CalendarDay) {
     const nextSelectedDate = this.resolveCalendarDate(value);
 
-    if (!this.rangeStartDate || this.rangeEndDate) {
+    if (this.isRangeSelecting) {
+      if (this.isSameDay(this.rangeStartDate, nextSelectedDate)) {
+        // Clicked start date again — cancel range mode, back to single day
+        this.isRangeSelecting = false;
+        this.rangeEndDate = null;
+      } else {
+        // Different date — complete the range
+        if (nextSelectedDate.getTime() < (this.rangeStartDate?.getTime() ?? 0)) {
+          this.rangeEndDate = new Date(this.rangeStartDate!);
+          this.rangeStartDate = new Date(nextSelectedDate);
+        } else {
+          this.rangeEndDate = new Date(nextSelectedDate);
+        }
+        this.isRangeSelecting = false;
+      }
+    } else if (this.isSameDay(this.rangeStartDate, nextSelectedDate) && !this.rangeEndDate) {
+      // Clicked already-selected date — enter range selection mode
+      this.isRangeSelecting = true;
+    } else {
+      // New date — just select it as single day, clear any range
       this.rangeStartDate = new Date(nextSelectedDate);
       this.rangeEndDate = null;
-    } else if (!this.isSameDay(this.rangeStartDate, nextSelectedDate)) {
-      if (nextSelectedDate.getTime() < this.rangeStartDate.getTime()) {
-        this.rangeEndDate = new Date(this.rangeStartDate);
-        this.rangeStartDate = new Date(nextSelectedDate);
-      } else {
-        this.rangeEndDate = new Date(nextSelectedDate);
-      }
+      this.isRangeSelecting = false;
     }
 
+    this.hoverDate = null;
     this.selectedDate = nextSelectedDate;
 
     if (typeof value !== "number" && !value.isCurrentMonth) {
@@ -634,6 +653,7 @@ export default (
       this.updateCalendarDisplay();
     }
     this.updateFilteredEvents();
+    this.saveSelectionToStorage();
   },
 
   hasEvent(value: number | Date | CalendarDay) {
@@ -693,6 +713,83 @@ export default (
     return (
       time > this.rangeStartDate.getTime() && time < this.rangeEndDate.getTime()
     );
+  },
+
+  saveSelectionToStorage() {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem('maag_calendar', JSON.stringify({
+      selectedDate: this.selectedDate?.toISOString() ?? null,
+      rangeStartDate: this.rangeStartDate?.toISOString() ?? null,
+      rangeEndDate: this.rangeEndDate?.toISOString() ?? null,
+      viewYear: this.year,
+      viewMonth: this.month,
+    }));
+  },
+
+  restoreSelectionFromStorage() {
+    if (typeof localStorage === 'undefined') return;
+    const raw = localStorage.getItem('maag_calendar');
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (!saved.selectedDate) return;
+    this.selectedDate = new Date(saved.selectedDate);
+    this.rangeStartDate = saved.rangeStartDate ? new Date(saved.rangeStartDate) : new Date(saved.selectedDate);
+    this.rangeEndDate = saved.rangeEndDate ? new Date(saved.rangeEndDate) : null;
+    this.year = saved.viewYear ?? this.year;
+    this.month = saved.viewMonth ?? this.month;
+  },
+
+  setHoverDate(value: number | Date | CalendarDay) {
+    if (!this.rangeStartDate || this.rangeEndDate) {
+      this.hoverDate = null;
+      return;
+    }
+    this.hoverDate = new Date(this.resolveCalendarDate(value));
+  },
+
+  clearHoverDate() {
+    this.hoverDate = null;
+  },
+
+  isInHoverMode() {
+    return Boolean(
+      this.isRangeSelecting &&
+        this.rangeStartDate &&
+        !this.rangeEndDate &&
+        this.hoverDate &&
+        !this.isSameDay(this.rangeStartDate, this.hoverDate),
+    );
+  },
+
+  isHoverEnd(value: number | Date | CalendarDay) {
+    if (!this.isInHoverMode() || !this.hoverDate) return false;
+    return this.isSameDay(this.resolveCalendarDate(value), this.hoverDate);
+  },
+
+  isHoverRangeStart(value: number | Date | CalendarDay) {
+    if (!this.isInHoverMode() || !this.rangeStartDate || !this.hoverDate) return false;
+    const lo =
+      this.rangeStartDate.getTime() <= this.hoverDate.getTime()
+        ? this.rangeStartDate
+        : this.hoverDate;
+    return this.isSameDay(this.resolveCalendarDate(value), lo);
+  },
+
+  isHoverRangeEnd(value: number | Date | CalendarDay) {
+    if (!this.isInHoverMode() || !this.rangeStartDate || !this.hoverDate) return false;
+    const hi =
+      this.rangeStartDate.getTime() > this.hoverDate.getTime()
+        ? this.rangeStartDate
+        : this.hoverDate;
+    return this.isSameDay(this.resolveCalendarDate(value), hi);
+  },
+
+  isWithinHoverRange(value: number | Date | CalendarDay) {
+    if (!this.isInHoverMode() || !this.rangeStartDate || !this.hoverDate) return false;
+    const time = this.resolveCalendarDate(value).getTime();
+    const lo = Math.min(this.rangeStartDate.getTime(), this.hoverDate.getTime());
+    const hi = Math.max(this.rangeStartDate.getTime(), this.hoverDate.getTime());
+    return time > lo && time < hi;
   },
 
   getSelectedDateHeading() {

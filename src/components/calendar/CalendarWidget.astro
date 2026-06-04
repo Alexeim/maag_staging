@@ -48,6 +48,8 @@ import { ChevronLeft, ChevronRight } from "lucide-astro";
         <button
           type="button"
           @click="$dispatch('date-selected', cell)"
+          @mouseenter="setHoverDate(cell)"
+          @mouseleave="clearHoverDate()"
           class="group relative flex aspect-square min-h-[42px] cursor-pointer items-center justify-center overflow-hidden font-inter text-[0.96rem] transition-colors sm:min-h-[48px] sm:text-[1.02rem] md:min-h-[52px] md:text-[1.05rem]"
         >
           <div
@@ -56,6 +58,19 @@ import { ChevronLeft, ChevronRight } from "lucide-astro";
           >
           </div>
 
+          <!-- Hover preview range bar -->
+          <div
+            x-show="cell.isCurrentMonth && isInHoverMode() && (isWithinHoverRange(cell) || isHoverRangeStart(cell) || isHoverRangeEnd(cell))"
+            :class="{
+              'left-1/2 right-0': isHoverRangeStart(cell) && !isHoverRangeEnd(cell),
+              'left-0 right-1/2': isHoverRangeEnd(cell) && !isHoverRangeStart(cell),
+              'left-0 right-0': isWithinHoverRange(cell)
+            }"
+            class="pointer-events-none absolute top-1/2 h-10 -translate-y-1/2 bg-calendar-range/50 sm:h-11 md:h-12"
+          >
+          </div>
+
+          <!-- Completed range bar -->
           <div
             x-show="cell.isCurrentMonth && hasCompletedRange() && (isWithinSelectedRange(cell) || isRangeStart(cell) || isRangeEnd(cell))"
             :class="{
@@ -76,8 +91,9 @@ import { ChevronLeft, ChevronRight } from "lucide-astro";
           <div
             :class="{
               'bg-error text-error-content': cell.isCurrentMonth && (isSelectedDate(cell) || isRangeBoundary(cell)),
+              'bg-error/60 text-error-content': cell.isCurrentMonth && isHoverEnd(cell) && !isRangeBoundary(cell) && !isSelectedDate(cell),
               'text-[#b5aaa2]': !cell.isCurrentMonth,
-              'text-[#302821]': cell.isCurrentMonth && !isSelectedDate(cell) && !isRangeBoundary(cell)
+              'text-[#302821]': cell.isCurrentMonth && !isSelectedDate(cell) && !isRangeBoundary(cell) && !isHoverEnd(cell)
             }"
             class="relative z-10 flex h-10 w-10 items-center justify-center rounded-full sm:h-11 sm:w-11 md:h-12 md:w-12"
           >
