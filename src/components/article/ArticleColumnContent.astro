@@ -12,14 +12,14 @@ interface ColumnData {
 interface Props {
   column: ColumnData;
   altLabel: string;
-  desktopTextAlign?: "start" | "end" | "center";
+  desktopTextAlign?: "start" | "end" | "justify";
   imageLayout?: "natural" | "fixed-height";
 }
 
 const {
   column,
   altLabel,
-  desktopTextAlign = "center",
+  desktopTextAlign = "justify",
   imageLayout = "natural",
 } = Astro.props;
 const textAlignmentClass =
@@ -27,7 +27,7 @@ const textAlignmentClass =
     ? "text-center lg:text-start"
     : desktopTextAlign === "start"
       ? "text-center lg:text-start"
-      : "text-center";
+      : "text-justify";
 const imageWrapperClass =
   imageLayout === "fixed-height"
     ? "flex h-[620px] w-full items-center justify-center overflow-hidden"
