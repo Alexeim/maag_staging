@@ -1,5 +1,6 @@
 ---
 import Layout from "../Layouts/Layout.astro";
+import { ChevronLeft, ChevronRight } from "lucide-astro";
 import FilterButtons from "../components/calendar/FilterButtons.astro";
 import CalendarWidget from "../components/calendar/CalendarWidget.astro";
 import EventList from "../components/calendar/EventList.astro";
@@ -410,20 +411,20 @@ const calendarState = JSON.stringify({
               <button
                 type="button"
                 aria-label="Предыдущее"
-                class="absolute left-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[1.6rem] text-[#7d726a] md:flex cursor-pointer"
+                class="absolute left-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[#7d726a] md:flex cursor-pointer"
                 x-show="hasMultipleFeaturedEvents()"
                 @click.prevent="prevFeaturedEvent()"
               >
-                ←
+                <ChevronLeft class="h-5 w-5" />
               </button>
               <button
                 type="button"
                 aria-label="Следующее"
-                class="absolute right-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[1.6rem] text-[#7d726a] md:flex cursor-pointer"
+                class="absolute right-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[#7d726a] md:flex cursor-pointer"
                 x-show="hasMultipleFeaturedEvents()"
                 @click.prevent="nextFeaturedEvent()"
               >
-                →
+                <ChevronRight class="h-5 w-5" />
               </button>
 
               <div class="mx-auto max-w-[1052px] lg:min-h-[21rem]">
@@ -536,18 +537,18 @@ const calendarState = JSON.stringify({
                 <button
                   type="button"
                   aria-label="Предыдущее"
-                  class="flex h-10 w-10 items-center justify-center bg-white text-[1.6rem] text-[#7d726a] cursor-pointer"
+                  class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
                   @click.prevent="prevFeaturedEvent()"
                 >
-                  ←
+                  <ChevronLeft class="h-5 w-5" />
                 </button>
                 <button
                   type="button"
                   aria-label="Следующее"
-                  class="flex h-10 w-10 items-center justify-center bg-white text-[1.6rem] text-[#7d726a] cursor-pointer"
+                  class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
                   @click.prevent="nextFeaturedEvent()"
                 >
-                  →
+                  <ChevronRight class="h-5 w-5" />
                 </button>
               </div>
             </div>

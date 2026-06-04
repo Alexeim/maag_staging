@@ -591,8 +591,7 @@ export default (
         isBoundaryDate(this.selectedDate as Date, event),
       );
       this.smallEvents = filtered
-        .filter((event) => isOngoingDate(this.selectedDate as Date, event))
-        .slice(0, 4);
+        .filter((event) => isOngoingDate(this.selectedDate as Date, event));
     }
   },
 
