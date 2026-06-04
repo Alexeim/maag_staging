@@ -1,5 +1,5 @@
 ---
-// This component is controlled by Alpine.js from the parent page
+import { ChevronLeft, ChevronRight } from "lucide-astro";
 ---
 
 <div class="w-full max-w-[25.5rem]">
@@ -19,40 +19,14 @@
           class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[#30282133] bg-white transition-colors hover:bg-[#f7f2ee]"
           aria-label="Предыдущий месяц"
         >
-          <svg
-            width="8"
-            height="14"
-            viewBox="0 0 8 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M7 13L1 7L7 1"
-              stroke="black"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"></path>
-          </svg>
+          <ChevronLeft class="h-4 w-4" />
         </button>
         <button
           @click="$dispatch('change-month', 1)"
           class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[#30282133] bg-white transition-colors hover:bg-[#f7f2ee]"
           aria-label="Следующий месяц"
         >
-          <svg
-            width="8"
-            height="14"
-            viewBox="0 0 8 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M1 13L7 7L1 1"
-              stroke="black"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"></path>
-          </svg>
+          <ChevronRight class="h-4 w-4" />
         </button>
       </div>
     </div>
