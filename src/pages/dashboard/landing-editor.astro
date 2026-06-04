@@ -1555,7 +1555,7 @@ const initialMainHeroState = (() => {
       <div class="flex flex-col gap-2">
         <h3 class="text-lg font-semibold">Culture Cards Controls</h3>
         <p class="text-sm text-base-content/70">
-          Три карточки под главным материалом в culture section на landing.
+          До 2 карточек под главным материалом в culture section на landing.
           Блок автоматически исключает global main hero и текущий hero рубрики.
         </p>
       </div>
@@ -1579,7 +1579,7 @@ const initialMainHeroState = (() => {
         </div>
 
         <div x-show="cultureCardsMode === 'auto-latest'" class="grid gap-2 max-w-xs">
-          <label for="culture-cards-limit" class="text-sm font-medium">Количество карточек</label>
+          <label for="culture-cards-limit" class="text-sm font-medium">Количество карточек (макс. 2)</label>
           <select
             id="culture-cards-limit"
             x-model="cultureCardsLimit"
@@ -1587,7 +1587,6 @@ const initialMainHeroState = (() => {
           >
             <option value="1">1</option>
             <option value="2">2</option>
-            <option value="3">3</option>
           </select>
         </div>
 
@@ -1645,7 +1644,7 @@ const initialMainHeroState = (() => {
       <div class="flex flex-col gap-2">
         <h3 class="text-lg font-semibold">Paris Cards Controls</h3>
         <p class="text-sm text-base-content/70">
-          Три карточки под главным материалом в paris section на landing.
+          До 2 карточек под главным материалом в paris section на landing.
           Блок автоматически исключает global main hero и текущий hero рубрики.
         </p>
       </div>
@@ -1669,7 +1668,7 @@ const initialMainHeroState = (() => {
         </div>
 
         <div x-show="parisCardsMode === 'auto-latest'" class="grid gap-2 max-w-xs">
-          <label for="paris-cards-limit" class="text-sm font-medium">Количество карточек</label>
+          <label for="paris-cards-limit" class="text-sm font-medium">Количество карточек (макс. 2)</label>
           <select
             id="paris-cards-limit"
             x-model="parisCardsLimit"
@@ -1677,7 +1676,6 @@ const initialMainHeroState = (() => {
           >
             <option value="1">1</option>
             <option value="2">2</option>
-            <option value="3">3</option>
           </select>
         </div>
 

@@ -615,58 +615,44 @@ const splitTitle = (t: string) => {
           {CATEGORY_LABELS[CULTURE_CATEGORY_KEY]}
         </h2>
         <div class="w-full flex flex-col gap-8">
-          <div
-            class="w-full bg-white flex flex-col gap-0 lg:flex-row lg:gap-8 items-start justify-start min-h-[100px]"
-          >
+          <article class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
             {
               cultureHero ? (
                 <>
-                  <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
-                    {cultureHero.imageUrl ? (
-                      <a
-                        href={cultureHero.href}
-                        class="linked-image-hover w-full h-full"
-                      >
-                        <LazyImage
-                          src={cultureHero.imageUrl}
-                          alt={cultureHero.title}
-                          class="linked-image-hover__media w-full h-full object-cover object-center"
-                          transitionName={getTransitionName(cultureHero)}
-                        />
-                      </a>
-                    ) : (
+                  {cultureHero.imageUrl ? (
+                    <a
+                      href={cultureHero.href}
+                      class="linked-image-hover aspect-[3/2]"
+                      aria-label={cultureHero.title}
+                    >
+                      <LazyImage
+                        src={cultureHero.imageUrl}
+                        alt={cultureHero.title}
+                        class="linked-image-hover__media block h-full w-full object-cover"
+                        transitionName={getTransitionName(cultureHero)}
+                      />
+                    </a>
+                  ) : (
+                    <div class="aspect-[3/2] overflow-hidden">
                       <Image
                         src={picture1}
                         alt="Culture image"
-                        class="w-full h-auto lg:h-[400px] object-cover object-center"
+                        class="block h-full w-full object-cover"
                         loading="eager"
-                        transition:name={getTransitionName(cultureHero)}
                       />
-                    )}
-                  </div>
-                  <div class="w-full lg:w-2/5 pt-0 lg:pt-3 px-4 lg:pl-2 lg:pr-6">
-                    {/* <p class="text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3">
-                      {formatArticleMeta(
-                        cultureHero,
-                        CATEGORY_LABELS[CULTURE_CATEGORY_KEY],
-                      )}
-                    </p> */}
-                    <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3 mt-4">
+                    </div>
+                  )}
+                  <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                    <p class="m-0">
                       <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                         {getPrimaryTag(cultureHero) || "Новости"}
                       </span>
-                      <span class="hidden text-black text-lg font-bold font-['Inter']">
-                        ·
-                      </span>
-                      <span class="hidden text-xs">
-                        {formatArticleDate(cultureHero?.createdAt)}
-                      </span>
-                    </div>
+                    </p>
                     <a
                       href={cultureHero.href}
-                      class="block transition-opacity duration-200 hover:opacity-90"
+                      class="text-current no-underline hover:underline"
                     >
-                      <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mb-2">
+                      <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
                         {cultureHero.paid ? (
                           <>
                             {splitTitle(cultureHero.title).start && (
@@ -683,7 +669,7 @@ const splitTitle = (t: string) => {
                       </h4>
                     </a>
                     {getCardLead(cultureHero) && (
-                      <p class="text-base lg:text-sm text-black/60 font-inter font-normal mb-4 lg:mb-0">
+                      <p class="text-base lg:text-sm text-black/60 font-inter font-normal">
                         {getCardLead(cultureHero)}
                       </p>
                     )}
@@ -691,34 +677,32 @@ const splitTitle = (t: string) => {
                 </>
               ) : (
                 <>
-                  <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
+                  <div class="aspect-[3/2] overflow-hidden">
                     <Image
                       src={picture1}
                       alt="Culture image"
-                      class="w-full h-full object-cover object-center"
+                      class="block h-full w-full object-cover"
                       loading="eager"
                     />
                   </div>
-                  <div class="w-full lg:w-2/5 pt-4 px-4 lg:px-0">
-                    <p class="text-error uppercase mb-3 font-inter text-sm tracking-[.46em]">
-                      Балет
-                    </p>
-                    <h4 class="text-2xl lg:text-3xl leading-tight font-thin font-oswald text-wrap break-words">
+                  <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                    <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">Балет</p>
+                    <h4 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
                       Нет статей в категории
                     </h4>
                   </div>
                 </>
               )
             }
-          </div>
+          </article>
 
           <div
             id="culture-articles-box"
-            class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 min-h-[100px] border-b border-base-content/15"
+            class="grid gap-4 sm:grid-cols-2 sm:items-stretch py-8 border-b border-base-content/15"
           >
             {
               cultureCardItems.length > 0 ? (
-                cultureCardItems.map((item) => (
+                cultureCardItems.slice(0, 2).map((item) => (
                   <ArticleCard
                     key={item.id}
                     isNetlenka={false}
@@ -735,7 +719,6 @@ const splitTitle = (t: string) => {
                 ))
               ) : (
                 <>
-                  <ArticleCard isNetlenka={false} />
                   <ArticleCard isNetlenka={false} />
                   <ArticleCard isNetlenka={false} />
                 </>
@@ -818,43 +801,32 @@ const splitTitle = (t: string) => {
               </h2>
 
               <div class="w-full flex flex-col gap-8">
-                <div class="w-full bg-white flex flex-col gap-0 lg:flex-row lg:gap-8 items-start justify-start min-h-[100px]">
+                <article class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
                   {parisHero ? (
                     <>
-                      <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
-                        <a
-                          href={parisHero.href}
-                          class="linked-image-hover w-full h-full"
-                          aria-label={parisHero.title}
-                        >
-                          <LazyImage
-                            src={parisHero.imageUrl ?? picture1}
-                            alt={parisHero.title}
-                            class="linked-image-hover__media block h-full w-full object-cover object-center"
-                            transitionName={getTransitionName(parisHero)}
-                          />
-                        </a>
-                      </div>
-
-                      <div class="w-full lg:w-2/5 pt-0 lg:pt-3 px-4 lg:pl-2 lg:pr-6">
-                        <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mb-3 mt-4">
+                      <a
+                        href={parisHero.href}
+                        class="linked-image-hover aspect-[3/2]"
+                        aria-label={parisHero.title}
+                      >
+                        <LazyImage
+                          src={parisHero.imageUrl ?? picture1}
+                          alt={parisHero.title}
+                          class="linked-image-hover__media block h-full w-full object-cover"
+                          transitionName={getTransitionName(parisHero)}
+                        />
+                      </a>
+                      <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                        <p class="m-0">
                           <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                            {getPrimaryTag(parisHero) ||
-                              CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
+                            {getPrimaryTag(parisHero) || CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
                           </span>
-                          <span class="hidden text-black text-lg font-bold font-['Inter']">
-                            ·
-                          </span>
-                          <span class="hidden text-xs">
-                            {formatArticleDate(parisHero?.createdAt)}
-                          </span>
-                        </div>
-
+                        </p>
                         <a
                           href={parisHero.href}
-                          class="block transition-opacity duration-200 hover:opacity-90"
+                          class="text-current no-underline hover:underline"
                         >
-                          <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mb-2">
+                          <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
                             {parisHero.paid ? (
                               <>
                                 {splitTitle(parisHero.title).start && (
@@ -870,9 +842,8 @@ const splitTitle = (t: string) => {
                             )}
                           </h4>
                         </a>
-
                         {getCardLead(parisHero) && (
-                          <p class="text-base lg:text-sm text-black/60 font-inter font-normal mb-4 lg:mb-0">
+                          <p class="text-base lg:text-sm text-black/60 font-inter font-normal">
                             {getCardLead(parisHero)}
                           </p>
                         )}
@@ -880,33 +851,32 @@ const splitTitle = (t: string) => {
                     </>
                   ) : (
                     <>
-                      <div class="w-full lg:w-3/5 aspect-[3/2] overflow-hidden">
+                      <div class="aspect-[3/2] overflow-hidden">
                         <Image
                           src={picture1}
                           alt="Paris image"
-                          class="w-full h-full object-cover object-center"
+                          class="block h-full w-full object-cover"
                           loading="eager"
                         />
                       </div>
-
-                      <div class="w-full lg:w-2/5 pt-4 px-4 lg:px-0">
-                        <p class="text-accent uppercase mb-3 font-inter text-sm tracking-[.46em]">
+                      <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                        <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">
                           {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
                         </p>
-                        <h4 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard text-wrap break-words">
+                        <h4 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
                           Нет статей в категории
                         </h4>
                       </div>
                     </>
                   )}
-                </div>
+                </article>
 
                 {parisCardItems.length > 0 ? (
                   <div
                     id="paris-articles-box-1"
-                    class="w-full flex flex-col gap-6 lg:flex-row lg:gap-8 items-stretch justify-start py-8 px-0 min-h-[100px] border-b border-base-content/15"
+                    class="grid gap-4 sm:grid-cols-2 sm:items-stretch py-8 border-b border-base-content/15"
                   >
-                    {parisCardItems.map((item) => (
+                    {parisCardItems.slice(0, 2).map((item) => (
                       <ArticleCard
                         key={item.id}
                         isNetlenka={false}
@@ -945,13 +915,13 @@ const splitTitle = (t: string) => {
                 <article class="overflow-hidden bg-white">
                   <a
                     href={`/photo-of-the-day/${photoOfTheDay.id}`}
-                    class="block"
+                    class="block aspect-[2/3] overflow-hidden"
                     aria-label={photoOfTheDay.title}
                   >
                     <LazyImage
                       src={photoOfTheDay.imageUrl}
                       alt={photoOfTheDay.title}
-                      class="block h-auto w-full object-cover lg:h-[240px]"
+                      class="w-full h-full object-cover object-center"
                     />
                   </a>
                   <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
