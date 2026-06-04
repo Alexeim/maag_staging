@@ -8,9 +8,10 @@ interface Props {
   caption?: string;
   transitionName?: string;
   transitionAliases?: string[];
-  figureClass?: string; // Классы для внешнего контейнера figure/div
-  imageClass?: string; // Классы для тега img
-  figcaptionClass?: string; // Классы для текста подписи
+  figureClass?: string;
+  imageClass?: string;
+  figcaptionClass?: string;
+  objectFit?: "contain" | "cover";
 }
 const {
   src,
@@ -21,10 +22,11 @@ const {
   figureClass,
   imageClass,
   figcaptionClass,
+  objectFit = "contain",
 } = Astro.props;
 
 const defaultImageClasses =
-  "w-full h-auto lg:h-[649px] object-contain object-center";
+  `w-full h-auto lg:h-[649px] ${objectFit === "cover" ? "object-cover" : "object-contain"} object-center`;
 const finalImageClasses = `${defaultImageClasses} ${imageClass || ""}`;
 
 const defaultFigureClasses =

@@ -24,17 +24,17 @@ const {
 } = Astro.props;
 const textAlignmentClass =
   desktopTextAlign === "end"
-    ? "text-center lg:text-end"
+    ? "text-center lg:text-start"
     : desktopTextAlign === "start"
       ? "text-center lg:text-start"
       : "text-center";
 const imageWrapperClass =
   imageLayout === "fixed-height"
-    ? "flex h-[620px] w-full items-center justify-center"
+    ? "flex h-[620px] w-full items-center justify-center overflow-hidden"
     : "flex w-full items-center justify-center";
 const imageClass =
   imageLayout === "fixed-height"
-    ? "max-h-full max-w-full object-contain"
+    ? "w-full h-full object-cover object-center"
     : "h-auto w-full object-contain";
 const columnRichTextHtml = getInitialRichTextHtml({
   html: column.html,

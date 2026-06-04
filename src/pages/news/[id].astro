@@ -1,9 +1,11 @@
 ---
 import Layout from "@/Layouts/Layout.astro";
+import ArticleHeader from "@/components/article/ArticleHeader.astro";
+import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import ArticleDate from "@/components/article/ArticleDate.astro";
+import ArticleImage from "@/components/article/ArticleImage.astro";
+import ArticleBody from "@/components/article/ArticleBody.astro";
 import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
-import NewsContent from "@/components/news/NewsContent.astro";
-import NewsHeader from "@/components/news/NewsHeader.astro";
-import NewsStickyImage from "@/components/news/NewsStickyImage.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import { ApiError, newsApi } from "@/lib/api/api";
 import {
@@ -38,8 +40,10 @@ const displayArticle = {
   authorName: articleData?.author
     ? `${articleData.author.firstName} ${articleData.author.lastName}`
     : "Автор",
+  authorAvatar: articleData?.author?.avatar,
   imageUrl: articleData?.imageUrl,
   imageCaption: articleData?.imageCaption || "",
+  imageAlt: articleData?.title || "News image",
   contentBlocks: articleData?.content || [],
 };
 
@@ -91,54 +95,55 @@ if (!error && articleData) {
   useClientRouter={true}
 >
   <main class="bg-base-200 min-h-screen">
-    <div class="max-w-[1512px] mx-auto px-4 lg:px-8">
+    <div class="max-w-[1512px] mx-auto">
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}
-      {
-        !error && articleData && (
-          <>
-            <div class="pb-[100px] pt-[50px]">
-              <NewsHeader
+      {!error && articleData && (
+        <>
+          <div class="pt-[50px] pb-[70px] px-4 lg:px-0 flex flex-col items-center">
+            <div class="flex flex-col gap-4 max-w-[825px] w-full">
+              <ArticleHeader
                 category={displayArticle.category}
                 title={displayArticle.title}
                 lead={displayArticle.lead}
-                authorName={displayArticle.authorName}
-                createdAt={articleData.createdAt}
+                titleClass="text-3xl lg:text-[42px]"
               />
-
-              <section class="mt-2 grid grid-cols-1 items-start gap-10 lg:mt-6 lg:grid-cols-12 lg:gap-12">
-                {displayArticle.imageUrl ? (
-                  <div class="self-start lg:col-span-5 lg:sticky lg:top-[110px]">
-                    <NewsStickyImage
-                      src={displayArticle.imageUrl}
-                      alt={displayArticle.title}
-                      caption={displayArticle.imageCaption}
-                      transitionName={`main-article-image-${id}`}
-                      transitionAliases={transitionAliases}
-                    />
-                  </div>
-                ) : null}
-
-                <div
-                  class:list={[
-                    "lg:min-w-0",
-                    displayArticle.imageUrl
-                      ? "lg:col-span-7"
-                      : "lg:col-span-8 lg:col-start-3",
-                  ]}
-                >
-                  <NewsContent contentBlocks={displayArticle.contentBlocks} />
-                </div>
-              </section>
-
-              <ContentCollectionMarquee
-                collectionItems={collectionContentItems}
-                categoryItems={sameCategoryItems}
-                fallbackImageSrc={picture1.src}
-              />
+              <div class="h-10 flex flex-row items-center justify-start gap-4">
+                <ArticleAuthor
+                  name={displayArticle.authorName}
+                  avatarUrl={displayArticle.authorAvatar}
+                />
+                <ArticleDate createdAt={articleData.createdAt} />
+              </div>
             </div>
-          </>
-        )
-      }
+
+            {displayArticle.imageUrl && (
+              <ArticleImage
+                src={displayArticle.imageUrl}
+                alt={displayArticle.imageAlt}
+                caption={displayArticle.imageCaption}
+                transitionName={`main-article-image-${id}`}
+                transitionAliases={transitionAliases}
+                figureClass="max-w-[826px]"
+                imageClass="shadow-lg"
+                figcaptionClass="text-center text-gray-500 mt-2"
+                objectFit="cover"
+              />
+            )}
+          </div>
+
+          <div class="w-full px-4 lg:px-14 pb-[100px]">
+            <ArticleBody
+              contentBlocks={displayArticle.contentBlocks}
+            />
+
+            <ContentCollectionMarquee
+              collectionItems={collectionContentItems}
+              categoryItems={sameCategoryItems}
+              fallbackImageSrc={picture1.src}
+            />
+          </div>
+        </>
+      )}
     </div>
   </main>
 </Layout>
