@@ -110,9 +110,9 @@ const syncContentBlockOrder = (blocks?: unknown) => {
 // Helper to create a new block object
 const createBlock = (type, data, position = 0) =>
   withBlockMeta({ type, ...data }, position);
-const TIP_TYPES = ["location", "time", "money", "idea", "like", "dislike"] as const;
+const TIP_TYPES = ["location", "time", "money", "idea", "like", "dislike", "link"] as const;
 type TipType = (typeof TIP_TYPES)[number];
-type TipItem = { type: TipType; text: string };
+type TipItem = { type: TipType; text: string; url?: string };
 
 export default function articleCreatorLogic(initialState = {}) {
   const {
@@ -291,7 +291,11 @@ export default function articleCreatorLogic(initialState = {}) {
         continue;
       }
       deduped.add(type);
-      normalized.push({ type, text });
+      const url =
+        type === "link" && typeof (rawItem as { url?: string }).url === "string"
+          ? (rawItem as { url?: string }).url!.trim()
+          : undefined;
+      normalized.push({ type, text, ...(url !== undefined ? { url } : {}) });
     }
     return normalized;
   };
@@ -397,6 +401,7 @@ export default function articleCreatorLogic(initialState = {}) {
       { type: "idea" as TipType, label: "Идея" },
       { type: "like" as TipType, label: "Плюсы" },
       { type: "dislike" as TipType, label: "Минусы" },
+      { type: "link" as TipType, label: "Ссылка" },
     ],
     getCategoryLabel(value?: string) {
       if (!value) {
@@ -561,7 +566,7 @@ export default function articleCreatorLogic(initialState = {}) {
       if (idx >= 0) {
         this.article.tips.splice(idx, 1);
       } else {
-        this.article.tips.push({ type, text: "" });
+        this.article.tips.push(type === "link" ? { type, text: "", url: "" } : { type, text: "" });
       }
     },
     getTipText(type: TipType) {
@@ -570,10 +575,17 @@ export default function articleCreatorLogic(initialState = {}) {
     },
     setTipText(type: TipType, value: string) {
       const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
-      if (idx < 0) {
-        return;
-      }
+      if (idx < 0) return;
       this.article.tips[idx].text = value;
+    },
+    getTipUrl(type: TipType) {
+      const tip = this.article.tips.find((item: TipItem) => item.type === type);
+      return (tip as any)?.url ?? "";
+    },
+    setTipUrl(type: TipType, value: string) {
+      const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
+      if (idx < 0) return;
+      (this.article.tips[idx] as any).url = value;
     },
     getAuthorLabel(author: any) {
       const firstName =

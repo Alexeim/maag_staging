@@ -4,6 +4,7 @@ import {
   Heart,
   HeartOff,
   Lightbulb,
+  Link2,
   MapPin,
   Wallet,
 } from "lucide-astro";
@@ -28,6 +29,7 @@ const ICONS = {
   idea: Lightbulb,
   like: Heart,
   dislike: HeartOff,
+  link: Link2,
 } as const;
 
 const normalizedType = type.trim().toLowerCase() as keyof typeof ICONS;

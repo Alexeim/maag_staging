@@ -15,7 +15,7 @@ export interface Article {
   authorId: string;
   articleType?: 'standard' | 'tips' | 'le_saviez_vous'; // Type of article layout
   content: any[]; // Array of content blocks (e.g., { type: 'paragraph', text: '...' })
-  tips?: Array<{ type: string; text: string }>;
+  tips?: Array<{ type: string; text: string; url?: string }>;
   imageUrl?: string;
   imageCaption?: string;
   category?: string; // <-- Added category
@@ -46,13 +46,13 @@ const normalizeArticleType = (
   return 'standard';
 };
 
-const normalizeTips = (tips: unknown): Array<{ type: string; text: string }> => {
+const normalizeTips = (tips: unknown): Array<{ type: string; text: string; url?: string }> => {
   if (!Array.isArray(tips)) {
     return [];
   }
 
   const deduped = new Set<string>();
-  const normalized: Array<{ type: string; text: string }> = [];
+  const normalized: Array<{ type: string; text: string; url?: string }> = [];
 
   tips.forEach((rawTip) => {
     if (!rawTip || typeof rawTip !== 'object') {
@@ -63,8 +63,12 @@ const normalizeTips = (tips: unknown): Array<{ type: string; text: string }> => 
     if (!type || !text || deduped.has(type)) {
       return;
     }
+    const url =
+      type === 'link' && typeof (rawTip as { url?: unknown }).url === 'string'
+        ? String((rawTip as { url?: string }).url).trim()
+        : undefined;
     deduped.add(type);
-    normalized.push({ type, text });
+    normalized.push({ type, text, ...(url ? { url } : {}) });
   });
 
   return normalized;

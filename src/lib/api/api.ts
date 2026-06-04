@@ -132,7 +132,7 @@ export interface ArticlePayload {
   authorId: string;
   articleType?: 'standard' | 'tips' | 'le_saviez_vous';
   content: unknown[];
-  tips?: Array<{ type: string; text: string }>;
+  tips?: Array<{ type: string; text: string; url?: string }>;
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
@@ -585,7 +585,7 @@ export interface GuidePayload {
   title: string;
   authorId: string;
   content: unknown[];
-  tips?: Array<{ type: string; text: string }>;
+  tips?: Array<{ type: string; text: string; url?: string }>;
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;

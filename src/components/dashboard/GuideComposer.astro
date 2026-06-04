@@ -313,6 +313,11 @@ const {
                 class="h-5 w-5 shrink-0 text-accent"
                 x-show="tip.type === 'dislike'"
               />
+              <TipIcon
+                type="link"
+                class="h-5 w-5 shrink-0 text-accent"
+                x-show="tip.type === 'link'"
+              />
               <span x-text="tip.label"></span>
             </span>
             <input
@@ -323,6 +328,16 @@ const {
               @input="setTipText(tip.type, $event.target.value)"
               placeholder="Текст подсказки..."
             />
+            <template x-if="tip.type === 'link'">
+              <input
+                type="url"
+                class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 col-start-3"
+                :disabled="!isTipSelected(tip.type)"
+                :value="getTipUrl(tip.type)"
+                @input="setTipUrl(tip.type, $event.target.value)"
+                placeholder="https://..."
+              />
+            </template>
           </div>
         </template>
       </div>

@@ -4,6 +4,7 @@ import TipIcon from "@/components/article/TipIcon.astro";
 interface Tip {
   type: string;
   text: string;
+  url?: string;
 }
 
 interface Props {
@@ -19,21 +20,24 @@ const ICONS = {
   idea: true,
   like: true,
   dislike: true,
+  link: true,
 } as const;
 
 type TipType = keyof typeof ICONS;
 
-const sortTips = (tips: { type: TipType; text: string }[]) =>
+const TIP_ORDER: TipType[] = [
+  "location",
+  "time",
+  "money",
+  "idea",
+  "like",
+  "dislike",
+  "link",
+];
+
+const sortTips = (tips: { type: TipType; text: string; url?: string }[]) =>
   [...tips].sort((left, right) => {
-    if (left.type === "like" && right.type === "dislike") {
-      return -1;
-    }
-
-    if (left.type === "dislike" && right.type === "like") {
-      return 1;
-    }
-
-    return 0;
+    return TIP_ORDER.indexOf(left.type) - TIP_ORDER.indexOf(right.type);
   });
 
 const preparedTips = tips
@@ -47,8 +51,9 @@ const preparedTips = tips
   .map((tip) => ({
     type: tip.type.trim().toLowerCase(),
     text: tip.text.trim(),
+    url: typeof tip.url === "string" ? tip.url.trim() : undefined,
   }))
-  .filter((tip): tip is { type: TipType; text: string } => tip.type in ICONS);
+  .filter((tip): tip is { type: TipType; text: string; url?: string } => tip.type in ICONS);
 
 const orderedTips = sortTips(preparedTips);
 ---
@@ -58,15 +63,27 @@ const orderedTips = sortTips(preparedTips);
     <section class="max-w-[826px] mx-auto mt-12">
       <div class="border border-base-300 bg-white/85">
         {orderedTips.map((tip) => {
+          const isLink = tip.type === "link" && tip.url;
           return (
             <div class="flex flex-row items-center justify-start gap-4 px-4 py-2 border-b border-base-300 last:border-b-0">
               <TipIcon
                 type={tip.type}
                 class="mt-0.5 h-5 w-5 shrink-0 text-accent"
               />
-              <p class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90">
-                {tip.text}
-              </p>
+              {isLink ? (
+                <a
+                  href={tip.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90 hover:underline"
+                >
+                  {tip.text}
+                </a>
+              ) : (
+                <p class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90">
+                  {tip.text}
+                </p>
+              )}
             </div>
           );
         })}

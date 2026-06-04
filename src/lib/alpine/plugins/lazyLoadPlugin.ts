@@ -327,6 +327,8 @@ export default function(Alpine: Alpine) {
       toggleTip() {},
       getTipText() { return ''; },
       setTipText() {},
+      getTipUrl() { return ''; },
+      setTipUrl() {},
       loadAuthors() {},
       syncCurrentContentCollection() {},
       loadContentCollections() {},
