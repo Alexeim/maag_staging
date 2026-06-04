@@ -1,0 +1,118 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import { photosOfTheDayApi } from "@/lib/api/api";
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+
+const photosRaw = await photosOfTheDayApi.list();
+
+const normalizeDate = (value: any) => {
+  if (!value) return null;
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "object") {
+    if (typeof value.toDate === "function") return value.toDate();
+    const seconds = "seconds" in value ? value.seconds : "_seconds" in value ? value._seconds : null;
+    if (seconds !== null) return new Date(seconds * 1000);
+  }
+  return null;
+};
+
+const photos = photosRaw.map((photo) => {
+  const date = normalizeDate(photo.createdAt);
+  return {
+    ...photo,
+    createdAtFormatted: date
+      ? date.toLocaleDateString("ru-RU", { year: "numeric", month: "short", day: "numeric" })
+      : "—",
+  };
+});
+---
+
+<DashboardLayout title="Фото дня" active="photo-of-the-day">
+  <div
+    class="bg-base-100 border border-base-300 rounded-xl p-6"
+    x-data={`$lazy('photoOfTheDayList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
+  >
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-semibold">Фото дня</h2>
+        <p class="text-sm text-base-content/70 mt-1">
+          Управляй фотографиями дня. Последнее загруженное отображается на лендинге.
+        </p>
+      </div>
+      <a
+        href="/dashboard/photo-of-the-day/create"
+        class="px-4 py-2 bg-primary text-primary-content text-sm rounded-lg hover:bg-primary/90 transition"
+      >
+        + Добавить фото
+      </a>
+    </div>
+
+    {photos.length > 0 ? (
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-base-content">
+          <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+            <tr>
+              <th scope="col" class="px-4 py-3 w-16">Фото</th>
+              <th scope="col" class="px-6 py-3">Заголовок</th>
+              <th scope="col" class="px-6 py-3 hidden md:table-cell">Создано</th>
+              <th scope="col" class="px-6 py-3">
+                <span class="sr-only">Действия</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {photos.map((photo, index) => {
+              const isLast = index === photos.length - 1;
+              return (
+                <tr
+                  class:list={[
+                    "bg-base-100 hover:bg-base-200/50",
+                    !isLast && "border-b border-base-300",
+                  ]}
+                >
+                  <td class="px-4 py-3">
+                    {photo.imageUrl && (
+                      <img
+                        src={photo.imageUrl}
+                        alt={photo.title}
+                        class="w-12 h-12 object-cover rounded"
+                      />
+                    )}
+                  </td>
+                  <td class="px-6 py-4 font-medium">{photo.title}</td>
+                  <td class="px-6 py-4 hidden md:table-cell text-base-content/60">
+                    {photo.createdAtFormatted}
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex gap-3 justify-end">
+                      <a
+                        href={`/dashboard/photo-of-the-day/${photo.id}/edit`}
+                        class="text-primary hover:underline text-sm"
+                      >
+                        Редактировать
+                      </a>
+                      <button
+                        type="button"
+                        class="text-error hover:underline text-sm cursor-pointer"
+                        @click={`handleDeleteClick('${photo.id}', '${photo.title.replace(/'/g, "\\'")}')`}
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <div class="text-center py-12 text-base-content/60">
+        <p>Нет ни одного фото дня. <a href="/dashboard/photo-of-the-day/create" class="text-primary hover:underline">Добавить первое</a>.</p>
+      </div>
+    )}
+  </div>
+</DashboardLayout>

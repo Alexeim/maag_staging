@@ -133,6 +133,7 @@ export interface LandingPlacementsDocument {
   eventCard: LandingEventCardSelection | null;
   cultureInterviewBlock: LandingCultureInterviewBlockSelection | null;
   leSaviezVousFeature: SectionPageLeSaviezVousSelection | null;
+  photoOfTheDayFeature: PhotoOfTheDayFeatureSelection | null;
   updatedAt: Date | null;
   updatedBy: string | null;
 }
@@ -211,6 +212,19 @@ export interface SectionPageLeSaviezVousManualSelection {
 export type SectionPageLeSaviezVousSelection =
   | SectionPageLeSaviezVousAutoSelection
   | SectionPageLeSaviezVousManualSelection;
+
+export interface PhotoOfTheDayFeatureAutoSelection {
+  mode: 'auto-latest';
+}
+
+export interface PhotoOfTheDayFeatureManualSelection {
+  mode: 'manual';
+  id: string;
+}
+
+export type PhotoOfTheDayFeatureSelection =
+  | PhotoOfTheDayFeatureAutoSelection
+  | PhotoOfTheDayFeatureManualSelection;
 
 export interface CulturePagePlacementsDocument {
   schemaVersion: 1;
@@ -300,6 +314,9 @@ const createDefaultLandingPlacements = (): LandingPlacementsDocument => ({
     mode: 'auto-latest',
   },
   leSaviezVousFeature: {
+    mode: 'auto-latest',
+  },
+  photoOfTheDayFeature: {
     mode: 'auto-latest',
   },
   updatedAt: null,
@@ -802,6 +819,11 @@ const normalizeLandingPlacements = (
     ? null
     : (normalizeSectionPageLeSaviezVousSelection(leSaviezVousRaw) ?? defaults.leSaviezVousFeature);
 
+  const photoOfTheDayRaw = 'photoOfTheDayFeature' in value ? value.photoOfTheDayFeature : undefined;
+  const photoOfTheDayFeature = photoOfTheDayRaw === null
+    ? null
+    : (normalizePhotoOfTheDayFeatureSelection(photoOfTheDayRaw) ?? defaults.photoOfTheDayFeature);
+
   return {
     schemaVersion: 4,
     mainHero,
@@ -814,6 +836,7 @@ const normalizeLandingPlacements = (
     eventCard,
     cultureInterviewBlock,
     leSaviezVousFeature,
+    photoOfTheDayFeature,
     updatedAt:
       value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
     updatedBy: normalizeStringId(value.updatedBy),
@@ -1064,6 +1087,7 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
     let eventCard = current.eventCard;
     let cultureInterviewBlock = current.cultureInterviewBlock;
     let leSaviezVousFeature = current.leSaviezVousFeature;
+    let photoOfTheDayFeature = current.photoOfTheDayFeature;
 
     if ('mainHero' in payload) {
       if (payload.mainHero === null) {
@@ -1320,6 +1344,26 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
       }
     }
 
+    if ('photoOfTheDayFeature' in payload) {
+      if (payload.photoOfTheDayFeature === null) {
+        photoOfTheDayFeature = null;
+      } else {
+        const normalized = normalizePhotoOfTheDayFeatureSelection(payload.photoOfTheDayFeature);
+        if (!normalized) {
+          return res.status(400).json({ message: 'Invalid photoOfTheDayFeature payload' });
+        }
+
+        if (normalized.mode === 'manual') {
+          const exists = await assertDocumentExists('photosOfTheDay', normalized.id);
+          if (!exists) {
+            return res.status(404).json({ message: 'Referenced photo of the day was not found' });
+          }
+        }
+
+        photoOfTheDayFeature = normalized;
+      }
+    }
+
     const nextValue: LandingPlacementsDocument = {
       schemaVersion: 4,
       mainHero,
@@ -1332,6 +1376,7 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
       eventCard,
       cultureInterviewBlock,
       leSaviezVousFeature,
+      photoOfTheDayFeature,
       updatedAt: new Date(),
       updatedBy: null,
     };
@@ -1548,6 +1593,11 @@ const normalizeSectionPageLeSaviezVousSelection = (
   }
   return null;
 };
+
+const normalizePhotoOfTheDayFeatureSelection = (
+  value: unknown,
+): PhotoOfTheDayFeatureSelection | null =>
+  normalizeSectionPageLeSaviezVousSelection(value) as PhotoOfTheDayFeatureSelection | null;
 
 const normalizeCulturePagePlacements = (
   value: FirebaseFirestore.DocumentData | undefined,

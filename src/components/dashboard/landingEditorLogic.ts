@@ -97,6 +97,11 @@ interface LandingEditorInitialState {
     mode: "empty" | "auto-latest" | "manual";
     id: string;
   };
+  photoOfTheDayOptions: ContentOption[];
+  initialPhotoOfTheDay: {
+    mode: "empty" | "auto-latest" | "manual";
+    id: string;
+  };
 }
 
 const getMainHeroTypeFromKey = (key: string) => {
@@ -197,6 +202,11 @@ export default (initialState: LandingEditorInitialState) => ({
   leSaviezVousMode: initialState.initialLeSaviezVous?.mode ?? "auto-latest",
   selectedLeSaviezVousId: initialState.initialLeSaviezVous?.id ?? "",
   leSaviezVousSaving: false,
+  photoOfTheDayOptions: initialState.photoOfTheDayOptions ?? [],
+  photoOfTheDayMode: initialState.initialPhotoOfTheDay?.mode ?? "auto-latest",
+  selectedPhotoOfTheDayId: initialState.initialPhotoOfTheDay?.id ?? "",
+  photoOfTheDaySaving: false,
+  photoOfTheDayError: "",
   leSaviezVousError: "",
 
   getUiStore(): UiStore | null {
@@ -783,6 +793,38 @@ export default (initialState: LandingEditorInitialState) => ({
       this.notify(this.leSaviezVousError, "error");
     } finally {
       this.leSaviezVousSaving = false;
+    }
+  },
+
+  async savePhotoOfTheDay() {
+    this.photoOfTheDaySaving = true;
+    this.photoOfTheDayError = "";
+
+    try {
+      let photoOfTheDayFeature: { mode: "auto-latest" } | { mode: "manual"; id: string } | null = null;
+
+      if (this.photoOfTheDayMode === "auto-latest") {
+        photoOfTheDayFeature = { mode: "auto-latest" };
+      } else if (this.photoOfTheDayMode === "manual") {
+        if (!this.selectedPhotoOfTheDayId) {
+          throw new Error("Для ручного режима выбери фото.");
+        }
+        photoOfTheDayFeature = { mode: "manual", id: this.selectedPhotoOfTheDayId };
+      }
+
+      await editorialPlacementsApi.updateLanding({ photoOfTheDayFeature });
+
+      this.notify("Фото дня на landing обновлено.");
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to save photo of the day", error);
+      this.photoOfTheDayError =
+        error instanceof Error
+          ? error.message
+          : "Не удалось сохранить фото дня.";
+      this.notify(this.photoOfTheDayError, "error");
+    } finally {
+      this.photoOfTheDaySaving = false;
     }
   },
 });

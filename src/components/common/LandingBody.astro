@@ -8,6 +8,7 @@ import {
   guidesApi,
   visualStoriesApi,
   newsApi,
+  photosOfTheDayApi,
   type LandingCategoryCardsSelection,
   type LandingCategoryCardsItemTarget,
   type LandingNetlenkaRailSelection,
@@ -138,6 +139,7 @@ let hotContentItems: any[] = [];
 let latestInterview: any = null;
 let allItemsSorted: any[] = [];
 let leSaviezVousArticle: any = null;
+let photoOfTheDay: any = null;
 
 const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   schemaVersion: 4,
@@ -164,6 +166,12 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
     mode: "auto-nearest",
   },
   cultureInterviewBlock: {
+    mode: "auto-latest",
+  },
+  leSaviezVousFeature: {
+    mode: "auto-latest",
+  },
+  photoOfTheDayFeature: {
     mode: "auto-latest",
   },
   updatedAt: null,
@@ -507,6 +515,20 @@ try {
         : null;
 } catch (error) {
   console.error("Failed to fetch data for LandingBody:", error);
+}
+
+try {
+  const placement = landingPlacements.photoOfTheDayFeature;
+  if (placement && placement.mode !== "empty") {
+    const photos = await photosOfTheDayApi.list();
+    if (placement.mode === "manual" && "id" in placement) {
+      photoOfTheDay = photos.find((p) => p.id === placement.id) ?? null;
+    } else {
+      photoOfTheDay = photos[0] ?? null;
+    }
+  }
+} catch (e) {
+  console.error("Failed to fetch photo of the day:", e);
 }
 
 const cultureHero = selectCategoryHero(
@@ -915,6 +937,42 @@ const splitTitle = (t: string) => {
           </div>
 
           <aside class="order-1 lg:order-none lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0">
+            {photoOfTheDay && (
+              <section class="grid gap-4 mb-8">
+                <h3 class="m-0 text-lg font-semibold uppercase tracking-[0.3em] font-old_standard">
+                  Фото дня
+                </h3>
+                <article class="overflow-hidden bg-white">
+                  <a
+                    href={`/photo-of-the-day/${photoOfTheDay.id}`}
+                    class="block"
+                    aria-label={photoOfTheDay.title}
+                  >
+                    <LazyImage
+                      src={photoOfTheDay.imageUrl}
+                      alt={photoOfTheDay.title}
+                      class="block h-auto w-full object-cover lg:h-[240px]"
+                    />
+                  </a>
+                  <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
+                    <a
+                      href={`/photo-of-the-day/${photoOfTheDay.id}`}
+                      class="text-current no-underline hover:underline"
+                    >
+                      <h4 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
+                        {photoOfTheDay.title}
+                      </h4>
+                    </a>
+                    {photoOfTheDay.caption && (
+                      <p class="m-0 text-sm text-black/60 font-inter font-normal line-clamp-2">
+                        {photoOfTheDay.caption}
+                      </p>
+                    )}
+                  </div>
+                </article>
+              </section>
+            )}
+
             <section class="grid gap-4">
               <h3 class="m-0 text-lg font-semibold uppercase tracking-[0.3em] font-old_standard">
                 Le saviez-vous?

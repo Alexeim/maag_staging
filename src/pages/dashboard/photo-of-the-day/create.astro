@@ -1,0 +1,19 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import PhotoOfTheDayComposer from "@/components/dashboard/PhotoOfTheDayComposer.astro";
+
+const creatorState = JSON.stringify({
+  initialPhoto: null,
+  photoId: null,
+  isEditMode: false,
+  onSaveRedirect: "/dashboard/photo-of-the-day",
+});
+---
+
+<DashboardLayout title="Создать фото дня" active="create-photo-of-the-day">
+  <PhotoOfTheDayComposer
+    heading="Создать фото дня"
+    submitLabel="Сохранить фото"
+    creatorState={creatorState}
+  />
+</DashboardLayout>

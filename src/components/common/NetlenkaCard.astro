@@ -24,26 +24,12 @@ const {
   href = "#",
 } = Astro.props as NetlenkaCardProps;
 
-const imageLoading: 'lazy' | 'eager' = imageUrl ? 'lazy' : 'eager';
+const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
 ---
 
 <div
-  class="w-full flex flex-col gap-2 max-h-[300px] min-w-[220px] lg:min-w-0 max-w-[303px]"
+  class="w-full flex flex-col gap-2 max-h-[380px] min-w-[220px] lg:min-w-0 max-w-[303px] bg-white"
 >
-  <div class="w-full aspect-[3/2] overflow-hidden">
-    <a
-      href={href}
-      class="linked-image-hover w-full h-full"
-    >
-      <LazyImage
-        src={imageUrl || picture3}
-        alt={imageUrl ? title : "Hot content image"}
-        class="linked-image-hover__media w-full h-full object-cover object-center"
-        loading={imageLoading}
-        transitionName={transitionName}
-      />
-    </a>
-  </div>
   {
     (date || category) && (
       <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em] mt-1">
@@ -61,14 +47,14 @@ const imageLoading: 'lazy' | 'eager' = imageUrl ? 'lazy' : 'eager';
           </span>
         )}
         {category && (
-          <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+          <span class="pl-2 py-2 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
             {category}
           </span>
         )}
       </div>
     )
   }
-  <h3 class="text-base lg:text-lg leading-tight font-oswald mb-3">
+  <h3 class="text-base lg:text-lg leading-tight font-oswald mb-3 text-center">
     <a
       href={href}
       class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90"
@@ -83,4 +69,15 @@ const imageLoading: 'lazy' | 'eager' = imageUrl ? 'lazy' : 'eager';
       </p>
     )
   }
+  <div class="w-full aspect-[3/2] overflow-hidden">
+    <a href={href} class="linked-image-hover w-full h-full">
+      <LazyImage
+        src={imageUrl || picture3}
+        alt={imageUrl ? title : "Hot content image"}
+        class="linked-image-hover__media w-full h-full object-cover object-center"
+        loading={imageLoading}
+        transitionName={transitionName}
+      />
+    </a>
+  </div>
 </div>

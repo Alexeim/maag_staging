@@ -1,0 +1,27 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import PhotoOfTheDayComposer from "@/components/dashboard/PhotoOfTheDayComposer.astro";
+import { photosOfTheDayApi } from "@/lib/api/api";
+
+const { id } = Astro.params;
+const photo = await photosOfTheDayApi.getById(id!);
+
+if (!photo) {
+  return Astro.redirect("/404");
+}
+
+const creatorState = JSON.stringify({
+  initialPhoto: photo,
+  photoId: id,
+  isEditMode: true,
+  onSaveRedirect: "/dashboard/photo-of-the-day",
+});
+---
+
+<DashboardLayout title={`Редактировать: ${photo.title}`} active="photo-of-the-day">
+  <PhotoOfTheDayComposer
+    heading={`Редактировать: ${photo.title}`}
+    submitLabel="Обновить фото"
+    creatorState={creatorState}
+  />
+</DashboardLayout>

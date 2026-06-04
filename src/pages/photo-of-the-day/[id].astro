@@ -1,0 +1,85 @@
+---
+import Layout from "@/Layouts/Layout.astro";
+import ArticleHeader from "@/components/article/ArticleHeader.astro";
+import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import ArticleDate from "@/components/article/ArticleDate.astro";
+import { ApiError, photosOfTheDayApi } from "@/lib/api/api";
+
+const { id } = Astro.params;
+
+let photo: any;
+let error: string | null = null;
+
+try {
+  photo = await photosOfTheDayApi.getById(id!);
+} catch (e: any) {
+  if (e instanceof ApiError) {
+    error = e.status === 404 ? "Фото не найдено." : `Ошибка загрузки: ${e.message}`;
+  } else {
+    error = `Ошибка загрузки: ${e.message}`;
+  }
+}
+
+const authorName = photo?.author
+  ? `${photo.author.firstName} ${photo.author.lastName}`
+  : "Автор";
+
+// Alpine lazy-load init — same pattern as LazyImage.astro
+const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('load', () => $el.style.opacity='1')";
+---
+
+<Layout
+  title={`${photo?.title ?? "Фото дня"} - Maag`}
+  navbarVariant="default"
+  includePreFooterCTA={false}
+  useClientRouter={true}
+>
+  <main class="bg-base-200 min-h-screen">
+    <div class="max-w-[1512px] mx-auto">
+      {error && <div class="text-red-500 text-center pt-40">{error}</div>}
+
+      {!error && photo && (
+        <>
+          <div class="pt-[50px] pb-[40px] px-4 lg:px-0 flex flex-col items-center">
+            <div class="flex flex-col gap-4 max-w-[825px] w-full">
+              <ArticleHeader
+                category="Фото дня"
+                title={photo.title}
+                titleClass="text-3xl lg:text-[42px]"
+              />
+              <div class="h-10 flex flex-row items-center justify-start gap-4">
+                <ArticleAuthor
+                  name={authorName}
+                  avatarUrl={photo.author?.avatar}
+                />
+                <ArticleDate createdAt={photo.createdAt} />
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full px-4 lg:px-14 pb-[100px] flex flex-col items-center gap-4">
+            <div class="w-full max-w-[1200px] h-[460px] lg:h-[700px] overflow-hidden bg-base-200">
+              <img
+                src={photo.imageUrl}
+                alt={photo.title}
+                class="opacity-0 transition-opacity duration-300 w-full h-full object-cover object-center shadow-lg"
+                loading="lazy"
+                x-data=""
+                x-init={xInit}
+              />
+            </div>
+
+            {photo.caption && (
+              <div class="max-w-[826px] w-full">
+                <p class="text-sm text-black/60 font-inter font-normal text-center">
+                  {photo.caption}
+                </p>
+                <hr class="w-full border-t border-neutral-200 mt-3" />
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  </main>
+</Layout>

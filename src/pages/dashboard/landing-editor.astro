@@ -10,6 +10,7 @@ import {
   interviewsApi,
   newsApi,
   visualStoriesApi,
+  photosOfTheDayApi,
   type LandingCategoryCardsItemType,
   type LandingMainHeroType,
   type LandingNetlenkaItemType,
@@ -44,6 +45,9 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
     mode: "auto-latest",
   },
   leSaviezVousFeature: {
+    mode: "auto-latest",
+  },
+  photoOfTheDayFeature: {
     mode: "auto-latest",
   },
   updatedAt: null,
@@ -147,6 +151,7 @@ const formatUpdatedAt = (value: unknown) => {
 let landingPlacements = DEFAULT_LANDING_PLACEMENTS;
 let loadError = "";
 let leSaviezVousItems: Array<{ id: string; title: string; createdAt: unknown }> = [];
+let photoOfTheDayItems: Array<{ id: string; title: string }> = [];
 
 const contentTitleMaps = {
   mainHero: new Map<string, string>(),
@@ -391,6 +396,13 @@ try {
     error instanceof Error
       ? error.message
       : "Не удалось загрузить editorial slots landing.";
+}
+
+try {
+  const photos = await photosOfTheDayApi.list();
+  photoOfTheDayItems = photos.map((p) => ({ id: p.id, title: p.title }));
+} catch (e) {
+  console.error("Failed to fetch photos of the day for landing editor:", e);
 }
 
 const getBadgeClass = (modeLabel: string): string => {
@@ -664,6 +676,22 @@ const slotCards = [
     description: "Interview block в culture section именно на landing.",
     modeLabel: cultureInterviewSummary.modeLabel,
     details: cultureInterviewSummary.details,
+  },
+  {
+    title: "Фото дня",
+    description: "Блок «Фото дня» в sidebar на landing.",
+    modeLabel: (() => {
+      if (!landingPlacements.photoOfTheDayFeature) return "Пусто";
+      if (landingPlacements.photoOfTheDayFeature.mode === "auto-latest") return "Auto latest";
+      return "Manual";
+    })(),
+    details: (() => {
+      if (!landingPlacements.photoOfTheDayFeature) return "Фото дня slot пуст.";
+      if (landingPlacements.photoOfTheDayFeature.mode === "auto-latest") return "Автоматически показывается последнее фото дня.";
+      const id = landingPlacements.photoOfTheDayFeature.id;
+      const found = photoOfTheDayItems.find((i) => i.id === id);
+      return found ? found.title : `Фото ${id}`;
+    })(),
   },
   {
     title: "Le Saviez-Vous",
@@ -956,6 +984,18 @@ const initialLeSaviezVousState = (() => {
   return { mode: "manual" as const, id: landingPlacements.leSaviezVousFeature.id };
 })();
 
+const photoOfTheDayOptions = photoOfTheDayItems;
+
+const initialPhotoOfTheDayState = (() => {
+  if (!landingPlacements.photoOfTheDayFeature) {
+    return { mode: "empty" as const, id: "" };
+  }
+  if (landingPlacements.photoOfTheDayFeature.mode === "auto-latest") {
+    return { mode: "auto-latest" as const, id: "" };
+  }
+  return { mode: "manual" as const, id: landingPlacements.photoOfTheDayFeature.id };
+})();
+
 const initialMainHeroState = (() => {
   if (!landingPlacements.mainHero) {
     return { mode: "empty" as const, key: "" };
@@ -993,6 +1033,8 @@ const initialMainHeroState = (() => {
       initialCultureInterview: initialCultureInterviewState,
       leSaviezVousOptions,
       initialLeSaviezVous: initialLeSaviezVousState,
+      photoOfTheDayOptions,
+      initialPhotoOfTheDay: initialPhotoOfTheDayState,
     })})`}
   >
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
@@ -1786,6 +1828,56 @@ const initialMainHeroState = (() => {
             Сохранить le saviez-vous
           </button>
           <span x-show="leSaviezVousSaving" class="text-sm text-base-content/70">Сохраняем...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Фото дня Controls</h3>
+        <p class="text-sm text-base-content/70">
+          Блок «Фото дня» в sidebar на landing.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="photo-of-the-day-mode" value="empty" x-model="photoOfTheDayMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="photo-of-the-day-mode" value="auto-latest" x-model="photoOfTheDayMode" />
+            <span class="text-sm">Auto latest</span>
+          </label>
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="photo-of-the-day-mode" value="manual" x-model="photoOfTheDayMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="photoOfTheDayMode === 'manual'" class="grid gap-2 max-w-sm">
+          <label for="photo-of-the-day-select" class="text-sm font-medium">Выбери фото</label>
+          <select id="photo-of-the-day-select" x-model="selectedPhotoOfTheDayId" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            <option value="">— выбери фото —</option>
+            {photoOfTheDayOptions.map((item) => (
+              <option value={item.id}>{item.title}</option>
+            ))}
+          </select>
+        </div>
+
+        <p x-show="photoOfTheDayError" class="text-sm text-error" x-text="photoOfTheDayError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="savePhotoOfTheDay()"
+            :disabled="photoOfTheDaySaving"
+          >
+            Сохранить фото дня
+          </button>
+          <span x-show="photoOfTheDaySaving" class="text-sm text-base-content/70">Сохраняем...</span>
         </div>
       </div>
     </div>

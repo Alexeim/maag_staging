@@ -1,0 +1,112 @@
+---
+import Button from "@/components/common/Button.astro";
+import { CloudUpload } from "lucide-astro";
+
+interface Props {
+  heading?: string;
+  submitLabel?: string;
+  creatorState: string;
+}
+
+const {
+  heading = "Фото дня",
+  submitLabel = "Сохранить",
+  creatorState,
+} = Astro.props;
+---
+
+<div class="max-w-4xl mx-auto" x-data={`$lazy('photoOfTheDayCreator', ${creatorState})`}>
+  <h1 class="text-3xl font-bold mb-6">{heading}</h1>
+
+  <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
+    <h2 class="text-xl font-semibold mb-4">Основная информация</h2>
+
+    <label class="block text-sm font-medium text-base-content mb-2">Заголовок</label>
+    <input
+      type="text"
+      x-model="photo.title"
+      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+      placeholder="Введите заголовок..."
+    />
+
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-base-content mb-2">Подпись к фото</label>
+      <textarea
+        x-model="photo.caption"
+        rows="3"
+        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        placeholder="Подпись, которая отображается под изображением на публичной странице..."
+      ></textarea>
+    </div>
+
+    <div class="mt-6">
+      <label class="block text-sm font-medium text-base-content mb-2">Автор</label>
+      <select
+        x-model="selectedAuthorId"
+        class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+      >
+        <option value="">Выберите автора...</option>
+        <template x-for="author in authors" :key="author.id">
+          <option :value="author.id" x-text="getAuthorLabel(author)"></option>
+        </template>
+      </select>
+      <p x-show="authorsLoading" class="text-xs text-base-content/60 mt-1">Загружаем авторов...</p>
+    </div>
+  </section>
+
+  <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
+    <h2 class="text-xl font-semibold mb-4">Изображение</h2>
+
+    <div class="flex items-center gap-4" x-data="{ fileName: '' }">
+      <label
+        for="photo-upload"
+        class="cursor-pointer text-white bg-green-700 hover:bg-green-800 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+      >
+        <CloudUpload />
+        Загрузить
+      </label>
+      <input
+        id="photo-upload"
+        type="file"
+        class="hidden"
+        accept="image/png, image/jpeg, image/webp"
+        @change="handleImageUpload($event); fileName = $event.target.files[0]?.name || ''"
+      />
+      <span
+        x-text="fileName ? fileName : (photo.imageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+        class="text-sm text-base-content/70"
+      ></span>
+    </div>
+
+    <div x-show="uploading" class="mt-4">
+      <p class="text-sm mb-1">Загрузка: <span x-text="uploadProgress.toFixed(0) + '%'"></span></p>
+      <div class="w-full bg-base-200 rounded-full h-2">
+        <div class="bg-primary h-2 rounded-full transition-all" :style="{ width: uploadProgress + '%' }"></div>
+      </div>
+    </div>
+
+    <div x-show="photo.imageUrl && !uploading" class="mt-4">
+      <img
+        :src="photo.imageUrl"
+        alt="Предпросмотр"
+        class="w-full max-h-[400px] object-cover rounded-md shadow"
+      />
+    </div>
+  </section>
+
+  <div class="mt-8 flex justify-between gap-3">
+    <div>
+      <template x-if="isEditMode">
+        <Button variant="error" @click="deletePhoto()" :disabled="isSaving">Удалить</Button>
+      </template>
+    </div>
+    <Button
+      variant="primary"
+      @click="savePhoto()"
+      :disabled="isSaving || uploading"
+      :class="{ 'opacity-50 cursor-not-allowed': isSaving || uploading }"
+    >
+      {submitLabel}
+    </Button>
+  </div>
+</div>

@@ -334,6 +334,19 @@ export type LandingCultureInterviewBlockSelection =
   | LandingCultureInterviewAutoSelection
   | LandingCultureInterviewManualSelection;
 
+export interface PhotoOfTheDayFeatureAutoSelection {
+  mode: "auto-latest";
+}
+
+export interface PhotoOfTheDayFeatureManualSelection {
+  mode: "manual";
+  id: string;
+}
+
+export type PhotoOfTheDayFeatureSelection =
+  | PhotoOfTheDayFeatureAutoSelection
+  | PhotoOfTheDayFeatureManualSelection;
+
 export interface LandingPlacementsResponse {
   schemaVersion: 4;
   mainHero: LandingMainHeroSelection | null;
@@ -346,6 +359,7 @@ export interface LandingPlacementsResponse {
   eventCard: LandingEventCardSelection | null;
   cultureInterviewBlock: LandingCultureInterviewBlockSelection | null;
   leSaviezVousFeature: SectionPageLeSaviezVousSelection | null;
+  photoOfTheDayFeature: PhotoOfTheDayFeatureSelection | null;
   updatedAt?: string | Date | null;
   updatedBy?: string | null;
 }
@@ -361,6 +375,7 @@ export interface UpdateLandingPlacementsPayload {
   eventCard?: LandingEventCardSelection | null;
   cultureInterviewBlock?: LandingCultureInterviewBlockSelection | null;
   leSaviezVousFeature?: SectionPageLeSaviezVousSelection | null;
+  photoOfTheDayFeature?: PhotoOfTheDayFeatureSelection | null;
 }
 
 export interface CalendarPageManualCardsSelection {
@@ -760,6 +775,53 @@ export const eventsApi = {
   },
   delete(id: string, token?: string) {
     return request<void>(`/api/events/${id}`, {
+      method: "DELETE",
+      token,
+    });
+  },
+};
+
+export interface PhotoOfTheDayResponse {
+  id: string;
+  title: string;
+  imageUrl: string;
+  caption: string;
+  authorId: string;
+  author?: { firstName: string; lastName: string; avatar?: string } | null;
+  createdAt: string | { _seconds: number } | Date;
+  updatedAt?: string | { _seconds: number } | Date;
+}
+
+export interface PhotoOfTheDayPayload {
+  title: string;
+  imageUrl: string;
+  caption: string;
+  authorId: string;
+}
+
+export const photosOfTheDayApi = {
+  list(token?: string) {
+    return request<PhotoOfTheDayResponse[]>("/api/photos-of-the-day", { token });
+  },
+  create(payload: PhotoOfTheDayPayload, token?: string) {
+    return request<PhotoOfTheDayResponse>("/api/photos-of-the-day", {
+      method: "POST",
+      body: payload,
+      token,
+    });
+  },
+  getById(id: string, token?: string) {
+    return request<PhotoOfTheDayResponse>(`/api/photos-of-the-day/${id}`, { token });
+  },
+  update(id: string, payload: PhotoOfTheDayPayload, token?: string) {
+    return request<PhotoOfTheDayResponse>(`/api/photos-of-the-day/${id}`, {
+      method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+  delete(id: string, token?: string) {
+    return request<void>(`/api/photos-of-the-day/${id}`, {
       method: "DELETE",
       token,
     });

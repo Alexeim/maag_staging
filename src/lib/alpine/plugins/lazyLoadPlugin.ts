@@ -28,6 +28,8 @@ const components: Record<string, () => Promise<any>> = {
   guideList: () => import('@/components/dashboard/guideListLogic'),
   visualStoryCreator: () => import('@/components/article/visualStoryCreatorLogic'),
   visualStoryList: () => import('@/components/dashboard/visualStoryListLogic'),
+  photoOfTheDayCreator: () => import('@/components/dashboard/photoOfTheDayCreatorLogic'),
+  photoOfTheDayList: () => import('@/components/dashboard/photoOfTheDayListLogic'),
 };
 
 export default function(Alpine: Alpine) {
@@ -560,6 +562,18 @@ export default function(Alpine: Alpine) {
       handleSlideImageUpload() {},
       saveStory() {},
       deleteStory() {},
+      // --- Photo of the Day Creator defaults ---
+      photo: { title: '', imageUrl: '', caption: '' },
+      photoId: null,
+      savePhoto() {},
+      deletePhoto() {},
+      // --- Landing Editor: Photo of the Day placement ---
+      photoOfTheDayOptions: [],
+      photoOfTheDayMode: 'auto-latest',
+      selectedPhotoOfTheDayId: '',
+      photoOfTheDaySaving: false,
+      photoOfTheDayError: '',
+      savePhotoOfTheDay() {},
     };
   });
 }
