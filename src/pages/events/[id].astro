@@ -392,6 +392,7 @@ const buildGoogleCalendarUrl = (
 let eventData: any;
 let relatedEvents: any[] = [];
 let collectionContentItems: PublicContentCardItem[] = [];
+let relatedContentItems: PublicContentCardItem[] = [];
 let linkedContentLookup: LinkedContentLookup = {};
 let error: string | null = null;
 
@@ -456,10 +457,17 @@ if (!error && eventData) {
   }
 }
 
+const hasRelatedContentEntries = (rc: unknown): boolean => {
+  if (!rc || typeof rc !== "object") return false;
+  return Object.values(rc).some((v) => Array.isArray(v) && v.length > 0);
+};
+
 if (
   !error &&
   eventData &&
-  (eventData.contentCollectionId || hasLinkedContentBlocks(eventData?.content))
+  (eventData.contentCollectionId ||
+    hasLinkedContentBlocks(eventData?.content) ||
+    hasRelatedContentEntries(eventData?.relatedContent))
 ) {
   try {
     const pools = await fetchPublicContentPools();
@@ -472,6 +480,39 @@ if (
         currentId: id!,
         pools,
       });
+    }
+
+    // Build related content items from eventData.relatedContent
+    const rc = eventData?.relatedContent;
+    if (rc && typeof rc === "object") {
+      const poolMaps: Record<string, Map<string, PublicContentCardItem>> = {
+        article: new Map(pools.allArticles.map((i) => [i.id, i])),
+        news: new Map(pools.allNews.map((i) => [i.id, i])),
+        interview: new Map(pools.allInterviews.map((i) => [i.id, i])),
+        guide: new Map(pools.allGuides.map((i) => [i.id, i])),
+        flipper: new Map(pools.allFlippers.map((i) => [i.id, i])),
+        visualStory: new Map(pools.allVisualStories.map((i) => [i.id, i])),
+      };
+
+      // Deduplicate against collection items already fetched
+      const seenKeys = new Set(
+        collectionContentItems.map((i) => `${i.contentType}:${i.id}`),
+      );
+
+      for (const [type, ids] of Object.entries(rc)) {
+        if (!Array.isArray(ids)) continue;
+        const map = poolMaps[type];
+        if (!map) continue;
+        for (const itemId of ids as string[]) {
+          const key = `${type}:${itemId}`;
+          if (seenKeys.has(key)) continue;
+          const item = map.get(itemId);
+          if (item) {
+            seenKeys.add(key);
+            relatedContentItems.push(item);
+          }
+        }
+      }
     }
   } catch (collectionError) {
     console.error("Failed to fetch collection content for event page:", collectionError);
@@ -681,17 +722,66 @@ const displayEvent = {
                     </article>
                   )}
                 </section>
+
+                <div class="grid gap-8 lg:grid-cols-[12rem_minmax(0,1fr)] lg:gap-8 lg:items-start mt-8">
+                  <div class="grid gap-4">
+                    {mapsUrl ? (
+                      <a
+                        href={mapsUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-white px-5 py-3 font-inter text-base text-base-content transition-opacity hover:opacity-90"
+                      >
+                        <EventMetaIcon type="location" class="h-5 w-5" />
+                        <span>Открыть в Google maps</span>
+                      </a>
+                    ) : (
+                      <div class="inline-flex min-h-14 items-center gap-3 rounded-2xl border border-base-300 px-5 py-3 font-inter text-base text-base-content/75">
+                        <EventMetaIcon type="location" class="h-5 w-5" />
+                        <span>Адрес уточняется</span>
+                      </div>
+                    )}
+
+                    {calendarUrl && (
+                      <a
+                        href={calendarUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-white px-5 py-3 font-inter text-base text-base-content transition-opacity hover:opacity-90"
+                      >
+                        <CalendarPlus class="h-5 w-5" />
+                        <span>Добавить в календарь</span>
+                      </a>
+                    )}
+                  </div>
+
+                  <div class="overflow-hidden border border-base-300 bg-white">
+                    {mapsEmbedUrl ? (
+                      <iframe
+                        src={mapsEmbedUrl}
+                        class="h-[340px] w-full border-0"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title={`Карта для события ${displayEvent.title}`}
+                      />
+                    ) : (
+                      <div class="flex h-[340px] items-center justify-center px-6 text-center font-inter text-base text-base-content/60">
+                        Карта появится, когда для события будет указан адрес.
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <aside class="lg:col-span-3 lg:border-l lg:border-base-content/10 lg:pl-6">
                 <div class="grid gap-10 lg:sticky lg:top-8">
-                  {collectionContentItems.length > 0 && (
+                  {(collectionContentItems.length > 0 || relatedContentItems.length > 0) && (
                     <div class="grid gap-6">
                       <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
-                        Из коллекции
+                        Читайте также
                       </h2>
                       <div class="grid gap-8">
-                        {collectionContentItems.slice(0, 4).map((item) => (
+                        {[...collectionContentItems, ...relatedContentItems].slice(0, 4).map((item) => (
                           <article class="grid gap-4">
                             <a
                               href={item.href}
@@ -791,56 +881,6 @@ const displayEvent = {
               </aside>
             </section>
 
-            <section class="mt-16 border-t border-base-content/10 pt-10">
-              <div class="grid gap-8 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-10 lg:items-start">
-                <div class="grid gap-4">
-                  {mapsUrl ? (
-                    <a
-                      href={mapsUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-white px-5 py-3 font-inter text-base text-base-content transition-opacity hover:opacity-90"
-                    >
-                      <EventMetaIcon type="location" class="h-5 w-5" />
-                      <span>Открыть в Google maps</span>
-                    </a>
-                  ) : (
-                    <div class="inline-flex min-h-14 items-center gap-3 rounded-2xl border border-base-300 px-5 py-3 font-inter text-base text-base-content/75">
-                      <EventMetaIcon type="location" class="h-5 w-5" />
-                      <span>Адрес уточняется</span>
-                    </div>
-                  )}
-
-                  {calendarUrl && (
-                    <a
-                      href={calendarUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-white px-5 py-3 font-inter text-base text-base-content transition-opacity hover:opacity-90"
-                    >
-                      <CalendarPlus class="h-5 w-5" />
-                      <span>Добавить в календарь</span>
-                    </a>
-                  )}
-                </div>
-
-                <div class="overflow-hidden border border-base-300 bg-white">
-                  {mapsEmbedUrl ? (
-                    <iframe
-                      src={mapsEmbedUrl}
-                      class="h-[420px] w-full border-0"
-                      loading="lazy"
-                      referrerpolicy="no-referrer-when-downgrade"
-                      title={`Карта для события ${displayEvent.title}`}
-                    />
-                  ) : (
-                    <div class="flex h-[420px] items-center justify-center px-6 text-center font-inter text-base text-base-content/60">
-                      Карта появится, когда для события будет указан адрес.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
           </>
         )
       }
