@@ -1,0 +1,61 @@
+---
+// Variant B — Classic Editorial: portrait image, white panel with M logo as background texture
+import picture3 from "../../assets/images/article_content/par.jpeg";
+import LazyImage from "./LazyImage.astro";
+
+interface NetlenkaCardTwoProps {
+  title?: string;
+  category?: string;
+  date?: string;
+  hideDate?: boolean;
+  lead?: string;
+  transitionName?: string;
+  imageUrl?: string;
+  href?: string;
+}
+
+const {
+  title = "Без названия",
+  category = "Самое Читаемое",
+  lead = "",
+  transitionName,
+  imageUrl,
+  href = "#",
+} = Astro.props as NetlenkaCardTwoProps;
+
+const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
+---
+
+<div class="w-full min-w-[220px] lg:min-w-0 max-w-[303px] bg-white">
+  <a
+    href={href}
+    class="linked-image-hover block relative aspect-[2/3] overflow-hidden"
+    aria-label={title}
+  >
+    <LazyImage
+      src={imageUrl || picture3}
+      alt={imageUrl ? title : "Editorial image"}
+      class="linked-image-hover__media w-full h-full object-cover object-center"
+      loading={imageLoading}
+      transitionName={transitionName}
+    />
+  </a>
+
+  <div class="border-l-[3px] border-accent pl-3 pt-3 pb-3">
+    {category && (
+      <p class="m-0 mb-2 text-[0.6rem] font-bold uppercase tracking-[0.28em] text-accent font-['Inter']">
+        {category}
+      </p>
+    )}
+    <a href={href} class="text-current no-underline hover:underline">
+      <h3 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.2]">
+        {title}
+      </h3>
+    </a>
+    {lead && (
+      <p class="mt-2 m-0 text-sm text-base-content/60 font-inter font-normal line-clamp-2">
+        {lead}
+      </p>
+    )}
+  </div>
+</div>

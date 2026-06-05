@@ -1,0 +1,69 @@
+---
+// Variant C — Dark Editorial Split: portrait image, dark panel with M logo as background texture
+import picture3 from "../../assets/images/article_content/par.jpeg";
+import LazyImage from "./LazyImage.astro";
+import MIcon from "../../assets/logo/m.svg";
+
+interface NetlenkaCardThreeProps {
+  title?: string;
+  category?: string;
+  date?: string;
+  hideDate?: boolean;
+  lead?: string;
+  transitionName?: string;
+  imageUrl?: string;
+  href?: string;
+}
+
+const {
+  title = "Без названия",
+  category = "Самое Читаемое",
+  lead = "",
+  transitionName,
+  imageUrl,
+  href = "#",
+} = Astro.props as NetlenkaCardThreeProps;
+
+const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
+---
+
+<div class="w-full min-w-[220px] lg:min-w-0 max-w-[303px]">
+  <a
+    href={href}
+    class="linked-image-hover block relative aspect-[3/4] overflow-hidden"
+    aria-label={title}
+  >
+    <LazyImage
+      src={imageUrl || picture3}
+      alt={imageUrl ? title : "Editorial image"}
+      class="linked-image-hover__media w-full h-full object-cover object-center"
+      loading={imageLoading}
+      transitionName={transitionName}
+    />
+  </a>
+
+  <div class="relative bg-[#1c1c1c] px-4 pt-4 pb-5 overflow-hidden">
+    <!-- M logo fills the panel as background texture, bleeds off the right edge -->
+    <MIcon
+      class="pointer-events-none absolute -bottom-4 -right-4 w-36 h-auto select-none"
+      style="opacity: 0.35;"
+      aria-hidden="true"
+    />
+
+    {category && (
+      <p class="relative m-0 mb-2 text-[0.6rem] font-bold uppercase tracking-[0.28em] text-accent font-['Inter']">
+        {category}
+      </p>
+    )}
+    <a href={href} class="relative no-underline hover:underline">
+      <h3 class="m-0 text-white text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.2]">
+        {title}
+      </h3>
+    </a>
+    {lead && (
+      <p class="relative mt-2 m-0 text-xs text-white/55 font-inter font-normal line-clamp-2">
+        {lead}
+      </p>
+    )}
+  </div>
+</div>

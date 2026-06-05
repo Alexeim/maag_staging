@@ -19,6 +19,7 @@ import {
 import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
 
 import NetlenkaCard from "./NetlenkaCard.astro";
+import NetlenkaCardOne from "./NetlenkaCardOne.astro";
 import ArticleCard from "./ArticleCard.astro";
 import LazyImage from "./LazyImage.astro";
 import PhotoOfTheDayCard from "./PhotoOfTheDayCard.astro";
@@ -765,7 +766,7 @@ const splitTitle = (t: string) => {
           {
             hotContentItems.length > 0 ? (
               hotContentItems.map((item) => (
-                <NetlenkaCard
+                <NetlenkaCardOne
                   key={item.id}
                   title={item.title}
                   category={getPrimaryTag(item)}
@@ -778,7 +779,7 @@ const splitTitle = (t: string) => {
                 />
               ))
             ) : (
-              <NetlenkaCard
+              <NetlenkaCardOne
                 title="Скоро появится материал"
                 category={CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY]}
               />

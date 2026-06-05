@@ -1,6 +1,7 @@
 ---
 import Layout from "../Layouts/Layout.astro";
 import NetlenkaCard from "@/components/common/NetlenkaCard.astro";
+import NetlenkaCardThree from "@/components/common/NetlenkaCardThree.astro";
 import PhotoOfTheDayCard from "@/components/common/PhotoOfTheDayCard.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
@@ -510,7 +511,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
             {
               editorialSidebarItems.length > 0 ? (
                 editorialSidebarItems.map((item) => (
-                  <NetlenkaCard
+                  <NetlenkaCardThree
                     title={item.title}
                     category={getPrimaryTag(item) || "Париж"}
                     imageUrl={item.imageUrl}

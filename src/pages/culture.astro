@@ -2,6 +2,7 @@
 import Layout from "../Layouts/Layout.astro";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import NetlenkaCard from "@/components/common/NetlenkaCard.astro";
+import NetlenkaCardTwo from "@/components/common/NetlenkaCardTwo.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import picture1 from "../assets/images/culture.jpg";
@@ -552,7 +553,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
             {
               editorialSidebarItems.length > 0 ? (
                 editorialSidebarItems.map((item) => (
-                  <NetlenkaCard
+                  <NetlenkaCardTwo
                     title={item.title}
                     category={getPrimaryTag(item) || "Культура"}
                     imageUrl={item.imageUrl}
