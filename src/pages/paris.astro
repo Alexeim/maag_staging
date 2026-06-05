@@ -1,6 +1,7 @@
 ---
 import Layout from "../Layouts/Layout.astro";
 import NetlenkaCard from "@/components/common/NetlenkaCard.astro";
+import PhotoOfTheDayCard from "@/components/common/PhotoOfTheDayCard.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
 import picture1 from "../assets/images/culture.jpg";
@@ -11,6 +12,7 @@ import {
   guidesApi,
   visualStoriesApi,
   newsApi,
+  photosOfTheDayApi,
   type ParisPagePlacementsResponse,
 } from "@/lib/api/api";
 
@@ -181,7 +183,7 @@ let primaryParisArticle: any = null;
 let secondaryStories: any[] = [];
 let editorialSidebarItems: any[] = [];
 let parisFeed: any[] = [];
-let leSaviezVousArticle: any = null;
+let photoOfTheDay: any = null;
 let parisPagePlacements: ParisPagePlacementsResponse | null = null;
 
 try {
@@ -212,36 +214,6 @@ try {
     contentType: "news",
     tags: normalizeTags(item?.tags),
   }));
-  const leSaviezVousArticles = articles
-    .filter((article) => isLeSaviezVousArticle(article))
-    .sort(
-      (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
-    );
-
-  const leSaviezVousFeaturePlacement =
-    parisPagePlacements?.leSaviezVousFeature ?? null;
-  if (
-    !parisPagePlacements ||
-    leSaviezVousFeaturePlacement?.mode === "auto-latest"
-  ) {
-    leSaviezVousArticle = leSaviezVousArticles[0] ?? null;
-  } else if (leSaviezVousFeaturePlacement?.mode === "manual") {
-    leSaviezVousArticle =
-      articles.find(
-        (a) =>
-          isLeSaviezVousArticle(a) && a.id === leSaviezVousFeaturePlacement.id,
-      ) ?? null;
-  } else {
-    leSaviezVousArticle = null;
-  }
-
-  if (leSaviezVousArticle) {
-    leSaviezVousArticle = {
-      ...leSaviezVousArticle,
-      href: toContentHref(leSaviezVousArticle),
-    };
-  }
-
   const allContent = [
     ...standardArticles.map((article) => ({
       ...article,
@@ -341,6 +313,13 @@ try {
   console.error("Failed to fetch paris page articles:", error);
 }
 
+try {
+  const photos = await photosOfTheDayApi.list();
+  photoOfTheDay = photos[0] ?? null;
+} catch (e) {
+  console.error("Failed to fetch photo of the day:", e);
+}
+
 const editorialGridItems = parisFeed.slice(0, MAX_EDITORIAL_GRID_ITEMS);
 const editorialCarouselItems = parisFeed.slice(MAX_EDITORIAL_GRID_ITEMS);
 
@@ -358,10 +337,6 @@ const primaryParisTrunc = primaryParisArticle
   : "";
 const primaryParisSplit = splitTitle(primaryParisTrunc);
 
-const leSaviezTrunc = leSaviezVousArticle
-  ? String(leSaviezVousArticle.title)
-  : "";
-const leSaviezSplit = splitTitle(leSaviezTrunc);
 ---
 
 <Layout
@@ -514,100 +489,22 @@ const leSaviezSplit = splitTitle(leSaviezTrunc);
         <aside
           class="min-w-0 border-t border-[#3028211f] pt-4 lg:col-span-3 lg:border-t-0 lg:border-l lg:border-[#3028211f] lg:pt-0 lg:pl-4"
         >
-          <section class="grid gap-4">
-            <p
-              class="m-0 text-lg font-normal uppercase tracking-[0.3em] font-old_standard"
-            >
-              Le saviez-vous?
-            </p>
-
-            {
-              leSaviezVousArticle ? (
-                <article class="overflow-hidden bg-white">
-                  <a
-                    href={leSaviezVousArticle.href}
-                    class="block"
-                    aria-label={leSaviezVousArticle.title}
-                  >
-                    <img
-                      src={leSaviezVousArticle.imageUrl || picture1.src}
-                      alt={leSaviezVousArticle.title}
-                      class="block h-auto w-full object-cover lg:h-[240px]"
-                      loading="lazy"
-                    />
-                  </a>
-
-                  <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
-                    <p class="m-0">
-                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                        {getPrimaryTag(leSaviezVousArticle) || "Париж"}
-                      </span>
-                    </p>
-
-                    <a
-                      href={leSaviezVousArticle.href}
-                      class="text-current no-underline hover:underline"
-                    >
-                      <h2 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
-                        {leSaviezVousArticle.paid ? (
-                          <>
-                            {leSaviezSplit.start && <>{leSaviezSplit.start} </>}
-                            <span class="whitespace-nowrap">
-                              {leSaviezSplit.last}{" "}
-                              <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
-                            </span>
-                          </>
-                        ) : (
-                          leSaviezTrunc
-                        )}
-                      </h2>
-                    </a>
-
-                    <p class="m-0 text-sm text-black/60 font-inter font-normal">
-                      {truncateText(
-                        getCardLead(leSaviezVousArticle) ||
-                          leSaviezVousArticle?.lead ||
-                          "",
-                        150,
-                      )}
-                    </p>
-                  </div>
-                </article>
-              ) : (
-                <article class="overflow-hidden bg-white">
-                  <img
-                    src={picture1.src}
-                    alt="Le saviez-vous placeholder"
-                    class="block h-auto w-full object-cover lg:h-[240px]"
-                    loading="lazy"
-                  />
-
-                  <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
-                    <p class="m-0">
-                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                        Париж
-                      </span>
-                    </p>
-
-                    <h2 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
-                      Неочевидный факт о городе скоро появится здесь
-                    </h2>
-
-                    <p class="m-0 text-sm text-black/60 font-inter font-normal">
-                      Пока это плейсхолдер: здесь будет короткий визуальный факт
-                      или наблюдение в духе карточки календаря, но без даты.
-                    </p>
-                  </div>
-                </article>
-              )
-            }
-          </section>
+          {
+            photoOfTheDay && (
+              <PhotoOfTheDayCard
+                id={photoOfTheDay.id}
+                title={photoOfTheDay.title}
+                imageUrl={photoOfTheDay.imageUrl}
+                caption={photoOfTheDay.caption}
+              />
+            )
+          }
 
           <div class="grid gap-4 border-t border-[#3028211f] pt-4 mt-4">
             <p
               class="m-0 text-lg font-normal uppercase tracking-[0.3em] font-old_standard"
             >
-              Нетленка
+              записная книжка
             </p>
 
             {

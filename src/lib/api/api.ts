@@ -334,6 +334,10 @@ export type LandingCultureInterviewBlockSelection =
   | LandingCultureInterviewAutoSelection
   | LandingCultureInterviewManualSelection;
 
+export interface PhotoOfTheDayFeatureEmptySelection {
+  mode: "empty";
+}
+
 export interface PhotoOfTheDayFeatureAutoSelection {
   mode: "auto-latest";
 }
@@ -344,6 +348,7 @@ export interface PhotoOfTheDayFeatureManualSelection {
 }
 
 export type PhotoOfTheDayFeatureSelection =
+  | PhotoOfTheDayFeatureEmptySelection
   | PhotoOfTheDayFeatureAutoSelection
   | PhotoOfTheDayFeatureManualSelection;
 

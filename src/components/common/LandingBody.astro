@@ -21,6 +21,7 @@ import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
 import NetlenkaCard from "./NetlenkaCard.astro";
 import ArticleCard from "./ArticleCard.astro";
 import LazyImage from "./LazyImage.astro";
+import PhotoOfTheDayCard from "./PhotoOfTheDayCard.astro";
 import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import MaagLogoMobile from "../../assets/logo/logo-mobile.svg";
 import LatestInterview from "../HomePage/LatestInterview.astro";
@@ -908,42 +909,17 @@ const splitTitle = (t: string) => {
 
           <aside class="order-1 lg:order-none lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0">
             {photoOfTheDay && (
-              <section class="grid gap-4 mb-8">
-                <h3 class="m-0 text-lg font-semibold uppercase tracking-[0.3em] font-old_standard">
-                  Фото дня
-                </h3>
-                <article class="overflow-hidden bg-white">
-                  <a
-                    href={`/photo-of-the-day/${photoOfTheDay.id}`}
-                    class="block aspect-[2/3] overflow-hidden"
-                    aria-label={photoOfTheDay.title}
-                  >
-                    <LazyImage
-                      src={photoOfTheDay.imageUrl}
-                      alt={photoOfTheDay.title}
-                      class="w-full h-full object-cover object-center"
-                    />
-                  </a>
-                  <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
-                    <a
-                      href={`/photo-of-the-day/${photoOfTheDay.id}`}
-                      class="text-current no-underline hover:underline"
-                    >
-                      <h4 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
-                        {photoOfTheDay.title}
-                      </h4>
-                    </a>
-                    {photoOfTheDay.caption && (
-                      <p class="m-0 text-sm text-black/60 font-inter font-normal line-clamp-2">
-                        {photoOfTheDay.caption}
-                      </p>
-                    )}
-                  </div>
-                </article>
-              </section>
+              <div class="mb-8">
+                <PhotoOfTheDayCard
+                  id={photoOfTheDay.id}
+                  title={photoOfTheDay.title}
+                  imageUrl={photoOfTheDay.imageUrl}
+                  caption={photoOfTheDay.caption}
+                />
+              </div>
             )}
 
-            <section class="grid gap-4">
+            <section class="hidden gap-4">
               <h3 class="m-0 text-lg font-semibold uppercase tracking-[0.3em] font-old_standard">
                 Le saviez-vous?
               </h3>

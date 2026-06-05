@@ -47,26 +47,11 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
           </span>
         )}
         {category && (
-          <span class="pl-2 py-2 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+          <span class="pl-4 pt-4 pb-2 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
             {category}
           </span>
         )}
       </div>
-    )
-  }
-  <h3 class="text-base lg:text-lg leading-tight font-oswald mb-3 text-center">
-    <a
-      href={href}
-      class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90"
-    >
-      {title}
-    </a>
-  </h3>
-  {
-    lead && (
-      <p class="text-sm leading-relaxed text-base-content/75 font-oswald font-thin hidden">
-        {lead}
-      </p>
     )
   }
   <div class="w-full aspect-[3/2] overflow-hidden">
@@ -80,4 +65,21 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
       />
     </a>
   </div>
+  <h3
+    class="text-base lg:text-lg leading-tight font-oswald mt-4 mb-4 text-left px-4"
+  >
+    <a
+      href={href}
+      class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90"
+    >
+      {title}
+    </a>
+  </h3>
+  {
+    lead && (
+      <p class="text-sm leading-relaxed text-base-content/75 font-oswald font-thin hidden mb-4">
+        {lead}
+      </p>
+    )
+  }
 </div>
