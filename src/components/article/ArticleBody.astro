@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-astro";
 import ArticleVideo from "./ArticleVideo.astro";
 import LinkToContent from "./LinkToContent.astro";
 import ArticleColumnContent from "./ArticleColumnContent.astro";
+import OneBigOneSmall from "./OneBigOneSmall.astro";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import {
   getLinkedContentKey,
@@ -55,17 +56,32 @@ interface FlipperBlock extends Block {
   slides: FlipperSlide[];
 }
 
+interface OneBigOneSmallBlock extends Block {
+  type: "one-big-one-small";
+  portraitImageUrl?: string;
+  portraitImageCaption?: string;
+  landscapeImageUrl?: string;
+  landscapeImageCaption?: string;
+}
+
 interface RenderableBlock {
-  type: "prose-group" | "two-columns" | "three-columns" | "flipper" | "video";
+  type:
+    | "prose-group"
+    | "two-columns"
+    | "three-columns"
+    | "flipper"
+    | "video"
+    | "one-big-one-small";
   content?: Block[]; // for prose-group
   block?: TwoColumnBlock; // for two-columns
   threeColumnBlock?: ThreeColumnBlock; // for three-columns
   flipper?: FlipperBlock; // for flipper
   video?: Block;
+  oneBigOneSmall?: OneBigOneSmallBlock;
 }
 
 interface Props {
-  contentBlocks: (Block | TwoColumnBlock | ThreeColumnBlock)[];
+  contentBlocks: (Block | TwoColumnBlock | ThreeColumnBlock | OneBigOneSmallBlock)[];
   linkedContentLookup?: LinkedContentLookup;
 }
 
@@ -130,6 +146,18 @@ for (const block of contentBlocks) {
     renderableGroups.push({
       type: "video",
       video: block,
+    });
+  } else if (block.type === "one-big-one-small") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "one-big-one-small",
+      oneBigOneSmall: block as OneBigOneSmallBlock,
     });
   } else {
     currentProseGroup.push(block);
@@ -360,6 +388,21 @@ if (currentProseGroup.length > 0) {
                 ))}
               </div>
             )}
+          </div>
+        );
+      } else if (group.type === "one-big-one-small" && group.oneBigOneSmall) {
+        const block = group.oneBigOneSmall;
+        if (!block.portraitImageUrl && !block.landscapeImageUrl) {
+          return null;
+        }
+        return (
+          <div class={wideBreakoutRailClass}>
+            <OneBigOneSmall
+              portraitImageUrl={block.portraitImageUrl}
+              portraitImageCaption={block.portraitImageCaption}
+              landscapeImageUrl={block.landscapeImageUrl}
+              landscapeImageCaption={block.landscapeImageCaption}
+            />
           </div>
         );
       }

@@ -93,6 +93,38 @@ import { ChevronLeft, ChevronRight } from "lucide-astro";
                   </figure>
                 </template>
 
+                <template x-if="block.type === 'one-big-one-small'">
+                  <section class="w-full h-auto lg:relative lg:w-[1356px] lg:h-[calc(100vh-90px)] not-prose">
+                    <figure class="w-full lg:absolute lg:top-0 lg:left-0 lg:w-[300px]">
+                      <img
+                        x-show="block.portraitImageUrl"
+                        :src="block.portraitImageUrl"
+                        :alt="block.portraitImageCaption || 'Portrait guide image'"
+                        class="block w-full aspect-[2/3] object-cover rounded-md"
+                      />
+                      <figcaption
+                        x-show="block.portraitImageCaption"
+                        class="mt-2 text-xs text-base-content/55"
+                        x-text="block.portraitImageCaption"
+                      ></figcaption>
+                    </figure>
+
+                    <figure class="mt-4 w-full lg:absolute lg:right-0 lg:bottom-0 lg:mt-0 lg:w-[1056px]">
+                      <img
+                        x-show="block.landscapeImageUrl"
+                        :src="block.landscapeImageUrl"
+                        :alt="block.landscapeImageCaption || 'Landscape guide image'"
+                        class="block w-full aspect-[16/9] object-cover rounded-md"
+                      />
+                      <figcaption
+                        x-show="block.landscapeImageCaption"
+                        class="mt-2 text-xs text-base-content/55"
+                        x-text="block.landscapeImageCaption"
+                      ></figcaption>
+                    </figure>
+                  </section>
+                </template>
+
                 <template x-if="block.type === 'video'">
                   <figure class="space-y-2">
                     <video

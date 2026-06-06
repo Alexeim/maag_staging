@@ -309,6 +309,14 @@ export const deleteGuide = async (req: Request, res: Response) => {
         if (block.type === 'image' && block.url) {
           imageUrlsToDelete.push(block.url);
         }
+        if (block.type === 'one-big-one-small') {
+          if (block.portraitImageUrl) {
+            imageUrlsToDelete.push(block.portraitImageUrl);
+          }
+          if (block.landscapeImageUrl) {
+            imageUrlsToDelete.push(block.landscapeImageUrl);
+          }
+        }
         if (block.type === 'tips-item' && block.imageUrl) {
           imageUrlsToDelete.push(block.imageUrl);
         }

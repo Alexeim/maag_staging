@@ -9,6 +9,7 @@ export const BLOCK_TYPE_LABELS: Record<string, string> = {
   quote: "Цитата",
   image: "Изображение",
   video: "Видео",
+  "one-big-one-small": "Одна большая + одна маленькая",
   "two-columns": "Две колонки",
   "three-columns": "Три колонки",
   link: "Блок-ссылка",
@@ -140,6 +141,17 @@ export const getBlockSummary = (
         truncatePreviewText(block.url, 80) ||
         "Видео не добавлено";
       return `${sourceLabel} · ${details}`;
+    }
+    case "one-big-one-small": {
+      const portraitStatus =
+        typeof block.portraitImageUrl === "string" && block.portraitImageUrl.trim()
+          ? "портрет загружен"
+          : "портрет не загружен";
+      const landscapeStatus =
+        typeof block.landscapeImageUrl === "string" && block.landscapeImageUrl.trim()
+          ? "пейзаж загружен"
+          : "пейзаж не загружен";
+      return `${portraitStatus} · ${landscapeStatus}`;
     }
     case "two-columns":
       return `Левая колонка: ${getColumnTypeLabel(block.left?.type)} · Правая колонка: ${getColumnTypeLabel(block.right?.type)}`;

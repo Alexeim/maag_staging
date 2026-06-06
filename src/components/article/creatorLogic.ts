@@ -1016,7 +1016,13 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     // --- Image Upload Method ---
-    async handleImageUpload(event, isCover = true, blockIndex = null, column = null) {
+    async handleImageUpload(
+      event,
+      isCover = true,
+      blockIndex = null,
+      column = null,
+      imageField = null,
+    ) {
       const raw = event.target.files[0];
       if (!raw) return;
 
@@ -1056,6 +1062,11 @@ export default function articleCreatorLogic(initialState = {}) {
               ) {
                 this.editingBlock[column].content = downloadURL;
                 this.editingBlock[column].type = 'image'; // Ensure type is image
+              } else if (
+                this.editingBlock.type === "one-big-one-small" &&
+                imageField
+              ) {
+                this.editingBlock[imageField] = downloadURL;
               }
             }
             this.uploading = false;
@@ -1201,6 +1212,14 @@ export default function articleCreatorLogic(initialState = {}) {
         case "flipper":
           newBlockData = {
             slides: [{ imageUrl: "", caption: "" }],
+          };
+          break;
+        case "one-big-one-small":
+          newBlockData = {
+            portraitImageUrl: "",
+            portraitImageCaption: "",
+            landscapeImageUrl: "",
+            landscapeImageCaption: "",
           };
           break;
         default:

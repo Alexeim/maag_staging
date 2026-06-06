@@ -310,6 +310,112 @@ const {
                 </div>
               </template>
 
+              <template x-if="editingBlock.type === 'one-big-one-small'">
+                <div class="space-y-6">
+                  <p class="text-sm text-base-content/70">
+                    Загрузи одну вертикальную картинку для малого блока и одну горизонтальную для большого.
+                  </p>
+
+                  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <div x-data="{ portraitFileName: '' }" class="space-y-3 rounded-lg border border-base-300 p-4">
+                      <label class="block text-sm font-medium">Маленькое портретное изображение</label>
+                      <div class="flex items-center gap-3">
+                        <label
+                          :for="'one-big-one-small-portrait-upload-' + index"
+                          class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                        >
+                          <CloudUpload />
+                          Загрузить файл
+                        </label>
+                        <input
+                          :id="'one-big-one-small-portrait-upload-' + index"
+                          type="file"
+                          class="hidden"
+                          @change="handleImageUpload($event, false, index, null, 'portraitImageUrl'); portraitFileName = $event.target.files[0]?.name || ''"
+                          accept="image/png, image/jpeg, image/webp"
+                        />
+                        <span
+                          x-text="portraitFileName || (editingBlock.portraitImageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+                          class="text-sm text-base-content/70"
+                        ></span>
+                      </div>
+                      <div x-show="uploading && editingIndex === index">
+                        <p>
+                          Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span>
+                        </p>
+                        <div class="w-full bg-base-200 rounded-full h-2">
+                          <div
+                            class="bg-primary h-2 rounded-full"
+                            :style="{ width: uploadProgress + '%' }"
+                          ></div>
+                        </div>
+                      </div>
+                      <img
+                        x-show="editingBlock.portraitImageUrl && !uploading"
+                        :src="editingBlock.portraitImageUrl"
+                        alt="Предпросмотр портретного изображения"
+                        class="rounded-md aspect-[2/3] w-full object-cover"
+                      />
+                      <label class="block text-sm font-medium mt-2">Подпись к портретному изображению</label>
+                      <input
+                        type="text"
+                        x-model="editingBlock.portraitImageCaption"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                        placeholder="Введите подпись..."
+                      />
+                    </div>
+
+                    <div x-data="{ landscapeFileName: '' }" class="space-y-3 rounded-lg border border-base-300 p-4">
+                      <label class="block text-sm font-medium">Большое горизонтальное изображение</label>
+                      <div class="flex items-center gap-3">
+                        <label
+                          :for="'one-big-one-small-landscape-upload-' + index"
+                          class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                        >
+                          <CloudUpload />
+                          Загрузить файл
+                        </label>
+                        <input
+                          :id="'one-big-one-small-landscape-upload-' + index"
+                          type="file"
+                          class="hidden"
+                          @change="handleImageUpload($event, false, index, null, 'landscapeImageUrl'); landscapeFileName = $event.target.files[0]?.name || ''"
+                          accept="image/png, image/jpeg, image/webp"
+                        />
+                        <span
+                          x-text="landscapeFileName || (editingBlock.landscapeImageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+                          class="text-sm text-base-content/70"
+                        ></span>
+                      </div>
+                      <div x-show="uploading && editingIndex === index">
+                        <p>
+                          Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span>
+                        </p>
+                        <div class="w-full bg-base-200 rounded-full h-2">
+                          <div
+                            class="bg-primary h-2 rounded-full"
+                            :style="{ width: uploadProgress + '%' }"
+                          ></div>
+                        </div>
+                      </div>
+                      <img
+                        x-show="editingBlock.landscapeImageUrl && !uploading"
+                        :src="editingBlock.landscapeImageUrl"
+                        alt="Предпросмотр горизонтального изображения"
+                        class="rounded-md aspect-[16/9] w-full object-cover"
+                      />
+                      <label class="block text-sm font-medium mt-2">Подпись к горизонтальному изображению</label>
+                      <input
+                        type="text"
+                        x-model="editingBlock.landscapeImageCaption"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                        placeholder="Введите подпись..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </template>
+
               <template x-if="editingBlock.type === 'video'">
                 <div class="space-y-4">
                   <div>
@@ -818,6 +924,51 @@ const {
                 </figure>
               </template>
 
+              <template x-if="block.type === 'one-big-one-small'">
+                <div class="space-y-3">
+                  <div class="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
+                    <figure class="space-y-2">
+                      <img
+                        x-show="block.portraitImageUrl"
+                        :src="block.portraitImageUrl"
+                        :alt="block.portraitImageCaption || 'Портретное изображение'"
+                        class="rounded-md aspect-[2/3] w-full object-cover"
+                      />
+                      <div
+                        x-show="!block.portraitImageUrl"
+                        class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-4 py-8 text-center text-sm text-base-content/60"
+                      >
+                        Портретное изображение ещё не загружено
+                      </div>
+                      <figcaption
+                        x-show="block.portraitImageCaption"
+                        class="text-center text-sm text-base-content/60"
+                        x-text="block.portraitImageCaption"
+                      ></figcaption>
+                    </figure>
+                    <figure class="space-y-2">
+                      <img
+                        x-show="block.landscapeImageUrl"
+                        :src="block.landscapeImageUrl"
+                        :alt="block.landscapeImageCaption || 'Горизонтальное изображение'"
+                        class="rounded-md aspect-[16/9] w-full object-cover"
+                      />
+                      <div
+                        x-show="!block.landscapeImageUrl"
+                        class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-4 py-8 text-center text-sm text-base-content/60"
+                      >
+                        Горизонтальное изображение ещё не загружено
+                      </div>
+                      <figcaption
+                        x-show="block.landscapeImageCaption"
+                        class="text-center text-sm text-base-content/60"
+                        x-text="block.landscapeImageCaption"
+                      ></figcaption>
+                    </figure>
+                  </div>
+                </div>
+              </template>
+
               <template x-if="block.type === 'video'">
                 <figure class="space-y-2">
                   <video
@@ -1012,6 +1163,7 @@ const {
           <button @click="addBlock('h3')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Подзаголовок H3</button>
           <button @click="addBlock('quote')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Цитата</button>
           <button @click="addBlock('image')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Картинка</button>
+          <button @click="addBlock('one-big-one-small')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Одна большая + одна маленькая</button>
           <button @click="addBlock('video')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Видео</button>
           <button @click="addBlock('two-columns')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Две колонки</button>
           <button @click="addBlock('three-columns')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Три колонки</button>

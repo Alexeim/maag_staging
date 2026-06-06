@@ -488,7 +488,13 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.isEditingCaption = false;
     },
 
-    async handleImageUpload(event, isCover = true, blockIndex = null, column = null) {
+    async handleImageUpload(
+      event,
+      isCover = true,
+      blockIndex = null,
+      column = null,
+      imageField = null,
+    ) {
       const raw = event.target.files[0];
       if (!raw) return;
 
@@ -520,6 +526,11 @@ export default function interviewCreatorLogic(initialState = {}) {
             ) {
               this.editingBlock[column].content = downloadURL;
               this.editingBlock[column].type = "image";
+            } else if (
+              imageField &&
+              this.editingBlock?.type === "one-big-one-small"
+            ) {
+              this.editingBlock[imageField] = downloadURL;
             } else if (blockIndex !== null && this.editingIndex !== null && this.interview.contentBlocks[this.editingIndex]?.type === "image") {
               this.interview.contentBlocks[this.editingIndex].url = downloadURL;
               // Also update editingBlock to reflect this change
@@ -660,6 +671,14 @@ export default function interviewCreatorLogic(initialState = {}) {
         case "flipper":
           newBlockData = {
             slides: [{ imageUrl: "", caption: "" }],
+          };
+          break;
+        case "one-big-one-small":
+          newBlockData = {
+            portraitImageUrl: "",
+            portraitImageCaption: "",
+            landscapeImageUrl: "",
+            landscapeImageCaption: "",
           };
           break;
         default:

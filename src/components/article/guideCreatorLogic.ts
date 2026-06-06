@@ -786,7 +786,13 @@ export default function guideCreatorLogic(initialState = {}) {
       this.isEditingCaption = false;
     },
 
-    async handleImageUpload(event, isCover = true, blockIndex = null, column = null) {
+    async handleImageUpload(
+      event,
+      isCover = true,
+      blockIndex = null,
+      column = null,
+      imageField = null,
+    ) {
       const raw = event.target.files[0];
       if (!raw) return;
 
@@ -826,6 +832,11 @@ export default function guideCreatorLogic(initialState = {}) {
               ) {
                 this.editingBlock[column].content = downloadURL;
                 this.editingBlock[column].type = 'image';
+              } else if (
+                this.editingBlock.type === "one-big-one-small" &&
+                imageField
+              ) {
+                this.editingBlock[imageField] = downloadURL;
               }
             }
             this.uploading = false;
@@ -960,6 +971,14 @@ export default function guideCreatorLogic(initialState = {}) {
         case "flipper":
           newBlockData = {
             slides: [{ imageUrl: "", caption: "" }],
+          };
+          break;
+        case "one-big-one-small":
+          newBlockData = {
+            portraitImageUrl: "",
+            portraitImageCaption: "",
+            landscapeImageUrl: "",
+            landscapeImageCaption: "",
           };
           break;
         default:

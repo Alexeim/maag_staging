@@ -1,0 +1,55 @@
+---
+import LazyImage from "../common/LazyImage.astro";
+
+interface Props {
+  portraitImageUrl?: string;
+  portraitImageCaption?: string;
+  landscapeImageUrl?: string;
+  landscapeImageCaption?: string;
+}
+
+const {
+  portraitImageUrl = "",
+  portraitImageCaption = "",
+  landscapeImageUrl = "",
+  landscapeImageCaption = "",
+} = Astro.props as Props;
+---
+
+<section class="w-full h-auto lg:relative lg:w-[1356px] lg:h-[calc(100vh-90px)]">
+  {
+    portraitImageUrl && (
+      <figure class="w-full lg:absolute lg:top-0 lg:left-0 lg:w-[300px]">
+        <LazyImage
+          src={portraitImageUrl}
+          alt={portraitImageCaption || "Portrait article image"}
+          class="block w-full aspect-[2/3] object-cover"
+          loading="lazy"
+        />
+        {portraitImageCaption && (
+          <figcaption class="mt-2 text-xs font-inter text-base-content/55">
+            {portraitImageCaption}
+          </figcaption>
+        )}
+      </figure>
+    )
+  }
+
+  {
+    landscapeImageUrl && (
+      <figure class="mt-4 w-full lg:absolute lg:right-0 lg:bottom-0 lg:mt-0 lg:w-[1056px]">
+        <LazyImage
+          src={landscapeImageUrl}
+          alt={landscapeImageCaption || "Landscape article image"}
+          class="block w-full aspect-[16/9] object-cover"
+          loading="lazy"
+        />
+        {landscapeImageCaption && (
+          <figcaption class="mt-2 text-xs font-inter text-base-content/55">
+            {landscapeImageCaption}
+          </figcaption>
+        )}
+      </figure>
+    )
+  }
+</section>
