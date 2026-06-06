@@ -40,23 +40,32 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
       transitionName={transitionName}
     />
 
-    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
+    <div
+      class="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/90 to-transparent"
+    >
+    </div>
 
-    {category && (
-      <span class="absolute top-3 left-3 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter']">
-        {category}
-      </span>
-    )}
+    {
+      category && (
+        <span class="absolute top-3 left-3 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter']">
+          {category}
+        </span>
+      )
+    }
 
     <div class="absolute bottom-0 left-0 right-0 p-4 pb-5">
-      <h3 class="m-0 text-white text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.2]">
+      <h3
+        class="m-0 text-white text-[28px] font-semibold font-old_standard tracking-[-0.02em] leading-[1.2]"
+      >
         {title}
       </h3>
-      {lead && (
-        <p class="mt-2 m-0 text-xs text-white/65 font-inter font-normal line-clamp-2">
-          {lead}
-        </p>
-      )}
+      {
+        lead && (
+          <p class="mt-2 m-0 text-[15px] text-white/65 font-inter font-normal line-clamp-2">
+            {lead}
+          </p>
+        )
+      }
     </div>
   </a>
 </div>

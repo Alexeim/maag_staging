@@ -148,13 +148,6 @@ const getPrimaryTag = (item: ContentCardItem): string => {
   return TAG_LABEL_ALIASES[normalized] ?? getKnownTagLabel(firstTag);
 };
 
-const getTransitionName = (item: ContentCardItem) => {
-  if (item.href.startsWith("/events/")) {
-    return `event-image-${item.id}`;
-  }
-  return `main-article-image-${item.id}`;
-};
-
 const hasRelatedItems = relatedItems.length > 0;
 const hasCategoryItems = categoryItems.length > 0;
 const hasAnyItems = hasRelatedItems || hasCategoryItems;
@@ -266,7 +259,6 @@ const pages = chunkEntries(marqueeEntries, 4);
                                   "rounded-full",
                               ]}
                               loading="lazy"
-                              transition:name={getTransitionName(entry.item)}
                             />
                           </a>
 

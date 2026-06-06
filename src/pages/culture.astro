@@ -1,8 +1,9 @@
 ---
 import Layout from "../Layouts/Layout.astro";
+import { getTransitionName } from "../lib/utils/transitions";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import NetlenkaCard from "@/components/common/NetlenkaCard.astro";
-import NetlenkaCardTwo from "@/components/common/NetlenkaCardTwo.astro";
+import NetlenkaCardOne from "@/components/common/NetlenkaCardOne.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import picture1 from "../assets/images/culture.jpg";
@@ -163,27 +164,6 @@ const truncateText = (text?: string, maxLength: number = 220) => {
   const safeText =
     lastSpaceIndex > 0 ? truncated.slice(0, lastSpaceIndex) : truncated;
   return `${safeText.trim()}...`;
-};
-
-const getTransitionName = (item: any) => {
-  if (!item?.id) {
-    return undefined;
-  }
-  const href = typeof item?.href === "string" ? item.href : "";
-  if (href.startsWith("/events/")) {
-    return `event-image-${item.id}`;
-  }
-  if (
-    href.startsWith("/article/") ||
-    href.startsWith("/news/") ||
-    href.startsWith("/interviews/") ||
-    href.startsWith("/flippers/") ||
-    href.startsWith("/guide/") ||
-    href.startsWith("/visual-story/")
-  ) {
-    return `main-article-image-${item.id}`;
-  }
-  return undefined;
 };
 
 const extractInterviewQuote = (interview: any): string | null => {
@@ -553,8 +533,9 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
             {
               editorialSidebarItems.length > 0 ? (
                 editorialSidebarItems.map((item) => (
-                  <NetlenkaCardTwo
+                  <NetlenkaCardOne
                     title={item.title}
+                    lead={item.lead}
                     category={getPrimaryTag(item) || "Культура"}
                     imageUrl={item.imageUrl}
                     href={item.href}

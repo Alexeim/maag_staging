@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import { getTransitionName } from "../../lib/utils/transitions";
 import {
   articlesApi,
   editorialPlacementsApi,
@@ -211,29 +212,6 @@ const formatArticleMeta = (item: any, fallbackCategory = "") => {
   return parts.join(" • ");
 };
 
-const getTransitionName = (item: any) => {
-  if (!item?.id) {
-    return undefined;
-  }
-
-  const href = typeof item?.href === "string" ? item.href : "";
-  if (href.startsWith("/events/")) {
-    return `event-image-${item.id}`;
-  }
-  if (
-    href.startsWith("/article/") ||
-    href.startsWith("/news/") ||
-    href.startsWith("/interviews/") ||
-    href.startsWith("/guide/") ||
-    href.startsWith("/visual-story/")
-  ) {
-    // Use a dedicated namespace to avoid duplicate transition names
-    // with MainLandingBlock on the same page.
-    return `landing-body-main-article-image-${item.id}`;
-  }
-
-  return undefined;
-};
 
 const toContentHref = (item: any) => {
   if (item?.type === "interview" || item?.contentType === "interview") {
@@ -735,10 +713,7 @@ const splitTitle = (t: string) => {
                 quote={interviewQuote}
                 imageUrl={latestInterview.imageUrl}
                 href={`/interviews/${latestInterview.id}`}
-                transitionName={getTransitionName({
-                  id: latestInterview.id,
-                  href: `/interviews/${latestInterview.id}`,
-                })}
+                transitionName={getTransitionName({ id: latestInterview.id, href: `/interviews/${latestInterview.id}` })}
               />
             )
           }

@@ -40,9 +40,15 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
       loading={imageLoading}
       transitionName={transitionName}
     />
+    {
+      category && (
+        <span class="absolute top-3 left-3 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter']">
+          {category}
+        </span>
+      )
+    }
   </a>
-
-  <div class="relative bg-[#1c1c1c] px-4 pt-4 pb-5 overflow-hidden">
+  <div class="relative bg-maag-beige px-4 pt-4 pb-5 overflow-hidden">
     <!-- M logo fills the panel as background texture, bleeds off the right edge -->
     <MIcon
       class="pointer-events-none absolute -bottom-4 -right-4 w-36 h-auto select-none"
@@ -50,20 +56,19 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
       aria-hidden="true"
     />
 
-    {category && (
-      <p class="relative m-0 mb-2 text-[0.6rem] font-bold uppercase tracking-[0.28em] text-accent font-['Inter']">
-        {category}
-      </p>
-    )}
     <a href={href} class="relative no-underline hover:underline">
-      <h3 class="m-0 text-white text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.2]">
+      <h3
+        class="m-0 text-base-content text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.2]"
+      >
         {title}
       </h3>
     </a>
-    {lead && (
-      <p class="relative mt-2 m-0 text-xs text-white/55 font-inter font-normal line-clamp-2">
-        {lead}
-      </p>
-    )}
+    {
+      lead && (
+        <p class="relative mt-2 m-0 text-xs text-white/55 font-inter font-normal line-clamp-2">
+          {lead}
+        </p>
+      )
+    }
   </div>
 </div>

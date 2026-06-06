@@ -12,6 +12,8 @@
   --color-primary: oklch(0.85 0.05 85); /* #DDCEB5 - Кнопка "Войти" */
   --color-primary-content: oklch(0 0 0);
 
+  --color-maag-beige: oklch(0.8971 0.0248 83.42);
+
   --color-accent: oklch(0.55 0.2 25); /* #D92F1C - Красный акцентный */
   --color-accent-content: oklch(1 0 0);
 

@@ -1,5 +1,6 @@
 ---
 import Layout from "../Layouts/Layout.astro";
+import { getTransitionName } from "../lib/utils/transitions";
 import NetlenkaCard from "@/components/common/NetlenkaCard.astro";
 import NetlenkaCardThree from "@/components/common/NetlenkaCardThree.astro";
 import PhotoOfTheDayCard from "@/components/common/PhotoOfTheDayCard.astro";
@@ -157,27 +158,6 @@ const truncateText = (text?: string, maxLength: number = 220) => {
   const safeText =
     lastSpaceIndex > 0 ? truncated.slice(0, lastSpaceIndex) : truncated;
   return `${safeText.trim()}...`;
-};
-
-const getTransitionName = (item: any) => {
-  if (!item?.id) {
-    return undefined;
-  }
-  const href = typeof item?.href === "string" ? item.href : "";
-  if (href.startsWith("/events/")) {
-    return `event-image-${item.id}`;
-  }
-  if (
-    href.startsWith("/article/") ||
-    href.startsWith("/news/") ||
-    href.startsWith("/interviews/") ||
-    href.startsWith("/flippers/") ||
-    href.startsWith("/guide/") ||
-    href.startsWith("/visual-story/")
-  ) {
-    return `main-article-image-${item.id}`;
-  }
-  return undefined;
 };
 
 let primaryParisArticle: any = null;
