@@ -26,7 +26,7 @@ const {
   authorAvatar,
   createdAt,
   imageUrl,
-  imageAlt = "Guide image",
+  imageAlt = "Tips article image",
   imageCaption,
   transitionName,
   transitionAliases = [],
@@ -45,21 +45,15 @@ const imageSrc = imageUrl
       class:list={[
         "grid h-auto gap-8 lg:h-full lg:gap-0 lg:items-stretch",
         imageUrl
-          ? "lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]"
+          ? "lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)]"
           : "grid-cols-1",
       ]}
     >
-      <div
-        class="flex flex-col justify-center px-2 py-8 text-center text-base-content sm:px-6 sm:py-10 lg:h-full lg:px-16 lg:py-12 xl:px-24"
-      >
-        <p
-          class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm"
-        >
+      <div class="flex flex-col justify-center px-2 py-8 text-center text-base-content sm:px-6 sm:py-10 lg:h-full lg:px-16 lg:py-12 xl:px-24">
+        <p class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm">
           {category}
         </p>
-        <h1
-          class="mt-8 font-old_standard text-4xl font-normal leading-[1.05] text-base-content sm:text-5xl lg:text-[4rem]"
-        >
+        <h1 class="mt-8 font-old_standard text-4xl font-normal leading-[1.05] text-base-content sm:text-5xl lg:text-[4rem]">
           {title}
         </h1>
         {
@@ -69,9 +63,7 @@ const imageSrc = imageUrl
             </p>
           )
         }
-        <div
-          class="mt-8 flex flex-wrap items-center justify-center gap-4 text-base-content lg:mt-10"
-        >
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-4 text-base-content lg:mt-10">
           <ArticleAuthor name={authorName} avatarUrl={authorAvatar} />
           <span aria-hidden="true" class="text-sm text-base-content/50">•</span>
           <ArticleDate createdAt={createdAt} />
@@ -99,7 +91,7 @@ const imageSrc = imageUrl
               )}
             </div>
             {imageCaption && (
-              <p class="border-t border-black/8 px-6 py-4 font-inter text-xs tracking-[0.12em] text-base-content/60 uppercase">
+              <p class="border-t border-black/8 px-6 py-4 font-inter text-xs uppercase tracking-[0.12em] text-base-content/60">
                 {imageCaption}
               </p>
             )}
@@ -116,7 +108,7 @@ const imageSrc = imageUrl
         src={imageSrc ?? ""}
         alt=""
         aria-hidden="true"
-        class="fixed -z-10 h-px w-px opacity-0 pointer-events-none"
+        class="fixed -z-10 h-px w-px pointer-events-none opacity-0"
         transition:name={alias}
       />
     ))
