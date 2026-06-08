@@ -1,12 +1,13 @@
 ---
+import { Image } from "astro:assets";
 import Layout from "@/Layouts/Layout.astro";
 import ArticleHeader from "@/components/article/ArticleHeader.astro";
 import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
 import ArticleImage from "@/components/article/ArticleImage.astro";
 import ArticleBody from "@/components/article/ArticleBody.astro";
-import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
 import picture1 from "@/assets/images/culture.jpg";
+import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { ApiError, newsApi } from "@/lib/api/api";
 import {
   buildContentCollectionItems,
@@ -15,6 +16,89 @@ import {
 } from "@/lib/utils/contentCollectionMarquee";
 
 const { id } = Astro.params;
+
+const CATEGORY_LABELS: Record<string, string> = {
+  culture: "Культура",
+  paris: "Париж",
+  hotContent: "Самое Читаемое",
+  interview: "Интервью",
+  ballet: "Балет",
+  opera: "Опера",
+  dance: "Танец",
+  music: "Музыка",
+  theatre: "Театр",
+  theater: "Театр",
+  performance: "Спектакль",
+  performances: "Спектакль",
+  concert: "Концерт",
+  concerts: "Концерт",
+  exhibition: "Выставка",
+  exhibitions: "Выставка",
+  books: "Книги",
+  artMarket: "Арт-рынок",
+  artmarket: "Арт-рынок",
+  architecture: "Архитектура",
+  museums: "Музеи",
+  tourism: "Туризм",
+  strike: "Забастовка",
+  kids: "Дети",
+  route: "Маршрут",
+  address: "Адрес",
+  notebook: "Записная книжка",
+  place: "Место",
+  news: "Новости",
+  ...Object.fromEntries(
+    Array.from({ length: 20 }, (_, i) => [
+      `district-${i + 1}`,
+      `${i + 1}-й округ`,
+    ]),
+  ),
+};
+
+const normalizeCategory = (value?: string) => {
+  if (!value) {
+    return value;
+  }
+  const lowerCaseValue = value.toLowerCase();
+  const entry = Object.entries(CATEGORY_LABELS).find(
+    ([key, label]) =>
+      key.toLowerCase() === lowerCaseValue ||
+      label.toLowerCase() === lowerCaseValue,
+  );
+  return entry ? entry[0] : value;
+};
+
+const getCategoryLabel = (value?: string) => {
+  const normalized = normalizeCategory(value);
+  if (normalized && CATEGORY_LABELS[normalized]) {
+    return CATEGORY_LABELS[normalized];
+  }
+  return value ?? "";
+};
+
+const getPrimaryTag = (article: any) => {
+  const rawTags = Array.isArray(article?.tags)
+    ? article.tags
+    : typeof article?.tags === "string"
+      ? [article.tags]
+      : [];
+
+  const firstTag = rawTags.find(
+    (tag) => typeof tag === "string" && tag.trim().length > 0,
+  );
+
+  if (firstTag) {
+    return (
+      getKnownTagLabel(firstTag.trim()) || getCategoryLabel(firstTag.trim())
+    );
+  }
+
+  if (article?.isHotContent) {
+    return CATEGORY_LABELS.hotContent;
+  }
+
+  return getCategoryLabel(article?.category);
+};
 
 let articleData: any;
 let error: string | null = null;
@@ -36,7 +120,7 @@ try {
 const displayArticle = {
   title: articleData?.title || "Новость",
   lead: articleData?.lead || "",
-  category: "Новость",
+  category: getPrimaryTag(articleData) || "Новость",
   authorName: articleData?.author
     ? `${articleData.author.firstName} ${articleData.author.lastName}`
     : "Автор",
@@ -51,6 +135,7 @@ const transitionAliases = [`landing-body-main-article-image-${id}`];
 
 let collectionContentItems: any[] = [];
 let sameCategoryItems: any[] = [];
+let moreNewsItems: any[] = [];
 
 if (!error && articleData) {
   try {
@@ -82,6 +167,25 @@ if (!error && articleData) {
       )
       .slice(0, 12)
       .map((item) => ({ ...item }));
+
+    const seenMoreNewsIds = new Set<string>();
+    const appendUniqueNewsItems = (items: any[]) => {
+      items.forEach((item) => {
+        if (
+          item?.contentType !== "news" ||
+          item?.id === id ||
+          seenMoreNewsIds.has(item.id)
+        ) {
+          return;
+        }
+        seenMoreNewsIds.add(item.id);
+        moreNewsItems.push(item);
+      });
+    };
+
+    appendUniqueNewsItems(collectionContentItems);
+    appendUniqueNewsItems(sameCategoryItems);
+    moreNewsItems = moreNewsItems.slice(0, 6);
   } catch (e) {
     console.error("Failed to fetch collection content for news page:", e);
   }
@@ -97,53 +201,112 @@ if (!error && articleData) {
   <main class="bg-base-200 min-h-screen">
     <div class="max-w-[1512px] mx-auto">
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}
-      {!error && articleData && (
-        <>
-          <div class="pt-[50px] pb-[70px] px-4 lg:px-0 flex flex-col items-center">
-            <div class="flex flex-col gap-4 max-w-[825px] w-full">
-              <ArticleHeader
-                category={displayArticle.category}
-                title={displayArticle.title}
-                lead={displayArticle.lead}
-                titleClass="text-3xl lg:text-[42px]"
-              />
-              <div class="h-10 flex flex-row items-center justify-start gap-4">
-                <ArticleAuthor
-                  name={displayArticle.authorName}
-                  avatarUrl={displayArticle.authorAvatar}
-                />
-                <ArticleDate createdAt={articleData.createdAt} />
-              </div>
+      {
+        !error && articleData && (
+          <>
+            <div class="px-4 pb-[100px] pt-[50px] lg:px-14">
+              <section class="grid gap-10 lg:grid-cols-12 lg:gap-8 lg:items-start">
+                <div class="grid gap-10 lg:col-span-9">
+                  <article class="grid gap-10">
+                    <div class="mx-auto flex w-full max-w-[825px] flex-col gap-4 lg:mx-0">
+                      <ArticleHeader
+                        category={displayArticle.category}
+                        title={displayArticle.title}
+                        lead={displayArticle.lead}
+                        titleClass="text-3xl lg:text-[42px]"
+                      />
+                      <div class="h-10 flex flex-row items-center justify-start gap-4">
+                        <ArticleAuthor
+                          name={displayArticle.authorName}
+                          avatarUrl={displayArticle.authorAvatar}
+                        />
+                        <ArticleDate createdAt={articleData.createdAt} />
+                      </div>
+                    </div>
+
+                    {displayArticle.imageUrl && (
+                      <div class="mx-auto w-full max-w-[826px] lg:mx-0">
+                        <ArticleImage
+                          src={displayArticle.imageUrl}
+                          alt={displayArticle.imageAlt}
+                          caption={displayArticle.imageCaption}
+                          transitionName={`main-article-image-${id}`}
+                          transitionAliases={transitionAliases}
+                          figureClass="max-w-[826px]"
+                          imageClass="shadow-lg"
+                          figcaptionClass="text-center text-gray-500 mt-2"
+                          objectFit="cover"
+                        />
+                      </div>
+                    )}
+
+                    <div class="border-t border-base-content/10 pt-10">
+                      <div class="bg-base-200 px-0 pb-0 pt-0 text-base-content">
+                        <div class="mx-auto w-full max-w-[826px] lg:mx-0">
+                          <ArticleBody
+                            contentBlocks={displayArticle.contentBlocks}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+
+                <aside class="lg:col-span-3 lg:border-l lg:border-base-content/10 lg:pl-6">
+                  <div class="grid gap-6 lg:sticky lg:top-8">
+                    <h2 class="m-0 font-old_standard text-lg font-semibold uppercase tracking-[0.3em] text-base-content">
+                      новости
+                    </h2>
+
+                    {moreNewsItems.length > 0 ? (
+                      <div class="flex gap-6 overflow-x-auto pb-2 -mx-2 px-2 lg:flex-col lg:gap-0 lg:mx-0 lg:px-0 lg:overflow-x-visible lg:overflow-y-hidden">
+                        {moreNewsItems.map((newsItem) => (
+                          <div class="flex-shrink-0 w-[280px] sm:w-1/2 md:w-1/3 lg:w-full lg:py-4 lg:border-b lg:border-base-content/15 last:lg:border-b-0">
+                            <div class="flex items-start gap-4">
+                              <a
+                                href={`/news/${newsItem.id}`}
+                                class="linked-image-hover bg-base-200 z-10"
+                              >
+                                <Image
+                                  src={newsItem.imageUrl || picture1.src}
+                                  alt={`News image for ${newsItem.title}`}
+                                  class="linked-image-hover__media w-20 h-20 object-cover flex-shrink-0"
+                                  width={80}
+                                  height={80}
+                                  transition:name={`main-article-image-${newsItem.id}`}
+                                />
+                              </a>
+                              <div class="flex-1 max-w-max">
+                                <div class="mb-1 flex items-start">
+                                  <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                    {getPrimaryTag(newsItem) || "Новости"}
+                                  </span>
+                                </div>
+                                <a
+                                  href={`/news/${newsItem.id}`}
+                                  class="block bg-base-200 z-10 transition-opacity duration-200 hover:opacity-90"
+                                >
+                                  <h3 class="text-xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90">
+                                    {newsItem.title}
+                                  </h3>
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p class="m-0 font-inter text-[0.9rem] leading-[1.6] text-base-content/60">
+                        Пока нет других новостей в этой категории.
+                      </p>
+                    )}
+                  </div>
+                </aside>
+              </section>
             </div>
-
-            {displayArticle.imageUrl && (
-              <ArticleImage
-                src={displayArticle.imageUrl}
-                alt={displayArticle.imageAlt}
-                caption={displayArticle.imageCaption}
-                transitionName={`main-article-image-${id}`}
-                transitionAliases={transitionAliases}
-                figureClass="max-w-[826px]"
-                imageClass="shadow-lg"
-                figcaptionClass="text-center text-gray-500 mt-2"
-                objectFit="cover"
-              />
-            )}
-          </div>
-
-          <div class="w-full px-4 lg:px-14 pb-[100px]">
-            <ArticleBody
-              contentBlocks={displayArticle.contentBlocks}
-            />
-
-            <ContentCollectionMarquee
-              collectionItems={collectionContentItems}
-              categoryItems={sameCategoryItems}
-              fallbackImageSrc={picture1.src}
-            />
-          </div>
-        </>
-      )}
+          </>
+        )
+      }
     </div>
   </main>
 </Layout>
