@@ -3,11 +3,7 @@ import Layout from "../../Layouts/Layout.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import EventMetaIcon from "../../components/common/EventMetaIcon.astro";
 import picture1 from "../../assets/images/culture.jpg";
-import {
-  Bookmark,
-  CalendarPlus,
-  Share2,
-} from "lucide-astro";
+import { Bookmark, CalendarPlus, Share2 } from "lucide-astro";
 import { ApiError, eventsApi } from "@/lib/api/api";
 import {
   buildContentCollectionItems,
@@ -438,7 +434,9 @@ if (!error && eventData) {
               ? item.address.trim()
               : "Место уточняется",
           categoryLabel: resolveTagLabel(
-            Array.isArray(item?.tags) && item.tags.length > 0 ? item.tags[0] : null,
+            Array.isArray(item?.tags) && item.tags.length > 0
+              ? item.tags[0]
+              : null,
             "Событие",
           ),
           startDate: itemStart,
@@ -515,7 +513,10 @@ if (
       }
     }
   } catch (collectionError) {
-    console.error("Failed to fetch collection content for event page:", collectionError);
+    console.error(
+      "Failed to fetch collection content for event page:",
+      collectionError,
+    );
   }
 }
 
@@ -539,8 +540,7 @@ const calendarUrl = buildGoogleCalendarUrl(
   lead,
 );
 const normalizedTags = normalizeTags(eventData?.tags);
-const topMetaTag =
-  resolveTagLabel(normalizedTags[0], "Событие");
+const topMetaTag = resolveTagLabel(normalizedTags[0], "Событие");
 
 const displayEvent = {
   title: eventData?.title || "Событие",
@@ -575,7 +575,7 @@ const displayEvent = {
 >
   <main class="min-h-screen bg-base-200 text-black">
     <div
-      class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
+      class="mx-auto max-w-[1512px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
     >
       {error && <div class="pt-24 text-center text-red-400">{error}</div>}
 
@@ -775,43 +775,49 @@ const displayEvent = {
 
               <aside class="lg:col-span-3 lg:border-l lg:border-base-content/10 lg:pl-6">
                 <div class="grid gap-10 lg:sticky lg:top-8">
-                  {(collectionContentItems.length > 0 || relatedContentItems.length > 0) && (
+                  {(collectionContentItems.length > 0 ||
+                    relatedContentItems.length > 0) && (
                     <div class="grid gap-6">
                       <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
                         Читайте также
                       </h2>
                       <div class="grid gap-8">
-                        {[...collectionContentItems, ...relatedContentItems].slice(0, 4).map((item) => (
-                          <article class="grid gap-4">
-                            <a
-                              href={item.href}
-                              class="block aspect-[3/2] overflow-hidden"
-                              aria-label={item.title}
-                            >
-                              <img
-                                src={item.imageUrl || picture1.src}
-                                alt={item.title}
-                                class="block h-full w-full object-cover"
-                                loading="lazy"
-                              />
-                            </a>
-                            <div class="grid gap-[0.55rem]">
-                              <p class="m-0">
-                                <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                                  {resolveTagLabel(item.contentType, "Материал")}
-                                </span>
-                              </p>
+                        {[...collectionContentItems, ...relatedContentItems]
+                          .slice(0, 4)
+                          .map((item) => (
+                            <article class="grid gap-4">
                               <a
                                 href={item.href}
-                                class="text-current no-underline hover:underline"
+                                class="block aspect-[3/2] overflow-hidden"
+                                aria-label={item.title}
                               >
-                                <h3 class="m-0 font-old_standard text-[1.3rem] font-normal leading-[1.12] text-base-content">
-                                  {item.title}
-                                </h3>
+                                <img
+                                  src={item.imageUrl || picture1.src}
+                                  alt={item.title}
+                                  class="block h-full w-full object-cover"
+                                  loading="lazy"
+                                />
                               </a>
-                            </div>
-                          </article>
-                        ))}
+                              <div class="grid gap-[0.55rem]">
+                                <p class="m-0">
+                                  <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                    {resolveTagLabel(
+                                      item.contentType,
+                                      "Материал",
+                                    )}
+                                  </span>
+                                </p>
+                                <a
+                                  href={item.href}
+                                  class="text-current no-underline hover:underline"
+                                >
+                                  <h3 class="m-0 font-old_standard text-[1.3rem] font-normal leading-[1.12] text-base-content">
+                                    {item.title}
+                                  </h3>
+                                </a>
+                              </div>
+                            </article>
+                          ))}
                       </div>
                     </div>
                   )}
@@ -821,66 +827,65 @@ const displayEvent = {
                       Ещё события
                     </h2>
 
-                  {relatedEvents.length > 0 ? (
-                    <div class="grid gap-8">
-                      {relatedEvents.map((item) => (
-                        <article class="grid gap-4">
-                          <a
-                            href={item.href}
-                            class="block aspect-[3/2] overflow-hidden"
-                            aria-label={item.title}
-                          >
-                            <img
-                              src={item.imageUrl}
-                              alt={item.title}
-                              class="block h-full w-full object-cover"
-                            />
-                          </a>
-
-                          <div class="grid gap-[0.55rem]">
-                            <p class="m-0 font-inter text-lg font-bold uppercase text-black">
-                              {formatShortDateRange(
-                                item.startDate,
-                                item.endDate,
-                              )}
-                            </p>
-
-                            <p class="m-0">
-                              <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                                {item.categoryLabel}
-                              </span>
-                            </p>
-
+                    {relatedEvents.length > 0 ? (
+                      <div class="grid gap-8">
+                        {relatedEvents.map((item) => (
+                          <article class="grid gap-4">
                             <a
                               href={item.href}
-                              class="text-current no-underline hover:underline"
+                              class="block aspect-[3/2] overflow-hidden"
+                              aria-label={item.title}
                             >
-                              <h3 class="m-0 font-old_standard text-[1.3rem] font-normal leading-[1.12] text-base-content">
-                                {item.title}
-                              </h3>
+                              <img
+                                src={item.imageUrl}
+                                alt={item.title}
+                                class="block h-full w-full object-cover"
+                              />
                             </a>
 
-                            <div class="mt-1 flex items-center gap-2 font-inter text-sm text-base-content/65">
-                              <EventMetaIcon
-                                type="location"
-                                class="h-4 w-4 shrink-0 text-[#302821bd]"
-                              />
-                              <span>{item.address}</span>
+                            <div class="grid gap-[0.55rem]">
+                              <p class="m-0 font-inter text-lg font-bold uppercase text-black">
+                                {formatShortDateRange(
+                                  item.startDate,
+                                  item.endDate,
+                                )}
+                              </p>
+
+                              <p class="m-0">
+                                <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                  {item.categoryLabel}
+                                </span>
+                              </p>
+
+                              <a
+                                href={item.href}
+                                class="text-current no-underline hover:underline"
+                              >
+                                <h3 class="m-0 font-old_standard text-[1.3rem] font-normal leading-[1.12] text-base-content">
+                                  {item.title}
+                                </h3>
+                              </a>
+
+                              <div class="mt-1 flex items-center gap-2 font-inter text-sm text-base-content/65">
+                                <EventMetaIcon
+                                  type="location"
+                                  class="h-4 w-4 shrink-0 text-[#302821bd]"
+                                />
+                                <span>{item.address}</span>
+                              </div>
                             </div>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  ) : (
-                    <p class="m-0 font-inter text-[0.9rem] leading-[1.6] text-base-content/60">
-                      Пока нет других событий на эту дату.
-                    </p>
-                  )}
+                          </article>
+                        ))}
+                      </div>
+                    ) : (
+                      <p class="m-0 font-inter text-[0.9rem] leading-[1.6] text-base-content/60">
+                        Пока нет других событий на эту дату.
+                      </p>
+                    )}
                   </div>
                 </div>
               </aside>
             </section>
-
           </>
         )
       }
