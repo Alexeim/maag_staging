@@ -53,7 +53,10 @@ const preparedTips = tips
     text: tip.text.trim(),
     url: typeof tip.url === "string" ? tip.url.trim() : undefined,
   }))
-  .filter((tip): tip is { type: TipType; text: string; url?: string } => tip.type in ICONS);
+  .filter(
+    (tip): tip is { type: TipType; text: string; url?: string } =>
+      tip.type in ICONS,
+  );
 
 const orderedTips = sortTips(preparedTips);
 ---
@@ -65,25 +68,29 @@ const orderedTips = sortTips(preparedTips);
         {orderedTips.map((tip) => {
           const isLink = tip.type === "link" && tip.url;
           return (
-            <div class="flex flex-row items-center justify-start gap-4 px-4 py-2 border-b border-base-300 last:border-b-0">
-              <TipIcon
-                type={tip.type}
-                class="mt-0.5 h-5 w-5 shrink-0 text-accent"
-              />
-              {isLink ? (
-                <a
-                  href={tip.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90 hover:underline"
-                >
-                  {tip.text}
-                </a>
-              ) : (
-                <p class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90">
-                  {tip.text}
-                </p>
-              )}
+            <div class="flex flex-row items-start justify-start gap-4 px-4 py-2 border-b border-base-300 last:border-b-0">
+              <div class="pt-1">
+                <TipIcon
+                  type={tip.type}
+                  class="mt-0.5 h-5 w-5 shrink-0 text-accent"
+                />
+              </div>
+              <div>
+                {isLink ? (
+                  <a
+                    href={tip.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90 hover:underline"
+                  >
+                    {tip.text}
+                  </a>
+                ) : (
+                  <p class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90">
+                    {tip.text}
+                  </p>
+                )}
+              </div>
             </div>
           );
         })}

@@ -215,7 +215,7 @@ if (!error && articleData) {
                         lead={displayArticle.lead}
                         titleClass="text-3xl lg:text-[42px]"
                       />
-                      <div class="h-10 flex flex-row items-center justify-start gap-4">
+                      <div class="flex flex-col items-start justify-center gap-4">
                         <ArticleAuthor
                           name={displayArticle.authorName}
                           avatarUrl={displayArticle.authorAvatar}
@@ -240,7 +240,7 @@ if (!error && articleData) {
                       </div>
                     )}
 
-                    <div class="border-t border-base-content/10 pt-10">
+                    <div class="pt-2">
                       <div class="bg-base-200 px-0 pb-0 pt-0 text-base-content">
                         <div class="mx-auto w-full max-w-[826px] lg:mx-0">
                           <ArticleBody

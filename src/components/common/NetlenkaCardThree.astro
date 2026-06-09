@@ -42,13 +42,13 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
     />
     {
       category && (
-        <span class="absolute top-3 left-3 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter']">
+        <span class="absolute top-3 left-3 text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter']">
           {category}
         </span>
       )
     }
   </a>
-  <div class="relative bg-maag-beige px-4 pt-4 pb-5 overflow-hidden">
+  <div class="relative bg-maag-beige px-4 pt-4 pb-5 overflow-hidden min-h-24">
     <!-- M logo fills the panel as background texture, bleeds off the right edge -->
     <MIcon
       class="pointer-events-none absolute -bottom-4 -right-4 w-36 h-auto select-none"

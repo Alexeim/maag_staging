@@ -41,7 +41,7 @@ const items = contentBlocks.filter((b) => b != null && b.type === "tips-item");
         {/* Right: content */}
         <div
           class:list={[
-            "flex flex-col justify-start gap-3 p-5",
+            "flex flex-col justify-start gap-3 px-5",
             item.imageUrl ? "sm:w-[58%]" : "w-full",
           ]}
         >
@@ -55,14 +55,14 @@ const items = contentBlocks.filter((b) => b != null && b.type === "tips-item");
           {/* Meta lines */}
           <div class="flex flex-col gap-1.5">
             {item.meta1 && (
-              <p class="flex items-center gap-2 text-sm font-oswald tracking-wide text-base-content/70">
+              <p class="flex items-start gap-4 text-sm font-oswald tracking-wide text-base-content/70">
                 <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} aria-hidden="true" />
                 <span>{item.meta1}</span>
               </p>
               <hr class="text-gray-300" />
             )}
             {item.meta2 && (
-              <p class="flex items-center gap-2 text-sm font-oswald tracking-wide text-base-content/70">
+              <p class="flex items-start gap-4 text-sm font-oswald tracking-wide text-base-content/70">
                 <Clock3 class="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} aria-hidden="true" />
                 {item.meta2IsLink && item.meta2Url ? (
                   <a

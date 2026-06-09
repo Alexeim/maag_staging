@@ -77,10 +77,18 @@ try {
     pools,
   });
 
-  const relatedFlipperIds = new Set(collectionContentItems.filter((i) => i.contentType === "flipper").map((i) => i.id));
+  const relatedFlipperIds = new Set(
+    collectionContentItems
+      .filter((i) => i.contentType === "flipper")
+      .map((i) => i.id),
+  );
   recentFlipperItems = allFlippers
     .filter((i) => i.id !== id && !relatedFlipperIds.has(i.id))
-    .sort((a, b) => (toDate(b?.createdAt)?.getTime() ?? 0) - (toDate(a?.createdAt)?.getTime() ?? 0))
+    .sort(
+      (a, b) =>
+        (toDate(b?.createdAt)?.getTime() ?? 0) -
+        (toDate(a?.createdAt)?.getTime() ?? 0),
+    )
     .slice(0, 12)
     .map((item) => ({ ...item }));
 } catch (e) {
@@ -96,7 +104,9 @@ try {
 >
   <main class="bg-base-200 min-h-screen">
     <div class="max-w-[1512px] mx-auto" x-data={flipperState}>
-      <div class="pt-[50px] pb-[70px] px-4 lg:px-0 flex flex-col items-center gap-[50px]">
+      <div
+        class="pt-[50px] pb-[70px] px-4 lg:px-0 flex flex-col items-center gap-[50px]"
+      >
         <div class="flex flex-col gap-4 max-w-[825px] w-full">
           <ArticleHeader
             category={getFlipperCategory()}
@@ -104,7 +114,7 @@ try {
             lead={flipper.lead}
           />
 
-          <div class="min-h-10 flex flex-row flex-wrap items-center justify-start gap-4">
+          <div class="flex flex-col flex-wrap items-start justify-center gap-4">
             {
               flipper.author && (
                 <ArticleAuthor
@@ -120,12 +130,14 @@ try {
 
       <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
         <div class="mx-auto w-full max-w-[1200px]">
-          <div class="relative overflow-hidden bg-white shadow-lg">
-            <div class="relative h-[360px] w-full sm:h-[460px] lg:h-[600px]">
+          <div class="relative">
+            <div
+              class="relative flex h-[360px] w-full items-center justify-center sm:h-[460px] lg:h-[600px]"
+            >
               <template x-for="(item, index) in slides" :key="index">
                 <div
                   x-show="activeSlide === index"
-                  class="absolute inset-0 duration-700 ease-in-out"
+                  class="absolute inset-0 flex items-center justify-center duration-700 ease-in-out"
                   x-transition:enter="transition ease-in-out duration-700"
                   x-transition:enter-start="opacity-0"
                   x-transition:enter-end="opacity-100"
@@ -135,22 +147,24 @@ try {
                 >
                   <img
                     :src="item.imageUrl"
-                    class="block h-full w-full object-contain bg-white"
+                    class="block h-full w-auto max-w-full object-contain object-center"
                     :alt="item.caption || 'Carousel image'"
                   />
                 </div>
               </template>
 
               <button
+                x-show="slides.length > 1"
                 @click="activeSlide = (activeSlide - 1 + slides.length) % slides.length"
-                class="absolute top-1/2 left-2 -translate-y-1/2 p-3 transition cursor-pointer text-neutral-300 hover:text-neutral-400"
+                class="absolute top-1/2 left-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-left-12"
                 aria-label="Предыдущий слайд"
               >
                 <ChevronLeft class="h-6 w-6" />
               </button>
               <button
+                x-show="slides.length > 1"
                 @click="activeSlide = (activeSlide + 1) % slides.length"
-                class="absolute top-1/2 right-2 -translate-y-1/2 p-3 transition cursor-pointer text-neutral-300 hover:text-neutral-400"
+                class="absolute top-1/2 right-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-right-12"
                 aria-label="Следующий слайд"
               >
                 <ChevronRight class="h-6 w-6" />
@@ -158,24 +172,26 @@ try {
             </div>
           </div>
 
-          <div class="mx-auto mt-4 max-w-[825px]">
+          <div class="mx-auto mt-6 max-w-[825px] min-h-[2.5rem]">
             <p
-              class="text-center text-sm text-black/60 font-inter font-normal"
+              class="text-center text-sm text-black/60 font-inter font-normal leading-relaxed"
               x-text="slides[activeSlide]?.caption || ''"
             >
             </p>
           </div>
 
-          <hr class="my-4 border-base-300" />
+          <hr class="my-5 border-base-300" />
 
-          <div class="mb-16 mt-2 flex justify-center gap-2">
+          <div
+            x-show="slides.length > 1"
+            class="mb-16 mt-2 flex justify-center gap-2"
+          >
             <template x-for="(slide, index) in slides" :key="index">
               <button
                 @click="activeSlide = index"
-                :class="{'bg-primary': activeSlide === index, 'bg-base-300': activeSlide !== index}"
-                class="h-3 w-3 rounded-full transition hover:bg-primary cursor-pointer"
-                :aria-label="`Перейти к слайду ${index + 1}`"
-              ></button>
+                :class="{'bg-base-content': activeSlide === index, 'bg-base-content/20': activeSlide !== index}"
+                class="h-2.5 w-2.5 rounded-full transition hover:bg-base-content/60 cursor-pointer"
+                :aria-label="`Перейти к слайду ${index + 1}`"></button>
             </template>
           </div>
         </div>
