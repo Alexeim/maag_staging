@@ -212,7 +212,6 @@ const formatArticleMeta = (item: any, fallbackCategory = "") => {
   return parts.join(" • ");
 };
 
-
 const toContentHref = (item: any) => {
   if (item?.type === "interview" || item?.contentType === "interview") {
     return `/interviews/${item.id}`;
@@ -595,7 +594,9 @@ const splitTitle = (t: string) => {
           {CATEGORY_LABELS[CULTURE_CATEGORY_KEY]}
         </h2>
         <div class="w-full flex flex-col gap-8">
-          <article class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
+          <article
+            class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]"
+          >
             {
               cultureHero ? (
                 <>
@@ -666,7 +667,9 @@ const splitTitle = (t: string) => {
                     />
                   </div>
                   <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
-                    <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">Балет</p>
+                    <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">
+                      Балет
+                    </p>
                     <h4 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
                       Нет статей в категории
                     </h4>
@@ -682,21 +685,23 @@ const splitTitle = (t: string) => {
           >
             {
               cultureCardItems.length > 0 ? (
-                cultureCardItems.slice(0, 2).map((item) => (
-                  <ArticleCard
-                    key={item.id}
-                    isNetlenka={false}
-                    title={item.title}
-                    category={getPrimaryTag(item)}
-                    date={formatArticleDate(item.createdAt)}
-                    hideDate={true}
-                    lead={truncateText(getCardLead(item), 120) || undefined}
-                    transitionName={getTransitionName(item)}
-                    imageUrl={item.imageUrl}
-                    href={item.href}
-                    paid={item.paid}
-                  />
-                ))
+                cultureCardItems
+                  .slice(0, 2)
+                  .map((item) => (
+                    <ArticleCard
+                      key={item.id}
+                      isNetlenka={false}
+                      title={item.title}
+                      category={getPrimaryTag(item)}
+                      date={formatArticleDate(item.createdAt)}
+                      hideDate={true}
+                      lead={truncateText(getCardLead(item), 120) || undefined}
+                      transitionName={getTransitionName(item)}
+                      imageUrl={item.imageUrl}
+                      href={item.href}
+                      paid={item.paid}
+                    />
+                  ))
               ) : (
                 <>
                   <ArticleCard isNetlenka={false} />
@@ -713,7 +718,10 @@ const splitTitle = (t: string) => {
                 quote={interviewQuote}
                 imageUrl={latestInterview.imageUrl}
                 href={`/interviews/${latestInterview.id}`}
-                transitionName={getTransitionName({ id: latestInterview.id, href: `/interviews/${latestInterview.id}` })}
+                transitionName={getTransitionName({
+                  id: latestInterview.id,
+                  href: `/interviews/${latestInterview.id}`,
+                })}
               />
             )
           }
@@ -735,9 +743,7 @@ const splitTitle = (t: string) => {
             class="pointer-events-none absolute z-20 left-[105px] top-[-57px] w-[120px] max-w-none lg:left-[110px] lg:top-[-50px] lg:w-[142px]"
           />
         </h3>
-        <div
-          class="flex flex-col gap-6"
-        >
+        <div class="flex flex-col gap-6">
           {
             hotContentItems.length > 0 ? (
               hotContentItems.map((item) => (
@@ -796,7 +802,8 @@ const splitTitle = (t: string) => {
                       <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                         <p class="m-0">
                           <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                            {getPrimaryTag(parisHero) || CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
+                            {getPrimaryTag(parisHero) ||
+                              CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
                           </span>
                         </p>
                         <a
@@ -851,7 +858,7 @@ const splitTitle = (t: string) => {
                 {parisCardItems.length > 0 ? (
                   <div
                     id="paris-articles-box-1"
-                    class="grid gap-4 sm:grid-cols-2 sm:items-stretch py-8 border-b border-base-content/15"
+                    class="grid gap-4 sm:grid-cols-2 sm:items-stretch py-8"
                   >
                     {parisCardItems.slice(0, 2).map((item) => (
                       <ArticleCard

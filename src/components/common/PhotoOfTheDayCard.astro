@@ -18,13 +18,13 @@ const { id, title, imageUrl, caption } = Astro.props as PhotoOfTheDayCardProps;
   <article class="overflow-hidden bg-white">
     <a
       href={`/photo-of-the-day/${id}`}
-      class="block aspect-[2/3] overflow-hidden"
+      class="linked-image-hover block aspect-[2/3] overflow-hidden"
       aria-label={title}
     >
       <LazyImage
         src={imageUrl}
         alt={title}
-        class="w-full h-full object-cover object-center"
+        class="linked-image-hover__media w-full h-full object-cover object-center"
       />
     </a>
     <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
