@@ -1,0 +1,46 @@
+---
+import "../styles/global.css";
+
+import AuthModal from "../components/auth/AuthModal.astro";
+import Toast from "../components/common/Toast.astro";
+import ConfirmationModal from "../components/common/ConfirmationModal.astro";
+
+interface VisualStoryLayoutProps {
+  title?: string;
+}
+
+const { title = "Maag" } = Astro.props as VisualStoryLayoutProps;
+---
+
+<!doctype html>
+<html lang="ru" data-theme="maag">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="Wrukspaces.dev" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jost:ital,wght@0,100..900;1,100..900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Oswald:wght@200..700&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jost:ital,wght@0,100..900;1,100..900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Oswald:wght@200..700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <title>{title}</title>
+  </head>
+  <body class="bg-base-100 text-base-content">
+    <slot />
+
+    <AuthModal />
+    <Toast />
+    <ConfirmationModal />
+  </body>
+</html>

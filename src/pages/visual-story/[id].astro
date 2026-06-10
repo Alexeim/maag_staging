@@ -2,6 +2,9 @@
 import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
 import QuoteIcon from "@/assets/icons/quote.svg";
 import logo from "@/assets/logo/logo.svg";
+import VisualStoryLayout from "@/Layouts/VisualStoryLayout.astro";
+import ContentActions from "@/components/common/ContentActions.astro";
+import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { ApiError, visualStoriesApi } from "@/lib/api/api";
 import { Info, MoveRight, MoveLeft } from "lucide-astro";
 
@@ -87,450 +90,521 @@ const heroImageUrl = storyData?.imageUrl || slides[0]?.imageUrl || "";
 const heroImageCaption =
   storyData?.imageCaption ||
   (!storyData?.imageUrl ? slides[0]?.caption || "" : "");
+const bookmarkCategory =
+  category === "culture" || category === "paris"
+    ? CATEGORY_LABELS[category]
+    : "";
+const firstBookmarkTag =
+  Array.isArray(storyData?.tags) && typeof storyData.tags[0] === "string"
+    ? storyData.tags[0]
+    : "";
+const bookmarkTag = firstBookmarkTag ? getKnownTagLabel(firstBookmarkTag) : "";
 ---
 
-<!doctype html>
-<html lang="ru" data-theme="maag">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} — Maag</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      :root {
-        --maag-bg: #ffffff;
-        --maag-surface: #faf7f2;
-        --maag-text: #000000;
-        --maag-muted: rgba(48, 40, 33, 0.6);
-        --maag-muted-soft: rgba(48, 40, 33, 0.4);
-        --maag-accent: #d92f1c;
-      }
+<VisualStoryLayout title={`${title} — Maag`}>
+  <style is:global>
+    :root {
+      --maag-bg: #ffffff;
+      --maag-surface: #faf7f2;
+      --maag-text: #000000;
+      --maag-muted: rgba(48, 40, 33, 0.6);
+      --maag-muted-soft: rgba(48, 40, 33, 0.4);
+      --maag-accent: #d92f1c;
+    }
 
-      * {
-        box-sizing: border-box;
-      }
+    * {
+      box-sizing: border-box;
+    }
 
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      background: var(--maag-bg);
+      color: var(--maag-text);
+      overflow: hidden;
+    }
+
+    /* ── slider mechanics ─────────────────────────── */
+    .story {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .slider {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s ease;
+      will-change: transform;
+    }
+
+    .slide {
+      min-width: 100vw;
+      height: 100vh;
+      display: flex;
+    }
+
+    /* ── shared halves ────────────────────────────── */
+    .slide-image {
+      position: relative;
+      width: 50%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: var(--maag-surface);
+      flex-shrink: 0;
+    }
+
+    .image-caption-hint {
+      position: absolute;
+      right: 22px;
+      bottom: 22px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      z-index: 3;
+    }
+
+    .image-caption-trigger {
+      width: 38px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .image-caption-trigger:hover,
+    .image-caption-trigger:focus-visible {
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .image-caption-popover {
+      max-width: min(520px, calc(100vw - 64px));
+      padding: 12px 14px;
+      border-radius: 0;
+      background: rgba(0, 0, 0, 0.76);
+      color: #ffffff;
+      font-family: "Inter", sans-serif;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+      opacity: 0;
+      transform: translateX(8px);
+      pointer-events: none;
+      transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .image-caption-hint:hover .image-caption-popover,
+    .image-caption-hint:focus-within .image-caption-popover {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .slide-content {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 56px 64px;
+      flex-shrink: 0;
+      background: var(--maag-bg);
+    }
+
+    /* ── hero slide ───────────────────────────────── */
+    .hero-category {
+      font-family: "Inter", sans-serif;
+      font-size: 0.75rem;
+      line-height: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--maag-accent);
+      margin: 0;
+    }
+
+    .hero-title {
+      font-family: "Old Standard TT", serif;
+      font-size: clamp(1.875rem, 4vw, 3.25rem);
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin: 8px 0 0;
+      color: var(--maag-text);
+    }
+
+    .hero-lead {
+      font-family: "Inter", sans-serif;
+      font-size: clamp(1.125rem, 1.7vw, 1.25rem);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      margin: 12px 0 0;
+      color: rgba(0, 0, 0, 0.8);
+      max-width: 35rem;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .hero-meta-author {
+      display: inline-flex;
+      align-items: center;
+      gap: 17px;
+      font-family: "Old Standard TT", serif;
+      font-size: 1.25rem;
+      font-style: italic;
+      line-height: 1.2;
+      color: var(--maag-text);
+    }
+
+    .hero-meta-author-icon {
+      width: 1rem;
+      height: 1rem;
+      flex-shrink: 0;
+    }
+
+    .hero-meta-date {
+      font-family: "Inter", sans-serif;
+      font-size: 0.875rem;
+      line-height: 1;
+      color: var(--maag-muted);
+    }
+
+    .hero-meta-dot {
+      font-size: 10px;
+      color: var(--maag-muted-soft);
+    }
+
+    .visual-story-actions {
+      margin-top: 22px;
+    }
+
+    /* ── content slide text ───────────────────────── */
+    .slide-counter {
+      font-family: "Inter", sans-serif;
+      font-size: 0.75rem;
+      line-height: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--maag-muted);
+      margin-bottom: auto;
+      padding-bottom: 0;
+      align-self: flex-end;
+    }
+
+    .slide-text-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .slide-text-body--quote {
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .slide-text-body p,
+    .slide-quote-text {
+      font-family: "Inter", sans-serif;
+      font-size: clamp(1.125rem, 1.7vw, 1.25rem);
+      font-weight: 300;
+      line-height: 1.7;
+      letter-spacing: -0.01em;
+      margin: 0;
+      color: rgba(0, 0, 0, 0.8);
+      max-width: 38rem;
+    }
+
+    .slide-quote {
+      width: 100%;
+      max-width: 32rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .slide-quote-icon {
+      width: 34px;
+      height: 34px;
+      color: var(--maag-accent);
+      flex-shrink: 0;
+    }
+
+    .slide-quote-icon--closing {
+      transform: rotate(180deg);
+    }
+
+    .slide-quote-text {
+      font-style: italic;
+      text-align: left;
+    }
+
+    .slide-quote-author {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      font-size: 0.8rem;
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--maag-muted);
+      text-align: center;
+    }
+
+    /* ── nav ──────────────────────────────────────── */
+    .nav {
+      position: fixed;
+      right: 30px;
+      bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    .nav button {
+      background: transparent;
+      border: 1px solid rgba(0, 0, 0, 0.45);
+      color: var(--maag-text);
+      padding: 10px 18px;
+      cursor: pointer;
+      font-family: "Inter", sans-serif;
+      font-size: 0.75rem;
+      line-height: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      transition:
+        opacity 0.2s ease,
+        border-color 0.2s ease;
+    }
+
+    .nav button:hover:not(:disabled) {
+      border-color: var(--maag-text);
+    }
+
+    .nav button:disabled {
+      opacity: 0.25;
+      cursor: default;
+    }
+
+    /* ── back link ────────────────────────────────── */
+    .back-link {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease-out;
+    }
+
+    .back-link:hover {
+      transform: scale(1.05);
+    }
+
+    .error-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 32px;
+    }
+
+    .error-message {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--maag-muted);
+    }
+
+    /* ── mobile ───────────────────────────────────── */
+    @media (max-width: 900px) {
       body {
-        margin: 0;
-        font-family: "Inter", sans-serif;
-        background: var(--maag-bg);
-        color: var(--maag-text);
-        overflow: hidden;
+        overflow: auto;
       }
 
-      /* ── slider mechanics ─────────────────────────── */
       .story {
-        position: relative;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
+        height: auto;
+        min-height: 100vh;
       }
 
       .slider {
-        display: flex;
-        width: 100%;
-        height: 100%;
-        transition: transform 0.5s ease;
-        will-change: transform;
+        display: block;
+        height: auto;
+        transform: none !important;
       }
 
       .slide {
+        display: none;
         min-width: 100vw;
-        height: 100vh;
+        height: auto;
+        min-height: 0;
+        flex-direction: column;
+      }
+
+      .slide.is-active {
         display: flex;
       }
 
-      /* ── shared halves ────────────────────────────── */
       .slide-image {
-        position: relative;
-        width: 50%;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-color: var(--maag-surface);
-        flex-shrink: 0;
+        width: 100%;
+        min-height: 52vh;
       }
 
       .image-caption-hint {
-        position: absolute;
-        right: 22px;
-        bottom: 22px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 10px;
-        z-index: 3;
-      }
-
-      .image-caption-trigger {
-        width: 38px;
-        height: 38px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        color: #ffffff;
-        cursor: pointer;
-        background: none;
-        border: none;
-        padding: 0;
-        transition: transform 0.2s ease;
-      }
-
-      .image-caption-trigger:hover,
-      .image-caption-trigger:focus-visible {
-        transform: translateY(-1px);
-        outline: none;
+        right: 16px;
+        bottom: 16px;
       }
 
       .image-caption-popover {
-        max-width: min(520px, calc(100vw - 64px));
-        padding: 12px 14px;
-        border-radius: 0;
-        background: rgba(0, 0, 0, 0.76);
-        color: #ffffff;
-        font-family: "Inter", sans-serif;
-        font-size: 0.8125rem;
-        line-height: 1.5;
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
-        opacity: 0;
-        transform: translateX(8px);
-        pointer-events: none;
-        transition:
-          opacity 0.2s ease,
-          transform 0.2s ease;
-      }
-
-      .image-caption-hint:hover .image-caption-popover,
-      .image-caption-hint:focus-within .image-caption-popover {
-        opacity: 1;
-        transform: translateX(0);
+        max-width: min(280px, calc(100vw - 28px));
       }
 
       .slide-content {
-        width: 50%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 56px 64px;
-        flex-shrink: 0;
-        background: var(--maag-bg);
+        width: 100%;
+        padding: 36px 28px 28px;
+        justify-content: flex-start;
       }
 
-      /* ── hero slide ───────────────────────────────── */
-      .hero-category {
-        font-family: "Inter", sans-serif;
-        font-size: 0.75rem;
-        line-height: 1rem;
-        font-weight: 700;
-        letter-spacing: 0.25em;
-        text-transform: uppercase;
-        color: var(--maag-accent);
-        margin: 0;
+      .slide-text-body p {
+        font-size: 1.125rem;
+        max-width: none;
       }
 
-      .hero-title {
-        font-family: "Old Standard TT", serif;
-        font-size: clamp(1.875rem, 4vw, 3.25rem);
-        font-weight: 400;
-        line-height: 1.1;
-        letter-spacing: -0.02em;
-        margin: 8px 0 0;
-        color: var(--maag-text);
-      }
-
-      .hero-lead {
-        font-family: "Inter", sans-serif;
-        font-size: clamp(1.125rem, 1.7vw, 1.25rem);
-        font-weight: 300;
-        letter-spacing: -0.01em;
-        margin: 12px 0 0;
-        color: rgba(0, 0, 0, 0.8);
-        max-width: 35rem;
-      }
-
-      .hero-meta {
-        display: flex;
-        flex-direction: column;
-        align-items: start;
-        gap: 12px;
-        margin-top: 20px;
-      }
-
-      .hero-meta-author {
-        display: inline-flex;
-        align-items: center;
-        gap: 17px;
-        font-family: "Old Standard TT", serif;
-        font-size: 1.25rem;
-        font-style: italic;
-        line-height: 1.2;
-        color: var(--maag-text);
-      }
-
-      .hero-meta-author-icon {
-        width: 1rem;
-        height: 1rem;
-        flex-shrink: 0;
-      }
-
-      .hero-meta-date {
-        font-family: "Inter", sans-serif;
-        font-size: 0.875rem;
-        line-height: 1;
-        color: var(--maag-muted);
-      }
-
-      .hero-meta-dot {
-        font-size: 10px;
-        color: var(--maag-muted-soft);
-      }
-
-      /* ── content slide text ───────────────────────── */
       .slide-counter {
-        font-family: "Inter", sans-serif;
-        font-size: 0.75rem;
-        line-height: 1rem;
-        font-weight: 700;
-        letter-spacing: 0.25em;
-        text-transform: uppercase;
-        color: var(--maag-muted);
-        margin-bottom: auto;
-        padding-bottom: 0;
-        align-self: flex-end;
+        margin-bottom: 24px;
+        align-self: flex-start;
       }
 
       .slide-text-body {
-        flex: 1;
-        display: flex;
-        align-items: center;
+        flex: none;
+        align-items: flex-start;
       }
 
-      .slide-text-body--quote {
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: center;
-        gap: 16px;
+      .slide-quote {
+        max-width: none;
+        gap: 12px;
       }
 
       .slide-text-body p,
       .slide-quote-text {
-        font-family: "Inter", sans-serif;
-        font-size: clamp(1.125rem, 1.7vw, 1.25rem);
-        font-weight: 300;
-        line-height: 1.7;
-        letter-spacing: -0.01em;
-        margin: 0;
-        color: rgba(0, 0, 0, 0.8);
-        max-width: 38rem;
+        font-size: 1.125rem;
       }
 
-      .slide-quote {
-        width: 100%;
-        max-width: 32rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 14px;
+      .hero-title {
+        font-size: 2.25rem;
       }
 
-      .slide-quote-icon {
-        width: 34px;
-        height: 34px;
-        color: var(--maag-accent);
-        flex-shrink: 0;
+      .hero-meta-author {
+        font-size: 1.1rem;
       }
 
-      .slide-quote-icon--closing {
-        transform: rotate(180deg);
-      }
-
-      .slide-quote-text {
-        font-style: italic;
-        text-align: left;
-      }
-
-      .slide-quote-author {
-        margin: 0;
-        font-family: "Inter", sans-serif;
-        font-size: 0.8rem;
-        line-height: 1.2;
-        font-weight: 700;
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-        color: var(--maag-muted);
-        text-align: center;
-      }
-
-      /* ── nav ──────────────────────────────────────── */
-      .nav {
-        position: fixed;
-        right: 30px;
-        bottom: 30px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        z-index: 10;
-      }
-
-      .nav button {
-        background: transparent;
-        border: 1px solid rgba(0, 0, 0, 0.45);
-        color: var(--maag-text);
-        padding: 10px 18px;
-        cursor: pointer;
-        font-family: "Inter", sans-serif;
+      .hero-meta-date {
         font-size: 0.75rem;
-        line-height: 1rem;
-        font-weight: 700;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        transition:
-          opacity 0.2s ease,
-          border-color 0.2s ease;
       }
 
-      .nav button:hover:not(:disabled) {
-        border-color: var(--maag-text);
+      .nav {
+        position: static;
+        right: auto;
+        bottom: auto;
+        margin-top: 42px;
+        margin-bottom: 32px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-top: 0;
       }
+    }
+  </style>
+  {
+    error ? (
+      <div class="error-state">
+        <p class="error-message">{error}</p>
+      </div>
+    ) : (
+      <main class="story">
+        <div class="slider" id="slider">
+          {/* ── Hero slide ──────────────────────────── */}
+          <section class="slide">
+            <div
+              class="slide-image bg-base-200"
+              style={
+                heroImageUrl ? `background-image:url('${heroImageUrl}')` : ""
+              }
+            >
+              {heroImageCaption && (
+                <div class="image-caption-hint">
+                  <div class="image-caption-popover">{heroImageCaption}</div>
+                  <button
+                    type="button"
+                    class="image-caption-trigger"
+                    aria-label="Показать подпись к изображению"
+                  >
+                    <Info class="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+            <div class="slide-content bg-base-100">
+              <p class="hero-category text-accent">{categoryLabel}</p>
+              <h1 class="hero-title text-base-content">{title}</h1>
+              {lead && <p class="hero-lead text-base-content">{lead}</p>}
+              {(authorName || dateFormatted) && (
+                <div class="hero-meta text-base-content">
+                  {authorName && (
+                    <span class="hero-meta-author">
+                      <AuthorIcon class="hero-meta-author-icon" />
+                      <span>{authorName}</span>
+                    </span>
+                  )}
+                  {dateFormatted && (
+                    <span class="hero-meta-date">{dateFormatted}</span>
+                  )}
+                </div>
+              )}
+              <div class="visual-story-actions">
+                <ContentActions
+                  contentType="visualStory"
+                  contentId={id!}
+                  title={title}
+                  href={`/visual-story/${id}`}
+                  category={bookmarkCategory}
+                  tag={bookmarkTag}
+                  imageUrl={heroImageUrl}
+                />
+              </div>
+            </div>
+          </section>
 
-      .nav button:disabled {
-        opacity: 0.25;
-        cursor: default;
-      }
-
-      /* ── back link ────────────────────────────────── */
-      .back-link {
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.2s ease-out;
-      }
-
-      .back-link:hover {
-        transform: scale(1.05);
-      }
-
-      .error-state {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        padding: 32px;
-      }
-
-      .error-message {
-        margin: 0;
-        font-family: "Inter", sans-serif;
-        font-size: 0.95rem;
-        line-height: 1.6;
-        color: var(--maag-muted);
-      }
-
-      /* ── mobile ───────────────────────────────────── */
-      @media (max-width: 900px) {
-        body {
-          overflow: auto;
-        }
-
-        .story {
-          height: auto;
-          min-height: 100vh;
-          padding-bottom: 92px;
-        }
-
-        .slider {
-          height: auto;
-        }
-
-        .slide {
-          min-width: 100vw;
-          height: auto;
-          min-height: 100vh;
-          flex-direction: column;
-        }
-
-        .slide-image {
-          width: 100%;
-          min-height: 52vh;
-        }
-
-        .image-caption-hint {
-          right: 16px;
-          bottom: 16px;
-        }
-
-        .image-caption-popover {
-          max-width: min(280px, calc(100vw - 28px));
-        }
-
-        .slide-content {
-          width: 100%;
-          padding: 36px 28px;
-          justify-content: flex-start;
-        }
-
-        .slide-text-body p {
-          font-size: 1.125rem;
-          max-width: none;
-        }
-
-        .slide-quote {
-          max-width: none;
-          gap: 12px;
-        }
-
-        .slide-text-body p,
-        .slide-quote-text {
-          font-size: 1.125rem;
-        }
-
-        .hero-title {
-          font-size: 2.25rem;
-        }
-
-        .hero-meta-author {
-          font-size: 1.1rem;
-        }
-
-        .hero-meta-date {
-          font-size: 0.75rem;
-        }
-
-        .nav {
-          right: 16px;
-          bottom: 16px;
-        }
-      }
-    </style>
-  </head>
-
-  <body class="bg-base-100 text-base-content">
-    {
-      error ? (
-        <div class="error-state">
-          <p class="error-message">{error}</p>
-        </div>
-      ) : (
-        <main class="story">
-          <div class="slider" id="slider">
-            {/* ── Hero slide ──────────────────────────── */}
+          {/* ── Content slides ──────────────────────── */}
+          {slides.map((slide, i) => (
             <section class="slide">
               <div
-                class="slide-image bg-base-200"
-                style={
-                  heroImageUrl ? `background-image:url('${heroImageUrl}')` : ""
-                }
+                class="slide-image"
+                style={`background-image:url('${slide.imageUrl}')`}
               >
-                {heroImageCaption && (
+                {slide.caption && (
                   <div class="image-caption-hint">
-                    <div class="image-caption-popover">{heroImageCaption}</div>
+                    <div class="image-caption-popover">{slide.caption}</div>
                     <button
                       type="button"
                       class="image-caption-trigger"
@@ -542,150 +616,134 @@ const heroImageCaption =
                 )}
               </div>
               <div class="slide-content bg-base-100">
-                <p class="hero-category text-accent">{categoryLabel}</p>
-                <h1 class="hero-title text-base-content">{title}</h1>
-                {lead && <p class="hero-lead text-base-content">{lead}</p>}
-                {(authorName || dateFormatted) && (
-                  <div class="hero-meta text-base-content">
-                    {authorName && (
-                      <span class="hero-meta-author">
-                        <AuthorIcon class="hero-meta-author-icon" />
-                        <span>{authorName}</span>
-                      </span>
-                    )}
-                    {dateFormatted && (
-                      <span class="hero-meta-date">{dateFormatted}</span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {/* ── Content slides ──────────────────────── */}
-            {slides.map((slide, i) => (
-              <section class="slide">
+                <span class="slide-counter text-base-content">
+                  {String(i + 1).padStart(2, "0")} /{" "}
+                  {String(slides.length).padStart(2, "0")}
+                </span>
                 <div
-                  class="slide-image"
-                  style={`background-image:url('${slide.imageUrl}')`}
+                  class:list={[
+                    "slide-text-body",
+                    slide.contentType === "quote" && "slide-text-body--quote",
+                  ]}
                 >
-                  {slide.caption && (
-                    <div class="image-caption-hint">
-                      <div class="image-caption-popover">{slide.caption}</div>
-                      <button
-                        type="button"
-                        class="image-caption-trigger"
-                        aria-label="Показать подпись к изображению"
-                      >
-                        <Info class="w-4 h-4" />
-                      </button>
-                    </div>
+                  {slide.contentType === "quote" ? (
+                    <>
+                      <div class="slide-quote">
+                        <QuoteIcon class="slide-quote-icon" />
+                        <blockquote class="slide-quote-text">
+                          {slide.quote}
+                        </blockquote>
+                        <QuoteIcon class="slide-quote-icon slide-quote-icon--closing" />
+                      </div>
+                      {slide.quoteAuthor && (
+                        <p class="slide-quote-author">{slide.quoteAuthor}</p>
+                      )}
+                    </>
+                  ) : (
+                    <p class="text-base-content">{slide.text}</p>
                   )}
                 </div>
-                <div class="slide-content bg-base-100">
-                  <span class="slide-counter text-base-content">
-                    {String(i + 1).padStart(2, "0")} /{" "}
-                    {String(slides.length).padStart(2, "0")}
-                  </span>
-                  <div
-                    class:list={[
-                      "slide-text-body",
-                      slide.contentType === "quote" && "slide-text-body--quote",
-                    ]}
-                  >
-                    {slide.contentType === "quote" ? (
-                      <>
-                        <div class="slide-quote">
-                          <QuoteIcon class="slide-quote-icon" />
-                          <blockquote class="slide-quote-text">
-                            {slide.quote}
-                          </blockquote>
-                          <QuoteIcon class="slide-quote-icon slide-quote-icon--closing" />
-                        </div>
-                        {slide.quoteAuthor && (
-                          <p class="slide-quote-author">{slide.quoteAuthor}</p>
-                        )}
-                      </>
-                    ) : (
-                      <p class="text-base-content">{slide.text}</p>
-                    )}
-                  </div>
-                </div>
-              </section>
-            ))}
-          </div>
+              </div>
+            </section>
+          ))}
+        </div>
 
-          <div class="nav">
-            <a href="/" class="back-link" aria-label="На главную">
-              <img src={logo.src} alt="Maag logo" class="w-10" />
-            </a>
-            <button
-              id="prev-button"
-              type="button"
-              aria-label="Предыдущий слайд"
-              class="border border-base-content text-base-content flex items-center justify-center"
-            >
-              <MoveLeft class="w-2 h-2" />
-            </button>
-            <button
-              id="next-button"
-              type="button"
-              aria-label="Следующий слайд"
-              class="border border-base-content text-base-content flex items-center justify-center"
-            >
-              <MoveRight class="w-2 h-2" />
-            </button>
-          </div>
-        </main>
-      )
-    }
+        <div class="nav" id="visual-story-nav">
+          <a href="/" class="back-link" aria-label="На главную">
+            <img src={logo.src} alt="Maag logo" class="w-10" />
+          </a>
+          <button
+            id="prev-button"
+            type="button"
+            aria-label="Предыдущий слайд"
+            class="border border-base-content text-base-content flex items-center justify-center"
+          >
+            <MoveLeft class="w-2 h-2" />
+          </button>
+          <button
+            id="next-button"
+            type="button"
+            aria-label="Следующий слайд"
+            class="border border-base-content text-base-content flex items-center justify-center"
+          >
+            <MoveRight class="w-2 h-2" />
+          </button>
+        </div>
+      </main>
+    )
+  }
 
-    <script>
-      const slider = document.getElementById("slider");
-      const prevBtn = document.getElementById(
-        "prev-button",
-      ) as HTMLButtonElement | null;
-      const nextBtn = document.getElementById(
-        "next-button",
-      ) as HTMLButtonElement | null;
-      const total = document.querySelectorAll(".slide").length;
+  <script>
+    const slider = document.getElementById("slider");
+    const prevBtn = document.getElementById(
+      "prev-button",
+    ) as HTMLButtonElement | null;
+    const nextBtn = document.getElementById(
+      "next-button",
+    ) as HTMLButtonElement | null;
+    const nav = document.getElementById("visual-story-nav");
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const total = slides.length;
+    const mobileQuery = window.matchMedia("(max-width: 900px)");
 
-      let index = 0;
+    let index = 0;
 
-      const update = () => {
-        if (!slider || !prevBtn || !nextBtn) return;
-        slider.style.transform = `translateX(-${index * 100}vw)`;
-        prevBtn.disabled = index === 0;
-        nextBtn.disabled = index === total - 1;
-      };
+    const syncNavPlacement = () => {
+      if (!slider || !nav) return;
 
-      prevBtn?.addEventListener("click", () => {
-        if (index > 0) {
-          index--;
-          update();
+      if (!mobileQuery.matches) {
+        if (nav.parentElement !== slider.parentElement) {
+          slider.parentElement?.appendChild(nav);
         }
+        return;
+      }
+
+      const activeContent = slides[index]?.querySelector(".slide-content");
+      if (activeContent && nav.parentElement !== activeContent) {
+        activeContent.appendChild(nav);
+      }
+    };
+
+    const update = () => {
+      if (!slider || !prevBtn || !nextBtn) return;
+      slider.style.transform = `translateX(-${index * 100}vw)`;
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle("is-active", slideIndex === index);
       });
-      nextBtn?.addEventListener("click", () => {
+      prevBtn.disabled = index === 0;
+      nextBtn.disabled = index === total - 1;
+      syncNavPlacement();
+    };
+
+    prevBtn?.addEventListener("click", () => {
+      if (index > 0) {
+        index--;
+        update();
+      }
+    });
+    nextBtn?.addEventListener("click", () => {
+      if (index < total - 1) {
+        index++;
+        update();
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         if (index < total - 1) {
           index++;
           update();
         }
-      });
-
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-          if (index < total - 1) {
-            index++;
-            update();
-          }
-        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-          if (index > 0) {
-            index--;
-            update();
-          }
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        if (index > 0) {
+          index--;
+          update();
         }
-      });
+      }
+    });
 
-      update();
-    </script>
-  </body>
-</html>
+    mobileQuery.addEventListener("change", syncNavPlacement);
+
+    update();
+  </script>
+</VisualStoryLayout>
