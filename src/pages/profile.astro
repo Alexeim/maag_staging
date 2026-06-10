@@ -1,6 +1,6 @@
 ---
 import Layout from "../Layouts/Layout.astro";
-import { BadgeCheck } from "lucide-astro";
+import { Bookmark, Trash2 } from "lucide-astro";
 ---
 
 <Layout
@@ -9,7 +9,7 @@ import { BadgeCheck } from "lucide-astro";
   title="Личный кабинет - Maag"
   useClientRouter={true}
 >
-  <div class="min-h-screen bg-base-200 py-8">
+  <div class="min-h-screen bg-base-200 py-8" x-data="{ activeTab: 'account' }">
     <div class="max-w-4xl mx-auto px-4 lg:px-8">
       <!-- Page Header -->
       <div class="mb-8">
@@ -22,16 +22,18 @@ import { BadgeCheck } from "lucide-astro";
         <!-- Navigation Tabs -->
         <div class="flex flex-col lg:flex-row gap-4 lg:gap-8">
           <button
-            class="w-full lg:w-auto text-left lg:text-center text-xs font-['Inter'] font-semibold uppercase tracking-[0.25em] text-base-content border-b-2 border-accent pb-1"
-            x-data="{ active: true }"
-            :class="{ 'text-accent': active }"
+            type="button"
+            class="w-full lg:w-auto text-left lg:text-center text-xs font-['Inter'] uppercase tracking-[0.25em] text-base-content pb-1 transition-colors cursor-pointer"
+            :class="activeTab === 'account' ? 'font-semibold text-accent border-b-2 border-accent' : 'font-normal text-base-content/70 hover:text-base-content'"
+            @click="activeTab = 'account'"
           >
             настройка аккаунта
           </button>
           <button
-            class="w-full lg:w-auto text-left lg:text-center text-xs font-['Inter'] font-normal uppercase tracking-[0.25em] text-base-content/70 hover:text-base-content transition-colors"
-            x-data="{ active: false }"
-            :class="{ 'text-accent': active }"
+            type="button"
+            class="w-full lg:w-auto text-left lg:text-center text-xs font-['Inter'] uppercase tracking-[0.25em] text-base-content pb-1 transition-colors cursor-pointer"
+            :class="activeTab === 'bookmarks' ? 'font-semibold text-accent border-b-2 border-accent' : 'font-normal text-base-content/70 hover:text-base-content'"
+            @click="activeTab = 'bookmarks'"
           >
             закладки
           </button>
@@ -39,7 +41,7 @@ import { BadgeCheck } from "lucide-astro";
       </div>
 
       <!-- Main Content -->
-      <div class="space-y-20 mb-16">
+      <div class="space-y-20 mb-16" x-show="activeTab === 'account'">
         <!-- Subscription Section -->
         <div class="space-y-8" x-data="$lazy('subscriptionManager')">
           <!-- Section Header -->
@@ -167,6 +169,7 @@ import { BadgeCheck } from "lucide-astro";
                       <input
                         type="password"
                         value="**********"
+                        autocomplete="current-password"
                         readonly
                         class="w-full bg-transparent text-[16px] lg:text-xs font-['Inter'] text-neutral-400 outline-none"
                       />
@@ -230,18 +233,129 @@ import { BadgeCheck } from "lucide-astro";
                 </div>
               </div>
             </template>
-            <div>
-              <h3 class="text-accent">--- DEBUG ---</h3>
-              <template x-if="$store.auth.user"
-                ><p class="text-green-500">
-                  User found: <span x-text="Object.keys($store.auth.profile)"
-                  ></span><br /><span x-text="$store.auth.user.displayName"
-                  ></span><br /><span
-                    :class="$store.auth.profile.role === 'admin' ? 'text-warning' : 'text-success'"
-                    x-text="$store.auth.profile.role"></span>
-                </p></template
-              >
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-16" x-show="activeTab === 'bookmarks'" x-cloak>
+        <div class="space-y-8" x-data="$lazy('profile')">
+          <div class="space-y-6">
+            <div class="w-full h-px bg-neutral-200"></div>
+            <h2
+              class="text-base font-old_standard font-normal uppercase tracking-[0.46em] text-base-content"
+            >
+              Закладки
+            </h2>
+          </div>
+
+          <template x-if="$store.auth.isLoading">
+            <p class="font-inter text-sm text-base-content/60">
+              Проверка сессии...
+            </p>
+          </template>
+
+          <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
+            <p class="font-inter text-sm text-base-content/60">
+              Войдите, чтобы увидеть сохранённые материалы.
+            </p>
+          </template>
+
+          <template
+            x-if="!$store.auth.isLoading && $store.auth.isLoggedIn && bookmarksLoading"
+          >
+            <p class="font-inter text-sm text-base-content/60">
+              Загрузка закладок...
+            </p>
+          </template>
+
+          <template
+            x-if="!$store.auth.isLoading && $store.auth.isLoggedIn && !bookmarksLoading && bookmarks.length === 0"
+          >
+            <div
+              class="flex max-w-2xl items-center gap-4 border border-base-300 bg-white p-5 text-base-content"
+            >
+              <Bookmark class="h-5 w-5 shrink-0 text-accent" />
+              <p class="m-0 font-inter text-sm text-base-content/70">
+                Вы пока ничего не сохранили.
+              </p>
             </div>
+          </template>
+
+          <div
+            class="space-y-12"
+            x-show="!$store.auth.isLoading && $store.auth.isLoggedIn && !bookmarksLoading && bookmarks.length > 0"
+          >
+            <template
+              x-for="group in bookmarkGroups"
+              :key="group.contentType"
+            >
+              <section class="space-y-5">
+                <div class="flex items-center gap-4">
+                  <h3
+                    class="m-0 font-old_standard text-2xl font-normal uppercase tracking-[0.24em] text-base-content"
+                    x-text="group.label"
+                  >
+                  </h3>
+                  <div class="h-px flex-1 bg-neutral-200"></div>
+                  <span
+                    class="font-inter text-xs text-base-content/50"
+                    x-text="group.items.length"
+                  >
+                  </span>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <template
+                    x-for="bookmark in group.items"
+                    :key="`${bookmark.contentType}-${bookmark.id}`"
+                  >
+                    <article class="grid gap-4 border border-base-300 bg-white p-4">
+                      <a :href="bookmark.href" class="grid gap-4">
+                        <template x-if="bookmark.imageUrl">
+                          <img
+                            :src="bookmark.imageUrl"
+                            :alt="bookmark.title"
+                            class="h-44 w-full object-cover"
+                            loading="lazy"
+                          />
+                        </template>
+                        <div class="grid gap-2">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <template x-if="bookmark.category">
+                              <span
+                                class="font-inter text-[11px] font-semibold uppercase tracking-[0.22em] text-base-content/50"
+                                x-text="bookmark.category"
+                              >
+                              </span>
+                            </template>
+                            <template x-if="bookmark.tag">
+                              <span
+                                class="font-inter text-[11px] font-semibold uppercase tracking-[0.22em] text-accent"
+                                x-text="bookmark.tag"
+                              >
+                              </span>
+                            </template>
+                          </div>
+                          <h4
+                            class="m-0 font-old_standard text-2xl leading-tight text-base-content"
+                            x-text="bookmark.title"
+                          >
+                          </h4>
+                        </div>
+                      </a>
+                      <button
+                        type="button"
+                        class="inline-flex w-fit items-center gap-2 font-inter text-sm text-base-content/60 transition hover:text-error cursor-pointer"
+                        @click="removeBookmark(bookmark)"
+                      >
+                        <Trash2 class="h-4 w-4" aria-hidden="true" />
+                        Удалить из закладок
+                      </button>
+                    </article>
+                  </template>
+                </div>
+              </section>
+            </template>
           </div>
         </div>
       </div>

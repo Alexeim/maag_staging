@@ -3,7 +3,9 @@ import Layout from "../../Layouts/Layout.astro";
 import { interviewsApi } from "../../lib/api/api";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
+import ContentActions from "@/components/common/ContentActions.astro";
 import InterviewHero from "@/components/interview/InterviewHero.astro";
+import { getKnownTagLabel } from "@/content/tags/parisTags";
 import picture1 from "@/assets/images/culture.jpg";
 import {
   buildContentCollectionItems,
@@ -38,6 +40,12 @@ const {
 } = interview;
 const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
 const transitionAliases = [`landing-body-main-article-image-${id}`];
+const firstBookmarkTag =
+  Array.isArray((interview as any)?.tags) &&
+  typeof (interview as any).tags[0] === "string"
+    ? (interview as any).tags[0]
+    : "";
+const bookmarkTag = firstBookmarkTag ? getKnownTagLabel(firstBookmarkTag) : "";
 
 let collectionContentItems: any[] = [];
 let recentInterviewItems: any[] = [];
@@ -88,6 +96,17 @@ try {
       />
 
       <div class="px-4 pb-[100px] pt-10 sm:px-6 lg:px-14 lg:pt-16">
+        <div class="mx-auto mb-10 max-w-[826px]">
+          <ContentActions
+            contentType="interview"
+            contentId={id!}
+            title={title}
+            href={`/interviews/${id}`}
+            tag={bookmarkTag}
+            imageUrl={imageUrl}
+            align="center"
+          />
+        </div>
         <ArticleBody
           contentBlocks={Array.isArray(content) ? content : []}
           linkedContentLookup={linkedContentLookup}

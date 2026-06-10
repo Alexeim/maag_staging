@@ -3,6 +3,7 @@ import Layout from "../../Layouts/Layout.astro";
 import ArticleHeader from "../../components/article/ArticleHeader.astro";
 import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
+import ContentActions from "@/components/common/ContentActions.astro";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { flippersApi } from "../../lib/api/api";
 import { ChevronLeft, ChevronRight } from "lucide-astro";
@@ -58,6 +59,17 @@ const getFlipperCategory = () => {
 
   return CATEGORY_LABELS[firstTag] || getKnownTagLabel(firstTag);
 };
+const bookmarkCategory =
+  flipper.category === "culture"
+    ? "Культура"
+    : flipper.category === "paris"
+      ? "Париж"
+      : "";
+const firstBookmarkTag =
+  Array.isArray(flipper.tags) && typeof flipper.tags[0] === "string"
+    ? flipper.tags[0]
+    : "";
+const bookmarkTag = firstBookmarkTag ? getKnownTagLabel(firstBookmarkTag) : "";
 
 const flipperState = JSON.stringify({
   activeSlide: 0,
@@ -124,6 +136,15 @@ try {
               )
             }
             {flipper.createdAt && <ArticleDate createdAt={flipper.createdAt} />}
+            <ContentActions
+              contentType="flipper"
+              contentId={id!}
+              title={flipper.title}
+              href={`/flippers/${id}`}
+              category={bookmarkCategory}
+              tag={bookmarkTag}
+              imageUrl={flipper.carouselContent?.[0]?.imageUrl}
+            />
           </div>
         </div>
       </div>

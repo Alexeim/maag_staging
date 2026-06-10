@@ -8,6 +8,7 @@ import ArticleBody from "../../components/article/ArticleBody.astro";
 import ArticleTips from "../../components/article/ArticleTips.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
 import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
+import ContentActions from "@/components/common/ContentActions.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import {
@@ -148,6 +149,19 @@ const displayArticle = {
   tips: Array.isArray(articleData?.tips) ? articleData.tips : [],
 };
 
+const bookmarkCategory =
+  rawCategory === "culture" || rawCategory === "paris"
+    ? CATEGORY_LABELS[rawCategory]
+    : "";
+const firstBookmarkTag =
+  Array.isArray(articleData?.tags) && typeof articleData.tags[0] === "string"
+    ? articleData.tags[0]
+    : "";
+const bookmarkTag = firstBookmarkTag
+  ? TAG_LABEL_ALIASES[firstBookmarkTag.toLowerCase()] ||
+    getKnownTagLabel(firstBookmarkTag)
+  : "";
+
 const transitionAliases = [`landing-body-main-article-image-${id}`];
 
 const isStandardCategoryArticle = (item: any) =>
@@ -217,7 +231,15 @@ if (!error && articleData) {
                   avatarUrl={displayArticle.authorAvatar}
                 />
                 <ArticleDate createdAt={articleData.createdAt} />
-                {/* <SocialShare readTime={displayArticle.readTime} /> */}
+                <ContentActions
+                  contentType="article"
+                  contentId={id!}
+                  title={displayArticle.title}
+                  href={`/article/${id}`}
+                  category={bookmarkCategory}
+                  tag={bookmarkTag}
+                  imageUrl={displayArticle.imageUrl}
+                />
               </div>
             </div>
 

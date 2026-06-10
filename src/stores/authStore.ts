@@ -1,13 +1,17 @@
 
-interface UserProfile {
+import type { User } from "firebase/auth";
+import type { UserBookmark } from "@/lib/api/api";
+
+export interface UserProfile {
   uid: string;
   firstName: string;
   lastName: string;
   role: string;
+  bookmarks?: UserBookmark[];
   // Add any other fields from your Firestore document
 }
 
-interface AuthStore {
+export interface AuthStore {
   isAuthModalOpen: boolean;
   formType: 'login' | 'signup';
   user: User | null;
@@ -20,6 +24,7 @@ interface AuthStore {
   closeAuthModal(): void;
   switchTo(type: 'login' | 'signup'): void;
   setUser(user: User | null, profile?: UserProfile | null): void;
+  setBookmarks(bookmarks: UserBookmark[]): void;
   clearUser(): void;
 }
 
@@ -60,7 +65,10 @@ export const authStore: AuthStore = {
     this.isLoading = false; // Firebase auth check is done
     
     if (profile) {
-      this.profile = profile;
+      this.profile = {
+        ...profile,
+        bookmarks: profile.bookmarks ?? [],
+      };
       this.isProfileLoaded = true; // Backend profile is now loaded
     } else if (user) {
       // User is logged in, but we don't have profile data yet.
@@ -70,6 +78,17 @@ export const authStore: AuthStore = {
       // User is logged out.
       this.isProfileLoaded = false;
     }
+  },
+
+  setBookmarks(bookmarks) {
+    if (!this.profile) {
+      return;
+    }
+
+    this.profile = {
+      ...this.profile,
+      bookmarks,
+    };
   },
 
   clearUser() {

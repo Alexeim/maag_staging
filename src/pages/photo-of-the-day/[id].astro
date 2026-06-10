@@ -3,6 +3,7 @@ import Layout from "@/Layouts/Layout.astro";
 import ArticleHeader from "@/components/article/ArticleHeader.astro";
 import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
+import ContentActions from "@/components/common/ContentActions.astro";
 import { ApiError, photosOfTheDayApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
@@ -54,6 +55,13 @@ const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('lo
                 />
                 <ArticleDate createdAt={photo.createdAt} />
               </div>
+              <ContentActions
+                contentType="photoOfTheDay"
+                contentId={id!}
+                title={photo.title}
+                href={`/photo-of-the-day/${id}`}
+                imageUrl={photo.imageUrl}
+              />
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 ---
 import logo from "../../assets/logo/logo.svg";
-import { Search, Instagram, Youtube, X } from "lucide-astro";
+import { Search, Instagram, X } from "lucide-astro";
 import { Image } from "astro:assets";
 import searchIcon from "../../assets/icons/search-mobile.svg";
 import burgerIcon from "../../assets/icons/burger-mobile.svg";
@@ -141,9 +141,6 @@ const currentPath = Astro.url.pathname;
       </button>
       <button class="p-2">
         <Instagram class="h-6 w-6" />
-      </button>
-      <button class="p-2">
-        <Youtube class="h-7 w-7" />
       </button>
       <div class="flex items-center gap-4" x-data="$lazy('navbar')">
         <!-- Loading State -->

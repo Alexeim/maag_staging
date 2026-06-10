@@ -1,0 +1,74 @@
+---
+import { Bookmark, BookmarkCheck, Share2 } from "lucide-astro";
+import type { BookmarkContentType } from "@/lib/api/api";
+
+interface Props {
+  contentType: BookmarkContentType;
+  contentId: string;
+  title: string;
+  href?: string;
+  category?: string;
+  tag?: string;
+  imageUrl?: string;
+  align?: "left" | "center" | "right";
+}
+
+const {
+  contentType,
+  contentId,
+  title,
+  href,
+  category,
+  tag,
+  imageUrl,
+  align = "left",
+} = Astro.props as Props;
+
+const actionState = JSON.stringify({
+  contentType,
+  id: contentId,
+  title,
+  href: href ?? Astro.url.pathname,
+  category,
+  tag,
+  imageUrl,
+});
+
+const alignmentClass =
+  align === "center"
+    ? "justify-center"
+    : align === "right"
+      ? "justify-end"
+      : "justify-start";
+---
+
+<div
+  class:list={["flex w-full flex-wrap items-center gap-3", alignmentClass]}
+  x-data={`$lazy('contentActions', ${actionState})`}
+>
+  <button
+    type="button"
+    class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
+    @click="shareContent()"
+    :disabled="isSharing"
+  >
+    <Share2 class="h-4 w-4" aria-hidden="true" />
+    <span x-text="shareLabel">Поделиться</span>
+  </button>
+
+  <button
+    type="button"
+    class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
+    @click="toggleBookmark()"
+    :disabled="isBookmarking || $store.auth.isLoading"
+    :aria-pressed="isBookmarked"
+  >
+    <span x-show="!isBookmarked" class="inline-flex">
+      <Bookmark class="h-4 w-4" aria-hidden="true" />
+    </span>
+    <span x-show="isBookmarked" class="inline-flex text-accent">
+      <BookmarkCheck class="h-4 w-4" aria-hidden="true" />
+    </span>
+    <span x-text="bookmarkLabel">В закладки</span>
+  </button>
+</div>

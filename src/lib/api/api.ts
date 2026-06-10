@@ -525,7 +525,30 @@ export interface UserProfileResponse {
   firstName: string;
   lastName: string;
   role: "reader" | "author" | "admin";
+  bookmarks?: UserBookmark[];
   createdAt: string | Date;
+}
+
+export type BookmarkContentType =
+  | "article"
+  | "event"
+  | "flipper"
+  | "guide"
+  | "interview"
+  | "news"
+  | "photoOfTheDay"
+  | "tips"
+  | "visualStory";
+
+export interface UserBookmark {
+  contentType: BookmarkContentType;
+  id: string;
+  title: string;
+  href: string;
+  category?: string;
+  tag?: string;
+  imageUrl?: string;
+  savedAt?: string | Date | { _seconds: number };
 }
 
 export interface AuthorPayload {
@@ -855,6 +878,30 @@ export const usersApi = {
       body: payload,
       token,
     });
+  },
+  getBookmarks(uid: string, token?: string) {
+    return request<UserBookmark[]>(`/api/users/${uid}/bookmarks`, { token });
+  },
+  addBookmark(uid: string, payload: UserBookmark, token?: string) {
+    return request<UserBookmark[]>(`/api/users/${uid}/bookmarks`, {
+      method: "POST",
+      body: payload,
+      token,
+    });
+  },
+  removeBookmark(
+    uid: string,
+    contentType: BookmarkContentType,
+    contentId: string,
+    token?: string,
+  ) {
+    return request<UserBookmark[]>(
+      `/api/users/${uid}/bookmarks/${contentType}/${contentId}`,
+      {
+        method: "DELETE",
+        token,
+      },
+    );
   },
 };
 

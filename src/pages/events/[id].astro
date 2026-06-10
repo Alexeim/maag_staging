@@ -1,9 +1,10 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
+import ContentActions from "@/components/common/ContentActions.astro";
 import EventMetaIcon from "../../components/common/EventMetaIcon.astro";
 import picture1 from "../../assets/images/culture.jpg";
-import { Bookmark, CalendarPlus, Share2 } from "lucide-astro";
+import { CalendarPlus } from "lucide-astro";
 import { ApiError, eventsApi } from "@/lib/api/api";
 import {
   buildContentCollectionItems,
@@ -565,6 +566,7 @@ const displayEvent = {
   datesLabel: formatDateRange(startDate, endDate),
   timeLabel: formatTimeLabel(eventData),
 };
+const bookmarkTag = normalizedTags[0] ? topMetaTag : "";
 ---
 
 <Layout
@@ -618,27 +620,14 @@ const displayEvent = {
                     )}
                   </div> */}
 
-                    {/* <div class="flex flex-wrap gap-4">
-                    <button
-                      type="button"
-                      class="inline-flex h-10 items-center gap-3 rounded-2xl border border-base-300 px-4 py-2 text-base-content transition-colors hover:bg-base-300"
-                    >
-                      <Share2 class="h-4 w-4" />
-                      <span class="text-sm font-['Inter']">Поделиться</span>
-                    </button>
-
-                    <div class="inline-flex h-10 items-center gap-3 rounded-2xl border border-base-300 px-4 py-2 text-base-content">
-                      <span class="text-base font-bold">{readTime}</span>
-                      <span class="text-sm font-['Inter']">Минут читать</span>
-                    </div>
-
-                    <button
-                      type="button"
-                      class="inline-flex h-10 items-center justify-center rounded-2xl border border-base-300 px-4 py-2 text-base-content transition-colors hover:bg-base-300"
-                    >
-                      <Bookmark class="h-4 w-4" />
-                    </button>
-                  </div> */}
+                    <ContentActions
+                      contentType="event"
+                      contentId={id!}
+                      title={displayEvent.title}
+                      href={`/events/${id}`}
+                      tag={bookmarkTag}
+                      imageUrl={displayEvent.imageUrl}
+                    />
                   </div>
 
                   <figure class="m-0">

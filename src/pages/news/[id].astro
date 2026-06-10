@@ -6,6 +6,7 @@ import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
 import ArticleImage from "@/components/article/ArticleImage.astro";
 import ArticleBody from "@/components/article/ArticleBody.astro";
+import ContentActions from "@/components/common/ContentActions.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { ApiError, newsApi } from "@/lib/api/api";
@@ -131,6 +132,18 @@ const displayArticle = {
   contentBlocks: articleData?.content || [],
 };
 
+const bookmarkCategory =
+  articleData?.category === "culture" || articleData?.category === "paris"
+    ? getCategoryLabel(articleData.category)
+    : "";
+const firstBookmarkTag =
+  Array.isArray(articleData?.tags) && typeof articleData.tags[0] === "string"
+    ? articleData.tags[0].trim()
+    : "";
+const bookmarkTag = firstBookmarkTag
+  ? getKnownTagLabel(firstBookmarkTag) || getCategoryLabel(firstBookmarkTag)
+  : "";
+
 const transitionAliases = [`landing-body-main-article-image-${id}`];
 
 let collectionContentItems: any[] = [];
@@ -221,6 +234,15 @@ if (!error && articleData) {
                           avatarUrl={displayArticle.authorAvatar}
                         />
                         <ArticleDate createdAt={articleData.createdAt} />
+                        <ContentActions
+                          contentType="news"
+                          contentId={id!}
+                          title={displayArticle.title}
+                          href={`/news/${id}`}
+                          category={bookmarkCategory}
+                          tag={bookmarkTag}
+                          imageUrl={displayArticle.imageUrl}
+                        />
                       </div>
                     </div>
 
