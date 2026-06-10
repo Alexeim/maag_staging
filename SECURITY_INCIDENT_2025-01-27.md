@@ -98,17 +98,17 @@ Most likely scenarios:
 
 If any of these were accessible during infection period, rotate them:
 
-- [ ] API keys in `.env` files
-- [ ] npm tokens (`npm token revoke` + create new)
-- [ ] SSH keys (if `~/.ssh/` was accessible)
-- [ ] AWS credentials (if `~/.aws/` was accessible)
-- [ ] Database credentials
-- [ ] Third-party service tokens (Firebase, etc.)
+- [x] API keys in `.env` files
+- [x] npm tokens (`npm token revoke` + create new)
+- [x] SSH keys (if `~/.ssh/` was accessible)
+- [x] AWS credentials (if `~/.aws/` was accessible)
+- [x] Database credentials
+- [x] Third-party service tokens (Firebase, etc.)
 
 ### Prevention
 
-- [ ] Review installed npm packages and their dependencies
-- [ ] Check IDE extensions for suspicious permissions
+- [x] Review installed npm packages and their dependencies
+- [x] Check IDE extensions for suspicious permissions
 - [ ] Enable npm package lockfile (`package-lock.json`) verification
 - [ ] Consider using `npm ci` instead of `npm install` in CI/CD
 - [ ] Set up Git hooks to scan for obfuscated code patterns
