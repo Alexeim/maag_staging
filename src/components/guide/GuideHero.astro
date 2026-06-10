@@ -37,10 +37,12 @@ const imageSrc = imageUrl
     ? imageUrl
     : imageUrl.src
   : null;
+
+const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
 ---
 
 <section class="w-full px-4 sm:px-6 lg:px-10">
-  <div class="overflow-visible lg:h-[calc(100svh-90px)]">
+  <div class="overflow-hidden lg:h-[calc(100svh-90px)]">
     <div
       class:list={[
         "grid h-auto gap-8 lg:h-full lg:gap-0 lg:items-stretch",
@@ -50,7 +52,7 @@ const imageSrc = imageUrl
       ]}
     >
       <div
-        class="flex flex-col justify-center px-2 py-8 text-center text-base-content sm:px-6 sm:py-10 lg:h-full lg:px-16 lg:py-12 xl:px-24"
+        class="flex flex-col justify-center px-2 py-8 text-center text-base-content sm:px-6 sm:py-10 lg:h-full lg:px-16 lg:py-12"
       >
         <p
           class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm"
@@ -58,7 +60,12 @@ const imageSrc = imageUrl
           {category}
         </p>
         <h1
-          class="mt-8 font-old_standard text-4xl font-normal leading-[1.05] text-base-content sm:text-5xl lg:text-[4rem]"
+          class:list={[
+            "mt-8 font-old_standard font-normal leading-[1.05] text-base-content",
+            isLongTitle
+              ? "sm:text-3xl lg:text-5xl"
+              : "text-3xl sm:text-5xl lg:text-7xl",
+          ]}
         >
           {title}
         </h1>
@@ -70,36 +77,35 @@ const imageSrc = imageUrl
           )
         }
         <div
-          class="mt-8 flex flex-wrap items-center justify-center gap-4 text-base-content lg:mt-10"
+          class="mt-8 flex flex-col items-center justify-center gap-4 text-base-content lg:mt-10"
         >
           <ArticleAuthor name={authorName} avatarUrl={authorAvatar} />
-          <span aria-hidden="true" class="text-sm text-base-content/50">•</span>
           <ArticleDate createdAt={createdAt} />
         </div>
       </div>
 
       {
         imageUrl && (
-          <div class="flex flex-col bg-white lg:h-full lg:min-h-0">
+          <div class="flex flex-col lg:h-full lg:min-h-0">
             <div class="flex items-center justify-center overflow-hidden lg:min-h-0 lg:flex-1">
               {typeof imageUrl === "string" ? (
                 <img
                   src={imageUrl}
                   alt={imageAlt}
-                  class="block h-auto w-full object-cover lg:h-full lg:w-auto lg:max-w-full lg:object-contain"
+                  class="block h-auto w-full object-cover lg:h-full lg:max-h-full lg:w-full lg:object-contain"
                   transition:name={transitionName}
                 />
               ) : (
                 <Image
                   src={imageUrl}
                   alt={imageAlt}
-                  class="block h-auto w-full object-cover lg:h-full lg:w-auto lg:max-w-full lg:object-contain"
+                  class="block h-auto w-full object-cover lg:h-full lg:max-h-full lg:w-full lg:object-contain"
                   transition:name={transitionName}
                 />
               )}
             </div>
             {imageCaption && (
-              <p class="border-t border-black/8 px-6 py-4 font-inter text-xs tracking-[0.12em] text-base-content/60 uppercase">
+              <p class="px-6 py-2 font-inter text-xs text-base-content/60 text-center">
                 {imageCaption}
               </p>
             )}

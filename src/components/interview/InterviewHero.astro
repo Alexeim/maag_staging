@@ -37,6 +37,8 @@ const imageSrc = imageUrl
     ? imageUrl
     : imageUrl.src
   : null;
+
+const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
 ---
 
 <section class="w-full px-4 sm:px-6 lg:px-10">
@@ -51,7 +53,7 @@ const imageSrc = imageUrl
     >
       {
         imageUrl && (
-          <div class="order-2 flex flex-col bg-white lg:order-1 lg:h-full lg:min-h-0">
+          <div class="order-2 flex flex-col lg:order-1 lg:h-full lg:min-h-0">
             <div class="flex items-center justify-center overflow-hidden lg:min-h-0 lg:flex-1">
               {typeof imageUrl === "string" ? (
                 <img
@@ -70,7 +72,7 @@ const imageSrc = imageUrl
               )}
             </div>
             {imageCaption && (
-              <p class="border-t border-black/8 px-6 py-4 font-inter text-xs uppercase tracking-[0.12em] text-base-content/60">
+              <p class="px-6 py-2 font-inter text-xs text-base-content/60 text-center">
                 {imageCaption}
               </p>
             )}
@@ -78,11 +80,22 @@ const imageSrc = imageUrl
         )
       }
 
-      <div class="order-1 flex flex-col justify-center px-2 py-8 text-center text-base-content sm:px-6 sm:py-10 lg:order-2 lg:h-full lg:px-16 lg:py-12 xl:px-24">
-        <p class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm">
+      <div
+        class="order-1 flex flex-col justify-center px-2 py-8 text-center text-base-content sm:px-6 sm:py-10 lg:order-2 lg:h-full lg:px-16 lg:py-12 xl:px-24"
+      >
+        <p
+          class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm"
+        >
           {category}
         </p>
-        <h1 class="mt-8 font-old_standard text-4xl font-normal leading-[1.05] text-base-content sm:text-5xl lg:text-[4rem]">
+        <h1
+          class:list={[
+            "mt-8 font-old_standard font-normal leading-[1.05] text-base-content",
+            isLongTitle
+              ? "sm:text-3xl lg:text-5xl"
+              : "text-3xl sm:text-5xl lg:text-7xl",
+          ]}
+        >
           {title}
         </h1>
         {
@@ -92,9 +105,10 @@ const imageSrc = imageUrl
             </p>
           )
         }
-        <div class="mt-8 flex flex-wrap items-center justify-center gap-4 text-base-content lg:mt-10">
+        <div
+          class="mt-8 flex flex-col items-center justify-center gap-4 text-base-content lg:mt-10"
+        >
           <ArticleAuthor name={authorName} avatarUrl={authorAvatar} />
-          <span aria-hidden="true" class="text-sm text-base-content/50">•</span>
           <ArticleDate createdAt={createdAt} />
         </div>
       </div>
