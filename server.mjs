@@ -6,11 +6,28 @@ import { dirname, join } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
+const clientDir = join(__dirname, './dist/client');
+
+app.get('/', (req, res, next) => {
+  res.sendFile(
+    join(clientDir, 'index.html'),
+    {
+      headers: {
+        'Cache-Control': 'public, max-age=0, must-revalidate',
+      },
+    },
+    (error) => {
+      if (error) {
+        next(error);
+      }
+    }
+  );
+});
 
 // Serve pre-compressed static files (.br, .gz created by astro-compressor at build time)
 app.use(
   '/',
-  expressStaticGzip(join(__dirname, './dist/client'), {
+  expressStaticGzip(clientDir, {
     enableBrotli: true,
     orderPreference: ['br', 'gz'],
     index: false,
