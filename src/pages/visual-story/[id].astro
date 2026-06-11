@@ -106,7 +106,13 @@ const firstBookmarkTag =
 const bookmarkTag = firstBookmarkTag ? getKnownTagLabel(firstBookmarkTag) : "";
 ---
 
-<VisualStoryLayout title={`${title} — Maag`}>
+<VisualStoryLayout
+  title={`${title} — Maag`}
+  description={lead}
+  image={heroImageUrl}
+  canonicalPath={`/visual-story/${id}`}
+  type="article"
+>
   <style is:global>
     :root {
       --maag-bg: #ffffff;

@@ -602,6 +602,10 @@ const bookmarkTag = normalizedTags[0] ? topMetaTag : "";
   navbarVariant="default"
   includePreFooterCTA={false}
   title={`${displayEvent.title} - Maag`}
+  description={displayEvent.lead}
+  image={displayEvent.imageUrl}
+  canonicalPath={`/events/${id}`}
+  type="article"
   useClientRouter={true}
 >
   <main class="min-h-screen bg-base-200 text-black">

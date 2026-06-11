@@ -110,6 +110,10 @@ try {
 
 <Layout
   title={`${flipper.title} - Maag`}
+  description={flipper.lead}
+  image={flipper.carouselContent?.[0]?.imageUrl}
+  canonicalPath={`/flippers/${id}`}
+  type="article"
   navbarVariant="default"
   includePreFooterCTA={false}
   useClientRouter={true}

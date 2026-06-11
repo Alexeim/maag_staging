@@ -31,6 +31,10 @@ const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('lo
 
 <Layout
   title={`${photo?.title ?? "Фото дня"} - Maag`}
+  description={photo?.title ?? "Фото дня"}
+  image={photo?.imageUrl}
+  canonicalPath={`/photo-of-the-day/${id}`}
+  type="article"
   navbarVariant="default"
   includePreFooterCTA={false}
   useClientRouter={true}

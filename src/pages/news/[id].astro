@@ -210,6 +210,10 @@ if (!error && articleData) {
 
 <Layout
   title={`${displayArticle.title} - Maag`}
+  description={displayArticle.lead}
+  image={displayArticle.imageUrl}
+  canonicalPath={`/news/${id}`}
+  type="article"
   navbarVariant="default"
   includePreFooterCTA={false}
   useClientRouter={true}

@@ -7,9 +7,32 @@ import ConfirmationModal from "../components/common/ConfirmationModal.astro";
 
 interface VisualStoryLayoutProps {
   title?: string;
+  description?: string;
+  image?: string;
+  canonicalPath?: string;
+  type?: "website" | "article";
 }
 
-const { title = "Maag" } = Astro.props as VisualStoryLayoutProps;
+const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
+
+const toAbsoluteUrl = (value?: string) => {
+  if (!value) {
+    return undefined;
+  }
+
+  return new URL(value, siteOrigin).toString();
+};
+
+const {
+  title = "Maag",
+  description = "MAAG France — медиа о культуре, Париже и жизни во Франции.",
+  image,
+  canonicalPath = Astro.url.pathname,
+  type = "article",
+} = Astro.props as VisualStoryLayoutProps;
+
+const canonicalUrl = toAbsoluteUrl(canonicalPath);
+const imageUrl = toAbsoluteUrl(image);
 ---
 
 <!doctype html>
@@ -19,9 +42,22 @@ const { title = "Maag" } = Astro.props as VisualStoryLayoutProps;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content="Wrukspaces.dev" />
+    <meta name="description" content={description} />
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    <meta property="og:site_name" content="MAAG France" />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+    {imageUrl && <meta property="og:image" content={imageUrl} />}
+    {imageUrl && <meta property="og:image:alt" content={title} />}
+    <meta name="twitter:card" content={imageUrl ? "summary_large_image" : "summary"} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {imageUrl && <meta name="twitter:image" content={imageUrl} />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <link
       rel="preload"
       as="style"

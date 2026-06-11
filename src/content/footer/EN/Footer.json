@@ -9,7 +9,7 @@
         },
         {
           "label": "Email",
-          "link": "mailto:contact@wurkspaces.dev"
+          "link": "mailto:contact@maagfrance.fr"
         },
         {
           "label": "Work time",
@@ -43,30 +43,30 @@
       "items": [
         {
           "label": "Google Workspace Solutions",
-          "link": "https://wurkspaces.dev/google-workspace-solutions"
+          "link": "/culture"
         },
         {
           "label": "Google Cloud Solutions",
-          "link": "https://wurkspaces.dev/google-cloud-solutions"
+          "link": "/paris"
         },
         {
           "label": "Generative AI Solutions",
-          "link": "https://wurkspaces.dev/generative-ai-solutions"
+          "link": "/calendar"
         }
       ]
     },
-    "copyright": "© 2025 Wurkspaces.dev. All rights reserved.",
+    "copyright": "© 2025 MAAG France. All rights reserved.",
     "privacyPolicy": {
       "title": "Privacy Policy",
-      "link": "https://wurkspaces.dev/privacy-policy"
+      "link": "/privacy"
     },
     "termsOfService": {
       "title": "Terms of Service",
-      "link": "https://wurkspaces.dev/terms-of-service"
+      "link": "/terms"
     },
     "cookiePolicy": {
       "title": "Cookie Policy",
-      "link": "https://wurkspaces.dev/cookie-policy"
+      "link": "/cookies"
     }
   }
 }
