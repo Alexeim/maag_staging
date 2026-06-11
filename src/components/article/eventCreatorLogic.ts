@@ -12,6 +12,14 @@ import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 
 type EventDateType = "single" | "duration";
 type EventTimeMode = "none" | "start" | "range";
+type EventInfoIcon = "calendar" | "clock" | "location" | "bulb";
+
+const EVENT_INFO_ICONS: EventInfoIcon[] = [
+  "calendar",
+  "clock",
+  "location",
+  "bulb",
+];
 
 const EVENT_TAGS: Array<{ value: string; title: string }> = [
   { value: "ballet", title: "Балет" },
@@ -109,6 +117,44 @@ const normalizeTime = (value?: string | null): string => {
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(trimmed) ? trimmed : "";
 };
 
+const createInfoId = (): string => {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+  return `info-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
+const normalizeInfoIcon = (value: unknown): EventInfoIcon => {
+  return EVENT_INFO_ICONS.includes(value as EventInfoIcon)
+    ? (value as EventInfoIcon)
+    : "bulb";
+};
+
+const normalizeAdditionalInfo = (value: unknown) => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item: any) => {
+      const text = typeof item?.text === "string" ? item.text.trim() : "";
+      if (!text) {
+        return null;
+      }
+      const id =
+        typeof item?.id === "string" && item.id.trim()
+          ? item.id.trim()
+          : createInfoId();
+
+      return {
+        id,
+        icon: normalizeInfoIcon(item?.icon),
+        text,
+      };
+    })
+    .filter(Boolean);
+};
+
 export default function eventCreatorLogic(initialState = {}) {
   const baseLogic = articleCreatorLogic(initialState);
 
@@ -140,6 +186,7 @@ export default function eventCreatorLogic(initialState = {}) {
     copy.endTime = normalizeTime(copy.endTime);
     copy.address = typeof copy.address === "string" ? copy.address.trim() : "";
     copy.isMainEvent = Boolean(copy.isMainEvent);
+    copy.additionalInfo = normalizeAdditionalInfo(copy.additionalInfo);
     const contentBlocks = Array.isArray(copy.contentBlocks)
       ? copy.contentBlocks
       : Array.isArray(copy.content)
@@ -179,6 +226,11 @@ export default function eventCreatorLogic(initialState = {}) {
       startTime: "",
       endTime: "",
       isMainEvent: false,
+      additionalInfo: [] as Array<{
+        id: string;
+        icon: EventInfoIcon;
+        text: string;
+      }>,
     },
     ...createLandingPlacementManager({
       getEntityId() {
@@ -246,6 +298,11 @@ export default function eventCreatorLogic(initialState = {}) {
           this.eventForm.startTime = normalized.startTime;
           this.eventForm.endTime = normalized.endTime;
           this.eventForm.isMainEvent = Boolean(normalized.isMainEvent);
+          this.eventForm.additionalInfo = Array.isArray(
+            normalized.additionalInfo,
+          )
+            ? normalized.additionalInfo
+            : [];
           this.selectedAuthorId =
             typeof normalized.authorId === "string" ? normalized.authorId : "";
           this.ensureSelectedAuthorPresent();
@@ -320,6 +377,47 @@ export default function eventCreatorLogic(initialState = {}) {
       if (value === "start") {
         this.eventForm.endTime = "";
       }
+    },
+
+    getEventInfoOptions() {
+      return [
+        { value: "calendar", title: "Дата" },
+        { value: "clock", title: "Время" },
+        { value: "location", title: "Место" },
+        { value: "bulb", title: "Идея" },
+      ];
+    },
+
+    addEventInfo() {
+      this.eventForm.additionalInfo = Array.isArray(
+        this.eventForm.additionalInfo,
+      )
+        ? this.eventForm.additionalInfo
+        : [];
+      this.eventForm.additionalInfo.push({
+        id: createInfoId(),
+        icon: "bulb",
+        text: "",
+      });
+    },
+
+    removeEventInfo(index: number) {
+      if (!Array.isArray(this.eventForm.additionalInfo)) {
+        this.eventForm.additionalInfo = [];
+        return;
+      }
+      this.eventForm.additionalInfo.splice(index, 1);
+    },
+
+    setEventInfoIcon(index: number, icon: EventInfoIcon) {
+      if (!Array.isArray(this.eventForm.additionalInfo)) {
+        return;
+      }
+      const block = this.eventForm.additionalInfo[index];
+      if (!block) {
+        return;
+      }
+      block.icon = normalizeInfoIcon(icon);
     },
 
     async saveEvent() {
@@ -401,6 +499,9 @@ export default function eventCreatorLogic(initialState = {}) {
       const timeMode = this.eventForm.timeMode;
       const startTime = normalizeTime(this.eventForm.startTime);
       const endTime = normalizeTime(this.eventForm.endTime);
+      const additionalInfo = normalizeAdditionalInfo(
+        this.eventForm.additionalInfo,
+      );
 
       if (timeMode === "start" && !startTime) {
         toast("Укажи время начала события.");
@@ -458,6 +559,7 @@ export default function eventCreatorLogic(initialState = {}) {
           startTime: startTime || null,
           endTime: timeMode === "range" ? endTime : null,
           isMainEvent: Boolean(this.eventForm.isMainEvent),
+          additionalInfo,
           relatedContent: sanitizeRelatedContent(
             this.article.relatedContent,
             "event",

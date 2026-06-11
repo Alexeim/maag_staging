@@ -1,7 +1,7 @@
 ---
 import Button from "@/components/common/Button.astro";
 
-import { CloudUpload } from "lucide-astro";
+import { CalendarDays, Clock3, CloudUpload, Lightbulb, MapPin } from "lucide-astro";
 import QuoteIcon from "@/assets/icons/quote.svg";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
@@ -221,6 +221,91 @@ const {
             class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
           />
         </div>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <label class="block text-sm font-medium text-base-content">Дополнительная информация</label>
+        <button
+          type="button"
+          class="px-4 py-2 rounded-lg border border-base-300 bg-base-100 text-sm text-base-content transition hover:bg-base-200 cursor-pointer"
+          @click="addEventInfo()"
+        >
+          Добавить инфо
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <template x-for="(info, index) in eventForm.additionalInfo" :key="info.id || index">
+          <div class="rounded-lg border border-base-300 bg-base-100 p-4">
+            <div class="mb-3 flex items-start justify-between gap-3">
+              <div class="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-lg border transition cursor-pointer"
+                  :class="info.icon === 'calendar' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                  title="Дата"
+                  aria-label="Дата"
+                  @click="setEventInfoIcon(index, 'calendar')"
+                >
+                  <CalendarDays class="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-lg border transition cursor-pointer"
+                  :class="info.icon === 'clock' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                  title="Время"
+                  aria-label="Время"
+                  @click="setEventInfoIcon(index, 'clock')"
+                >
+                  <Clock3 class="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-lg border transition cursor-pointer"
+                  :class="info.icon === 'location' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                  title="Место"
+                  aria-label="Место"
+                  @click="setEventInfoIcon(index, 'location')"
+                >
+                  <MapPin class="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-lg border transition cursor-pointer"
+                  :class="info.icon === 'bulb' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                  title="Идея"
+                  aria-label="Идея"
+                  @click="setEventInfoIcon(index, 'bulb')"
+                >
+                  <Lightbulb class="h-4 w-4" />
+                </button>
+              </div>
+              <button
+                type="button"
+                class="px-3 py-2 rounded-lg border border-error/40 text-sm text-error transition hover:bg-error/10 cursor-pointer"
+                @click="removeEventInfo(index)"
+              >
+                Удалить
+              </button>
+            </div>
+
+            <textarea
+              x-model="info.text"
+              rows="2"
+              class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+              placeholder="Текст для дополнительного блока на публичной странице"
+            ></textarea>
+          </div>
+        </template>
+
+        <p
+          x-show="!eventForm.additionalInfo || eventForm.additionalInfo.length === 0"
+          class="text-sm text-base-content/60"
+        >
+          Дополнительные блоки появятся рядом с адресом, датами и временем на публичной странице события.
+        </p>
       </div>
     </div>
 

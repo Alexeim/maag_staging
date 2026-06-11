@@ -150,6 +150,34 @@ const formatTimeLabel = (event: any): string | null => {
   return null;
 };
 
+const EVENT_INFO_LABELS: Record<string, string> = {
+  calendar: "Дата",
+  clock: "Время",
+  location: "Адрес",
+  bulb: "Идея",
+};
+
+const normalizeAdditionalInfo = (value: unknown) => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item: any) => {
+      const icon = typeof item?.icon === "string" ? item.icon.trim() : "";
+      const text = typeof item?.text === "string" ? item.text.trim() : "";
+      if (!text || !(icon in EVENT_INFO_LABELS)) {
+        return null;
+      }
+      return {
+        icon,
+        label: EVENT_INFO_LABELS[icon],
+        text,
+      };
+    })
+    .filter(Boolean);
+};
+
 const toDateKey = (date: Date | null): string => {
   if (!date) {
     return "";
@@ -565,6 +593,7 @@ const displayEvent = {
   contentBlocks: Array.isArray(eventData?.content) ? eventData.content : [],
   datesLabel: formatDateRange(startDate, endDate),
   timeLabel: formatTimeLabel(eventData),
+  additionalInfo: normalizeAdditionalInfo(eventData?.additionalInfo),
 };
 const bookmarkTag = normalizedTags[0] ? topMetaTag : "";
 ---
@@ -709,6 +738,25 @@ const bookmarkTag = normalizedTags[0] ? topMetaTag : "";
                       </div>
                     </article>
                   )}
+
+                  {displayEvent.additionalInfo.map((info: any) => (
+                    <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
+                      <div class="flex items-start gap-4">
+                        <EventMetaIcon
+                          type={info.icon}
+                          class="mt-0.5 h-5 w-5 shrink-0 text-accent"
+                        />
+                        <div class="grid gap-1">
+                          <h2 class="m-0 text-[11px] font-inter uppercase tracking-[0.22em] text-accent">
+                            {info.label}
+                          </h2>
+                          <p class="m-0 whitespace-pre-line font-oswald text-lg leading-tight">
+                            {info.text}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
                 </section>
 
                 <div class="grid gap-8 lg:grid-cols-[12rem_minmax(0,1fr)] lg:gap-8 lg:items-start mt-8">

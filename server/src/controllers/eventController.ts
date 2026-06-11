@@ -26,6 +26,11 @@ export interface EventItem {
   createdAt: Date;
   updatedAt?: Date;
   isMainEvent?: boolean;
+  additionalInfo?: Array<{
+    id?: string;
+    icon: 'calendar' | 'clock' | 'location' | 'bulb';
+    text: string;
+  }>;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
 }
@@ -78,6 +83,38 @@ const normalizeTime = (value: unknown): string | null => {
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(trimmed) ? trimmed : null;
 };
 
+const EVENT_INFO_ICONS = new Set(['calendar', 'clock', 'location', 'bulb']);
+
+const normalizeAdditionalInfo = (input: unknown): EventItem['additionalInfo'] => {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  return input
+    .map((item) => {
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+
+      const record = item as Record<string, unknown>;
+      const icon = typeof record.icon === 'string' ? record.icon.trim() : '';
+      const text = typeof record.text === 'string' ? record.text.trim() : '';
+
+      if (!EVENT_INFO_ICONS.has(icon) || !text) {
+        return null;
+      }
+
+      const id = typeof record.id === 'string' && record.id.trim() ? record.id.trim() : undefined;
+
+      return {
+        ...(id ? { id } : {}),
+        icon: icon as 'calendar' | 'clock' | 'location' | 'bulb',
+        text,
+      };
+    })
+    .filter((item): item is NonNullable<EventItem['additionalInfo']>[number] => Boolean(item));
+};
+
 export const createEvent = async (req: Request, res: Response) => {
   try {
     const {
@@ -96,6 +133,7 @@ export const createEvent = async (req: Request, res: Response) => {
       timeMode = 'none',
       startTime = null,
       endTime = null,
+      additionalInfo = [],
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -156,6 +194,7 @@ export const createEvent = async (req: Request, res: Response) => {
       endTime: normalizedTimeMode === 'range' ? normalizedEndTime : null,
       createdAt: now,
       isMainEvent,
+      additionalInfo: normalizeAdditionalInfo(additionalInfo),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
     };
@@ -256,6 +295,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       startTime = null,
       endTime = null,
       isMainEvent = false,
+      additionalInfo = [],
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -319,6 +359,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       endTime: normalizedTimeMode === 'range' ? normalizedEndTime : null,
       updatedAt: now,
       isMainEvent: mainEventFlag,
+      additionalInfo: normalizeAdditionalInfo(additionalInfo),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
     };

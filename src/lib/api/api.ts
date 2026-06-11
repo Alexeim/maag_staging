@@ -216,6 +216,11 @@ export interface EventPayload {
   startTime?: string | null;
   endTime?: string | null;
   isMainEvent?: boolean;
+  additionalInfo?: Array<{
+    id?: string;
+    icon: "calendar" | "clock" | "location" | "bulb";
+    text: string;
+  }>;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
 }

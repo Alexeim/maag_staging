@@ -1,5 +1,5 @@
 ---
-import { CalendarDays, Clock3, MapPin } from "lucide-astro";
+import { CalendarDays, Clock3, Lightbulb, MapPin } from "lucide-astro";
 
 interface Props {
   type: string;
@@ -18,6 +18,9 @@ const ICONS = {
   location: MapPin,
   time: Clock3,
   date: CalendarDays,
+  calendar: CalendarDays,
+  clock: Clock3,
+  bulb: Lightbulb,
 } as const;
 
 const normalizedType = type.trim().toLowerCase() as keyof typeof ICONS;
