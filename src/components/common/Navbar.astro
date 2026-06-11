@@ -2,7 +2,6 @@
 import logo from "../../assets/logo/logo.svg";
 import { Search, Instagram, X } from "lucide-astro";
 import { Image } from "astro:assets";
-import searchIcon from "../../assets/icons/search-mobile.svg";
 import burgerIcon from "../../assets/icons/burger-mobile.svg";
 import Button from "./Button.astro";
 
@@ -121,7 +120,7 @@ const currentPath = Astro.url.pathname;
     <!-- Mobile Controls -->
     <div x-data="{}" class="flex items-center gap-4 lg:hidden">
       <button type="button" class="p-2">
-        <img src={searchIcon.src} alt="Поиск" class="h-5 w-5" />
+        <Search />
       </button>
       <button
         type="button"
@@ -136,12 +135,18 @@ const currentPath = Astro.url.pathname;
 
     <!-- Right Side -->
     <div class="hidden lg:flex items-center gap-[19px]">
-      <button class="p-2">
-        <img src={searchIcon.src} alt="Поиск" class="h-5 w-5" />
+      <!-- TODO remove 'hidden' -->
+      <button class="p-2 hidden">
+        <Search />
       </button>
-      <button class="p-2">
-        <Instagram class="h-6 w-6" />
-      </button>
+      <a
+        href="https://www.instagram.com/stories/maag_france/"
+        target="_blank"
+        class="hover:text-gray-500 transition-colors"
+        aria-label="Instagram"
+      >
+        <Instagram />
+      </a>
       <div class="flex items-center gap-4" x-data="$lazy('navbar')">
         <!-- Loading State -->
         <template x-if="$store.auth.isLoading">
