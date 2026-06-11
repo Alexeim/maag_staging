@@ -1,0 +1,138 @@
+---
+import LazyImage from "../common/LazyImage.astro";
+import { Info } from "lucide-astro";
+
+interface Props {
+  leftPortraitImageUrl?: string;
+  leftPortraitImageCaption?: string;
+  topLandscapeImageUrl?: string;
+  topLandscapeImageCaption?: string;
+  mainLandscapeImageUrl?: string;
+  mainLandscapeImageCaption?: string;
+  rightPortraitImageUrl?: string;
+  rightPortraitImageCaption?: string;
+}
+
+const {
+  leftPortraitImageUrl = "",
+  leftPortraitImageCaption = "",
+  topLandscapeImageUrl = "",
+  topLandscapeImageCaption = "",
+  mainLandscapeImageUrl = "",
+  mainLandscapeImageCaption = "",
+  rightPortraitImageUrl = "",
+  rightPortraitImageCaption = "",
+} = Astro.props as Props;
+---
+
+<section
+  class="mx-auto grid w-full gap-6 lg:relative lg:h-[920px] lg:w-[1198px] lg:gap-0"
+>
+  {
+    leftPortraitImageUrl && (
+      <figure class="group relative w-full lg:absolute lg:left-0 lg:top-0 lg:w-[300px]">
+        <LazyImage
+          src={leftPortraitImageUrl}
+          alt={leftPortraitImageCaption || "Left portrait collage image"}
+          class="block w-full aspect-[3/4] object-cover"
+          loading="lazy"
+        />
+        {leftPortraitImageCaption && (
+          <div class="absolute left-0 top-full z-30 mt-2 flex items-center gap-2">
+            <button
+              type="button"
+              class="inline-flex h-8 w-8 items-center justify-center text-base-content transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+              aria-label="Показать подпись к изображению"
+            >
+              <Info class="h-4 w-4" />
+            </button>
+            <div class="pointer-events-none max-w-[min(320px,calc(100vw-3rem))] translate-x-2 bg-black/75 px-3 py-2 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100">
+              {leftPortraitImageCaption}
+            </div>
+          </div>
+        )}
+      </figure>
+    )
+  }
+
+  {
+    topLandscapeImageUrl && (
+      <figure class="group relative w-full lg:absolute lg:left-1/4 lg:top-1/12 lg:w-[500px]">
+        <LazyImage
+          src={topLandscapeImageUrl}
+          alt={topLandscapeImageCaption || "Top landscape collage image"}
+          class="block w-full aspect-[5/3] object-cover"
+          loading="lazy"
+        />
+        {topLandscapeImageCaption && (
+          <div class="absolute left-full top-1/2 z-30 ml-2 flex -translate-y-1/2 items-center gap-2">
+            <button
+              type="button"
+              class="inline-flex h-8 w-8 items-center justify-center text-base-content transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+              aria-label="Показать подпись к изображению"
+            >
+              <Info class="h-4 w-4" />
+            </button>
+            <div class="pointer-events-none max-w-[min(360px,calc(100vw-3rem))] translate-x-2 bg-black/75 px-3 py-2 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100">
+              {topLandscapeImageCaption}
+            </div>
+          </div>
+        )}
+      </figure>
+    )
+  }
+
+  {
+    mainLandscapeImageUrl && (
+      <figure class="group relative w-full lg:absolute lg:left-1/12 lg:top-1/2 lg:w-[800px] lg:-translate-y-20">
+        <LazyImage
+          src={mainLandscapeImageUrl}
+          alt={mainLandscapeImageCaption || "Main landscape collage image"}
+          class="block w-full aspect-[16/9] object-cover"
+          loading="lazy"
+        />
+        {mainLandscapeImageCaption && (
+          <div class="absolute left-0 top-full z-30 mt-2 flex items-center gap-2">
+            <button
+              type="button"
+              class="inline-flex h-8 w-8 items-center justify-center text-base-content transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+              aria-label="Показать подпись к изображению"
+            >
+              <Info class="h-4 w-4" />
+            </button>
+            <div class="pointer-events-none max-w-[min(420px,calc(100vw-3rem))] translate-x-2 bg-black/75 px-3 py-2 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100">
+              {mainLandscapeImageCaption}
+            </div>
+          </div>
+        )}
+      </figure>
+    )
+  }
+
+  {
+    rightPortraitImageUrl && (
+      <figure class="group relative w-full lg:absolute lg:bottom-0 lg:right-0 lg:w-[300px]">
+        <LazyImage
+          src={rightPortraitImageUrl}
+          alt={rightPortraitImageCaption || "Right portrait collage image"}
+          class="block w-full aspect-[3/4] object-cover"
+          loading="lazy"
+        />
+        {rightPortraitImageCaption && (
+          <div class="absolute bottom-full right-0 z-30 mb-2 flex items-center gap-2">
+            <div class="pointer-events-none max-w-[min(320px,calc(100vw-3rem))] -translate-x-2 bg-black/75 px-3 py-2 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100">
+              {rightPortraitImageCaption}
+            </div>
+            <button
+              type="button"
+              class="inline-flex h-8 w-8 items-center justify-center text-base-content transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+              aria-label="Показать подпись к изображению"
+            >
+              <Info class="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </figure>
+    )
+  }
+</section>

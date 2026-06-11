@@ -5,6 +5,7 @@ import ArticleVideo from "./ArticleVideo.astro";
 import LinkToContent from "./LinkToContent.astro";
 import ArticleColumnContent from "./ArticleColumnContent.astro";
 import OneBigOneSmall from "./OneBigOneSmall.astro";
+import Collage from "./Collage.astro";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import {
   getLinkedContentKey,
@@ -73,6 +74,18 @@ interface OneBigOneSmallBlock extends Block {
   landscapeImageCaption?: string;
 }
 
+interface CollageBlock extends Block {
+  type: "collage";
+  leftPortraitImageUrl?: string;
+  leftPortraitImageCaption?: string;
+  topLandscapeImageUrl?: string;
+  topLandscapeImageCaption?: string;
+  mainLandscapeImageUrl?: string;
+  mainLandscapeImageCaption?: string;
+  rightPortraitImageUrl?: string;
+  rightPortraitImageCaption?: string;
+}
+
 interface RenderableBlock {
   type:
     | "prose-group"
@@ -80,17 +93,25 @@ interface RenderableBlock {
     | "three-columns"
     | "flipper"
     | "video"
-    | "one-big-one-small";
+    | "one-big-one-small"
+    | "collage";
   content?: Block[]; // for prose-group
   block?: TwoColumnBlock; // for two-columns
   threeColumnBlock?: ThreeColumnBlock; // for three-columns
   flipper?: FlipperBlock; // for flipper
   video?: Block;
   oneBigOneSmall?: OneBigOneSmallBlock;
+  collage?: CollageBlock;
 }
 
 interface Props {
-  contentBlocks: (Block | TwoColumnBlock | ThreeColumnBlock | OneBigOneSmallBlock)[];
+  contentBlocks: (
+    | Block
+    | TwoColumnBlock
+    | ThreeColumnBlock
+    | OneBigOneSmallBlock
+    | CollageBlock
+  )[];
   linkedContentLookup?: LinkedContentLookup;
 }
 
@@ -167,6 +188,18 @@ for (const block of contentBlocks) {
     renderableGroups.push({
       type: "one-big-one-small",
       oneBigOneSmall: block as OneBigOneSmallBlock,
+    });
+  } else if (block.type === "collage") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "collage",
+      collage: block as CollageBlock,
     });
   } else {
     currentProseGroup.push(block);
@@ -413,6 +446,31 @@ if (currentProseGroup.length > 0) {
               portraitImageCaption={block.portraitImageCaption}
               landscapeImageUrl={block.landscapeImageUrl}
               landscapeImageCaption={block.landscapeImageCaption}
+            />
+          </div>
+        );
+      } else if (group.type === "collage" && group.collage) {
+        const block = group.collage;
+        const hasImages = Boolean(
+          block.leftPortraitImageUrl ||
+            block.topLandscapeImageUrl ||
+            block.mainLandscapeImageUrl ||
+            block.rightPortraitImageUrl,
+        );
+        if (!hasImages) {
+          return null;
+        }
+        return (
+          <div class={wideBreakoutRailClass}>
+            <Collage
+              leftPortraitImageUrl={block.leftPortraitImageUrl}
+              leftPortraitImageCaption={block.leftPortraitImageCaption}
+              topLandscapeImageUrl={block.topLandscapeImageUrl}
+              topLandscapeImageCaption={block.topLandscapeImageCaption}
+              mainLandscapeImageUrl={block.mainLandscapeImageUrl}
+              mainLandscapeImageCaption={block.mainLandscapeImageCaption}
+              rightPortraitImageUrl={block.rightPortraitImageUrl}
+              rightPortraitImageCaption={block.rightPortraitImageCaption}
             />
           </div>
         );

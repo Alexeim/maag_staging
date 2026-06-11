@@ -1054,7 +1054,9 @@ export default function articleCreatorLogic(initialState = {}) {
                 this.editingBlock[column].content = downloadURL;
                 this.editingBlock[column].type = 'image'; // Ensure type is image
               } else if (
-                this.editingBlock.type === "one-big-one-small" &&
+                ["one-big-one-small", "collage"].includes(
+                  this.editingBlock.type,
+                ) &&
                 imageField
               ) {
                 this.editingBlock[imageField] = downloadURL;
@@ -1211,6 +1213,18 @@ export default function articleCreatorLogic(initialState = {}) {
             portraitImageCaption: "",
             landscapeImageUrl: "",
             landscapeImageCaption: "",
+          };
+          break;
+        case "collage":
+          newBlockData = {
+            leftPortraitImageUrl: "",
+            leftPortraitImageCaption: "",
+            topLandscapeImageUrl: "",
+            topLandscapeImageCaption: "",
+            mainLandscapeImageUrl: "",
+            mainLandscapeImageCaption: "",
+            rightPortraitImageUrl: "",
+            rightPortraitImageCaption: "",
           };
           break;
         default:

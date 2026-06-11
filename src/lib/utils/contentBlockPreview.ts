@@ -10,6 +10,7 @@ export const BLOCK_TYPE_LABELS: Record<string, string> = {
   image: "Изображение",
   video: "Видео",
   "one-big-one-small": "Одна большая + одна маленькая",
+  collage: "Коллаж",
   "two-columns": "Две колонки",
   "three-columns": "Три колонки",
   link: "Блок-ссылка",
@@ -157,6 +158,18 @@ export const getBlockSummary = (
           ? "пейзаж загружен"
           : "пейзаж не загружен";
       return `${portraitStatus} · ${landscapeStatus}`;
+    }
+    case "collage": {
+      const fields = [
+        block.leftPortraitImageUrl,
+        block.topLandscapeImageUrl,
+        block.mainLandscapeImageUrl,
+        block.rightPortraitImageUrl,
+      ];
+      const uploadedCount = fields.filter(
+        (value) => typeof value === "string" && value.trim(),
+      ).length;
+      return `Изображений загружено: ${uploadedCount} из 4`;
     }
     case "two-columns":
       return `Левая колонка: ${getColumnTypeLabel(block.left?.type)} · Правая колонка: ${getColumnTypeLabel(block.right?.type)}`;
