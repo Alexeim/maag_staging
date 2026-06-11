@@ -87,7 +87,11 @@ const navItems = [
     label: "Создать Le saviez-vous",
     id: "create-le-saviez-vous",
   },
-  { href: "/dashboard/photo-of-the-day", label: "Фото дня", id: "photo-of-the-day" },
+  {
+    href: "/dashboard/photo-of-the-day",
+    label: "Фото дня",
+    id: "photo-of-the-day",
+  },
   {
     href: "/dashboard/photo-of-the-day/create",
     label: "Создать фото дня",
@@ -122,6 +126,7 @@ const { title = "MAAG Dashboard", active = "articles-overview" } =
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <link
       rel="preload"
       as="style"
@@ -163,7 +168,8 @@ const { title = "MAAG Dashboard", active = "articles-overview" } =
               >
                 <p
                   class:list={[
-                    item.id === "landing-editor" || item.id === "calendar-editor"
+                    item.id === "landing-editor" ||
+                    item.id === "calendar-editor"
                       ? "font-bold text-lg"
                       : "",
                   ]}

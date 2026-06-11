@@ -8,6 +8,8 @@ import node from "@astrojs/node";
 
 import partytown from "@astrojs/partytown";
 
+import sitemap from "@astrojs/sitemap";
+
 // https://astro.build/config
 export default defineConfig({
   output: "server",
@@ -23,10 +25,12 @@ export default defineConfig({
       },
     ],
   },
+  site: "https://maagfrance.fr/",
   integrations: [
     alpinejs({ entrypoint: "/src/alpine-entrypoint.ts" }),
     compressor({ gzip: true, brotli: true }),
     partytown(),
+    sitemap(),
   ],
   compressHTML: true,
   base: process.env.ASTRO_BASE_PATH || "/",
