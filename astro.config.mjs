@@ -10,6 +10,26 @@ import partytown from "@astrojs/partytown";
 
 import sitemap from "@astrojs/sitemap";
 
+const sitemapExcludedPaths = new Set([
+  "/article-variant/",
+  "/cancel/",
+  "/dashboard/",
+  "/profile/",
+  "/success/",
+  "/wtf/",
+]);
+
+const sitemapExcludedPathPrefixes = ["/dashboard/"];
+
+const shouldIncludeInSitemap = (page) => {
+  const { pathname } = new URL(page);
+
+  return (
+    !sitemapExcludedPaths.has(pathname) &&
+    !sitemapExcludedPathPrefixes.some((prefix) => pathname.startsWith(prefix))
+  );
+};
+
 // https://astro.build/config
 export default defineConfig({
   output: "server",
@@ -30,7 +50,9 @@ export default defineConfig({
     alpinejs({ entrypoint: "/src/alpine-entrypoint.ts" }),
     compressor({ gzip: true, brotli: true }),
     partytown(),
-    sitemap(),
+    sitemap({
+      filter: shouldIncludeInSitemap,
+    }),
   ],
   compressHTML: true,
   base: process.env.ASTRO_BASE_PATH || "/",
