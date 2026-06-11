@@ -25,7 +25,7 @@ export default defineConfig({
       },
     ],
   },
-  site: "https://maagfrance.fr/",
+  site: "https://maagfrance.fr",
   integrations: [
     alpinejs({ entrypoint: "/src/alpine-entrypoint.ts" }),
     compressor({ gzip: true, brotli: true }),
