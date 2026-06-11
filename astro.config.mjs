@@ -6,12 +6,14 @@ import compressor from "astro-compressor";
 
 import node from "@astrojs/node";
 
+import partytown from "@astrojs/partytown";
+
 // https://astro.build/config
 export default defineConfig({
-  output: 'server',
+  output: "server",
   prefetch: {
     prefetchAll: true,
-    defaultStrategy: 'hover',
+    defaultStrategy: "hover",
   },
   image: {
     remotePatterns: [
@@ -22,8 +24,9 @@ export default defineConfig({
     ],
   },
   integrations: [
-    alpinejs({ entrypoint: '/src/alpine-entrypoint.ts' }),
+    alpinejs({ entrypoint: "/src/alpine-entrypoint.ts" }),
     compressor({ gzip: true, brotli: true }),
+    partytown(),
   ],
   compressHTML: true,
   base: process.env.ASTRO_BASE_PATH || "/",
@@ -34,7 +37,7 @@ export default defineConfig({
 
   server: {
     host: "0.0.0.0",
-    port: 8080
+    port: 8080,
   },
 
   adapter: node({

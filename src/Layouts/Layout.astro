@@ -48,6 +48,21 @@ const {
         rel="stylesheet"
       />
     </noscript>
+    <!-- Google tag (gtag.js) -->
+    <script
+      type="text/partytown"
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-JENH0KE84K"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-JENH0KE84K");
+    </script>
+    <!-- Google tag (gtag.js) -->
     {useClientRouter && <ClientRouter />}
     <title>{title}</title>
   </head>
