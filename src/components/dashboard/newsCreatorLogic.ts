@@ -1,6 +1,7 @@
 import { newsApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
+  MATERIAL_LINK_TYPE_OPTIONS,
   RELATED_CONTENT_TYPE_OPTIONS,
   createEmptyRelatedContent,
   createEmptyRelatedContentLists,
@@ -146,6 +147,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     contentListsLoading: false,
     relatedContentLists: createEmptyRelatedContentLists(),
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
+    materialLinkTypeOptions: MATERIAL_LINK_TYPE_OPTIONS,
     selectedRelatedContentType: "article",
     selectedRelatedContentId: "",
     ...createContentCollectionEditorState("article"),
@@ -242,6 +244,9 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
         (entry) => entry.id === id,
       );
       return item?.title || id;
+    },
+    getFilteredContentList(contentType: string) {
+      return (this.relatedContentLists as Record<string, any[]>)[contentType] ?? [];
     },
     addRelatedContent() {
       const type = this.selectedRelatedContentType;
@@ -458,6 +463,14 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       switch (type) {
         case "paragraph":
           newBlockData = { text: "" };
+          break;
+        case "link":
+          newBlockData = {
+            text: "",
+            linkedContentType: "article",
+            linkedContentId: "",
+            linkedContentTitle: "",
+          };
           break;
         case "url-link":
           newBlockData = { text: "", url: "" };

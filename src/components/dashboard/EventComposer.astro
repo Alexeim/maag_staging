@@ -858,10 +858,9 @@ const {
                       @change="editingBlock.linkedContentId = ''"
                       class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
                     >
-                      <option value="article">Статья</option>
-                      <option value="event">Событие</option>
-                      <option value="interview">Интервью</option>
-                      <option value="flipper">Флиппер</option>
+                      <template x-for="type in materialLinkTypeOptions" :key="type.value">
+                        <option :value="type.value" x-text="type.label"></option>
+                      </template>
                     </select>
                   </div>
                   <div x-show="editingBlock.linkedContentType">
@@ -1230,29 +1229,29 @@ const {
     <div class="mt-6">
       <template x-if="showBlockOptions">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 border border-base-300 rounded-lg bg-base-100">
-          <button @click="addBlock('paragraph')" class="btn btn-outline btn-sm justify-start">Обычный абзац</button>
-          <button @click="addBlock('first-paragraph')" class="btn btn-outline btn-sm justify-start">Абзац с буквицей</button>
-          <button @click="addBlock('h2')" class="btn btn-outline btn-sm justify-start">Подзаголовок H2</button>
-          <button @click="addBlock('h3')" class="btn btn-outline btn-sm justify-start">Подзаголовок H3</button>
-          <button @click="addBlock('quote')" class="btn btn-outline btn-sm justify-start">Цитата</button>
-          <button @click="addBlock('image')" class="btn btn-outline btn-sm justify-start">Картинка</button>
-          <button @click="addBlock('one-big-one-small')" class="btn btn-outline btn-sm justify-start">Одна большая + одна маленькая</button>
-          <button @click="addBlock('video')" class="btn btn-outline btn-sm justify-start">Видео</button>
-          <button @click="addBlock('two-columns')" class="btn btn-outline btn-sm justify-start">Две колонки</button>
-          <button @click="addBlock('three-columns')" class="btn btn-outline btn-sm justify-start">Три колонки</button>
+          <button @click="addBlock('paragraph')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Обычный абзац</button>
+          <button @click="addBlock('first-paragraph')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Абзац с буквицей</button>
+          <button @click="addBlock('h2')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Подзаголовок H2</button>
+          <button @click="addBlock('h3')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Подзаголовок H3</button>
+          <button @click="addBlock('quote')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Цитата</button>
+          <button @click="addBlock('image')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Картинка</button>
+          <button @click="addBlock('one-big-one-small')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Одна большая + одна маленькая</button>
+          <button @click="addBlock('video')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Видео</button>
+          <button @click="addBlock('two-columns')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Две колонки</button>
+          <button @click="addBlock('three-columns')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Три колонки</button>
           <button
             @click="addBlock('link')"
-            class="btn btn-outline btn-sm justify-start"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
             >Блок-ссылка</button
           >
           <button
             @click="addBlock('url-link')"
-            class="btn btn-outline btn-sm justify-start"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
             >Ссылка на URL</button
           >
           <button
             @click="addBlock('flipper')"
-            class="btn btn-outline btn-sm justify-start"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
             >Листалка</button
           >
         </div>

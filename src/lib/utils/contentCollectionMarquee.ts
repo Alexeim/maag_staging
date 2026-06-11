@@ -6,6 +6,7 @@ import {
   guidesApi,
   interviewsApi,
   newsApi,
+  photosOfTheDayApi,
   visualStoriesApi,
 } from "@/lib/api/api";
 
@@ -62,6 +63,7 @@ export interface PublicContentPools {
   allFlippers: PublicContentCardItem[];
   allGuides: PublicContentCardItem[];
   allVisualStories: PublicContentCardItem[];
+  allPhotosOfTheDay: PublicContentCardItem[];
 }
 
 export const normalizeTags = (value: unknown): string[] => {
@@ -119,6 +121,9 @@ export const toContentHref = (item: any) => {
   if (item?.contentType === "visual-story") {
     return `/visual-story/${item.id}`;
   }
+  if (item?.contentType === "photoOfTheDay") {
+    return `/photo-of-the-day/${item.id}`;
+  }
   if (item?.contentType === "article" && item?.articleType === "tips") {
     return `/tips/${item.id}`;
   }
@@ -134,6 +139,7 @@ export const fetchPublicContentPools = async (): Promise<PublicContentPools> => 
     allFlippersRaw,
     allGuidesRaw,
     allVisualStoriesRaw,
+    allPhotosOfTheDayRaw,
   ] = await Promise.all([
     articlesApi.list(),
     newsApi.list(),
@@ -142,6 +148,7 @@ export const fetchPublicContentPools = async (): Promise<PublicContentPools> => 
     flippersApi.list(),
     guidesApi.list(),
     visualStoriesApi.list(),
+    photosOfTheDayApi.list(),
   ]);
 
   const allArticles = allArticlesRaw.map((article) => ({
@@ -196,6 +203,15 @@ export const fetchPublicContentPools = async (): Promise<PublicContentPools> => 
     href: toContentHref({ ...item, contentType: "visual-story" }),
   }));
 
+  const allPhotosOfTheDay = allPhotosOfTheDayRaw.map((item) => ({
+    ...item,
+    contentType: "photoOfTheDay",
+    imageUrl: item?.imageUrl || null,
+    cardLead: item?.caption || "",
+    tags: [],
+    href: toContentHref({ ...item, contentType: "photoOfTheDay" }),
+  }));
+
   return {
     allArticles,
     allNews,
@@ -204,6 +220,7 @@ export const fetchPublicContentPools = async (): Promise<PublicContentPools> => 
     allFlippers,
     allGuides,
     allVisualStories,
+    allPhotosOfTheDay,
   };
 };
 
@@ -288,6 +305,7 @@ export const buildLinkedContentLookup = (
     ...pools.allFlippers,
     ...pools.allGuides,
     ...pools.allVisualStories,
+    ...pools.allPhotosOfTheDay,
   ];
 
   return items.reduce<LinkedContentLookup>((lookup, item) => {
@@ -295,6 +313,10 @@ export const buildLinkedContentLookup = (
 
     if (key) {
       lookup[key] = item;
+    }
+
+    if (item.contentType === "visual-story") {
+      lookup[getLinkedContentKey("visualStory", item.id)] = item;
     }
 
     return lookup;

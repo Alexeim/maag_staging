@@ -20,9 +20,14 @@ export const BLOCK_TYPE_LABELS: Record<string, string> = {
 
 export const LINKED_CONTENT_TYPE_LABELS: Record<string, string> = {
   article: "Статья",
+  news: "Новость",
   event: "Событие",
   interview: "Интервью",
+  guide: "Гид",
   flipper: "Флиппер",
+  visualStory: "Visual Story",
+  "visual-story": "Visual Story",
+  photoOfTheDay: "Фото дня",
 };
 
 export const COLUMN_CONTENT_TYPE_LABELS: Record<string, string> = {

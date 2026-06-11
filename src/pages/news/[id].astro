@@ -6,14 +6,17 @@ import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
 import ArticleImage from "@/components/article/ArticleImage.astro";
 import ArticleBody from "@/components/article/ArticleBody.astro";
+import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { ApiError, newsApi } from "@/lib/api/api";
 import {
+  buildLinkedContentLookup,
   buildContentCollectionItems,
   fetchPublicContentPools,
   toDate,
+  type LinkedContentLookup,
 } from "@/lib/utils/contentCollectionMarquee";
 
 const { id } = Astro.params;
@@ -147,10 +150,12 @@ const bookmarkTag = firstBookmarkTag
 let collectionContentItems: any[] = [];
 let sameCategoryItems: any[] = [];
 let moreNewsItems: any[] = [];
+let linkedContentLookup: LinkedContentLookup = {};
 
 if (!error && articleData) {
   try {
     const pools = await fetchPublicContentPools();
+    linkedContentLookup = buildLinkedContentLookup(pools);
     const allNews = pools.allNews;
     collectionContentItems = await buildContentCollectionItems({
       contentCollectionId: articleData?.contentCollectionId,
@@ -263,6 +268,7 @@ if (!error && articleData) {
                         <div class="mx-auto w-full max-w-[826px] lg:mx-0">
                           <ArticleBody
                             contentBlocks={displayArticle.contentBlocks}
+                            linkedContentLookup={linkedContentLookup}
                           />
                         </div>
                       </div>
@@ -322,6 +328,12 @@ if (!error && articleData) {
                   </div>
                 </aside>
               </section>
+
+              <ContentCollectionMarquee
+                collectionItems={collectionContentItems}
+                categoryItems={sameCategoryItems}
+                fallbackImageSrc={picture1.src}
+              />
             </div>
           </>
         )

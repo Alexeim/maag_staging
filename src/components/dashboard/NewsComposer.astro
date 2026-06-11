@@ -329,6 +329,35 @@ const {
                   rows="5"></textarea>
               </template>
 
+              <template x-if="editingBlock.type === 'link'">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium">Тип контента</label>
+                    <select
+                      x-model="editingBlock.linkedContentType"
+                      @change="editingBlock.linkedContentId = ''"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    >
+                      <template x-for="type in materialLinkTypeOptions" :key="type.value">
+                        <option :value="type.value" x-text="type.label"></option>
+                      </template>
+                    </select>
+                  </div>
+                  <div x-show="editingBlock.linkedContentType">
+                    <label class="block text-sm font-medium">Выберите контент</label>
+                    <select
+                      x-model="editingBlock.linkedContentId"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    >
+                      <option value="" disabled>Выберите...</option>
+                      <template x-for="item in getFilteredContentList(editingBlock.linkedContentType)" :key="item.id">
+                        <option :value="item.id" x-text="item.title"></option>
+                      </template>
+                    </select>
+                  </div>
+                </div>
+              </template>
+
               <template x-if="editingBlock.type === 'url-link'">
                 <div class="space-y-4">
                   <div>
@@ -379,6 +408,23 @@ const {
               <template x-if="block.type === 'paragraph'">
                 <p class="text-base" x-text="block.text"></p>
               </template>
+              <template x-if="block.type === 'link'">
+                <div class="rounded-lg border border-base-300 bg-base-200/40 p-4 space-y-2">
+                  <p
+                    class="text-xs uppercase tracking-[0.2em] text-base-content/60"
+                    x-text="getLinkedContentTypeLabel(block.linkedContentType)"
+                  ></p>
+                  <p
+                    class="text-sm font-medium text-base-content"
+                    x-text="getLinkedBlockTitle(block) || 'Контент не выбран'"
+                  ></p>
+                  <p
+                    x-show="block.linkedContentId"
+                    class="text-xs text-base-content/60 break-all"
+                    x-text="block.linkedContentId"
+                  ></p>
+                </div>
+              </template>
               <template x-if="block.type === 'url-link'">
                 <p class="rounded-lg border border-base-300 bg-base-200/40 p-4 text-sm">
                   <span class="font-medium" x-text="block.text || '(без текста)'"></span>
@@ -399,9 +445,10 @@ const {
 
     <div class="mt-6">
       <template x-if="showBlockOptions">
-        <div class="grid grid-cols-2 gap-3 p-4 border border-base-300 rounded-lg bg-base-100">
-          <button @click="addBlock('paragraph')" class="btn btn-outline btn-sm justify-start">Абзац</button>
-          <button @click="addBlock('url-link')" class="btn btn-outline btn-sm justify-start">Ссылка на URL</button>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 border border-base-300 rounded-lg bg-base-100">
+          <button @click="addBlock('paragraph')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Абзац</button>
+          <button @click="addBlock('link')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Блок-ссылка</button>
+          <button @click="addBlock('url-link')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Ссылка на URL</button>
         </div>
       </template>
       <div x-show="!showBlockOptions" class="text-center">

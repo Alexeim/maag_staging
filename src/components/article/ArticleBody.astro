@@ -21,7 +21,16 @@ interface Block {
   answer?: string;
   sourceType?: string;
   provider?: string;
-  linkedContentType?: "article" | "event" | "interview" | "flipper";
+  linkedContentType?:
+    | "article"
+    | "news"
+    | "event"
+    | "interview"
+    | "guide"
+    | "flipper"
+    | "visualStory"
+    | "visual-story"
+    | "photoOfTheDay";
   linkedContentId?: string;
   linkedContentTitle?: string;
 }

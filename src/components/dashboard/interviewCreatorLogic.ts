@@ -4,6 +4,7 @@ import {
 } from "@/lib/api/api";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import {
+  MATERIAL_LINK_TYPE_OPTIONS,
   RELATED_CONTENT_TYPE_OPTIONS,
   createEmptyRelatedContent,
   createEmptyRelatedContentLists,
@@ -161,6 +162,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     contentListsLoading: false,
     relatedContentLists: createEmptyRelatedContentLists(),
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
+    materialLinkTypeOptions: MATERIAL_LINK_TYPE_OPTIONS,
     selectedRelatedContentType: "article",
     selectedRelatedContentId: "",
     ...createContentCollectionEditorState("interview"),
@@ -300,18 +302,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     },
 
     getFilteredContentList(contentType) {
-      switch (contentType) {
-        case "article":
-          return this.relatedContentLists.article;
-        case "event":
-          return this.relatedContentLists.event;
-        case "interview":
-          return this.relatedContentLists.interview;
-        case "flipper":
-          return this.relatedContentLists.flipper;
-        default:
-          return [];
-      }
+      return this.relatedContentLists[contentType] ?? [];
     },
     getAvailableRelatedContentItems() {
       if (!this.selectedRelatedContentType) {

@@ -2,6 +2,7 @@ import { guidesApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import {
+  MATERIAL_LINK_TYPE_OPTIONS,
   RELATED_CONTENT_TYPE_OPTIONS,
   createEmptyRelatedContent,
   createEmptyRelatedContentLists,
@@ -257,6 +258,7 @@ export default function guideCreatorLogic(initialState = {}) {
     contentListsLoading: false,
     relatedContentLists: createEmptyRelatedContentLists(),
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
+    materialLinkTypeOptions: MATERIAL_LINK_TYPE_OPTIONS,
     selectedRelatedContentType: "article",
     selectedRelatedContentId: "",
     ...createContentCollectionEditorState("article"),
@@ -578,18 +580,7 @@ export default function guideCreatorLogic(initialState = {}) {
     },
 
     getFilteredContentList(contentType) {
-      switch (contentType) {
-        case "article":
-          return this.relatedContentLists.article;
-        case "event":
-          return this.relatedContentLists.event;
-        case "interview":
-          return this.relatedContentLists.interview;
-        case "flipper":
-          return this.relatedContentLists.flipper;
-        default:
-          return [];
-      }
+      return this.relatedContentLists[contentType] ?? [];
     },
     getAvailableRelatedContentItems() {
       if (!this.selectedRelatedContentType) {

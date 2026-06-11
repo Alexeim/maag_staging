@@ -12,6 +12,7 @@ import {
   toContentCollectionOption,
 } from "@/lib/utils/contentCollections";
 import {
+  MATERIAL_LINK_TYPE_OPTIONS,
   RELATED_CONTENT_TYPE_OPTIONS,
   createEmptyRelatedContent,
   createEmptyRelatedContentLists,
@@ -327,6 +328,7 @@ export default function articleCreatorLogic(initialState = {}) {
     contentListsLoading: false,
     relatedContentLists: createEmptyRelatedContentLists(),
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
+    materialLinkTypeOptions: MATERIAL_LINK_TYPE_OPTIONS,
     selectedRelatedContentType: "article",
     selectedRelatedContentId: "",
     contentCollectionsLoading: false,
@@ -790,18 +792,7 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     getFilteredContentList(contentType) {
-      switch (contentType) {
-        case "article":
-          return this.relatedContentLists.article;
-        case "event":
-          return this.relatedContentLists.event;
-        case "interview":
-          return this.relatedContentLists.interview;
-        case "flipper":
-          return this.relatedContentLists.flipper;
-        default:
-          return [];
-      }
+      return this.relatedContentLists[contentType] ?? [];
     },
     getAvailableRelatedContentItems() {
       if (!this.selectedRelatedContentType) {

@@ -5,6 +5,7 @@ import {
   guidesApi,
   interviewsApi,
   newsApi,
+  photosOfTheDayApi,
   visualStoriesApi,
   type ArticleResponse,
   type EventResponse,
@@ -12,6 +13,7 @@ import {
   type GuideResponse,
   type InterviewResponse,
   type NewsResponse,
+  type PhotoOfTheDayResponse,
   type VisualStoryResponse,
 } from "@/lib/api/api";
 
@@ -26,6 +28,7 @@ export const RELATED_CONTENT_TYPES = [
 ] as const;
 
 export type RelatedContentType = (typeof RELATED_CONTENT_TYPES)[number];
+export type MaterialLinkContentType = RelatedContentType | "photoOfTheDay";
 
 export interface RelatedContent {
   article: string[];
@@ -45,6 +48,7 @@ export interface RelatedContentLists {
   news: NewsResponse[];
   flipper: FlipperResponse[];
   visualStory: VisualStoryResponse[];
+  photoOfTheDay: PhotoOfTheDayResponse[];
 }
 
 export const RELATED_CONTENT_TYPE_OPTIONS: Array<{
@@ -58,6 +62,20 @@ export const RELATED_CONTENT_TYPE_OPTIONS: Array<{
   { value: "news", label: "Новость" },
   { value: "flipper", label: "Флиппер" },
   { value: "visualStory", label: "Visual Story" },
+];
+
+export const MATERIAL_LINK_TYPE_OPTIONS: Array<{
+  value: MaterialLinkContentType;
+  label: string;
+}> = [
+  { value: "article", label: "Статья" },
+  { value: "event", label: "Событие" },
+  { value: "interview", label: "Интервью" },
+  { value: "guide", label: "Гид" },
+  { value: "news", label: "Новость" },
+  { value: "flipper", label: "Флиппер" },
+  { value: "visualStory", label: "Visual Story" },
+  { value: "photoOfTheDay", label: "Фото дня" },
 ];
 
 const normalizeIdList = (value: unknown): string[] => {
@@ -103,6 +121,7 @@ export const createEmptyRelatedContentLists = (): RelatedContentLists => ({
   news: [],
   flipper: [],
   visualStory: [],
+  photoOfTheDay: [],
 });
 
 export const normalizeRelatedContent = (value: unknown): RelatedContent => {
@@ -145,6 +164,7 @@ export const fetchRelatedContentLists = async (): Promise<RelatedContentLists> =
     news,
     flippers,
     visualStories,
+    photosOfTheDay,
   ] = await Promise.all([
     articlesApi.list(),
     eventsApi.list(),
@@ -153,6 +173,7 @@ export const fetchRelatedContentLists = async (): Promise<RelatedContentLists> =
     newsApi.list(),
     flippersApi.list(),
     visualStoriesApi.list(),
+    photosOfTheDayApi.list(),
   ]);
 
   return {
@@ -163,5 +184,6 @@ export const fetchRelatedContentLists = async (): Promise<RelatedContentLists> =
     news: Array.isArray(news) ? news : [],
     flipper: Array.isArray(flippers) ? flippers : [],
     visualStory: Array.isArray(visualStories) ? visualStories : [],
+    photoOfTheDay: Array.isArray(photosOfTheDay) ? photosOfTheDay : [],
   };
 };
