@@ -2,7 +2,6 @@
 import Layout from "../Layouts/Layout.astro";
 import { getTransitionName } from "../lib/utils/transitions";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
-import NetlenkaCard from "@/components/common/NetlenkaCard.astro";
 import NetlenkaCardOne from "@/components/common/NetlenkaCardOne.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
@@ -404,7 +403,6 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                     alt={primaryCultureArticle.title}
                     class="linked-image-hover__media block h-full w-full object-cover"
                     loading="lazy"
-                    transition:name={getTransitionName(primaryCultureArticle)}
                   />
                 </a>
 
@@ -469,7 +467,6 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                         alt={item.title}
                         class="linked-image-hover__media block h-full w-full object-cover"
                         loading="lazy"
-                        transition:name={getTransitionName(item)}
                       />
                     </a>
 
@@ -564,7 +561,10 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
               }
               imageUrl={featuredInterview.imageUrl || picture1.src}
               href={`/interviews/${featuredInterview.id}`}
-              transitionName={`main-article-image-${featuredInterview.id}`}
+              transitionName={getTransitionName({
+                id: featuredInterview.id,
+                href: `/interviews/${featuredInterview.id}`,
+              })}
             />
           </section>
         )
@@ -582,15 +582,15 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                       item.contentType === "interview" && "content-start",
                     ]}
                   >
-                    <a
-                      href={item.href}
-                      class:list={[
-                        "linked-image-hover bg-white/50 aspect-[1.02/1]",
-                        item.contentType === "interview" &&
-                          "w-full aspect-square rounded-full bg-transparent",
-                      ]}
-                      aria-label={item.title}
-                    >
+                      <a
+                        href={item.href}
+                        class:list={[
+                          "linked-image-hover bg-white/50 aspect-[1.02/1]",
+                          item.contentType === "interview" &&
+                            "w-full aspect-square rounded-full bg-transparent",
+                        ]}
+                        aria-label={item.title}
+                      >
                       <img
                         src={item.imageUrl || picture1.src}
                         alt={item.title}
@@ -599,7 +599,6 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                           item.contentType === "interview" && "rounded-full",
                         ]}
                         loading="lazy"
-                        transition:name={getTransitionName(item)}
                       />
                     </a>
 
@@ -680,11 +679,6 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                                     "rounded-full",
                                 ]}
                                 loading="lazy"
-                                transition:name={
-                                  i < editorialCarouselItems.length
-                                    ? getTransitionName(item)
-                                    : undefined
-                                }
                               />
                             </a>
 

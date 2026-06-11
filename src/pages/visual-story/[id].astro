@@ -6,6 +6,7 @@ import VisualStoryLayout from "@/Layouts/VisualStoryLayout.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { ApiError, visualStoriesApi } from "@/lib/api/api";
+import { getTransitionName } from "@/lib/utils/transitions";
 import { Info, MoveRight, MoveLeft } from "lucide-astro";
 
 const { id } = Astro.params;
@@ -87,6 +88,10 @@ const dateFormatted = createdAt
 
 // Dedicated cover takes priority; fall back to first slide's image
 const heroImageUrl = storyData?.imageUrl || slides[0]?.imageUrl || "";
+const heroTransitionName =
+  id && heroImageUrl
+    ? getTransitionName({ id, href: `/visual-story/${id}` })
+    : undefined;
 const heroImageCaption =
   storyData?.imageCaption ||
   (!storyData?.imageUrl ? slides[0]?.caption || "" : "");
@@ -550,6 +555,7 @@ const bookmarkTag = firstBookmarkTag ? getKnownTagLabel(firstBookmarkTag) : "";
               style={
                 heroImageUrl ? `background-image:url('${heroImageUrl}')` : ""
               }
+              transition:name={heroTransitionName}
             >
               {heroImageCaption && (
                 <div class="image-caption-hint">

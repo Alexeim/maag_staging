@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
+import { getTransitionName } from "../../lib/utils/transitions";
 import {
   articlesApi,
   editorialPlacementsApi,
@@ -538,7 +539,9 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
         {
           newsArticles.map((newsItem) => (
             <div class="flex-shrink-0 w-[280px] sm:w-1/2 md:w-1/3 lg:w-full lg:py-4 lg:border-b lg:border-base-content/15 last:lg:border-b-0">
-              <div class="flex items-start gap-4">
+              <div
+                class="flex items-start gap-4"
+              >
                 <a
                   href={`/news/${newsItem.id}`}
                   class="linked-image-hover bg-base-200 z-10"
@@ -549,7 +552,6 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
                     class="linked-image-hover__media w-20 h-20 object-cover flex-shrink-0"
                     width={80}
                     height={80}
-                    transition:name={`main-article-image-${newsItem.id}`}
                   />
                 </a>
                 <div class="flex-1 max-w-max">
@@ -593,7 +595,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
                   src={mainArticle.imageUrl}
                   alt={mainArticle.title}
                   class="linked-image-hover__media w-full h-full object-cover"
-                  transition:name={`main-article-image-${mainArticle.id}`}
+                  transition:name={getTransitionName(mainArticle)}
                 />
               </a>
             </div>
@@ -691,14 +693,12 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
                 alt={landingEvent.title}
                 class="linked-image-hover__media w-full h-auto lg:h-[240px] object-cover"
                 loading="eager"
-                transition:name={`event-image-${landingEvent.id}`}
               />
             ) : (
               <Image
                 src={picture2}
                 alt="Event"
                 class="linked-image-hover__media w-full h-auto lg:h-[240px] object-cover"
-                transition:name={`event-image-${landingEvent.id}`}
               />
             )}
             <div class="px-4 py-4">

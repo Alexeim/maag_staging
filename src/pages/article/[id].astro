@@ -162,8 +162,6 @@ const bookmarkTag = firstBookmarkTag
     getKnownTagLabel(firstBookmarkTag)
   : "";
 
-const transitionAliases = [`landing-body-main-article-image-${id}`];
-
 const isStandardCategoryArticle = (item: any) =>
   !item?.isNews &&
   item?.articleType !== "tips" &&
@@ -249,7 +247,6 @@ if (!error && articleData) {
                 alt={displayArticle.imageAlt}
                 caption={displayArticle.imageCaption}
                 transitionName={`main-article-image-${id}`}
-                transitionAliases={transitionAliases}
                 figureClass="max-w-[1200px]"
                 imageClass="shadow-lg"
                 figcaptionClass="text-center text-gray-500 mt-2"

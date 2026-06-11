@@ -39,7 +39,6 @@ const {
   lead,
 } = interview;
 const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
-const transitionAliases = [`landing-body-main-article-image-${id}`];
 const firstBookmarkTag =
   Array.isArray((interview as any)?.tags) &&
   typeof (interview as any).tags[0] === "string"
@@ -92,7 +91,6 @@ try {
         imageAlt={imageCaption || title}
         imageCaption={imageCaption}
         transitionName={`main-article-image-${id}`}
-        transitionAliases={transitionAliases}
       />
 
       <div class="px-4 pb-[100px] pt-10 sm:px-6 lg:px-14 lg:pt-16">

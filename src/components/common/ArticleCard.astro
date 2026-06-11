@@ -41,7 +41,10 @@ const lastWord =
 
 <div class="w-full flex flex-col justify-start gap-2">
   <div class="w-full aspect-[3/2] overflow-hidden">
-    <a href={href} class="linked-image-hover w-full h-full">
+    <a
+      href={href}
+      class="linked-image-hover w-full h-full"
+    >
       <LazyImage
         src={imageUrl || picture1}
         alt={imageUrl ? title : "Culture image"}

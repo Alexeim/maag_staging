@@ -15,7 +15,6 @@ interface Props {
   imageAlt?: string;
   imageCaption?: string;
   transitionName?: string;
-  transitionAliases?: string[];
 }
 
 const {
@@ -29,14 +28,7 @@ const {
   imageAlt = "Guide image",
   imageCaption,
   transitionName,
-  transitionAliases = [],
 } = Astro.props;
-
-const imageSrc = imageUrl
-  ? typeof imageUrl === "string"
-    ? imageUrl
-    : imageUrl.src
-  : null;
 
 const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
 ---
@@ -115,16 +107,4 @@ const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
     </div>
   </div>
   <hr class="mt-10 w-full border-t border-neutral-200 lg:mt-16" />
-
-  {
-    transitionAliases.map((alias) => (
-      <img
-        src={imageSrc ?? ""}
-        alt=""
-        aria-hidden="true"
-        class="fixed -z-10 h-px w-px opacity-0 pointer-events-none"
-        transition:name={alias}
-      />
-    ))
-  }
 </section>

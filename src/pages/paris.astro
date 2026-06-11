@@ -1,7 +1,6 @@
 ---
 import Layout from "../Layouts/Layout.astro";
 import { getTransitionName } from "../lib/utils/transitions";
-import NetlenkaCard from "@/components/common/NetlenkaCard.astro";
 import NetlenkaCardThree from "@/components/common/NetlenkaCardThree.astro";
 import PhotoOfTheDayCard from "@/components/common/PhotoOfTheDayCard.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
@@ -350,7 +349,6 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                     alt={primaryParisArticle.title}
                     class="linked-image-hover__media block h-full w-full object-cover"
                     loading="lazy"
-                    transition:name={getTransitionName(primaryParisArticle)}
                   />
                 </a>
 
@@ -415,7 +413,6 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                         alt={item.title}
                         class="linked-image-hover__media block h-full w-full object-cover"
                         loading="lazy"
-                        transition:name={getTransitionName(item)}
                       />
                     </a>
 
@@ -527,7 +524,6 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                           alt={item.title}
                           class="linked-image-hover__media block h-full w-full object-cover"
                           loading="lazy"
-                          transition:name={getTransitionName(item)}
                         />
                       </a>
 
@@ -591,11 +587,6 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                                 alt={item.title}
                                 class="linked-image-hover__media block h-full w-full object-cover"
                                 loading="lazy"
-                                transition:name={
-                                  i < editorialCarouselItems.length
-                                    ? getTransitionName(item)
-                                    : undefined
-                                }
                               />
                             </a>
 

@@ -19,7 +19,6 @@ import {
 } from "@/lib/api/api";
 import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
 
-import NetlenkaCard from "./NetlenkaCard.astro";
 import NetlenkaCardOne from "./NetlenkaCardOne.astro";
 import ArticleCard from "./ArticleCard.astro";
 import LazyImage from "./LazyImage.astro";
@@ -478,11 +477,6 @@ try {
   ].sort(
     (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
   );
-  hotContentItems = selectNetlenkaItems(
-    netlenkaCandidates,
-    landingPlacements.netlenkaRail,
-    landingPlacements,
-  );
   const cultureInterviewBlock = landingPlacements.cultureInterviewBlock;
   latestInterview =
     cultureInterviewBlock?.mode === "manual"
@@ -492,6 +486,15 @@ try {
       : cultureInterviewBlock?.mode === "auto-latest"
         ? (interviews[0] ?? null)
         : null;
+
+  const latestInterviewKey = latestInterview?.id
+    ? `interview:${latestInterview.id}`
+    : null;
+  hotContentItems = selectNetlenkaItems(
+    netlenkaCandidates,
+    landingPlacements.netlenkaRail,
+    landingPlacements,
+  ).filter((item) => getNetlenkaItemKey(item) !== latestInterviewKey);
 } catch (error) {
   console.error("Failed to fetch data for LandingBody:", error);
 }
@@ -529,10 +532,24 @@ const parisCardItems = selectCategoryCardItems(
   new Set([parisHero?.id].filter(Boolean)),
 );
 
-const excludedIds = new Set([cultureHero?.id, parisHero?.id].filter(Boolean));
+const displayedContentIds = new Set(
+  [
+    landingPlacements.mainHero?.id,
+    cultureHero?.id,
+    ...cultureCardItems.map((item) => item?.id),
+    parisHero?.id,
+    ...parisCardItems.map((item) => item?.id),
+    latestInterview?.id,
+    ...hotContentItems.map((item) => item?.id),
+    leSaviezVousArticle?.id,
+  ].filter(Boolean),
+);
 const carouselItems = allItemsSorted
   .filter(
-    (item) => !isHotContent(item) && !item.isNews && !excludedIds.has(item.id),
+    (item) =>
+      !isHotContent(item) &&
+      !item.isNews &&
+      !displayedContentIds.has(item.id),
   )
   .slice(0, 20);
 
@@ -1003,7 +1020,7 @@ const splitTitle = (t: string) => {
                 class="articles-marquee-track flex gap-8 items-stretch py-8"
                 style="width: max-content;"
               >
-                {[...carouselItems, ...carouselItems].map((item) => (
+                {[...carouselItems, ...carouselItems].map((item, index) => (
                   <div class="w-[320px] flex-shrink-0">
                     <ArticleCard
                       isNetlenka={false}
@@ -1012,6 +1029,11 @@ const splitTitle = (t: string) => {
                       date={formatArticleDate(item.createdAt)}
                       hideDate={true}
                       lead={truncateText(getCardLead(item), 120) || undefined}
+                      transitionName={
+                        index < carouselItems.length
+                          ? getTransitionName(item)
+                          : undefined
+                      }
                       imageUrl={item.imageUrl}
                       href={item.href}
                       paid={item.paid}

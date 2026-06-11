@@ -40,7 +40,6 @@ const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('lo
         loading="lazy"
         x-data=""
         x-init={xInit}
-        transition:name={transitionName}
       />
     ) : (
       <Image
@@ -50,7 +49,6 @@ const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('lo
         width={width}
         height={height}
         loading="lazy"
-        transition:name={transitionName}
       />
     )
   ) : (
@@ -62,7 +60,6 @@ const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('lo
         width={width}
         height={height}
         loading="eager"
-        transition:name={transitionName}
       />
     ) : (
       <Image
@@ -72,7 +69,6 @@ const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('lo
         width={width}
         height={height}
         loading="eager"
-        transition:name={transitionName}
       />
     )
   )

@@ -4,7 +4,6 @@ interface Props {
   alt: string;
   caption?: string;
   transitionName?: string;
-  transitionAliases?: string[];
 }
 
 const {
@@ -12,7 +11,6 @@ const {
   alt,
   caption = "",
   transitionName,
-  transitionAliases = [],
 } = Astro.props as Props;
 ---
 
@@ -34,15 +32,4 @@ const {
     )
   }
 
-  {
-    transitionAliases.map((alias) => (
-      <img
-        src={src}
-        alt=""
-        aria-hidden="true"
-        class="fixed h-px w-px pointer-events-none -z-10 opacity-0"
-        transition:name={alias}
-      />
-    ))
-  }
 </figure>

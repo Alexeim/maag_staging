@@ -7,7 +7,6 @@ interface Props {
   alt: string;
   caption?: string;
   transitionName?: string;
-  transitionAliases?: string[];
   figureClass?: string;
   imageClass?: string;
   figcaptionClass?: string;
@@ -18,7 +17,6 @@ const {
   alt,
   caption,
   transitionName,
-  transitionAliases = [],
   figureClass,
   imageClass,
   figcaptionClass,
@@ -36,7 +34,6 @@ const finalFigureClasses = `${defaultFigureClasses} ${figureClass || ""}`;
 const defaultFigcaptionClasses =
   "text-xs text-gray-500 font-inter text-center mb-8";
 const finalFigcaptionClasses = `${defaultFigcaptionClasses} ${figcaptionClass || ""}`;
-const imageSrc = typeof src === "string" ? src : src.src;
 ---
 
 <div class={finalFigureClasses}>
@@ -59,17 +56,6 @@ const imageSrc = typeof src === "string" ? src : src.src;
       )
     }
   </div>
-  {
-    transitionAliases.map((alias) => (
-      <img
-        src={imageSrc}
-        alt=""
-        aria-hidden="true"
-        class="fixed w-px h-px opacity-0 pointer-events-none -z-10"
-        transition:name={alias}
-      />
-    ))
-  }
   <div class="max-w-[826px] w-full">
     <p class={finalFigcaptionClasses}>
       {caption}
