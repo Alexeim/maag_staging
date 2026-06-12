@@ -9,12 +9,7 @@ import baletImage from "../assets/images/calendar/balet.png";
 import theatreShowImage from "../assets/images/calendar/theatre-show.png";
 import smallEventImage from "../assets/images/calendar/small-event.png";
 import picture1 from "../assets/images/culture.jpg";
-import {
-  editorialPlacementsApi,
-  eventsApi,
-  type CalendarPagePlacementsResponse,
-} from "@/lib/api/api";
-import { resolveAutoSecondaryEventIds } from "@/lib/utils/calendarPage";
+import { publicCalendarApi } from "@/lib/api/api";
 
 const TAG_LABEL_ALIASES: Record<string, string> = {
   exhibition: "Выставка",
@@ -199,84 +194,20 @@ const formatDateRange = (startIso: string, endIso: string | null): string => {
   return `${format(start, !sameYear)} – ${format(end, true)}`;
 };
 
-let eventsResponse: any[] = [];
-let calendarPagePlacements: CalendarPagePlacementsResponse = {
-  schemaVersion: 1,
-  mainCards: null,
-  secondaryCards: null,
-  updatedAt: null,
-  updatedBy: null,
-};
+let normalizedEvents: any[] = [];
+let featuredEventSourceCards: any[] = [];
+let topSourceCards: any[] = [];
 
 try {
-  const [events, placements] = await Promise.all([
-    eventsApi.list(),
-    editorialPlacementsApi.getCalendarPage().catch(() => calendarPagePlacements),
-  ]);
-  eventsResponse = events;
-  calendarPagePlacements = placements;
+  const calendarPage = await publicCalendarApi.get();
+  normalizedEvents = calendarPage.events as any[];
+  featuredEventSourceCards = calendarPage.featuredEventCards as any[];
+  topSourceCards = calendarPage.topCards as any[];
 } catch (error) {
   console.error("Failed to fetch events:", error);
 }
 
-const normalizedEvents = eventsResponse
-  .map((event) => {
-    const startDate = toDate(event?.startDate);
-    if (!startDate) {
-      return null;
-    }
-    startDate.setUTCHours(0, 0, 0, 0);
-    const endDate = toDate(event?.endDate);
-    if (endDate) {
-      endDate.setUTCHours(0, 0, 0, 0);
-    }
-    const category = typeof event?.category === "string" ? event.category : "";
-    const primaryTag = resolveTagLabel(
-      Array.isArray(event?.tags) && event.tags.length > 0
-        ? event.tags[0]
-        : null,
-      "Событие",
-    );
-
-    return {
-      id: event.id,
-      title: event.title ?? "Событие",
-      imageUrl: typeof event.imageUrl === "string" ? event.imageUrl : null,
-      startDate: startDate.toISOString(),
-      endDate: endDate ? endDate.toISOString() : null,
-      dateType: event?.dateType === "duration" ? "duration" : "single",
-      address: typeof event?.address === "string" ? event.address : "",
-      timeMode:
-        event?.timeMode === "start" || event?.timeMode === "range"
-          ? event.timeMode
-          : "none",
-      startTime: typeof event?.startTime === "string" ? event.startTime : null,
-      endTime: typeof event?.endTime === "string" ? event.endTime : null,
-      category,
-      categoryLabel: primaryTag,
-      tagLabel: primaryTag,
-      description: extractDescription(event?.content),
-      isMainEvent: Boolean(event?.isMainEvent),
-      url: `/events/${event.id}`,
-    };
-  })
-  .filter((event): event is NonNullable<typeof event> => Boolean(event))
-  .sort(
-    (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
-  );
-
 const heroFallbackImages = [baletImage, picture1, theatreShowImage];
-
-const now = new Date();
-const todayUtc = new Date(
-  Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-);
-const normalizedEventMap = new Map(normalizedEvents.map((event) => [event.id, event]));
-
-const resolveEventsByIds = (ids: string[] = []) =>
-  ids
-    .map((id) => normalizedEventMap.get(id))
-    .filter((event): event is NonNullable<typeof event> => Boolean(event));
 
 const buildCardPayload = (event: (typeof normalizedEvents)[number], index: number) => ({
   ...event,
@@ -286,24 +217,11 @@ const buildCardPayload = (event: (typeof normalizedEvents)[number], index: numbe
   ...getDateParts(event.startDate, event.endDate),
 });
 
-const featuredEventCards =
-  calendarPagePlacements.mainCards?.mode === "manual"
-    ? resolveEventsByIds(calendarPagePlacements.mainCards.ids)
-        .slice(0, 4)
-        .map((event, index) => buildCardPayload(event, index))
-    : [];
+const featuredEventCards = featuredEventSourceCards.map((event, index) =>
+  buildCardPayload(event, index),
+);
 
-const secondaryCardEvents =
-  calendarPagePlacements.secondaryCards?.mode === "manual"
-    ? resolveEventsByIds(calendarPagePlacements.secondaryCards.ids).slice(0, 4)
-    : calendarPagePlacements.secondaryCards?.mode ===
-          "auto-current-week-single-day-priority"
-      ? resolveAutoSecondaryEventIds(normalizedEvents, 4, todayUtc)
-          .map((id) => normalizedEventMap.get(id))
-          .filter((event): event is NonNullable<typeof event> => Boolean(event))
-      : [];
-
-const topCards = secondaryCardEvents.map((event, index) =>
+const topCards = topSourceCards.map((event, index) =>
   buildCardPayload(event, index + 1),
 );
 

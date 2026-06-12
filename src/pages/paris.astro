@@ -6,16 +6,7 @@ import PhotoOfTheDayCard from "@/components/common/PhotoOfTheDayCard.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
 import picture1 from "../assets/images/culture.jpg";
-import {
-  articlesApi,
-  editorialPlacementsApi,
-  flippersApi,
-  guidesApi,
-  visualStoriesApi,
-  newsApi,
-  photosOfTheDayApi,
-  type ParisPagePlacementsResponse,
-} from "@/lib/api/api";
+import { publicParisApi } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
   paris: "Париж",
@@ -164,140 +155,16 @@ let secondaryStories: any[] = [];
 let editorialSidebarItems: any[] = [];
 let parisFeed: any[] = [];
 let photoOfTheDay: any = null;
-let parisPagePlacements: ParisPagePlacementsResponse | null = null;
 
 try {
-  const [
-    articles,
-    flippers,
-    guides,
-    visualStories,
-    newsItemsRaw,
-    parisPagePlacementsResponse,
-  ] = await Promise.all([
-    articlesApi.list(),
-    flippersApi.list(),
-    guidesApi.list(),
-    visualStoriesApi.list(),
-    newsApi.list(),
-    editorialPlacementsApi.getParisPage().catch(() => null),
-  ]);
-
-  parisPagePlacements = parisPagePlacementsResponse;
-
-  const standardArticles = articles.filter(
-    (article) => !isLeSaviezVousArticle(article),
-  );
-  const newsItems = newsItemsRaw.map((item) => ({
-    ...item,
-    isNews: true,
-    contentType: "news",
-    tags: normalizeTags(item?.tags),
-  }));
-  const allContent = [
-    ...standardArticles.map((article) => ({
-      ...article,
-      contentType: "article",
-      tags: normalizeTags(article?.tags),
-    })),
-    ...newsItems,
-    ...flippers.map((flipper) => ({
-      ...flipper,
-      contentType: "flipper",
-      imageUrl: flipper?.carouselContent?.[0]?.imageUrl || null,
-      tags: normalizeTags(flipper?.tags),
-    })),
-    ...guides.map((guide) => ({
-      ...guide,
-      contentType: "guide",
-      tags: normalizeTags(guide?.tags),
-    })),
-    ...visualStories.map((story) => ({
-      ...story,
-      contentType: "visual-story",
-      imageUrl: story?.imageUrl || story?.slides?.[0]?.imageUrl || null,
-      tags: normalizeTags(story?.tags),
-    })),
-  ];
-
-  const sortedContent = [...allContent].sort(
-    (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
-  );
-
-  const allParisItems = sortedContent
-    .filter((item) => normalizeCategory(item.category) === PARIS_CATEGORY_KEY)
-    .map((item) => ({
-      ...item,
-      href: toContentHref(item),
-    }));
-
-  const topItems = allParisItems.filter((item) => !isHotContent(item));
-
-  const heroPlacement = parisPagePlacements?.hero ?? null;
-  if (heroPlacement?.mode === "manual") {
-    primaryParisArticle =
-      allParisItems.find(
-        (item) =>
-          item.id === heroPlacement.id &&
-          item.contentType === heroPlacement.type,
-      ) ?? null;
-  } else {
-    // fallback during migration: isMainInCategory or first item
-    primaryParisArticle =
-      topItems.find((item) => isMainInCategoryItem(item)) ??
-      topItems[0] ??
-      null;
-  }
-
-  const topWithoutPrimary = topItems.filter((item) =>
-    primaryParisArticle ? item.id !== primaryParisArticle.id : true,
-  );
-
-  const secondaryPlacement = parisPagePlacements?.secondaryStories ?? null;
-  if (secondaryPlacement === null) {
-    secondaryStories = [];
-  } else if (secondaryPlacement.mode === "manual") {
-    const itemsByKey = new Map(
-      topItems.map((item) => [`${item.contentType}:${item.id}`, item]),
-    );
-    secondaryStories = secondaryPlacement.items
-      .map(({ type, id }) => itemsByKey.get(`${type}:${id}`))
-      .filter(Boolean);
-  } else {
-    secondaryStories = topWithoutPrimary.slice(
-      0,
-      secondaryPlacement.limit ?? 4,
-    );
-  }
-
-  const topIds = new Set(
-    [
-      primaryParisArticle?.id,
-      ...secondaryStories.map((item) => item?.id),
-    ].filter(Boolean),
-  );
-
-  const parisHotContentItems = allParisItems.filter(
-    (item) => !topIds.has(item.id) && isHotContent(item),
-  );
-
-  editorialSidebarItems = parisHotContentItems.slice(0, 4);
-
-  const sidebarIds = new Set(editorialSidebarItems.map((item) => item.id));
-
-  parisFeed = allParisItems.filter(
-    (item) =>
-      !topIds.has(item.id) && !sidebarIds.has(item.id) && !isHotContent(item),
-  );
+  const parisPage = await publicParisApi.get();
+  primaryParisArticle = parisPage.primaryParisArticle;
+  secondaryStories = parisPage.secondaryStories as any[];
+  editorialSidebarItems = parisPage.editorialSidebarItems as any[];
+  parisFeed = parisPage.parisFeed as any[];
+  photoOfTheDay = parisPage.photoOfTheDay;
 } catch (error) {
   console.error("Failed to fetch paris page articles:", error);
-}
-
-try {
-  const photos = await photosOfTheDayApi.list();
-  photoOfTheDay = photos[0] ?? null;
-} catch (e) {
-  console.error("Failed to fetch photo of the day:", e);
 }
 
 const editorialGridItems = parisFeed.slice(0, MAX_EDITORIAL_GRID_ITEMS);

@@ -6,16 +6,7 @@ import NetlenkaCardOne from "@/components/common/NetlenkaCardOne.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import picture1 from "../assets/images/culture.jpg";
-import {
-  articlesApi,
-  editorialPlacementsApi,
-  interviewsApi,
-  flippersApi,
-  guidesApi,
-  visualStoriesApi,
-  newsApi,
-  type CulturePagePlacementsResponse,
-} from "@/lib/api/api";
+import { publicCultureApi } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -184,169 +175,14 @@ let secondaryStories: any[] = [];
 let editorialSidebarItems: any[] = [];
 let cultureFeed: any[] = [];
 let featuredInterview: any = null;
-let culturePagePlacements: CulturePagePlacementsResponse | null = null;
 
 try {
-  const [
-    articles,
-    interviews,
-    flippers,
-    guides,
-    visualStories,
-    newsItemsRaw,
-    culturePagePlacementsResponse,
-  ] = await Promise.all([
-    articlesApi.list(),
-    interviewsApi.list(),
-    flippersApi.list(),
-    guidesApi.list(),
-    visualStoriesApi.list(),
-    newsApi.list(),
-    editorialPlacementsApi.getCulturePage().catch(() => null),
-  ]);
-
-  culturePagePlacements = culturePagePlacementsResponse;
-
-  const standardArticles = articles.filter(
-    (article) => !isLeSaviezVousArticle(article),
-  );
-  const newsItems = newsItemsRaw.map((item) => ({
-    ...item,
-    isNews: true,
-    contentType: "news",
-    tags: normalizeTags(item?.tags),
-  }));
-
-  const allContent = [
-    ...standardArticles.map((article) => ({
-      ...article,
-      contentType: "article",
-      tags: normalizeTags(article?.tags),
-    })),
-    ...newsItems,
-    ...interviews.map((interview) => ({
-      ...interview,
-      contentType: "interview",
-      category: "culture",
-      tags: normalizeTags(interview?.tags),
-    })),
-    ...flippers.map((flipper) => ({
-      ...flipper,
-      contentType: "flipper",
-      imageUrl: flipper?.carouselContent?.[0]?.imageUrl || null,
-      tags: normalizeTags(flipper?.tags),
-    })),
-    ...guides.map((guide) => ({
-      ...guide,
-      contentType: "guide",
-      tags: normalizeTags(guide?.tags),
-    })),
-    ...visualStories.map((story) => ({
-      ...story,
-      contentType: "visual-story",
-      imageUrl: story?.imageUrl || story?.slides?.[0]?.imageUrl || null,
-      tags: normalizeTags(story?.tags),
-    })),
-  ];
-
-  const sortedContent = [...allContent].sort(
-    (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
-  );
-
-  const allCultureItems = sortedContent
-    .filter((item) => normalizeCategory(item.category) === CULTURE_CATEGORY_KEY)
-    .map((item) => ({
-      ...item,
-      href: toContentHref(item),
-    }));
-
-  const topItems = allCultureItems.filter(
-    (item) => !isHotContent(item) && item.contentType !== "interview",
-  );
-
-  const heroPlacement = culturePagePlacements?.hero ?? null;
-  if (heroPlacement?.mode === "manual") {
-    primaryCultureArticle =
-      allCultureItems.find(
-        (item) =>
-          item.id === heroPlacement.id &&
-          item.contentType === heroPlacement.type,
-      ) ?? null;
-  } else {
-    // fallback during migration: isMainInCategory or first item
-    primaryCultureArticle =
-      topItems.find((item) => isMainInCategoryItem(item)) ??
-      topItems[0] ??
-      null;
-  }
-
-  const topWithoutPrimary = topItems.filter((item) =>
-    primaryCultureArticle ? item.id !== primaryCultureArticle.id : true,
-  );
-
-  const secondaryPlacement = culturePagePlacements?.secondaryStories ?? null;
-  if (secondaryPlacement === null) {
-    secondaryStories = [];
-  } else if (secondaryPlacement.mode === "manual") {
-    const itemsByKey = new Map(
-      topItems.map((item) => [`${item.contentType}:${item.id}`, item]),
-    );
-    secondaryStories = secondaryPlacement.items
-      .map(({ type, id }) => itemsByKey.get(`${type}:${id}`))
-      .filter(Boolean);
-  } else {
-    secondaryStories = topWithoutPrimary.slice(
-      0,
-      secondaryPlacement.limit ?? 4,
-    );
-  }
-
-  const topIds = new Set(
-    [
-      primaryCultureArticle?.id,
-      ...secondaryStories.map((item) => item?.id),
-    ].filter(Boolean),
-  );
-
-  const interviewPlacement = culturePagePlacements?.featuredInterview ?? null;
-  if (!culturePagePlacements || interviewPlacement?.mode === "auto-latest") {
-    featuredInterview =
-      allCultureItems.find(
-        (item) => item.contentType === "interview" && !topIds.has(item.id),
-      ) ??
-      allCultureItems.find((item) => item.contentType === "interview") ??
-      null;
-  } else if (interviewPlacement?.mode === "manual") {
-    featuredInterview =
-      allCultureItems.find(
-        (item) =>
-          item.contentType === "interview" && item.id === interviewPlacement.id,
-      ) ?? null;
-  } else {
-    featuredInterview = null;
-  }
-
-  const excludedIds = new Set(
-    [...topIds, featuredInterview?.id].filter(Boolean),
-  );
-
-  const cultureHotContentItems = allCultureItems.filter(
-    (item) =>
-      normalizeCategory(item.category) === CULTURE_CATEGORY_KEY &&
-      !excludedIds.has(item.id) &&
-      isHotContent(item),
-  );
-
-  editorialSidebarItems = cultureHotContentItems.slice(0, 4);
-
-  const sidebarIds = new Set(editorialSidebarItems.map((item) => item.id));
-
-  cultureFeed = allCultureItems.filter(
-    (item) =>
-      !excludedIds.has(item.id) &&
-      !sidebarIds.has(item.id) &&
-      !isHotContent(item),
-  );
+  const culturePage = await publicCultureApi.get();
+  primaryCultureArticle = culturePage.primaryCultureArticle;
+  secondaryStories = culturePage.secondaryStories as any[];
+  editorialSidebarItems = culturePage.editorialSidebarItems as any[];
+  cultureFeed = culturePage.cultureFeed as any[];
+  featuredInterview = culturePage.featuredInterview;
 } catch (error) {
   console.error("Failed to fetch culture page articles:", error);
 }

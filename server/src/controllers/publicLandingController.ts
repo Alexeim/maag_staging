@@ -18,6 +18,9 @@ interface LandingTarget {
 
 const db = getDb();
 const landingPlacementsRef = db.collection('editorialPlacements').doc('landing');
+const culturePagePlacementsRef = db.collection('editorialPlacements').doc('culturePage');
+const parisPagePlacementsRef = db.collection('editorialPlacements').doc('parisPage');
+const calendarPagePlacementsRef = db.collection('editorialPlacements').doc('calendarPage');
 
 const COLLECTION_BY_TYPE: Record<LandingContentType, string> = {
   article: 'articles',
@@ -126,6 +129,7 @@ const toLandingItem = (
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
     isHotContent: Boolean(data.isHotContent) || data.category === 'hotContent',
+    isMainInCategory: Boolean(data.isMainInCategory),
     isNews: type === 'news',
     articleType: data.articleType ?? null,
     paid: Boolean(data.paid),
@@ -329,6 +333,385 @@ const getLandingPlacements = async () => {
   };
 };
 
+const DEFAULT_CULTURE_PAGE_PLACEMENTS = {
+  schemaVersion: 1,
+  hero: null,
+  secondaryStories: { mode: 'auto-latest', limit: 4 },
+  featuredInterview: { mode: 'auto-latest' },
+  sidebarRail: { mode: 'auto-hot', limit: 4 },
+};
+
+const DEFAULT_PARIS_PAGE_PLACEMENTS = {
+  schemaVersion: 1,
+  hero: null,
+  secondaryStories: { mode: 'auto-latest', limit: 4 },
+  leSaviezVousFeature: { mode: 'auto-latest' },
+  sidebarRail: { mode: 'auto-hot', limit: 4 },
+};
+
+const DEFAULT_CALENDAR_PAGE_PLACEMENTS = {
+  schemaVersion: 1,
+  mainCards: null,
+  secondaryCards: null,
+  updatedAt: null,
+  updatedBy: null,
+};
+
+const SECTION_FETCH_LIMIT_PER_TYPE = 80;
+const SECTION_CONTENT_TYPES: LandingContentType[] = [
+  'article',
+  'guide',
+  'flipper',
+  'visual-story',
+  'news',
+];
+
+const normalizeSectionItem = (item: any, category: 'culture' | 'paris') => {
+  if (!item) return null;
+  if (category === 'culture' && item.contentType === 'interview') {
+    return { ...item, category: 'culture' };
+  }
+  return item;
+};
+
+const isMainInCategoryItem = (item: any) =>
+  item?.isMainInCategory === true ||
+  item?.isMainInCategory === 'true' ||
+  item?.isMainInCategory === 1 ||
+  item?.isMainInCategory === '1';
+
+const fetchSectionCandidates = async (category: 'culture' | 'paris') => {
+  const types =
+    category === 'culture'
+      ? [...SECTION_CONTENT_TYPES, 'interview' as LandingContentType]
+      : SECTION_CONTENT_TYPES;
+
+  const groups = await Promise.all(
+    types.map((type) => fetchLatest(type, SECTION_FETCH_LIMIT_PER_TYPE)),
+  );
+
+  return groups
+    .flat()
+    .map((item) => normalizeSectionItem(item, category))
+    .filter(Boolean)
+    .filter((item: any) => !isLeSaviezVousItem(item))
+    .filter((item: any) => normalizeCategory(item.category) === category)
+    .sort((left: any, right: any) => getTime(right?.createdAt) - getTime(left?.createdAt));
+};
+
+const fetchSectionHero = async (selection: any, candidates: any[]) => {
+  if (selection?.mode === 'manual') {
+    return fetchByTarget({ type: selection.type, id: selection.id });
+  }
+
+  const topItems = candidates.filter(
+    (item) => !item.isHotContent && item.contentType !== 'interview',
+  );
+  return topItems.find(isMainInCategoryItem) ?? topItems[0] ?? null;
+};
+
+const selectSectionSecondaryStories = async (
+  selection: any,
+  candidates: any[],
+  primaryItem: any,
+) => {
+  const topItems = candidates.filter(
+    (item) => !item.isHotContent && item.contentType !== 'interview',
+  );
+  const topWithoutPrimary = topItems.filter((item) =>
+    primaryItem ? item.id !== primaryItem.id : true,
+  );
+
+  if (selection === null) return [];
+  if (selection?.mode === 'manual') {
+    return (await fetchByTargets(Array.isArray(selection.items) ? selection.items : []))
+      .filter((item: any) => item && !item.isHotContent && item.contentType !== 'interview');
+  }
+
+  return topWithoutPrimary.slice(0, selection?.limit ?? 4);
+};
+
+const selectSectionSidebarItems = async (
+  selection: any,
+  candidates: any[],
+  excludedIds: Set<string>,
+) => {
+  if (selection?.mode === 'manual') {
+    return fetchByTargets(Array.isArray(selection.items) ? selection.items : []);
+  }
+
+  return candidates
+    .filter((item: any) => item.isHotContent && !excludedIds.has(item.id))
+    .slice(0, selection?.limit ?? 4);
+};
+
+const selectSectionFeaturedInterview = async (
+  selection: any,
+  candidates: any[],
+  excludedIds: Set<string>,
+) => {
+  if (selection?.mode === 'manual') {
+    return fetchByTarget({ type: 'interview', id: selection.id });
+  }
+
+  if (!selection || selection.mode === 'auto-latest') {
+    return (
+      candidates.find(
+        (item: any) => item.contentType === 'interview' && !excludedIds.has(item.id),
+      ) ??
+      candidates.find((item: any) => item.contentType === 'interview') ??
+      null
+    );
+  }
+
+  return null;
+};
+
+const buildCulturePagePayload = async () => {
+  const [placementsDoc, candidates] = await Promise.all([
+    culturePagePlacementsRef.get(),
+    fetchSectionCandidates('culture'),
+  ]);
+  const culturePagePlacements = {
+    ...DEFAULT_CULTURE_PAGE_PLACEMENTS,
+    ...(placementsDoc.exists ? placementsDoc.data() : {}),
+  };
+
+  const primaryCultureArticle = await fetchSectionHero(
+    culturePagePlacements.hero,
+    candidates,
+  );
+  const secondaryStories = await selectSectionSecondaryStories(
+    culturePagePlacements.secondaryStories,
+    candidates,
+    primaryCultureArticle,
+  );
+  const topIds = new Set(
+    [primaryCultureArticle?.id, ...secondaryStories.map((item: any) => item?.id)].filter(Boolean),
+  );
+  const featuredInterview = await selectSectionFeaturedInterview(
+    culturePagePlacements.featuredInterview,
+    candidates,
+    topIds,
+  );
+  const excludedIds = new Set([...topIds, featuredInterview?.id].filter(Boolean));
+  const editorialSidebarItems = await selectSectionSidebarItems(
+    culturePagePlacements.sidebarRail,
+    candidates,
+    excludedIds,
+  );
+  const sidebarIds = new Set(editorialSidebarItems.map((item: any) => item.id));
+  const cultureFeed = candidates.filter(
+    (item: any) =>
+      !excludedIds.has(item.id) &&
+      !sidebarIds.has(item.id) &&
+      !item.isHotContent,
+  );
+
+  return {
+    culturePagePlacements,
+    primaryCultureArticle,
+    secondaryStories,
+    editorialSidebarItems,
+    cultureFeed,
+    featuredInterview,
+  };
+};
+
+const buildParisPagePayload = async () => {
+  const [placementsDoc, candidates] = await Promise.all([
+    parisPagePlacementsRef.get(),
+    fetchSectionCandidates('paris'),
+  ]);
+  const parisPagePlacements = {
+    ...DEFAULT_PARIS_PAGE_PLACEMENTS,
+    ...(placementsDoc.exists ? placementsDoc.data() : {}),
+  };
+
+  const primaryParisArticle = await fetchSectionHero(parisPagePlacements.hero, candidates);
+  const secondaryStories = await selectSectionSecondaryStories(
+    parisPagePlacements.secondaryStories,
+    candidates,
+    primaryParisArticle,
+  );
+  const topIds = new Set(
+    [primaryParisArticle?.id, ...secondaryStories.map((item: any) => item?.id)].filter(Boolean),
+  );
+  const editorialSidebarItems = await selectSectionSidebarItems(
+    parisPagePlacements.sidebarRail,
+    candidates,
+    topIds,
+  );
+  const sidebarIds = new Set(editorialSidebarItems.map((item: any) => item.id));
+  const parisFeed = candidates.filter(
+    (item: any) =>
+      !topIds.has(item.id) &&
+      !sidebarIds.has(item.id) &&
+      !item.isHotContent,
+  );
+  const photoOfTheDay = await selectPhotoOfTheDay({ mode: 'auto-latest' });
+
+  return {
+    parisPagePlacements,
+    primaryParisArticle,
+    secondaryStories,
+    editorialSidebarItems,
+    parisFeed,
+    photoOfTheDay,
+  };
+};
+
+const extractDescription = (blocks: any): string => {
+  if (!Array.isArray(blocks)) return 'Подробнее скоро.';
+  const blockWithText = blocks.find(
+    (block) => typeof block?.text === 'string' && block.text.trim().length > 0,
+  );
+  if (!blockWithText) return 'Подробнее скоро.';
+  const text = blockWithText.text.trim();
+  return text.length > 180 ? `${text.slice(0, 177).trim()}...` : text;
+};
+
+const toPublicCalendarEvent = (doc: FirebaseFirestore.DocumentSnapshot) => {
+  const data = doc.data();
+  if (!doc.exists || !data) return null;
+  const startDate = toDate(data.startDate);
+  if (!startDate) return null;
+  const endDate = toDate(data.endDate);
+  startDate.setUTCHours(0, 0, 0, 0);
+  if (endDate) endDate.setUTCHours(0, 0, 0, 0);
+
+  const primaryTag = Array.isArray(data.tags) && data.tags.length > 0 ? data.tags[0] : null;
+
+  return {
+    id: doc.id,
+    title: data.title ?? 'Событие',
+    imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl : null,
+    startDate: startDate.toISOString(),
+    endDate: endDate ? endDate.toISOString() : null,
+    dateType: data.dateType === 'duration' ? 'duration' : 'single',
+    address: typeof data.address === 'string' ? data.address : '',
+    timeMode:
+      data.timeMode === 'start' || data.timeMode === 'range' ? data.timeMode : 'none',
+    startTime: typeof data.startTime === 'string' ? data.startTime : null,
+    endTime: typeof data.endTime === 'string' ? data.endTime : null,
+    category: typeof data.category === 'string' ? data.category : '',
+    categoryLabel: primaryTag ?? 'Событие',
+    tagLabel: primaryTag ?? 'Событие',
+    description: extractDescription(data.content),
+    isMainEvent: Boolean(data.isMainEvent),
+    url: `/events/${doc.id}`,
+  };
+};
+
+const fetchCalendarEvents = async () => {
+  const snapshot = await db.collection('events').orderBy('startDate', 'desc').get();
+  return snapshot.docs
+    .map(toPublicCalendarEvent)
+    .filter(Boolean)
+    .sort(
+      (left: any, right: any) =>
+        new Date(left.startDate).getTime() - new Date(right.startDate).getTime(),
+    );
+};
+
+const getComparableCalendarRange = (event: any) => {
+  const start = toDate(event?.startDate);
+  if (!start) return null;
+  const end = toDate(event?.endDate) ?? start;
+  return {
+    start: resetToUtcMidnight(start),
+    end: resetToUtcMidnight(end),
+  };
+};
+
+const getWeekBounds = (today: Date) => {
+  const weekStart = resetToUtcMidnight(today);
+  const day = weekStart.getUTCDay();
+  weekStart.setUTCDate(weekStart.getUTCDate() - ((day + 6) % 7));
+  const weekEnd = new Date(weekStart);
+  weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
+  weekEnd.setUTCHours(23, 59, 59, 999);
+  return { weekStart, weekEnd };
+};
+
+const resolveAutoSecondaryEventIds = (events: any[], limit = 4) => {
+  const today = resetToUtcMidnight(new Date());
+  const { weekStart, weekEnd } = getWeekBounds(today);
+  const currentWeekSingleDay: any[] = [];
+  const currentWeekDuration: any[] = [];
+  const upcomingSingleDay: any[] = [];
+  const upcomingDuration: any[] = [];
+
+  events.forEach((event) => {
+    const range = getComparableCalendarRange(event);
+    if (!range) return;
+    const { start, end } = range;
+    const isSingleDay = start.getTime() === end.getTime();
+
+    if (start.getTime() <= weekEnd.getTime() && end.getTime() >= weekStart.getTime()) {
+      if (isSingleDay) currentWeekSingleDay.push(event);
+      else currentWeekDuration.push(event);
+      return;
+    }
+
+    if (start.getTime() > weekEnd.getTime()) {
+      if (isSingleDay) upcomingSingleDay.push(event);
+      else upcomingDuration.push(event);
+    }
+  });
+
+  const byStartDateAsc = (left: any, right: any) =>
+    new Date(left.startDate).getTime() - new Date(right.startDate).getTime();
+
+  return [
+    ...currentWeekSingleDay.sort(byStartDateAsc),
+    ...currentWeekDuration.sort(byStartDateAsc),
+    ...upcomingSingleDay.sort(byStartDateAsc),
+    ...upcomingDuration.sort(byStartDateAsc),
+  ]
+    .slice(0, limit)
+    .map((event) => event.id);
+};
+
+const buildCalendarPagePayload = async () => {
+  const [placementsDoc, events] = await Promise.all([
+    calendarPagePlacementsRef.get(),
+    fetchCalendarEvents(),
+  ]);
+  const calendarPagePlacements: any = {
+    ...DEFAULT_CALENDAR_PAGE_PLACEMENTS,
+    ...(placementsDoc.exists ? placementsDoc.data() : {}),
+  };
+  const eventMap = new Map(events.map((event: any) => [event.id, event]));
+  const resolveEventsByIds = (ids: string[] = []) =>
+    ids.map((id) => eventMap.get(id)).filter(Boolean);
+
+  const featuredEventCards =
+    calendarPagePlacements.mainCards?.mode === 'manual'
+      ? resolveEventsByIds(calendarPagePlacements.mainCards.ids).slice(0, 4)
+      : [];
+
+  const secondaryCardEvents =
+    calendarPagePlacements.secondaryCards?.mode === 'manual'
+      ? resolveEventsByIds(calendarPagePlacements.secondaryCards.ids).slice(0, 4)
+      : calendarPagePlacements.secondaryCards?.mode ===
+          'auto-current-week-single-day-priority'
+        ? resolveAutoSecondaryEventIds(
+            events,
+            calendarPagePlacements.secondaryCards.limit ?? 4,
+          )
+            .map((id) => eventMap.get(id))
+            .filter(Boolean)
+        : [];
+
+  return {
+    calendarPagePlacements,
+    events,
+    featuredEventCards,
+    topCards: secondaryCardEvents,
+  };
+};
+
 export const getPublicLanding = async (_req: Request, res: Response) => {
   try {
     const landingPlacements: any = await getLandingPlacements();
@@ -432,5 +815,32 @@ export const getPublicLanding = async (_req: Request, res: Response) => {
   } catch (error) {
     console.error('Error getting public landing:', error);
     res.status(500).json({ message: 'Server error while getting public landing' });
+  }
+};
+
+export const getPublicCulture = async (_req: Request, res: Response) => {
+  try {
+    res.status(200).json(await buildCulturePagePayload());
+  } catch (error) {
+    console.error('Error getting public culture page:', error);
+    res.status(500).json({ message: 'Server error while getting public culture page' });
+  }
+};
+
+export const getPublicParis = async (_req: Request, res: Response) => {
+  try {
+    res.status(200).json(await buildParisPagePayload());
+  } catch (error) {
+    console.error('Error getting public paris page:', error);
+    res.status(500).json({ message: 'Server error while getting public paris page' });
+  }
+};
+
+export const getPublicCalendar = async (_req: Request, res: Response) => {
+  try {
+    res.status(200).json(await buildCalendarPagePayload());
+  } catch (error) {
+    console.error('Error getting public calendar page:', error);
+    res.status(500).json({ message: 'Server error while getting public calendar page' });
   }
 };

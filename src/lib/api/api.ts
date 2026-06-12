@@ -1095,3 +1095,52 @@ export const publicLandingApi = {
     });
   },
 };
+
+export interface PublicCultureResponse {
+  culturePagePlacements: CulturePagePlacementsResponse;
+  primaryCultureArticle: unknown | null;
+  secondaryStories: unknown[];
+  editorialSidebarItems: unknown[];
+  cultureFeed: unknown[];
+  featuredInterview: unknown | null;
+}
+
+export interface PublicParisResponse {
+  parisPagePlacements: ParisPagePlacementsResponse;
+  primaryParisArticle: unknown | null;
+  secondaryStories: unknown[];
+  editorialSidebarItems: unknown[];
+  parisFeed: unknown[];
+  photoOfTheDay: unknown | null;
+}
+
+export interface PublicCalendarResponse {
+  calendarPagePlacements: CalendarPagePlacementsResponse;
+  events: unknown[];
+  featuredEventCards: unknown[];
+  topCards: unknown[];
+}
+
+export const publicCultureApi = {
+  get() {
+    return request<PublicCultureResponse>("/api/public/culture", {
+      public: true,
+    });
+  },
+};
+
+export const publicParisApi = {
+  get() {
+    return request<PublicParisResponse>("/api/public/paris", {
+      public: true,
+    });
+  },
+};
+
+export const publicCalendarApi = {
+  get() {
+    return request<PublicCalendarResponse>("/api/public/calendar", {
+      public: true,
+    });
+  },
+};
