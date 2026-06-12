@@ -43,6 +43,10 @@
     {
       "title": "назначение",
       "value": "naznachenie"
+    },
+    {
+      "title": "арт",
+      "value": "art"
     }
   ]
 }

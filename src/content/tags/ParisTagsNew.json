@@ -39,6 +39,10 @@
     {
       "title": "мода",
       "value": "fashion"
+    },
+    {
+      "title": "арт",
+      "value": "art"
     }
   ]
 }

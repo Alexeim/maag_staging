@@ -360,7 +360,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
             <p
               class="m-0 text-lg font-semibold uppercase tracking-[0.3em] font-old_standard"
             >
-              записная книжка
+              самое читаемое
             </p>
 
             {
@@ -418,15 +418,15 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                       item.contentType === "interview" && "content-start",
                     ]}
                   >
-                      <a
-                        href={item.href}
-                        class:list={[
-                          "linked-image-hover bg-white/50 aspect-[1.02/1]",
-                          item.contentType === "interview" &&
-                            "w-full aspect-square rounded-full bg-transparent",
-                        ]}
-                        aria-label={item.title}
-                      >
+                    <a
+                      href={item.href}
+                      class:list={[
+                        "linked-image-hover bg-white/50 aspect-[1.02/1]",
+                        item.contentType === "interview" &&
+                          "w-full aspect-square rounded-full bg-transparent",
+                      ]}
+                      aria-label={item.title}
+                    >
                       <img
                         src={item.imageUrl || picture1.src}
                         alt={item.title}

@@ -172,6 +172,9 @@ const { title = "MAAG Dashboard", active = "articles-overview" } =
                     item.id === "calendar-editor"
                       ? "font-bold text-lg"
                       : "",
+                    item.id === "culture-editor" || item.id === "paris-editor"
+                      ? "font-bold"
+                      : "",
                   ]}
                 >
                   {item.label}

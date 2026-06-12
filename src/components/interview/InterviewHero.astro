@@ -83,16 +83,14 @@ const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
         <h1
           class:list={[
             "mt-8 font-old_standard font-normal leading-[1.05] text-base-content",
-            isLongTitle
-              ? "sm:text-3xl lg:text-5xl"
-              : "text-3xl sm:text-5xl lg:text-7xl",
+            isLongTitle ? "text-4xl lg:text-5xl" : "text-5xl lg:text-7xl",
           ]}
         >
           {title}
         </h1>
         {
           lead && (
-            <p class="mx-auto mt-8 max-w-[34rem] font-article-body text-lg font-light text-base-content lg:mt-10">
+            <p class="mx-auto mt-8 max-w-[34rem] font-article-body text-base font-light text-base-content lg:mt-10">
               {lead}
             </p>
           )
