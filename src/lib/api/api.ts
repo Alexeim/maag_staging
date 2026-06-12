@@ -1066,3 +1066,32 @@ export const editorialPlacementsApi = {
     );
   },
 };
+
+export interface PublicLandingResponse {
+  landingPlacements: LandingPlacementsResponse;
+  mainBlock: {
+    mainArticle: unknown | null;
+    newsArticles: unknown[];
+    landingEvent: unknown | null;
+  };
+  body: {
+    landingPlacements: LandingPlacementsResponse;
+    cultureHero: unknown | null;
+    cultureCardItems: unknown[];
+    parisHero: unknown | null;
+    parisCardItems: unknown[];
+    hotContentItems: unknown[];
+    latestInterview: unknown | null;
+    carouselItems: unknown[];
+    leSaviezVousArticle: unknown | null;
+    photoOfTheDay: unknown | null;
+  };
+}
+
+export const publicLandingApi = {
+  get() {
+    return request<PublicLandingResponse>("/api/public/landing", {
+      public: true,
+    });
+  },
+};

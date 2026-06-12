@@ -1,11 +1,33 @@
 ---
 import Layout from "../Layouts/Layout.astro";
-import eric from "../assets/common/image.jpg";
-import logoFull from "../assets/logo/logoFull.svg";
-import { Image } from "astro:assets";
 import Hero from "../components/HomePage/Hero.astro";
 import MainLandingBlock from "../components/common/MainLandingBlock.astro";
 import LandingBody from "../components/common/LandingBody.astro";
+import { publicLandingApi } from "@/lib/api/api";
+
+const EMPTY_PUBLIC_LANDING = {
+  mainBlock: {
+    mainArticle: null,
+    newsArticles: [],
+    landingEvent: null,
+  },
+  body: {
+    cultureHero: null,
+    cultureCardItems: [],
+    parisHero: null,
+    parisCardItems: [],
+    hotContentItems: [],
+    latestInterview: null,
+    carouselItems: [],
+    leSaviezVousArticle: null,
+    photoOfTheDay: null,
+  },
+};
+
+const publicLanding = await publicLandingApi.get().catch((error) => {
+  console.error("Failed to load public landing data:", error);
+  return EMPTY_PUBLIC_LANDING;
+});
 ---
 
 <Layout
@@ -15,6 +37,6 @@ import LandingBody from "../components/common/LandingBody.astro";
   useClientRouter={true}
 >
   <Hero />
-  <MainLandingBlock />
-  <LandingBody />
+  <MainLandingBlock data={publicLanding.mainBlock} />
+  <LandingBody data={publicLanding.body} />
 </Layout>

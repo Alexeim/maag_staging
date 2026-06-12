@@ -13,6 +13,7 @@ import newsRoutes from './routes/newsRoutes';
 import editorialPlacementsRoutes from './routes/editorialPlacementsRoutes';
 import contentCollectionsRoutes from './routes/contentCollectionsRoutes';
 import photoOfTheDayRoutes from './routes/photoOfTheDayRoutes';
+import publicRoutes from './routes/publicRoutes';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -66,6 +67,9 @@ app.use('/api/content-collections', contentCollectionsRoutes);
 
 // Use the photo of the day routes
 app.use('/api/photos-of-the-day', photoOfTheDayRoutes);
+
+// Use public read-model routes
+app.use('/api/public', publicRoutes);
 
 // Test route to verify Firebase connection
 app.get('/api/test-firebase', async (req, res) => {

@@ -1,22 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import { getTransitionName } from "../../lib/utils/transitions";
-import {
-  articlesApi,
-  editorialPlacementsApi,
-  interviewsApi,
-  flippersApi,
-  guidesApi,
-  visualStoriesApi,
-  newsApi,
-  photosOfTheDayApi,
-  type LandingCategoryCardsSelection,
-  type LandingCategoryCardsItemTarget,
-  type LandingNetlenkaRailSelection,
-  type InterviewResponse,
-  type FlipperPayload,
-  type LandingPlacementsResponse,
-} from "@/lib/api/api";
+import type { LandingPlacementsResponse } from "@/lib/api/api";
 import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
 
 import NetlenkaCardOne from "./NetlenkaCardOne.astro";
@@ -31,14 +16,22 @@ import picture1 from "../../assets/images/culture.jpg";
 
 interface LandingBodyProps {
   isLanding?: boolean;
+  data?: {
+    landingPlacements?: LandingPlacementsResponse;
+    cultureHero?: any;
+    cultureCardItems?: any[];
+    parisHero?: any;
+    parisCardItems?: any[];
+    hotContentItems?: any[];
+    latestInterview?: any;
+    carouselItems?: any[];
+    leSaviezVousArticle?: any;
+    photoOfTheDay?: any;
+  };
 }
 
-interface FlipperResponse extends FlipperPayload {
-  id: string;
-  createdAt: string | Date;
-}
-
-const { isLanding = true } = Astro.props as LandingBodyProps;
+const { isLanding = true, data: publicLandingData } =
+  Astro.props as LandingBodyProps;
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -129,19 +122,10 @@ const getCardLead = (item: any) => {
 };
 const isHotContent = (item: any) => Boolean(item?.isHotContent);
 
-const isLandingHotContentItem = (item: any) =>
-  isHotContent(item) && !item?.isNews;
-
-const isLeSaviezVousArticle = (item: any) =>
-  item?.articleType === "le_saviez_vous";
-
-let cultureItems: any[] = [];
-let parisItems: any[] = [];
-let hotContentItems: any[] = [];
-let latestInterview: any = null;
-let allItemsSorted: any[] = [];
-let leSaviezVousArticle: any = null;
-let photoOfTheDay: any = null;
+const hotContentItems = publicLandingData?.hotContentItems ?? [];
+const latestInterview = publicLandingData?.latestInterview ?? null;
+const leSaviezVousArticle = publicLandingData?.leSaviezVousArticle ?? null;
+const photoOfTheDay = publicLandingData?.photoOfTheDay ?? null;
 
 const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   schemaVersion: 4,
@@ -180,7 +164,8 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   updatedBy: null,
 };
 
-let landingPlacements = DEFAULT_LANDING_PLACEMENTS;
+const landingPlacements =
+  publicLandingData?.landingPlacements ?? DEFAULT_LANDING_PLACEMENTS;
 
 const getDate = (timestamp: any): Date => {
   if (timestamp && typeof timestamp === "object" && timestamp._seconds) {
@@ -211,347 +196,11 @@ const formatArticleMeta = (item: any, fallbackCategory = "") => {
   return parts.join(" • ");
 };
 
-const toContentHref = (item: any) => {
-  if (item?.type === "interview" || item?.contentType === "interview") {
-    return `/interviews/${item.id}`;
-  }
-  if (item?.type === "flipper" || item?.contentType === "flipper") {
-    return `/flippers/${item.id}`;
-  }
-  if (item?.type === "guide" || item?.contentType === "guide") {
-    return `/guide/${item.id}`;
-  }
-  if (item?.type === "visual-story" || item?.contentType === "visual-story") {
-    return `/visual-story/${item.id}`;
-  }
-  return `/${item?.isNews ? "news" : "article"}/${item.id}`;
-};
-
-const getPlacementType = (item: any): string | null =>
-  item?.contentType || item?.type || null;
-
-const isPlacedMainHero = (
-  item: any,
-  landingPlacements: LandingPlacementsResponse,
-) =>
-  Boolean(
-    landingPlacements.mainHero &&
-    landingPlacements.mainHero.id === item?.id &&
-    landingPlacements.mainHero.type === getPlacementType(item),
-  );
-
-const getNetlenkaItemKey = (item: any) => {
-  const type = getPlacementType(item);
-  if (!type || !item?.id) {
-    return null;
-  }
-
-  return `${type}:${item.id}`;
-};
-
-const getCategoryCardItemKey = (item: any) => {
-  const type = getPlacementType(item);
-  if (!type || type === "interview" || !item?.id) {
-    return null;
-  }
-
-  return `${type}:${item.id}`;
-};
-
-const selectNetlenkaItems = (
-  items: any[],
-  netlenkaRail: LandingNetlenkaRailSelection | null,
-  landingPlacements: LandingPlacementsResponse,
-) => {
-  if (!netlenkaRail) {
-    return [];
-  }
-
-  if (netlenkaRail.mode === "auto-latest") {
-    return items
-      .filter(
-        (item) =>
-          isLandingHotContentItem(item) &&
-          !isPlacedMainHero(item, landingPlacements) &&
-          item.id !==
-            (landingPlacements.cultureInterviewBlock?.mode === "manual"
-              ? landingPlacements.cultureInterviewBlock.id
-              : null),
-      )
-      .slice(0, netlenkaRail.limit);
-  }
-
-  const itemsByKey = new Map(
-    items
-      .map((item) => [getNetlenkaItemKey(item), item] as const)
-      .filter(([key]) => Boolean(key)),
-  );
-
-  return netlenkaRail.items
-    .map((item) => itemsByKey.get(`${item.type}:${item.id}`))
-    .filter((item) => Boolean(item) && isLandingHotContentItem(item))
-    .filter(Boolean);
-};
-
-const selectCategoryCardItems = (
-  items: any[],
-  selection: LandingCategoryCardsSelection | null,
-  excludedIds: Set<string>,
-) => {
-  const availableItems = items.filter(
-    (item) => item?.id && !excludedIds.has(item.id),
-  );
-
-  if (!selection) {
-    return [];
-  }
-
-  if (selection.mode === "auto-latest") {
-    return availableItems.slice(0, selection.limit);
-  }
-
-  const itemsByKey = new Map(
-    availableItems
-      .map((item) => [getCategoryCardItemKey(item), item] as const)
-      .filter(([key]) => Boolean(key)),
-  );
-
-  return selection.items
-    .map((item: LandingCategoryCardsItemTarget) =>
-      itemsByKey.get(`${item.type}:${item.id}`),
-    )
-    .filter(Boolean);
-};
-
-const selectCategoryHero = (
-  items: any[],
-  heroSelection:
-    | LandingPlacementsResponse["cultureHero"]
-    | LandingPlacementsResponse["parisHero"],
-) => {
-  if (heroSelection?.mode === "manual") {
-    return (
-      items.find(
-        (item) =>
-          item?.id === heroSelection.id &&
-          getPlacementType(item) === heroSelection.type,
-      ) ?? null
-    );
-  }
-
-  return null;
-};
-
-try {
-  const [
-    articles,
-    flippers,
-    interviews,
-    guides,
-    visualStories,
-    newsItemsRaw,
-    landingPlacementsResponse,
-  ] = await Promise.all([
-    articlesApi.list(),
-    flippersApi.list() as Promise<FlipperResponse[]>,
-    interviewsApi.list() as Promise<InterviewResponse[]>,
-    guidesApi.list(),
-    visualStoriesApi.list(),
-    newsApi.list(),
-    editorialPlacementsApi.getLanding().catch(() => DEFAULT_LANDING_PLACEMENTS),
-  ]);
-
-  landingPlacements = landingPlacementsResponse;
-
-  const standardArticles = articles.filter(
-    (article) => !isLeSaviezVousArticle(article),
-  );
-  const newsItems = newsItemsRaw.map((item) => ({
-    ...item,
-    type: "news",
-    contentType: "news",
-    isNews: true,
-  }));
-  const leSaviezVousArticles = articles
-    .filter((article) => isLeSaviezVousArticle(article))
-    .sort(
-      (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
-    );
-
-  const leSaviezVousPlacement = landingPlacements.leSaviezVousFeature ?? null;
-  if (!leSaviezVousPlacement || leSaviezVousPlacement.mode === "auto-latest") {
-    leSaviezVousArticle = leSaviezVousArticles[0] ?? null;
-  } else if (leSaviezVousPlacement.mode === "manual") {
-    leSaviezVousArticle =
-      leSaviezVousArticles.find((a) => a.id === leSaviezVousPlacement.id) ??
-      null;
-  } else {
-    leSaviezVousArticle = null;
-  }
-
-  if (leSaviezVousArticle) {
-    leSaviezVousArticle = {
-      ...leSaviezVousArticle,
-      href: toContentHref(leSaviezVousArticle),
-    };
-  }
-
-  const allItems = [
-    ...standardArticles.map((article) => ({
-      ...article,
-      type: "article",
-      href: `/article/${article.id}`,
-    })),
-    ...newsItems.map((item) => ({
-      ...item,
-      href: `/news/${item.id}`,
-    })),
-    ...flippers.map((flipper) => ({
-      ...flipper,
-      type: "flipper",
-      href: `/flippers/${flipper.id}`,
-      imageUrl: flipper.carouselContent?.[0]?.imageUrl,
-    })),
-    ...guides.map((guide) => ({
-      ...guide,
-      type: "guide",
-      href: `/guide/${guide.id}`,
-    })),
-    ...visualStories.map((story) => ({
-      ...story,
-      type: "visual-story",
-      href: `/visual-story/${story.id}`,
-      imageUrl: story?.imageUrl || story?.slides?.[0]?.imageUrl || null,
-    })),
-  ].sort(
-    (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
-  );
-
-  allItemsSorted = allItems;
-
-  cultureItems = allItems.filter(
-    (item) =>
-      normalizeCategory(item.category) === CULTURE_CATEGORY_KEY &&
-      !isHotContent(item) &&
-      !item.isNews &&
-      !isPlacedMainHero(item, landingPlacements),
-  );
-
-  parisItems = allItems.filter(
-    (item) =>
-      normalizeCategory(item.category) === PARIS_CATEGORY_KEY &&
-      !isHotContent(item) &&
-      !item.isNews &&
-      !isPlacedMainHero(item, landingPlacements),
-  );
-
-  const netlenkaCandidates = [
-    ...articles.map((article) => ({
-      ...article,
-      type: "article",
-      href: toContentHref(article),
-    })),
-    ...interviews.map((interview) => ({
-      ...interview,
-      type: "interview",
-      category: CULTURE_CATEGORY_KEY,
-      href: toContentHref({ ...interview, type: "interview" }),
-    })),
-    ...flippers.map((flipper) => ({
-      ...flipper,
-      type: "flipper",
-      href: toContentHref({ ...flipper, type: "flipper" }),
-      imageUrl: flipper.carouselContent?.[0]?.imageUrl,
-    })),
-    ...guides.map((guide) => ({
-      ...guide,
-      type: "guide",
-      href: toContentHref({ ...guide, type: "guide" }),
-    })),
-    ...visualStories.map((story) => ({
-      ...story,
-      type: "visual-story",
-      href: toContentHref({ ...story, type: "visual-story" }),
-      imageUrl: story?.imageUrl || story?.slides?.[0]?.imageUrl || undefined,
-    })),
-  ].sort(
-    (a, b) => getDate(b.createdAt).getTime() - getDate(a.createdAt).getTime(),
-  );
-  const cultureInterviewBlock = landingPlacements.cultureInterviewBlock;
-  latestInterview =
-    cultureInterviewBlock?.mode === "manual"
-      ? (interviews.find(
-          (interview) => interview.id === cultureInterviewBlock.id,
-        ) ?? null)
-      : cultureInterviewBlock?.mode === "auto-latest"
-        ? (interviews[0] ?? null)
-        : null;
-
-  const latestInterviewKey = latestInterview?.id
-    ? `interview:${latestInterview.id}`
-    : null;
-  hotContentItems = selectNetlenkaItems(
-    netlenkaCandidates,
-    landingPlacements.netlenkaRail,
-    landingPlacements,
-  ).filter((item) => getNetlenkaItemKey(item) !== latestInterviewKey);
-} catch (error) {
-  console.error("Failed to fetch data for LandingBody:", error);
-}
-
-try {
-  const placement = landingPlacements.photoOfTheDayFeature;
-  if (placement && placement.mode !== "empty") {
-    const photos = await photosOfTheDayApi.list();
-    if (placement.mode === "manual" && "id" in placement) {
-      photoOfTheDay = photos.find((p) => p.id === placement.id) ?? null;
-    } else {
-      photoOfTheDay = photos[0] ?? null;
-    }
-  }
-} catch (e) {
-  console.error("Failed to fetch photo of the day:", e);
-}
-
-const cultureHero = selectCategoryHero(
-  cultureItems,
-  landingPlacements.cultureHero,
-);
-
-const cultureCardItems = selectCategoryCardItems(
-  cultureItems,
-  landingPlacements.cultureCards,
-  new Set([cultureHero?.id].filter(Boolean)),
-);
-
-const parisHero = selectCategoryHero(parisItems, landingPlacements.parisHero);
-
-const parisCardItems = selectCategoryCardItems(
-  parisItems,
-  landingPlacements.parisCards,
-  new Set([parisHero?.id].filter(Boolean)),
-);
-
-const displayedContentIds = new Set(
-  [
-    landingPlacements.mainHero?.id,
-    cultureHero?.id,
-    ...cultureCardItems.map((item) => item?.id),
-    parisHero?.id,
-    ...parisCardItems.map((item) => item?.id),
-    latestInterview?.id,
-    ...hotContentItems.map((item) => item?.id),
-    leSaviezVousArticle?.id,
-  ].filter(Boolean),
-);
-const carouselItems = allItemsSorted
-  .filter(
-    (item) =>
-      !isHotContent(item) &&
-      !item.isNews &&
-      !displayedContentIds.has(item.id),
-  )
-  .slice(0, 20);
+const cultureHero = publicLandingData?.cultureHero ?? null;
+const cultureCardItems = publicLandingData?.cultureCardItems ?? [];
+const parisHero = publicLandingData?.parisHero ?? null;
+const parisCardItems = publicLandingData?.parisCardItems ?? [];
+const carouselItems = publicLandingData?.carouselItems ?? [];
 
 const extractQuoteOrAnswer = (interview: any) => {
   if (!interview || !Array.isArray(interview.content)) {

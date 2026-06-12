@@ -3,20 +3,17 @@ import { Image } from "astro:assets";
 import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
 import { getTransitionName } from "../../lib/utils/transitions";
-import {
-  articlesApi,
-  editorialPlacementsApi,
-  eventsApi,
-  flippersApi,
-  guidesApi,
-  interviewsApi,
-  newsApi,
-  visualStoriesApi,
-  type LandingEventCardSelection,
-  type LandingNewsRailSelection,
-  type LandingPlacementsResponse,
-} from "@/lib/api/api";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
+
+interface MainLandingBlockProps {
+  data?: {
+    mainArticle?: any;
+    newsArticles?: any[];
+    landingEvent?: any;
+  };
+}
+
+const { data: publicLandingData } = Astro.props as MainLandingBlockProps;
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -109,29 +106,6 @@ const getCardLead = (item: any) => {
   return cardLead;
 };
 
-const toContentHref = (item: any) => {
-  if (item?.contentType === "interview") {
-    return `/interviews/${item.id}`;
-  }
-  if (item?.contentType === "flipper") {
-    return `/flippers/${item.id}`;
-  }
-  if (item?.contentType === "guide") {
-    return `/guide/${item.id}`;
-  }
-  if (item?.contentType === "visual-story") {
-    return `/visual-story/${item.id}`;
-  }
-  return `/${item?.isNews ? "news" : "article"}/${item.id}`;
-};
-
-const isHotContentItem = (article: any) =>
-  Boolean(article?.isHotContent) ||
-  normalizeCategory(article?.category) === "hotContent";
-
-const isLeSaviezVousArticle = (article: any) =>
-  article?.articleType === "le_saviez_vous";
-
 const splitTitle = (t: string) => {
   const s = t.trimEnd();
   const i = s.lastIndexOf(" ");
@@ -141,125 +115,9 @@ const splitTitle = (t: string) => {
   };
 };
 
-const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
-  schemaVersion: 4,
-  mainHero: null,
-  newsRail: {
-    mode: "auto-latest",
-    limit: 4,
-  },
-  netlenkaRail: {
-    mode: "auto-latest",
-    limit: 4,
-  },
-  cultureHero: null,
-  cultureCards: {
-    mode: "auto-latest",
-    limit: 3,
-  },
-  parisHero: null,
-  parisCards: {
-    mode: "auto-latest",
-    limit: 3,
-  },
-  eventCard: {
-    mode: "auto-nearest",
-  },
-  cultureInterviewBlock: {
-    mode: "auto-latest",
-  },
-  updatedAt: null,
-  updatedBy: null,
-};
-
-let mainArticle: any = null;
-let newsArticles: any[] = [];
-let landingEvent: any = null;
-
-try {
-  const [
-    articles,
-    guides,
-    interviews,
-    flippers,
-    visualStories,
-    newsItemsRaw,
-    events,
-    landingPlacements,
-  ] = await Promise.all([
-    articlesApi.list(),
-    guidesApi.list(),
-    interviewsApi.list(),
-    flippersApi.list(),
-    visualStoriesApi.list(),
-    newsApi.list(),
-    eventsApi.list(),
-    editorialPlacementsApi.getLanding().catch(() => DEFAULT_LANDING_PLACEMENTS),
-  ]);
-  const standardArticles = articles.filter(
-    (article) => !isLeSaviezVousArticle(article),
-  );
-  const newsItems = newsItemsRaw.map((item) => ({
-    ...item,
-    isNews: true,
-    contentType: "news",
-  }));
-  const articleHeroCandidates = standardArticles.map((article) => ({
-    ...article,
-    contentType: "article",
-    href: toContentHref(article),
-  }));
-  const guideHeroCandidates = guides.map((guide) => ({
-    ...guide,
-    contentType: "guide",
-    href: toContentHref({ ...guide, contentType: "guide" }),
-  }));
-  const interviewHeroCandidates = interviews.map((interview) => ({
-    ...interview,
-    contentType: "interview",
-    href: toContentHref({ ...interview, contentType: "interview" }),
-  }));
-  const flipperHeroCandidates = flippers.map((flipper) => ({
-    ...flipper,
-    contentType: "flipper",
-    href: toContentHref({ ...flipper, contentType: "flipper" }),
-    imageUrl: flipper?.carouselContent?.[0]?.imageUrl || null,
-  }));
-  const visualStoryHeroCandidates = visualStories.map((story) => ({
-    ...story,
-    contentType: "visual-story",
-    href: toContentHref({ ...story, contentType: "visual-story" }),
-    imageUrl: story?.imageUrl || story?.slides?.[0]?.imageUrl || null,
-  }));
-  const landingContent = [
-    ...articleHeroCandidates,
-    ...guideHeroCandidates,
-    ...interviewHeroCandidates,
-    ...flipperHeroCandidates,
-    ...visualStoryHeroCandidates,
-  ];
-
-  const isCategoryRubricItem = (item: any) => {
-    const cat = normalizeCategory(item?.category);
-    return cat === "culture" || cat === "paris";
-  };
-
-  const mainHeroSelection = landingPlacements.mainHero ?? null;
-  const placedMainHero = mainHeroSelection
-    ? landingContent.find(
-        (item) =>
-          item.id === mainHeroSelection.id &&
-          item.contentType === mainHeroSelection.type,
-      )
-    : null;
-
-  mainArticle = placedMainHero || null;
-
-  newsArticles = selectNewsRailItems(newsItems, landingPlacements.newsRail);
-  landingEvent = selectEventCard(events, landingPlacements.eventCard);
-} catch (error) {
-  console.error("Failed to fetch articles:", error);
-}
+const mainArticle = publicLandingData?.mainArticle ?? null;
+const newsArticles = publicLandingData?.newsArticles ?? [];
+const landingEvent = publicLandingData?.landingEvent ?? null;
 
 const eventCategoryLabels: Record<string, string> = {
   exhibition: "Выставка",
@@ -391,106 +249,6 @@ function normalizeEvents(events: any[]) {
 
 function isSingleDayEvent(event: { startDay: Date; endDay: Date }) {
   return event.startDay.getTime() === event.endDay.getTime();
-}
-
-function sortByCreatedAtDesc(left: any, right: any) {
-  return (
-    (toDate(right?.createdAt)?.getTime() ?? 0) -
-    (toDate(left?.createdAt)?.getTime() ?? 0)
-  );
-}
-
-function selectNearestEvent(events: any[]) {
-  const today = resetToUtcMidnight(new Date());
-  return (
-    normalizeEvents(events)
-      .filter((event) => event.endDay.getTime() >= today.getTime())
-      .sort((a, b) => {
-        const aIsActiveToday =
-          a.startDay.getTime() <= today.getTime() &&
-          a.endDay.getTime() >= today.getTime();
-        const bIsActiveToday =
-          b.startDay.getTime() <= today.getTime() &&
-          b.endDay.getTime() >= today.getTime();
-
-        if (aIsActiveToday !== bIsActiveToday) {
-          return aIsActiveToday ? -1 : 1;
-        }
-
-        if (aIsActiveToday && bIsActiveToday) {
-          const aDistance = Math.abs(a.startDay.getTime() - today.getTime());
-          const bDistance = Math.abs(b.startDay.getTime() - today.getTime());
-
-          if (aDistance !== bDistance) {
-            return aDistance - bDistance;
-          }
-
-          return b.startDay.getTime() - a.startDay.getTime();
-        }
-
-        return a.startDay.getTime() - b.startDay.getTime();
-      })[0] || null
-  );
-}
-
-function selectAutoLandingEvent(events: any[]) {
-  const today = resetToUtcMidnight(new Date());
-  const normalizedEvents = normalizeEvents(events);
-
-  const singleDayEventsForToday = normalizedEvents
-    .filter(
-      (event) =>
-        isSingleDayEvent(event) && event.startDay.getTime() === today.getTime(),
-    )
-    .sort(sortByCreatedAtDesc);
-
-  if (singleDayEventsForToday[0]) {
-    return singleDayEventsForToday[0];
-  }
-
-  const activeRangeEvents = normalizedEvents
-    .filter(
-      (event) =>
-        !isSingleDayEvent(event) &&
-        event.startDay.getTime() <= today.getTime() &&
-        event.endDay.getTime() >= today.getTime(),
-    )
-    .sort(sortByCreatedAtDesc);
-
-  if (activeRangeEvents[0]) {
-    return activeRangeEvents[0];
-  }
-
-  return selectNearestEvent(events);
-}
-
-function selectEventCard(
-  events: any[],
-  eventCard: LandingEventCardSelection | null,
-) {
-  if (!eventCard) {
-    return null;
-  }
-
-  if (eventCard.mode === "manual") {
-    const matched = events.find((event) => event.id === eventCard.id);
-    if (!matched) {
-      return null;
-    }
-
-    const startDate = toDate(matched.startDate);
-    if (!startDate) {
-      return null;
-    }
-
-    return {
-      ...matched,
-      startDate,
-      endDate: toDate(matched.endDate),
-    };
-  }
-
-  return selectAutoLandingEvent(events);
 }
 
 function getLandingEventDisplayDate(event: any) {
