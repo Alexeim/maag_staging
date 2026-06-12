@@ -352,6 +352,10 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
                 <img
                   src={mainArticle.imageUrl}
                   alt={mainArticle.title}
+                  width="1200"
+                  height="800"
+                  loading="eager"
+                  fetchpriority="high"
                   class="linked-image-hover__media w-full h-full object-cover"
                   transition:name={getTransitionName(mainArticle)}
                 />
