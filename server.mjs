@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const clientDir = join(__dirname, "dist", "client");
 const app = express();
 
 // Serve pre-compressed static files (.br, .gz created by astro-compressor at build time)
