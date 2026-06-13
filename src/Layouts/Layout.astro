@@ -32,7 +32,7 @@ const toAbsoluteUrl = (value?: string) => {
 };
 
 const {
-  title = "Maag",
+  title = "MAAG France",
   description = "MAAG France — медиа о культуре, Париже и жизни во Франции.",
   image,
   canonicalPath = Astro.url.pathname,
@@ -62,7 +62,10 @@ const imageUrl = toAbsoluteUrl(image);
     {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
     {imageUrl && <meta property="og:image" content={imageUrl} />}
     {imageUrl && <meta property="og:image:alt" content={title} />}
-    <meta name="twitter:card" content={imageUrl ? "summary_large_image" : "summary"} />
+    <meta
+      name="twitter:card"
+      content={imageUrl ? "summary_large_image" : "summary"}
+    />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     {imageUrl && <meta name="twitter:image" content={imageUrl} />}
@@ -83,10 +86,10 @@ const imageUrl = toAbsoluteUrl(image);
     </noscript>
     <!-- Google tag (gtag.js) -->
     <script
-      type="text/partytown"
+      is:inline
       async
       src="https://www.googletagmanager.com/gtag/js?id=G-7EDWP4DX2J"></script>
-    <script>
+    <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
