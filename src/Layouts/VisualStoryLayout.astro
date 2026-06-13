@@ -43,6 +43,10 @@ const imageUrl = toAbsoluteUrl(image);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <meta
+      name="google-site-verification"
+      content="a1g4Q9POWbQ8LXHxizcXDOD5DiG_5gMiXcMMCIa0XQw"
+    />
     {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
     <meta property="og:site_name" content="MAAG France" />
     <meta property="og:type" content={type} />
@@ -51,7 +55,10 @@ const imageUrl = toAbsoluteUrl(image);
     {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
     {imageUrl && <meta property="og:image" content={imageUrl} />}
     {imageUrl && <meta property="og:image:alt" content={title} />}
-    <meta name="twitter:card" content={imageUrl ? "summary_large_image" : "summary"} />
+    <meta
+      name="twitter:card"
+      content={imageUrl ? "summary_large_image" : "summary"}
+    />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     {imageUrl && <meta name="twitter:image" content={imageUrl} />}
