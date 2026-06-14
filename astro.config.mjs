@@ -17,7 +17,6 @@ const sitemapExcludedPaths = new Set([
   "/profile/",
   "/sitemap-content.xml",
   "/success/",
-  "/wtf/",
 ]);
 
 const sitemapExcludedPathPrefixes = ["/dashboard/"];
