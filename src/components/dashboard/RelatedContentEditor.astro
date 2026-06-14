@@ -23,57 +23,6 @@ const { heading = "Подвязка контента", className = "mt-8 mb-8" }
       </p>
     </div>
 
-    <div
-      class="mt-5 grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)_auto] lg:items-end"
-    >
-      <div>
-        <label class="mb-1 block text-sm font-medium text-base-content"
-          >Тип контента</label
-        >
-        <select
-          x-model="selectedRelatedContentType"
-          @change="selectedRelatedContentId = ''"
-          class="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-sm text-base-content focus:border-primary focus:ring-primary"
-        >
-          <option value="" disabled>Выберите тип...</option>
-          <template x-for="type in relatedContentTypeOptions" :key="type.value">
-            <option :value="type.value" x-text="type.label"></option>
-          </template>
-        </select>
-      </div>
-
-      <div>
-        <label class="mb-1 block text-sm font-medium text-base-content"
-          >Контент</label
-        >
-        <select
-          x-model="selectedRelatedContentId"
-          :disabled="!selectedRelatedContentType || contentListsLoading"
-          class="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-sm text-base-content focus:border-primary focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <option value="" disabled>Выберите материал...</option>
-          <template
-            x-for="item in getAvailableRelatedContentItems()"
-            :key="item.id"
-          >
-            <option :value="item.id" x-text="item.title || item.id"></option>
-          </template>
-        </select>
-      </div>
-
-      <div class="flex justify-end">
-        <Button
-          variant="primary"
-          type="button"
-          @click="addRelatedContent()"
-          :disabled="!selectedRelatedContentType || !selectedRelatedContentId || contentListsLoading"
-          :class="{ 'opacity-50 cursor-not-allowed': !selectedRelatedContentType || !selectedRelatedContentId || contentListsLoading }"
-        >
-          Добавить
-        </Button>
-      </div>
-    </div>
-
     <div class="mt-6 grid gap-4">
       <template x-for="type in relatedContentTypeOptions" :key="type.value">
         <section
@@ -117,6 +66,63 @@ const { heading = "Подвязка контента", className = "mt-8 mb-8" }
           </div>
         </section>
       </template>
+    </div>
+
+    <div
+      class="mt-5 grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)_auto] lg:items-end"
+    >
+      <div>
+        <label class="mb-1 block text-sm font-medium text-base-content"
+          >Тип контента</label
+        >
+        <select
+          x-model="selectedRelatedContentType"
+          @change="selectedRelatedContentId = ''"
+          class="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-sm text-base-content focus:border-primary focus:ring-primary"
+        >
+          <option value="" disabled>Выберите тип...</option>
+          <template x-for="type in relatedContentTypeOptions" :key="type.value">
+            <option :value="type.value" x-text="type.label"></option>
+          </template>
+        </select>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-base-content"
+          >Контент</label
+        >
+        <select
+          x-model="selectedRelatedContentId"
+          :disabled="!selectedRelatedContentType || contentListsLoading"
+          class="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-sm text-base-content focus:border-primary focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <option value="" disabled>Выберите материал...</option>
+          <template
+            x-for="item in getAvailableRelatedContentItems()"
+            :key="item.id"
+          >
+            <option :value="item.id" x-text="item.title || item.id"></option>
+          </template>
+        </select>
+        <p
+          x-show="selectedRelatedContentType && !contentListsLoading && getAvailableRelatedContentItems().length === 0"
+          class="mt-1 text-xs text-base-content/60"
+        >
+          Для выбранного типа материалы не найдены.
+        </p>
+      </div>
+
+      <div class="flex justify-end">
+        <Button
+          variant="primary"
+          type="button"
+          @click="addRelatedContent()"
+          :disabled="!selectedRelatedContentType || !selectedRelatedContentId || contentListsLoading"
+          :class="{ 'opacity-50 cursor-not-allowed': !selectedRelatedContentType || !selectedRelatedContentId || contentListsLoading }"
+        >
+          Добавить
+        </Button>
+      </div>
     </div>
   </div>
 </section>

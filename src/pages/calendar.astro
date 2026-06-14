@@ -101,6 +101,18 @@ const resolveTagLabel = (rawTag: unknown, fallback: string): string => {
   return TAG_LABEL_ALIASES[normalized] ?? fallback;
 };
 
+const normalizeCalendarEventLabels = (event: any) => {
+  const fallbackLabel = resolveTagLabel(event?.category, "Событие");
+  const tagLabel = resolveTagLabel(event?.tagLabel, fallbackLabel);
+  const categoryLabel = resolveTagLabel(event?.categoryLabel, tagLabel);
+
+  return {
+    ...event,
+    tagLabel,
+    categoryLabel,
+  };
+};
+
 const formatShortDateRange = (
   startIso: string,
   endIso: string | null,
@@ -200,9 +212,11 @@ let topSourceCards: any[] = [];
 
 try {
   const calendarPage = await publicCalendarApi.get();
-  normalizedEvents = calendarPage.events as any[];
-  featuredEventSourceCards = calendarPage.featuredEventCards as any[];
-  topSourceCards = calendarPage.topCards as any[];
+  normalizedEvents = (calendarPage.events as any[]).map(normalizeCalendarEventLabels);
+  featuredEventSourceCards = (calendarPage.featuredEventCards as any[]).map(
+    normalizeCalendarEventLabels,
+  );
+  topSourceCards = (calendarPage.topCards as any[]).map(normalizeCalendarEventLabels);
 } catch (error) {
   console.error("Failed to fetch events:", error);
 }

@@ -156,16 +156,8 @@ export const sanitizeRelatedContent = (
 };
 
 export const fetchRelatedContentLists = async (): Promise<RelatedContentLists> => {
-  const [
-    articles,
-    events,
-    interviews,
-    guides,
-    news,
-    flippers,
-    visualStories,
-    photosOfTheDay,
-  ] = await Promise.all([
+  const emptyLists = createEmptyRelatedContentLists();
+  const results = await Promise.allSettled([
     articlesApi.list(),
     eventsApi.list(),
     interviewsApi.list(),
@@ -176,14 +168,27 @@ export const fetchRelatedContentLists = async (): Promise<RelatedContentLists> =
     photosOfTheDayApi.list(),
   ]);
 
+  const readList = <T>(index: number, fallback: T[]): T[] => {
+    const result = results[index];
+    if (result?.status === "fulfilled" && Array.isArray(result.value)) {
+      return result.value as T[];
+    }
+
+    if (result?.status === "rejected") {
+      console.warn("Failed to fetch related content list:", result.reason);
+    }
+
+    return fallback;
+  };
+
   return {
-    article: Array.isArray(articles) ? articles : [],
-    event: Array.isArray(events) ? events : [],
-    interview: Array.isArray(interviews) ? interviews : [],
-    guide: Array.isArray(guides) ? guides : [],
-    news: Array.isArray(news) ? news : [],
-    flipper: Array.isArray(flippers) ? flippers : [],
-    visualStory: Array.isArray(visualStories) ? visualStories : [],
-    photoOfTheDay: Array.isArray(photosOfTheDay) ? photosOfTheDay : [],
+    article: readList(0, emptyLists.article),
+    event: readList(1, emptyLists.event),
+    interview: readList(2, emptyLists.interview),
+    guide: readList(3, emptyLists.guide),
+    news: readList(4, emptyLists.news),
+    flipper: readList(5, emptyLists.flipper),
+    visualStory: readList(6, emptyLists.visualStory),
+    photoOfTheDay: readList(7, emptyLists.photoOfTheDay),
   };
 };

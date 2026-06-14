@@ -214,8 +214,22 @@ export default function eventCreatorLogic(initialState = {}) {
     return copy;
   };
 
+  const normalizedInitialEvent = normalizeIncoming(initialEvent);
+  const initialArticle = normalizedInitialEvent
+    ? {
+        ...baseLogic.article,
+        ...normalizedInitialEvent,
+        relatedContent: sanitizeRelatedContent(
+          normalizedInitialEvent.relatedContent,
+          "event",
+          eventId,
+        ),
+      }
+    : baseLogic.article;
+
   return {
     ...baseLogic,
+    article: initialArticle,
     eventId,
     eventForm: {
       startDate: "",
@@ -271,42 +285,46 @@ export default function eventCreatorLogic(initialState = {}) {
     init() {
       baseLogic.init?.call(this);
 
-      if (initialEvent) {
-        const normalized = normalizeIncoming(initialEvent);
-        if (normalized) {
-          this.article = { ...this.article, ...normalized };
-          this.article.contentBlocks = Array.isArray(normalized.contentBlocks)
-            ? normalized.contentBlocks
-            : [];
-          this.article.tags = Array.isArray(normalized.tags)
-            ? normalized.tags
-            : [];
-          this.article.relatedContent = sanitizeRelatedContent(
-            normalized.relatedContent,
-            "event",
-            this.eventId,
-          );
-          this.article.contentCollectionId = normalized.contentCollectionId;
-          this.article.imageUrl = normalized.imageUrl;
-          this.article.imageCaption = normalized.imageCaption ?? "";
-          this.article.title = normalized.title ?? "";
-          this.eventForm.startDate = normalized.startDate;
-          this.eventForm.endDate = normalized.endDate;
-          this.eventForm.dateType = normalized.dateType;
-          this.eventForm.address = normalized.address;
-          this.eventForm.timeMode = normalized.timeMode;
-          this.eventForm.startTime = normalized.startTime;
-          this.eventForm.endTime = normalized.endTime;
-          this.eventForm.isMainEvent = Boolean(normalized.isMainEvent);
-          this.eventForm.additionalInfo = Array.isArray(
-            normalized.additionalInfo,
-          )
-            ? normalized.additionalInfo
-            : [];
-          this.selectedAuthorId =
-            typeof normalized.authorId === "string" ? normalized.authorId : "";
-          this.ensureSelectedAuthorPresent();
-        }
+      if (normalizedInitialEvent) {
+        this.article = { ...this.article, ...normalizedInitialEvent };
+        this.article.contentBlocks = Array.isArray(
+          normalizedInitialEvent.contentBlocks,
+        )
+          ? normalizedInitialEvent.contentBlocks
+          : [];
+        this.article.tags = Array.isArray(normalizedInitialEvent.tags)
+          ? normalizedInitialEvent.tags
+          : [];
+        this.article.relatedContent = sanitizeRelatedContent(
+          normalizedInitialEvent.relatedContent,
+          "event",
+          this.eventId,
+        );
+        this.article.contentCollectionId =
+          normalizedInitialEvent.contentCollectionId;
+        this.article.imageUrl = normalizedInitialEvent.imageUrl;
+        this.article.imageCaption = normalizedInitialEvent.imageCaption ?? "";
+        this.article.title = normalizedInitialEvent.title ?? "";
+        this.eventForm.startDate = normalizedInitialEvent.startDate;
+        this.eventForm.endDate = normalizedInitialEvent.endDate;
+        this.eventForm.dateType = normalizedInitialEvent.dateType;
+        this.eventForm.address = normalizedInitialEvent.address;
+        this.eventForm.timeMode = normalizedInitialEvent.timeMode;
+        this.eventForm.startTime = normalizedInitialEvent.startTime;
+        this.eventForm.endTime = normalizedInitialEvent.endTime;
+        this.eventForm.isMainEvent = Boolean(
+          normalizedInitialEvent.isMainEvent,
+        );
+        this.eventForm.additionalInfo = Array.isArray(
+          normalizedInitialEvent.additionalInfo,
+        )
+          ? normalizedInitialEvent.additionalInfo
+          : [];
+        this.selectedAuthorId =
+          typeof normalizedInitialEvent.authorId === "string"
+            ? normalizedInitialEvent.authorId
+            : "";
+        this.ensureSelectedAuthorPresent();
       }
 
       if (eventId) {
