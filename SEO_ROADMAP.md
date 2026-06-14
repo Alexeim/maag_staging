@@ -138,7 +138,9 @@ Current implementation status:
 - Done: `Layout.astro` and `VisualStoryLayout.astro` include global `WebSite` and `NewsMediaOrganization` schema.
 - Done: `/article/[id]` includes `Article` schema.
 - Done: `/news/[id]` includes `NewsArticle` schema.
-- Pending: `Event` schema for `/events/[id]`.
+- Done: `/interviews/[id]`, `/guide/[id]`, `/tips/[id]`, `/flippers/[id]`, and `/visual-story/[id]` include `Article` schema.
+- Done: `/photo-of-the-day/[id]` includes `ImageObject` schema.
+- Done: `/events/[id]` includes `Event` schema.
 - Pending: `BreadcrumbList` schema once breadcrumb UI/data is implemented.
 
 Recommended article schema fields:
@@ -453,7 +455,9 @@ Near-term expectations:
 - Done: add global `WebSite` JSON-LD.
 - Done: add global `NewsMediaOrganization` JSON-LD.
 - Done: add `Article` / `NewsArticle` JSON-LD to article and news pages.
-- Add `Event` JSON-LD to event pages.
+- Done: add `Article` JSON-LD to interview, guide, tips, flipper, and visual story pages.
+- Done: add `ImageObject` JSON-LD to photo-of-the-day pages.
+- Done: add `Event` JSON-LD to event pages.
 - Add `BreadcrumbList` once breadcrumbs are implemented.
 
 ### Phase 4: Internal Linking

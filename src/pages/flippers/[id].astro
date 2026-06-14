@@ -14,6 +14,7 @@ import {
   fetchPublicContentPools,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
+import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
 const flipper = await flippersApi.getById(id);
@@ -75,6 +76,19 @@ const flipperState = JSON.stringify({
   activeSlide: 0,
   slides: flipper.carouselContent || [],
 });
+const authorName = flipper.author
+  ? `${flipper.author.firstName} ${flipper.author.lastName}`
+  : "";
+const articleStructuredData = buildArticleStructuredData({
+  siteOrigin: Astro.site?.origin ?? Astro.url.origin,
+  path: `/flippers/${id}`,
+  headline: flipper.title,
+  description: flipper.lead,
+  image: flipper.carouselContent?.[0]?.imageUrl,
+  datePublished: flipper.createdAt,
+  dateModified: flipper.updatedAt ?? flipper.createdAt,
+  authorName,
+});
 
 let collectionContentItems: any[] = [];
 let recentFlipperItems: any[] = [];
@@ -114,6 +128,7 @@ try {
   image={flipper.carouselContent?.[0]?.imageUrl}
   canonicalPath={`/flippers/${id}`}
   type="article"
+  structuredData={articleStructuredData}
   navbarVariant="default"
   includePreFooterCTA={false}
   useClientRouter={true}

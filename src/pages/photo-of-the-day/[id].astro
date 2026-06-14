@@ -5,6 +5,7 @@ import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import { ApiError, photosOfTheDayApi } from "@/lib/api/api";
+import { buildImageStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
 
@@ -24,6 +25,18 @@ try {
 const authorName = photo?.author
   ? `${photo.author.firstName} ${photo.author.lastName}`
   : "Автор";
+const imageStructuredData = photo
+  ? buildImageStructuredData({
+      siteOrigin: Astro.site?.origin ?? Astro.url.origin,
+      path: `/photo-of-the-day/${id}`,
+      name: photo.title,
+      description: photo.caption || photo.title,
+      image: photo.imageUrl,
+      datePublished: photo.createdAt,
+      dateModified: photo.updatedAt ?? photo.createdAt,
+      authorName: photo.author ? authorName : undefined,
+    })
+  : [];
 
 // Alpine lazy-load init — same pattern as LazyImage.astro
 const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('load', () => $el.style.opacity='1')";
@@ -35,6 +48,7 @@ const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('lo
   image={photo?.imageUrl}
   canonicalPath={`/photo-of-the-day/${id}`}
   type="article"
+  structuredData={imageStructuredData}
   navbarVariant="default"
   includePreFooterCTA={false}
   useClientRouter={true}

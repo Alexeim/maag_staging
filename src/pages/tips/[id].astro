@@ -15,6 +15,7 @@ import {
   fetchPublicContentPools,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
+import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params as { id: string };
 
@@ -68,6 +69,19 @@ const bookmarkCategory =
   rawCategory === "culture" || rawCategory === "paris"
     ? CATEGORY_LABELS[rawCategory]
     : "";
+const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
+const articleStructuredData = articleData
+  ? buildArticleStructuredData({
+      siteOrigin,
+      path: `/tips/${id}`,
+      headline: displayArticle.title,
+      description: displayArticle.lead,
+      image: displayArticle.imageUrl,
+      datePublished: articleData.createdAt,
+      dateModified: articleData.updatedAt ?? articleData.createdAt,
+      authorName: articleData.author ? displayArticle.authorName : undefined,
+    })
+  : [];
 
 let collectionContentItems: any[] = [];
 let sameCategoryItems: any[] = [];
@@ -106,6 +120,7 @@ if (!error && articleData) {
   image={displayArticle.imageUrl}
   canonicalPath={`/tips/${id}`}
   type="article"
+  structuredData={articleStructuredData}
   useClientRouter={true}
 >
   <main class="bg-base-200 min-h-screen">

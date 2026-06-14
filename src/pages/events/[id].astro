@@ -14,6 +14,7 @@ import {
   type LinkedContentLookup,
   type PublicContentCardItem,
 } from "@/lib/utils/contentCollectionMarquee";
+import { buildEventStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
 
@@ -596,6 +597,20 @@ const displayEvent = {
   additionalInfo: normalizeAdditionalInfo(eventData?.additionalInfo),
 };
 const bookmarkTag = normalizedTags[0] ? topMetaTag : "";
+const eventStructuredData = eventData
+  ? buildEventStructuredData({
+      siteOrigin: Astro.site?.origin ?? Astro.url.origin,
+      path: `/events/${id}`,
+      name: displayEvent.title,
+      description: displayEvent.lead,
+      image: displayEvent.imageUrl,
+      startDate,
+      endDate,
+      locationName: address,
+      address,
+      organizerName: "MAAG France",
+    })
+  : [];
 ---
 
 <Layout
@@ -606,6 +621,7 @@ const bookmarkTag = normalizedTags[0] ? topMetaTag : "";
   image={displayEvent.imageUrl}
   canonicalPath={`/events/${id}`}
   type="article"
+  structuredData={eventStructuredData}
   useClientRouter={true}
 >
   <main class="min-h-screen bg-base-200 text-black">

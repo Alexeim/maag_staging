@@ -14,6 +14,7 @@ import {
   type LinkedContentLookup,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
+import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
 
@@ -45,6 +46,17 @@ const firstBookmarkTag =
     ? (interview as any).tags[0]
     : "";
 const bookmarkTag = firstBookmarkTag ? getKnownTagLabel(firstBookmarkTag) : "";
+const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
+const articleStructuredData = buildArticleStructuredData({
+  siteOrigin,
+  path: `/interviews/${id}`,
+  headline: title,
+  description: lead,
+  image: imageUrl,
+  datePublished: interview.createdAt,
+  dateModified: (interview as any).updatedAt ?? interview.createdAt,
+  authorName: author ? authorName : undefined,
+});
 
 let collectionContentItems: any[] = [];
 let recentInterviewItems: any[] = [];
@@ -80,6 +92,7 @@ try {
   image={imageUrl}
   canonicalPath={`/interviews/${id}`}
   type="article"
+  structuredData={articleStructuredData}
   useClientRouter={true}
 >
   <main class="bg-base-200 min-h-screen">

@@ -12,6 +12,7 @@ import {
   hasLinkedContentBlocks,
   type LinkedContentLookup,
 } from "@/lib/utils/contentCollectionMarquee";
+import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
 
@@ -64,6 +65,19 @@ const bookmarkCategory =
   rawCategory === "culture" || rawCategory === "paris"
     ? CATEGORY_LABELS[rawCategory]
     : "";
+const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
+const articleStructuredData = guideData
+  ? buildArticleStructuredData({
+      siteOrigin,
+      path: `/guide/${id}`,
+      headline: displayGuide.title,
+      description: displayGuide.lead,
+      image: displayGuide.imageUrl,
+      datePublished: guideData.createdAt,
+      dateModified: guideData.updatedAt ?? guideData.createdAt,
+      authorName: guideData.author ? displayGuide.authorName : undefined,
+    })
+  : [];
 
 if (!error && hasLinkedContentBlocks(displayGuide.contentBlocks)) {
   try {
@@ -83,6 +97,7 @@ if (!error && hasLinkedContentBlocks(displayGuide.contentBlocks)) {
   image={displayGuide.imageUrl}
   canonicalPath={`/guide/${id}`}
   type="article"
+  structuredData={articleStructuredData}
   useClientRouter={true}
 >
   <main class="bg-base-200 min-h-screen">
