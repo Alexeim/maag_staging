@@ -1,11 +1,12 @@
 import type { APIRoute } from "astro";
 
-const getRobotsTxt = (sitemapURL: URL) => `\
+const getRobotsTxt = (sitemapIndexURL: URL, contentSitemapURL: URL) => `\
 User-agent: *
 Allow: /
 Disallow: /dashboard/
 
-Sitemap: ${sitemapURL.href}
+Sitemap: ${sitemapIndexURL.href}
+Sitemap: ${contentSitemapURL.href}
 `;
 
 export const GET: APIRoute = ({ site }) => {
@@ -13,8 +14,10 @@ export const GET: APIRoute = ({ site }) => {
     throw new Error("Missing Astro `site` config required to generate robots.txt");
   }
 
-  const sitemapURL = new URL("sitemap-index.xml", site);
-  return new Response(getRobotsTxt(sitemapURL), {
+  const sitemapIndexURL = new URL("sitemap-index.xml", site);
+  const contentSitemapURL = new URL("sitemap-content.xml", site);
+
+  return new Response(getRobotsTxt(sitemapIndexURL, contentSitemapURL), {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
     },
