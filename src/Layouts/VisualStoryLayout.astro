@@ -4,6 +4,12 @@ import "../styles/global.css";
 import AuthModal from "../components/auth/AuthModal.astro";
 import Toast from "../components/common/Toast.astro";
 import ConfirmationModal from "../components/common/ConfirmationModal.astro";
+import StructuredData from "../components/seo/StructuredData.astro";
+import {
+  buildGlobalStructuredData,
+  toStructuredDataArray,
+  type JsonLdObject,
+} from "../lib/seo/structuredData";
 
 interface VisualStoryLayoutProps {
   title?: string;
@@ -11,9 +17,12 @@ interface VisualStoryLayoutProps {
   image?: string;
   canonicalPath?: string;
   type?: "website" | "article";
+  structuredData?: JsonLdObject | JsonLdObject[];
 }
 
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
+const fallbackDescription =
+  "MAAG France — медиа о культуре, Париже и жизни во Франции.";
 
 const toAbsoluteUrl = (value?: string) => {
   if (!value) {
@@ -25,14 +34,21 @@ const toAbsoluteUrl = (value?: string) => {
 
 const {
   title = "Maag",
-  description = "MAAG France — медиа о культуре, Париже и жизни во Франции.",
+  description: rawDescription = fallbackDescription,
   image,
   canonicalPath = Astro.url.pathname,
   type = "article",
+  structuredData = [],
 } = Astro.props as VisualStoryLayoutProps;
 
+const description = rawDescription.trim() || fallbackDescription;
 const canonicalUrl = toAbsoluteUrl(canonicalPath);
 const imageUrl = toAbsoluteUrl(image);
+const globalStructuredData = buildGlobalStructuredData(siteOrigin, toAbsoluteUrl);
+const allStructuredData = [
+  ...globalStructuredData,
+  ...toStructuredDataArray(structuredData),
+];
 ---
 
 <!doctype html>
@@ -62,6 +78,7 @@ const imageUrl = toAbsoluteUrl(image);
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     {imageUrl && <meta name="twitter:image" content={imageUrl} />}
+    <StructuredData data={allStructuredData} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="sitemap" href="/sitemap-index.xml" />

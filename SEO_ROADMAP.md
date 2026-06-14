@@ -132,6 +132,15 @@ Recommended schema types:
 - `Event` for event pages.
 - `BreadcrumbList` for navigational context.
 
+Current implementation status:
+
+- Done: `StructuredData.astro` renders JSON-LD safely through `<script type="application/ld+json">`.
+- Done: `Layout.astro` and `VisualStoryLayout.astro` include global `WebSite` and `NewsMediaOrganization` schema.
+- Done: `/article/[id]` includes `Article` schema.
+- Done: `/news/[id]` includes `NewsArticle` schema.
+- Pending: `Event` schema for `/events/[id]`.
+- Pending: `BreadcrumbList` schema once breadcrumb UI/data is implemented.
+
 Recommended article schema fields:
 
 - `@context`
@@ -441,9 +450,9 @@ Near-term expectations:
 
 ### Phase 3: Structured Data
 
-- Add global `WebSite` JSON-LD.
-- Add global `NewsMediaOrganization` JSON-LD.
-- Add `Article` / `NewsArticle` JSON-LD to article and news pages.
+- Done: add global `WebSite` JSON-LD.
+- Done: add global `NewsMediaOrganization` JSON-LD.
+- Done: add `Article` / `NewsArticle` JSON-LD to article and news pages.
 - Add `Event` JSON-LD to event pages.
 - Add `BreadcrumbList` once breadcrumbs are implemented.
 

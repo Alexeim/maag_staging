@@ -167,6 +167,43 @@ const isStandardCategoryArticle = (item: any) =>
   item?.articleType !== "tips" &&
   item?.articleType !== "le_saviez_vous";
 
+const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
+const canonicalUrl = new URL(`/article/${id}`, siteOrigin).toString();
+const organizationId = new URL("/#organization", siteOrigin).toString();
+const toAbsoluteUrl = (value?: string) =>
+  value ? new URL(value, siteOrigin).toString() : undefined;
+const toIsoDate = (value: unknown) => toDate(value)?.toISOString();
+const articleAuthor = articleData?.author
+  ? {
+      "@type": "Person",
+      name: displayArticle.authorName,
+    }
+  : {
+      "@id": organizationId,
+    };
+const articleStructuredData = articleData
+  ? {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: displayArticle.title,
+      description: displayArticle.lead,
+      image: displayArticle.imageUrl
+        ? [toAbsoluteUrl(displayArticle.imageUrl)]
+        : undefined,
+      datePublished: toIsoDate(articleData.createdAt),
+      dateModified: toIsoDate(articleData.updatedAt ?? articleData.createdAt),
+      author: articleAuthor,
+      publisher: {
+        "@id": organizationId,
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonicalUrl,
+      },
+      inLanguage: "ru",
+    }
+  : [];
+
 if (!error && articleData) {
   try {
     const pools = await fetchPublicContentPools();
@@ -212,6 +249,7 @@ if (!error && articleData) {
   image={displayArticle.imageUrl}
   canonicalPath={`/article/${id}`}
   type="article"
+  structuredData={articleStructuredData}
   useClientRouter={true}
 >
   <main class="bg-base-200 min-h-screen">

@@ -8,7 +8,13 @@ import Footer from "../components/common/Footer.astro";
 import AuthModal from "../components/auth/AuthModal.astro";
 import Toast from "../components/common/Toast.astro";
 import ConfirmationModal from "../components/common/ConfirmationModal.astro";
+import StructuredData from "../components/seo/StructuredData.astro";
 import { navbarContent } from "../content/navbar/RU/Navbar.json";
+import {
+  buildGlobalStructuredData,
+  toStructuredDataArray,
+  type JsonLdObject,
+} from "../lib/seo/structuredData";
 
 interface LayoutProps {
   title?: string;
@@ -16,12 +22,15 @@ interface LayoutProps {
   image?: string;
   canonicalPath?: string;
   type?: "website" | "article";
+  structuredData?: JsonLdObject | JsonLdObject[];
   useClientRouter?: boolean;
   navbarVariant?: "default" | "transparent";
   includePreFooterCTA?: boolean;
 }
 
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
+const fallbackDescription =
+  "MAAG France — медиа о культуре, Париже и жизни во Франции.";
 
 const toAbsoluteUrl = (value?: string) => {
   if (!value) {
@@ -33,17 +42,24 @@ const toAbsoluteUrl = (value?: string) => {
 
 const {
   title = "MAAG France",
-  description = "MAAG France — медиа о культуре, Париже и жизни во Франции.",
+  description: rawDescription = fallbackDescription,
   image,
   canonicalPath = Astro.url.pathname,
   type = "website",
+  structuredData = [],
   useClientRouter = false,
   navbarVariant = "default",
   includePreFooterCTA = true,
 } = Astro.props as LayoutProps;
 
+const description = rawDescription.trim() || fallbackDescription;
 const canonicalUrl = toAbsoluteUrl(canonicalPath);
 const imageUrl = toAbsoluteUrl(image);
+const globalStructuredData = buildGlobalStructuredData(siteOrigin, toAbsoluteUrl);
+const allStructuredData = [
+  ...globalStructuredData,
+  ...toStructuredDataArray(structuredData),
+];
 ---
 
 <!doctype html>
@@ -73,6 +89,7 @@ const imageUrl = toAbsoluteUrl(image);
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     {imageUrl && <meta name="twitter:image" content={imageUrl} />}
+    <StructuredData data={allStructuredData} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="sitemap" href="/sitemap-index.xml" />
