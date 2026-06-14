@@ -52,7 +52,7 @@ This explains why Google Search Console reports around 14 discovered pages.
 
 Current implementation status:
 
-- Demo news variant pages were excluded from the generated Astro sitemap.
+- Demo news variant pages were deleted from public routes and removed from the generated Astro sitemap.
 - The generated static sitemap now contains 9 public static URLs:
   - `/`
   - `/about/`
@@ -396,7 +396,7 @@ Sitemap: https://maagfrance.fr/sitemap-content.xml
 
 ## Sitemap Cleanup
 
-Current sitemap includes design/demo pages:
+Initial sitemap included design/demo pages:
 
 - `/news/new-news1/`
 - `/news/new-news2/`
@@ -404,11 +404,10 @@ Current sitemap includes design/demo pages:
 - `/news/new-news4/`
 - `/news/new-news5/`
 
-These should be either:
+Current implementation status:
 
-- removed from sitemap, or
-- marked `noindex`, or
-- deleted if no longer needed.
+- Done: demo news variant routes were deleted.
+- Done: the generated Astro sitemap no longer includes these URLs.
 
 Recommended path:
 
