@@ -4,6 +4,7 @@ import { Image } from "astro:assets";
 import heroImage from "../../assets/images/culture.jpg";
 import alexeyMakarovImage from "../../assets/team/AM.jpeg";
 import dmitryMakarovImage from "../../assets/team/dm.jpg";
+import mariaSidelnikovaImage from "../../assets/team/MS.jpeg";
 
 const createMockAvatar = (
   label: string,
@@ -39,19 +40,16 @@ const teamMembers = [
   {
     role: "Редакция",
     title: "Мария Сидельникова",
-    note: "Следим за тем, что действительно стоит вашего времени сегодня и что не потеряет актуальности завтра.",
-    avatar: createMockAvatar("MF", "#b36a5e", "#d6b18a"),
+    avatar: mariaSidelnikovaImage.src,
   },
   {
     role: "CEO",
     title: "Алексей Макаров",
-    note: "Собираем город не по открыткам, а по живому опыту: где быть, куда свернуть и что не пропустить.",
     avatar: alexeyMakarovImage.src,
   },
   {
     role: "CTO",
     title: "Дмитрий Макаров",
-    note: "Ищем спектакли, выставки и семейные сценарии, которые работают в реальной жизни, а не только на бумаге.",
     avatar: dmitryMakarovImage.src,
   },
 ];
@@ -166,9 +164,6 @@ const teamMembers = [
                 <h2 class="mt-3 font-old_standard text-[2rem] leading-[1.05] text-base-content lg:text-xl">
                   {member.title}
                 </h2>
-                <p class="mt-4 max-w-[32rem] font-old_standard text-[1.9rem] italic leading-[1.18] text-base-content/92 lg:text-2xl">
-                  {member.note}
-                </p>
               </div>
             </article>
           ))
