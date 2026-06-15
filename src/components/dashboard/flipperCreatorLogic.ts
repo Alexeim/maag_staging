@@ -554,5 +554,29 @@ export default function flipperCreatorLogic(initialState = {}) {
         this.isSaving = false;
       }
     },
+
+    deleteFlipper() {
+      if (!this.flipperId) return;
+
+      const performDelete = async () => {
+        try {
+          await flippersApi.delete(this.flipperId);
+          window.Alpine.store("ui").showToast("Листалка удалена");
+          setTimeout(() => {
+            window.location.href = this.onSaveRedirect || "/dashboard/flippers";
+          }, 1000);
+        } catch (error) {
+          console.error("Delete flipper failed:", error);
+          window.Alpine.store("ui").showToast("Не удалось удалить листалку.", "error");
+        }
+      };
+
+      const uiStore = window.Alpine?.store?.("ui");
+      if (uiStore?.showConfirmation) {
+        uiStore.showConfirmation("Удалить листалку? Это действие необратимо.", performDelete);
+      } else {
+        performDelete();
+      }
+    },
   };
 }

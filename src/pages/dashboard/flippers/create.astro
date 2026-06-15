@@ -13,5 +13,8 @@ const creatorState = JSON.stringify({
 ---
 
 <DashboardLayout title="Создать листалку" active="create-flipper">
-  <FlipperComposer creatorState={creatorState} />
+  <FlipperComposer
+    creatorState={creatorState}
+    cancelHref="/dashboard/flippers"
+  />
 </DashboardLayout>

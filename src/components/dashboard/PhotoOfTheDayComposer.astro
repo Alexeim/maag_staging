@@ -6,12 +6,14 @@ interface Props {
   heading?: string;
   submitLabel?: string;
   creatorState: string;
+  cancelHref?: string;
 }
 
 const {
   heading = "Фото дня",
   submitLabel = "Сохранить",
   creatorState,
+  cancelHref,
 } = Astro.props;
 ---
 
@@ -101,6 +103,14 @@ const {
       </template>
     </div>
     <div class="flex justify-end gap-3">
+      {cancelHref && (
+        <a
+          href={cancelHref}
+          class="cursor-pointer text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-yellow-300 flex flex-row items-center justify-center px-4 py-2 rounded-lg"
+        >
+          Отмена
+        </a>
+      )}
       <Button variant="secondary" @click="previewPhoto()">Предпросмотр</Button>
       <Button
         variant="primary"

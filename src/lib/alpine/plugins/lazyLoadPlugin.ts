@@ -564,6 +564,7 @@ export default function(Alpine: Alpine) {
       addCarouselItem() {},
       removeCarouselItem() {},
       saveFlipper() {},
+      deleteFlipper() {},
       // --- Tips Article Creator defaults ---
       addTipsItem() {},
       moveBlock() {},
