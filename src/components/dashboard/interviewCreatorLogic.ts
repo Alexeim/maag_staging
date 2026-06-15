@@ -54,12 +54,14 @@ export default function interviewCreatorLogic(initialState = {}) {
     initialInterview = null,
     interviewId = null,
     isEditMode = false,
+    isPreview = false,
     onSaveRedirect = null,
     ...restInitialState
   } = initialState as {
     initialInterview?: Record<string, unknown> | null;
     interviewId?: string | null;
     isEditMode?: boolean;
+    isPreview?: boolean;
     onSaveRedirect?: string | null;
   };
 
@@ -417,7 +419,36 @@ export default function interviewCreatorLogic(initialState = {}) {
     },
 
     init() {
-      if (initialInterview) {
+      if (isPreview) {
+        try {
+          const stored = window.localStorage?.getItem("interviewPreview");
+          const previewState = stored ? JSON.parse(stored) : null;
+          const normalizedInitial = normalizeLoadedInterview(previewState?.interview);
+          if (normalizedInitial) {
+            this.interview = normalizedInitial;
+            this.interviewId =
+              typeof previewState?.interviewId === "string"
+                ? previewState.interviewId
+                : null;
+            this.isEditMode = Boolean(previewState?.isEditMode);
+            this.selectedAuthorId =
+              typeof previewState?.selectedAuthorId === "string"
+                ? previewState.selectedAuthorId
+                : "";
+            this.useNewAuthor = Boolean(previewState?.useNewAuthor);
+            this.newAuthorFirstName =
+              typeof previewState?.newAuthorFirstName === "string"
+                ? previewState.newAuthorFirstName
+                : "";
+            this.newAuthorLastName =
+              typeof previewState?.newAuthorLastName === "string"
+                ? previewState.newAuthorLastName
+                : "";
+          }
+        } catch (error) {
+          console.error("Failed to load interview preview draft:", error);
+        }
+      } else if (initialInterview) {
         const normalizedInitial = normalizeLoadedInterview(initialInterview);
         if (normalizedInitial) {
           this.interview = normalizedInitial;
@@ -453,6 +484,40 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.syncCurrentContentCollection();
       this.loadContentCollections();
       this.loadLandingPlacements();
+    },
+
+    returnToEdit() {
+      window.location.href =
+        this.isEditMode && this.interviewId
+          ? `/dashboard/interview/${this.interviewId}/edit`
+          : "/dashboard/interview/create";
+    },
+
+    previewInterview() {
+      if (this.editingIndex !== null) {
+        this.updateBlock();
+        if (this.editingIndex !== null) return;
+      }
+
+      if (this.uploading) {
+        window.Alpine.store("ui").showToast(
+          "Подожди — загрузка файла ещё не завершилась.",
+          "error",
+        );
+        return;
+      }
+
+      const previewState = {
+        interview: this.interview,
+        interviewId: this.interviewId,
+        isEditMode: this.isEditMode,
+        selectedAuthorId: this.selectedAuthorId,
+        useNewAuthor: this.useNewAuthor,
+        newAuthorFirstName: this.newAuthorFirstName,
+        newAuthorLastName: this.newAuthorLastName,
+      };
+      window.localStorage.setItem("interviewPreview", JSON.stringify(previewState));
+      window.location.href = "/dashboard/interview/preview";
     },
 
     editTitle() {

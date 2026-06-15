@@ -1,0 +1,100 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import Button from "@/components/common/Button.astro";
+import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticleBodyPreview.astro";
+import articleData from "@/content/articlePage/RU/Article.json";
+---
+
+<DashboardLayout title="Предпросмотр новости" active="news">
+  <div
+    id="preview-container"
+    class="max-w-[1512px] mx-auto"
+    x-data="$lazy('newsCreator', { isPreview: true })"
+  >
+    <div class="bg-base-100 border border-base-300 rounded-xl shadow-sm">
+      <div class="px-6 py-6 border-b border-base-300 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold">Предпросмотр новости</h1>
+          <p class="text-sm text-base-content/70 mt-1">
+            Используй кнопки справа, чтобы вернуться к редактированию или сохранить материал.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <Button variant="secondary" @click="returnToEdit()">Вернуться к редактированию</Button>
+          <Button variant="primary" @click="saveArticle()">Сохранить новость</Button>
+        </div>
+      </div>
+
+      <main class="bg-base-100">
+        <div class="px-4 pb-[100px] pt-[50px] lg:px-14">
+          <section class="grid gap-10 lg:grid-cols-12 lg:gap-8 lg:items-start">
+            <div class="grid gap-10 lg:col-span-9">
+              <article class="grid gap-10">
+                <div class="mx-auto flex w-full max-w-[825px] flex-col gap-4 lg:mx-0">
+                  <div class="flex flex-col gap-8 w-full">
+                    <div class="flex flex-col items-start gap-2">
+                      <p
+                        class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']"
+                        x-text="article.tags?.length ? getTagLabel(article.tags[0]) : getCategoryLabel(article.category)"
+                      ></p>
+                      <h1
+                        class="text-3xl lg:text-[42px] leading-tight font-old_standard text-base-content w-full"
+                        x-text="article.title"
+                      ></h1>
+                      <p
+                        x-show="article.lead"
+                        x-text="article.lead"
+                        class="max-w-[760px] text-lg font-light text-base-content/80 font-article-body lg:text-[22px]"
+                      ></p>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-col items-start justify-center gap-4">
+                    <ArticleAuthor
+                      name={articleData.author.name}
+                      avatarUrl={articleData.author.avatarUrl}
+                    />
+                  </div>
+                </div>
+
+                <template x-if="article.imageUrl">
+                  <div class="mx-auto w-full max-w-[826px] lg:mx-0">
+                    <figure class="max-w-[826px]">
+                      <img
+                        :src="article.imageUrl"
+                        :alt="article.imageCaption || article.title || 'News image'"
+                        class="w-full h-auto shadow-lg object-cover"
+                      />
+                      <figcaption
+                        x-show="article.imageCaption"
+                        x-text="article.imageCaption"
+                        class="text-center text-gray-500 mt-2"
+                      ></figcaption>
+                    </figure>
+                  </div>
+                </template>
+
+                <div class="pt-2">
+                  <div class="bg-base-100 px-0 pb-0 pt-0 text-base-content">
+                    <div class="mx-auto w-full max-w-[826px] lg:mx-0">
+                      <DashboardArticleBodyPreview imageAltLabel="News image" />
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <aside class="lg:col-span-3 lg:border-l lg:border-base-content/10 lg:pl-6">
+              <div class="grid gap-6 lg:sticky lg:top-8">
+                <h2 class="m-0 font-old_standard text-lg font-semibold uppercase tracking-[0.3em] text-base-content">
+                  новости
+                </h2>
+              </div>
+            </aside>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+</DashboardLayout>

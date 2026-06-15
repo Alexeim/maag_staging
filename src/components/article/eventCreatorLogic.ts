@@ -161,12 +161,14 @@ export default function eventCreatorLogic(initialState = {}) {
   const {
     eventId = null,
     isEditMode = false,
+    isPreview = false,
     onSaveRedirect = null,
     initialEvent = null,
     ...restInitial
   } = initialState as {
     eventId?: string | null;
     isEditMode?: boolean;
+    isPreview?: boolean;
     onSaveRedirect?: string | null;
     initialEvent?: Record<string, unknown> | null;
   };
@@ -285,45 +287,72 @@ export default function eventCreatorLogic(initialState = {}) {
     init() {
       baseLogic.init?.call(this);
 
-      if (normalizedInitialEvent) {
-        this.article = { ...this.article, ...normalizedInitialEvent };
+      const previewEvent = (() => {
+        if (!isPreview) {
+          return null;
+        }
+        try {
+          const stored = window.localStorage?.getItem("eventPreview");
+          const previewState = stored ? JSON.parse(stored) : null;
+          const normalized = normalizeIncoming(previewState?.event);
+          if (normalized) {
+            this.eventId =
+              typeof previewState?.eventId === "string"
+                ? previewState.eventId
+                : null;
+            this.isEditMode = Boolean(previewState?.isEditMode);
+            this.selectedAuthorId =
+              typeof previewState?.selectedAuthorId === "string"
+                ? previewState.selectedAuthorId
+                : "";
+          }
+          return normalized;
+        } catch (error) {
+          console.error("Failed to load event preview draft:", error);
+          return null;
+        }
+      })();
+
+      const eventDraft = previewEvent || normalizedInitialEvent;
+
+      if (eventDraft) {
+        this.article = { ...this.article, ...eventDraft };
         this.article.contentBlocks = Array.isArray(
-          normalizedInitialEvent.contentBlocks,
+          eventDraft.contentBlocks,
         )
-          ? normalizedInitialEvent.contentBlocks
+          ? eventDraft.contentBlocks
           : [];
-        this.article.tags = Array.isArray(normalizedInitialEvent.tags)
-          ? normalizedInitialEvent.tags
+        this.article.tags = Array.isArray(eventDraft.tags)
+          ? eventDraft.tags
           : [];
         this.article.relatedContent = sanitizeRelatedContent(
-          normalizedInitialEvent.relatedContent,
+          eventDraft.relatedContent,
           "event",
           this.eventId,
         );
         this.article.contentCollectionId =
-          normalizedInitialEvent.contentCollectionId;
-        this.article.imageUrl = normalizedInitialEvent.imageUrl;
-        this.article.imageCaption = normalizedInitialEvent.imageCaption ?? "";
-        this.article.title = normalizedInitialEvent.title ?? "";
-        this.eventForm.startDate = normalizedInitialEvent.startDate;
-        this.eventForm.endDate = normalizedInitialEvent.endDate;
-        this.eventForm.dateType = normalizedInitialEvent.dateType;
-        this.eventForm.address = normalizedInitialEvent.address;
-        this.eventForm.timeMode = normalizedInitialEvent.timeMode;
-        this.eventForm.startTime = normalizedInitialEvent.startTime;
-        this.eventForm.endTime = normalizedInitialEvent.endTime;
-        this.eventForm.isMainEvent = Boolean(
-          normalizedInitialEvent.isMainEvent,
-        );
+          eventDraft.contentCollectionId;
+        this.article.imageUrl = eventDraft.imageUrl;
+        this.article.imageCaption = eventDraft.imageCaption ?? "";
+        this.article.title = eventDraft.title ?? "";
+        this.eventForm.startDate = eventDraft.startDate;
+        this.eventForm.endDate = eventDraft.endDate;
+        this.eventForm.dateType = eventDraft.dateType;
+        this.eventForm.address = eventDraft.address;
+        this.eventForm.timeMode = eventDraft.timeMode;
+        this.eventForm.startTime = eventDraft.startTime;
+        this.eventForm.endTime = eventDraft.endTime;
+        this.eventForm.isMainEvent = Boolean(eventDraft.isMainEvent);
         this.eventForm.additionalInfo = Array.isArray(
-          normalizedInitialEvent.additionalInfo,
+          eventDraft.additionalInfo,
         )
-          ? normalizedInitialEvent.additionalInfo
+          ? eventDraft.additionalInfo
           : [];
         this.selectedAuthorId =
-          typeof normalizedInitialEvent.authorId === "string"
-            ? normalizedInitialEvent.authorId
-            : "";
+          this.selectedAuthorId ||
+          (typeof eventDraft.authorId === "string"
+            ? eventDraft.authorId
+            : "");
         this.ensureSelectedAuthorPresent();
       }
 
@@ -345,6 +374,40 @@ export default function eventCreatorLogic(initialState = {}) {
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? reindexContentBlocks(this.article.contentBlocks)
         : [];
+    },
+
+    returnToEdit() {
+      window.location.href =
+        this.isEditMode && this.eventId
+          ? `/dashboard/event/${this.eventId}/edit`
+          : "/dashboard/event/create";
+    },
+
+    previewEvent() {
+      if (this.editingIndex !== null) {
+        this.updateBlock();
+        if (this.editingIndex !== null) return;
+      }
+
+      if (this.uploading) {
+        window.Alpine.store("ui").showToast(
+          "Подожди — загрузка файла ещё не завершилась.",
+          "error",
+        );
+        return;
+      }
+
+      const previewState = {
+        event: {
+          ...this.article,
+          ...this.eventForm,
+        },
+        eventId: this.eventId,
+        isEditMode: this.isEditMode,
+        selectedAuthorId: this.selectedAuthorId,
+      };
+      window.localStorage.setItem("eventPreview", JSON.stringify(previewState));
+      window.location.href = "/dashboard/event/preview";
     },
 
     getAvailableTags() {

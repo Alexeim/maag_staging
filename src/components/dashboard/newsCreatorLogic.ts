@@ -45,6 +45,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     initialArticle = null,
     articleId = null,
     isEditMode = false,
+    isPreview = false,
     onSaveRedirect = null,
     ...restInitialState
   } = initialState as {
@@ -52,6 +53,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     initialArticle?: Record<string, unknown> | null;
     articleId?: string | null;
     isEditMode?: boolean;
+    isPreview?: boolean;
     onSaveRedirect?: string | null;
   };
 
@@ -360,7 +362,36 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     },
 
     init() {
-      if (initialArticle) {
+      if (isPreview) {
+        try {
+          const stored = window.localStorage?.getItem("newsPreview");
+          const previewState = stored ? JSON.parse(stored) : null;
+          const normalized = normalizeLoadedArticle(previewState?.article);
+          if (normalized) {
+            this.article = normalized;
+            this.articleId =
+              typeof previewState?.articleId === "string"
+                ? previewState.articleId
+                : null;
+            this.isEditMode = Boolean(previewState?.isEditMode);
+            this.selectedAuthorId =
+              typeof previewState?.selectedAuthorId === "string"
+                ? previewState.selectedAuthorId
+                : "";
+            this.useNewAuthor = Boolean(previewState?.useNewAuthor);
+            this.newAuthorFirstName =
+              typeof previewState?.newAuthorFirstName === "string"
+                ? previewState.newAuthorFirstName
+                : "";
+            this.newAuthorLastName =
+              typeof previewState?.newAuthorLastName === "string"
+                ? previewState.newAuthorLastName
+                : "";
+          }
+        } catch (error) {
+          console.error("Failed to load news preview draft:", error);
+        }
+      } else if (initialArticle) {
         const normalized = normalizeLoadedArticle(initialArticle);
         if (normalized) this.article = normalized;
       }
@@ -390,6 +421,40 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       this.loadAuthors();
       this.syncCurrentContentCollection();
       this.loadContentCollections();
+    },
+
+    returnToEdit() {
+      window.location.href =
+        this.isEditMode && this.articleId
+          ? `/dashboard/news/${this.articleId}/edit`
+          : "/dashboard/news/create";
+    },
+
+    previewArticle() {
+      if (this.editingIndex !== null) {
+        this.updateBlock();
+        if (this.editingIndex !== null) return;
+      }
+
+      if (this.uploading) {
+        (window as any).Alpine.store("ui").showToast(
+          "Подожди — загрузка файла ещё не завершилась.",
+          "error",
+        );
+        return;
+      }
+
+      const previewState = {
+        article: this.article,
+        articleId: this.articleId,
+        isEditMode: this.isEditMode,
+        selectedAuthorId: this.selectedAuthorId,
+        useNewAuthor: this.useNewAuthor,
+        newAuthorFirstName: this.newAuthorFirstName,
+        newAuthorLastName: this.newAuthorLastName,
+      };
+      window.localStorage.setItem("newsPreview", JSON.stringify(previewState));
+      window.location.href = "/dashboard/news/preview";
     },
 
     // Title editing

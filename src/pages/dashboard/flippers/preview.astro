@@ -1,0 +1,121 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import Button from "@/components/common/Button.astro";
+import articleData from "@/content/articlePage/RU/Article.json";
+import { ChevronLeft, ChevronRight } from "lucide-astro";
+---
+
+<DashboardLayout title="Предпросмотр листалки" active="flippers">
+  <div
+    id="preview-container"
+    class="max-w-[1512px] mx-auto"
+    x-data="$lazy('flipperCreator', { isPreview: true })"
+  >
+    <div class="bg-base-100 border border-base-300 rounded-xl shadow-sm">
+      <div class="px-6 py-6 border-b border-base-300 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold">Предпросмотр листалки</h1>
+          <p class="text-sm text-base-content/70 mt-1">
+            Используй кнопки справа, чтобы вернуться к редактированию или сохранить материал.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <Button variant="secondary" @click="returnToEdit()">Вернуться к редактированию</Button>
+          <Button variant="primary" @click="saveFlipper()">Сохранить листалку</Button>
+        </div>
+      </div>
+
+      <main class="bg-base-100">
+        <div class="pt-[50px] pb-[70px] px-4 lg:px-0 flex flex-col items-center gap-[50px]">
+          <div class="flex flex-col gap-4 max-w-[825px] w-full">
+            <p
+              class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mt-2"
+              x-text="flipper.tags?.length ? getTagLabel(flipper.tags[0]) : getCategoryLabel(flipper.category)"
+            ></p>
+            <h1
+              class="text-3xl lg:text-[52px] leading-tight font-old_standard text-base-content w-full"
+              x-text="flipper.title"
+            ></h1>
+            <p
+              x-show="flipper.lead"
+              x-text="flipper.lead"
+              class="text-base font-light text-base-content font-article-body mt-2"
+            ></p>
+            <ArticleAuthor
+              name={articleData.author.name}
+              avatarUrl={articleData.author.avatarUrl}
+            />
+          </div>
+        </div>
+
+        <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
+          <div class="mx-auto w-full max-w-[1200px]" x-data="{ activeSlide: 0 }">
+            <div class="relative">
+              <div class="relative flex h-[360px] w-full items-center justify-center sm:h-[460px] lg:h-[600px]">
+                <template x-for="(item, index) in (flipper.carouselContent || [])" :key="index">
+                  <div
+                    x-show="activeSlide === index"
+                    class="absolute inset-0 flex items-center justify-center duration-700 ease-in-out"
+                    x-transition:enter="transition ease-in-out duration-700"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in-out duration-700"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                  >
+                    <img
+                      :src="item.imageUrl"
+                      class="block h-full w-auto max-w-full object-contain object-center"
+                      :alt="item.caption || 'Carousel image'"
+                    />
+                  </div>
+                </template>
+
+                <button
+                  x-show="(flipper.carouselContent || []).length > 1"
+                  @click="activeSlide = (activeSlide - 1 + (flipper.carouselContent || []).length) % (flipper.carouselContent || []).length"
+                  class="absolute top-1/2 left-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-left-12"
+                  aria-label="Предыдущий слайд"
+                >
+                  <ChevronLeft class="h-6 w-6" />
+                </button>
+                <button
+                  x-show="(flipper.carouselContent || []).length > 1"
+                  @click="activeSlide = (activeSlide + 1) % (flipper.carouselContent || []).length"
+                  class="absolute top-1/2 right-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-right-12"
+                  aria-label="Следующий слайд"
+                >
+                  <ChevronRight class="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+
+            <div class="mx-auto mt-6 max-w-[825px] min-h-[2.5rem]">
+              <p
+                class="text-center text-sm text-black/60 font-inter font-normal leading-relaxed"
+                x-text="(flipper.carouselContent || [])[activeSlide]?.caption || ''"
+              ></p>
+            </div>
+
+            <hr class="my-5 border-base-300" />
+
+            <div
+              x-show="(flipper.carouselContent || []).length > 1"
+              class="mb-16 mt-2 flex justify-center gap-2"
+            >
+              <template x-for="(slide, index) in (flipper.carouselContent || [])" :key="index">
+                <button
+                  @click="activeSlide = index"
+                  :class="{'bg-base-content': activeSlide === index, 'bg-base-content/20': activeSlide !== index}"
+                  class="h-2.5 w-2.5 rounded-full transition hover:bg-base-content/60 cursor-pointer"
+                  :aria-label="`Перейти к слайду ${index + 1}`"
+                ></button>
+              </template>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</DashboardLayout>

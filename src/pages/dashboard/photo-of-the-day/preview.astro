@@ -1,0 +1,71 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import Button from "@/components/common/Button.astro";
+---
+
+<DashboardLayout title="Предпросмотр фото дня" active="photo-of-the-day">
+  <div
+    class="max-w-[1512px] mx-auto"
+    x-data="$lazy('photoOfTheDayCreator', { isPreview: true })"
+  >
+    <div class="bg-base-100 border border-base-300 rounded-xl shadow-sm">
+      <div class="px-6 py-6 border-b border-base-300 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold">Предпросмотр фото дня</h1>
+          <p class="text-sm text-base-content/70 mt-1">
+            Черновой просмотр текущей формы без публикации.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <Button variant="secondary" @click="returnToEdit()">Вернуться к редактированию</Button>
+          <Button variant="primary" @click="savePhoto()">Сохранить фото</Button>
+        </div>
+      </div>
+
+      <main class="bg-base-200 min-h-screen">
+        <div class="pt-[50px] pb-[40px] px-4 lg:px-0 flex flex-col items-center">
+          <div class="flex flex-col gap-4 max-w-[825px] w-full">
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+              Фото дня
+            </p>
+            <h2
+              class="text-3xl lg:text-[42px] leading-tight font-old_standard text-base-content"
+              x-text="photo.title || 'Без заголовка'"
+            ></h2>
+            <div class="h-10 flex flex-row items-center justify-start gap-4">
+              <ArticleAuthor name="Автор" />
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full px-4 lg:px-14 pb-[100px] flex flex-col items-center gap-4">
+          <div class="w-full max-w-[1200px] h-[460px] lg:h-[700px] overflow-hidden bg-base-200">
+            <template x-if="photo.imageUrl">
+              <img
+                :src="photo.imageUrl"
+                :alt="photo.title || 'Фото дня'"
+                class="w-full h-full object-cover object-center shadow-lg"
+              />
+            </template>
+            <template x-if="!photo.imageUrl">
+              <div class="h-full w-full flex items-center justify-center text-sm text-base-content/50">
+                Нет изображения
+              </div>
+            </template>
+          </div>
+
+          <template x-if="photo.caption">
+            <div class="max-w-[826px] w-full">
+              <p
+                class="text-sm text-black/60 font-inter font-normal text-center"
+                x-text="photo.caption"
+              ></p>
+              <hr class="w-full border-t border-neutral-200 mt-3" />
+            </div>
+          </template>
+        </div>
+      </main>
+    </div>
+  </div>
+</DashboardLayout>

@@ -25,6 +25,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     initialFlipper = null,
     flipperId = null,
     isEditMode = false,
+    isPreview = false,
     onSaveRedirect = null,
     categoryTags = {},
     parisDistrictOptions = [],
@@ -32,6 +33,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     initialFlipper?: any;
     flipperId?: string | null;
     isEditMode?: boolean;
+    isPreview?: boolean;
     onSaveRedirect?: string | null;
     categoryTags?: Record<string, Array<{ title: string; value: string }>>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
@@ -162,7 +164,36 @@ export default function flipperCreatorLogic(initialState = {}) {
     }),
 
     init() {
-      if (initialFlipper) {
+      if (isPreview) {
+        try {
+          const stored = window.localStorage?.getItem("flipperPreview");
+          const previewState = stored ? JSON.parse(stored) : null;
+          const flipperCopy = normalizeLoadedFlipper(previewState?.flipper);
+          if (flipperCopy) {
+            this.flipper = { ...this.flipper, ...flipperCopy };
+            this.flipperId =
+              typeof previewState?.flipperId === "string"
+                ? previewState.flipperId
+                : null;
+            this.isEditMode = Boolean(previewState?.isEditMode);
+            this.selectedAuthorId =
+              typeof previewState?.selectedAuthorId === "string"
+                ? previewState.selectedAuthorId
+                : "";
+            this.useNewAuthor = Boolean(previewState?.useNewAuthor);
+            this.newAuthorFirstName =
+              typeof previewState?.newAuthorFirstName === "string"
+                ? previewState.newAuthorFirstName
+                : "";
+            this.newAuthorLastName =
+              typeof previewState?.newAuthorLastName === "string"
+                ? previewState.newAuthorLastName
+                : "";
+          }
+        } catch (error) {
+          console.error("Failed to load flipper preview draft:", error);
+        }
+      } else if (initialFlipper) {
         const flipperCopy = normalizeLoadedFlipper(initialFlipper);
         this.flipper = { ...this.flipper, ...flipperCopy };
         if (!this.flipper.carouselContent || this.flipper.carouselContent.length === 0) {
@@ -182,6 +213,45 @@ export default function flipperCreatorLogic(initialState = {}) {
       this.syncCurrentContentCollection();
       this.loadContentCollections();
       this.loadLandingPlacements();
+    },
+
+    getCategoryLabel(value?: string) {
+      if (!value) return "Листалка";
+      const categoryLabels: Record<string, string> = {
+        culture: "Культура",
+        paris: "Париж",
+        hotContent: "Самое Читаемое",
+      };
+      return categoryLabels[value] || this.getTagLabel(value);
+    },
+
+    returnToEdit() {
+      window.location.href =
+        this.isEditMode && this.flipperId
+          ? `/dashboard/flippers/edit/${this.flipperId}`
+          : "/dashboard/flippers/create";
+    },
+
+    previewFlipper() {
+      if (this.uploading) {
+        window.Alpine.store("ui").showToast(
+          "Подожди — загрузка картинки ещё не завершилась.",
+          "error",
+        );
+        return;
+      }
+
+      const previewState = {
+        flipper: this.flipper,
+        flipperId: this.flipperId,
+        isEditMode: this.isEditMode,
+        selectedAuthorId: this.selectedAuthorId,
+        useNewAuthor: this.useNewAuthor,
+        newAuthorFirstName: this.newAuthorFirstName,
+        newAuthorLastName: this.newAuthorLastName,
+      };
+      window.localStorage.setItem("flipperPreview", JSON.stringify(previewState));
+      window.location.href = "/dashboard/flippers/preview";
     },
 
     getAvailableTags() {

@@ -1,0 +1,118 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import Button from "@/components/common/Button.astro";
+---
+
+<DashboardLayout title="Предпросмотр визуальной истории" active="visual-stories">
+  <div
+    class="max-w-[1512px] mx-auto"
+    x-data="$lazy('visualStoryCreator', { isPreview: true })"
+  >
+    <div class="bg-base-100 border border-base-300 rounded-xl shadow-sm overflow-hidden">
+      <div class="px-6 py-6 border-b border-base-300 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold">Предпросмотр визуальной истории</h1>
+          <p class="text-sm text-base-content/70 mt-1">
+            Черновой просмотр текущих слайдов без публикации.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <Button variant="secondary" @click="returnToEdit()">Вернуться к редактированию</Button>
+          <Button variant="primary" @click="saveStory()">Сохранить историю</Button>
+        </div>
+      </div>
+
+      <main class="bg-white">
+        <div class="grid min-h-[680px] grid-cols-1 lg:grid-cols-2">
+          <section class="relative min-h-[360px] bg-base-200">
+            <template x-if="story.imageUrl || (Array.isArray(story.slides) && story.slides[0]?.imageUrl)">
+              <img
+                :src="story.imageUrl || story.slides[0]?.imageUrl"
+                :alt="story.imageCaption || story.title || 'Visual story image'"
+                class="absolute inset-0 h-full w-full object-cover"
+              />
+            </template>
+            <template x-if="!(story.imageUrl || (Array.isArray(story.slides) && story.slides[0]?.imageUrl))">
+              <div class="absolute inset-0 flex items-center justify-center text-sm text-base-content/50">
+                Нет изображения
+              </div>
+            </template>
+            <div
+              x-show="story.imageCaption || (Array.isArray(story.slides) && story.slides[0]?.caption)"
+              class="absolute bottom-4 right-4 max-w-md bg-black/75 px-4 py-3 text-sm leading-relaxed text-white"
+              x-text="story.imageCaption || story.slides[0]?.caption"
+            ></div>
+          </section>
+
+          <section class="flex flex-col justify-center px-8 py-12 lg:px-16">
+            <p
+              class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']"
+              x-text="getCategoryLabel(story.category || 'visual-story')"
+            ></p>
+            <h2
+              class="mt-3 text-4xl leading-tight text-base-content font-old_standard lg:text-[52px]"
+              x-text="story.title || 'Без заголовка'"
+            ></h2>
+            <p
+              x-show="story.lead"
+              class="mt-5 max-w-2xl text-xl font-light leading-relaxed text-base-content/80 font-['Inter']"
+              x-text="story.lead"
+            ></p>
+          </section>
+        </div>
+
+        <section class="divide-y divide-base-300">
+          <template x-for="(slide, index) in (Array.isArray(story.slides) ? story.slides : [])" :key="index">
+            <article class="grid min-h-[560px] grid-cols-1 lg:grid-cols-2">
+              <div class="relative min-h-[320px] bg-base-200">
+                <template x-if="slide.imageUrl">
+                  <img
+                    :src="slide.imageUrl"
+                    :alt="slide.caption || story.title || 'Visual story slide'"
+                    class="absolute inset-0 h-full w-full object-cover"
+                  />
+                </template>
+                <template x-if="!slide.imageUrl">
+                  <div class="absolute inset-0 flex items-center justify-center text-sm text-base-content/50">
+                    Нет изображения
+                  </div>
+                </template>
+                <div
+                  x-show="slide.caption"
+                  class="absolute bottom-4 right-4 max-w-md bg-black/75 px-4 py-3 text-sm leading-relaxed text-white"
+                  x-text="slide.caption"
+                ></div>
+              </div>
+
+              <div class="flex flex-col justify-center px-8 py-12 lg:px-16">
+                <span
+                  class="mb-10 self-start text-xs font-bold uppercase tracking-[0.25em] text-base-content/50 font-['Inter']"
+                  x-text="String(index + 1).padStart(2, '0') + ' / ' + String((Array.isArray(story.slides) ? story.slides.length : 0)).padStart(2, '0')"
+                ></span>
+                <template x-if="slide.contentType === 'quote'">
+                  <div class="max-w-xl">
+                    <blockquote
+                      class="text-2xl italic font-light leading-relaxed text-base-content/80 font-['Inter']"
+                      x-text="slide.quote"
+                    ></blockquote>
+                    <p
+                      x-show="slide.quoteAuthor"
+                      class="mt-6 text-xs font-bold uppercase tracking-[0.22em] text-base-content/50 font-['Inter']"
+                      x-text="slide.quoteAuthor"
+                    ></p>
+                  </div>
+                </template>
+                <template x-if="slide.contentType !== 'quote'">
+                  <p
+                    class="max-w-xl text-xl font-light leading-relaxed text-base-content/80 font-['Inter']"
+                    x-text="slide.text"
+                  ></p>
+                </template>
+              </div>
+            </article>
+          </template>
+        </section>
+      </main>
+    </div>
+  </div>
+</DashboardLayout>

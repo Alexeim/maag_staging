@@ -100,13 +100,16 @@ const {
         <Button variant="error" @click="deletePhoto()" :disabled="isSaving">Удалить</Button>
       </template>
     </div>
-    <Button
-      variant="primary"
-      @click="savePhoto()"
-      :disabled="isSaving || uploading"
-      :class="{ 'opacity-50 cursor-not-allowed': isSaving || uploading }"
-    >
-      {submitLabel}
-    </Button>
+    <div class="flex justify-end gap-3">
+      <Button variant="secondary" @click="previewPhoto()">Предпросмотр</Button>
+      <Button
+        variant="primary"
+        @click="savePhoto()"
+        :disabled="isSaving || uploading"
+        :class="{ 'opacity-50 cursor-not-allowed': isSaving || uploading }"
+      >
+        {submitLabel}
+      </Button>
+    </div>
   </div>
 </div>

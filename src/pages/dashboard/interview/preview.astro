@@ -1,0 +1,87 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import Button from "@/components/common/Button.astro";
+import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticleBodyPreview.astro";
+import articleData from "@/content/articlePage/RU/Article.json";
+---
+
+<DashboardLayout title="Предпросмотр интервью" active="interviews">
+  <div
+    id="preview-container"
+    class="max-w-[1512px] mx-auto"
+    x-data="$lazy('interviewCreator', { isPreview: true })"
+  >
+    <div class="bg-base-100 border border-base-300 rounded-xl shadow-sm">
+      <div class="px-6 py-6 border-b border-base-300 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold">Предпросмотр интервью</h1>
+          <p class="text-sm text-base-content/70 mt-1">
+            Используй кнопки справа, чтобы вернуться к редактированию или сохранить материал.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <Button variant="secondary" @click="returnToEdit()">Вернуться к редактированию</Button>
+          <Button variant="primary" @click="saveInterview()">Сохранить интервью</Button>
+        </div>
+      </div>
+
+      <main class="bg-base-100">
+        <section class="w-full px-4 sm:px-6 lg:px-10">
+          <div class="overflow-visible lg:h-[calc(100svh-90px)]">
+            <div
+              class="grid h-auto gap-8 lg:h-full lg:gap-0 lg:items-stretch"
+              :class="interview.imageUrl ? 'lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]' : 'grid-cols-1'"
+            >
+              <template x-if="interview.imageUrl">
+                <div class="order-2 flex flex-col lg:order-1 lg:h-full lg:min-h-0">
+                  <div class="flex items-center justify-center overflow-hidden lg:min-h-0 lg:flex-1">
+                    <img
+                      :src="interview.imageUrl"
+                      :alt="interview.imageCaption || interview.title || 'Interview image'"
+                      class="block h-auto w-full object-cover lg:h-full lg:w-auto lg:max-w-full lg:object-contain"
+                    />
+                  </div>
+                  <p
+                    x-show="interview.imageCaption"
+                    x-text="interview.imageCaption"
+                    class="px-6 py-2 font-inter text-xs text-base-content/60 text-center"
+                  ></p>
+                </div>
+              </template>
+
+              <div class="order-1 flex flex-col justify-center px-2 py-8 text-center text-base-content sm:px-6 sm:py-10 lg:order-2 lg:h-full lg:px-16 lg:py-12 xl:px-24">
+                <p class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm">
+                  Интервью
+                </p>
+                <h1
+                  class="mt-8 font-old_standard font-normal leading-[1.05] text-base-content text-4xl lg:text-5xl"
+                  x-text="interview.title"
+                ></h1>
+                <p
+                  x-show="interview.lead"
+                  x-text="interview.lead"
+                  class="mx-auto mt-8 max-w-[34rem] font-article-body text-base font-light text-base-content lg:mt-10"
+                ></p>
+                <div class="mt-8 flex flex-col items-center justify-center gap-4 text-base-content lg:mt-10">
+                  <ArticleAuthor
+                    name={articleData.author.name}
+                    avatarUrl={articleData.author.avatarUrl}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr class="mt-10 w-full border-t border-neutral-200 lg:mt-16" />
+        </section>
+
+        <div class="px-4 pb-[100px] pt-10 sm:px-6 lg:px-14 lg:pt-16">
+          <DashboardArticleBodyPreview
+            contentExpression="interview.contentBlocks"
+            imageAltLabel="Interview image"
+          />
+        </div>
+      </main>
+    </div>
+  </div>
+</DashboardLayout>

@@ -85,6 +85,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     initialArticle = null,
     articleId = null,
     isEditMode = false,
+    isPreview = false,
     onSaveRedirect = null,
     categoryTags = {},
     parisDistrictOptions = [],
@@ -92,6 +93,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     initialArticle?: Record<string, unknown> | null;
     articleId?: string | null;
     isEditMode?: boolean;
+    isPreview?: boolean;
     onSaveRedirect?: string | null;
     categoryTags?: Record<string, Array<{ title: string; value: string }>>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
@@ -184,7 +186,36 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
     // ── Init ──────────────────────────────────────────────────────────────────
     init() {
-      if (initialArticle) {
+      if (isPreview) {
+        try {
+          const stored = globalThis.localStorage?.getItem("tipsPreview");
+          const previewState = stored ? JSON.parse(stored) : null;
+          const normalized = normalizeLoadedArticle(previewState?.article);
+          if (normalized) {
+            this.article = normalized;
+            this.articleId =
+              typeof previewState?.articleId === "string"
+                ? previewState.articleId
+                : null;
+            this.isEditMode = Boolean(previewState?.isEditMode);
+            this.selectedAuthorId =
+              typeof previewState?.selectedAuthorId === "string"
+                ? previewState.selectedAuthorId
+                : "";
+            this.useNewAuthor = Boolean(previewState?.useNewAuthor);
+            this.newAuthorFirstName =
+              typeof previewState?.newAuthorFirstName === "string"
+                ? previewState.newAuthorFirstName
+                : "";
+            this.newAuthorLastName =
+              typeof previewState?.newAuthorLastName === "string"
+                ? previewState.newAuthorLastName
+                : "";
+          }
+        } catch (error) {
+          console.error("Failed to load tips preview draft:", error);
+        }
+      } else if (initialArticle) {
         const normalized = normalizeLoadedArticle(initialArticle);
         if (normalized) this.article = normalized;
       }
@@ -227,6 +258,32 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       this.syncCurrentContentCollection();
       this.loadContentCollections();
       this.loadLandingPlacements();
+    },
+
+    returnToEdit() {
+      globalThis.location.href =
+        this.isEditMode && this.articleId
+          ? `/dashboard/tips/${this.articleId}/edit`
+          : "/dashboard/tips/create";
+    },
+
+    previewArticle() {
+      if (this.uploading) {
+        ui()?.showToast?.("Подожди — загрузка файла ещё не завершилась.", "error");
+        return;
+      }
+
+      const previewState = {
+        article: this.article,
+        articleId: this.articleId,
+        isEditMode: this.isEditMode,
+        selectedAuthorId: this.selectedAuthorId,
+        useNewAuthor: this.useNewAuthor,
+        newAuthorFirstName: this.newAuthorFirstName,
+        newAuthorLastName: this.newAuthorLastName,
+      };
+      globalThis.localStorage.setItem("tipsPreview", JSON.stringify(previewState));
+      globalThis.location.href = "/dashboard/tips/preview";
     },
 
     // ── Title editing ────────────────────────────────────────────────────────

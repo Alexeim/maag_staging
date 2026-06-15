@@ -69,6 +69,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     storyId = null,
     isEditMode = false,
     onSaveRedirect = null,
+    isPreview = false,
   } = initialState as {
     categoryTags?: Record<string, Array<{ title: string; value: string }>>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
@@ -76,6 +77,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     storyId?: string | null;
     isEditMode?: boolean;
     onSaveRedirect?: string | null;
+    isPreview?: boolean;
   };
 
   const categoryLabels: Record<string, string> = {
@@ -132,6 +134,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
 
     storyId,
     isEditMode,
+    isPreview,
     onSaveRedirect,
     categoryTags,
     parisDistrictOptions,
@@ -453,8 +456,41 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     },
 
     init() {
-      if (initialStory) {
-        const copy = JSON.parse(JSON.stringify(initialStory));
+      let previewState: any = null;
+      if (typeof window !== "undefined") {
+        try {
+          const stored = window.localStorage?.getItem("visualStoryPreview");
+          previewState = stored ? JSON.parse(stored) : null;
+        } catch (error) {
+          console.error("Failed to parse visual story preview draft:", error);
+        }
+      }
+
+      const previewStory = previewState?.story && typeof previewState.story === "object"
+        ? previewState.story
+        : null;
+      const storyDraft = this.isPreview && previewStory ? previewStory : initialStory;
+
+      if (this.isPreview && previewState) {
+        this.storyId = typeof previewState.storyId === "string" ? previewState.storyId : null;
+        this.isEditMode = Boolean(previewState.isEditMode);
+        this.selectedAuthorId =
+          typeof previewState.selectedAuthorId === "string"
+            ? previewState.selectedAuthorId
+            : "";
+        this.useNewAuthor = Boolean(previewState.useNewAuthor);
+        this.newAuthorFirstName =
+          typeof previewState.newAuthorFirstName === "string"
+            ? previewState.newAuthorFirstName
+            : "";
+        this.newAuthorLastName =
+          typeof previewState.newAuthorLastName === "string"
+            ? previewState.newAuthorLastName
+            : "";
+      }
+
+      if (storyDraft) {
+        const copy = JSON.parse(JSON.stringify(storyDraft));
         this.story.title = copy.title || "";
         this.story.lead = copy.lead || "";
         this.story.cardLead = copy.cardLead || "";
@@ -483,7 +519,9 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           this.storyId,
         );
         (this.story as any).author = copy.author;
-        this.selectedAuthorId = typeof copy.authorId === "string" ? copy.authorId : "";
+        this.selectedAuthorId =
+          this.selectedAuthorId ||
+          (typeof copy.authorId === "string" ? copy.authorId : "");
       }
       this.story.tags = Array.isArray(this.story.tags) ? this.story.tags : [];
       this.story.parisSubCategories = normalizeTags(
@@ -503,6 +541,27 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       this.syncCurrentContentCollection();
       this.loadContentCollections();
       this.loadLandingPlacements();
+    },
+
+    returnToEdit() {
+      window.location.href =
+        this.isEditMode && this.storyId
+          ? `/dashboard/visual-story/${this.storyId}/edit`
+          : "/dashboard/visual-story/create";
+    },
+
+    previewStory() {
+      const previewState = {
+        story: this.story,
+        storyId: this.storyId,
+        isEditMode: this.isEditMode,
+        selectedAuthorId: this.selectedAuthorId,
+        useNewAuthor: this.useNewAuthor,
+        newAuthorFirstName: this.newAuthorFirstName,
+        newAuthorLastName: this.newAuthorLastName,
+      };
+      localStorage.setItem("visualStoryPreview", JSON.stringify(previewState));
+      window.location.href = "/dashboard/visual-story/preview";
     },
 
     async saveStory() {

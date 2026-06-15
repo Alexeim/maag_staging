@@ -14,26 +14,42 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
     photoId = null,
     isEditMode = false,
     onSaveRedirect = null,
+    isPreview = false,
   } = initialState as {
     initialPhoto?: any;
     photoId?: string | null;
     isEditMode?: boolean;
     onSaveRedirect?: string | null;
+    isPreview?: boolean;
   };
+
+  let previewState: any = null;
+  if (typeof window !== "undefined" && isPreview) {
+    try {
+      const stored = window.localStorage?.getItem("photoOfTheDayPreview");
+      previewState = stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      console.error("Failed to parse photo preview draft:", error);
+    }
+  }
+
+  const photoDraft = isPreview && previewState?.photo ? previewState.photo : initialPhoto;
 
   return {
     photo: {
-      title: (initialPhoto?.title as string) || "",
-      imageUrl: (initialPhoto?.imageUrl as string) || "",
-      caption: (initialPhoto?.caption as string) || "",
+      title: (photoDraft?.title as string) || "",
+      imageUrl: (photoDraft?.imageUrl as string) || "",
+      caption: (photoDraft?.caption as string) || "",
     },
-    photoId: photoId as string | null,
-    isEditMode: isEditMode as boolean,
+    photoId: (isPreview ? previewState?.photoId : photoId) as string | null,
+    isEditMode: (isPreview ? Boolean(previewState?.isEditMode) : isEditMode) as boolean,
+    isPreview: isPreview as boolean,
     onSaveRedirect: onSaveRedirect as string | null,
 
     authors: [] as any[],
     authorsLoading: false,
-    selectedAuthorId: (initialPhoto?.authorId as string) || "",
+    selectedAuthorId:
+      (isPreview ? previewState?.selectedAuthorId : photoDraft?.authorId) || "",
 
     uploading: false,
     uploadProgress: 0,
@@ -59,6 +75,24 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
 
     async init() {
       await this.loadAuthors();
+    },
+
+    returnToEdit() {
+      window.location.href =
+        this.isEditMode && this.photoId
+          ? `/dashboard/photo-of-the-day/${this.photoId}/edit`
+          : "/dashboard/photo-of-the-day/create";
+    },
+
+    previewPhoto() {
+      const previewState = {
+        photo: this.photo,
+        photoId: this.photoId,
+        isEditMode: this.isEditMode,
+        selectedAuthorId: this.selectedAuthorId,
+      };
+      localStorage.setItem("photoOfTheDayPreview", JSON.stringify(previewState));
+      window.location.href = "/dashboard/photo-of-the-day/preview";
     },
 
     async loadAuthors() {

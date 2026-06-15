@@ -1,0 +1,74 @@
+---
+import { Clock3, MapPin } from "lucide-astro";
+
+interface Props {
+  contentExpression?: string;
+}
+
+const { contentExpression = "article.contentBlocks" } = Astro.props as Props;
+---
+
+<div class="max-w-[826px] mx-auto">
+  <template x-for={`(item, index) in (${contentExpression} || []).filter((block) => block?.type === 'tips-item')`} :key="item.id || index">
+    <article class="flex flex-col sm:flex-row py-8 gap-6">
+      <div x-show="item.imageUrl" class="sm:w-[42%] shrink-0">
+        <img
+          :src="item.imageUrl"
+          :alt="item.imageCaption || item.heading || `Пункт ${index + 1}`"
+          class="w-full h-full object-cover min-h-[200px] max-h-[340px]"
+        />
+      </div>
+
+      <div
+        class="flex flex-col justify-start gap-3 px-5"
+        :class="item.imageUrl ? 'sm:w-[58%]' : 'w-full'"
+      >
+        <h2
+          x-show="item.heading"
+          x-text="item.heading"
+          class="text-xl font-bold font-old_standard"
+        ></h2>
+        <hr class="text-gray-300" />
+
+        <div class="flex flex-col gap-1.5">
+          <template x-if="item.meta1">
+            <div>
+              <p class="flex items-start gap-4 text-sm font-oswald tracking-wide text-base-content/70">
+                <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} aria-hidden="true" />
+                <span x-text="item.meta1"></span>
+              </p>
+              <hr class="text-gray-300" />
+            </div>
+          </template>
+
+          <template x-if="item.meta2">
+            <div>
+              <p class="flex items-start gap-4 text-sm font-oswald tracking-wide text-base-content/70">
+                <Clock3 class="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} aria-hidden="true" />
+                <a
+                  x-show="item.meta2IsLink && item.meta2Url"
+                  :href="item.meta2Url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="underline hover:text-base-content transition-colors"
+                  x-text="item.meta2"
+                ></a>
+                <span
+                  x-show="!item.meta2IsLink || !item.meta2Url"
+                  x-text="item.meta2"
+                ></span>
+              </p>
+              <hr class="text-gray-300" />
+            </div>
+          </template>
+        </div>
+
+        <p
+          x-show="item.text"
+          x-text="item.text"
+          class="text-sm font-inter text-base-content/80 mt-1"
+        ></p>
+      </div>
+    </article>
+  </template>
+</div>
