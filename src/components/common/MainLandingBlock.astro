@@ -195,62 +195,6 @@ const formatArticleDate = (value: unknown) => {
     .replace(" г.", "");
 };
 
-const formatArticleMeta = (article: any, fallbackCategory = "") => {
-  const parts = [
-    formatArticleDate(article?.createdAt),
-    getPrimaryTag(article) || fallbackCategory,
-  ].filter(Boolean);
-  return parts.join(" • ");
-};
-
-function selectNewsRailItems(
-  newsItems: any[],
-  newsRail: LandingNewsRailSelection | null,
-) {
-  if (!newsRail) {
-    return [];
-  }
-
-  if (newsRail.mode === "auto-latest") {
-    return newsItems.slice(0, newsRail.limit);
-  }
-
-  const itemsById = new Map(newsItems.map((item) => [item.id, item]));
-  return newsRail.ids.map((id) => itemsById.get(id)).filter(Boolean);
-}
-
-function normalizeEvents(events: any[]) {
-  return events
-    .map((event) => {
-      const startDate = toDate(event?.startDate);
-      const endDate = toDate(event?.endDate);
-
-      if (!startDate) {
-        return null;
-      }
-
-      return {
-        ...event,
-        startDate,
-        endDate,
-        startDay: resetToUtcMidnight(startDate),
-        endDay: resetToUtcMidnight(endDate ?? startDate),
-      };
-    })
-    .filter(Boolean) as Array<
-    {
-      startDate: Date;
-      endDate: Date | null;
-      startDay: Date;
-      endDay: Date;
-    } & any
-  >;
-}
-
-function isSingleDayEvent(event: { startDay: Date; endDay: Date }) {
-  return event.startDay.getTime() === event.endDay.getTime();
-}
-
 function getLandingEventDisplayDate(event: any) {
   const startDate = toDate(event?.startDate);
   if (!startDate) {
