@@ -9,18 +9,19 @@ import { Image } from "astro:assets";
   x-bind:class="$store.navbar.isScrolled ? 'z-0' : 'z-20'"
   class="relative"
 >
+  <h1 class="sr-only">MAAG France</h1>
   <div class="h-[130px] lg:h-[195px] bg-base-200">
     <!-- This div is only for background and height -->
   </div>
   <Image
     src={logoMobile}
-    alt="Maag"
+    alt="MAAG France"
     x-bind:class="$store.navbar.isScrolled ? 'z-0 scale-95 opacity-75' : 'z-10 scale-100 opacity-100'"
     class="absolute -top-11 left-1/2 block h-[250px] w-2/3 -translate-x-1/2 pointer-events-none transition-all duration-300 ease-out lg:hidden"
   />
   <Image
     src={logoFull}
-    alt="Maag"
+    alt="MAAG France"
     x-bind:class="$store.navbar.isScrolled ? 'z-0 scale-95 opacity-75' : 'z-10 scale-100 opacity-100'"
     class="absolute -top-10 left-1/2 hidden h-[333px] w-2/3 -translate-x-1/2 pointer-events-none transition-all duration-300 ease-out lg:block"
   />
