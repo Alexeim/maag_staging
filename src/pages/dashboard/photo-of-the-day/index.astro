@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import DashboardListActions from "@/components/dashboard/DashboardListActions.astro";
 import { photosOfTheDayApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
@@ -86,23 +87,11 @@ const photos = photosRaw.map((photo) => {
                   <td class="px-6 py-4 hidden md:table-cell text-base-content/60">
                     {photo.createdAtFormatted}
                   </td>
-                  <td class="px-6 py-4">
-                    <div class="flex gap-3 justify-end">
-                      <a
-                        href={`/dashboard/photo-of-the-day/${photo.id}/edit`}
-                        class="text-primary hover:underline text-sm"
-                      >
-                        Редактировать
-                      </a>
-                      <button
-                        type="button"
-                        class="text-error hover:underline text-sm cursor-pointer"
-                        @click={`handleDeleteClick('${photo.id}', '${photo.title.replace(/'/g, "\\'")}')`}
-                      >
-                        Удалить
-                      </button>
-                    </div>
-                  </td>
+                  <DashboardListActions
+                    viewHref={`/photo-of-the-day/${photo.id}`}
+                    editHref={`/dashboard/photo-of-the-day/${photo.id}/edit`}
+                    deleteClick={`handleDeleteClick('${photo.id}', '${photo.title.replace(/'/g, "\\'")}')`}
+                  />
                 </tr>
               );
             })}

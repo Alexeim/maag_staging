@@ -1,0 +1,36 @@
+---
+interface Props {
+  viewHref?: string;
+  editHref: string;
+  deleteClick: string;
+}
+
+const { viewHref, editHref, deleteClick } = Astro.props;
+---
+
+<td class="px-6 py-4 text-right">
+  <div class="flex justify-end gap-4">
+    {
+      viewHref && (
+        <a
+          href={viewHref}
+          class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Просмотр
+        </a>
+      )
+    }
+    <a href={editHref} class="font-medium text-primary hover:underline">
+      Редактировать
+    </a>
+    <button
+      type="button"
+      class="font-medium text-error hover:underline"
+      @click={deleteClick}
+    >
+      Удалить
+    </button>
+  </div>
+</td>

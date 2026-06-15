@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from "../../Layouts/DashboardLayout.astro";
+import DashboardListActions from "@/components/dashboard/DashboardListActions.astro";
 import { flippersApi } from "../../lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
@@ -85,23 +86,11 @@ const flippers = flippersRaw.map((flipper) => {
                   <td class="px-6 py-4 hidden md:table-cell">
                     {flipper.createdAtFormatted}
                   </td>
-                  <td class="px-6 py-4 text-right">
-                    <div class="flex justify-end gap-4">
-                      <a href={`/flippers/${flipper.id}`} class="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank">
-                        Просмотр
-                      </a>
-                      <a href={`/dashboard/flippers/edit/${flipper.id}`} class="font-medium text-primary hover:underline">
-                        Редактировать
-                      </a>
-                      <button
-                        type="button"
-                        class="font-medium text-error hover:underline"
-                        @click={`handleDeleteClick('${flipper.id}', '${flipper.title.replace(/'/g, "\'")}')`}
-                      >
-                        Удалить
-                      </button>
-                    </div>
-                  </td>
+                  <DashboardListActions
+                    viewHref={`/flippers/${flipper.id}`}
+                    editHref={`/dashboard/flippers/edit/${flipper.id}`}
+                    deleteClick={`handleDeleteClick('${flipper.id}', '${flipper.title.replace(/'/g, "\'")}')`}
+                  />
                 </tr>
               );
             })}

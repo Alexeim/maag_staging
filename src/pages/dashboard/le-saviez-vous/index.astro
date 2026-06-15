@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import DashboardListActions from "@/components/dashboard/DashboardListActions.astro";
 import { articlesApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
@@ -134,30 +135,11 @@ const articles = articlesRaw
                   <td class="px-6 py-4 hidden md:table-cell">
                     {article.createdAtFormatted}
                   </td>
-                  <td class="px-6 py-4 text-right">
-                    <div class="flex justify-end gap-4">
-                      <a
-                        href={`/dashboard/le-saviez-vous/${article.id}/edit`}
-                        class="font-medium text-primary hover:underline"
-                      >
-                        Редактировать
-                      </a>
-                      <a
-                        href={`/article/${article.id}`}
-                        target="_blank"
-                        class="font-medium text-base-content/60 hover:underline"
-                      >
-                        Просмотр
-                      </a>
-                      <button
-                        type="button"
-                        class="font-medium text-error hover:underline"
-                        @click={`handleDeleteClick('${article.id}', '${escapeForJsSingleQuote(article.title)}')`}
-                      >
-                        Удалить
-                      </button>
-                    </div>
-                  </td>
+                  <DashboardListActions
+                    viewHref={`/article/${article.id}`}
+                    editHref={`/dashboard/le-saviez-vous/${article.id}/edit`}
+                    deleteClick={`handleDeleteClick('${article.id}', '${escapeForJsSingleQuote(article.title)}')`}
+                  />
                 </tr>
               );
             })}

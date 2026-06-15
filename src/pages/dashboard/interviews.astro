@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import DashboardListActions from "@/components/dashboard/DashboardListActions.astro";
 import { interviewsApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
@@ -86,20 +87,11 @@ const interviews = interviewsRaw.map((interview) => {
                     <span class="text-xs text-base-content/70">{tagsLabel}</span>
                   </td>
                   <td class="px-6 py-4 hidden md:table-cell">{interview.createdAtFormatted}</td>
-                  <td class="px-6 py-4 text-right">
-                    <div class="flex justify-end gap-4">
-                      <a href={`/dashboard/interview/${interview.id}/edit`} class="font-medium text-primary hover:underline">
-                        Редактировать
-                      </a>
-                      <button
-                        type="button"
-                        class="font-medium text-error hover:underline"
-                        @click={`handleDeleteClick('${interview.id}', '${interview.title.replace(/'/g, "\'")}')`}
-                      >
-                        Удалить
-                      </button>
-                    </div>
-                  </td>
+                  <DashboardListActions
+                    viewHref={`/interviews/${interview.id}`}
+                    editHref={`/dashboard/interview/${interview.id}/edit`}
+                    deleteClick={`handleDeleteClick('${interview.id}', '${interview.title.replace(/'/g, "\'")}')`}
+                  />
                 </tr>
               );
             })}

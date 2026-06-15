@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import DashboardListActions from "@/components/dashboard/DashboardListActions.astro";
 import { editorialPlacementsApi, eventsApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
@@ -182,20 +183,11 @@ const decoratedEvents = events.map((event) => {
                       <span class="badge badge-ghost badge-sm text-base-content/60">off</span>
                     )}
                   </td>
-                  <td class="px-6 py-4 text-right">
-                    <div class="flex justify-end gap-4">
-                      <a href={`/dashboard/event/${eventItem.id}/edit`} class="font-medium text-primary hover:underline">
-                        Редактировать
-                      </a>
-                      <button
-                        type="button"
-                        class="font-medium text-error hover:underline"
-                        @click={`handleDeleteClick('${eventItem.id}', '${eventItem.title.replace(/'/g, "\\'")}')`}
-                      >
-                        Удалить
-                      </button>
-                    </div>
-                  </td>
+                  <DashboardListActions
+                    viewHref={`/events/${eventItem.id}`}
+                    editHref={`/dashboard/event/${eventItem.id}/edit`}
+                    deleteClick={`handleDeleteClick('${eventItem.id}', '${eventItem.title.replace(/'/g, "\\'")}')`}
+                  />
                 </tr>
               );
             })}

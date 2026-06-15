@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import DashboardListActions from "@/components/dashboard/DashboardListActions.astro";
 import { visualStoriesApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
@@ -90,20 +91,11 @@ const stories = storiesRaw.map((story) => {
                   <td class="px-6 py-4 hidden md:table-cell">
                     {story.createdAtFormatted}
                   </td>
-                  <td class="px-6 py-4 text-right">
-                    <div class="flex justify-end gap-4">
-                      <a href={`/dashboard/visual-story/${story.id}/edit`} class="font-medium text-primary hover:underline">
-                        Редактировать
-                      </a>
-                      <button
-                        type="button"
-                        class="font-medium text-error hover:underline"
-                        @click={`handleDeleteClick('${story.id}', '${story.title.replace(/'/g, "\\'")}')`}
-                      >
-                        Удалить
-                      </button>
-                    </div>
-                  </td>
+                  <DashboardListActions
+                    viewHref={`/visual-story/${story.id}`}
+                    editHref={`/dashboard/visual-story/${story.id}/edit`}
+                    deleteClick={`handleDeleteClick('${story.id}', '${story.title.replace(/'/g, "\\'")}')`}
+                  />
                 </tr>
               );
             })}
