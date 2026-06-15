@@ -1,7 +1,7 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import DashboardListActions from "@/components/dashboard/DashboardListActions.astro";
-import { editorialPlacementsApi, eventsApi } from "@/lib/api/api";
+import { eventsApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
 const normalizeDate = (value: unknown) => {
@@ -59,31 +59,29 @@ const formatRange = (start: Date | null, end: Date | null) => {
 };
 
 let events = [] as Awaited<ReturnType<typeof eventsApi.list>>;
-let featuredEventId: string | null = null;
 try {
-  const [eventsResponse, landingPlacements] = await Promise.all([
-    eventsApi.list(),
-    editorialPlacementsApi.getLanding().catch(() => null),
-  ]);
-  events = eventsResponse;
-  featuredEventId =
-    landingPlacements?.eventCard?.mode === "manual"
-      ? landingPlacements.eventCard.id
-      : null;
+  events = await eventsApi.list();
 } catch (error) {
   console.error("Failed to load events", error);
   events = [];
-  featuredEventId = null;
 }
 
 const decoratedEvents = events.map((event) => {
   const startDate = normalizeDate(event.startDate);
   const endDate = normalizeDate(event.endDate);
+  const timeLabel = (() => {
+    if (event.startTime && event.endTime) {
+      return `${event.startTime} — ${event.endTime}`;
+    }
+    return event.startTime || "Время уточняется";
+  })();
   return {
     ...event,
     startDateFormatted: startDate,
     endDateFormatted: endDate,
     dateRangeLabel: formatRange(startDate, endDate),
+    locationLabel: event.address || "Место уточняется",
+    timeLabel,
     categoryLabel: (() => {
       switch (event.category) {
         case "exhibition":
@@ -109,7 +107,7 @@ const decoratedEvents = events.map((event) => {
       <div>
         <h2 class="text-xl font-semibold">События</h2>
         <p class="text-sm text-base-content/70 mt-1">
-          Управляй расписанием — редактируй, закрепляй для лендинга, удаляй лишнее.
+          Управляй расписанием — редактируй события, проверяй даты и удаляй лишнее.
         </p>
       </div>
     </div>
@@ -129,10 +127,7 @@ const decoratedEvents = events.map((event) => {
                 Категория / теги
               </th>
               <th scope="col" class="px-6 py-3 hidden md:table-cell">
-                Landing
-              </th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">
-                Main
+                Место / время
               </th>
               <th scope="col" class="px-6 py-3">
                 <span class="sr-only">Действия</span>
@@ -170,18 +165,14 @@ const decoratedEvents = events.map((event) => {
                     </div>
                   </td>
                   <td class="px-6 py-4 hidden md:table-cell">
-                    {featuredEventId === eventItem.id ? (
-                      <span class="badge badge-success badge-sm">on</span>
-                    ) : (
-                      <span class="badge badge-ghost badge-sm text-base-content/60">off</span>
-                    )}
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    {eventItem.isMainEvent ? (
-                      <span class="badge badge-success badge-sm">on</span>
-                    ) : (
-                      <span class="badge badge-ghost badge-sm text-base-content/60">off</span>
-                    )}
+                    <div class="flex flex-col gap-1">
+                      <span class="font-semibold truncate max-w-xs" title={eventItem.locationLabel}>
+                        {eventItem.locationLabel}
+                      </span>
+                      <span class="text-xs text-base-content/70">
+                        {eventItem.timeLabel}
+                      </span>
+                    </div>
                   </td>
                   <DashboardListActions
                     viewHref={`/events/${eventItem.id}`}
