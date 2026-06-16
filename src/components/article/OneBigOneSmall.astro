@@ -16,10 +16,10 @@ const {
 } = Astro.props as Props;
 ---
 
-<section class="w-full h-auto lg:relative lg:w-[1356px] lg:h-[calc(100vh-90px)]">
+<section class="w-full h-auto lg:relative lg:max-w-[1356px] lg:h-[calc(100vh-90px)]">
   {
     portraitImageUrl && (
-      <figure class="w-full lg:absolute lg:top-0 lg:left-0 lg:w-[300px]">
+      <figure class="w-full lg:absolute lg:top-0 lg:left-0 lg:w-[22.1239%]">
         <LazyImage
           src={portraitImageUrl}
           alt={portraitImageCaption || "Portrait article image"}
@@ -37,7 +37,7 @@ const {
 
   {
     landscapeImageUrl && (
-      <figure class="mt-4 w-full lg:absolute lg:right-0 lg:bottom-0 lg:mt-0 lg:w-[1056px]">
+      <figure class="mt-4 w-full lg:absolute lg:right-0 lg:bottom-0 lg:mt-0 lg:w-[77.8761%]">
         <LazyImage
           src={landscapeImageUrl}
           alt={landscapeImageCaption || "Landscape article image"}
