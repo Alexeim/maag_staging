@@ -26,11 +26,11 @@ const {
 ---
 
 <section
-  class="mx-auto grid w-full gap-6 lg:relative lg:h-[920px] lg:w-[1198px] lg:gap-0"
+  class="mx-auto grid w-full gap-6 lg:relative lg:h-[920px] lg:max-w-[1198px] lg:gap-0"
 >
   {
     leftPortraitImageUrl && (
-      <figure class="group relative w-full lg:absolute lg:left-0 lg:top-0 lg:w-[300px]">
+      <figure class="group relative w-full lg:absolute lg:left-0 lg:top-0 lg:w-[25.0417%]">
         <LazyImage
           src={leftPortraitImageUrl}
           alt={leftPortraitImageCaption || "Left portrait collage image"}
@@ -57,7 +57,7 @@ const {
 
   {
     topLandscapeImageUrl && (
-      <figure class="group relative w-full lg:absolute lg:left-1/4 lg:top-1/12 lg:w-[500px]">
+      <figure class="group relative w-full lg:absolute lg:left-1/4 lg:top-1/12 lg:w-[41.7362%]">
         <LazyImage
           src={topLandscapeImageUrl}
           alt={topLandscapeImageCaption || "Top landscape collage image"}
@@ -84,7 +84,7 @@ const {
 
   {
     mainLandscapeImageUrl && (
-      <figure class="group relative w-full lg:absolute lg:left-1/12 lg:top-1/2 lg:w-[800px] lg:-translate-y-20">
+      <figure class="group relative w-full lg:absolute lg:left-1/12 lg:top-1/2 lg:w-[66.778%] lg:-translate-y-20">
         <LazyImage
           src={mainLandscapeImageUrl}
           alt={mainLandscapeImageCaption || "Main landscape collage image"}
@@ -111,7 +111,7 @@ const {
 
   {
     rightPortraitImageUrl && (
-      <figure class="group relative w-full lg:absolute lg:bottom-0 lg:right-0 lg:w-[300px]">
+      <figure class="group relative w-full lg:absolute lg:bottom-0 lg:right-0 lg:w-[25.0417%]">
         <LazyImage
           src={rightPortraitImageUrl}
           alt={rightPortraitImageCaption || "Right portrait collage image"}
