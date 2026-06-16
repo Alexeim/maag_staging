@@ -67,7 +67,11 @@ const normalizeLoadedArticle = (data: any) => {
   if (!data || typeof data !== "object") return null;
   // JSON round-trip strips Alpine reactive proxies — structuredClone does not work on them
   const copy = JSON.parse(JSON.stringify(data));
-  copy.contentBlocks = Array.isArray(copy.content) ? copy.content : [];
+  copy.contentBlocks = Array.isArray(copy.content)
+    ? copy.content
+    : Array.isArray(copy.contentBlocks)
+      ? copy.contentBlocks
+      : [];
   copy.tags = normalizeTags(copy.tags);
   copy.imageCaption = copy.imageCaption ?? "";
   copy.lead = copy.lead ?? "";
