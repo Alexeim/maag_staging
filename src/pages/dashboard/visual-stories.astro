@@ -8,15 +8,30 @@ import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 const normalizeDate = (value: any) => {
   if (!value) return null;
   if (typeof value === "string") {
-    const parsed = new Date(value.replace(/ /g, " ").replace(/\s+at\s+/i, " ").replace(/UTC([+-]\d{1,2})/, "GMT$1"));
+    const parsed = new Date(
+      value
+        .replace(/ /g, " ")
+        .replace(/\s+at\s+/i, " ")
+        .replace(/UTC([+-]\d{1,2})/, "GMT$1"),
+    );
     return Number.isNaN(parsed.getTime()) ? null : parsed;
   }
   if (typeof value === "number") return new Date(value);
   if (typeof value === "object") {
     if (typeof value.toDate === "function") return value.toDate();
-    const seconds = "seconds" in value ? value.seconds : "_seconds" in value ? value._seconds : null;
+    const seconds =
+      "seconds" in value
+        ? value.seconds
+        : "_seconds" in value
+          ? value._seconds
+          : null;
     if (seconds !== null) {
-      const nanos = "nanoseconds" in value ? value.nanoseconds : "_nanoseconds" in value ? value._nanoseconds : 0;
+      const nanos =
+        "nanoseconds" in value
+          ? value.nanoseconds
+          : "_nanoseconds" in value
+            ? value._nanoseconds
+            : 0;
       return new Date(seconds * 1000 + nanos / 1_000_000);
     }
   }
@@ -35,13 +50,20 @@ const stories = storiesRaw.map((story) => {
   return {
     ...story,
     createdAtFormatted: createdAtDate
-      ? createdAtDate.toLocaleDateString("ru-RU", { year: "numeric", month: "short", day: "numeric" })
+      ? createdAtDate.toLocaleDateString("ru-RU", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
       : "—",
   };
 });
 ---
 
-<DashboardLayout title="Управление визуальными историями" active="visual-stories">
+<DashboardLayout
+  title="Управление визуальными историями"
+  active="visual-stories"
+>
   <div
     class="bg-base-100 border border-base-300 rounded-xl p-6"
     x-data={`$lazy('visualStoryList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
@@ -61,56 +83,95 @@ const stories = storiesRaw.map((story) => {
       </a>
     </div>
 
-    {stories.length > 0 ? (
-      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left rtl:text-right text-base-content">
-          <thead class="text-xs text-base-content/70 uppercase bg-base-200">
-            <tr>
-              <th scope="col" class="px-6 py-3">Заголовок</th>
-              <th scope="col" class="px-6 py-3">Слайды</th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">Создан</th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">Опубликовано</th>
-              <th scope="col" class="px-6 py-3"><span class="sr-only">Действия</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            {stories.map((story, index) => {
-              const isLast = index === stories.length - 1;
-              return (
-                <tr
-                  class:list={[
-                    "bg-base-100 hover:bg-base-200/50",
-                    !isLast && "border-b border-base-300",
-                  ]}
+    {
+      stories.length > 0 ? (
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table class="w-full text-sm text-left rtl:text-right text-base-content">
+            <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+              <tr>
+                <th scope="col" class="px-6 py-3">
+                  Заголовок
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  Слайды
+                </th>
+                <th scope="col" class="px-6 py-3 hidden md:table-cell">
+                  Создан
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 hidden md:flex md:items-center md:justify-center"
                 >
-                  <th scope="row" class="px-6 py-4 font-medium text-base-content whitespace-nowrap">
-                    <div class="font-semibold truncate max-w-xs" title={story.title}>{story.title}</div>
-                    <div class="text-xs text-base-content/60 mt-1 truncate" title={story.id}>ID: {story.id}</div>
-                  </th>
-                  <td class="px-6 py-4">
-                    {Array.isArray(story.slides) ? story.slides.length : 0} слайд(ов)
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    {story.createdAtFormatted}
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    <PublishedIndicator published={Boolean(story.published)} />
-                  </td>
-                  <DashboardListActions
-                    viewHref={`/visual-story/${story.id}`}
-                    editHref={`/dashboard/visual-story/${story.id}/edit`}
-                    deleteClick={`handleDeleteClick('${story.id}', '${story.title.replace(/'/g, "\\'")}')`}
-                  />
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    ) : (
-      <div class="p-8 text-center text-base-content/70">
-        <p>Пока нет визуальных историй. <a href="/dashboard/visual-story/create" class="text-primary hover:underline">Создай первую!</a></p>
-      </div>
-    )}
+                  Опубликовано
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  <span class="sr-only">Действия</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {stories.map((story, index) => {
+                const isLast = index === stories.length - 1;
+                return (
+                  <tr
+                    class:list={[
+                      "bg-base-100 hover:bg-base-200/50",
+                      !isLast && "border-b border-base-300",
+                    ]}
+                  >
+                    <th
+                      scope="row"
+                      class="px-6 py-4 font-medium text-base-content whitespace-nowrap"
+                    >
+                      <div
+                        class="font-semibold truncate max-w-xs"
+                        title={story.title}
+                      >
+                        {story.title}
+                      </div>
+                      <div
+                        class="text-xs text-base-content/60 mt-1 truncate"
+                        title={story.id}
+                      >
+                        ID: {story.id}
+                      </div>
+                    </th>
+                    <td class="px-6 py-4">
+                      {Array.isArray(story.slides) ? story.slides.length : 0}{" "}
+                      слайд(ов)
+                    </td>
+                    <td class="px-6 py-4 hidden md:table-cell">
+                      {story.createdAtFormatted}
+                    </td>
+                    <td class="px-6 py-4 hidden md:flex md:items-center md:justify-center">
+                      <PublishedIndicator
+                        published={Boolean(story.published)}
+                      />
+                    </td>
+                    <DashboardListActions
+                      viewHref={`/visual-story/${story.id}`}
+                      editHref={`/dashboard/visual-story/${story.id}/edit`}
+                      deleteClick={`handleDeleteClick('${story.id}', '${story.title.replace(/'/g, "\\'")}')`}
+                    />
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="p-8 text-center text-base-content/70">
+          <p>
+            Пока нет визуальных историй.{" "}
+            <a
+              href="/dashboard/visual-story/create"
+              class="text-primary hover:underline"
+            >
+              Создай первую!
+            </a>
+          </p>
+        </div>
+      )
+    }
   </div>
 </DashboardLayout>

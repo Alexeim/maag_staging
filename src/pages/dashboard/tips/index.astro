@@ -72,7 +72,10 @@ const articles = articlesRaw
 ---
 
 <DashboardLayout title="Tips-статьи" active="tips">
-  <div class="bg-base-100 border border-base-300 rounded-xl p-6" x-data={`$lazy('tipsList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}>
+  <div
+    class="bg-base-100 border border-base-300 rounded-xl p-6"
+    x-data={`$lazy('tipsList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
+  >
     <div class="flex items-center justify-between mb-6">
       <div>
         <h2 class="text-xl font-semibold">Tips-статьи</h2>
@@ -88,70 +91,101 @@ const articles = articlesRaw
       </a>
     </div>
 
-    {articles.length > 0 ? (
-      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left text-base-content">
-          <thead class="text-xs text-base-content/70 uppercase bg-base-200">
-            <tr>
-              <th scope="col" class="px-6 py-3">Заголовок</th>
-              <th scope="col" class="px-6 py-3">Категория / теги</th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">Создана</th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">Опубликовано</th>
-              <th scope="col" class="px-6 py-3"><span class="sr-only">Действия</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            {articles.map((article, index) => {
-              const isLast = index === articles.length - 1;
-              const categoryLabel = article.category || "—";
-              const tagsLabel = Array.isArray(article.tags)
-                ? article.tags.join(", ")
-                : "—";
-              return (
-                <tr
-                  class:list={[
-                    "bg-base-100 hover:bg-base-200/50",
-                    !isLast && "border-b border-base-300",
-                  ]}
+    {
+      articles.length > 0 ? (
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table class="w-full text-sm text-left text-base-content">
+            <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+              <tr>
+                <th scope="col" class="px-6 py-3">
+                  Заголовок
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  Категория / теги
+                </th>
+                <th scope="col" class="px-6 py-3 hidden md:table-cell">
+                  Создана
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 hidden md:flex md:items-center md:justify-center"
                 >
-                  <th scope="row" class="px-6 py-4 font-medium text-base-content whitespace-nowrap">
-                    <div class="font-semibold truncate max-w-xs" title={article.title}>
-                      {article.title}
-                    </div>
-                    <div class="text-xs text-base-content/60 mt-1 truncate" title={article.id}>
-                      ID: {article.id}
-                    </div>
-                  </th>
-                  <td class="px-6 py-4">
-                    <div class="flex flex-col gap-1">
-                      <span class="font-semibold">{categoryLabel}</span>
-                      <span class="text-xs text-base-content/70">{tagsLabel}</span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    {article.createdAtFormatted}
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    <PublishedIndicator published={Boolean(article.published)} />
-                  </td>
-                  <DashboardListActions
-                    viewHref={`/tips/${article.id}`}
-                    editHref={`/dashboard/tips/${article.id}/edit`}
-                    deleteClick={`handleDeleteClick('${article.id}', '${article.title.replace(/'/g, "\\'")}')`}
-                  />
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    ) : (
-      <div class="p-8 text-center text-base-content/70">
-        <p>Пока нет tips-статей.</p>
-        <a href="/dashboard/tips/create" class="mt-3 inline-block text-primary hover:underline text-sm">
-          Создать первую →
-        </a>
-      </div>
-    )}
+                  Опубликовано
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  <span class="sr-only">Действия</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {articles.map((article, index) => {
+                const isLast = index === articles.length - 1;
+                const categoryLabel = article.category || "—";
+                const tagsLabel = Array.isArray(article.tags)
+                  ? article.tags.join(", ")
+                  : "—";
+                return (
+                  <tr
+                    class:list={[
+                      "bg-base-100 hover:bg-base-200/50",
+                      !isLast && "border-b border-base-300",
+                    ]}
+                  >
+                    <th
+                      scope="row"
+                      class="px-6 py-4 font-medium text-base-content whitespace-nowrap"
+                    >
+                      <div
+                        class="font-semibold truncate max-w-xs"
+                        title={article.title}
+                      >
+                        {article.title}
+                      </div>
+                      <div
+                        class="text-xs text-base-content/60 mt-1 truncate"
+                        title={article.id}
+                      >
+                        ID: {article.id}
+                      </div>
+                    </th>
+                    <td class="px-6 py-4">
+                      <div class="flex flex-col gap-1">
+                        <span class="font-semibold">{categoryLabel}</span>
+                        <span class="text-xs text-base-content/70">
+                          {tagsLabel}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 hidden md:table-cell">
+                      {article.createdAtFormatted}
+                    </td>
+                    <td class="px-6 py-4 hidden md:flex md:items-center md:justify-center">
+                      <PublishedIndicator
+                        published={Boolean(article.published)}
+                      />
+                    </td>
+                    <DashboardListActions
+                      viewHref={`/tips/${article.id}`}
+                      editHref={`/dashboard/tips/${article.id}/edit`}
+                      deleteClick={`handleDeleteClick('${article.id}', '${article.title.replace(/'/g, "\\'")}')`}
+                    />
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="p-8 text-center text-base-content/70">
+          <p>Пока нет tips-статей.</p>
+          <a
+            href="/dashboard/tips/create"
+            class="mt-3 inline-block text-primary hover:underline text-sm"
+          >
+            Создать первую →
+          </a>
+        </div>
+      )
+    }
   </div>
 </DashboardLayout>

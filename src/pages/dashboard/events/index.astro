@@ -108,94 +108,123 @@ const decoratedEvents = events.map((event) => {
       <div>
         <h2 class="text-xl font-semibold">События</h2>
         <p class="text-sm text-base-content/70 mt-1">
-          Управляй расписанием — редактируй события, проверяй даты и удаляй лишнее.
+          Управляй расписанием — редактируй события, проверяй даты и удаляй
+          лишнее.
         </p>
       </div>
     </div>
 
-    {decoratedEvents.length > 0 ? (
-      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left text-base-content">
-          <thead class="text-xs text-base-content/70 uppercase bg-base-200">
-            <tr>
-              <th scope="col" class="px-6 py-3">
-                Событие
-              </th>
-              <th scope="col" class="px-6 py-3">
-                Даты
-              </th>
-              <th scope="col" class="px-6 py-3 hidden lg:table-cell">
-                Категория / теги
-              </th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">
-                Место / время
-              </th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">
-                Опубликовано
-              </th>
-              <th scope="col" class="px-6 py-3">
-                <span class="sr-only">Действия</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {decoratedEvents.map((eventItem, index) => {
-              const isLast = index === decoratedEvents.length - 1;
-              const tagsLabel = Array.isArray(eventItem.tags) && eventItem.tags.length > 0
-                ? eventItem.tags.join(", ")
-                : "—";
-              return (
-                <tr
-                  class:list={[
-                    "bg-base-100 hover:bg-base-200/50",
-                    !isLast && "border-b border-base-300",
-                  ]}
+    {
+      decoratedEvents.length > 0 ? (
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table class="w-full text-sm text-left text-base-content">
+            <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+              <tr>
+                <th scope="col" class="px-6 py-3">
+                  Событие
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  Даты
+                </th>
+                <th scope="col" class="px-6 py-3 hidden lg:table-cell">
+                  Категория / теги
+                </th>
+                <th scope="col" class="px-6 py-3 hidden md:table-cell">
+                  Место / время
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 hidden md:flex md:items-center md:justify-center"
                 >
-                  <th scope="row" class="px-6 py-4 font-medium text-base-content whitespace-nowrap">
-                    <div class="font-semibold truncate max-w-xs" title={eventItem.title}>{eventItem.title}</div>
-                    <div class="text-xs text-base-content/60 mt-1 truncate" title={eventItem.id}>ID: {eventItem.id}</div>
-                  </th>
-                  <td class="px-6 py-4">
-                    <div class="flex flex-col gap-1">
-                      <span class="font-semibold">{eventItem.dateRangeLabel}</span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 hidden lg:table-cell">
-                    <div class="flex flex-col gap-1">
-                      <span class="font-semibold">{eventItem.categoryLabel}</span>
-                      <span class="text-xs text-base-content/70">
-                        {tagsLabel}
-                      </span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    <div class="flex flex-col gap-1">
-                      <span class="font-semibold truncate max-w-xs" title={eventItem.locationLabel}>
-                        {eventItem.locationLabel}
-                      </span>
-                      <span class="text-xs text-base-content/70">
-                        {eventItem.timeLabel}
-                      </span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    <PublishedIndicator published={Boolean(eventItem.published)} />
-                  </td>
-                  <DashboardListActions
-                    viewHref={`/events/${eventItem.id}`}
-                    editHref={`/dashboard/event/${eventItem.id}/edit`}
-                    deleteClick={`handleDeleteClick('${eventItem.id}', '${eventItem.title.replace(/'/g, "\\'")}')`}
-                  />
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    ) : (
-      <div class="p-8 text-center text-base-content/70">
-        <p>Пока нет событий. Создай первое, чтобы заполнить календарь.</p>
-      </div>
-    )}
+                  Опубликовано
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  <span class="sr-only">Действия</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {decoratedEvents.map((eventItem, index) => {
+                const isLast = index === decoratedEvents.length - 1;
+                const tagsLabel =
+                  Array.isArray(eventItem.tags) && eventItem.tags.length > 0
+                    ? eventItem.tags.join(", ")
+                    : "—";
+                return (
+                  <tr
+                    class:list={[
+                      "bg-base-100 hover:bg-base-200/50",
+                      !isLast && "border-b border-base-300",
+                    ]}
+                  >
+                    <th
+                      scope="row"
+                      class="px-6 py-4 font-medium text-base-content whitespace-nowrap"
+                    >
+                      <div
+                        class="font-semibold truncate max-w-xs"
+                        title={eventItem.title}
+                      >
+                        {eventItem.title}
+                      </div>
+                      <div
+                        class="text-xs text-base-content/60 mt-1 truncate"
+                        title={eventItem.id}
+                      >
+                        ID: {eventItem.id}
+                      </div>
+                    </th>
+                    <td class="px-6 py-4">
+                      <div class="flex flex-col gap-1">
+                        <span class="font-semibold">
+                          {eventItem.dateRangeLabel}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 hidden lg:table-cell">
+                      <div class="flex flex-col gap-1">
+                        <span class="font-semibold">
+                          {eventItem.categoryLabel}
+                        </span>
+                        <span class="text-xs text-base-content/70">
+                          {tagsLabel}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 hidden md:table-cell">
+                      <div class="flex flex-col gap-1">
+                        <span
+                          class="font-semibold truncate max-w-xs"
+                          title={eventItem.locationLabel}
+                        >
+                          {eventItem.locationLabel}
+                        </span>
+                        <span class="text-xs text-base-content/70">
+                          {eventItem.timeLabel}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 hidden md:flex md:items-center md:justify-center">
+                      <PublishedIndicator
+                        published={Boolean(eventItem.published)}
+                      />
+                    </td>
+                    <DashboardListActions
+                      viewHref={`/events/${eventItem.id}`}
+                      editHref={`/dashboard/event/${eventItem.id}/edit`}
+                      deleteClick={`handleDeleteClick('${eventItem.id}', '${eventItem.title.replace(/'/g, "\\'")}')`}
+                    />
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="p-8 text-center text-base-content/70">
+          <p>Пока нет событий. Создай первое, чтобы заполнить календарь.</p>
+        </div>
+      )
+    }
   </div>
 </DashboardLayout>

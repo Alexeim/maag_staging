@@ -57,7 +57,9 @@ const normalizeDate = (value: any) => {
 };
 
 const normalizeArticleCategory = (value: unknown) =>
-  String(value ?? "").trim().toLowerCase();
+  String(value ?? "")
+    .trim()
+    .toLowerCase();
 
 const formatDashboardArticle = (
   article: Awaited<ReturnType<typeof articlesApi.list>>[number],
@@ -102,7 +104,7 @@ try {
 const articles = articlesRaw
   .filter(
     (article) =>
-      !((article as any).isNews) &&
+      !(article as any).isNews &&
       (article as any).articleType !== "tips" &&
       (article as any).articleType !== "le_saviez_vous" &&
       normalizeArticleCategory(article.category) === categoryKey,
@@ -122,7 +124,9 @@ const articleListState = JSON.stringify({
   class="bg-base-100 border border-base-300 rounded-xl p-6"
   x-data={`$lazy('articleList', ${articleListState})`}
 >
-  <div class="flex flex-col gap-4 mb-6 md:flex-row md:items-end md:justify-between">
+  <div
+    class="flex flex-col gap-4 mb-6 md:flex-row md:items-end md:justify-between"
+  >
     <div>
       <h2 class="text-xl font-semibold">{title}</h2>
       <p class="text-sm text-base-content/70 mt-1">
@@ -143,94 +147,101 @@ const articleListState = JSON.stringify({
     </label>
   </div>
 
-  {articles.length > 0 ? (
-    <>
-      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left rtl:text-right text-base-content">
-          <thead class="text-xs text-base-content/70 uppercase bg-base-200">
-            <tr>
-              <th scope="col" class="px-6 py-3">
-                Заголовок
-              </th>
-              <th scope="col" class="px-6 py-3">
-                Статус / теги
-              </th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">
-                Создана
-              </th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">
-                Опубликовано
-              </th>
-              <th scope="col" class="px-6 py-3">
-                <span class="sr-only">Действия</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {articles.map((article, index) => {
-              const isLast = index === articles.length - 1;
-
-              return (
-                <tr
-                  class:list={[
-                    "bg-base-100 hover:bg-base-200/50",
-                    !isLast && "border-b border-base-300",
-                  ]}
-                  x-show={`matchesFilter(hotFilter, ${article.isHotContent ? "true" : "false"})`}
+  {
+    articles.length > 0 ? (
+      <>
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table class="w-full text-sm text-left rtl:text-right text-base-content">
+            <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+              <tr>
+                <th scope="col" class="px-6 py-3">
+                  Заголовок
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  Статус / теги
+                </th>
+                <th scope="col" class="px-6 py-3 hidden md:table-cell">
+                  Создана
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 hidden md:flex md:items-center md:justify-center"
                 >
-                  <th
-                    scope="row"
-                    class="px-6 py-4 font-medium text-base-content whitespace-nowrap"
-                  >
-                    <div
-                      class="font-semibold truncate max-w-xs"
-                      title={article.title}
-                    >
-                      {article.title}
-                    </div>
-                    <div
-                      class="text-xs text-base-content/60 mt-1 truncate"
-                      title={article.id}
-                    >
-                      ID: {article.id}
-                    </div>
-                  </th>
-                  <td class="px-6 py-4">
-                    <div class="flex flex-col gap-1">
-                      <span class="font-semibold">{article.statusLabel}</span>
-                      <span class="text-xs text-base-content/70">
-                        {article.tagsLabel}
-                      </span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    {article.createdAtFormatted}
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    <PublishedIndicator published={Boolean(article.published)} />
-                  </td>
-                  <DashboardListActions
-                    viewHref={`/article/${article.id}`}
-                    editHref={`/dashboard/article/${article.id}/edit`}
-                    deleteClick={`handleDeleteClick('${article.id}', '${escapeForJsSingleQuote(article.title)}')`}
-                  />
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                  Опубликовано
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  <span class="sr-only">Действия</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {articles.map((article, index) => {
+                const isLast = index === articles.length - 1;
 
-      <div
-        x-show="getVisibleCount() === 0"
-        class="p-6 text-center text-sm text-base-content/70"
-      >
-        По текущему фильтру статей не найдено.
+                return (
+                  <tr
+                    class:list={[
+                      "bg-base-100 hover:bg-base-200/50",
+                      !isLast && "border-b border-base-300",
+                    ]}
+                    x-show={`matchesFilter(hotFilter, ${article.isHotContent ? "true" : "false"})`}
+                  >
+                    <th
+                      scope="row"
+                      class="px-6 py-4 font-medium text-base-content whitespace-nowrap"
+                    >
+                      <div
+                        class="font-semibold truncate max-w-xs"
+                        title={article.title}
+                      >
+                        {article.title}
+                      </div>
+                      <div
+                        class="text-xs text-base-content/60 mt-1 truncate"
+                        title={article.id}
+                      >
+                        ID: {article.id}
+                      </div>
+                    </th>
+                    <td class="px-6 py-4">
+                      <div class="flex flex-col gap-1">
+                        <span class="font-semibold">{article.statusLabel}</span>
+                        <span class="text-xs text-base-content/70">
+                          {article.tagsLabel}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 hidden md:table-cell">
+                      {article.createdAtFormatted}
+                    </td>
+                    <td class="px-6 py-4 hidden md:flex md:items-center md:justify-center">
+                      <PublishedIndicator
+                        published={Boolean(article.published)}
+                      />
+                    </td>
+                    <DashboardListActions
+                      viewHref={`/article/${article.id}`}
+                      editHref={`/dashboard/article/${article.id}/edit`}
+                      deleteClick={`handleDeleteClick('${article.id}', '${escapeForJsSingleQuote(article.title)}')`}
+                    />
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div
+          x-show="getVisibleCount() === 0"
+          class="p-6 text-center text-sm text-base-content/70"
+        >
+          По текущему фильтру статей не найдено.
+        </div>
+      </>
+    ) : (
+      <div class="p-8 text-center text-base-content/70">
+        <p>{emptyMessage}</p>
       </div>
-    </>
-  ) : (
-    <div class="p-8 text-center text-base-content/70">
-      <p>{emptyMessage}</p>
-    </div>
-  )}
+    )
+  }
 </div>

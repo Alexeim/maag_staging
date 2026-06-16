@@ -15,7 +15,12 @@ const normalizeDate = (value: any) => {
   }
   if (typeof value === "object") {
     if (typeof value.toDate === "function") return value.toDate();
-    const seconds = "seconds" in value ? value.seconds : "_seconds" in value ? value._seconds : null;
+    const seconds =
+      "seconds" in value
+        ? value.seconds
+        : "_seconds" in value
+          ? value._seconds
+          : null;
     if (seconds !== null) return new Date(seconds * 1000);
   }
   return null;
@@ -26,7 +31,11 @@ const photos = photosRaw.map((photo) => {
   return {
     ...photo,
     createdAtFormatted: date
-      ? date.toLocaleDateString("ru-RU", { year: "numeric", month: "short", day: "numeric" })
+      ? date.toLocaleDateString("ru-RU", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
       : "—",
   };
 });
@@ -41,7 +50,8 @@ const photos = photosRaw.map((photo) => {
       <div>
         <h2 class="text-xl font-semibold">Фото дня</h2>
         <p class="text-sm text-base-content/70 mt-1">
-          Управляй фотографиями дня. Последнее загруженное отображается на лендинге.
+          Управляй фотографиями дня. Последнее загруженное отображается на
+          лендинге.
         </p>
       </div>
       <a
@@ -52,61 +62,85 @@ const photos = photosRaw.map((photo) => {
       </a>
     </div>
 
-    {photos.length > 0 ? (
-      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left text-base-content">
-          <thead class="text-xs text-base-content/70 uppercase bg-base-200">
-            <tr>
-              <th scope="col" class="px-4 py-3 w-16">Фото</th>
-              <th scope="col" class="px-6 py-3">Заголовок</th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">Создано</th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">Опубликовано</th>
-              <th scope="col" class="px-6 py-3">
-                <span class="sr-only">Действия</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {photos.map((photo, index) => {
-              const isLast = index === photos.length - 1;
-              return (
-                <tr
-                  class:list={[
-                    "bg-base-100 hover:bg-base-200/50",
-                    !isLast && "border-b border-base-300",
-                  ]}
+    {
+      photos.length > 0 ? (
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table class="w-full text-sm text-left text-base-content">
+            <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+              <tr>
+                <th scope="col" class="px-4 py-3 w-16">
+                  Фото
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  Заголовок
+                </th>
+                <th scope="col" class="px-6 py-3 hidden md:table-cell">
+                  Создано
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 hidden md:flex md:items-center md:justify-center"
                 >
-                  <td class="px-4 py-3">
-                    {photo.imageUrl && (
-                      <img
-                        src={photo.imageUrl}
-                        alt={photo.title}
-                        class="w-12 h-12 object-cover rounded"
+                  Опубликовано
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  <span class="sr-only">Действия</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {photos.map((photo, index) => {
+                const isLast = index === photos.length - 1;
+                return (
+                  <tr
+                    class:list={[
+                      "bg-base-100 hover:bg-base-200/50",
+                      !isLast && "border-b border-base-300",
+                    ]}
+                  >
+                    <td class="px-4 py-3">
+                      {photo.imageUrl && (
+                        <img
+                          src={photo.imageUrl}
+                          alt={photo.title}
+                          class="w-12 h-12 object-cover rounded"
+                        />
+                      )}
+                    </td>
+                    <td class="px-6 py-4 font-medium">{photo.title}</td>
+                    <td class="px-6 py-4 hidden md:table-cell text-base-content/60">
+                      {photo.createdAtFormatted}
+                    </td>
+                    <td class="px-6 py-4 hidden md:flex md:items-center md:justify-center">
+                      <PublishedIndicator
+                        published={Boolean(photo.published)}
                       />
-                    )}
-                  </td>
-                  <td class="px-6 py-4 font-medium">{photo.title}</td>
-                  <td class="px-6 py-4 hidden md:table-cell text-base-content/60">
-                    {photo.createdAtFormatted}
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    <PublishedIndicator published={Boolean(photo.published)} />
-                  </td>
-                  <DashboardListActions
-                    viewHref={`/photo-of-the-day/${photo.id}`}
-                    editHref={`/dashboard/photo-of-the-day/${photo.id}/edit`}
-                    deleteClick={`handleDeleteClick('${photo.id}', '${photo.title.replace(/'/g, "\\'")}')`}
-                  />
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    ) : (
-      <div class="text-center py-12 text-base-content/60">
-        <p>Нет ни одного фото дня. <a href="/dashboard/photo-of-the-day/create" class="text-primary hover:underline">Добавить первое</a>.</p>
-      </div>
-    )}
+                    </td>
+                    <DashboardListActions
+                      viewHref={`/photo-of-the-day/${photo.id}`}
+                      editHref={`/dashboard/photo-of-the-day/${photo.id}/edit`}
+                      deleteClick={`handleDeleteClick('${photo.id}', '${photo.title.replace(/'/g, "\\'")}')`}
+                    />
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="text-center py-12 text-base-content/60">
+          <p>
+            Нет ни одного фото дня.{" "}
+            <a
+              href="/dashboard/photo-of-the-day/create"
+              class="text-primary hover:underline"
+            >
+              Добавить первое
+            </a>
+            .
+          </p>
+        </div>
+      )
+    }
   </div>
 </DashboardLayout>

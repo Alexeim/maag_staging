@@ -98,77 +98,105 @@ const guides = guidesRaw.map((guide) => {
       </a>
     </div>
 
-    {guides.length > 0 ? (
-      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left rtl:text-right text-base-content">
-          <thead class="text-xs text-base-content/70 uppercase bg-base-200">
-            <tr>
-              <th scope="col" class="px-6 py-3">
-                Заголовок
-              </th>
-              <th scope="col" class="px-6 py-3">
-                Категория / теги
-              </th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">
-                Создан
-              </th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">
-                Опубликовано
-              </th>
-              <th scope="col" class="px-6 py-3">
-                <span class="sr-only">Действия</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {guides.map((guide, index) => {
-              const isLast = index === guides.length - 1;
-              const categoryLabel = guide.isHotContent
-                ? "Самое Читаемое"
-                : guide.category || "—";
-              const tagsLabel = Array.isArray(guide.tags)
-                ? guide.tags.join(", ")
-                : "—";
-              return (
-                <tr
-                  class:list={[
-                    "bg-base-100 hover:bg-base-200/50",
-                    !isLast && "border-b border-base-300",
-                  ]}
+    {
+      guides.length > 0 ? (
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table class="w-full text-sm text-left rtl:text-right text-base-content">
+            <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+              <tr>
+                <th scope="col" class="px-6 py-3">
+                  Заголовок
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  Категория / теги
+                </th>
+                <th scope="col" class="px-6 py-3 hidden md:table-cell">
+                  Создан
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 hidden md:flex md:items-center md:justify-center"
                 >
-                  <th scope="row" class="px-6 py-4 font-medium text-base-content whitespace-nowrap">
-                    <div class="font-semibold truncate max-w-xs" title={guide.title}>{guide.title}</div>
-                    <div class="text-xs text-base-content/60 mt-1 truncate" title={guide.id}>ID: {guide.id}</div>
-                  </th>
-                  <td class="px-6 py-4">
-                    <div class="flex flex-col gap-1">
-                      <span class="font-semibold">{categoryLabel}</span>
-                      <span class="text-xs text-base-content/70">
-                        {tagsLabel}
-                      </span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    {guide.createdAtFormatted}
-                  </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
-                    <PublishedIndicator published={Boolean(guide.published)} />
-                  </td>
-                  <DashboardListActions
-                    viewHref={`/guide/${guide.id}`}
-                    editHref={`/dashboard/guide/${guide.id}/edit`}
-                    deleteClick={`handleDeleteClick('${guide.id}', '${guide.title.replace(/'/g, "\\'")}')`}
-                  />
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    ) : (
-      <div class="p-8 text-center text-base-content/70">
-        <p>Пока нет путеводителей. <a href="/dashboard/guide/create" class="text-primary hover:underline">Создай первый!</a></p>
-      </div>
-    )}
+                  Опубликовано
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  <span class="sr-only">Действия</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {guides.map((guide, index) => {
+                const isLast = index === guides.length - 1;
+                const categoryLabel = guide.isHotContent
+                  ? "Самое Читаемое"
+                  : guide.category || "—";
+                const tagsLabel = Array.isArray(guide.tags)
+                  ? guide.tags.join(", ")
+                  : "—";
+                return (
+                  <tr
+                    class:list={[
+                      "bg-base-100 hover:bg-base-200/50",
+                      !isLast && "border-b border-base-300",
+                    ]}
+                  >
+                    <th
+                      scope="row"
+                      class="px-6 py-4 font-medium text-base-content whitespace-nowrap"
+                    >
+                      <div
+                        class="font-semibold truncate max-w-xs"
+                        title={guide.title}
+                      >
+                        {guide.title}
+                      </div>
+                      <div
+                        class="text-xs text-base-content/60 mt-1 truncate"
+                        title={guide.id}
+                      >
+                        ID: {guide.id}
+                      </div>
+                    </th>
+                    <td class="px-6 py-4">
+                      <div class="flex flex-col gap-1">
+                        <span class="font-semibold">{categoryLabel}</span>
+                        <span class="text-xs text-base-content/70">
+                          {tagsLabel}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 hidden md:table-cell">
+                      {guide.createdAtFormatted}
+                    </td>
+                    <td class="px-6 py-4 hidden md:flex md:items-center md:justify-center">
+                      <PublishedIndicator
+                        published={Boolean(guide.published)}
+                      />
+                    </td>
+                    <DashboardListActions
+                      viewHref={`/guide/${guide.id}`}
+                      editHref={`/dashboard/guide/${guide.id}/edit`}
+                      deleteClick={`handleDeleteClick('${guide.id}', '${guide.title.replace(/'/g, "\\'")}')`}
+                    />
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="p-8 text-center text-base-content/70">
+          <p>
+            Пока нет путеводителей.{" "}
+            <a
+              href="/dashboard/guide/create"
+              class="text-primary hover:underline"
+            >
+              Создай первый!
+            </a>
+          </p>
+        </div>
+      )
+    }
   </div>
 </DashboardLayout>

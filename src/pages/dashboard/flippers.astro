@@ -65,7 +65,7 @@ const flippers = flippersRaw.map((flipper) => {
               <th scope="col" class="px-6 py-3 hidden md:table-cell">
                 Создана
               </th>
-              <th scope="col" class="px-6 py-3 hidden md:table-cell">
+              <th scope="col" class="px-6 py-3 hidden md:flex md:items-center md:justify-center">
                 Опубликовано
               </th>
               <th scope="col" class="px-6 py-3">
@@ -90,7 +90,7 @@ const flippers = flippersRaw.map((flipper) => {
                   <td class="px-6 py-4 hidden md:table-cell">
                     {flipper.createdAtFormatted}
                   </td>
-                  <td class="px-6 py-4 hidden md:table-cell">
+                  <td class="px-6 py-4 hidden md:flex md:items-center md:justify-center">
                     <PublishedIndicator published={Boolean(flipper.published)} />
                   </td>
                   <DashboardListActions
