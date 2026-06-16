@@ -1,8 +1,4 @@
-import {
-  articlesApi,
-  authorsApi,
-  contentCollectionsApi,
-} from "@/lib/api/api";
+import { articlesApi, authorsApi, contentCollectionsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import {
@@ -111,7 +107,15 @@ const syncContentBlockOrder = (blocks?: unknown) => {
 // Helper to create a new block object
 const createBlock = (type, data, position = 0) =>
   withBlockMeta({ type, ...data }, position);
-const TIP_TYPES = ["location", "time", "money", "idea", "like", "dislike", "link"] as const;
+const TIP_TYPES = [
+  "location",
+  "time",
+  "money",
+  "idea",
+  "like",
+  "dislike",
+  "link",
+] as const;
 type TipType = (typeof TIP_TYPES)[number];
 type TipItem = { type: TipType; text: string; url?: string };
 
@@ -264,7 +268,9 @@ export default function articleCreatorLogic(initialState = {}) {
     copy.imageCaption = copy.imageCaption ?? "";
     copy.cardLead = copy.cardLead ?? "";
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
-    copy.contentCollectionId = normalizeContentCollectionId(copy.contentCollectionId);
+    copy.contentCollectionId = normalizeContentCollectionId(
+      copy.contentCollectionId,
+    );
     return copy;
   };
 
@@ -356,8 +362,13 @@ export default function articleCreatorLogic(initialState = {}) {
       },
       getCategoryHeroTarget() {
         const cat = (this.article?.category || "").trim().toLowerCase();
-        if (!this.articleId || (cat !== "culture" && cat !== "paris")) return null;
-        return { type: "article", id: this.articleId, category: cat as "culture" | "paris" };
+        if (!this.articleId || (cat !== "culture" && cat !== "paris"))
+          return null;
+        return {
+          type: "article",
+          id: this.articleId,
+          category: cat as "culture" | "paris",
+        };
       },
     }),
 
@@ -445,7 +456,8 @@ export default function articleCreatorLogic(initialState = {}) {
     },
     getBlockSummary(block) {
       return buildBlockSummary(block, {
-        resolveLinkedTitle: (currentBlock) => this.getLinkedBlockTitle(currentBlock),
+        resolveLinkedTitle: (currentBlock) =>
+          this.getLinkedBlockTitle(currentBlock),
       });
     },
     normalizeContentBlocks(blocks) {
@@ -531,7 +543,8 @@ export default function articleCreatorLogic(initialState = {}) {
       return this.getSelectedCategoryTags().includes(value);
     },
     toggleTag(value: string) {
-      const normalized = normalizeTags([value], this.article.category)[0] || value;
+      const normalized =
+        normalizeTags([value], this.article.category)[0] || value;
       const targetTags = this.getSelectedCategoryTags();
       const idx = targetTags.indexOf(normalized);
       if (idx >= 0) {
@@ -545,7 +558,10 @@ export default function articleCreatorLogic(initialState = {}) {
           "paris",
         );
       } else {
-        this.article.tags = normalizeTags(this.article.tags, this.article.category);
+        this.article.tags = normalizeTags(
+          this.article.tags,
+          this.article.category,
+        );
       }
     },
     removeTag(value: string) {
@@ -562,17 +578,23 @@ export default function articleCreatorLogic(initialState = {}) {
         this.article.parisSubCategories,
         "paris",
       );
-      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
+      this.article.parisDistrict = normalizeParisDistrict(
+        this.article.parisDistrict,
+      );
     },
     isTipSelected(type: TipType) {
       return this.article.tips.some((tip: TipItem) => tip.type === type);
     },
     toggleTip(type: TipType) {
-      const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
+      const idx = this.article.tips.findIndex(
+        (tip: TipItem) => tip.type === type,
+      );
       if (idx >= 0) {
         this.article.tips.splice(idx, 1);
       } else {
-        this.article.tips.push(type === "link" ? { type, text: "", url: "" } : { type, text: "" });
+        this.article.tips.push(
+          type === "link" ? { type, text: "", url: "" } : { type, text: "" },
+        );
       }
     },
     getTipText(type: TipType) {
@@ -580,7 +602,9 @@ export default function articleCreatorLogic(initialState = {}) {
       return tip?.text ?? "";
     },
     setTipText(type: TipType, value: string) {
-      const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
+      const idx = this.article.tips.findIndex(
+        (tip: TipItem) => tip.type === type,
+      );
       if (idx < 0) return;
       this.article.tips[idx].text = value;
     },
@@ -589,7 +613,9 @@ export default function articleCreatorLogic(initialState = {}) {
       return (tip as any)?.url ?? "";
     },
     setTipUrl(type: TipType, value: string) {
-      const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
+      const idx = this.article.tips.findIndex(
+        (tip: TipItem) => tip.type === type,
+      );
       if (idx < 0) return;
       (this.article.tips[idx] as any).url = value;
     },
@@ -735,7 +761,8 @@ export default function articleCreatorLogic(initialState = {}) {
 
       try {
         const createdCollection = await contentCollectionsApi.create({ title });
-        const normalizedCollection = normalizeContentCollection(createdCollection);
+        const normalizedCollection =
+          normalizeContentCollection(createdCollection);
 
         if (!normalizedCollection) {
           throw new Error("Не удалось нормализовать созданную collection.");
@@ -866,7 +893,11 @@ export default function articleCreatorLogic(initialState = {}) {
           if (stored) {
             const parsed = JSON.parse(stored);
             if (parsed && typeof parsed === "object") {
-              if ("article" in parsed || "articleId" in parsed || "isEditMode" in parsed) {
+              if (
+                "article" in parsed ||
+                "articleId" in parsed ||
+                "isEditMode" in parsed
+              ) {
                 previewState = parsed as PreviewState;
               } else {
                 previewState = { article: parsed } as PreviewState;
@@ -912,8 +943,7 @@ export default function articleCreatorLogic(initialState = {}) {
         const isPreviewEdit = Boolean(previewState?.isEditMode);
         const isSameEdit =
           this.isEditMode && previewId !== null && previewId === this.articleId;
-        const isCreateDraft =
-          !this.isEditMode && !previewId && !isPreviewEdit;
+        const isCreateDraft = !this.isEditMode && !previewId && !isPreviewEdit;
         return isSameEdit || isCreateDraft;
       })();
 
@@ -922,7 +952,10 @@ export default function articleCreatorLogic(initialState = {}) {
         if (normalizedPreview) {
           if (this.isPreview) {
             this.article = normalizedPreview;
-            if (typeof previewState.articleId === "string" && previewState.articleId) {
+            if (
+              typeof previewState.articleId === "string" &&
+              previewState.articleId
+            ) {
               this.articleId = previewState.articleId;
             }
             if (typeof previewState.isEditMode === "boolean") {
@@ -932,14 +965,21 @@ export default function articleCreatorLogic(initialState = {}) {
             Object.assign(this.article, normalizedPreview);
           }
         }
-        if (typeof previewState.editRouteBase === "string" && previewState.editRouteBase) {
+        if (
+          typeof previewState.editRouteBase === "string" &&
+          previewState.editRouteBase
+        ) {
           this.editRouteBase = previewState.editRouteBase;
         }
-        if (typeof previewState.createRoute === "string" && previewState.createRoute) {
+        if (
+          typeof previewState.createRoute === "string" &&
+          previewState.createRoute
+        ) {
           this.createRoute = previewState.createRoute;
         }
         if ("createSuccessRedirect" in previewState) {
-          this.createSuccessRedirect = previewState.createSuccessRedirect ?? null;
+          this.createSuccessRedirect =
+            previewState.createSuccessRedirect ?? null;
         }
       } else if (previewState) {
         try {
@@ -954,12 +994,15 @@ export default function articleCreatorLogic(initialState = {}) {
         this.article.parisSubCategories,
         "paris",
       );
-      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
+      this.article.parisDistrict = normalizeParisDistrict(
+        this.article.parisDistrict,
+      );
       this.article.binaryForGuide = Boolean(this.article.binaryForGuide);
       this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
       this.article.cardLead = this.article.cardLead ?? "";
-      this.article.articleType = this.article.articleType ?? articleType ?? "standard";
+      this.article.articleType =
+        this.article.articleType ?? articleType ?? "standard";
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.relatedContent = sanitizeRelatedContent(
@@ -1056,7 +1099,7 @@ export default function articleCreatorLogic(initialState = {}) {
                 column
               ) {
                 this.editingBlock[column].content = downloadURL;
-                this.editingBlock[column].type = 'image'; // Ensure type is image
+                this.editingBlock[column].type = "image"; // Ensure type is image
               } else if (
                 ["one-big-one-small", "collage"].includes(
                   this.editingBlock.type,
@@ -1131,11 +1174,15 @@ export default function articleCreatorLogic(initialState = {}) {
       uploadTask.on(
         "state_changed",
         (snapshot) => {
-          this.uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          this.uploadProgress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         },
         (error) => {
           console.error("Upload failed:", error);
-          window.Alpine.store("ui").showToast(`Проблема загрузки картинки: ${error.message}`, "error");
+          window.Alpine.store("ui").showToast(
+            `Проблема загрузки картинки: ${error.message}`,
+            "error",
+          );
           this.uploading = false;
         },
         () => {
@@ -1346,9 +1393,12 @@ export default function articleCreatorLogic(initialState = {}) {
 
       const uiStore = window.Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
-        uiStore.showConfirmation("Ты точно хочешь удалить этот блок?", removeBlock);
+        uiStore.showConfirmation(
+          "Ты точно хочешь удалить этот блок?",
+          removeBlock,
+        );
       } else {
-        console.warn('UI store недоступен, удаляем блок без подтверждения');
+        console.warn("UI store недоступен, удаляем блок без подтверждения");
         removeBlock();
       }
     },
@@ -1407,13 +1457,20 @@ export default function articleCreatorLogic(initialState = {}) {
         isHotContentFlag && normalizedCategory === "hotContent"
           ? ""
           : normalizedCategory;
-      this.article.contentBlocks = reindexContentBlocks(this.article.contentBlocks);
-      this.article.tags = normalizeTags(this.article.tags, this.article.category);
+      this.article.contentBlocks = reindexContentBlocks(
+        this.article.contentBlocks,
+      );
+      this.article.tags = normalizeTags(
+        this.article.tags,
+        this.article.category,
+      );
       this.article.parisSubCategories = normalizeTags(
         this.article.parisSubCategories,
         "paris",
       );
-      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
+      this.article.parisDistrict = normalizeParisDistrict(
+        this.article.parisDistrict,
+      );
       this.article.tips = normalizeTips(this.article.tips);
 
       const hasInvalidVideoBlock = this.article.contentBlocks.some(
@@ -1434,7 +1491,10 @@ export default function articleCreatorLogic(initialState = {}) {
       }
 
       const selectedCategoryTags = this.getSelectedCategoryTags();
-      if (!Array.isArray(selectedCategoryTags) || selectedCategoryTags.length === 0) {
+      if (
+        !Array.isArray(selectedCategoryTags) ||
+        selectedCategoryTags.length === 0
+      ) {
         window.Alpine.store("ui").showToast(
           "Добавь хотя бы один тег — без него статья не сохранится.",
           "error",
@@ -1454,7 +1514,9 @@ export default function articleCreatorLogic(initialState = {}) {
 
       try {
         const resolvedAuthorId = await this.resolveAuthorId();
-        const tagsForDb = selectedCategoryTags.map((tag) => this.getTagLabel(tag));
+        const tagsForDb = selectedCategoryTags.map((tag) =>
+          this.getTagLabel(tag),
+        );
         const isParisCategory = this.isParisCategory();
         const payload = {
           title: this.article.title,
@@ -1467,8 +1529,12 @@ export default function articleCreatorLogic(initialState = {}) {
           content: this.article.contentBlocks,
           category: this.article.category,
           tags: tagsForDb,
-          parisSubCategories: isParisCategory ? this.article.parisSubCategories : [],
-          parisDistrict: isParisCategory ? this.article.parisDistrict || null : null,
+          parisSubCategories: isParisCategory
+            ? this.article.parisSubCategories
+            : [],
+          parisDistrict: isParisCategory
+            ? this.article.parisDistrict || null
+            : null,
           binaryForGuide: false,
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,
@@ -1489,14 +1555,20 @@ export default function articleCreatorLogic(initialState = {}) {
           await articlesApi.update(this.articleId, payload);
           localStorage.removeItem("articlePreview");
           window.Alpine.store("ui").showToast("Статья успешно обновлена!");
-          const redirectTo = this.onSaveRedirect || `/dashboard/article/${this.articleId}/edit`;
-          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
+          const redirectTo = this.onSaveRedirect || `/dashboard`;
+          setTimeout(() => {
+            globalThis.location.href = redirectTo;
+          }, 1500);
         } else {
           const result = await articlesApi.create(payload);
           localStorage.removeItem("articlePreview");
-          window.Alpine.store("ui").showToast("Статья успешно создана! Молодец!");
-          const redirectTo = this.createSuccessRedirect || `/article/${result.id}`;
-          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
+          window.Alpine.store("ui").showToast(
+            "Статья успешно создана! Молодец!",
+          );
+          const redirectTo = this.createSuccessRedirect || `/dashboard`;
+          setTimeout(() => {
+            globalThis.location.href = redirectTo;
+          }, 1500);
         }
       } catch (error) {
         console.error("Проблемка сохранения:", error);
@@ -1522,11 +1594,14 @@ export default function articleCreatorLogic(initialState = {}) {
           }
           window.Alpine.store("ui").showToast("Статья удалена");
           setTimeout(() => {
-            window.location.href = redirectUrl || '/dashboard';
+            window.location.href = redirectUrl || "/dashboard";
           }, 1500);
         } catch (error) {
           console.error(error);
-          window.Alpine.store("ui").showToast("Не удалось удалить статью.", "error");
+          window.Alpine.store("ui").showToast(
+            "Не удалось удалить статью.",
+            "error",
+          );
         }
       };
 
@@ -1534,7 +1609,7 @@ export default function articleCreatorLogic(initialState = {}) {
       if (uiStore?.showConfirmation) {
         uiStore.showConfirmation(
           `Удалить статью «${this.article.title}»? Это действие необратимо.`,
-          performDelete
+          performDelete,
         );
       } else {
         if (confirm("Вы уверены, что хотите удалить эту статью?")) {

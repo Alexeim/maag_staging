@@ -39,7 +39,9 @@ const createBlock = (
   position = 0,
 ) => withBlockMeta({ type, ...data }, position);
 
-export default function newsCreatorLogic(initialState: Record<string, unknown> = {}) {
+export default function newsCreatorLogic(
+  initialState: Record<string, unknown> = {},
+) {
   const {
     categoryTags = {},
     initialArticle = null,
@@ -73,7 +75,9 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
 
   const buildLegacyTagMap = (category?: string) => {
     if (!category) return {};
-    const tags = (categoryTags as Record<string, Array<{ title: string; value: string }>>)[category];
+    const tags = (
+      categoryTags as Record<string, Array<{ title: string; value: string }>>
+    )[category];
     if (!tags) return {};
     return Object.fromEntries(tags.map((tag) => [tag.title, tag.value]));
   };
@@ -204,7 +208,8 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     },
     getBlockSummary(block: Record<string, unknown>) {
       return buildBlockSummary(block, {
-        resolveLinkedTitle: (currentBlock) => this.getLinkedBlockTitle(currentBlock),
+        resolveLinkedTitle: (currentBlock) =>
+          this.getLinkedBlockTitle(currentBlock),
       });
     },
     syncContentBlockOrder(blocks = this.article.contentBlocks) {
@@ -246,13 +251,15 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       return this.article?.relatedContent?.[type] ?? [];
     },
     getRelatedContentItemLabel(type: string, id: string) {
-      const item = (this.relatedContentLists as Record<string, any[]>)[type]?.find(
-        (entry) => entry.id === id,
-      );
+      const item = (this.relatedContentLists as Record<string, any[]>)[
+        type
+      ]?.find((entry) => entry.id === id);
       return item?.title || id;
     },
     getFilteredContentList(contentType: string) {
-      return (this.relatedContentLists as Record<string, any[]>)[contentType] ?? [];
+      return (
+        (this.relatedContentLists as Record<string, any[]>)[contentType] ?? []
+      );
     },
     addRelatedContent() {
       const type = this.selectedRelatedContentType;
@@ -287,14 +294,18 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       return this.article.tags.includes(value);
     },
     toggleTag(value: string) {
-      const normalized = normalizeTags([value], this.article.category)[0] || value;
+      const normalized =
+        normalizeTags([value], this.article.category)[0] || value;
       const idx = this.article.tags.indexOf(normalized);
       if (idx >= 0) {
         this.article.tags.splice(idx, 1);
       } else {
         this.article.tags.push(normalized);
       }
-      this.article.tags = normalizeTags(this.article.tags, this.article.category);
+      this.article.tags = normalizeTags(
+        this.article.tags,
+        this.article.category,
+      );
     },
     removeTag(value: string) {
       const idx = this.article.tags.indexOf(value);
@@ -517,7 +528,9 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
             this.article.imageUrl = downloadURL;
             this.uploading = false;
-            (window as any).Alpine.store("ui").showToast("Картинка успешно загружена!");
+            (window as any).Alpine.store("ui").showToast(
+              "Картинка успешно загружена!",
+            );
           });
         },
       );
@@ -662,8 +675,13 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
 
       const normalizedCategory = normalizeCategory(this.article.category) || "";
       this.article.category = normalizedCategory;
-      this.article.contentBlocks = reindexContentBlocks(this.article.contentBlocks);
-      this.article.tags = normalizeTags(this.article.tags, this.article.category);
+      this.article.contentBlocks = reindexContentBlocks(
+        this.article.contentBlocks,
+      );
+      this.article.tags = normalizeTags(
+        this.article.tags,
+        this.article.category,
+      );
 
       if (!this.article.category) {
         (window as any).Alpine.store("ui").showToast(
@@ -685,7 +703,9 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
 
       try {
         const resolvedAuthorId = await this.resolveAuthorId();
-        const tagsForDb = this.article.tags.map((tag: string) => this.getTagLabel(tag));
+        const tagsForDb = this.article.tags.map((tag: string) =>
+          this.getTagLabel(tag),
+        );
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
@@ -711,19 +731,21 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
         if (this.isEditMode && this.articleId) {
           await newsApi.update(this.articleId, payload);
           (window as any).Alpine.store("ui").showToast("Новость обновлена!");
-          const redirectTo = this.onSaveRedirect || `/dashboard/news/${this.articleId}/edit`;
-          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
+          const redirectTo = this.onSaveRedirect || `/dashboard/news`;
+          setTimeout(() => {
+            globalThis.location.href = redirectTo;
+          }, 1500);
         } else {
           const result = await newsApi.create(payload);
           (window as any).Alpine.store("ui").showToast("Новость создана!");
-          setTimeout(() => { globalThis.location.href = `/news/${result.id}`; }, 1500);
+          setTimeout(() => {
+            globalThis.location.href = `/dashboard/news`;
+          }, 1500);
         }
       } catch (error) {
         console.error("Save error:", error);
         const message =
-          error instanceof Error
-            ? error.message
-            : "Ошибка сохранения новости.";
+          error instanceof Error ? error.message : "Ошибка сохранения новости.";
         (window as any).Alpine.store("ui").showToast(message, "error");
         this.isSaving = false;
       }
@@ -741,7 +763,10 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
           }, 1500);
         } catch (error) {
           console.error(error);
-          (window as any).Alpine.store("ui").showToast("Не удалось удалить.", "error");
+          (window as any).Alpine.store("ui").showToast(
+            "Не удалось удалить.",
+            "error",
+          );
         }
       };
 

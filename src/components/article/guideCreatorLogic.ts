@@ -44,7 +44,15 @@ const storage = getStorage(app);
 
 const createBlock = (type, data, position = 0) =>
   withBlockMeta({ type, ...data }, position);
-const TIP_TYPES = ["location", "time", "money", "idea", "like", "dislike", "link"] as const;
+const TIP_TYPES = [
+  "location",
+  "time",
+  "money",
+  "idea",
+  "like",
+  "dislike",
+  "link",
+] as const;
 type TipType = (typeof TIP_TYPES)[number];
 type TipItem = { type: TipType; text: string; url?: string };
 
@@ -281,8 +289,13 @@ export default function guideCreatorLogic(initialState = {}) {
       },
       getCategoryHeroTarget() {
         const cat = (this.article?.category || "").trim().toLowerCase();
-        if (!this.articleId || (cat !== "culture" && cat !== "paris")) return null;
-        return { type: "guide", id: this.articleId, category: cat as "culture" | "paris" };
+        if (!this.articleId || (cat !== "culture" && cat !== "paris"))
+          return null;
+        return {
+          type: "guide",
+          id: this.articleId,
+          category: cat as "culture" | "paris",
+        };
       },
     }),
 
@@ -360,7 +373,8 @@ export default function guideCreatorLogic(initialState = {}) {
     },
     getBlockSummary(block) {
       return buildBlockSummary(block, {
-        resolveLinkedTitle: (currentBlock) => this.getLinkedBlockTitle(currentBlock),
+        resolveLinkedTitle: (currentBlock) =>
+          this.getLinkedBlockTitle(currentBlock),
       });
     },
     normalizeContentBlocks(blocks) {
@@ -445,7 +459,8 @@ export default function guideCreatorLogic(initialState = {}) {
       return this.getSelectedCategoryTags().includes(value);
     },
     toggleTag(value: string) {
-      const normalized = normalizeTags([value], this.article.category)[0] || value;
+      const normalized =
+        normalizeTags([value], this.article.category)[0] || value;
       const targetTags = this.getSelectedCategoryTags();
       const idx = targetTags.indexOf(normalized);
       if (idx >= 0) {
@@ -459,7 +474,10 @@ export default function guideCreatorLogic(initialState = {}) {
           "paris",
         );
       } else {
-        this.article.tags = normalizeTags(this.article.tags, this.article.category);
+        this.article.tags = normalizeTags(
+          this.article.tags,
+          this.article.category,
+        );
       }
     },
     removeTag(value: string) {
@@ -476,17 +494,23 @@ export default function guideCreatorLogic(initialState = {}) {
         this.article.parisSubCategories,
         "paris",
       );
-      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
+      this.article.parisDistrict = normalizeParisDistrict(
+        this.article.parisDistrict,
+      );
     },
     isTipSelected(type: TipType) {
       return this.article.tips.some((tip: TipItem) => tip.type === type);
     },
     toggleTip(type: TipType) {
-      const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
+      const idx = this.article.tips.findIndex(
+        (tip: TipItem) => tip.type === type,
+      );
       if (idx >= 0) {
         this.article.tips.splice(idx, 1);
       } else {
-        this.article.tips.push(type === "link" ? { type, text: "", url: "" } : { type, text: "" });
+        this.article.tips.push(
+          type === "link" ? { type, text: "", url: "" } : { type, text: "" },
+        );
       }
     },
     getTipText(type: TipType) {
@@ -494,7 +518,9 @@ export default function guideCreatorLogic(initialState = {}) {
       return tip?.text ?? "";
     },
     setTipText(type: TipType, value: string) {
-      const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
+      const idx = this.article.tips.findIndex(
+        (tip: TipItem) => tip.type === type,
+      );
       if (idx < 0) return;
       this.article.tips[idx].text = value;
     },
@@ -503,7 +529,9 @@ export default function guideCreatorLogic(initialState = {}) {
       return (tip as any)?.url ?? "";
     },
     setTipUrl(type: TipType, value: string) {
-      const idx = this.article.tips.findIndex((tip: TipItem) => tip.type === type);
+      const idx = this.article.tips.findIndex(
+        (tip: TipItem) => tip.type === type,
+      );
       if (idx < 0) return;
       (this.article.tips[idx] as any).url = value;
     },
@@ -652,7 +680,11 @@ export default function guideCreatorLogic(initialState = {}) {
           if (stored) {
             const parsed = JSON.parse(stored);
             if (parsed && typeof parsed === "object") {
-              if ("article" in parsed || "articleId" in parsed || "isEditMode" in parsed) {
+              if (
+                "article" in parsed ||
+                "articleId" in parsed ||
+                "isEditMode" in parsed
+              ) {
                 previewState = parsed as PreviewState;
               } else {
                 previewState = { article: parsed } as PreviewState;
@@ -698,8 +730,7 @@ export default function guideCreatorLogic(initialState = {}) {
         const isPreviewEdit = Boolean(previewState?.isEditMode);
         const isSameEdit =
           this.isEditMode && previewId !== null && previewId === this.articleId;
-        const isCreateDraft =
-          !this.isEditMode && !previewId && !isPreviewEdit;
+        const isCreateDraft = !this.isEditMode && !previewId && !isPreviewEdit;
         return isSameEdit || isCreateDraft;
       })();
 
@@ -708,7 +739,10 @@ export default function guideCreatorLogic(initialState = {}) {
         if (normalizedPreview) {
           if (this.isPreview) {
             this.article = normalizedPreview;
-            if (typeof previewState.articleId === "string" && previewState.articleId) {
+            if (
+              typeof previewState.articleId === "string" &&
+              previewState.articleId
+            ) {
               this.articleId = previewState.articleId;
             }
             if (typeof previewState.isEditMode === "boolean") {
@@ -731,7 +765,9 @@ export default function guideCreatorLogic(initialState = {}) {
         this.article.parisSubCategories,
         "paris",
       );
-      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
+      this.article.parisDistrict = normalizeParisDistrict(
+        this.article.parisDistrict,
+      );
       this.article.binaryForGuide = Boolean(this.article.binaryForGuide);
       this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
@@ -826,7 +862,7 @@ export default function guideCreatorLogic(initialState = {}) {
                 column
               ) {
                 this.editingBlock[column].content = downloadURL;
-                this.editingBlock[column].type = 'image';
+                this.editingBlock[column].type = "image";
               } else if (
                 this.editingBlock.type === "one-big-one-small" &&
                 imageField
@@ -898,11 +934,15 @@ export default function guideCreatorLogic(initialState = {}) {
       uploadTask.on(
         "state_changed",
         (snapshot) => {
-          this.uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          this.uploadProgress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         },
         (error) => {
           console.error("Upload failed:", error);
-          window.Alpine.store("ui").showToast(`Проблема загрузки картинки: ${error.message}`, "error");
+          window.Alpine.store("ui").showToast(
+            `Проблема загрузки картинки: ${error.message}`,
+            "error",
+          );
           this.uploading = false;
         },
         () => {
@@ -1085,7 +1125,10 @@ export default function guideCreatorLogic(initialState = {}) {
 
       const uiStore = window.Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
-        uiStore.showConfirmation("Ты точно хочешь удалить этот блок?", removeBlock);
+        uiStore.showConfirmation(
+          "Ты точно хочешь удалить этот блок?",
+          removeBlock,
+        );
       } else {
         removeBlock();
       }
@@ -1143,12 +1186,17 @@ export default function guideCreatorLogic(initialState = {}) {
       this.article.contentBlocks = normalizeEditableContentBlocks(
         this.article.contentBlocks,
       );
-      this.article.tags = normalizeTags(this.article.tags, this.article.category);
+      this.article.tags = normalizeTags(
+        this.article.tags,
+        this.article.category,
+      );
       this.article.parisSubCategories = normalizeTags(
         this.article.parisSubCategories,
         "paris",
       );
-      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
+      this.article.parisDistrict = normalizeParisDistrict(
+        this.article.parisDistrict,
+      );
       this.article.tips = normalizeTips(this.article.tips);
 
       const hasInvalidVideoBlock = this.article.contentBlocks.some(
@@ -1169,7 +1217,10 @@ export default function guideCreatorLogic(initialState = {}) {
       }
 
       const selectedCategoryTags = this.getSelectedCategoryTags();
-      if (!Array.isArray(selectedCategoryTags) || selectedCategoryTags.length === 0) {
+      if (
+        !Array.isArray(selectedCategoryTags) ||
+        selectedCategoryTags.length === 0
+      ) {
         window.Alpine.store("ui").showToast(
           "Добавь хотя бы один тег — без него путеводитель не сохранится.",
           "error",
@@ -1189,7 +1240,9 @@ export default function guideCreatorLogic(initialState = {}) {
 
       try {
         const resolvedAuthorId = await this.resolveAuthorId();
-        const tagsForDb = selectedCategoryTags.map((tag) => this.getTagLabel(tag));
+        const tagsForDb = selectedCategoryTags.map((tag) =>
+          this.getTagLabel(tag),
+        );
         const isParisCategory = this.isParisCategory();
         const payload = {
           title: this.article.title,
@@ -1201,8 +1254,12 @@ export default function guideCreatorLogic(initialState = {}) {
           content: this.article.contentBlocks,
           category: this.article.category,
           tags: tagsForDb,
-          parisSubCategories: isParisCategory ? this.article.parisSubCategories : [],
-          parisDistrict: isParisCategory ? this.article.parisDistrict || null : null,
+          parisSubCategories: isParisCategory
+            ? this.article.parisSubCategories
+            : [],
+          parisDistrict: isParisCategory
+            ? this.article.parisDistrict || null
+            : null,
           binaryForGuide: isParisCategory,
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,
@@ -1223,13 +1280,19 @@ export default function guideCreatorLogic(initialState = {}) {
           await guidesApi.update(this.articleId, payload);
           localStorage.removeItem("guidePreview");
           window.Alpine.store("ui").showToast("Путеводитель успешно обновлён!");
-          const redirectTo = this.onSaveRedirect || `/dashboard/guide/${this.articleId}/edit`;
-          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
+          const redirectTo = this.onSaveRedirect || `/dashboard/guides`;
+          setTimeout(() => {
+            globalThis.location.href = redirectTo;
+          }, 1500);
         } else {
           const result = await guidesApi.create(payload);
           localStorage.removeItem("guidePreview");
-          window.Alpine.store("ui").showToast("Путеводитель успешно создан! Молодец!");
-          setTimeout(() => { globalThis.location.href = `/guide/${result.id}`; }, 1500);
+          window.Alpine.store("ui").showToast(
+            "Путеводитель успешно создан! Молодец!",
+          );
+          setTimeout(() => {
+            globalThis.location.href = `dashboard/guides`;
+          }, 1500);
         }
       } catch (error) {
         console.error("Проблемка сохранения:", error);
@@ -1252,11 +1315,14 @@ export default function guideCreatorLogic(initialState = {}) {
           await guidesApi.delete(this.articleId);
           window.Alpine.store("ui").showToast("Путеводитель удалён");
           setTimeout(() => {
-            window.location.href = redirectUrl || '/dashboard/guides';
+            window.location.href = redirectUrl || "/dashboard/guides";
           }, 1500);
         } catch (error) {
           console.error(error);
-          window.Alpine.store("ui").showToast("Не удалось удалить путеводитель.", "error");
+          window.Alpine.store("ui").showToast(
+            "Не удалось удалить путеводитель.",
+            "error",
+          );
         }
       };
 
@@ -1264,7 +1330,7 @@ export default function guideCreatorLogic(initialState = {}) {
       if (uiStore?.showConfirmation) {
         uiStore.showConfirmation(
           `Удалить путеводитель «${this.article.title}»? Это действие необратимо.`,
-          performDelete
+          performDelete,
         );
       } else {
         if (confirm("Вы уверены, что хотите удалить этот путеводитель?")) {

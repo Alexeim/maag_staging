@@ -214,7 +214,9 @@ export default function eventCreatorLogic(initialState = {}) {
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
-    copy.contentCollectionId = normalizeContentCollectionId(copy.contentCollectionId);
+    copy.contentCollectionId = normalizeContentCollectionId(
+      copy.contentCollectionId,
+    );
     return copy;
   };
 
@@ -319,9 +321,7 @@ export default function eventCreatorLogic(initialState = {}) {
 
       if (eventDraft) {
         this.article = { ...this.article, ...eventDraft };
-        this.article.contentBlocks = Array.isArray(
-          eventDraft.contentBlocks,
-        )
+        this.article.contentBlocks = Array.isArray(eventDraft.contentBlocks)
           ? eventDraft.contentBlocks
           : [];
         this.article.tags = Array.isArray(eventDraft.tags)
@@ -332,8 +332,7 @@ export default function eventCreatorLogic(initialState = {}) {
           "event",
           this.eventId,
         );
-        this.article.contentCollectionId =
-          eventDraft.contentCollectionId;
+        this.article.contentCollectionId = eventDraft.contentCollectionId;
         this.article.imageUrl = eventDraft.imageUrl;
         this.article.imageCaption = eventDraft.imageCaption ?? "";
         this.article.title = eventDraft.title ?? "";
@@ -345,16 +344,12 @@ export default function eventCreatorLogic(initialState = {}) {
         this.eventForm.startTime = eventDraft.startTime;
         this.eventForm.endTime = eventDraft.endTime;
         this.eventForm.isMainEvent = Boolean(eventDraft.isMainEvent);
-        this.eventForm.additionalInfo = Array.isArray(
-          eventDraft.additionalInfo,
-        )
+        this.eventForm.additionalInfo = Array.isArray(eventDraft.additionalInfo)
           ? eventDraft.additionalInfo
           : [];
         this.selectedAuthorId =
           this.selectedAuthorId ||
-          (typeof eventDraft.authorId === "string"
-            ? eventDraft.authorId
-            : "");
+          (typeof eventDraft.authorId === "string" ? eventDraft.authorId : "");
         this.ensureSelectedAuthorPresent();
       }
 
@@ -659,8 +654,7 @@ export default function eventCreatorLogic(initialState = {}) {
           (globalThis as any).Alpine.store("ui").showToast(
             "Событие обновлено, красота!",
           );
-          const redirectTo =
-            this.onSaveRedirect || `/dashboard/event/${this.eventId}/edit`;
+          const redirectTo = this.onSaveRedirect || `/dashboard/events`;
           setTimeout(() => {
             globalThis.location.href = redirectTo;
           }, 1500);
@@ -670,7 +664,7 @@ export default function eventCreatorLogic(initialState = {}) {
             "Событие создано, поехали!",
           );
           setTimeout(() => {
-            globalThis.location.href = `/events/${result.id}`;
+            globalThis.location.href = `/dashboard/events`;
           }, 1500);
         }
       } catch (error) {

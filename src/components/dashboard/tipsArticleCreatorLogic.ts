@@ -136,8 +136,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       contentBlocks: [] as any[],
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
-      authorId: "" as string,  // populated from loaded article in edit mode
-      author: null as any,     // populated from API response in edit mode
+      authorId: "" as string, // populated from loaded article in edit mode
+      author: null as any, // populated from API response in edit mode
     },
 
     // Editing state
@@ -176,8 +176,13 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       },
       getCategoryHeroTarget() {
         const cat = (this.article?.category || "").trim().toLowerCase();
-        if (!this.articleId || (cat !== "culture" && cat !== "paris")) return null;
-        return { type: "article", id: this.articleId, category: cat as "culture" | "paris" };
+        if (!this.articleId || (cat !== "culture" && cat !== "paris"))
+          return null;
+        return {
+          type: "article",
+          id: this.articleId,
+          category: cat as "culture" | "paris",
+        };
       },
     }),
 
@@ -244,7 +249,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       this.article.parisDistrict = normalizeParisDistrict(
         (this.article as any).parisDistrict,
       );
-      this.article.binaryForGuide = Boolean((this.article as any).binaryForGuide);
+      this.article.binaryForGuide = Boolean(
+        (this.article as any).binaryForGuide,
+      );
       this.article.relatedContent = sanitizeRelatedContent(
         (this.article as any).relatedContent,
         "article",
@@ -273,7 +280,10 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
     previewArticle() {
       if (this.uploading) {
-        ui()?.showToast?.("Подожди — загрузка файла ещё не завершилась.", "error");
+        ui()?.showToast?.(
+          "Подожди — загрузка файла ещё не завершилась.",
+          "error",
+        );
         return;
       }
 
@@ -286,7 +296,10 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         newAuthorFirstName: this.newAuthorFirstName,
         newAuthorLastName: this.newAuthorLastName,
       };
-      globalThis.localStorage.setItem("tipsPreview", JSON.stringify(previewState));
+      globalThis.localStorage.setItem(
+        "tipsPreview",
+        JSON.stringify(previewState),
+      );
       globalThis.location.href = "/dashboard/tips/preview";
     },
 
@@ -378,7 +391,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         this.categoryTags,
         "paris",
       );
-      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
+      this.article.parisDistrict = normalizeParisDistrict(
+        this.article.parisDistrict,
+      );
     },
 
     // ── Authors ───────────────────────────────────────────────────────────────
@@ -458,9 +473,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       return (this.article as any)?.relatedContent?.[type] ?? [];
     },
     getRelatedContentItemLabel(type: string, id: string) {
-      const item = (this.relatedContentLists as Record<string, any[]>)[type]?.find(
-        (entry) => entry.id === id,
-      );
+      const item = (this.relatedContentLists as Record<string, any[]>)[
+        type
+      ]?.find((entry) => entry.id === id);
       return item?.title || id;
     },
     addRelatedContent() {
@@ -468,9 +483,14 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       const id = this.selectedRelatedContentId;
       if (!type || !id) return;
 
-      const normalized = sanitizeRelatedContent((this.article as any).relatedContent);
+      const normalized = sanitizeRelatedContent(
+        (this.article as any).relatedContent,
+      );
       if (this.articleId && type === "article" && id === this.articleId) {
-        ui()?.showToast?.("Нельзя привязать текущий материал к самому себе.", "error");
+        ui()?.showToast?.(
+          "Нельзя привязать текущий материал к самому себе.",
+          "error",
+        );
         return;
       }
       if (normalized[type].includes(id)) {
@@ -483,7 +503,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       this.selectedRelatedContentId = "";
     },
     removeRelatedContent(type: string, id: string) {
-      const normalized = sanitizeRelatedContent((this.article as any).relatedContent);
+      const normalized = sanitizeRelatedContent(
+        (this.article as any).relatedContent,
+      );
       normalized[type] = normalized[type].filter((itemId) => itemId !== id);
       (this.article as any).relatedContent = normalized;
     },
@@ -498,7 +520,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     editBlock(index: number) {
       this.editingIndex = index;
       // JSON round-trip strips Alpine reactive proxies; structuredClone does not work on them
-      this.editingBlock = JSON.parse(JSON.stringify(this.article.contentBlocks[index])); // NOSONAR
+      this.editingBlock = JSON.parse(
+        JSON.stringify(this.article.contentBlocks[index]),
+      ); // NOSONAR
     },
 
     updateBlock() {
@@ -551,7 +575,11 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       });
     },
 
-    async _uploadFile(raw: File, folder: string, onSuccess: (url: string) => void) {
+    async _uploadFile(
+      raw: File,
+      folder: string,
+      onSuccess: (url: string) => void,
+    ) {
       this.uploading = true;
       this.uploadProgress = 0;
       const file = await compressImage(raw);
@@ -561,8 +589,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       task.on(
         "state_changed",
         (snap) => {
-          this.uploadProgress =
-            (snap.bytesTransferred / snap.totalBytes) * 100;
+          this.uploadProgress = (snap.bytesTransferred / snap.totalBytes) * 100;
         },
         (error) => {
           console.error("Upload failed:", error);
@@ -588,7 +615,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           await articlesApi.delete(this.articleId!);
           ui()?.showToast?.("Статья удалена");
           setTimeout(() => {
-            globalThis.location.href = redirectUrl || "/dashboard";
+            globalThis.location.href = redirectUrl || "/dashboard/tips";
           }, 1500);
         } catch (error) {
           console.error(error);
@@ -619,7 +646,10 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
       // Block save while a file upload is still in progress
       if (this.uploading) {
-        ui()?.showToast?.("Подожди — загрузка файла ещё не завершилась.", "error");
+        ui()?.showToast?.(
+          "Подожди — загрузка файла ещё не завершилась.",
+          "error",
+        );
         return;
       }
 
@@ -637,7 +667,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         this.categoryTags,
         "paris",
       );
-      this.article.parisDistrict = normalizeParisDistrict(this.article.parisDistrict);
+      this.article.parisDistrict = normalizeParisDistrict(
+        this.article.parisDistrict,
+      );
 
       if (!this.article.title) {
         ui()?.showToast?.("Добавь заголовок.", "error");
@@ -669,8 +701,12 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           imageCaption: this.article.imageCaption,
           category: this.article.category,
           tags: selectedCategoryTags.map((tag) => this.getTagLabel(tag)),
-          parisSubCategories: isParisCategory ? this.article.parisSubCategories : [],
-          parisDistrict: isParisCategory ? this.article.parisDistrict || null : null,
+          parisSubCategories: isParisCategory
+            ? this.article.parisSubCategories
+            : [],
+          parisDistrict: isParisCategory
+            ? this.article.parisDistrict || null
+            : null,
           binaryForGuide: false,
           isHotContent: Boolean(this.article.isHotContent),
           isMainInCategory: Boolean(this.article.isMainInCategory),
@@ -689,11 +725,15 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         if (this.isEditMode && this.articleId) {
           await articlesApi.update(this.articleId, payload);
           ui()?.showToast?.("Статья обновлена!");
-          setTimeout(() => { globalThis.location.href = this.onSaveRedirect || "/dashboard"; }, 1500);
+          setTimeout(() => {
+            globalThis.location.href = this.onSaveRedirect || "/dashboard/tips";
+          }, 1500);
         } else {
           await articlesApi.create(payload);
           ui()?.showToast?.("Статья создана!");
-          setTimeout(() => { globalThis.location.href = "/dashboard"; }, 1500);
+          setTimeout(() => {
+            globalThis.location.href = "/dashboard/tips";
+          }, 1500);
         }
       } catch (e) {
         console.error("Ошибка сохранения:", e);
