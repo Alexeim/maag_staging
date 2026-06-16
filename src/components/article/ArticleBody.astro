@@ -224,7 +224,7 @@ if (currentProseGroup.length > 0) {
                     const html = getInitialRichTextHtml(block);
                     return (
                       <div
-                        class="article-rich-text article-rich-text--dropcap text-lg font-article-body text-justify"
+                        class="article-rich-text article-rich-text--dropcap text-base font-article-body text-justify"
                         set:html={html}
                       />
                     );
@@ -240,13 +240,13 @@ if (currentProseGroup.length > 0) {
                   }
                   case "h2":
                     return (
-                      <h2 class="text-xl font-bold font-old_standard italic">
+                      <h2 class="text-2xl font-bold font-old_standard italic">
                         {block.text}
                       </h2>
                     );
                   case "h3":
                     return (
-                      <h3 class="text-2xl font-bold font-old_standard italic">
+                      <h3 class="text-4xl font-bold font-old_standard italic">
                         {block.text}
                       </h3>
                     );

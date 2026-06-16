@@ -12,7 +12,9 @@ const { id, title, imageUrl, caption } = Astro.props as PhotoOfTheDayCardProps;
 ---
 
 <section class="grid gap-4">
-  <h3 class="m-0 text-lg font-semibold uppercase tracking-[0.3em] font-old_standard">
+  <h3
+    class="m-0 text-lg font-semibold uppercase tracking-[0.3em] font-old_standard"
+  >
     Фото дня
   </h3>
   <article class="overflow-hidden bg-white">
@@ -32,15 +34,19 @@ const { id, title, imageUrl, caption } = Astro.props as PhotoOfTheDayCardProps;
         href={`/photo-of-the-day/${id}`}
         class="text-current no-underline hover:underline"
       >
-        <h4 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]">
+        <h4
+          class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]"
+        >
           {title}
         </h4>
       </a>
-      {caption && (
-        <p class="m-0 text-sm text-black/60 font-inter font-normal line-clamp-2">
-          {caption}
-        </p>
-      )}
+      {
+        caption && (
+          <p class="m-0 border-t-2 pt-1 pl-1 border-black/50 text-xs text-black font-inter font-light line-clamp-2">
+            {caption}
+          </p>
+        )
+      }
     </div>
   </article>
 </section>

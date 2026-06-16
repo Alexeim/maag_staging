@@ -344,7 +344,7 @@ const splitTitle = (t: string) => {
       <div class="flex flex-row"></div>
     </div>
     <div
-      class="relative z-10 order-1 lg:order-none lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0"
+      class="relative z-10 order-1 lg:order-none lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-base-content/15 mt-6 lg:mt-0"
     >
       <div id="netlenka-container" class="relative z-10">
         <h3 class="relative z-10 mb-6 overflow-visible text-black">
@@ -504,7 +504,7 @@ const splitTitle = (t: string) => {
             </div>
           </div>
 
-          <aside class="order-1 lg:order-none lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-gray-300 mt-6 lg:mt-0">
+          <aside class="order-1 lg:order-none lg:col-span-3 px-0 lg:pl-4 lg:border-l lg:border-base-content/15 mt-6 lg:mt-0">
             {photoOfTheDay && (
               <div class="mb-8">
                 <PhotoOfTheDayCard
@@ -515,7 +515,6 @@ const splitTitle = (t: string) => {
                 />
               </div>
             )}
-
           </aside>
         </div>
         {carouselItems.length > 0 && (
