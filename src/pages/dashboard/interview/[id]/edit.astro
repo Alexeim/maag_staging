@@ -29,6 +29,8 @@ const interviewCreatorState = JSON.stringify({
       submitLabel="Сохранить изменения"
       interviewCreatorState={interviewCreatorState}
       cancelHref="/dashboard/interviews"
+      deleteInterviewId={id}
+      deleteRedirect="/dashboard/interviews"
     />
   ) : (
     <div class="p-8 text-center text-base-content/70">

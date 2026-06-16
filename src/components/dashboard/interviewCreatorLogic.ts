@@ -944,6 +944,38 @@ export default function interviewCreatorLogic(initialState = {}) {
       }
     },
 
+    deleteInterview(redirectUrl?: string) {
+      if (!this.interviewId) {
+        return;
+      }
+
+      const performDelete = async () => {
+        try {
+          await interviewsApi.delete(this.interviewId as string);
+          window.Alpine.store("ui").showToast("Интервью удалено");
+          setTimeout(() => {
+            globalThis.location.href = redirectUrl || "/dashboard/interviews";
+          }, 1500);
+        } catch (error) {
+          console.error(error);
+          window.Alpine.store("ui").showToast(
+            "Не получилось удалить интервью.",
+            "error",
+          );
+        }
+      };
+
+      const uiStore = window.Alpine?.store?.("ui");
+      if (uiStore?.showConfirmation) {
+        uiStore.showConfirmation(
+          `Удалить интервью «${this.interview.title || "без названия"}»? Это действие необратимо.`,
+          performDelete,
+        );
+      } else if (window.confirm("Удалить интервью? Это действие необратимо.")) {
+        performDelete();
+      }
+    },
+
     ...restInitialState,
   };
 }

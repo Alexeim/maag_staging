@@ -1199,7 +1199,14 @@ const {
 
   <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex gap-2">
-      <!-- Delete button logic can be added here if needed -->
+      {deleteInterviewId && (
+        <Button
+          variant="error"
+          @click={`deleteInterview('${deleteRedirect}')`}
+        >
+          Удалить
+        </Button>
+      )}
     </div>
     <div class="flex justify-end gap-3">
       <PublicationToggle model="interview" />
