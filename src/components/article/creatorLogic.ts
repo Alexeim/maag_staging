@@ -166,11 +166,37 @@ export default function articleCreatorLogic(initialState = {}) {
     if (!category) {
       return {};
     }
-    const tags = categoryTags[category];
-    if (!tags) {
-      return {};
-    }
+    const tags = normalizeTagOptions(categoryTags[category]);
     return Object.fromEntries(tags.map((tag) => [tag.title, tag.value]));
+  };
+
+  const normalizeTagOptions = (tags?: unknown) => {
+    if (!Array.isArray(tags)) {
+      return [];
+    }
+    const seen = new Set<string>();
+    const normalized: Array<{ title: string; value: string }> = [];
+    for (const raw of tags) {
+      const value =
+        typeof raw === "string"
+          ? raw.trim()
+          : typeof raw?.value === "string"
+            ? raw.value.trim()
+            : "";
+      const title =
+        typeof raw === "object" &&
+        raw !== null &&
+        typeof raw.title === "string" &&
+        raw.title.trim()
+          ? raw.title.trim()
+          : value;
+      if (!value || seen.has(value)) {
+        continue;
+      }
+      seen.add(value);
+      normalized.push({ title, value });
+    }
+    return normalized;
   };
 
   const buildParisDistrictMap = () =>
@@ -514,15 +540,24 @@ export default function articleCreatorLogic(initialState = {}) {
       if (!this.article?.category) {
         return [];
       }
-      return this.categoryTags[this.article.category] || [];
+      return normalizeTagOptions(this.categoryTags[this.article.category]);
     },
     isParisCategory() {
       return this.article?.category === "paris";
     },
     getSelectedCategoryTags() {
-      return this.isParisCategory()
-        ? this.article.parisSubCategories
-        : this.article.tags;
+      if (this.isParisCategory()) {
+        this.article.parisSubCategories = Array.isArray(
+          this.article.parisSubCategories,
+        )
+          ? this.article.parisSubCategories
+          : [];
+        return this.article.parisSubCategories;
+      }
+      this.article.tags = Array.isArray(this.article.tags)
+        ? this.article.tags
+        : [];
+      return this.article.tags;
     },
     getTagLabel(value: string) {
       const availableForCurrent = this.getAvailableTags();

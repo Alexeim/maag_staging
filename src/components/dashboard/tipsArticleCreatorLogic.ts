@@ -43,11 +43,36 @@ const normalizeCategoryTags = (
   if (!Array.isArray(tags)) return [];
   const legacyMap: Record<string, string> = {};
   if (category && categoryTags?.[category]) {
-    for (const tag of categoryTags[category]) {
+    for (const tag of normalizeTagOptions(categoryTags[category])) {
       legacyMap[tag.title] = tag.value;
     }
   }
   return normalizeTags(tags.map((tag) => legacyMap[tag] || tag));
+};
+
+const normalizeTagOptions = (tags?: unknown) => {
+  if (!Array.isArray(tags)) return [];
+  const seen = new Set<string>();
+  const normalized: Array<{ title: string; value: string }> = [];
+  for (const raw of tags) {
+    const value =
+      typeof raw === "string"
+        ? raw.trim()
+        : typeof raw?.value === "string"
+          ? raw.value.trim()
+          : "";
+    const title =
+      typeof raw === "object" &&
+      raw !== null &&
+      typeof raw.title === "string" &&
+      raw.title.trim()
+        ? raw.title.trim()
+        : value;
+    if (!value || seen.has(value)) continue;
+    seen.add(value);
+    normalized.push({ title, value });
+  }
+  return normalized;
 };
 
 // Creates a blank tips-item block
@@ -336,7 +361,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     // ── Tags ─────────────────────────────────────────────────────────────────
     getAvailableTags() {
       if (!this.article?.category) return [];
-      return this.categoryTags[this.article.category] || [];
+      return normalizeTagOptions(this.categoryTags[this.article.category]);
     },
     getTagLabel(value: string) {
       for (const tags of Object.values(this.categoryTags)) {
@@ -349,9 +374,18 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       return this.article.category === "paris";
     },
     getSelectedCategoryTags() {
-      return this.isParisCategory()
-        ? this.article.parisSubCategories
-        : this.article.tags;
+      if (this.isParisCategory()) {
+        this.article.parisSubCategories = Array.isArray(
+          this.article.parisSubCategories,
+        )
+          ? this.article.parisSubCategories
+          : [];
+        return this.article.parisSubCategories;
+      }
+      this.article.tags = Array.isArray(this.article.tags)
+        ? this.article.tags
+        : [];
+      return this.article.tags;
     },
     isTagSelected(value: string) {
       return this.getSelectedCategoryTags().includes(value);

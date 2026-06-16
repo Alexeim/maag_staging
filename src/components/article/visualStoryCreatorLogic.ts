@@ -42,7 +42,7 @@ const normalizeTags = (
   if (!Array.isArray(tags)) return [];
   const legacyMap: Record<string, string> = {};
   if (category && categoryTags?.[category]) {
-    for (const tag of categoryTags[category]) {
+    for (const tag of normalizeTagOptions(categoryTags[category])) {
       legacyMap[tag.title] = tag.value;
     }
   }
@@ -59,6 +59,31 @@ const normalizeTags = (
     }
   }
   return result;
+};
+
+const normalizeTagOptions = (tags?: unknown) => {
+  if (!Array.isArray(tags)) return [];
+  const seen = new Set<string>();
+  const normalized: Array<{ title: string; value: string }> = [];
+  for (const raw of tags) {
+    const value =
+      typeof raw === "string"
+        ? raw.trim()
+        : typeof raw?.value === "string"
+          ? raw.value.trim()
+          : "";
+    const title =
+      typeof raw === "object" &&
+      raw !== null &&
+      typeof raw.title === "string" &&
+      raw.title.trim()
+        ? raw.title.trim()
+        : value;
+    if (!value || seen.has(value)) continue;
+    seen.add(value);
+    normalized.push({ title, value });
+  }
+  return normalized;
 };
 
 export default function visualStoryCreatorLogic(initialState = {}) {
@@ -183,15 +208,22 @@ export default function visualStoryCreatorLogic(initialState = {}) {
 
     getAvailableTags() {
       if (!this.story?.category) return [];
-      return this.categoryTags[this.story.category] || [];
+      return normalizeTagOptions(this.categoryTags[this.story.category]);
     },
     isParisCategory() {
       return this.story?.category === "paris";
     },
     getSelectedCategoryTags() {
-      return this.isParisCategory()
-        ? this.story.parisSubCategories
-        : this.story.tags;
+      if (this.isParisCategory()) {
+        this.story.parisSubCategories = Array.isArray(
+          this.story.parisSubCategories,
+        )
+          ? this.story.parisSubCategories
+          : [];
+        return this.story.parisSubCategories;
+      }
+      this.story.tags = Array.isArray(this.story.tags) ? this.story.tags : [];
+      return this.story.tags;
     },
 
     getTagLabel(value: string) {

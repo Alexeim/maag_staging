@@ -41,9 +41,33 @@ export default function flipperCreatorLogic(initialState = {}) {
 
   const buildLegacyTagMap = (category?: string) => {
     if (!category) return {};
-    const tags = categoryTags[category];
-    if (!tags) return {};
+    const tags = normalizeTagOptions(categoryTags[category]);
     return Object.fromEntries(tags.map((tag) => [tag.title, tag.value]));
+  };
+
+  const normalizeTagOptions = (tags?: unknown) => {
+    if (!Array.isArray(tags)) return [];
+    const seen = new Set<string>();
+    const normalized: Array<{ title: string; value: string }> = [];
+    for (const raw of tags) {
+      const value =
+        typeof raw === "string"
+          ? raw.trim()
+          : typeof raw?.value === "string"
+            ? raw.value.trim()
+            : "";
+      const title =
+        typeof raw === "object" &&
+        raw !== null &&
+        typeof raw.title === "string" &&
+        raw.title.trim()
+          ? raw.title.trim()
+          : value;
+      if (!value || seen.has(value)) continue;
+      seen.add(value);
+      normalized.push({ title, value });
+    }
+    return normalized;
   };
 
   const buildParisDistrictMap = () =>
@@ -260,15 +284,24 @@ export default function flipperCreatorLogic(initialState = {}) {
 
     getAvailableTags() {
       if (!this.flipper?.category) return [];
-      return this.categoryTags[this.flipper.category] || [];
+      return normalizeTagOptions(this.categoryTags[this.flipper.category]);
     },
     isParisCategory() {
       return this.flipper?.category === "paris";
     },
     getSelectedCategoryTags() {
-      return this.isParisCategory()
-        ? this.flipper.parisSubCategories
-        : this.flipper.tags;
+      if (this.isParisCategory()) {
+        this.flipper.parisSubCategories = Array.isArray(
+          this.flipper.parisSubCategories,
+        )
+          ? this.flipper.parisSubCategories
+          : [];
+        return this.flipper.parisSubCategories;
+      }
+      this.flipper.tags = Array.isArray(this.flipper.tags)
+        ? this.flipper.tags
+        : [];
+      return this.flipper.tags;
     },
     getTagLabel(value: string) {
       const availableForCurrent = this.getAvailableTags();
