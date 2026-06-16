@@ -1,103 +1,77 @@
 # News
 
-## Область проверки
+Статус: source-verified на 2026-06-17, runtime-not-verified.
 
-Новость. Проверены creator, editor, previewer, action footer,
-save/update/delete, preview draft и redirects.
-
-## Файлы
+## Source files
 
 - Create page: `src/pages/dashboard/news/create.astro`
 - Edit page: `src/pages/dashboard/news/[id]/edit.astro`
 - Preview page: `src/pages/dashboard/news/preview.astro`
 - Composer: `src/components/dashboard/NewsComposer.astro`
 - Logic: `src/components/dashboard/newsCreatorLogic.ts`
-- API/controller: `newsApi`, `server/src/controllers/newsController.ts`
 
-## Creator
+## Текущий workflow
 
-- Create page passes `isEditMode: false`.
-- Create page sets `onSaveRedirect: "/dashboard/news"`.
-- Composer использует `x-data="$lazy('newsCreator', newsCreatorState)"`.
+- Preview action: `previewArticle()`.
+- Save/update action: `saveArticle()`.
+- Preview draft key: `newsPreview`.
+- Footer delete action: `deleteArticle(deleteRedirect)`.
 
-## Editor
+## Author logic
 
-- Edit page загружает news через `newsApi.getById(id)`.
-- Передает `initialArticle`, `articleId`, `isEditMode: true`.
-- Передает `deleteArticleId={id}` и `deleteRedirect="/dashboard/news"`.
+- Preview page рендерит автора через `ArticleAuthor`.
+- Evidence: `src/pages/dashboard/news/preview.astro:54-56`.
+- `previewArticle()` сохраняет transient author fields:
+  - `selectedAuthorId`
+  - `useNewAuthor`
+  - `newAuthorFirstName`
+  - `newAuthorLastName`
+- Evidence: `src/components/dashboard/newsCreatorLogic.ts:448-471`.
 
-## Previewer
+Проблема:
 
-- Preview page использует `newsCreator` with `{ isPreview: true }`.
-- Действия в header: `returnToEdit()` и `saveArticle()`.
-- Preview storage key: `newsPreview`.
-- Preview author rendering не использует выбранного автора из draft: page
-  рендерит `ArticleAuthor` из статического `articleData.author.name` и
-  `articleData.author.avatarUrl`.
-- Author persistence bug: preview draft сохраняет `selectedAuthorId`, но после
-  restore `init()` снова присваивает `selectedAuthorId` из `article.authorId`,
-  что может стереть выбранного автора, если он еще не записан в article payload.
+- Restore сначала читает `selectedAuthorId` из preview state.
+- Evidence: `src/components/dashboard/newsCreatorLogic.ts:382-394`.
+- Но позже `selectedAuthorId` выставляется из `article.authorId`.
+- Evidence: `src/components/dashboard/newsCreatorLogic.ts:432`.
 
-## Action footer
+Риск:
 
-- Footer начинается в `src/components/dashboard/NewsComposer.astro:467`.
-- Layout: `mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`.
-- Левая группа: delete только в edit mode.
-- Правая группа: `PublicationToggle`, cancel, preview, save.
-- Delete: ручной inline `<button>`.
-- Cancel: ручной inline `<a>`.
-- Preview/save: общий `Button`.
+- Выбранный автор может пропасть после preview return, если `article.authorId` еще не синхронизирован с UI selection.
 
-## Карта логики
+## Preview draft lifecycle
 
-- Основной объект называется `article`, но API family - `newsApi`.
-- State включает title/lead/cardLead/image/caption/category/tags/isMainInCategory/published/contentBlocks/relatedContent/contentCollectionId.
-- Init читает `newsPreview` in preview mode, иначе использует initial article.
-- Title/caption methods работают как в Article: edit copies, save writes trimmed value, cancel exits.
-- Author logic поддерживает selected author и creation of new author.
-- `handleCategoryChange()` меняет category и нормализует tags.
-- `toggleTag()` добавляет/удаляет normalized tag.
-- News не использует `isHotContent`; loaded data explicitly removes `isHotContent`.
-- Block logic проще Article: UI предлагает paragraph/link/url-link, но add/edit/update/delete and drag/drop still use `contentBlocks`.
-- Related content поддерживается.
-- Content collection id included in payload.
+- Read: `localStorage.getItem("newsPreview")`.
+- Evidence: `src/components/dashboard/newsCreatorLogic.ts:382`.
+- Write: `localStorage.setItem("newsPreview", ...)`.
+- Evidence: `src/components/dashboard/newsCreatorLogic.ts:471`.
+- Cleanup после save/update не найден в проверенных строках.
 
-## Save / Update
+Риск:
 
-- `saveArticle()` начинается в `src/components/dashboard/newsCreatorLogic.ts:656`.
-- Есть upload guard.
-- Есть double-submit guard через `isSaving`.
-- Update вызывает `newsApi.update(this.articleId, payload)`.
-- Create вызывает `newsApi.create(payload)`.
-- Перед save открытый block auto-commit-ится.
-- Validation: category обязательна, cover image обязателен.
-- Payload включает `isMainInCategory`, `published`, related content и content collection id.
+- Старый `newsPreview` может пережить успешное сохранение и потом влиять на следующий preview/edit flow.
 
-## Delete
+## Block and media logic
 
-- `deleteArticle(redirectUrl)` начинается в `src/components/dashboard/newsCreatorLogic.ts:754`.
-- Использует `newsApi.delete(this.articleId)`.
+- News имеет block editor с `updateBlock()`, `deleteBlock(index)` и editing state.
+- Evidence: `src/components/dashboard/NewsComposer.astro:388-441`.
+- Preview/save logic нужно держать под одним contract: перед preview и save должен быть одинаковый commit текущего блока.
 
-## Preview draft / localStorage
+## Save/update/delete/cancel
 
-- Key: `newsPreview`.
-- Cleanup после успешного save: не найден.
+- Published/draft: `PublicationToggle model="article"`.
+- Footer layout: canonical-like `mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`.
+- Evidence: `src/components/dashboard/NewsComposer.astro:468-494`.
+- Cancel реализован через link/button area внутри footer.
 
-## Redirects
+## Known inconsistencies
 
-- Update redirects to `this.onSaveRedirect || "/dashboard/news"`.
-- Create redirects to `/dashboard/news`.
+- Preview draft cleanup отсутствует или не найден.
+- Restore author state может перетираться.
+- Footer похож на article/guide, но общий компонент отсутствует.
 
-## Проблемы
+## First safe fix
 
-- Delete/cancel вручную стилизованы.
-- Preview draft cleanup отсутствует.
-- Использует `PublicationStatusBanner model="article"` и `PublicationToggle model="article"`, потому что local state называется `article`.
-- Preview and save auto-commit an open block, but `addBlock(type)` can still
-  switch editing to a new block while a previous `editingBlock` has unsaved
-  changes.
-- Block-level `updateBlock()` can still be clicked during upload.
-
-## Вердикт
-
-News визуально близок к Article, но workflow не полностью унифицирован.
+1. Защитить restore author: preview `selectedAuthorId` должен иметь приоритет над `article.authorId`.
+2. Добавить cleanup `newsPreview` после успешного save/update.
+3. Унифицировать pre-preview/pre-save block commit.

@@ -1,166 +1,89 @@
 # Tips
 
-## Область проверки
+Статус: source-verified на 2026-06-17, runtime-not-verified.
 
-Tips article. Проверены creator, editor, previewer, action footer,
-save/update/delete, preview draft и redirects.
-
-## Файлы
+## Source files
 
 - Create page: `src/pages/dashboard/tips/create.astro`
 - Edit page: `src/pages/dashboard/tips/[id]/edit.astro`
 - Preview page: `src/pages/dashboard/tips/preview.astro`
 - Composer: `src/components/dashboard/TipsArticleComposer.astro`
 - Logic: `src/components/dashboard/tipsArticleCreatorLogic.ts`
-- API/controller: `articlesApi`, `server/src/controllers/articleController.ts`
 
-## Creator
+## Текущий workflow
 
-- Create page passes `isEditMode: false`.
-- Create page sets `onSaveRedirect: "/dashboard"`.
-- Composer использует `x-data="$lazy('tipsArticleCreator', tipsCreatorState)"`.
+- Preview action: `previewArticle()`.
+- Save/update action: `saveArticle()`.
+- Preview draft key: `tipsPreview`.
+- Delete action: `deleteArticle(deleteRedirect)`.
 
-## Editor
+## Author logic
 
-- Edit page загружает article через `articlesApi.getById(id)`.
-- Передает `initialArticle`, `articleId`, `isEditMode: true`.
-- Передает `deleteArticleId={id}`.
-- Explicit `deleteRedirect` не передается, значит используется composer default.
+- Preview page рендерит автора через `ArticleAuthor`.
+- Evidence: `src/pages/dashboard/tips/preview.astro:45-47`.
+- `previewArticle()` сохраняет transient author fields.
+- Evidence: `src/components/dashboard/tipsArticleCreatorLogic.ts:285-305`.
 
-## Previewer
+Проблема:
 
-- Preview page использует `tipsArticleCreator` with `{ isPreview: true }`.
-- Действия в header: `returnToEdit()` и `saveArticle()`.
-- Preview storage key: `tipsPreview`.
-- `previewArticle()` writes `tipsPreview`.
-- Preview author rendering не использует выбранного автора из draft: page
-  рендерит `ArticleAuthor` из статического `articleData.author.name` и
-  `articleData.author.avatarUrl`.
-- Author persistence bug: preview draft сохраняет `selectedAuthorId`, но после
-  restore `init()` снова присваивает `selectedAuthorId` из `article.authorId`,
-  что может стереть выбранного автора, если он еще не записан в article payload.
+- Restore читает `selectedAuthorId` из `tipsPreview`.
+- Evidence: `src/components/dashboard/tipsArticleCreatorLogic.ts:204-216`.
+- Но позже `selectedAuthorId` выставляется из `article.authorId`.
+- Evidence: `src/components/dashboard/tipsArticleCreatorLogic.ts:268`.
 
-## Action footer
+Риск:
 
-- Footer начинается в `src/components/dashboard/TipsArticleComposer.astro:515`.
-- Layout: `flex justify-between items-center gap-4 mt-4 pb-16`.
-- Это отличается от большинства material footers.
-- Левая группа: cancel, delete.
-- Правая группа: publication, preview, save.
-- Cancel: вложенный интерактивный markup `<a href={cancelHref}><Button>...</Button></a>`.
-- Delete/preview/save используют общий `Button`.
+- Автор может исчезать после preview return, если selected author был только в UI state.
 
-## Карта логики
+## Preview draft lifecycle
 
-### State
+- Read: `localStorage.getItem("tipsPreview")`.
+- Evidence: `src/components/dashboard/tipsArticleCreatorLogic.ts:204`.
+- Write: `localStorage.setItem("tipsPreview", ...)`.
+- Evidence: `src/components/dashboard/tipsArticleCreatorLogic.ts:303-305`.
+- Cleanup после save/update не найден в проверенных строках.
 
-- Основной объект: `article`.
-- Ключевые поля: `title`, `lead`, `cardLead`, `imageUrl`, `imageCaption`, `category`, `tags`, `parisSubCategories`, `parisDistrict`, `isHotContent`, `isMainInCategory`, `published`, `publishedAt`, `contentBlocks`, `relatedContent`, `contentCollectionId`.
-- UI state: `isEditingTitle`, `editingTitleText`, `isEditingCaption`, `editingCaptionText`, `editingIndex`, `editingBlock`, `uploading`, `uploadProgress`, `uploadingBlockIndex`, `isSaving`.
-- Author state: `authors`, `authorsLoading`, `selectedAuthorId`, `useNewAuthor`, `newAuthorFirstName`, `newAuthorLastName`.
+Риск:
 
-### Init
+- Старый draft может сохраняться в browser state дольше, чем ожидает пользователь.
 
-- `init()` читает `tipsPreview` из `localStorage`, если открыт preview mode.
-- Preview state заменяет `article`, `articleId`, `isEditMode`, author state.
-- После init нормализуются tags, `parisSubCategories`, `parisDistrict`, `relatedContent`, `contentBlocks`.
-- Загружаются authors и related content lists.
+## Block and media logic
 
-### Title / Caption
+- Tips работает не как большой article body, а как список tips/items.
+- `previewArticle()` пишет draft без явного commit текущего редактируемого item.
+- Evidence: `src/components/dashboard/tipsArticleCreatorLogic.ts:285-305`.
+- `saveArticle()` перед сохранением вызывает update/commit текущего item.
+- Evidence: `src/components/dashboard/tipsArticleCreatorLogic.ts:644-648`.
+- `addTipsItem()` создает/переключает item editing flow.
+- Evidence: `src/components/dashboard/tipsArticleCreatorLogic.ts:518-528`.
 
-- `editTitle()` копирует `article.title` в `editingTitleText`.
-- `saveTitle()` trim-ит временное значение и пишет его в `article.title`.
-- `cancelEditTitle()` выходит без записи.
-- Caption работает тем же pattern для `article.imageCaption`.
+Главная гипотеза потери контента:
 
-### Author
+- Пользователь редактирует item, потом идет в preview или переключает действие до полного commit/upload.
+- На быстрой машине это трудно поймать.
+- На медленной машине или при тяжелых image uploads вероятность выше.
 
-- Existing author: `resolveAuthorId()` возвращает `selectedAuthorId`.
-- New author: создает автора через `authorsApi.create`, пишет новый id в `selectedAuthorId`, сбрасывает `useNewAuthor`.
-- Если author не выбран, save падает через error path.
+## Save/update/delete/cancel
 
-### Category / Tags / Flags
+- Published/draft: `PublicationToggle model="article"`.
+- Footer layout отличается от большинства материалов.
+- Evidence: `src/components/dashboard/TipsArticleComposer.astro:515-535`.
+- Отличия:
+  - `flex justify-between items-center gap-4 mt-4 pb-16` вместо canonical-like footer.
+  - Cancel сделан как nested `<a><Button>`.
+  - Delete стоит рядом с cancel в left group.
 
-- `handleCategoryChange(value)` меняет category и нормализует tags, Paris subcategories и district.
-- `toggleTag(value)` для Paris меняет `parisSubCategories`, для остальных категорий меняет `tags`.
-- `getSelectedCategoryTags()` возвращает Paris subcategories или обычные tags в зависимости от category.
-- `isHotContent`, `isMainInCategory`, `published` меняются напрямую через form controls и попадают в save payload.
+## Known inconsistencies
 
-### Tips Items
+- Высокий риск data loss вокруг uncommitted tips item.
+- Нет найденного cleanup `tipsPreview` после save/update.
+- Footer отличается от остальных creators/editors.
+- Preview/save используют разные степени подготовки state.
 
-- Основной content unit: `tips-item`.
-- `addTipsItem()` пушит новый пустой item в `article.contentBlocks` и сразу открывает его на edit.
-- `editBlock(index)` deep-copy-ит item в `editingBlock`.
-- `updateBlock()` пишет `editingBlock` обратно в `article.contentBlocks[editingIndex]`.
-- `deleteBlock(index)` удаляет item после confirmation.
-- `moveBlock(index, direction)` меняет порядок items.
-- Data-loss risk: edits live in separate `editingBlock` until `updateBlock()`.
-  If user opens preview or adds another item before saving current item, current
-  edits can be lost.
-- `previewArticle()` currently does not auto-commit an open `editingBlock`.
-- `addTipsItem()` currently does not auto-commit or block when another item is
-  open; it switches `editingBlock` to the new item.
-- `x-for` key uses `index`, which is fragile for reorder/delete flows.
+## First safe fix
 
-### Upload / Related / Collections / Placement
-
-- `handleCoverUpload()` грузит cover и пишет URL в `article.imageUrl`.
-- `handleItemImageUpload()` грузит image для текущего item и пишет URL в `editingBlock.imageUrl`.
-- Save/preview блокируются при `uploading = true`.
-- Item-level upload risk: `updateBlock()` can still be clicked while an image
-  upload is running; after `editingBlock` is cleared, upload completion may not
-  safely attach the image URL to the intended item.
-- UX risk: global `uploading` indicator exists, but action buttons do not all
-  communicate clearly that save/preview/add/update are unavailable during item
-  upload.
-- `addRelatedContent()` и `removeRelatedContent()` меняют `article.relatedContent`.
-- `ContentCollectionsEditor` работает через `article.contentCollectionId`.
-- `LandingPlacementPanel` подключен для placement controls.
-
-## Save / Update
-
-- `saveArticle()` начинается в `src/components/dashboard/tipsArticleCreatorLogic.ts:644`.
-- Есть upload guard.
-- Есть double-submit guard через `isSaving`.
-- Payload задает `articleType: "tips"`.
-- Update вызывает `articlesApi.update(this.articleId, payload)`.
-- Create вызывает `articlesApi.create(payload)`.
-- Перед API call открытый item auto-commit-ится через `updateBlock()`.
-- Validation: title обязателен, минимум один tips item обязателен, минимум один selected category tag обязателен.
-- Payload включает `published`, но `publishedAt` явно не отправляется из creator.
-
-## Delete
-
-- `deleteArticle(redirectUrl?)` начинается в `src/components/dashboard/tipsArticleCreatorLogic.ts:614`.
-- Использует `articlesApi.delete(this.articleId)`.
-- Logic fallback redirect: `/dashboard/tips`.
-- Composer default `deleteRedirect`: `/dashboard`.
-
-## Preview draft / localStorage
-
-- Key: `tipsPreview`.
-- Cleanup после успешного save: не найден.
-
-## Redirects
-
-- Create page sets `onSaveRedirect: "/dashboard"`.
-- Create branch redirects to `/dashboard/tips`.
-- Update branch redirects to `this.onSaveRedirect || "/dashboard/tips"`.
-
-## Проблемы
-
-- Footer layout не унифицирован.
-- Порядок/grouping кнопок отличается от Article/News/Guide/Event.
-- Cancel использует неправильную вложенность интерактивных элементов.
-- High data-loss risk in tips item editing:
-  - unsaved `editingBlock` is not auto-committed before preview;
-  - adding a new item can discard unsaved changes in the current item;
-  - item save/update is not consistently disabled during image upload;
-  - `index` key can make reorder/delete/edit state more fragile.
-- Preview draft cleanup отсутствует.
-- Redirect defaults конфликтуют между create state, composer default и logic fallback.
-
-## Вердикт
-
-Tips - один из главных сломанных случаев. Нужна нормализация footer/layout,
-workflow and explicit data-loss prevention around item editing and uploads.
+1. Заблокировать preview/save, пока идет image upload или item находится в несохраненном editing state.
+2. Перед preview выполнять тот же commit текущего item, что и перед save.
+3. Добавить явный loading/disabled state для image upload.
+4. Добавить cleanup `tipsPreview` после успешного save/update.
+5. Привести footer к общему action layout.

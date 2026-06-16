@@ -1,76 +1,101 @@
-# Аудит dashboard material creators/editors/previewers
+# Dashboard material creators/editors/previewers audit
 
-Дата аудита: 2026-06-16.
+Дата полной пересборки: 2026-06-17.
 
-Scope: только material creators/editors/previewers в dashboard. Этот аудит не
-меняет код и фиксирует текущее состояние реализации.
+Статус: source-verified, runtime-not-verified.
 
-Не входит в scope: `landing`, `paris`, `culture`, `calendar` editors. Это
-только граница scope, не отдельный deliverable.
+Этот folder описывает только dashboard material creators/editors/previewers.
+Это документация текущего поведения и безопасного порядка исправлений.
 
-## Материалы
+## Как читать
 
-| Материал | Файл аудита | Главный статус |
-|---|---|---|
-| Article | [article.md](./article.md) | Частично унифицирован |
-| Le saviez-vous | [le-saviez-vous.md](./le-saviez-vous.md) | Использует Article flow |
-| News | [news.md](./news.md) | Частично унифицирован |
-| Tips | [tips.md](./tips.md) | Не унифицирован |
-| Guide | [guide.md](./guide.md) | Частично унифицирован, есть wiring/redirect проблемы |
-| Event | [event.md](./event.md) | Частично унифицирован, грязное именование state |
-| Interview | [interview.md](./interview.md) | Delete workflow не завершен |
-| Visual Story | [visual-story.md](./visual-story.md) | Частично унифицирован |
-| Flipper | [flipper.md](./flipper.md) | Частично унифицирован |
-| Photo of the Day | [photo-of-the-day.md](./photo-of-the-day.md) | Не унифицирован |
+1. Сначала этот файл.
+2. Потом material file для нужного материала.
+3. Потом `IMPLEMENTATION_PLAN.md`, если нужно писать код.
+4. `IMPLEMENTATION_ROADMAP.md` использовать только как target-contract reference, не как порядок работ.
 
-## Ожидаемый единый action footer
+## Scope
 
-```html
-<div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-  <div class="flex gap-2">
-    <!-- delete action -->
-  </div>
-  <div class="flex justify-end gap-3">
-    <!-- published, cancel, preview, save -->
-  </div>
-</div>
-```
+В scope входят:
 
-## Главные проблемы
+- Article
+- Le Saviez-vous
+- News
+- Tips
+- Guide
+- Event
+- Interview
+- Visual Story
+- Flipper
+- Photo Of The Day
 
-- `Tips` использует другой footer layout и вложенный `<a><Button>...</Button></a>`.
-- `Photo of the Day` использует другой footer layout без mobile-first поведения.
-- `Interview` имеет props под delete, но delete action в editor footer не реализован.
-- `Button.astro` дублирует `cursor-pointer` в base и variants.
-- Preview author rendering сломан системно: большинство preview pages показывают
-  статический `articleData.author`, `Photo of the Day` показывает literal
-  `"Автор"`, а не выбранного автора из preview draft.
-- Preview author persistence inconsistent: часть creators теряет выбранного
-  автора после перехода `creator -> preview -> return to edit`, потому что
-  author UI state не сохраняется или перетирается из пустого `authorId`.
-- Tips has a data-loss risk in block editing: open `editingBlock` can be lost
-  on preview/add-item flows, and item image upload needs stronger button
-  disabling plus clearer loading state.
-- Similar block-editing risks exist outside Tips: `Article` and `Guide`
-  preview does not auto-commit open blocks; most block editors can switch to a
-  new block while an old `editingBlock` is unsaved.
-- Upload-in-progress guards are inconsistent: some save flows block upload,
-  some preview flows do not, and block/slide/item buttons do not consistently
-  disable while uploads are running.
-- Preview draft cleanup есть у `Article` и `Guide`, но отсутствует у большинства остальных.
-- Cancel/delete кнопки реализованы разными способами.
-- Redirect behavior не одинаковый между материалами.
+Вне scope:
 
-## Что теперь описывает каждый material-файл
+- landing
+- paris
+- culture
+- calendar
 
-- State model: основные Alpine state поля.
-- Init logic: как применяется initial data или preview draft.
-- UI interaction logic: title/caption, author, tags/category, flags.
-- Material-specific logic: blocks, tips items, event date/time, slides, carousel, photo upload.
-- Data-loss risks: open block editing, upload-in-progress guards, disabled
-  states, and clear save/preview availability.
-- Upload behavior.
-- Related content / content collections / placement, если они есть у материала.
-- Publication behavior: `published` и отсутствие/наличие явной работы с `publishedAt`.
-- Preview behavior: localStorage key, write/read, return-to-edit.
-- Save/update/delete: validation, payload, API call, redirect, cleanup.
+Эти editors не смешивать с material creators/editors/previewers.
+
+## Current material docs
+
+Каждый файл ниже является актуальным verified-паспортом материала:
+
+| Material | Doc |
+|---|---|
+| Article | [article.md](./article.md) |
+| Le Saviez-vous | [le-saviez-vous.md](./le-saviez-vous.md) |
+| News | [news.md](./news.md) |
+| Tips | [tips.md](./tips.md) |
+| Guide | [guide.md](./guide.md) |
+| Event | [event.md](./event.md) |
+| Interview | [interview.md](./interview.md) |
+| Visual Story | [visual-story.md](./visual-story.md) |
+| Flipper | [flipper.md](./flipper.md) |
+| Photo Of The Day | [photo-of-the-day.md](./photo-of-the-day.md) |
+
+## Что есть в каждом material file
+
+- Source files: create/edit/preview/composer/logic.
+- Current workflow.
+- Author preview rendering.
+- Author return-to-edit persistence.
+- Preview draft lifecycle.
+- Block/media risks.
+- Save/update/delete/cancel behavior.
+- Footer/action layout status.
+- Known inconsistencies.
+- First safe fix.
+
+## Главные verified проблемы
+
+1. Author preview/persistence is inconsistent.
+   - `photo-of-the-day` hardcodes author as `Автор`.
+   - `visual-story` dashboard preview author render is not confirmed.
+   - `article`, `guide`, `news`, `tips`, `interview`, `flipper` have high-risk author restore patterns.
+
+2. Preview draft cleanup is inconsistent.
+   - Cleanup found for `article` and `guide`.
+   - Cleanup not found for `news`, `tips`, `event`, `interview`, `visual-story`, `flipper`, `photo-of-the-day`.
+
+3. Block/media data-loss protection is inconsistent.
+   - `article`, `guide`, `tips` save commits open edit state, but preview does not clearly share the same path.
+   - `tips` has the highest user-facing data-loss risk around uncommitted items and image upload timing.
+   - `visual-story` and `photo-of-the-day` need preview/save upload guard verification.
+
+4. Action footer is not unified.
+   - Majority uses `mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`.
+   - `tips` and `photo-of-the-day` are clear layout outliers.
+   - Cancel/delete implementations differ between raw links, nested link/button, and Button component.
+
+## Implementation rule
+
+Do not fix everything at once.
+
+Use `IMPLEMENTATION_PLAN.md`:
+
+- one workflow at a time;
+- one material first when risk is high;
+- no opportunistic footer/delete/redirect fixes while fixing author or data-loss;
+- every PR must have allowed files and manual checks.

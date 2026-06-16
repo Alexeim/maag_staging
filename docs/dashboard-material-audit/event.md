@@ -1,126 +1,69 @@
 # Event
 
-## Область проверки
+Статус: source-verified на 2026-06-17, runtime-not-verified.
 
-Событие. Проверены creator, editor, previewer, action footer,
-save/update/delete, preview draft и redirects.
-
-## Файлы
+## Source files
 
 - Create page: `src/pages/dashboard/event/create.astro`
 - Edit page: `src/pages/dashboard/event/[id]/edit.astro`
 - Preview page: `src/pages/dashboard/event/preview.astro`
 - Composer: `src/components/dashboard/EventComposer.astro`
 - Logic: `src/components/article/eventCreatorLogic.ts`
-- API/controller: `eventsApi`, `server/src/controllers/eventController.ts`
 
-## Creator
+## Текущий workflow
 
-- Create page passes `isEditMode: false`.
-- Composer использует `x-data="$lazy('eventCreator', eventCreatorState)"`.
+- Preview action: `previewEvent()`.
+- Save/update action: `saveEvent()`.
+- Preview draft key: `eventPreview`.
+- Delete action: `deleteEvent(deleteRedirect)`.
 
-## Editor
+## Author logic
 
-- Edit page загружает event через `eventsApi.getById(id)`.
-- Передает `initialEvent`, `eventId`, `isEditMode: true`.
-- Передает `deleteEventId={id}` и `deleteRedirect="/dashboard/events"`.
+- Preview page рендерит автора через `ArticleAuthor`.
+- Evidence: `src/pages/dashboard/event/preview.astro:51-53`.
+- `previewEvent()` сохраняет `selectedAuthorId`.
+- Evidence: `src/components/article/eventCreatorLogic.ts:383-406`.
+- Restore использует fallback `this.selectedAuthorId || eventDraft.authorId`.
+- Evidence: `src/components/article/eventCreatorLogic.ts:350-351`.
 
-## Previewer
+Вывод:
 
-- Preview page использует `eventCreator` with `{ isPreview: true }`.
-- Действия в header: `returnToEdit()` и `saveEvent()`.
-- Preview storage key: `eventPreview`.
-- Preview author rendering не использует выбранного автора из draft: page
-  рендерит `ArticleAuthor` из статического `articleData.author.name` и
-  `articleData.author.avatarUrl`.
-- Author persistence выглядит устойчивее: `init()` сохраняет restored
-  `selectedAuthorId` и fallback к `eventDraft.authorId` делает через `||`.
+- Event выглядит безопаснее, чем article/news/tips/guide/interview/flipper, потому что preview-selected author не должен перетираться `eventDraft.authorId`.
 
-## Action footer
+## Preview draft lifecycle
 
-- Footer начинается в `src/components/dashboard/EventComposer.astro:1357`.
-- Layout: `mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`.
-- Левая группа: delete при `deleteEventId` exists.
-- Правая группа: `PublicationToggle`, cancel, preview, save.
-- Delete: ручной inline `<button>`.
-- Cancel: ручной inline `<a>`.
-- Preview/save: общий `Button`.
-- Publication использует `model="article"` because local state stores event content in `article`.
+- Read: `localStorage.getItem("eventPreview")`.
+- Evidence: `src/components/article/eventCreatorLogic.ts:299`.
+- Write: `localStorage.setItem("eventPreview", ...)`.
+- Evidence: `src/components/article/eventCreatorLogic.ts:406`.
+- Cleanup после save/update не найден в проверенных строках.
 
-## Карта логики
+Риск:
 
-### State
+- Старый `eventPreview` может пережить успешное сохранение.
 
-- Content state живет в `article`.
-- Event-specific state живет в `eventForm`.
-- `eventForm`: `startDate`, `endDate`, `dateType`, `address`, `timeMode`, `startTime`, `endTime`, `isMainEvent`, `additionalInfo`.
+## Block and media logic
 
-### Init
+- Event имеет article-like block editor плюс event-specific fields.
+- Composer содержит block edit/update/delete controls.
+- Evidence: `src/components/dashboard/EventComposer.astro:1037-1040`, `src/components/dashboard/EventComposer.astro:1310`.
+- Нужно проверить runtime, одинаково ли preview/save commit-ят открытый block.
 
-- Init читает `eventPreview` in preview mode.
-- Initial event normalizes dates, time mode, additional info, tags, related content, content collection id and content blocks.
-- Event fields are copied into `eventForm`.
+## Save/update/delete/cancel
 
-### Shared Article-like Logic
+- Published/draft: `PublicationToggle model="article"`.
+- Footer layout: canonical-like `mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`.
+- Evidence: `src/components/dashboard/EventComposer.astro:1357-1375`.
+- Cancel сделан raw `<a>` с button classes, а не shared Button component.
 
-- Title/caption, author, upload, related content and content blocks follow the Article-like pattern.
-- Preview auto-commits open block before writing `eventPreview`.
-- Save auto-commits open block before validation.
+## Known inconsistencies
 
-### Event Date / Time Logic
+- Preview draft cleanup отсутствует или не найден.
+- Footer похож на общий layout, но cancel implementation отличается.
+- Publication model is `article`, хотя material is event.
 
-- `setStartDate(value)` updates start date and adjusts end date if duration range becomes invalid.
-- `setEndDate(value)` updates end date and may adjust start date.
-- `setDateType("single")` clears end date.
-- `setDateType("duration")` initializes end date from start date when missing.
-- `setTimeMode("none")` clears start/end time.
-- `setTimeMode("start")` clears end time.
-- `setTimeMode("range")` requires start and end time.
+## First safe fix
 
-### Additional Info Logic
-
-- `addEventInfo()` adds an info row with icon/text.
-- `removeEventInfo(index)` removes a row.
-- `setEventInfoIcon(index, icon)` changes row icon.
-
-## Save / Update
-
-- `saveEvent()` начинается в `src/components/article/eventCreatorLogic.ts:501`.
-- Delegates to `saveArticle()`.
-- `saveArticle()` начинается в `src/components/article/eventCreatorLogic.ts:505`.
-- Есть upload guard.
-- Есть double-submit guard через `isSaving`.
-- Update вызывает `eventsApi.update(this.eventId, payload)`.
-- Create вызывает `eventsApi.create(payload)`.
-- Validation: cover обязателен, title обязателен, start date обязателен, end date обязателен для duration, dates должны быть валидны, end date не раньше start date, time fields должны соответствовать `timeMode`, минимум один tag обязателен.
-- Payload включает нормализованные event dates/times, `isMainEvent`, `additionalInfo`, `published`, related content и content collection id.
-
-## Delete
-
-- `deleteEvent(redirectUrl)` начинается в `src/components/article/eventCreatorLogic.ts:681`.
-- Использует `eventsApi.delete(this.eventId)`.
-
-## Preview draft / localStorage
-
-- Key: `eventPreview`.
-- Cleanup после успешного save: не найден.
-
-## Redirects
-
-- Update redirects to `this.onSaveRedirect || "/dashboard/events"`.
-- Create redirects to `/dashboard/events`.
-
-## Проблемы
-
-- Event content живет в state object `article`, что сбивает семантику.
-- Publication components используют `article` model для event.
-- Delete/cancel вручную стилизованы.
-- Preview draft cleanup отсутствует.
-- Preview and save auto-commit an open block, but `addBlock(type)` can still
-  switch editing to a new block while a previous `editingBlock` has unsaved
-  changes.
-- Block-level `updateBlock()` can still be clicked during upload.
-
-## Вердикт
-
-Event близок по layout, но state naming и preview cleanup не соответствуют чистому общему contract.
+1. Добавить cleanup `eventPreview` после успешного save/update.
+2. Проверить и унифицировать pre-preview/pre-save commit open block.
+3. После shared footer component решить, должен ли cancel быть Button/link единообразно.

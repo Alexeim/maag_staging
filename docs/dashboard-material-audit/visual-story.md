@@ -1,118 +1,77 @@
 # Visual Story
 
-## Область проверки
+Статус: source-verified на 2026-06-17, runtime-not-verified.
 
-Визуальная история. Проверены creator, editor, previewer, action footer,
-save/update/delete, preview draft и redirects.
-
-## Файлы
+## Source files
 
 - Create page: `src/pages/dashboard/visual-story/create.astro`
 - Edit page: `src/pages/dashboard/visual-story/[id]/edit.astro`
 - Preview page: `src/pages/dashboard/visual-story/preview.astro`
 - Composer: `src/components/dashboard/VisualStoryComposer.astro`
 - Logic: `src/components/article/visualStoryCreatorLogic.ts`
-- API/controller: `visualStoriesApi`, `server/src/controllers/visualStoryController.ts`
 
-## Creator
+## Текущий workflow
 
-- Create page passes `isEditMode: false`.
-- Create page sets `onSaveRedirect: "/dashboard/visual-stories"`.
-- Composer использует `x-data="$lazy('visualStoryCreator', storyCreatorState)"`.
+- Preview action: `previewStory()`.
+- Save/update action: `saveStory()`.
+- Preview draft key: `visualStoryPreview`.
+- Delete action: `deleteStory(deleteRedirect)`.
 
-## Editor
+## Author logic
 
-- Edit page загружает story через `visualStoriesApi.getById(id)`.
-- Передает `initialStory`, `storyId`, `isEditMode: true`.
-- Передает `deleteStoryId={id}` и `deleteRedirect="/dashboard/visual-stories"`.
+- Dashboard preview search did not find `ArticleAuthor` rendering in `src/pages/dashboard/visual-story/preview.astro`.
+- Проверенный поиск по preview pages нашел author render в других materials, но не в visual-story.
 
-## Previewer
+Вывод:
 
-- Preview page использует `visualStoryCreator` with `{ isPreview: true }`.
-- Действия в header: `returnToEdit()` и `saveStory()`.
-- Preview storage key: `visualStoryPreview`.
-- Preview author rendering отсутствует: preview state хранит author fields, но
-  preview page не рендерит `ArticleAuthor`.
-- Author persistence выглядит устойчивее: restored `selectedAuthorId`
-  сохраняется, а fallback к `story.authorId` делается через `||`.
+- Visual Story likely does not render dashboard preview author at all, or renders it through a different component/pattern that needs runtime inspection.
 
-## Action footer
+Persistence:
 
-- Footer начинается в `src/components/dashboard/VisualStoryComposer.astro:411`.
-- Layout: `mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`.
-- Левая группа: delete только в edit mode.
-- Правая группа: `PublicationToggle`, cancel, preview, save.
-- Delete: ручной inline `<button>`.
-- Cancel: ручной inline `<a>`.
-- Preview/save: общий `Button`.
+- `previewStory()` сохраняет `selectedAuthorId`.
+- Evidence: `src/components/article/visualStoryCreatorLogic.ts:557-567`.
+- Restore использует fallback `this.selectedAuthorId || copy.authorId`.
+- Evidence: `src/components/article/visualStoryCreatorLogic.ts:526-527`.
 
-## Карта логики
+Вывод:
 
-### State
+- Author persistence выглядит лучше, чем у interview/news/tips/flipper, но preview rendering автора требует отдельной проверки.
 
-- Основной объект: `story`.
-- Ключевые поля: `title`, `lead`, `cardLead`, `imageUrl`, `imageCaption`, `category`, `tags`, `parisSubCategories`, `parisDistrict`, `isHotContent`, `paid`, `published`, `publishedAt`, `slides`, `relatedContent`, `contentCollectionId`.
+## Preview draft lifecycle
 
-### Init
+- Read: `localStorage.getItem("visualStoryPreview")`.
+- Evidence: `src/components/article/visualStoryCreatorLogic.ts:464`.
+- Write: `localStorage.setItem("visualStoryPreview", ...)`.
+- Evidence: `src/components/article/visualStoryCreatorLogic.ts:567`.
+- Cleanup после save/update не найден в проверенных строках.
 
-- Init читает `visualStoryPreview` in preview mode.
-- Loaded story normalizes category/tags/Paris fields, booleans, slides, related content and author state.
+## Block and media logic
 
-### Category / Tags / Author
+- Visual Story отличается от article-like blocks: story-specific structure, cover/media/story items.
+- `previewStory()` пишет draft.
+- Evidence: `src/components/article/visualStoryCreatorLogic.ts:557-567`.
+- `saveStory()` имеет отдельную save path.
+- Evidence: `src/components/article/visualStoryCreatorLogic.ts:571`.
 
-- Category/tag logic mirrors Tips/Flipper style: Paris category использует `parisSubCategories`, other categories use `tags`.
-- Author logic supports selected author and new author creation.
-- `isHotContent`, `paid`, `published` are direct flags in payload.
+Риск:
 
-### Slides / Upload
+- Если media upload идет асинхронно, preview/save должны иметь общий upload guard.
+- В текущем audit нет подтверждения, что preview блокируется на время upload.
 
-- `addSlide()` pushes a slide with empty image, `contentType: "text"` and empty text/quote fields.
-- `removeSlide(index)` removes after confirmation.
-- Slide fields: `imageUrl`, `caption`, `contentType`, `text`, `quote`, `quoteAuthor`.
-- `contentType = "quote"` требует quote; иначе обязателен text.
-- Cover upload writes to `story.imageUrl`.
-- Slide upload writes to `story.slides[slideIndex].imageUrl`.
+## Save/update/delete/cancel
 
-### Related / Collections
+- Published/draft: `PublicationToggle model="story"`.
+- Footer layout: canonical-like `mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`.
+- Evidence: `src/components/dashboard/VisualStoryComposer.astro:411-436`.
 
-- Related content поддерживается and sanitized перед save.
-- Content collection id включается in payload.
+## Known inconsistencies
 
-## Save / Update
+- Dashboard preview author rendering не подтвержден.
+- Preview draft cleanup отсутствует или не найден.
+- Нужно отдельно проверить upload guards для preview/save.
 
-- `saveStory()` начинается в `src/components/article/visualStoryCreatorLogic.ts:571`.
-- Есть upload guard.
-- Есть double-submit guard через `isSaving`.
-- Update вызывает `visualStoriesApi.update(this.storyId, payload)`.
-- Create вызывает `visualStoriesApi.create(payload)`.
-- Validation: title обязателен, минимум один slide обязателен, каждый slide должен иметь image, каждый slide должен иметь text или quote в зависимости от `contentType`.
-- Payload нормализует каждый slide и включает category/tags/Paris fields, hot/paid/published flags, related content и content collection id.
+## First safe fix
 
-## Delete
-
-- `deleteStory(redirectUrl)` начинается в `src/components/article/visualStoryCreatorLogic.ts:667`.
-- Использует `visualStoriesApi.delete(this.storyId)`.
-
-## Preview draft / localStorage
-
-- Key: `visualStoryPreview`.
-- Cleanup после успешного save: не найден.
-
-## Redirects
-
-- Update redirects to `this.onSaveRedirect || "/dashboard/visual-story/{id}/edit"`.
-- Create redirects to public `/visual-story/{result.id}`.
-
-## Проблемы
-
-- Create redirect уходит на public page, не как большинство dashboard creators.
-- Delete/cancel вручную стилизованы.
-- Preview draft cleanup отсутствует.
-- Preview can be opened while cover/slide upload is still in progress.
-- Add/save/preview buttons do not consistently communicate upload-blocked state.
-- Slide rendering uses `:key="index"`, which is fragile for future reorder/delete
-  flows.
-
-## Вердикт
-
-Visual Story близок по footer layout, но cleanup и redirect policy не выровнены.
+1. Проверить runtime visual-story preview: должен ли там быть author.
+2. Если author нужен, рендерить его из preview draft/current author contract.
+3. Добавить cleanup `visualStoryPreview` после successful save/update.

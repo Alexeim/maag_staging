@@ -1,93 +1,64 @@
-# Le saviez-vous
+# Le Saviez-vous
 
-## Область проверки
+Статус: source-verified на 2026-06-17, runtime-not-verified.
 
-Le saviez-vous. Это не отдельный composer/logic, а Article flow с другим
-`articleType` и route configuration.
+Цель файла: зафиксировать, что `le-saviez-vous` сейчас не является отдельным полноценным creator engine, а использует article workflow.
 
-## Файлы
+## Source files
 
 - Create page: `src/pages/dashboard/le-saviez-vous/create.astro`
 - Edit page: `src/pages/dashboard/le-saviez-vous/[id]/edit.astro`
-- Preview page: общий `src/pages/dashboard/article/preview.astro`
-- Composer: `src/components/dashboard/ArticleComposer.astro`
-- Logic: `src/components/article/creatorLogic.ts`
-- API/controller: `articlesApi`, `server/src/controllers/articleController.ts`
+- Preview page: uses article preview flow.
+- Composer: uses `src/components/dashboard/ArticleComposer.astro`
+- Logic: uses `src/components/article/creatorLogic.ts`
 
-## Creator
+## Текущий workflow
 
-- Create page sets `articleType: "le_saviez_vous"`.
-- Также задает:
-  - `onSaveRedirect: "/dashboard/le-saviez-vous"`
-  - `createSuccessRedirect: "/dashboard/le-saviez-vous"`
-  - `editRouteBase: "/dashboard/le-saviez-vous"`
-  - `createRoute: "/dashboard/le-saviez-vous/create"`
+- Это отдельный material route, но не отдельная logic implementation.
+- UI, preview draft, save/update/delete и block logic наследуют поведение `article`.
+- Preview draft key: `articlePreview`.
+- Save/update action: `saveArticle()`.
+- Delete action: `deleteArticle(deleteRedirect)`.
 
-## Editor
+## Author logic
 
-- Edit page загружает article через `articlesApi.getById(id)`.
-- Использует `ArticleComposer`.
-- Передает `deleteArticleId={id}` и `deleteRedirect="/dashboard/le-saviez-vous"`.
+- Author behavior совпадает с `article`.
+- Preview рендерит `articleData.author.name` и `articleData.author.avatarUrl`.
+- Evidence: `src/pages/dashboard/article/preview.astro:47-49`.
 
-## Previewer
+Проблема:
 
-- Использует generic Article preview flow.
-- Preview storage key: `articlePreview`.
-- Отдельного `le-saviez-vous` preview page нет.
-- Preview author rendering наследует проблему общего Article preview:
-  отображается статический `articleData.author`, а не выбранный/новый автор из
-  draft.
-- Author persistence наследует проблему общего Article flow: author UI state не
-  пишется в `articlePreview`, поэтому выбранный автор может пропасть после
-  `preview -> return to edit`.
+- Так как используется `creatorLogic.ts`, preview draft не хранит полный transient author UI state.
+- Evidence: `src/components/article/creatorLogic.ts:1416-1425`.
+- Restore может перезаписать `selectedAuthorId` из `article.authorId`.
+- Evidence: `src/components/article/creatorLogic.ts:1019`.
 
-## Action footer
+## Preview draft lifecycle
 
-- Same footer as Article: `src/components/dashboard/ArticleComposer.astro:1788`.
+- Read/write/cleanup совпадают с `article`.
+- Read: `src/components/article/creatorLogic.ts:892`.
+- Write: `src/components/article/creatorLogic.ts:1425`.
+- Cleanup: `src/components/article/creatorLogic.ts:1556`, `src/components/article/creatorLogic.ts:1564`.
 
-## Карта логики
+## Block and media logic
 
-- Вся interaction logic inherited from Article:
-  - title/caption edit-save-cancel;
-  - author selection/new author creation;
-  - category/tags/Paris district;
-  - tips array controls;
-  - content blocks;
-  - uploads;
-  - related content;
-  - content collections;
-  - landing placement controls;
-  - publication toggle;
-  - preview draft via `articlePreview`;
-  - save/update/delete через `articlesApi`.
-- Отличие: state config sets `articleType: "le_saviez_vous"` and custom dashboard routes.
-- Отдельной Le saviez-vous logic map в коде нет, потому что отдельного logic-файла нет.
+- Block/media risks совпадают с `article`.
+- Preview не делает тот же обязательный commit открытого блока, который делает save.
+- Evidence: `src/components/article/creatorLogic.ts:1416-1435`.
 
-## Save / Update
+## Save/update/delete/cancel
 
-- Same `saveArticle()` as Article.
-- Payload включает `articleType` из state/config.
-- Create/update идут через `articlesApi`.
+- Реальное поведение определяется `ArticleComposer.astro`.
+- Published/draft: `PublicationToggle model="article"`.
+- Footer layout совпадает с article footer.
+- Evidence: `src/components/dashboard/ArticleComposer.astro:1789-1816`.
 
-## Delete
+## Known inconsistencies
 
-- Same `deleteArticle()` as Article.
-- Redirect на `/dashboard/le-saviez-vous`, если edit page передал этот redirect.
+- В документации и implementation plan нельзя описывать `le-saviez-vous` как отдельный engine, пока он технически использует article implementation.
+- Любой fix в `creatorLogic.ts` затронет и `article`, и `le-saviez-vous`.
 
-## Preview draft / localStorage
+## First safe fix
 
-- Key: `articlePreview`.
-- Cleanup после успешного save: есть, inherited from Article flow.
-
-## Redirects
-
-- Routes кастомизируются через `createSuccessRedirect`, `editRouteBase`, `createRoute`.
-
-## Проблемы
-
-- Это не отдельный previewer, хотя материал отдельный в dashboard.
-- Все проблемы Article footer автоматически относятся и сюда.
-
-## Вердикт
-
-Le saviez-vous является Article variant. Это нормально только если явно считать его shared Article flow.
+1. Фиксить author preview/persistence один раз в article workflow.
+2. После этого отдельно проверить create/edit pages `le-saviez-vous`, потому что route-specific redirects/type могут отличаться.

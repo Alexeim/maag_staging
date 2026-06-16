@@ -1,6 +1,14 @@
-# Roadmap исправления dashboard material creators/editors/previewers
+# Target contracts for dashboard material creators/editors/previewers
+
+Важно: этот файл не является implementation plan.
+
+Для порядка работ использовать только `IMPLEMENTATION_PLAN.md`.
+Этот файл хранит target contracts и архитектурные идеи. Нельзя начинать кодинг
+с произвольной секции отсюда, потому что так легко смешать author fixes,
+data-loss fixes, footer refactor, redirects и cleanup в один небезопасный PR.
 
 Дата: 2026-06-16.
+Дата уточнения роли файла: 2026-06-17.
 
 Scope: только material creators/editors/previewers из `docs/dashboard-material-audit`.
 Цель: привести общие workflows к одному контракту, не ломая различия контента,
