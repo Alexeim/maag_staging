@@ -178,6 +178,10 @@ export default function interviewCreatorLogic(initialState = {}) {
     useNewAuthor: false,
     newAuthorFirstName: "",
     newAuthorLastName: "",
+    previewAuthorDisplay: {
+      name: "",
+      avatarUrl: "",
+    },
     ...createLandingPlacementManager({
       getEntityId() {
         return this.interviewId;
@@ -368,6 +372,50 @@ export default function interviewCreatorLogic(initialState = {}) {
         typeof author?.lastName === "string" ? author.lastName.trim() : "";
       return `${firstName} ${lastName}`.trim();
     },
+    getAuthorAvatarUrl(author: any) {
+      if (typeof author?.avatarUrl === "string" && author.avatarUrl.trim()) {
+        return author.avatarUrl.trim();
+      }
+      if (typeof author?.avatar === "string" && author.avatar.trim()) {
+        return author.avatar.trim();
+      }
+      return "";
+    },
+    getSelectedAuthorDisplay() {
+      if (this.useNewAuthor) {
+        return {
+          name: `${this.newAuthorFirstName.trim()} ${this.newAuthorLastName.trim()}`.trim(),
+          avatarUrl: "",
+        };
+      }
+
+      const selectedAuthor = this.authors.find(
+        (author: any) => author.id === this.selectedAuthorId,
+      );
+      if (selectedAuthor) {
+        return {
+          name: this.getAuthorLabel(selectedAuthor),
+          avatarUrl: this.getAuthorAvatarUrl(selectedAuthor),
+        };
+      }
+
+      const fallbackAuthor = this.interview?.author;
+      if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
+        return {
+          name: this.getAuthorLabel(fallbackAuthor),
+          avatarUrl: this.getAuthorAvatarUrl(fallbackAuthor),
+        };
+      }
+
+      return {
+        name: "",
+        avatarUrl: "",
+      };
+    },
+    getPreviewAuthorName() {
+      const currentDisplay = this.getSelectedAuthorDisplay();
+      return currentDisplay.name || this.previewAuthorDisplay.name || "Автор";
+    },
     ensureSelectedAuthorPresent() {
       if (!this.selectedAuthorId) {
         return;
@@ -423,36 +471,36 @@ export default function interviewCreatorLogic(initialState = {}) {
     },
 
     init() {
-      if (isPreview) {
+      type PreviewState = {
+        interview?: unknown;
+        interviewId?: string | null;
+        isEditMode?: boolean;
+        selectedAuthorId?: string;
+        useNewAuthor?: boolean;
+        newAuthorFirstName?: string;
+        newAuthorLastName?: string;
+        authorDisplay?: {
+          name?: string;
+          avatarUrl?: string;
+        };
+      };
+
+      let previewState: PreviewState | null = null;
+      let restoredPreviewAuthorState = false;
+
+      if (typeof window !== "undefined") {
         try {
           const stored = window.localStorage?.getItem("interviewPreview");
-          const previewState = stored ? JSON.parse(stored) : null;
-          const normalizedInitial = normalizeLoadedInterview(previewState?.interview);
-          if (normalizedInitial) {
-            this.interview = normalizedInitial;
-            this.interviewId =
-              typeof previewState?.interviewId === "string"
-                ? previewState.interviewId
-                : null;
-            this.isEditMode = Boolean(previewState?.isEditMode);
-            this.selectedAuthorId =
-              typeof previewState?.selectedAuthorId === "string"
-                ? previewState.selectedAuthorId
-                : "";
-            this.useNewAuthor = Boolean(previewState?.useNewAuthor);
-            this.newAuthorFirstName =
-              typeof previewState?.newAuthorFirstName === "string"
-                ? previewState.newAuthorFirstName
-                : "";
-            this.newAuthorLastName =
-              typeof previewState?.newAuthorLastName === "string"
-                ? previewState.newAuthorLastName
-                : "";
+          const parsed = stored ? JSON.parse(stored) : null;
+          if (parsed && typeof parsed === "object") {
+            previewState = parsed as PreviewState;
           }
         } catch (error) {
           console.error("Failed to load interview preview draft:", error);
         }
-      } else if (initialInterview) {
+      }
+
+      if (initialInterview) {
         const normalizedInitial = normalizeLoadedInterview(initialInterview);
         if (normalizedInitial) {
           this.interview = normalizedInitial;
@@ -468,6 +516,68 @@ export default function interviewCreatorLogic(initialState = {}) {
       if (onSaveRedirect) {
         this.onSaveRedirect = onSaveRedirect;
       }
+
+      const shouldApplyPreview = (() => {
+        if (!previewState?.interview) {
+          return false;
+        }
+        if (isPreview) {
+          return true;
+        }
+        const previewId =
+          typeof previewState.interviewId === "string" && previewState.interviewId
+            ? previewState.interviewId
+            : null;
+        const isPreviewEdit = Boolean(previewState.isEditMode);
+        const isSameEdit =
+          this.isEditMode && previewId !== null && previewId === this.interviewId;
+        const isCreateDraft = !this.isEditMode && !previewId && !isPreviewEdit;
+        return isSameEdit || isCreateDraft;
+      })();
+
+      if (shouldApplyPreview && previewState?.interview) {
+        const normalizedPreview = normalizeLoadedInterview(previewState.interview);
+        if (normalizedPreview) {
+          if (isPreview) {
+            this.interview = normalizedPreview;
+            this.interviewId =
+              typeof previewState.interviewId === "string"
+                ? previewState.interviewId
+                : null;
+            this.isEditMode = Boolean(previewState.isEditMode);
+          } else {
+            Object.assign(this.interview, normalizedPreview);
+          }
+        }
+        this.selectedAuthorId =
+          typeof previewState.selectedAuthorId === "string"
+            ? previewState.selectedAuthorId
+            : "";
+        this.useNewAuthor = Boolean(previewState.useNewAuthor);
+        this.newAuthorFirstName =
+          typeof previewState.newAuthorFirstName === "string"
+            ? previewState.newAuthorFirstName
+            : "";
+        this.newAuthorLastName =
+          typeof previewState.newAuthorLastName === "string"
+            ? previewState.newAuthorLastName
+            : "";
+        this.previewAuthorDisplay =
+          previewState.authorDisplay && typeof previewState.authorDisplay === "object"
+            ? {
+                name:
+                  typeof previewState.authorDisplay.name === "string"
+                    ? previewState.authorDisplay.name
+                    : "",
+                avatarUrl:
+                  typeof previewState.authorDisplay.avatarUrl === "string"
+                    ? previewState.authorDisplay.avatarUrl
+                    : "",
+              }
+            : { name: "", avatarUrl: "" };
+        restoredPreviewAuthorState = true;
+      }
+
       this.interview.tags = this.interview.tags ?? [];
       this.interview.isHotContent = Boolean(this.interview.isHotContent);
       this.interview.relatedContent = sanitizeRelatedContent(
@@ -478,10 +588,12 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.interview.contentBlocks = Array.isArray(this.interview.contentBlocks)
         ? normalizeEditableInterviewBlocks(this.interview.contentBlocks)
         : [];
-      this.selectedAuthorId =
-        typeof this.interview.authorId === "string"
-          ? this.interview.authorId
-          : "";
+      if (!restoredPreviewAuthorState) {
+        this.selectedAuthorId =
+          typeof this.interview.authorId === "string"
+            ? this.interview.authorId
+            : "";
+      }
       this.ensureSelectedAuthorPresent();
       this.fetchContentLists();
       this.loadAuthors();
@@ -511,6 +623,7 @@ export default function interviewCreatorLogic(initialState = {}) {
         return;
       }
 
+      const authorDisplay = this.getSelectedAuthorDisplay();
       const previewState = {
         interview: this.interview,
         interviewId: this.interviewId,
@@ -519,6 +632,7 @@ export default function interviewCreatorLogic(initialState = {}) {
         useNewAuthor: this.useNewAuthor,
         newAuthorFirstName: this.newAuthorFirstName,
         newAuthorLastName: this.newAuthorLastName,
+        authorDisplay,
       };
       window.localStorage.setItem("interviewPreview", JSON.stringify(previewState));
       window.location.href = "/dashboard/interview/preview";
