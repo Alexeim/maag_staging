@@ -3,6 +3,8 @@ import Button from "@/components/common/Button.astro";
 import { CloudUpload } from "lucide-astro";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
+import PublicationStatusBanner from "@/components/dashboard/PublicationStatusBanner.astro";
+import PublicationToggle from "@/components/dashboard/PublicationToggle.astro";
 
 interface Props {
   heading: string;
@@ -28,6 +30,7 @@ const {
   x-data={`$lazy('newsCreator', ${newsCreatorState})`}
 >
   <h1 class="text-3xl font-bold mb-6">{heading}</h1>
+  <PublicationStatusBanner model="article" />
 
   <!-- Main info section -->
   <section
@@ -476,6 +479,7 @@ const {
       </template>
     </div>
     <div class="flex justify-end gap-3">
+      <PublicationToggle model="article" />
       {
         cancelHref && (
           <a

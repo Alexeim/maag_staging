@@ -40,6 +40,11 @@ try {
   }
 }
 
+if (!error && guideData?.published !== true) {
+  error = "Путеводитель не найден.";
+  guideData = null;
+}
+
 const rawCategory = guideData?.category ?? null;
 
 const displayGuide = {

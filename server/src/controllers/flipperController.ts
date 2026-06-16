@@ -5,6 +5,10 @@ import {
   normalizeContentCollectionId,
   syncSingleContentCollectionMembershipInTransaction,
 } from '../utils/contentCollections';
+import {
+  buildPublicationFieldsForCreate,
+  buildPublicationFieldsForUpdate,
+} from '../utils/publication';
 
 // Interface for Flipper structure
 export interface Flipper {
@@ -17,6 +21,8 @@ export interface Flipper {
   tags?: string[];
   isHotContent?: boolean;
   paid?: boolean;
+  published: boolean;
+  publishedAt: Date | null;
   carouselContent: { imageUrl: string; caption: string }[];
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
@@ -62,6 +68,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
 
+    const now = new Date();
     const newFlipper: Omit<Flipper, 'id'> = {
       title,
       authorId,
@@ -71,15 +78,14 @@ export const createFlipper = async (req: Request, res: Response) => {
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       paid: Boolean(paid),
+      ...buildPublicationFieldsForCreate(req.body, now),
       carouselContent,
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
-      createdAt: new Date(),
+      createdAt: now,
     };
 
-    const now = new Date();
     const docRef = flippersCollection.doc();
-    newFlipper.createdAt = now;
 
     await db.runTransaction(async (transaction) => {
       await syncSingleContentCollectionMembershipInTransaction({
@@ -202,6 +208,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
     const legacyHotContent =
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
+    const now = new Date();
 
     const updatedFlipper = {
       title,
@@ -212,17 +219,16 @@ export const updateFlipper = async (req: Request, res: Response) => {
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       paid: Boolean(paid),
+      ...buildPublicationFieldsForUpdate(req.body, doc.data(), now),
       carouselContent,
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
-      updatedAt: new Date(),
+      updatedAt: now,
     };
 
     const previousContentCollectionId = normalizeContentCollectionId(
       doc.data()?.contentCollectionId,
     );
-    const now = updatedFlipper.updatedAt;
-
     await db.runTransaction(async (transaction) => {
       await syncSingleContentCollectionMembershipInTransaction({
         transaction,

@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import DashboardListActions from "@/components/dashboard/DashboardListActions.astro";
+import PublishedIndicator from "@/components/dashboard/PublishedIndicator.astro";
 import { articlesApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
@@ -101,6 +102,7 @@ const articles = articlesRaw
               <th scope="col" class="px-6 py-3">Заголовок</th>
               <th scope="col" class="px-6 py-3">Категория / теги</th>
               <th scope="col" class="px-6 py-3 hidden md:table-cell">Создана</th>
+              <th scope="col" class="px-6 py-3 hidden md:table-cell">Опубликовано</th>
               <th scope="col" class="px-6 py-3"><span class="sr-only">Действия</span></th>
             </tr>
           </thead>
@@ -134,6 +136,9 @@ const articles = articlesRaw
                   </td>
                   <td class="px-6 py-4 hidden md:table-cell">
                     {article.createdAtFormatted}
+                  </td>
+                  <td class="px-6 py-4 hidden md:table-cell">
+                    <PublishedIndicator published={Boolean(article.published)} />
                   </td>
                   <DashboardListActions
                     viewHref={`/article/${article.id}`}

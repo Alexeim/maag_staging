@@ -23,6 +23,10 @@ if (!flipper) {
   return Astro.redirect("/404");
 }
 
+if ((flipper as any).published !== true) {
+  return Astro.redirect("/404");
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
   paris: "Париж",

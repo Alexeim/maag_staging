@@ -10,6 +10,8 @@ import timeIcon from "@/assets/icons/new/time.svg?raw";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
 import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
+import PublicationStatusBanner from "@/components/dashboard/PublicationStatusBanner.astro";
+import PublicationToggle from "@/components/dashboard/PublicationToggle.astro";
 
 interface Props {
   heading: string;
@@ -39,6 +41,7 @@ const allParisDistricts = parisDistrictTags;
   x-data={`$lazy('tipsArticleCreator', ${tipsCreatorState})`}
 >
   <h1 class="text-3xl font-bold mb-6">{heading}</h1>
+  <PublicationStatusBanner model="article" />
 
   <!-- ── Основная информация ──────────────────────────────────────────────── -->
   <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
@@ -527,6 +530,7 @@ const allParisDistricts = parisDistrictTags;
       )}
     </div>
     <div class="flex justify-end gap-3">
+      <PublicationToggle model="article" />
       <Button variant="secondary" size="md" @click="previewArticle()">Предпросмотр</Button>
       <Button variant="primary" size="md" @click="saveArticle()" :disabled="isSaving" :class="{'opacity-50 cursor-not-allowed': isSaving}">{submitLabel}</Button>
     </div>

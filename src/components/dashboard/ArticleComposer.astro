@@ -7,6 +7,8 @@ import QuoteIcon from "@/assets/icons/quote.svg";
 import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
+import PublicationStatusBanner from "@/components/dashboard/PublicationStatusBanner.astro";
+import PublicationToggle from "@/components/dashboard/PublicationToggle.astro";
 
 interface Props {
   heading: string;
@@ -32,6 +34,7 @@ const {
   x-data={`$lazy('articleCreator', ${articleCreatorState})`}
 >
   <h1 class="text-3xl font-bold mb-6">{heading}</h1>
+  <PublicationStatusBanner model="article" />
 
   <section
     class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm"
@@ -1797,6 +1800,7 @@ const {
       </template>
     </div>
     <div class="flex justify-end gap-3">
+      <PublicationToggle model="article" />
       {
         cancelHref && (
           <a

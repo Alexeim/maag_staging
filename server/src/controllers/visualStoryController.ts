@@ -5,6 +5,10 @@ import {
   normalizeContentCollectionId,
   syncSingleContentCollectionMembershipInTransaction,
 } from '../utils/contentCollections';
+import {
+  buildPublicationFieldsForCreate,
+  buildPublicationFieldsForUpdate,
+} from '../utils/publication';
 
 export interface VisualStory {
   id?: string;
@@ -28,6 +32,8 @@ export interface VisualStory {
   parisDistrict?: string | null;
   isHotContent?: boolean;
   paid?: boolean;
+  published: boolean;
+  publishedAt: Date | null;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
   createdAt: Date;
@@ -121,15 +127,15 @@ export const createVisualStory = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'At least one slide is required' });
     }
 
+    const now = new Date();
     const newStory: Omit<VisualStory, 'id'> = {
       ...payload,
       ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
-      createdAt: new Date(),
+      ...buildPublicationFieldsForCreate(req.body, now),
+      createdAt: now,
     };
 
-    const now = new Date();
     const docRef = collection.doc();
-    newStory.createdAt = now;
 
     await db.runTransaction(async (transaction) => {
       await syncSingleContentCollectionMembershipInTransaction({
@@ -207,17 +213,17 @@ export const updateVisualStory = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Title and authorId are required' });
     }
 
+    const now = new Date();
     const updated = {
       ...payload,
       ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
-      updatedAt: new Date(),
+      ...buildPublicationFieldsForUpdate(req.body, doc.data(), now),
+      updatedAt: now,
     };
 
     const previousContentCollectionId = normalizeContentCollectionId(
       doc.data()?.contentCollectionId,
     );
-    const now = updated.updatedAt;
-
     await db.runTransaction(async (transaction) => {
       await syncSingleContentCollectionMembershipInTransaction({
         transaction,

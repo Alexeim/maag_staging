@@ -211,6 +211,8 @@ export default function eventCreatorLogic(initialState = {}) {
       typeof copy.imageCaption === "string" ? copy.imageCaption : "";
     copy.lead = copy.lead ?? "";
     copy.cardLead = copy.cardLead ?? "";
+    copy.published = Boolean(copy.published);
+    copy.publishedAt = copy.publishedAt ?? null;
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     copy.contentCollectionId = normalizeContentCollectionId(copy.contentCollectionId);
     return copy;
@@ -640,6 +642,7 @@ export default function eventCreatorLogic(initialState = {}) {
           startTime: startTime || null,
           endTime: timeMode === "range" ? endTime : null,
           isMainEvent: Boolean(this.eventForm.isMainEvent),
+          published: Boolean(this.article.published),
           additionalInfo,
           relatedContent: sanitizeRelatedContent(
             this.article.relatedContent,

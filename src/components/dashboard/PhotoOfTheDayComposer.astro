@@ -1,6 +1,8 @@
 ---
 import Button from "@/components/common/Button.astro";
 import { CloudUpload } from "lucide-astro";
+import PublicationStatusBanner from "@/components/dashboard/PublicationStatusBanner.astro";
+import PublicationToggle from "@/components/dashboard/PublicationToggle.astro";
 
 interface Props {
   heading?: string;
@@ -19,6 +21,7 @@ const {
 
 <div class="max-w-4xl mx-auto" x-data={`$lazy('photoOfTheDayCreator', ${creatorState})`}>
   <h1 class="text-3xl font-bold mb-6">{heading}</h1>
+  <PublicationStatusBanner model="photo" />
 
   <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
     <h2 class="text-xl font-semibold mb-4">Основная информация</h2>
@@ -103,6 +106,7 @@ const {
       </template>
     </div>
     <div class="flex justify-end gap-3">
+      <PublicationToggle model="photo" />
       {cancelHref && (
         <a
           href={cancelHref}

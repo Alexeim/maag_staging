@@ -42,6 +42,11 @@ try {
   }
 }
 
+if (!error && articleData?.published !== true) {
+  error = "Статья не найдена.";
+  articleData = null;
+}
+
 const rawCategory =
   articleData?.category ?? articleData?.header?.category ?? null;
 

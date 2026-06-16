@@ -74,6 +74,8 @@ const normalizeLoadedArticle = (data: any) => {
   copy.cardLead = copy.cardLead ?? "";
   copy.isHotContent = Boolean(copy.isHotContent);
   copy.isMainInCategory = Boolean(copy.isMainInCategory);
+  copy.published = Boolean(copy.published);
+  copy.publishedAt = copy.publishedAt ?? null;
   copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
   return copy;
 };
@@ -129,6 +131,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       binaryForGuide: false,
       isHotContent: false,
       isMainInCategory: false,
+      published: false,
+      publishedAt: null,
       contentBlocks: [] as any[],
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
@@ -670,6 +674,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           binaryForGuide: false,
           isHotContent: Boolean(this.article.isHotContent),
           isMainInCategory: Boolean(this.article.isMainInCategory),
+          published: Boolean(this.article.published),
           content: this.article.contentBlocks,
           relatedContent: sanitizeRelatedContent(
             (this.article as any).relatedContent,

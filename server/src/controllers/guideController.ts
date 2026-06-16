@@ -5,6 +5,10 @@ import {
   normalizeContentCollectionId,
   syncSingleContentCollectionMembershipInTransaction,
 } from '../utils/contentCollections';
+import {
+  buildPublicationFieldsForCreate,
+  buildPublicationFieldsForUpdate,
+} from '../utils/publication';
 
 export interface Guide {
   id?: string;
@@ -21,6 +25,8 @@ export interface Guide {
   isHotContent?: boolean;
   isMainInCategory?: boolean;
   paid?: boolean;
+  published: boolean;
+  publishedAt: Date | null;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
   createdAt: Date;
@@ -110,6 +116,7 @@ export const createGuide = async (req: Request, res: Response) => {
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isMainInCategory: Boolean(isMainInCategory),
       paid: Boolean(paid),
+      ...buildPublicationFieldsForCreate(req.body, now),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       createdAt: now,
@@ -256,6 +263,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isMainInCategory: Boolean(isMainInCategory),
       paid: Boolean(paid),
+      ...buildPublicationFieldsForUpdate(req.body, guideDoc.data(), now),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       updatedAt: now,

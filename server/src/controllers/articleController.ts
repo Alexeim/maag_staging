@@ -5,6 +5,10 @@ import {
   normalizeContentCollectionId,
   syncSingleContentCollectionMembershipInTransaction,
 } from '../utils/contentCollections';
+import {
+  buildPublicationFieldsForCreate,
+  buildPublicationFieldsForUpdate,
+} from '../utils/publication';
 
 // Interface for our Article structure
 export interface Article {
@@ -24,6 +28,8 @@ export interface Article {
   isMainInCategory?: boolean;
   isNews?: boolean;
   paid?: boolean;
+  published: boolean;
+  publishedAt: Date | null;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
   createdAt: Date;
@@ -133,6 +139,7 @@ export const createArticle = async (req: Request, res: Response) => {
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
       paid: Boolean(paid),
+      ...buildPublicationFieldsForCreate(req.body, now),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizedContentCollectionId,
       createdAt: now,
@@ -288,6 +295,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
       paid: Boolean(paid),
+      ...buildPublicationFieldsForUpdate(req.body, articleDoc.data(), now),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizedContentCollectionId,
       updatedAt: now,

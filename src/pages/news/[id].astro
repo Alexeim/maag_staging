@@ -121,6 +121,11 @@ try {
   }
 }
 
+if (!error && articleData?.published !== true) {
+  error = "Новость не найдена.";
+  articleData = null;
+}
+
 const displayArticle = {
   title: articleData?.title || "Новость",
   lead: articleData?.lead || "",

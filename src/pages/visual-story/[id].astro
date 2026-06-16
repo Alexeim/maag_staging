@@ -32,6 +32,11 @@ if (!id) {
   }
 }
 
+if (!error && storyData?.published !== true) {
+  error = "Визуальная история не найдена.";
+  storyData = null;
+}
+
 const slides: Array<{
   imageUrl: string;
   contentType: "text" | "quote";

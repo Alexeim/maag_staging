@@ -90,6 +90,7 @@ const normalizeCategory = (value?: string): string => {
 };
 
 const isLeSaviezVousItem = (item: any) => item?.articleType === 'le_saviez_vous';
+const isPublished = (data: any) => data?.published === true;
 
 const getHref = (type: LandingContentType, id: string): string => {
   if (type === 'interview') return `/interviews/${id}`;
@@ -114,6 +115,7 @@ const toLandingItem = (
 ) => {
   const data = doc.data();
   if (!doc.exists || !data) return null;
+  if (!isPublished(data)) return null;
 
   return {
     id: doc.id,
@@ -128,6 +130,8 @@ const toLandingItem = (
     tags: Array.isArray(data.tags) ? data.tags : [],
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
+    published: Boolean(data.published),
+    publishedAt: data.publishedAt ?? null,
     isHotContent: Boolean(data.isHotContent) || data.category === 'hotContent',
     isMainInCategory: Boolean(data.isMainInCategory),
     isNews: type === 'news',
@@ -574,6 +578,7 @@ const extractDescription = (blocks: any): string => {
 const toPublicCalendarEvent = (doc: FirebaseFirestore.DocumentSnapshot) => {
   const data = doc.data();
   if (!doc.exists || !data) return null;
+  if (!isPublished(data)) return null;
   const startDate = toDate(data.startDate);
   if (!startDate) return null;
   const endDate = toDate(data.endDate);

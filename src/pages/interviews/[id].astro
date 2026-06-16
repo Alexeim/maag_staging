@@ -31,6 +31,10 @@ if (!interview) {
   return Astro.redirect("/404");
 }
 
+if ((interview as any).published !== true) {
+  return Astro.redirect("/404");
+}
+
 const {
   title,
   author,

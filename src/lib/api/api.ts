@@ -26,6 +26,8 @@ export class ApiError extends Error {
   }
 }
 
+export type ApiTimestamp = string | Date | { _seconds: number } | null;
+
 const isJsonLike = (value: unknown): boolean =>
   typeof value === "object" && value !== null && !(value instanceof FormData);
 
@@ -145,6 +147,8 @@ export interface ArticlePayload {
   isHotContent?: boolean;
   isMainInCategory?: boolean;
   isNews?: boolean;
+  published?: boolean;
+  publishedAt?: ApiTimestamp;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
 }
@@ -188,6 +192,8 @@ export interface NewsPayload {
   category?: string;
   tags?: string[];
   isMainInCategory?: boolean;
+  published?: boolean;
+  publishedAt?: ApiTimestamp;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
 }
@@ -216,6 +222,8 @@ export interface EventPayload {
   startTime?: string | null;
   endTime?: string | null;
   isMainEvent?: boolean;
+  published?: boolean;
+  publishedAt?: ApiTimestamp;
   additionalInfo?: Array<{
     id?: string;
     icon: "calendar" | "clock" | "location" | "bulb";
@@ -579,6 +587,8 @@ export interface FlipperPayload {
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
   isHotContent?: boolean;
+  published?: boolean;
+  publishedAt?: ApiTimestamp;
   carouselContent: { imageUrl: string; caption: string }[];
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
@@ -603,6 +613,8 @@ export interface InterviewPayload {
   mainQuote?: string;
   tags?: string[];
   isHotContent?: boolean;
+  published?: boolean;
+  publishedAt?: ApiTimestamp;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
 }
@@ -630,6 +642,8 @@ export interface GuidePayload {
   binaryForGuide?: boolean;
   isHotContent?: boolean;
   isMainInCategory?: boolean;
+  published?: boolean;
+  publishedAt?: ApiTimestamp;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
 }
@@ -820,6 +834,8 @@ export interface PhotoOfTheDayResponse {
   imageUrl: string;
   caption: string;
   authorId: string;
+  published?: boolean;
+  publishedAt?: ApiTimestamp;
   author?: { firstName: string; lastName: string; avatar?: string } | null;
   createdAt: string | { _seconds: number } | Date;
   updatedAt?: string | { _seconds: number } | Date;
@@ -830,6 +846,8 @@ export interface PhotoOfTheDayPayload {
   imageUrl: string;
   caption: string;
   authorId: string;
+  published?: boolean;
+  publishedAt?: ApiTimestamp;
 }
 
 export const photosOfTheDayApi = {
@@ -971,6 +989,8 @@ export interface VisualStoryPayload {
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
   isHotContent?: boolean;
+  published?: boolean;
+  publishedAt?: ApiTimestamp;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
 }

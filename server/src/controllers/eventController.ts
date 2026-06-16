@@ -5,6 +5,10 @@ import {
   normalizeContentCollectionId,
   syncSingleContentCollectionMembershipInTransaction,
 } from '../utils/contentCollections';
+import {
+  buildPublicationFieldsForCreate,
+  buildPublicationFieldsForUpdate,
+} from '../utils/publication';
 
 export interface EventItem {
   id?: string;
@@ -25,6 +29,8 @@ export interface EventItem {
   endTime?: string | null;
   createdAt: Date;
   updatedAt?: Date;
+  published: boolean;
+  publishedAt: Date | null;
   isMainEvent?: boolean;
   additionalInfo?: Array<{
     id?: string;
@@ -193,6 +199,7 @@ export const createEvent = async (req: Request, res: Response) => {
       startTime: normalizedTimeMode === 'none' ? null : normalizedStartTime,
       endTime: normalizedTimeMode === 'range' ? normalizedEndTime : null,
       createdAt: now,
+      ...buildPublicationFieldsForCreate(req.body, now),
       isMainEvent,
       additionalInfo: normalizeAdditionalInfo(additionalInfo),
       relatedContent: normalizeRelatedContent(relatedContent),
@@ -358,6 +365,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       startTime: normalizedTimeMode === 'none' ? null : normalizedStartTime,
       endTime: normalizedTimeMode === 'range' ? normalizedEndTime : null,
       updatedAt: now,
+      ...buildPublicationFieldsForUpdate(req.body, eventDoc.data(), now),
       isMainEvent: mainEventFlag,
       additionalInfo: normalizeAdditionalInfo(additionalInfo),
       relatedContent: normalizeRelatedContent(relatedContent),

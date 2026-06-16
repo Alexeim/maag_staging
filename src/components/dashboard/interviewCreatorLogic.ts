@@ -110,6 +110,8 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.mainQuote = copy.mainQuote ?? "";
     copy.isHotContent = Boolean(copy.isHotContent);
     copy.paid = Boolean(copy.paid);
+    copy.published = Boolean(copy.published);
+    copy.publishedAt = copy.publishedAt ?? null;
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     copy.contentCollectionId = normalizeContentCollectionId(copy.contentCollectionId);
     return copy;
@@ -136,6 +138,8 @@ export default function interviewCreatorLogic(initialState = {}) {
       mainQuote: "",
       isHotContent: false,
       paid: false,
+      published: false,
+      publishedAt: null,
       imageUrl: "",
       imageCaption: "",
       contentBlocks: [],
@@ -906,6 +910,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           mainQuote: this.interview.mainQuote,
           isHotContent: Boolean(this.interview.isHotContent),
           paid: Boolean(this.interview.paid),
+          published: Boolean(this.interview.published),
           imageUrl: this.interview.imageUrl,
           imageCaption: this.interview.imageCaption,
           authorId: resolvedAuthorId,

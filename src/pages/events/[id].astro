@@ -460,12 +460,18 @@ try {
   }
 }
 
+if (!error && eventData?.published !== true) {
+  error = "Событие не найдено.";
+  eventData = null;
+}
+
 if (!error && eventData) {
   try {
     const allEvents = await eventsApi.list();
     const today = toUtcDayStart(new Date());
 
     relatedEvents = allEvents
+      .filter((item) => item?.published === true)
       .map((item) => {
         const itemStart = toDate(item?.startDate);
         const itemEnd = toDate(item?.endDate);

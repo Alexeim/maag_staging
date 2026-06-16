@@ -111,6 +111,8 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
     copy.imageCaption = copy.imageCaption ?? "";
     copy.lead = copy.lead ?? "";
     copy.cardLead = copy.cardLead ?? "";
+    copy.published = Boolean(copy.published);
+    copy.publishedAt = copy.publishedAt ?? null;
     delete copy.isHotContent;
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     return copy;
@@ -127,6 +129,8 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
       tags: [] as string[],
       category: "",
       isMainInCategory: false,
+      published: false,
+      publishedAt: null,
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
     },
@@ -693,6 +697,7 @@ export default function newsCreatorLogic(initialState: Record<string, unknown> =
           category: this.article.category,
           tags: tagsForDb,
           isMainInCategory: Boolean(this.article.isMainInCategory),
+          published: Boolean(this.article.published),
           relatedContent: sanitizeRelatedContent(
             this.article.relatedContent,
             "news",

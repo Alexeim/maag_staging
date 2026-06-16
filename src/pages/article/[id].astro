@@ -124,6 +124,11 @@ try {
   }
 }
 
+if (!error && articleData?.published !== true) {
+  error = "Article not found.";
+  articleData = null;
+}
+
 // Redirect tips articles to their dedicated page
 if (articleData?.articleType === 'tips') {
   return Astro.redirect(`/tips/${id}`);

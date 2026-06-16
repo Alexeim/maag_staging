@@ -5,6 +5,10 @@ import {
   normalizeContentCollectionId,
   syncSingleContentCollectionMembershipInTransaction,
 } from '../utils/contentCollections';
+import {
+  buildPublicationFieldsForCreate,
+  buildPublicationFieldsForUpdate,
+} from '../utils/publication';
 
 // Interface for our Interview structure
 export interface Interview {
@@ -17,6 +21,8 @@ export interface Interview {
   mainQuote?: string;
   isHotContent?: boolean;
   paid?: boolean;
+  published: boolean;
+  publishedAt: Date | null;
   content: any[]; // Array of content blocks
   imageUrl?: string;
   imageCaption?: string;
@@ -73,6 +79,7 @@ export const createInterview = async (req: Request, res: Response) => {
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
       paid: Boolean(paid),
+      ...buildPublicationFieldsForCreate(req.body, now),
       content,
       imageUrl,
       imageCaption,
@@ -216,6 +223,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
       paid: Boolean(paid),
+      ...buildPublicationFieldsForUpdate(req.body, interviewDoc.data(), now),
       content,
       imageUrl,
       imageCaption,

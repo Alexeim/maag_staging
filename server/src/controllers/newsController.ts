@@ -5,6 +5,10 @@ import {
   normalizeContentCollectionId,
   syncSingleContentCollectionMembershipInTransaction,
 } from '../utils/contentCollections';
+import {
+  buildPublicationFieldsForCreate,
+  buildPublicationFieldsForUpdate,
+} from '../utils/publication';
 
 export interface NewsItem {
   id?: string;
@@ -18,6 +22,8 @@ export interface NewsItem {
   category?: string;
   tags?: string[];
   isMainInCategory?: boolean;
+  published: boolean;
+  publishedAt: Date | null;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
   createdAt: Date;
@@ -110,6 +116,7 @@ export const createNews = async (req: Request, res: Response) => {
     const docRef = newsCollection.doc();
     const newNews: Omit<NewsItem, 'id'> = {
       ...payload,
+      ...buildPublicationFieldsForCreate(req.body, now),
       createdAt: now,
     };
 
@@ -186,6 +193,7 @@ export const updateNews = async (req: Request, res: Response) => {
 
     const updatedNews = {
       ...payload,
+      ...buildPublicationFieldsForUpdate(req.body, newsDoc.data(), now),
       updatedAt: now,
     };
 

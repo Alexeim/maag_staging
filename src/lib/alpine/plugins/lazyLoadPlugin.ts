@@ -153,6 +153,8 @@ export default function(Alpine: Alpine) {
         isHotContent: false,
         isMainInCategory: false,
         paid: false,
+        published: false,
+        publishedAt: null,
         contentCollectionId: null,
         relatedContent: {
           article: [],
@@ -173,6 +175,8 @@ export default function(Alpine: Alpine) {
         mainQuote: '',
         isHotContent: false,
         paid: false,
+        published: false,
+        publishedAt: null,
         imageUrl: '',
         imageCaption: '',
         contentBlocks: [],
@@ -549,6 +553,8 @@ export default function(Alpine: Alpine) {
         category: '',
         tags: [],
         paid: false,
+        published: false,
+        publishedAt: null,
         carouselContent: [],
         relatedContent: {
           article: [],
@@ -591,6 +597,8 @@ export default function(Alpine: Alpine) {
         binaryForGuide: false,
         isHotContent: false,
         paid: false,
+        published: false,
+        publishedAt: null,
         slides: [],
         relatedContent: {
           article: [],
@@ -611,7 +619,7 @@ export default function(Alpine: Alpine) {
       saveStory() {},
       deleteStory() {},
       // --- Photo of the Day Creator defaults ---
-      photo: { title: '', imageUrl: '', caption: '' },
+      photo: { title: '', imageUrl: '', caption: '', published: false, publishedAt: null },
       photoId: null,
       savePhoto() {},
       deletePhoto() {},

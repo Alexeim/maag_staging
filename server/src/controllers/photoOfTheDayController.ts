@@ -1,5 +1,9 @@
 import { Request, Response } from 'express';
 import { getDb, deleteFileFromStorage } from '../services/firebase';
+import {
+  buildPublicationFieldsForCreate,
+  buildPublicationFieldsForUpdate,
+} from '../utils/publication';
 
 export interface PhotoOfTheDay {
   id?: string;
@@ -7,6 +11,8 @@ export interface PhotoOfTheDay {
   imageUrl: string;
   caption: string;
   authorId: string;
+  published: boolean;
+  publishedAt: Date | null;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -22,12 +28,14 @@ export const createPhotoOfTheDay = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'title, imageUrl и authorId обязательны' });
     }
 
+    const now = new Date();
     const doc: Omit<PhotoOfTheDay, 'id'> = {
       title,
       imageUrl,
       caption: caption || '',
       authorId,
-      createdAt: new Date(),
+      ...buildPublicationFieldsForCreate(req.body, now),
+      createdAt: now,
     };
 
     const docRef = collection.doc();
@@ -105,12 +113,14 @@ export const updatePhotoOfTheDay = async (req: Request, res: Response) => {
       await deleteFileFromStorage(previousImageUrl);
     }
 
+    const now = new Date();
     const updated = {
       title,
       imageUrl,
       caption: caption || '',
       authorId,
-      updatedAt: new Date(),
+      ...buildPublicationFieldsForUpdate(req.body, doc.data(), now),
+      updatedAt: now,
     };
 
     await collection.doc(id).update(updated);

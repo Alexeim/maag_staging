@@ -40,6 +40,8 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
       title: (photoDraft?.title as string) || "",
       imageUrl: (photoDraft?.imageUrl as string) || "",
       caption: (photoDraft?.caption as string) || "",
+      published: Boolean(photoDraft?.published),
+      publishedAt: photoDraft?.publishedAt || null,
     },
     photoId: (isPreview ? previewState?.photoId : photoId) as string | null,
     isEditMode: (isPreview ? Boolean(previewState?.isEditMode) : isEditMode) as boolean,
@@ -164,6 +166,7 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
           imageUrl: this.photo.imageUrl,
           caption: this.photo.caption.trim(),
           authorId: this.selectedAuthorId,
+          published: Boolean(this.photo.published),
         };
 
         if (this.isEditMode && this.photoId) {

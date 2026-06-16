@@ -22,6 +22,11 @@ try {
   }
 }
 
+if (!error && photo?.published !== true) {
+  error = "Фото не найдено.";
+  photo = null;
+}
+
 const authorName = photo?.author
   ? `${photo.author.firstName} ${photo.author.lastName}`
   : "Автор";

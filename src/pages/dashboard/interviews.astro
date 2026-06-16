@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import DashboardListActions from "@/components/dashboard/DashboardListActions.astro";
+import PublishedIndicator from "@/components/dashboard/PublishedIndicator.astro";
 import { interviewsApi } from "@/lib/api/api";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 
@@ -70,6 +71,7 @@ const interviews = interviewsRaw.map((interview) => {
               <th scope="col" class="px-6 py-3">Заголовок</th>
               <th scope="col" class="px-6 py-3">Теги</th>
               <th scope="col" class="px-6 py-3 hidden md:table-cell">Создана</th>
+              <th scope="col" class="px-6 py-3 hidden md:table-cell">Опубликовано</th>
               <th scope="col" class="px-6 py-3"><span class="sr-only">Действия</span></th>
             </tr>
           </thead>
@@ -87,6 +89,9 @@ const interviews = interviewsRaw.map((interview) => {
                     <span class="text-xs text-base-content/70">{tagsLabel}</span>
                   </td>
                   <td class="px-6 py-4 hidden md:table-cell">{interview.createdAtFormatted}</td>
+                  <td class="px-6 py-4 hidden md:table-cell">
+                    <PublishedIndicator published={Boolean(interview.published)} />
+                  </td>
                   <DashboardListActions
                     viewHref={`/interviews/${interview.id}`}
                     editHref={`/dashboard/interview/${interview.id}/edit`}

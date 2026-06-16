@@ -99,6 +99,8 @@ export default function flipperCreatorLogic(initialState = {}) {
         : normalizedCategory;
     copy.isHotContent = isHotContentLegacy;
     copy.paid = Boolean(copy.paid);
+    copy.published = Boolean(copy.published);
+    copy.publishedAt = copy.publishedAt ?? null;
     copy.lead = copy.lead ?? "";
     copy.cardLead = copy.cardLead ?? "";
     copy.tags = normalizeTags(copy.tags, copy.category);
@@ -120,6 +122,8 @@ export default function flipperCreatorLogic(initialState = {}) {
       category: "",
       isHotContent: false,
       paid: false,
+      published: false,
+      publishedAt: null,
       tags: [],
       parisSubCategories: [],
       parisDistrict: "",

@@ -120,6 +120,8 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       binaryForGuide: false,
       isHotContent: false,
       paid: false,
+      published: false,
+      publishedAt: null,
       slides: [] as Array<{
         imageUrl: string;
         contentType: "text" | "quote";
@@ -508,6 +510,8 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.binaryForGuide = Boolean(copy.binaryForGuide);
         this.story.isHotContent = Boolean(copy.isHotContent);
         this.story.paid = Boolean(copy.paid);
+        this.story.published = Boolean(copy.published);
+        this.story.publishedAt = copy.publishedAt ?? null;
         this.story.slides = Array.isArray(copy.slides)
           ? copy.slides.map((slide: Record<string, unknown>) =>
               normalizeSlide(slide),
@@ -631,6 +635,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           binaryForGuide: false,
           isHotContent: this.story.isHotContent,
           paid: this.story.paid,
+          published: Boolean(this.story.published),
           relatedContent: sanitizeRelatedContent(
             this.story.relatedContent,
             "visualStory",

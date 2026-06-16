@@ -4,6 +4,8 @@ import { CloudUpload } from "lucide-astro";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
 import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
+import PublicationStatusBanner from "@/components/dashboard/PublicationStatusBanner.astro";
+import PublicationToggle from "@/components/dashboard/PublicationToggle.astro";
 
 interface Props {
   heading?: string;
@@ -24,6 +26,7 @@ const {
 
 <div class="max-w-4xl mx-auto" x-data={`$lazy('flipperCreator', ${creatorState})`}>
   <h1 class="text-3xl font-bold mb-6">{heading}</h1>
+  <PublicationStatusBanner model="flipper" />
 
   <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
     <h2 class="text-xl font-semibold mb-4">Основная информация</h2>
@@ -252,6 +255,7 @@ const {
       )}
     </div>
     <div class="flex justify-end gap-3">
+      <PublicationToggle model="flipper" />
       {cancelHref && (
         <a
           href={cancelHref}
