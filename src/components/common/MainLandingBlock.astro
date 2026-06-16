@@ -241,9 +241,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
         {
           newsArticles.map((newsItem) => (
             <div class="flex-shrink-0 w-[280px] sm:w-1/2 md:w-1/3 lg:w-full lg:py-4 lg:border-b lg:border-base-content/15 last:lg:border-b-0">
-              <div
-                class="flex items-start gap-4"
-              >
+              <div class="flex items-start gap-4">
                 <a
                   href={`/news/${newsItem.id}`}
                   class="linked-image-hover bg-base-200 z-10"
@@ -321,7 +319,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
                 href={mainArticle.href}
                 class="block transition-opacity duration-200 hover:opacity-90"
               >
-                <h2 class="text-3xl lg:text-[44px] font-normal font-old_standard tracking-[-0.04em] leading-[48px] hover:underline mt-1 mb-2">
+                <h2 class="text-3xl lg:text-[37px] font-normal font-old_standard tracking-[-0.04em] leading-[48px] hover:underline mt-1 mb-2">
                   {mainArticle.paid ? (
                     <>
                       {splitTitle(mainArticle.title).start && (

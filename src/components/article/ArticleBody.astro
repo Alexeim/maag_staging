@@ -233,14 +233,14 @@ if (currentProseGroup.length > 0) {
                     const html = getInitialRichTextHtml(block);
                     return (
                       <div
-                        class="article-rich-text text-lg font-article-body text-justify"
+                        class="article-rich-text text-base font-article-body text-justify"
                         set:html={html}
                       />
                     );
                   }
                   case "h2":
                     return (
-                      <h2 class="text-2xl font-bold font-old_standard italic">
+                      <h2 class="text-xl font-bold font-old_standard italic">
                         {block.text}
                       </h2>
                     );
@@ -254,7 +254,7 @@ if (currentProseGroup.length > 0) {
                     return (
                       <div class="p-2 flex flex-col items-center justify-center gap-2">
                         <QuoteIcon class="w-8 h-8" />
-                        <blockquote class="text-3xl italic font-article-body pl-4 my-4">
+                        <blockquote class="text-base lg:text-3xl italic font-article-body pl-4 my-4">
                           {block.text}
                         </blockquote>
                         <QuoteIcon class="w-8 h-8 rotate-180" />
@@ -289,12 +289,12 @@ if (currentProseGroup.length > 0) {
                     return (
                       <div class="space-y-4">
                         {block.question && (
-                          <p class="text-xl font-article-body font-bold! italic">
+                          <p class="text-base font-article-body font-bold! italic">
                             {block.question}
                           </p>
                         )}
                         {block.answer && (
-                          <p class="text-lg font-article-body text-justify">
+                          <p class="text-base font-article-body text-justify">
                             {block.answer}
                           </p>
                         )}

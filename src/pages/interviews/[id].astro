@@ -35,9 +35,13 @@ if ((interview as any).published !== true) {
   return Astro.redirect("/404");
 }
 
+console.log("here --------------------->>>>>>>>>", Object.keys(interview));
+
 const {
   title,
   author,
+  interviewee,
+  mainQuote,
   content,
   imageUrl,
   imageCaption,
@@ -77,10 +81,18 @@ try {
     pools,
   });
 
-  const relatedInterviewIds = new Set(collectionContentItems.filter((i) => i.contentType === "interview").map((i) => i.id));
+  const relatedInterviewIds = new Set(
+    collectionContentItems
+      .filter((i) => i.contentType === "interview")
+      .map((i) => i.id),
+  );
   recentInterviewItems = allInterviews
     .filter((i) => i.id !== id && !relatedInterviewIds.has(i.id))
-    .sort((a, b) => (toDate(b?.createdAt)?.getTime() ?? 0) - (toDate(a?.createdAt)?.getTime() ?? 0))
+    .sort(
+      (a, b) =>
+        (toDate(b?.createdAt)?.getTime() ?? 0) -
+        (toDate(a?.createdAt)?.getTime() ?? 0),
+    )
     .slice(0, 12)
     .map((item) => ({ ...item }));
 } catch (e) {
@@ -107,6 +119,8 @@ try {
         lead={lead}
         authorName={authorName}
         authorAvatar={author?.avatar}
+        interviewee={interviewee}
+        mainQuote={mainQuote || ""}
         createdAt={interview.createdAt}
         imageUrl={imageUrl}
         imageAlt={imageCaption || title}

@@ -43,6 +43,14 @@
     {
       "title": "арт",
       "value": "art"
+    },
+    {
+      "title": "путеводитель",
+      "value": "guide"
+    },
+    {
+      "title": "дети",
+      "value": "kids"
     }
   ]
 }

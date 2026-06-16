@@ -7,6 +7,8 @@ import ArticleDate from "@/components/article/ArticleDate.astro";
 interface Props {
   category: string;
   title: string;
+  interviewee: string;
+  mainQuote: string;
   lead?: string;
   authorName: string;
   authorAvatar?: string;
@@ -20,6 +22,8 @@ interface Props {
 const {
   category,
   title,
+  interviewee,
+  mainQuote,
   lead,
   authorName,
   authorAvatar,
@@ -73,7 +77,7 @@ const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
       }
 
       <div
-        class="order-1 flex flex-col justify-center px-2 py-8 text-center text-base-content sm:px-6 sm:py-10 lg:order-2 lg:h-full lg:px-16 lg:py-12 xl:px-24"
+        class="order-1 flex flex-col justify-center px-2 py-8 text-center text-base-content sm:px-6 sm:py-10 lg:order-2 lg:h-full lg:px-16 lg:py-12"
       >
         <p
           class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm"
@@ -82,12 +86,20 @@ const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
         </p>
         <h1
           class:list={[
-            "mt-8 font-old_standard font-normal leading-[1.05] text-base-content",
+            "mt-8 font-old_standard font-semibold leading-[1.05] text-base-content",
             isLongTitle ? "text-4xl lg:text-5xl" : "text-5xl lg:text-7xl",
           ]}
         >
-          {title}
+          {interviewee}:
         </h1>
+        <h2
+          class:list={[
+            "font-old_standard font-normal italic leading-[1.05] text-base-content",
+            isLongTitle ? "text-4xl lg:text-5xl" : "text-5xl lg:text-7xl",
+          ]}
+        >
+          "{mainQuote}"
+        </h2>
         {
           lead && (
             <p class="mx-auto mt-8 max-w-[34rem] font-article-body text-base font-light text-base-content lg:mt-10">
