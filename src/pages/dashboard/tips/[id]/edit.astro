@@ -21,7 +21,7 @@ const tipsCreatorState = JSON.stringify({
   isEditMode: true,
   articleId: id,
   initialArticle: article,
-  onSaveRedirect: "/dashboard",
+  onSaveRedirect: "/dashboard/tips",
 });
 ---
 
@@ -31,8 +31,9 @@ const tipsCreatorState = JSON.stringify({
       heading="Редактировать tips-статью"
       submitLabel="Сохранить изменения"
       tipsCreatorState={tipsCreatorState}
-      cancelHref="/dashboard"
+      cancelHref="/dashboard/tips"
       deleteArticleId={id}
+      deleteRedirect="/dashboard/tips"
     />
   ) : (
     <div class="p-8 text-center text-base-content/70">

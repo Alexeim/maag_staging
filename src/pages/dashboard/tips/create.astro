@@ -7,7 +7,7 @@ const tipsCreatorState = JSON.stringify({
   categoryTags,
   parisDistrictOptions: parisDistrictTags,
   isEditMode: false,
-  onSaveRedirect: "/dashboard",
+  onSaveRedirect: "/dashboard/tips",
 });
 ---
 
@@ -16,6 +16,6 @@ const tipsCreatorState = JSON.stringify({
     heading="Создать tips-статью"
     submitLabel="Сохранить статью"
     tipsCreatorState={tipsCreatorState}
-    cancelHref="/dashboard"
+    cancelHref="/dashboard/tips"
   />
 </DashboardLayout>
