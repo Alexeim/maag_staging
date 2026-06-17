@@ -173,6 +173,10 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     useNewAuthor: false,
     newAuthorFirstName: "",
     newAuthorLastName: "",
+    previewAuthorDisplay: {
+      name: "",
+      avatarUrl: "",
+    },
     ...createLandingPlacementManager({
       getEntityId() {
         return this.storyId;
@@ -283,6 +287,53 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       const first = typeof author?.firstName === "string" ? author.firstName.trim() : "";
       const last = typeof author?.lastName === "string" ? author.lastName.trim() : "";
       return `${first} ${last}`.trim();
+    },
+
+    getAuthorAvatarUrl(author: any) {
+      if (typeof author?.avatarUrl === "string" && author.avatarUrl.trim()) {
+        return author.avatarUrl.trim();
+      }
+      if (typeof author?.avatar === "string" && author.avatar.trim()) {
+        return author.avatar.trim();
+      }
+      return "";
+    },
+
+    getSelectedAuthorDisplay() {
+      if (this.useNewAuthor) {
+        return {
+          name: `${this.newAuthorFirstName.trim()} ${this.newAuthorLastName.trim()}`.trim(),
+          avatarUrl: "",
+        };
+      }
+
+      const selectedAuthor = this.authors.find(
+        (author: any) => author.id === this.selectedAuthorId,
+      );
+      if (selectedAuthor) {
+        return {
+          name: this.getAuthorLabel(selectedAuthor),
+          avatarUrl: this.getAuthorAvatarUrl(selectedAuthor),
+        };
+      }
+
+      const fallbackAuthor = this.story?.author;
+      if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
+        return {
+          name: this.getAuthorLabel(fallbackAuthor),
+          avatarUrl: this.getAuthorAvatarUrl(fallbackAuthor),
+        };
+      }
+
+      return {
+        name: "",
+        avatarUrl: "",
+      };
+    },
+
+    getPreviewAuthorName() {
+      const currentDisplay = this.getSelectedAuthorDisplay();
+      return currentDisplay.name || this.previewAuthorDisplay.name || "Автор";
     },
 
     async loadAuthors() {
@@ -521,6 +572,19 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           typeof previewState.newAuthorLastName === "string"
             ? previewState.newAuthorLastName
             : "";
+        this.previewAuthorDisplay =
+          previewState.authorDisplay && typeof previewState.authorDisplay === "object"
+            ? {
+                name:
+                  typeof previewState.authorDisplay.name === "string"
+                    ? previewState.authorDisplay.name
+                    : "",
+                avatarUrl:
+                  typeof previewState.authorDisplay.avatarUrl === "string"
+                    ? previewState.authorDisplay.avatarUrl
+                    : "",
+              }
+            : { name: "", avatarUrl: "" };
       }
 
       if (storyDraft) {
@@ -587,6 +651,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     },
 
     previewStory() {
+      const authorDisplay = this.getSelectedAuthorDisplay();
       const previewState = {
         story: this.story,
         storyId: this.storyId,
@@ -595,6 +660,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         useNewAuthor: this.useNewAuthor,
         newAuthorFirstName: this.newAuthorFirstName,
         newAuthorLastName: this.newAuthorLastName,
+        authorDisplay,
       };
       localStorage.setItem("visualStoryPreview", JSON.stringify(previewState));
       window.location.href = "/dashboard/visual-story/preview";

@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
 import Button from "@/components/common/Button.astro";
 ---
 
@@ -58,6 +59,13 @@ import Button from "@/components/common/Button.astro";
               class="mt-5 max-w-2xl text-xl font-light leading-relaxed text-base-content/80 font-['Inter']"
               x-text="story.lead"
             ></p>
+            <div class="mt-8 flex items-center gap-[17px] text-base-content">
+              <AuthorIcon class="w-4 h-4" />
+              <div
+                class="text-base lg:text-xl font-thin font-old_standard italic"
+                x-text="getPreviewAuthorName()"
+              ></div>
+            </div>
           </section>
         </div>
 
