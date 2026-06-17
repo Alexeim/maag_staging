@@ -196,6 +196,10 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     useNewAuthor: false,
     newAuthorFirstName: "",
     newAuthorLastName: "",
+    previewAuthorDisplay: {
+      name: "",
+      avatarUrl: "",
+    },
     ...createLandingPlacementManager({
       getEntityId() {
         return this.articleId;
@@ -224,36 +228,34 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
     // ── Init ──────────────────────────────────────────────────────────────────
     init() {
-      if (isPreview) {
-        try {
-          const stored = globalThis.localStorage?.getItem("tipsPreview");
-          const previewState = stored ? JSON.parse(stored) : null;
-          const normalized = normalizeLoadedArticle(previewState?.article);
-          if (normalized) {
-            this.article = normalized;
-            this.articleId =
-              typeof previewState?.articleId === "string"
-                ? previewState.articleId
-                : null;
-            this.isEditMode = Boolean(previewState?.isEditMode);
-            this.selectedAuthorId =
-              typeof previewState?.selectedAuthorId === "string"
-                ? previewState.selectedAuthorId
-                : "";
-            this.useNewAuthor = Boolean(previewState?.useNewAuthor);
-            this.newAuthorFirstName =
-              typeof previewState?.newAuthorFirstName === "string"
-                ? previewState.newAuthorFirstName
-                : "";
-            this.newAuthorLastName =
-              typeof previewState?.newAuthorLastName === "string"
-                ? previewState.newAuthorLastName
-                : "";
-          }
-        } catch (error) {
-          console.error("Failed to load tips preview draft:", error);
+      type PreviewState = {
+        article?: unknown;
+        articleId?: string | null;
+        isEditMode?: boolean;
+        selectedAuthorId?: string;
+        useNewAuthor?: boolean;
+        newAuthorFirstName?: string;
+        newAuthorLastName?: string;
+        authorDisplay?: {
+          name?: string;
+          avatarUrl?: string;
+        };
+      };
+
+      let previewState: PreviewState | null = null;
+      let restoredPreviewAuthorState = false;
+
+      try {
+        const stored = globalThis.localStorage?.getItem("tipsPreview");
+        const parsed = stored ? JSON.parse(stored) : null;
+        if (parsed && typeof parsed === "object") {
+          previewState = parsed as PreviewState;
         }
-      } else if (initialArticle) {
+      } catch (error) {
+        console.error("Failed to load tips preview draft:", error);
+      }
+
+      if (initialArticle) {
         const normalized = normalizeLoadedArticle(initialArticle);
         if (normalized) this.article = normalized;
       }
@@ -263,6 +265,63 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       }
       if (typeof isEditMode === "boolean") this.isEditMode = isEditMode;
       if (onSaveRedirect) this.onSaveRedirect = onSaveRedirect;
+
+      const shouldApplyPreview = (() => {
+        if (!previewState?.article) return false;
+        if (isPreview) return true;
+        const previewId =
+          typeof previewState.articleId === "string" && previewState.articleId
+            ? previewState.articleId
+            : null;
+        const isPreviewEdit = Boolean(previewState.isEditMode);
+        const isSameEdit =
+          this.isEditMode && previewId !== null && previewId === this.articleId;
+        const isCreateDraft = !this.isEditMode && !previewId && !isPreviewEdit;
+        return isSameEdit || isCreateDraft;
+      })();
+
+      if (shouldApplyPreview && previewState?.article) {
+        const normalized = normalizeLoadedArticle(previewState.article);
+        if (normalized) {
+          if (isPreview) {
+            this.article = normalized;
+            this.articleId =
+              typeof previewState.articleId === "string"
+                ? previewState.articleId
+                : null;
+            this.isEditMode = Boolean(previewState.isEditMode);
+          } else {
+            Object.assign(this.article, normalized);
+          }
+        }
+        this.selectedAuthorId =
+          typeof previewState.selectedAuthorId === "string"
+            ? previewState.selectedAuthorId
+            : "";
+        this.useNewAuthor = Boolean(previewState.useNewAuthor);
+        this.newAuthorFirstName =
+          typeof previewState.newAuthorFirstName === "string"
+            ? previewState.newAuthorFirstName
+            : "";
+        this.newAuthorLastName =
+          typeof previewState.newAuthorLastName === "string"
+            ? previewState.newAuthorLastName
+            : "";
+        this.previewAuthorDisplay =
+          previewState.authorDisplay && typeof previewState.authorDisplay === "object"
+            ? {
+                name:
+                  typeof previewState.authorDisplay.name === "string"
+                    ? previewState.authorDisplay.name
+                    : "",
+                avatarUrl:
+                  typeof previewState.authorDisplay.avatarUrl === "string"
+                    ? previewState.authorDisplay.avatarUrl
+                    : "",
+              }
+            : { name: "", avatarUrl: "" };
+        restoredPreviewAuthorState = true;
+      }
 
       this.article.tags = normalizeCategoryTags(
         this.article.tags,
@@ -290,8 +349,10 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         ? this.article.contentBlocks
         : [];
 
-      this.selectedAuthorId =
-        typeof this.article.authorId === "string" ? this.article.authorId : "";
+      if (!restoredPreviewAuthorState) {
+        this.selectedAuthorId =
+          typeof this.article.authorId === "string" ? this.article.authorId : "";
+      }
 
       this.fetchContentLists();
       this.loadAuthors();
@@ -316,6 +377,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         return;
       }
 
+      const authorDisplay = this.getSelectedAuthorDisplay();
       const previewState = {
         article: this.article,
         articleId: this.articleId,
@@ -324,6 +386,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         useNewAuthor: this.useNewAuthor,
         newAuthorFirstName: this.newAuthorFirstName,
         newAuthorLastName: this.newAuthorLastName,
+        authorDisplay,
       };
       globalThis.localStorage.setItem(
         "tipsPreview",
@@ -441,6 +504,50 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       const last =
         typeof author?.lastName === "string" ? author.lastName.trim() : "";
       return `${first} ${last}`.trim();
+    },
+    getAuthorAvatarUrl(author: any) {
+      if (typeof author?.avatarUrl === "string" && author.avatarUrl.trim()) {
+        return author.avatarUrl.trim();
+      }
+      if (typeof author?.avatar === "string" && author.avatar.trim()) {
+        return author.avatar.trim();
+      }
+      return "";
+    },
+    getSelectedAuthorDisplay() {
+      if (this.useNewAuthor) {
+        return {
+          name: `${this.newAuthorFirstName.trim()} ${this.newAuthorLastName.trim()}`.trim(),
+          avatarUrl: "",
+        };
+      }
+
+      const selectedAuthor = this.authors.find(
+        (author: any) => author.id === this.selectedAuthorId,
+      );
+      if (selectedAuthor) {
+        return {
+          name: this.getAuthorLabel(selectedAuthor),
+          avatarUrl: this.getAuthorAvatarUrl(selectedAuthor),
+        };
+      }
+
+      const fallbackAuthor = this.article?.author;
+      if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
+        return {
+          name: this.getAuthorLabel(fallbackAuthor),
+          avatarUrl: this.getAuthorAvatarUrl(fallbackAuthor),
+        };
+      }
+
+      return {
+        name: "",
+        avatarUrl: "",
+      };
+    },
+    getPreviewAuthorName() {
+      const currentDisplay = this.getSelectedAuthorDisplay();
+      return currentDisplay.name || this.previewAuthorDisplay.name || "Автор";
     },
     ensureSelectedAuthorPresent() {
       if (!this.selectedAuthorId) return;
