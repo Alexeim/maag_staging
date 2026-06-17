@@ -6,7 +6,7 @@ import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.as
 import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
 import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
 import PublicationStatusBanner from "@/components/dashboard/PublicationStatusBanner.astro";
-import PublicationToggle from "@/components/dashboard/PublicationToggle.astro";
+import DashboardMaterialActionFooter from "@/components/dashboard/DashboardMaterialActionFooter.astro";
 
 interface Props {
   heading: string;
@@ -1197,24 +1197,15 @@ const {
   <ContentCollectionsEditor />
   <RelatedContentEditor />
 
-  <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <div class="flex gap-2">
-      {deleteInterviewId && (
-        <Button
-          variant="error"
-          @click={`deleteInterview('${deleteRedirect}')`}
-        >
-          Удалить
-        </Button>
-      )}
-    </div>
-    <div class="flex justify-end gap-3">
-      <PublicationToggle model="interview" />
-      {cancelHref && (
-        <a href={cancelHref} class="cursor-pointer text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-yellow-300 flex flex-row items-center justify-center px-4 py-2 rounded-lg">Отмена</a>
-      )}
-      <Button variant="secondary" @click="previewInterview()">Предпросмотр</Button>
-      <Button variant="primary" @click="saveInterview()" :disabled="isSaving" :class="{'opacity-50 cursor-not-allowed': isSaving}">{submitLabel}</Button>
-    </div>
-  </div>
+  <DashboardMaterialActionFooter
+    cancelHref={cancelHref}
+    deleteAction={`deleteInterview('${deleteRedirect}')`}
+    deleteLabel="Удалить"
+    previewAction="previewInterview()"
+    publishedModel="interview"
+    saveAction="saveInterview()"
+    saveDisabled="isSaving"
+    saveLabel={submitLabel}
+    showDelete={Boolean(deleteInterviewId)}
+  />
 </div>

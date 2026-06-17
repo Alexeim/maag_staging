@@ -1,8 +1,7 @@
 ---
-import Button from "@/components/common/Button.astro";
 import { CloudUpload } from "lucide-astro";
 import PublicationStatusBanner from "@/components/dashboard/PublicationStatusBanner.astro";
-import PublicationToggle from "@/components/dashboard/PublicationToggle.astro";
+import DashboardMaterialActionFooter from "@/components/dashboard/DashboardMaterialActionFooter.astro";
 
 interface Props {
   heading?: string;
@@ -99,31 +98,17 @@ const {
     </div>
   </section>
 
-  <div class="mt-8 flex justify-between gap-3">
-    <div>
-      <template x-if="isEditMode">
-        <Button variant="error" @click="deletePhoto()" :disabled="isSaving">Удалить</Button>
-      </template>
-    </div>
-    <div class="flex justify-end gap-3">
-      <PublicationToggle model="photo" />
-      {cancelHref && (
-        <a
-          href={cancelHref}
-          class="cursor-pointer text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-yellow-300 flex flex-row items-center justify-center px-4 py-2 rounded-lg"
-        >
-          Отмена
-        </a>
-      )}
-      <Button variant="secondary" @click="previewPhoto()">Предпросмотр</Button>
-      <Button
-        variant="primary"
-        @click="savePhoto()"
-        :disabled="isSaving || uploading"
-        :class="{ 'opacity-50 cursor-not-allowed': isSaving || uploading }"
-      >
-        {submitLabel}
-      </Button>
-    </div>
-  </div>
+  <DashboardMaterialActionFooter
+    cancelHref={cancelHref}
+    deleteAction="deletePhoto()"
+    deleteDisabled="isSaving"
+    deleteLabel="Удалить"
+    deleteVisible="isEditMode"
+    previewAction="previewPhoto()"
+    publishedModel="photo"
+    saveAction="savePhoto()"
+    saveDisabled="isSaving || uploading"
+    saveLabel={submitLabel}
+    showDelete={true}
+  />
 </div>

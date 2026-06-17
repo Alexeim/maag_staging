@@ -11,7 +11,7 @@ import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.as
 import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
 import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
 import PublicationStatusBanner from "@/components/dashboard/PublicationStatusBanner.astro";
-import PublicationToggle from "@/components/dashboard/PublicationToggle.astro";
+import DashboardMaterialActionFooter from "@/components/dashboard/DashboardMaterialActionFooter.astro";
 
 interface Props {
   heading: string;
@@ -514,28 +514,16 @@ const allParisDistricts = parisDistrictTags;
   <ContentCollectionsEditor />
   <RelatedContentEditor />
 
-  <!-- ── Кнопки действий ───────────────────────────────────────────────────── -->
-  <div class="flex justify-between items-center gap-4 mt-4 pb-16">
-    <div class="flex gap-3">
-      {cancelHref && (
-        <a href={cancelHref}>
-          <Button variant="secondary" size="md">Отмена</Button>
-        </a>
-      )}
-      {deleteArticleId && (
-        <Button
-          variant="error"
-          size="md"
-          @click={`deleteArticle('${deleteRedirect}')`}
-        >
-          Удалить
-        </Button>
-      )}
-    </div>
-    <div class="flex justify-end gap-3">
-      <PublicationToggle model="article" />
-      <Button variant="secondary" size="md" @click="previewArticle()" :disabled="uploading || isSaving" :class="{'opacity-50 cursor-not-allowed': uploading || isSaving}">Предпросмотр</Button>
-      <Button variant="primary" size="md" @click="saveArticle()" :disabled="isSaving || uploading" :class="{'opacity-50 cursor-not-allowed': isSaving || uploading}">{submitLabel}</Button>
-    </div>
-  </div>
+  <DashboardMaterialActionFooter
+    cancelHref={cancelHref}
+    deleteAction={`deleteArticle('${deleteRedirect}')`}
+    deleteLabel="Удалить"
+    previewAction="previewArticle()"
+    previewDisabled="uploading || isSaving"
+    publishedModel="article"
+    saveAction="saveArticle()"
+    saveDisabled="isSaving || uploading"
+    saveLabel={submitLabel}
+    showDelete={Boolean(deleteArticleId)}
+  />
 </div>
