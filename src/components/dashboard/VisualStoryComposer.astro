@@ -412,9 +412,10 @@ const {
     deleteAction={`deleteStory('${deleteRedirect}')`}
     deleteLabel="Удалить визуальную историю"
     previewAction="previewStory()"
+    previewDisabled="uploading || isSaving"
     publishedModel="story"
     saveAction="saveStory()"
-    saveDisabled="isSaving"
+    saveDisabled="isSaving || uploading"
     saveLabel={submitLabel}
     showDelete={Boolean(deleteStoryId)}
   />

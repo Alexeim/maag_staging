@@ -20,6 +20,20 @@ import { compressImage } from "@/lib/images/compressImage";
 
 const storage = getStorage(app);
 
+const createCarouselItem = (item: Record<string, unknown> = {}) => ({
+  imageUrl: typeof item.imageUrl === "string" ? item.imageUrl : "",
+  caption: typeof item.caption === "string" ? item.caption : "",
+  _dashboardUid:
+    typeof item._dashboardUid === "string"
+      ? item._dashboardUid
+      : globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`,
+});
+
+const stripCarouselItemUiState = (item: Record<string, unknown> = {}) => ({
+  imageUrl: typeof item.imageUrl === "string" ? item.imageUrl : "",
+  caption: typeof item.caption === "string" ? item.caption : "",
+});
+
 export default function flipperCreatorLogic(initialState = {}) {
   const {
     initialFlipper = null,
@@ -135,6 +149,11 @@ export default function flipperCreatorLogic(initialState = {}) {
     copy.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
     copy.binaryForGuide = Boolean(copy.binaryForGuide);
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
+    copy.carouselContent = Array.isArray(copy.carouselContent)
+      ? copy.carouselContent.map((item: Record<string, unknown>) =>
+          createCarouselItem(item),
+        )
+      : [createCarouselItem()];
     return copy;
   };
 
@@ -152,7 +171,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       parisSubCategories: [],
       parisDistrict: "",
       binaryForGuide: false,
-      carouselContent: [{ imageUrl: "", caption: "" }],
+      carouselContent: [createCarouselItem()],
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
     },
@@ -227,7 +246,7 @@ export default function flipperCreatorLogic(initialState = {}) {
         const flipperCopy = normalizeLoadedFlipper(initialFlipper);
         this.flipper = { ...this.flipper, ...flipperCopy };
         if (!this.flipper.carouselContent || this.flipper.carouselContent.length === 0) {
-          this.flipper.carouselContent = [{ imageUrl: "", caption: "" }];
+          this.flipper.carouselContent = [createCarouselItem()];
         }
       }
 
@@ -579,14 +598,29 @@ export default function flipperCreatorLogic(initialState = {}) {
     },
 
     addCarouselItem() {
-      this.flipper.carouselContent.push({ imageUrl: "", caption: "" });
+      if (this.uploading) return;
+      this.flipper.carouselContent.push(createCarouselItem());
     },
     removeCarouselItem(index: number) {
+      if (this.uploading) return;
       this.flipper.carouselContent.splice(index, 1);
     },
-    async handleImageUpload(event, index) {
+    async handleImageUpload(event, itemUid?: string) {
       const raw = event.target.files[0];
       if (!raw) return;
+      if (this.uploading) {
+        window.Alpine.store("ui").showToast(
+          "Подожди — текущая загрузка ещё не завершилась.",
+          "error",
+        );
+        return;
+      }
+
+      const index = this.flipper.carouselContent.findIndex(
+        (item) => item._dashboardUid === itemUid,
+      );
+      if (index === -1) return;
+
       this.uploading = true;
       this.uploadingIndex = index;
       this.uploadProgress = 0;
@@ -602,7 +636,12 @@ export default function flipperCreatorLogic(initialState = {}) {
         this.uploadingIndex = -1;
       }, () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          this.flipper.carouselContent[index].imageUrl = downloadURL;
+          const target = this.flipper.carouselContent.find(
+            (item) => item._dashboardUid === itemUid,
+          );
+          if (target) {
+            target.imageUrl = downloadURL;
+          }
           window.Alpine.store("ui").showToast("Изображение успешно загружено!");
           this.uploading = false;
           this.uploadingIndex = -1;
@@ -662,6 +701,7 @@ export default function flipperCreatorLogic(initialState = {}) {
         const payload = {
           ...this.flipper,
           authorId: resolvedAuthorId,
+          carouselContent: this.flipper.carouselContent.map(stripCarouselItemUiState),
           lead: this.flipper.lead,
           cardLead: this.flipper.cardLead,
           tags: tagsForDb,

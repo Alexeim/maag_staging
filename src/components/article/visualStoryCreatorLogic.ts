@@ -651,6 +651,14 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     },
 
     previewStory() {
+      if (this.uploading) {
+        window.Alpine?.store("ui")?.showToast?.(
+          "Подожди — загрузка ещё не завершилась.",
+          "error",
+        );
+        return;
+      }
+
       const authorDisplay = this.getSelectedAuthorDisplay();
       const previewState = {
         story: this.story,

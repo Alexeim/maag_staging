@@ -205,16 +205,27 @@ const {
   <section class="p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
     <h2 class="text-xl font-semibold mb-4">Слайды листалки</h2>
     <div class="space-y-4">
-      <template x-for="(item, index) in flipper.carouselContent" :key="index">
+      <template x-for="(item, index) in flipper.carouselContent" :key="item._dashboardUid">
         <div class="p-4 border border-base-300 rounded-lg bg-base-100 relative group">
           <h3 class="font-semibold mb-2" x-text="'Слайд ' + (index + 1)"></h3>
           
           <div class="flex items-center" x-data="{ fileName: '' }">
-            <label :for="'file-upload-' + index" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
+            <label
+              :for="'file-upload-' + item._dashboardUid"
+              class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+              :class="{'opacity-50 cursor-not-allowed': uploading}"
+            >
               <CloudUpload />
               Загрузить
             </label>
-            <input :id="'file-upload-' + index" type="file" class="hidden" @change="handleImageUpload($event, index); fileName = $event.target.files[0]?.name || ''" accept="image/png, image/jpeg, image/webp" />
+            <input
+              :id="'file-upload-' + item._dashboardUid"
+              type="file"
+              class="hidden"
+              @change="handleImageUpload($event, item._dashboardUid); fileName = $event.target.files[0]?.name || ''"
+              accept="image/png, image/jpeg, image/webp"
+              :disabled="uploading"
+            />
             <span x-text="fileName ? fileName : (item.imageUrl ? 'Изображение загружено' : 'Файл не выбран')" class="ml-4 text-sm text-base-content/70"></span>
           </div>
 
@@ -233,13 +244,28 @@ const {
           <textarea x-model="item.caption" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" rows="2" placeholder="Введите подпись..."></textarea>
 
           <div class="absolute top-3 right-3">
-            <Button variant="error" size="sm" @click="removeCarouselItem(index)">Удалить</Button>
+            <Button
+              variant="error"
+              size="sm"
+              @click="removeCarouselItem(index)"
+              :disabled="uploading"
+              :class="{'opacity-50 cursor-not-allowed': uploading}"
+            >
+              Удалить
+            </Button>
           </div>
         </div>
       </template>
     </div>
     <div class="mt-6 text-center">
-      <Button variant="primary" @click="addCarouselItem()">+ Добавить слайд</Button>
+      <Button
+        variant="primary"
+        @click="addCarouselItem()"
+        :disabled="uploading"
+        :class="{'opacity-50 cursor-not-allowed': uploading}"
+      >
+        + Добавить слайд
+      </Button>
     </div>
   </section>
 
@@ -252,9 +278,10 @@ const {
     deleteDisabled="isSaving"
     deleteLabel="Удалить листалку"
     previewAction="previewFlipper()"
+    previewDisabled="uploading || isSaving"
     publishedModel="flipper"
     saveAction="saveFlipper()"
-    saveDisabled="isSaving"
+    saveDisabled="isSaving || uploading"
     saveLabel={submitLabel}
     showDelete={Boolean(deleteFlipperId)}
   />

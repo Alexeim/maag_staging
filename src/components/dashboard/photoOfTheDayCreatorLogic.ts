@@ -137,6 +137,11 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
     },
 
     previewPhoto() {
+      if (this.uploading) {
+        this.notify("Подожди — загрузка изображения ещё не завершилась.", "error");
+        return;
+      }
+
       const authorDisplay = this.getSelectedAuthorDisplay();
       const previewState = {
         photo: this.photo,
@@ -198,6 +203,11 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
     },
 
     async savePhoto() {
+      if (this.uploading) {
+        this.notify("Подожди — загрузка изображения ещё не завершилась.", "error");
+        return;
+      }
+
       if (!this.photo.title.trim()) {
         this.notify("Введи заголовок", "error");
         return;
