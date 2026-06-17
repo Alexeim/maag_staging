@@ -306,6 +306,10 @@ export default function guideCreatorLogic(initialState = {}) {
     useNewAuthor: false,
     newAuthorFirstName: "",
     newAuthorLastName: "",
+    previewAuthorDisplay: {
+      name: "",
+      avatarUrl: "",
+    },
     ...createLandingPlacementManager({
       getEntityId() {
         return this.articleId;
@@ -577,6 +581,50 @@ export default function guideCreatorLogic(initialState = {}) {
         typeof author?.lastName === "string" ? author.lastName.trim() : "";
       return `${firstName} ${lastName}`.trim();
     },
+    getAuthorAvatarUrl(author: any) {
+      if (typeof author?.avatarUrl === "string" && author.avatarUrl.trim()) {
+        return author.avatarUrl.trim();
+      }
+      if (typeof author?.avatar === "string" && author.avatar.trim()) {
+        return author.avatar.trim();
+      }
+      return "";
+    },
+    getSelectedAuthorDisplay() {
+      if (this.useNewAuthor) {
+        return {
+          name: `${this.newAuthorFirstName.trim()} ${this.newAuthorLastName.trim()}`.trim(),
+          avatarUrl: "",
+        };
+      }
+
+      const selectedAuthor = this.authors.find(
+        (author: any) => author.id === this.selectedAuthorId,
+      );
+      if (selectedAuthor) {
+        return {
+          name: this.getAuthorLabel(selectedAuthor),
+          avatarUrl: this.getAuthorAvatarUrl(selectedAuthor),
+        };
+      }
+
+      const fallbackAuthor = this.article?.author;
+      if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
+        return {
+          name: this.getAuthorLabel(fallbackAuthor),
+          avatarUrl: this.getAuthorAvatarUrl(fallbackAuthor),
+        };
+      }
+
+      return {
+        name: "",
+        avatarUrl: "",
+      };
+    },
+    getPreviewAuthorName() {
+      const currentDisplay = this.getSelectedAuthorDisplay();
+      return currentDisplay.name || this.previewAuthorDisplay.name || "Автор";
+    },
     ensureSelectedAuthorPresent() {
       if (!this.selectedAuthorId) {
         return;
@@ -706,8 +754,17 @@ export default function guideCreatorLogic(initialState = {}) {
         article?: unknown;
         articleId?: string | null;
         isEditMode?: boolean;
+        selectedAuthorId?: string;
+        useNewAuthor?: boolean;
+        newAuthorFirstName?: string;
+        newAuthorLastName?: string;
+        authorDisplay?: {
+          name?: string;
+          avatarUrl?: string;
+        };
       };
       let previewState: PreviewState | null = null;
+      let restoredPreviewAuthorState = false;
 
       if (typeof window !== "undefined") {
         try {
@@ -787,6 +844,33 @@ export default function guideCreatorLogic(initialState = {}) {
             Object.assign(this.article, normalizedPreview);
           }
         }
+        this.selectedAuthorId =
+          typeof previewState.selectedAuthorId === "string"
+            ? previewState.selectedAuthorId
+            : "";
+        this.useNewAuthor = Boolean(previewState.useNewAuthor);
+        this.newAuthorFirstName =
+          typeof previewState.newAuthorFirstName === "string"
+            ? previewState.newAuthorFirstName
+            : "";
+        this.newAuthorLastName =
+          typeof previewState.newAuthorLastName === "string"
+            ? previewState.newAuthorLastName
+            : "";
+        this.previewAuthorDisplay =
+          previewState.authorDisplay && typeof previewState.authorDisplay === "object"
+            ? {
+                name:
+                  typeof previewState.authorDisplay.name === "string"
+                    ? previewState.authorDisplay.name
+                    : "",
+                avatarUrl:
+                  typeof previewState.authorDisplay.avatarUrl === "string"
+                    ? previewState.authorDisplay.avatarUrl
+                    : "",
+              }
+            : { name: "", avatarUrl: "" };
+        restoredPreviewAuthorState = true;
       } else if (previewState) {
         try {
           window.localStorage?.removeItem("guidePreview");
@@ -817,8 +901,10 @@ export default function guideCreatorLogic(initialState = {}) {
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? normalizeContentBlocks(this.article.contentBlocks)
         : [];
-      this.selectedAuthorId =
-        typeof this.article.authorId === "string" ? this.article.authorId : "";
+      if (!restoredPreviewAuthorState) {
+        this.selectedAuthorId =
+          typeof this.article.authorId === "string" ? this.article.authorId : "";
+      }
       this.ensureSelectedAuthorPresent();
 
       this.fetchContentLists();
@@ -1178,10 +1264,16 @@ export default function guideCreatorLogic(initialState = {}) {
     },
 
     previewArticle() {
+      const authorDisplay = this.getSelectedAuthorDisplay();
       const previewState = {
         article: this.article,
         articleId: this.articleId,
         isEditMode: this.isEditMode,
+        selectedAuthorId: this.selectedAuthorId,
+        useNewAuthor: this.useNewAuthor,
+        newAuthorFirstName: this.newAuthorFirstName,
+        newAuthorLastName: this.newAuthorLastName,
+        authorDisplay,
       };
       localStorage.setItem("guidePreview", JSON.stringify(previewState));
       window.location.href = "/dashboard/guide/preview";

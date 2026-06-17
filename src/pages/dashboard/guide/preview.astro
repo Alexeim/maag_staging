@@ -1,9 +1,8 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
-import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
 import Button from "@/components/common/Button.astro";
 import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticleBodyPreview.astro";
-import articleData from "@/content/articlePage/RU/Article.json";
 ---
 
 <DashboardLayout title="Предпросмотр путеводителя" active="guides">
@@ -44,10 +43,13 @@ import articleData from "@/content/articlePage/RU/Article.json";
                 class="text-base font-light text-base-content font-article-body mt-2">
               </p>
             </div>
-            <ArticleAuthor
-              name={articleData.author.name}
-              avatarUrl={articleData.author.avatarUrl}
-            />
+            <div class="flex items-center gap-[17px]">
+              <AuthorIcon class="w-4 h-4" />
+              <div
+                class="text-base lg:text-xl font-thin font-old_standard italic text-base-content"
+                x-text="getPreviewAuthorName()"
+              ></div>
+            </div>
           </div>
 
           <template x-if="article.imageUrl">
