@@ -52,6 +52,16 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
     authorsLoading: false,
     selectedAuthorId:
       (isPreview ? previewState?.selectedAuthorId : photoDraft?.authorId) || "",
+    previewAuthorDisplay: {
+      name:
+        typeof previewState?.authorDisplay?.name === "string"
+          ? previewState.authorDisplay.name
+          : "",
+      avatarUrl:
+        typeof previewState?.authorDisplay?.avatarUrl === "string"
+          ? previewState.authorDisplay.avatarUrl
+          : "",
+    },
 
     uploading: false,
     uploadProgress: 0,
@@ -75,6 +85,46 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
       return `${author.firstName || ""} ${author.lastName || ""}`.trim();
     },
 
+    getAuthorAvatarUrl(author: any) {
+      if (typeof author?.avatarUrl === "string" && author.avatarUrl.trim()) {
+        return author.avatarUrl.trim();
+      }
+      if (typeof author?.avatar === "string" && author.avatar.trim()) {
+        return author.avatar.trim();
+      }
+      return "";
+    },
+
+    getSelectedAuthorDisplay() {
+      const selectedAuthor = this.authors.find(
+        (author: any) => author.id === this.selectedAuthorId,
+      );
+      if (selectedAuthor) {
+        return {
+          name: this.getAuthorLabel(selectedAuthor),
+          avatarUrl: this.getAuthorAvatarUrl(selectedAuthor),
+        };
+      }
+
+      const fallbackAuthor = (isPreview ? previewState?.photo : photoDraft)?.author;
+      if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
+        return {
+          name: this.getAuthorLabel(fallbackAuthor),
+          avatarUrl: this.getAuthorAvatarUrl(fallbackAuthor),
+        };
+      }
+
+      return {
+        name: "",
+        avatarUrl: "",
+      };
+    },
+
+    getPreviewAuthorName() {
+      const currentDisplay = this.getSelectedAuthorDisplay();
+      return currentDisplay.name || this.previewAuthorDisplay.name || "Автор";
+    },
+
     async init() {
       await this.loadAuthors();
     },
@@ -87,11 +137,13 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
     },
 
     previewPhoto() {
+      const authorDisplay = this.getSelectedAuthorDisplay();
       const previewState = {
         photo: this.photo,
         photoId: this.photoId,
         isEditMode: this.isEditMode,
         selectedAuthorId: this.selectedAuthorId,
+        authorDisplay,
       };
       localStorage.setItem("photoOfTheDayPreview", JSON.stringify(previewState));
       window.location.href = "/dashboard/photo-of-the-day/preview";

@@ -1,6 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
-import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
 import Button from "@/components/common/Button.astro";
 ---
 
@@ -34,7 +34,13 @@ import Button from "@/components/common/Button.astro";
               x-text="photo.title || 'Без заголовка'"
             ></h2>
             <div class="h-10 flex flex-row items-center justify-start gap-4">
-              <ArticleAuthor name="Автор" />
+              <div class="flex items-center gap-[17px]">
+                <AuthorIcon class="w-4 h-4" />
+                <div
+                  class="text-base lg:text-xl font-thin font-old_standard italic text-base-content"
+                  x-text="getPreviewAuthorName()"
+                ></div>
+              </div>
             </div>
           </div>
         </div>
