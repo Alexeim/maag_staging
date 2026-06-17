@@ -1449,6 +1449,23 @@ export default function articleCreatorLogic(initialState = {}) {
       this.editingBlock = null;
     },
 
+    prepareBlocksForAction() {
+      if (this.uploading) {
+        window.Alpine.store("ui").showToast(
+          "Подожди — загрузка файла ещё не завершилась.",
+          "error",
+        );
+        return false;
+      }
+
+      if (this.editingIndex !== null) {
+        this.updateBlock();
+        if (this.editingIndex !== null) return false;
+      }
+
+      return true;
+    },
+
     startBlockDrag(index) {
       if (this.editingIndex !== null || this.uploading) {
         return;
@@ -1535,6 +1552,8 @@ export default function articleCreatorLogic(initialState = {}) {
 
     // --- Preview and Save methods ---
     previewArticle() {
+      if (!this.prepareBlocksForAction()) return;
+
       const authorDisplay = this.getSelectedAuthorDisplay();
       const previewState = {
         article: this.article,
@@ -1554,22 +1573,7 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     async saveArticle() {
-      // Auto-commit any open block — prevents losing unsaved flipper/image/text edits
-      if (this.editingIndex !== null) {
-        this.updateBlock();
-        // updateBlock() sets editingIndex to null on success, but returns early on
-        // invalid video — in that case we stop the save so the user can fix the block
-        if (this.editingIndex !== null) return;
-      }
-
-      // Block save while a file upload is still in progress
-      if (this.uploading) {
-        window.Alpine.store("ui").showToast(
-          "Подожди — загрузка файла ещё не завершилась.",
-          "error",
-        );
-        return;
-      }
+      if (!this.prepareBlocksForAction()) return;
 
       // Guard against double-submit
       if (this.isSaving) return;
