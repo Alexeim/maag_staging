@@ -414,7 +414,10 @@ const allParisDistricts = parisDistrictTags;
                     class="text-sm text-base-content/70"
                   ></span>
                 </div>
-                <div x-show="uploading" class="mt-3">
+                <div x-show="uploading && uploadingBlockIndex === index" class="mt-3">
+                  <p class="mb-1 text-xs text-base-content/60">
+                    Загружаем фото пункта <span x-text="index + 1"></span>: <span x-text="uploadProgress.toFixed(0) + '%'"></span>
+                  </p>
                   <div class="w-full bg-base-200 rounded-full h-2">
                     <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
                   </div>
@@ -489,8 +492,8 @@ const allParisDistricts = parisDistrictTags;
               </div>
 
               <div class="flex justify-end gap-3">
-                <Button variant="secondary" size="sm" @click="cancelEdit()">Отмена</Button>
-                <Button variant="primary" size="sm" @click="updateBlock()">Сохранить пункт</Button>
+                <Button variant="secondary" size="sm" @click="cancelEdit()" :disabled="uploading" :class="{'opacity-50 cursor-not-allowed': uploading}">Отмена</Button>
+                <Button variant="primary" size="sm" @click="updateBlock()" :disabled="uploading" :class="{'opacity-50 cursor-not-allowed': uploading}">Сохранить пункт</Button>
               </div>
             </div>
           </template>
@@ -500,7 +503,7 @@ const allParisDistricts = parisDistrictTags;
     </div>
 
     <div class="mt-6">
-      <Button variant="outline" size="md" @click="addTipsItem()">
+      <Button variant="outline" size="md" @click="addTipsItem()" :disabled="uploading" :class="{'opacity-50 cursor-not-allowed': uploading}">
         + Добавить пункт
       </Button>
     </div>
@@ -531,8 +534,8 @@ const allParisDistricts = parisDistrictTags;
     </div>
     <div class="flex justify-end gap-3">
       <PublicationToggle model="article" />
-      <Button variant="secondary" size="md" @click="previewArticle()">Предпросмотр</Button>
-      <Button variant="primary" size="md" @click="saveArticle()" :disabled="isSaving" :class="{'opacity-50 cursor-not-allowed': isSaving}">{submitLabel}</Button>
+      <Button variant="secondary" size="md" @click="previewArticle()" :disabled="uploading || isSaving" :class="{'opacity-50 cursor-not-allowed': uploading || isSaving}">Предпросмотр</Button>
+      <Button variant="primary" size="md" @click="saveArticle()" :disabled="isSaving || uploading" :class="{'opacity-50 cursor-not-allowed': isSaving || uploading}">{submitLabel}</Button>
     </div>
   </div>
 </div>

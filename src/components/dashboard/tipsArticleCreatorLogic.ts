@@ -369,13 +369,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     },
 
     previewArticle() {
-      if (this.uploading) {
-        ui()?.showToast?.(
-          "Подожди — загрузка файла ещё не завершилась.",
-          "error",
-        );
-        return;
-      }
+      if (!this.commitOpenItemBeforeAction()) return;
 
       const authorDisplay = this.getSelectedAuthorDisplay();
       const previewState = {
@@ -657,6 +651,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
     // ── Tips-item blocks ──────────────────────────────────────────────────────
     addTipsItem() {
+      if (!this.commitOpenItemBeforeAction()) return;
       this.article.contentBlocks.push(createTipsItem());
       const newIndex = this.article.contentBlocks.length - 1;
       this.editBlock(newIndex);
@@ -672,9 +667,33 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
     updateBlock() {
       if (this.editingIndex !== null) {
+        if (this.uploading) {
+          ui()?.showToast?.(
+            "Подожди — загрузка файла ещё не завершилась.",
+            "error",
+          );
+          return;
+        }
         this.article.contentBlocks[this.editingIndex] = this.editingBlock;
         this.cancelEdit();
       }
+    },
+
+    commitOpenItemBeforeAction() {
+      if (this.uploading) {
+        ui()?.showToast?.(
+          "Подожди — загрузка файла ещё не завершилась.",
+          "error",
+        );
+        return false;
+      }
+
+      if (this.editingIndex !== null) {
+        this.updateBlock();
+        if (this.editingIndex !== null) return false;
+      }
+
+      return true;
     },
 
     cancelEdit() {
@@ -707,25 +726,38 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     handleCoverUpload(event: Event) {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      this._uploadFile(file, "tips-articles", (url) => {
-        this.article.imageUrl = url;
-      });
+      this._uploadFile(
+        file,
+        "tips-articles",
+        (url) => {
+          this.article.imageUrl = url;
+        },
+        null,
+      );
     },
 
     handleItemImageUpload(event: Event) {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (!file || !this.editingBlock) return;
-      this._uploadFile(file, "tips-articles", (url) => {
-        this.editingBlock.imageUrl = url;
-      });
+      const blockIndex = this.editingIndex;
+      this._uploadFile(
+        file,
+        "tips-articles",
+        (url) => {
+          this.editingBlock.imageUrl = url;
+        },
+        blockIndex,
+      );
     },
 
     async _uploadFile(
       raw: File,
       folder: string,
       onSuccess: (url: string) => void,
+      blockIndex: number | null = null,
     ) {
       this.uploading = true;
+      this.uploadingBlockIndex = blockIndex;
       this.uploadProgress = 0;
       const file = await compressImage(raw);
       const storageRef = ref(storage, `${folder}/${Date.now()}-${file.name}`);
@@ -740,11 +772,13 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           console.error("Upload failed:", error);
           ui()?.showToast?.(`Ошибка загрузки: ${error.message}`, "error");
           this.uploading = false;
+          this.uploadingBlockIndex = null;
         },
         () => {
           getDownloadURL(task.snapshot.ref).then((url) => {
             onSuccess(url);
             this.uploading = false;
+            this.uploadingBlockIndex = null;
             ui()?.showToast?.("Картинка загружена!");
           });
         },
@@ -783,20 +817,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
     // ── Save ──────────────────────────────────────────────────────────────────
     async saveArticle() {
-      // Auto-commit any open block — prevents losing unsaved flipper/image/text edits
-      if (this.editingIndex !== null) {
-        this.updateBlock();
-        if (this.editingIndex !== null) return;
-      }
-
-      // Block save while a file upload is still in progress
-      if (this.uploading) {
-        ui()?.showToast?.(
-          "Подожди — загрузка файла ещё не завершилась.",
-          "error",
-        );
-        return;
-      }
+      if (!this.commitOpenItemBeforeAction()) return;
 
       // Guard against double-submit
       if (this.isSaving) return;
