@@ -54,7 +54,7 @@ const disabledClass = (expression?: string) =>
   </div>
   <div class="flex justify-end gap-3">
     <PublicationToggle model={publishedModel} />
-    {cancelHref && <Button href={cancelHref} variant="secondary">Отмена</Button>}
+    {cancelHref && <Button href={cancelHref} variant="accent">Отмена</Button>}
     <Button
       variant="secondary"
       @click={previewAction}

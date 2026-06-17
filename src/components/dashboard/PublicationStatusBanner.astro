@@ -1,4 +1,6 @@
 ---
+import PublicationToggle from "@/components/dashboard/PublicationToggle.astro";
+
 interface Props {
   model: string;
 }
@@ -46,6 +48,9 @@ const { model } = Astro.props as Props;
           </span>
         </p>
       </div>
+    </div>
+    <div>
+      <PublicationToggle model={model} />
     </div>
   </div>
 </div>
