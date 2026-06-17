@@ -746,11 +746,13 @@ export default function visualStoryCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.storyId) {
           await visualStoriesApi.update(this.storyId, payload);
+          localStorage.removeItem("visualStoryPreview");
           window.Alpine?.store("ui")?.showToast?.("Визуальная история обновлена!");
           const redirectTo = this.onSaveRedirect || `/dashboard/visual-story/${this.storyId}/edit`;
           setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
         } else {
           const result = await visualStoriesApi.create(payload);
+          localStorage.removeItem("visualStoryPreview");
           window.Alpine?.store("ui")?.showToast?.("Визуальная история создана!");
           setTimeout(() => { globalThis.location.href = `/visual-story/${result.id}`; }, 1500);
         }

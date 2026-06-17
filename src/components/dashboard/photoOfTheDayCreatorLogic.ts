@@ -223,9 +223,11 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
 
         if (this.isEditMode && this.photoId) {
           await photosOfTheDayApi.update(this.photoId, payload);
+          localStorage.removeItem("photoOfTheDayPreview");
           this.notify("Фото дня обновлено");
         } else {
           await photosOfTheDayApi.create(payload);
+          localStorage.removeItem("photoOfTheDayPreview");
           this.notify("Фото дня создано");
         }
 

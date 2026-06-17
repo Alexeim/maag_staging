@@ -667,6 +667,7 @@ export default function eventCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.eventId) {
           await eventsApi.update(this.eventId, payload);
+          window.localStorage.removeItem("eventPreview");
           (globalThis as any).Alpine.store("ui").showToast(
             "Событие обновлено, красота!",
           );
@@ -676,6 +677,7 @@ export default function eventCreatorLogic(initialState = {}) {
           }, 1500);
         } else {
           const result = await eventsApi.create(payload);
+          window.localStorage.removeItem("eventPreview");
           (globalThis as any).Alpine.store("ui").showToast(
             "Событие создано, поехали!",
           );

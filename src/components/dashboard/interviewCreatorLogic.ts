@@ -1042,11 +1042,13 @@ export default function interviewCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.interviewId) {
           await interviewsApi.update(this.interviewId, payload);
+          window.localStorage.removeItem("interviewPreview");
           window.Alpine.store("ui").showToast("Интервью успешно обновлено!");
           const redirectTo = this.onSaveRedirect || `/dashboard/interviews`;
           setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
         } else {
           await interviewsApi.create(payload);
+          window.localStorage.removeItem("interviewPreview");
           window.Alpine.store("ui").showToast("Интервью успешно создано!");
           setTimeout(() => { globalThis.location.href = `/dashboard/interviews`; }, 1500);
         }

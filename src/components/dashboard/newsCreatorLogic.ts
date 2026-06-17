@@ -863,6 +863,7 @@ export default function newsCreatorLogic(
 
         if (this.isEditMode && this.articleId) {
           await newsApi.update(this.articleId, payload);
+          window.localStorage.removeItem("newsPreview");
           (window as any).Alpine.store("ui").showToast("Новость обновлена!");
           const redirectTo = this.onSaveRedirect || `/dashboard/news`;
           setTimeout(() => {
@@ -870,6 +871,7 @@ export default function newsCreatorLogic(
           }, 1500);
         } else {
           const result = await newsApi.create(payload);
+          window.localStorage.removeItem("newsPreview");
           (window as any).Alpine.store("ui").showToast("Новость создана!");
           setTimeout(() => {
             globalThis.location.href = `/dashboard/news`;

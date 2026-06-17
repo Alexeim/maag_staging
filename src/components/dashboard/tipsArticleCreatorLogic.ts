@@ -890,12 +890,14 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.articleId) {
           await articlesApi.update(this.articleId, payload);
+          globalThis.localStorage.removeItem("tipsPreview");
           ui()?.showToast?.("Статья обновлена!");
           setTimeout(() => {
             globalThis.location.href = this.onSaveRedirect || "/dashboard/tips";
           }, 1500);
         } else {
           await articlesApi.create(payload);
+          globalThis.localStorage.removeItem("tipsPreview");
           ui()?.showToast?.("Статья создана!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard/tips";

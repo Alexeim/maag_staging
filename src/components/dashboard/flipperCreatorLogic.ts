@@ -682,11 +682,13 @@ export default function flipperCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.flipperId) {
           await flippersApi.update(this.flipperId, payload);
+          window.localStorage.removeItem("flipperPreview");
           window.Alpine.store("ui").showToast("Листалка успешно обновлена!");
           const redirectTo = this.onSaveRedirect || `/dashboard/flippers`;
           setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
         } else {
           await flippersApi.create(payload);
+          window.localStorage.removeItem("flipperPreview");
           window.Alpine.store("ui").showToast("Листалка успешно создана!");
           setTimeout(() => { globalThis.location.href = `/dashboard/flippers`; }, 1500);
         }
