@@ -309,6 +309,20 @@ export default function eventCreatorLogic(initialState = {}) {
               typeof previewState?.selectedAuthorId === "string"
                 ? previewState.selectedAuthorId
                 : "";
+            this.previewAuthorDisplay =
+              previewState?.authorDisplay &&
+              typeof previewState.authorDisplay === "object"
+                ? {
+                    name:
+                      typeof previewState.authorDisplay.name === "string"
+                        ? previewState.authorDisplay.name
+                        : "",
+                    avatarUrl:
+                      typeof previewState.authorDisplay.avatarUrl === "string"
+                        ? previewState.authorDisplay.avatarUrl
+                        : "",
+                  }
+                : { name: "", avatarUrl: "" };
           }
           return normalized;
         } catch (error) {
@@ -394,6 +408,7 @@ export default function eventCreatorLogic(initialState = {}) {
         return;
       }
 
+      const authorDisplay = this.getSelectedAuthorDisplay();
       const previewState = {
         event: {
           ...this.article,
@@ -402,6 +417,7 @@ export default function eventCreatorLogic(initialState = {}) {
         eventId: this.eventId,
         isEditMode: this.isEditMode,
         selectedAuthorId: this.selectedAuthorId,
+        authorDisplay,
       };
       window.localStorage.setItem("eventPreview", JSON.stringify(previewState));
       window.location.href = "/dashboard/event/preview";
