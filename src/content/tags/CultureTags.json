@@ -51,6 +51,10 @@
     {
       "title": "кино",
       "value": "cinema"
+    },
+    {
+      "title": "фотография",
+      "value": "photo"
     }
   ]
 }

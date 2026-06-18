@@ -162,12 +162,13 @@ const fetchLatest = async (type: LandingContentType, limit: number) => {
   const snapshot = await db
     .collection(COLLECTION_BY_TYPE[type])
     .orderBy('createdAt', 'desc')
-    .limit(limit)
+    .limit(Math.max(limit * 3, 10))
     .get();
 
   return snapshot.docs
     .map((doc) => toLandingItem(doc, type))
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, limit);
 };
 
 const fetchLatestFromTypes = async (

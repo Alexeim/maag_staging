@@ -9,34 +9,41 @@ const { name, avatarUrl } = Astro.props;
 ---
 
 <div class="flex items-center gap-[17px]">
-  <!-- <div
-    class="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden"
-  >
+  {avatarUrl && (
     <div
-      class="object-cover w-full h-full"
-      x-data={`{imageError: false, avatarUrl: ${JSON.stringify(avatarUrl)}, name: ${JSON.stringify(name)}}`}
+      class="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden"
     >
-      <template x-if="!imageError">
-        <img
-          :src="avatarUrl"
-          alt="avatar"
-          @error="imageError = true"
-          class="object-cover w-full h-full"
-          style="display: none"
-          x-init="$nextTick(() => { $el.style.display = 'block' })"
-        />
-      </template>
-      <template x-if="imageError">
-        <div
-          class="flex h-full w-full items-center justify-center bg-gray-300 text-white"
-        >
-          <span x-text="name[0].toUpperCase()"></span>
-        </div>
-      </template>
+      <div
+        class="object-cover w-full h-full"
+        x-data={`{imageError: false, avatarUrl: ${JSON.stringify(avatarUrl)}, name: ${JSON.stringify(name)}}`}
+      >
+        <template x-if="!imageError">
+          <img
+            :src="avatarUrl"
+            alt="avatar"
+            @error="imageError = true"
+            class="object-cover w-full h-full"
+            style="display: none"
+            x-init="$nextTick(() => { $el.style.display = 'block' })"
+          />
+        </template>
+        <template x-if="imageError">
+          <div
+            class="flex h-full w-full items-center justify-center bg-gray-300 text-white"
+          >
+            <span x-text="name[0].toUpperCase()"></span>
+          </div>
+        </template>
+      </div>
     </div>
-  </div> -->
-  <AuthorIcon class="w-4 h-4" />
-  <div class="text-base lg:text-xl font-thin font-old_standard italic text-base-content">
+
+  )}
+  {!avatarUrl && 
+    <AuthorIcon class="w-4 h-4" />
+  }
+  <div
+    class="text-base lg:text-xl font-thin font-old_standard italic text-base-content"
+  >
     {name}
   </div>
 </div>
