@@ -1,14 +1,18 @@
 ---
 // src/components/article/ArticleAuthor.astro
+import LazyImage from "../common/LazyImage.astro";
+
 import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
+import baloonImage from "@/assets/baloon/baloon003.png"
 interface Props {
   name: string;
   avatarUrl?: string;
+  isKid?: boolean;
 }
-const { name, avatarUrl } = Astro.props;
+const { name, avatarUrl, isKid = false } = Astro.props;
 ---
 
-<div class="flex items-center gap-[17px]">
+<div class="flex items-center gap-[17px] relative z-20">
   {avatarUrl && (
     <div
       class="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden"
@@ -22,7 +26,7 @@ const { name, avatarUrl } = Astro.props;
             :src="avatarUrl"
             alt="avatar"
             @error="imageError = true"
-            class="object-cover w-full h-full"
+            class="object-cover w-full h-full z-20 relative"
             style="display: none"
             x-init="$nextTick(() => { $el.style.display = 'block' })"
           />
@@ -38,12 +42,15 @@ const { name, avatarUrl } = Astro.props;
     </div>
 
   )}
-  {!avatarUrl && 
-    <AuthorIcon class="w-4 h-4" />
-  }
+    {!avatarUrl && 
+      <AuthorIcon class="w-4 h-4" />
+    }
   <div
     class="text-base lg:text-xl font-thin font-old_standard italic text-base-content"
   >
     {name}
   </div>
+  {isKid && (
+    <LazyImage src={baloonImage.src} alt="baloon" class="absolute -top-4 -left-3 w-6 -rotate-12 z-10" />
+  )}
 </div>
