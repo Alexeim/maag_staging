@@ -286,8 +286,9 @@ const articleStructuredData = storyData
 
     .hero-meta {
       display: flex;
-      flex-direction: column;
-      align-items: start;
+      flex-direction: row;
+      align-items: center;
+      justify-content: start;
       gap: 12px;
       margin-top: 20px;
     }
@@ -607,6 +608,7 @@ const articleStructuredData = storyData
                       <span>{authorName}</span>
                     </span>
                   )}
+                  <p class="font-inter text-base-content/50">|</p>
                   {dateFormatted && (
                     <span class="hero-meta-date">{dateFormatted}</span>
                   )}
