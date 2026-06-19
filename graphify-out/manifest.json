@@ -1,0 +1,1917 @@
+{
+  "/Users/dimitrimakarov/Dev/maag_staging/astro.config.mjs": {
+    "mtime": 1781459112.025965,
+    "ast_hash": "a52d704be1d5f11da925e35f2da007cf",
+    "semantic_hash": "a52d704be1d5f11da925e35f2da007cf"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/cors.json": {
+    "mtime": 1759793715.4363928,
+    "ast_hash": "e350013b6d984021bde59b1c43ef5c40",
+    "semantic_hash": "e350013b6d984021bde59b1c43ef5c40"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/deploy.sh": {
+    "mtime": 1759790838.334742,
+    "ast_hash": "a94deb2a437f8150b8c961a3069d5e8c",
+    "semantic_hash": "a94deb2a437f8150b8c961a3069d5e8c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/firebase.json": {
+    "mtime": 1777758781.9120367,
+    "ast_hash": "6a77ca3acd63c2b1c61ba2d99e65e7ff",
+    "semantic_hash": "6a77ca3acd63c2b1c61ba2d99e65e7ff"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/package.json": {
+    "mtime": 1781142613.9887283,
+    "ast_hash": "1796fa8bad0ba547be88748095f15c6a",
+    "semantic_hash": "1796fa8bad0ba547be88748095f15c6a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server.mjs": {
+    "mtime": 1781283777.8165936,
+    "ast_hash": "b9f2fa22a1459495e1fd515b03341d72",
+    "semantic_hash": "b9f2fa22a1459495e1fd515b03341d72"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/deploy.sh": {
+    "mtime": 1761780166.2792983,
+    "ast_hash": "32d08581aa113fbaeb8989adaac52fd7",
+    "semantic_hash": "32d08581aa113fbaeb8989adaac52fd7"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/package.json": {
+    "mtime": 1781568451.6387196,
+    "ast_hash": "1d1a8f6cc5552ed29e3f540a242afb02",
+    "semantic_hash": "1d1a8f6cc5552ed29e3f540a242afb02"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/scripts/backfillPublishedFields.js": {
+    "mtime": 1781568451.545888,
+    "ast_hash": "5fa22aa3db56b96ec32cf6cdb7092c72",
+    "semantic_hash": "5fa22aa3db56b96ec32cf6cdb7092c72"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/scripts/compressStorageImages.js": {
+    "mtime": 1780510687.8305383,
+    "ast_hash": "4ed089c032ef9bb1ab3d67c937c71349",
+    "semantic_hash": "4ed089c032ef9bb1ab3d67c937c71349"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/scripts/fixLandingMainHeroSchema.js": {
+    "mtime": 1779416033.643412,
+    "ast_hash": "69c189579053bb4ae30ee84fceab8d3b",
+    "semantic_hash": "69c189579053bb4ae30ee84fceab8d3b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/scripts/migrateArticlesNewsToNewsCollection.js": {
+    "mtime": 1779413965.2524633,
+    "ast_hash": "a842df0874a8c3413789e23352a35c07",
+    "semantic_hash": "a842df0874a8c3413789e23352a35c07"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/scripts/migrateNewsCategory.js": {
+    "mtime": 1770772522.9034429,
+    "ast_hash": "67cb332e67b6aeea60fe92aaaade6247",
+    "semantic_hash": "67cb332e67b6aeea60fe92aaaade6247"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/scripts/removeLegacyIsOnLanding.js": {
+    "mtime": 1779413965.3433514,
+    "ast_hash": "8ecbb3f26eb88dc058ef12c2ac22601c",
+    "semantic_hash": "8ecbb3f26eb88dc058ef12c2ac22601c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/articleController.ts": {
+    "mtime": 1781568384.2616763,
+    "ast_hash": "e563a306a4896ef555b401de00c752c5",
+    "semantic_hash": "e563a306a4896ef555b401de00c752c5"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/authorController.ts": {
+    "mtime": 1771296102.4824219,
+    "ast_hash": "39658126981923f37b1f9f377aacb61a",
+    "semantic_hash": "39658126981923f37b1f9f377aacb61a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/contentCollectionsController.ts": {
+    "mtime": 1779418899.6089935,
+    "ast_hash": "e2754d07edbd6f7cd0d183b86d1d6174",
+    "semantic_hash": "e2754d07edbd6f7cd0d183b86d1d6174"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/editorialPlacementsController.ts": {
+    "mtime": 1780547080.1791818,
+    "ast_hash": "7dc6d51b25fb699b9bf0ed5c2b4fdca0",
+    "semantic_hash": "7dc6d51b25fb699b9bf0ed5c2b4fdca0"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/eventController.ts": {
+    "mtime": 1781568385.2347178,
+    "ast_hash": "035e33c13bb095421a748eb0f0cf9e85",
+    "semantic_hash": "035e33c13bb095421a748eb0f0cf9e85"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/flipperController.ts": {
+    "mtime": 1781568420.6274343,
+    "ast_hash": "1f634629c9e5e635165426293243dab5",
+    "semantic_hash": "1f634629c9e5e635165426293243dab5"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/guideController.ts": {
+    "mtime": 1781568384.3553212,
+    "ast_hash": "c42c889491abbaee3e6ef67b2b6674e9",
+    "semantic_hash": "c42c889491abbaee3e6ef67b2b6674e9"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/interviewController.ts": {
+    "mtime": 1781568409.1190913,
+    "ast_hash": "a2b27c447d59ddd3742aed5e26e90d40",
+    "semantic_hash": "a2b27c447d59ddd3742aed5e26e90d40"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/newsController.ts": {
+    "mtime": 1781568385.1279266,
+    "ast_hash": "a03f283363d6c032b321cd437e1bbb03",
+    "semantic_hash": "a03f283363d6c032b321cd437e1bbb03"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/photoOfTheDayController.ts": {
+    "mtime": 1781568420.9964938,
+    "ast_hash": "7957eac97c839b3871221911ae8938eb",
+    "semantic_hash": "7957eac97c839b3871221911ae8938eb"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/publicLandingController.ts": {
+    "mtime": 1781728025.5828154,
+    "ast_hash": "56250cba25b2dbd2c6c46bd3602fa668",
+    "semantic_hash": "56250cba25b2dbd2c6c46bd3602fa668"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/stripeController.ts": {
+    "mtime": 1761776267.2445014,
+    "ast_hash": "4331e4711c9fa81a17d51711e0c26e51",
+    "semantic_hash": "4331e4711c9fa81a17d51711e0c26e51"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/userController.ts": {
+    "mtime": 1781133945.601196,
+    "ast_hash": "968153f023297bb051e17b62e74977c9",
+    "semantic_hash": "968153f023297bb051e17b62e74977c9"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/controllers/visualStoryController.ts": {
+    "mtime": 1781568409.8317318,
+    "ast_hash": "3ddbbedced330d7e2a41425cf94fe55d",
+    "semantic_hash": "3ddbbedced330d7e2a41425cf94fe55d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/index.ts": {
+    "mtime": 1781280725.8847175,
+    "ast_hash": "ee84a1a053590f2205e84022f577153e",
+    "semantic_hash": "ee84a1a053590f2205e84022f577153e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/middleware/auth.ts": {
+    "mtime": 1778699099.779392,
+    "ast_hash": "4c1099959d4a7abd7411064082c77d97",
+    "semantic_hash": "4c1099959d4a7abd7411064082c77d97"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/articleRoutes.ts": {
+    "mtime": 1760484787.6262403,
+    "ast_hash": "42286991d0001a762945829ce220d861",
+    "semantic_hash": "42286991d0001a762945829ce220d861"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/authorRoutes.ts": {
+    "mtime": 1771296107.3566313,
+    "ast_hash": "cba3cf93b4af9bcc8052e1056e078b7f",
+    "semantic_hash": "cba3cf93b4af9bcc8052e1056e078b7f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/contentCollectionsRoutes.ts": {
+    "mtime": 1779418899.6525984,
+    "ast_hash": "d4841e7a438e84960d518354b52870bd",
+    "semantic_hash": "d4841e7a438e84960d518354b52870bd"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/editorialPlacementsRoutes.ts": {
+    "mtime": 1779996002.6236725,
+    "ast_hash": "b2cc1c05c3cef7271d7317ad767e1949",
+    "semantic_hash": "b2cc1c05c3cef7271d7317ad767e1949"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/eventRoutes.ts": {
+    "mtime": 1760550092.5494115,
+    "ast_hash": "ce4595bdc0a5dd3d4be471a8f2ecf762",
+    "semantic_hash": "ce4595bdc0a5dd3d4be471a8f2ecf762"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/flipperRoutes.ts": {
+    "mtime": 1761024349.0452626,
+    "ast_hash": "4cbde9fc6380c9c5905ee7c3bd1eed50",
+    "semantic_hash": "4cbde9fc6380c9c5905ee7c3bd1eed50"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/guideRoutes.ts": {
+    "mtime": 1776396505.475197,
+    "ast_hash": "a8e2de6a6f651d63987a87b618fc0aa3",
+    "semantic_hash": "a8e2de6a6f651d63987a87b618fc0aa3"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/interviewRoutes.ts": {
+    "mtime": 1761747193.2150674,
+    "ast_hash": "0f2792f9f59d3d84024d75398d6c4802",
+    "semantic_hash": "0f2792f9f59d3d84024d75398d6c4802"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/newsRoutes.ts": {
+    "mtime": 1778951910.590676,
+    "ast_hash": "71559038828a55d22e3a573082b71409",
+    "semantic_hash": "71559038828a55d22e3a573082b71409"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/photoOfTheDayRoutes.ts": {
+    "mtime": 1780545906.7071016,
+    "ast_hash": "631016df9cab3e32611ad6eea9ad1e6d",
+    "semantic_hash": "631016df9cab3e32611ad6eea9ad1e6d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/publicRoutes.ts": {
+    "mtime": 1781283018.412529,
+    "ast_hash": "bc0bb4641568a2672ac4edb07e46804b",
+    "semantic_hash": "bc0bb4641568a2672ac4edb07e46804b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/stripeRoutes.ts": {
+    "mtime": 1761761403.3378825,
+    "ast_hash": "cf15bd09aaa1ba6534f69f6ad324d580",
+    "semantic_hash": "cf15bd09aaa1ba6534f69f6ad324d580"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/userRoutes.ts": {
+    "mtime": 1781131399.6822944,
+    "ast_hash": "5764cd21a51a1ed05c87563ddd25d0b8",
+    "semantic_hash": "5764cd21a51a1ed05c87563ddd25d0b8"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/routes/visualStoryRoutes.ts": {
+    "mtime": 1777764698.5972962,
+    "ast_hash": "a7de5f9c7f1471899aaf5af99c628804",
+    "semantic_hash": "a7de5f9c7f1471899aaf5af99c628804"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/services/firebase.ts": {
+    "mtime": 1779308464.9915667,
+    "ast_hash": "f4bc6c7b92aae1c557b9cfbb568ff788",
+    "semantic_hash": "f4bc6c7b92aae1c557b9cfbb568ff788"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/test-firebase-direct.ts": {
+    "mtime": 1757634773.9130585,
+    "ast_hash": "848e84b9f44bec5c82c6c496a4ae8ea3",
+    "semantic_hash": "848e84b9f44bec5c82c6c496a4ae8ea3"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/utils/contentCollections.ts": {
+    "mtime": 1779418899.563144,
+    "ast_hash": "95f31561e6a3965da54b293880d57790",
+    "semantic_hash": "95f31561e6a3965da54b293880d57790"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/utils/publication.ts": {
+    "mtime": 1781568364.508696,
+    "ast_hash": "4fdadf1c65a1e5a2e7cb43515bf4fe2f",
+    "semantic_hash": "4fdadf1c65a1e5a2e7cb43515bf4fe2f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/src/utils/relatedContent.ts": {
+    "mtime": 1779308464.9918585,
+    "ast_hash": "c313ffa673e415bd56df9df054e39cec",
+    "semantic_hash": "c313ffa673e415bd56df9df054e39cec"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/server/tsconfig.json": {
+    "mtime": 1761769968.165185,
+    "ast_hash": "63f684ac1a499377ca9975f0c4996427",
+    "semantic_hash": "63f684ac1a499377ca9975f0c4996427"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/Layouts/DashboardLayout.astro": {
+    "mtime": 1781287530.163097,
+    "ast_hash": "063ccc47b75b8aa6b35654df9148bdd1",
+    "semantic_hash": "063ccc47b75b8aa6b35654df9148bdd1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/Layouts/Layout.astro": {
+    "mtime": 1781458078.8915143,
+    "ast_hash": "c4d15dd89a832134172457d42433d607",
+    "semantic_hash": "c4d15dd89a832134172457d42433d607"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/Layouts/VisualStoryLayout.astro": {
+    "mtime": 1781458078.9861634,
+    "ast_hash": "8725e373bc7dd1b4d0a46776a97e50ac",
+    "semantic_hash": "8725e373bc7dd1b4d0a46776a97e50ac"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/Layouts/layoutLogic.ts": {
+    "mtime": 1777733184.9391463,
+    "ast_hash": "7c3be3c5615023a00ce56c4d20457f44",
+    "semantic_hash": "7c3be3c5615023a00ce56c4d20457f44"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/alpine-entrypoint.ts": {
+    "mtime": 1778699146.129892,
+    "ast_hash": "a2149806e8b2c60b077ae1ae8ef7d67c",
+    "semantic_hash": "a2149806e8b2c60b077ae1ae8ef7d67c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/HomePage/Hero.astro": {
+    "mtime": 1781554290.608165,
+    "ast_hash": "2c6a7afe8c2fd8af958e02c9c22cd1cd",
+    "semantic_hash": "2c6a7afe8c2fd8af958e02c9c22cd1cd"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/HomePage/LatestInterview.astro": {
+    "mtime": 1781146406.4752939,
+    "ast_hash": "7a6514390781b243d17752251f74ec57",
+    "semantic_hash": "7a6514390781b243d17752251f74ec57"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/HomePage/PageHead.astro": {
+    "mtime": 1757634773.9353077,
+    "ast_hash": "ad3d9af48e13dc1da8a3ea0fe2cd70ea",
+    "semantic_hash": "ad3d9af48e13dc1da8a3ea0fe2cd70ea"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/about/AboutProjectContent.astro": {
+    "mtime": 1781561160.570627,
+    "ast_hash": "c54fa75471ba993e9117da7dd29d24dc",
+    "semantic_hash": "c54fa75471ba993e9117da7dd29d24dc"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/ArticleAuthor.astro": {
+    "mtime": 1781817031.5076354,
+    "ast_hash": "5ac45a12cea7bec1066c0aecbcacc644",
+    "semantic_hash": "5ac45a12cea7bec1066c0aecbcacc644"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/ArticleBody.astro": {
+    "mtime": 1781630579.1702366,
+    "ast_hash": "f7851e18f7fb868c00c592bc01cfc723",
+    "semantic_hash": "f7851e18f7fb868c00c592bc01cfc723"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/ArticleBodyVariant.astro": {
+    "mtime": 1757634773.9354575,
+    "ast_hash": "f2abe38a454051199b5afc0978c3fc12",
+    "semantic_hash": "f2abe38a454051199b5afc0978c3fc12"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/ArticleColumnContent.astro": {
+    "mtime": 1780552597.309806,
+    "ast_hash": "2b0b32e065b9d699e4c3dd56f8eb41b4",
+    "semantic_hash": "2b0b32e065b9d699e4c3dd56f8eb41b4"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/ArticleDate.astro": {
+    "mtime": 1778163954.9280775,
+    "ast_hash": "41de78bb54a0de11c51dbcccf94d1eae",
+    "semantic_hash": "41de78bb54a0de11c51dbcccf94d1eae"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/ArticleHeader.astro": {
+    "mtime": 1781817275.481578,
+    "ast_hash": "0452d0d471264648c776784e05919ff9",
+    "semantic_hash": "0452d0d471264648c776784e05919ff9"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/ArticleImage.astro": {
+    "mtime": 1781145310.905384,
+    "ast_hash": "aec205668a04c6de295d09b798c86972",
+    "semantic_hash": "aec205668a04c6de295d09b798c86972"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/ArticleTip.astro": {
+    "mtime": 1779998548.5165884,
+    "ast_hash": "91efe2faf0725c8c5345e8bbcd2ab51b",
+    "semantic_hash": "91efe2faf0725c8c5345e8bbcd2ab51b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/ArticleTips.astro": {
+    "mtime": 1780974126.682189,
+    "ast_hash": "787844f739af6e9e390d28d0dea6abcb",
+    "semantic_hash": "787844f739af6e9e390d28d0dea6abcb"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/ArticleVideo.astro": {
+    "mtime": 1780073651.5284078,
+    "ast_hash": "6bb55e22d45db1d061741ee73d65e7a1",
+    "semantic_hash": "6bb55e22d45db1d061741ee73d65e7a1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/Collage.astro": {
+    "mtime": 1781623326.5475793,
+    "ast_hash": "67a41bee4710e9f90d9d296bc28b8655",
+    "semantic_hash": "67a41bee4710e9f90d9d296bc28b8655"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/ContentCollectionMarquee.astro": {
+    "mtime": 1780676243.7848032,
+    "ast_hash": "4e11c2e9c71307fb54629591becb50f8",
+    "semantic_hash": "4e11c2e9c71307fb54629591becb50f8"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/EventDetails.astro": {
+    "mtime": 1779998534.4302258,
+    "ast_hash": "8460fcc768a46e4430428446038f6f86",
+    "semantic_hash": "8460fcc768a46e4430428446038f6f86"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/LinkToContent.astro": {
+    "mtime": 1781181247.9016874,
+    "ast_hash": "5480f336cd90731625c82188c9a20f9f",
+    "semantic_hash": "5480f336cd90731625c82188c9a20f9f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/NewsImage.astro": {
+    "mtime": 1781145310.9977603,
+    "ast_hash": "08969bb9fbc70697b526cbf13cd08bee",
+    "semantic_hash": "08969bb9fbc70697b526cbf13cd08bee"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/OneBigOneSmall.astro": {
+    "mtime": 1781623134.54091,
+    "ast_hash": "00c56969ebe145f389bac6f633e3078c",
+    "semantic_hash": "00c56969ebe145f389bac6f633e3078c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/RecentArticles.astro": {
+    "mtime": 1757634773.9356956,
+    "ast_hash": "0ebea6e65e450354ae400d9da66c02da",
+    "semantic_hash": "0ebea6e65e450354ae400d9da66c02da"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/RelatedContentMarquee.astro": {
+    "mtime": 1780676215.488263,
+    "ast_hash": "475a2cfe7df45fc80c31440038c677dc",
+    "semantic_hash": "475a2cfe7df45fc80c31440038c677dc"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/SocialShare.astro": {
+    "mtime": 1778016435.8050659,
+    "ast_hash": "d6d8ab6aaff5e190b616eab0c8da9a55",
+    "semantic_hash": "d6d8ab6aaff5e190b616eab0c8da9a55"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/TipIcon.astro": {
+    "mtime": 1780551925.4320354,
+    "ast_hash": "2257c4808f672bc3e81f3525990a9b49",
+    "semantic_hash": "2257c4808f672bc3e81f3525990a9b49"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/TipsArticleBody.astro": {
+    "mtime": 1780973368.1021786,
+    "ast_hash": "a25b15b2444c49d20a7d04c70750d80f",
+    "semantic_hash": "a25b15b2444c49d20a7d04c70750d80f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/creatorLogic.ts": {
+    "mtime": 1781711733.2071593,
+    "ast_hash": "9949bb4f9f044d3401dce72aa1934443",
+    "semantic_hash": "9949bb4f9f044d3401dce72aa1934443"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/eventCreatorLogic.ts": {
+    "mtime": 1781711923.805562,
+    "ast_hash": "ff0f567c5cc7b2d06a79c31e468a154f",
+    "semantic_hash": "ff0f567c5cc7b2d06a79c31e468a154f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/guideCreatorLogic.ts": {
+    "mtime": 1781711747.5238466,
+    "ast_hash": "7a4623e18ec39c1675fd7df0364b0368",
+    "semantic_hash": "7a4623e18ec39c1675fd7df0364b0368"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/article/visualStoryCreatorLogic.ts": {
+    "mtime": 1781713194.7526073,
+    "ast_hash": "2cdaf64bac8367e599c1ea698ad9ec6a",
+    "semantic_hash": "2cdaf64bac8367e599c1ea698ad9ec6a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/auth/AuthModal.astro": {
+    "mtime": 1781131775.8551302,
+    "ast_hash": "a7b825474c20e5557351b2b4f74d0b0c",
+    "semantic_hash": "a7b825474c20e5557351b2b4f74d0b0c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/auth/authLogic.ts": {
+    "mtime": 1778713082.0158272,
+    "ast_hash": "5373d8107d849c372547d54d2ae44a31",
+    "semantic_hash": "5373d8107d849c372547d54d2ae44a31"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/calendar/CalendarWidget.astro": {
+    "mtime": 1780549931.4930053,
+    "ast_hash": "0b94a1b20e48f4cf97131efee316218d",
+    "semantic_hash": "0b94a1b20e48f4cf97131efee316218d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/calendar/EventCard.astro": {
+    "mtime": 1779998672.9874132,
+    "ast_hash": "ccd46b115acd99db7fdca76bde2c0a3a",
+    "semantic_hash": "ccd46b115acd99db7fdca76bde2c0a3a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/calendar/EventList.astro": {
+    "mtime": 1780549262.3719876,
+    "ast_hash": "b758f828c3b4e1f0dba5ec6c680a0349",
+    "semantic_hash": "b758f828c3b4e1f0dba5ec6c680a0349"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/calendar/FilterButtons.astro": {
+    "mtime": 1779465387.872944,
+    "ast_hash": "328b845c3b9ab5448914b6b84b071df3",
+    "semantic_hash": "328b845c3b9ab5448914b6b84b071df3"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/calendar/logic.ts": {
+    "mtime": 1781463640.9699216,
+    "ast_hash": "4591b22fa5897aa83fbbb3f26c5e211b",
+    "semantic_hash": "4591b22fa5897aa83fbbb3f26c5e211b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/Alert.astro": {
+    "mtime": 1757634773.9360814,
+    "ast_hash": "039e951fa6abbc42eda5b4082aaff0c1",
+    "semantic_hash": "039e951fa6abbc42eda5b4082aaff0c1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/ArticleCard.astro": {
+    "mtime": 1781146406.0945776,
+    "ast_hash": "09da7069eb7fbc126465a87368b3b045",
+    "semantic_hash": "09da7069eb7fbc126465a87368b3b045"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/Button.astro": {
+    "mtime": 1760553792.4035387,
+    "ast_hash": "d2d67d13410ea32b8f21d2b2c2eabd16",
+    "semantic_hash": "d2d67d13410ea32b8f21d2b2c2eabd16"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/CategoryHero.astro": {
+    "mtime": 1781145311.1072829,
+    "ast_hash": "bdbd5d9024444dd49800f8028e5323d2",
+    "semantic_hash": "bdbd5d9024444dd49800f8028e5323d2"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/Checkbox.astro": {
+    "mtime": 1757634773.9361649,
+    "ast_hash": "e4fc50ee0dd3c60f39054f1b923d966a",
+    "semantic_hash": "e4fc50ee0dd3c60f39054f1b923d966a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/ConfirmationModal.astro": {
+    "mtime": 1780503957.305362,
+    "ast_hash": "5773ca004f947f02732acfef09129ba0",
+    "semantic_hash": "5773ca004f947f02732acfef09129ba0"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/ContentActions.astro": {
+    "mtime": 1781140905.089306,
+    "ast_hash": "ca427aeb9454786656de49a3e128ef7d",
+    "semantic_hash": "ca427aeb9454786656de49a3e128ef7d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/EventMetaIcon.astro": {
+    "mtime": 1781182250.681764,
+    "ast_hash": "df8bda30833bebc0ffe5cdc6f9659858",
+    "semantic_hash": "df8bda30833bebc0ffe5cdc6f9659858"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/Footer.astro": {
+    "mtime": 1781561265.378138,
+    "ast_hash": "942a808763ca94dd1d74dc4b363c32b1",
+    "semantic_hash": "942a808763ca94dd1d74dc4b363c32b1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/Header.astro": {
+    "mtime": 1757634773.9363182,
+    "ast_hash": "544fa18aece6a787c80bb2543c09c1c1",
+    "semantic_hash": "544fa18aece6a787c80bb2543c09c1c1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/Input.astro": {
+    "mtime": 1760560890.9425113,
+    "ast_hash": "5bc21104cc491bbe030b96b386759bed",
+    "semantic_hash": "5bc21104cc491bbe030b96b386759bed"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/LandingBody.astro": {
+    "mtime": 1781631410.6667924,
+    "ast_hash": "77adf2df565651fc9ac66aa31aae44f3",
+    "semantic_hash": "77adf2df565651fc9ac66aa31aae44f3"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/LazyImage.astro": {
+    "mtime": 1781146405.9976912,
+    "ast_hash": "b85891abfee8f387ac55515e57d2c4a8",
+    "semantic_hash": "b85891abfee8f387ac55515e57d2c4a8"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/MainLandingBlock.astro": {
+    "mtime": 1781631346.640333,
+    "ast_hash": "b54d9f16fb487b51c033813592eb9fea",
+    "semantic_hash": "b54d9f16fb487b51c033813592eb9fea"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/ModalFooter.astro": {
+    "mtime": 1757634773.9365222,
+    "ast_hash": "d734cfa18ab54d1b48e0db78b09fc9e5",
+    "semantic_hash": "d734cfa18ab54d1b48e0db78b09fc9e5"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/ModalHeader.astro": {
+    "mtime": 1757634773.936559,
+    "ast_hash": "25bf9c818536553a9ca2bd6b2ccabf8d",
+    "semantic_hash": "25bf9c818536553a9ca2bd6b2ccabf8d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/ModalShell.astro": {
+    "mtime": 1757634773.9366004,
+    "ast_hash": "eed7d4eadf64406d017e2f4cc56a3ba4",
+    "semantic_hash": "eed7d4eadf64406d017e2f4cc56a3ba4"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/Navbar.astro": {
+    "mtime": 1781553836.2735567,
+    "ast_hash": "861e68c297ace58429bec5750d48c55f",
+    "semantic_hash": "861e68c297ace58429bec5750d48c55f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/NetlenkaCard.astro": {
+    "mtime": 1780668879.6771448,
+    "ast_hash": "8b66a6174df85d09f56ae2b81869b8af",
+    "semantic_hash": "8b66a6174df85d09f56ae2b81869b8af"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/NetlenkaCardOne.astro": {
+    "mtime": 1781146406.1918178,
+    "ast_hash": "3ddc38137f63671b7d97ed81f5b2e3e3",
+    "semantic_hash": "3ddc38137f63671b7d97ed81f5b2e3e3"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/NetlenkaCardThree.astro": {
+    "mtime": 1781146406.3826928,
+    "ast_hash": "effe153bd3529195bde20b8879035f98",
+    "semantic_hash": "effe153bd3529195bde20b8879035f98"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/NetlenkaCardTwo.astro": {
+    "mtime": 1781146406.2859144,
+    "ast_hash": "e40b4ff34462bf59a0f8224503827710",
+    "semantic_hash": "e40b4ff34462bf59a0f8224503827710"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/PhotoOfTheDayCard.astro": {
+    "mtime": 1781631142.3863535,
+    "ast_hash": "cb59e69e87dcdb9426ae10b1ff0de5c3",
+    "semantic_hash": "cb59e69e87dcdb9426ae10b1ff0de5c3"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/Textarea.astro": {
+    "mtime": 1757634773.9367568,
+    "ast_hash": "52985d2061aec4fbc462117cb586c608",
+    "semantic_hash": "52985d2061aec4fbc462117cb586c608"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/Toast.astro": {
+    "mtime": 1760486815.6162467,
+    "ast_hash": "b9a5084e6b6773415f645bab510e571a",
+    "semantic_hash": "b9a5084e6b6773415f645bab510e571a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/contentActionsLogic.ts": {
+    "mtime": 1781133397.102294,
+    "ast_hash": "b22dd069f129d46232f599430d6cb358",
+    "semantic_hash": "b22dd069f129d46232f599430d6cb358"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/navbarLogic.ts": {
+    "mtime": 1760487924.7398424,
+    "ast_hash": "f8873e43b96224f80bc949f13d9d33f4",
+    "semantic_hash": "f8873e43b96224f80bc949f13d9d33f4"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/ArticleCategoryList.astro": {
+    "mtime": 1781570231.5098588,
+    "ast_hash": "440debfe6277e25e5a938b019d7c18ad",
+    "semantic_hash": "440debfe6277e25e5a938b019d7c18ad"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/ArticleComposer.astro": {
+    "mtime": 1781712209.1372275,
+    "ast_hash": "5ce11211161f8b74b9ca320e4984ae19",
+    "semantic_hash": "5ce11211161f8b74b9ca320e4984ae19"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/AuthorCreationForm.astro": {
+    "mtime": 1760472050.9764674,
+    "ast_hash": "c00780710208332f07a43831efb1f4b7",
+    "semantic_hash": "c00780710208332f07a43831efb1f4b7"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/AuthorCreatorContent.astro": {
+    "mtime": 1760471609.9337156,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/ContentCollectionsEditor.astro": {
+    "mtime": 1779421127.2870727,
+    "ast_hash": "0dc3708d05e1ec9e7c8b50706ccfdc98",
+    "semantic_hash": "0dc3708d05e1ec9e7c8b50706ccfdc98"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/DashboardArticleBodyPreview.astro": {
+    "mtime": 1781623368.7320914,
+    "ast_hash": "5142d6f4bbf9a6a4b51fc1e1331fe20d",
+    "semantic_hash": "5142d6f4bbf9a6a4b51fc1e1331fe20d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/DashboardListActions.astro": {
+    "mtime": 1781564606.388153,
+    "ast_hash": "4427664fe234c05ebb6b8373a78958e6",
+    "semantic_hash": "4427664fe234c05ebb6b8373a78958e6"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/DashboardMaterialActionFooter.astro": {
+    "mtime": 1781714857.5827124,
+    "ast_hash": "e2ca2347d18454bc3b8f3d2829417f8a",
+    "semantic_hash": "e2ca2347d18454bc3b8f3d2829417f8a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/DashboardTipsBodyPreview.astro": {
+    "mtime": 1781566399.9098642,
+    "ast_hash": "d2c2ed0706b1a9744342c7a85b441366",
+    "semantic_hash": "d2c2ed0706b1a9744342c7a85b441366"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/EventComposer.astro": {
+    "mtime": 1781712267.0942647,
+    "ast_hash": "3f69255df1f803ade6db786b58a460a4",
+    "semantic_hash": "3f69255df1f803ade6db786b58a460a4"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/FlipperComposer.astro": {
+    "mtime": 1781713236.4341753,
+    "ast_hash": "d300760d34202dc4eee9dddf2d9e39d1",
+    "semantic_hash": "d300760d34202dc4eee9dddf2d9e39d1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/GuideComposer.astro": {
+    "mtime": 1781712221.1218567,
+    "ast_hash": "a19c2105a9a344a458db1981c80ea6b2",
+    "semantic_hash": "a19c2105a9a344a458db1981c80ea6b2"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/InterviewComposer.astro": {
+    "mtime": 1781712255.9705307,
+    "ast_hash": "2aea9c92778a1ef603e770b5adb24c97",
+    "semantic_hash": "2aea9c92778a1ef603e770b5adb24c97"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/LandingPlacementPanel.astro": {
+    "mtime": 1779999261.8410366,
+    "ast_hash": "e3e81d2da79c7e44ffa1af0794f4f02b",
+    "semantic_hash": "e3e81d2da79c7e44ffa1af0794f4f02b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/NewsComposer.astro": {
+    "mtime": 1781712234.232462,
+    "ast_hash": "a5a545625e05a2bb6844644ba5f28874",
+    "semantic_hash": "a5a545625e05a2bb6844644ba5f28874"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/PhotoOfTheDayComposer.astro": {
+    "mtime": 1781713189.7400212,
+    "ast_hash": "5a1d9cc7fff25aefa5beaf9b1c90dcca",
+    "semantic_hash": "5a1d9cc7fff25aefa5beaf9b1c90dcca"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/PublicationStatusBanner.astro": {
+    "mtime": 1781714371.2445803,
+    "ast_hash": "964155dd9e67c0dbb65cb4626f0824ca",
+    "semantic_hash": "964155dd9e67c0dbb65cb4626f0824ca"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/PublicationToggle.astro": {
+    "mtime": 1781568518.1966848,
+    "ast_hash": "8079601f37c23487f0c7cfb897c30a82",
+    "semantic_hash": "8079601f37c23487f0c7cfb897c30a82"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/PublishedIndicator.astro": {
+    "mtime": 1781568518.293451,
+    "ast_hash": "d56e050fbe1412ae92fc7a589fa23772",
+    "semantic_hash": "d56e050fbe1412ae92fc7a589fa23772"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/RelatedContentEditor.astro": {
+    "mtime": 1781462817.7740548,
+    "ast_hash": "b66421eb20fb937298e271c3eb800adf",
+    "semantic_hash": "b66421eb20fb937298e271c3eb800adf"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/TipsArticleComposer.astro": {
+    "mtime": 1781712466.980641,
+    "ast_hash": "d5d552c7c4d2ac03202159b9f1806e4a",
+    "semantic_hash": "d5d552c7c4d2ac03202159b9f1806e4a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/VisualStoryComposer.astro": {
+    "mtime": 1781713199.673119,
+    "ast_hash": "934a967c952739a5074750cd697f1d3c",
+    "semantic_hash": "934a967c952739a5074750cd697f1d3c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/articleListLogic.ts": {
+    "mtime": 1778620383.4231784,
+    "ast_hash": "df2317ee270cdbedd86b4f34c6e62282",
+    "semantic_hash": "df2317ee270cdbedd86b4f34c6e62282"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/calendarEditorLogic.ts": {
+    "mtime": 1779907979.195104,
+    "ast_hash": "7ea10625bb23ca961f26606f7b9126e8",
+    "semantic_hash": "7ea10625bb23ca961f26606f7b9126e8"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/cultureEditorLogic.ts": {
+    "mtime": 1779996590.9537318,
+    "ast_hash": "2d8f3a49f023ed96cceb7398f57e45db",
+    "semantic_hash": "2d8f3a49f023ed96cceb7398f57e45db"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/eventListLogic.ts": {
+    "mtime": 1760552948.5307822,
+    "ast_hash": "ce7b967e5c9c6f394fba6396d5528199",
+    "semantic_hash": "ce7b967e5c9c6f394fba6396d5528199"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/flipperCreatorLogic.ts": {
+    "mtime": 1781713217.1902134,
+    "ast_hash": "d7d6926bc9b57882b87864b3d0158f11",
+    "semantic_hash": "d7d6926bc9b57882b87864b3d0158f11"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/flipperListLogic.ts": {
+    "mtime": 1761748725.5399926,
+    "ast_hash": "133c1e899d704d647806f7589590f23d",
+    "semantic_hash": "133c1e899d704d647806f7589590f23d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/guideListLogic.ts": {
+    "mtime": 1776396649.4541104,
+    "ast_hash": "dc4adf5ebb92264c4ecdc72d543fbb39",
+    "semantic_hash": "dc4adf5ebb92264c4ecdc72d543fbb39"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/interviewCreatorLogic.ts": {
+    "mtime": 1781711929.6575882,
+    "ast_hash": "f5c23061fd2de83a58b6c4b37b913d07",
+    "semantic_hash": "f5c23061fd2de83a58b6c4b37b913d07"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/interviewListLogic.ts": {
+    "mtime": 1761747325.1583927,
+    "ast_hash": "88764876fef8a7c6e175fedc5db33318",
+    "semantic_hash": "88764876fef8a7c6e175fedc5db33318"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/landingEditorLogic.ts": {
+    "mtime": 1780547221.6018736,
+    "ast_hash": "8bbd074d4c8251c9e8ac6f1a39e6a499",
+    "semantic_hash": "8bbd074d4c8251c9e8ac6f1a39e6a499"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/landingPlacementManager.ts": {
+    "mtime": 1779999218.3298001,
+    "ast_hash": "b2dd668273ce44b19171efd05b968174",
+    "semantic_hash": "b2dd668273ce44b19171efd05b968174"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/leSaviezVousListLogic.ts": {
+    "mtime": 1778716396.3721585,
+    "ast_hash": "ca1aed6d84f308cb7bf6ce81860a534b",
+    "semantic_hash": "ca1aed6d84f308cb7bf6ce81860a534b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/newsCreatorLogic.ts": {
+    "mtime": 1781711912.5167708,
+    "ast_hash": "774ea02ded2aa5c009f31ab66d0ce9d2",
+    "semantic_hash": "774ea02ded2aa5c009f31ab66d0ce9d2"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/newsListLogic.ts": {
+    "mtime": 1778952106.44471,
+    "ast_hash": "79aa266e9c3977c905e90e0c5ab56d76",
+    "semantic_hash": "79aa266e9c3977c905e90e0c5ab56d76"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/parisEditorLogic.ts": {
+    "mtime": 1779996613.937154,
+    "ast_hash": "10e1adc9f5182b8be54c1676c463fbdf",
+    "semantic_hash": "10e1adc9f5182b8be54c1676c463fbdf"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/photoOfTheDayCreatorLogic.ts": {
+    "mtime": 1781713184.9993582,
+    "ast_hash": "3b39e999de966665b6e0767f83e1b16f",
+    "semantic_hash": "3b39e999de966665b6e0767f83e1b16f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/photoOfTheDayListLogic.ts": {
+    "mtime": 1780546098.62955,
+    "ast_hash": "9136c263ee0fa851741639ba6e328988",
+    "semantic_hash": "9136c263ee0fa851741639ba6e328988"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/tipsArticleCreatorLogic.ts": {
+    "mtime": 1781711918.081068,
+    "ast_hash": "379b09b9a7a51af71123422cabd6c4d9",
+    "semantic_hash": "379b09b9a7a51af71123422cabd6c4d9"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/tipsListLogic.ts": {
+    "mtime": 1777510563.3794649,
+    "ast_hash": "d6b0c3ee189dbf9959034b5e00822052",
+    "semantic_hash": "d6b0c3ee189dbf9959034b5e00822052"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/dashboard/visualStoryListLogic.ts": {
+    "mtime": 1777764131.3899384,
+    "ast_hash": "ab648d97ae0b7d350933b493d366528d",
+    "semantic_hash": "ab648d97ae0b7d350933b493d366528d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/guide/GuideHero.astro": {
+    "mtime": 1781286846.5170298,
+    "ast_hash": "56544d024e29037024e478c8951fcf1b",
+    "semantic_hash": "56544d024e29037024e478c8951fcf1b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/interview/InterviewHero.astro": {
+    "mtime": 1781628587.5977142,
+    "ast_hash": "1d242f17ee7e612e0662540897f70b53",
+    "semantic_hash": "1d242f17ee7e612e0662540897f70b53"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/legal/LegalPageLayout.astro": {
+    "mtime": 1780504149.2797499,
+    "ast_hash": "c960d593e8354e2c27a0a67e454c80c2",
+    "semantic_hash": "c960d593e8354e2c27a0a67e454c80c2"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/news/NewsContent.astro": {
+    "mtime": 1780056154.8580263,
+    "ast_hash": "5121c6aa6442971d463d1fc39a4f2902",
+    "semantic_hash": "5121c6aa6442971d463d1fc39a4f2902"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/news/NewsHeader.astro": {
+    "mtime": 1780072353.596475,
+    "ast_hash": "014da15992a9504659cc9b208c697554",
+    "semantic_hash": "014da15992a9504659cc9b208c697554"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/news/NewsStickyImage.astro": {
+    "mtime": 1781145311.5491915,
+    "ast_hash": "ef167f3c3f0076e3e51172339c64f956",
+    "semantic_hash": "ef167f3c3f0076e3e51172339c64f956"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/profile/AccountDataSection.astro": {
+    "mtime": 1769551515.3379142,
+    "ast_hash": "0207fc57d3faf493fbc5944b5236dda1",
+    "semantic_hash": "0207fc57d3faf493fbc5944b5236dda1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/profile/SubscriptionSection.astro": {
+    "mtime": 1769551515.3380506,
+    "ast_hash": "39409a6c8e87abb13a300f08643f90b2",
+    "semantic_hash": "39409a6c8e87abb13a300f08643f90b2"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/profile/profileLogic.ts": {
+    "mtime": 1781134079.756252,
+    "ast_hash": "d464099a4aba75f7e01ab324a1ccfa6a",
+    "semantic_hash": "d464099a4aba75f7e01ab324a1ccfa6a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/profile/subscriptionLogic.ts": {
+    "mtime": 1778701941.849233,
+    "ast_hash": "cd820ceb77d8bd9c4160e0a4b86dc553",
+    "semantic_hash": "cd820ceb77d8bd9c4160e0a4b86dc553"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/seo/StructuredData.astro": {
+    "mtime": 1781457618.9083495,
+    "ast_hash": "cda62a88824cab2b8dcb1975e33c1f00",
+    "semantic_hash": "cda62a88824cab2b8dcb1975e33c1f00"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/tips/TipsHero.astro": {
+    "mtime": 1781629366.7792406,
+    "ast_hash": "07b199aa9415d765f27cabe42fff40e0",
+    "semantic_hash": "07b199aa9415d765f27cabe42fff40e0"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/aboutPage/EN/CardsSection.json": {
+    "mtime": 1757634773.9369054,
+    "ast_hash": "62a925cf2553e775e213443470e75e7a",
+    "semantic_hash": "62a925cf2553e775e213443470e75e7a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/aboutPage/EN/OurStory.json": {
+    "mtime": 1757634773.9369493,
+    "ast_hash": "c3b9c1a2b3cd8a8124880046b74a7b96",
+    "semantic_hash": "c3b9c1a2b3cd8a8124880046b74a7b96"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/aboutPage/EN/PageHeader.json": {
+    "mtime": 1757634773.9369965,
+    "ast_hash": "2cb215268e01d274e7f2bffb71c26b3a",
+    "semantic_hash": "2cb215268e01d274e7f2bffb71c26b3a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/aboutPage/EN/Stats.json": {
+    "mtime": 1757634773.9370413,
+    "ast_hash": "80b373418b5950c38f1f2488ab92f7ec",
+    "semantic_hash": "80b373418b5950c38f1f2488ab92f7ec"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/aboutPage/EN/StatsCardsSection.json": {
+    "mtime": 1757634773.937076,
+    "ast_hash": "1170ef14a9a90e8f2ccd4436b32143b6",
+    "semantic_hash": "1170ef14a9a90e8f2ccd4436b32143b6"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/aboutPage/EN/WhyChooseUs.json": {
+    "mtime": 1757634773.9371133,
+    "ast_hash": "40bd9f75dc0bd3f5caadd0a86d322193",
+    "semantic_hash": "40bd9f75dc0bd3f5caadd0a86d322193"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/articlePage/RU/Article.json": {
+    "mtime": 1759790165.9818418,
+    "ast_hash": "a3a2ca0188cb2a32c1e4f3834bea9789",
+    "semantic_hash": "a3a2ca0188cb2a32c1e4f3834bea9789"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/contactPage/EN/ContactPage.json": {
+    "mtime": 1757634773.937311,
+    "ast_hash": "e7a09234d0a56d1b3411e2b29b2a5a2e",
+    "semantic_hash": "e7a09234d0a56d1b3411e2b29b2a5a2e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/footer/EN/Footer.json": {
+    "mtime": 1781188350.6626852,
+    "ast_hash": "a6af23dc1e33bf697f6a302f55081fd2",
+    "semantic_hash": "a6af23dc1e33bf697f6a302f55081fd2"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/homePage/EN/BookACall.json": {
+    "mtime": 1757634773.9374652,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/homePage/EN/Hero.json": {
+    "mtime": 1757634773.9375248,
+    "ast_hash": "c179025553bf3426947ab4c67ce5acd1",
+    "semantic_hash": "c179025553bf3426947ab4c67ce5acd1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/homePage/EN/HowIHelp.json": {
+    "mtime": 1757634773.9375618,
+    "ast_hash": "97a859ba353a4202a27dae7b14c0ffa8",
+    "semantic_hash": "97a859ba353a4202a27dae7b14c0ffa8"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/homePage/EN/LargeCards.json": {
+    "mtime": 1757634773.9375994,
+    "ast_hash": "1a56112d65c1d3b2b11aca5fb6765058",
+    "semantic_hash": "1a56112d65c1d3b2b11aca5fb6765058"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/homePage/EN/SmallCards.json": {
+    "mtime": 1757634773.9376347,
+    "ast_hash": "ebde75c96debb89902669256d9aa2016",
+    "semantic_hash": "ebde75c96debb89902669256d9aa2016"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/homePage/EN/Testimonials.json": {
+    "mtime": 1757634773.9376707,
+    "ast_hash": "b2ce8915c966efcdc3352d76e2ef010e",
+    "semantic_hash": "b2ce8915c966efcdc3352d76e2ef010e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/homePage/EN/TestimonialsHeading.json": {
+    "mtime": 1757634773.9377108,
+    "ast_hash": "46912beeb8c77107d6a9e7cee301b55e",
+    "semantic_hash": "46912beeb8c77107d6a9e7cee301b55e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/homePage/EN/learnMore.json": {
+    "mtime": 1757634773.9377472,
+    "ast_hash": "fef8158ef9ed5dc756a61ce426e77302",
+    "semantic_hash": "fef8158ef9ed5dc756a61ce426e77302"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/mockNews.ts": {
+    "mtime": 1757634773.9377878,
+    "ast_hash": "91daa817ac7380248b494aae363cb9fb",
+    "semantic_hash": "91daa817ac7380248b494aae363cb9fb"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/navbar/EN/Navbar.json": {
+    "mtime": 1781188350.566698,
+    "ast_hash": "5d61912e2b2e3c1b1195a706869eaa23",
+    "semantic_hash": "5d61912e2b2e3c1b1195a706869eaa23"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/navbar/RU/Navbar.json": {
+    "mtime": 1781188218.6391537,
+    "ast_hash": "715b18c49dd31f405b95c22e3d1cafa5",
+    "semantic_hash": "715b18c49dd31f405b95c22e3d1cafa5"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/tags/CultureTags.json": {
+    "mtime": 1781820157.1984859,
+    "ast_hash": "a689cff40a2cf1ab41285ed23715ccdc",
+    "semantic_hash": "a689cff40a2cf1ab41285ed23715ccdc"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/tags/NewsTags.json": {
+    "mtime": 1778621164.4304643,
+    "ast_hash": "66393e47a173da1b8cbe1f9e13bdaee6",
+    "semantic_hash": "66393e47a173da1b8cbe1f9e13bdaee6"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/tags/ParisDistricts.json": {
+    "mtime": 1778948860.9525888,
+    "ast_hash": "1be6fb8e296289dbbd0170c3662243ab",
+    "semantic_hash": "1be6fb8e296289dbbd0170c3662243ab"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/tags/ParisTags.json": {
+    "mtime": 1779251918.0837734,
+    "ast_hash": "03dbb237181b5639b821f53e0dff42c8",
+    "semantic_hash": "03dbb237181b5639b821f53e0dff42c8"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/tags/ParisTagsNew.json": {
+    "mtime": 1781630027.2411141,
+    "ast_hash": "79bc0ff949268af3f7d7a05ab071330b",
+    "semantic_hash": "79bc0ff949268af3f7d7a05ab071330b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/tags/ParisTechTags.json": {
+    "mtime": 1778345305.7381144,
+    "ast_hash": "9ff77833be5a6b8dae5e808a01299a69",
+    "semantic_hash": "9ff77833be5a6b8dae5e808a01299a69"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/tags/parisTags.ts": {
+    "mtime": 1780053245.2606642,
+    "ast_hash": "e994d90203b9edb6351d319f147b746b",
+    "semantic_hash": "e994d90203b9edb6351d319f147b746b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/tags/subCategoriesParis.ts": {
+    "mtime": 1778344611.3561037,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/alpine/blockRichTextEditor.ts": {
+    "mtime": 1780075835.9174576,
+    "ast_hash": "10aa63dd69b1e7070e9ad93212be3506",
+    "semantic_hash": "10aa63dd69b1e7070e9ad93212be3506"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/alpine/plugins/lazyLoadPlugin.ts": {
+    "mtime": 1781650554.2259476,
+    "ast_hash": "4c4639c1cb4d81c5b8992e68d2e66ec9",
+    "semantic_hash": "4c4639c1cb4d81c5b8992e68d2e66ec9"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/api/api.ts": {
+    "mtime": 1781568493.337504,
+    "ast_hash": "06d0c03c39661848615e6cb908f37fe8",
+    "semantic_hash": "06d0c03c39661848615e6cb908f37fe8"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/firebase/client.ts": {
+    "mtime": 1759792862.95798,
+    "ast_hash": "eb7a54b0c9cb1e833a6f333a915e2d31",
+    "semantic_hash": "eb7a54b0c9cb1e833a6f333a915e2d31"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/images/compressImage.ts": {
+    "mtime": 1780509567.2082603,
+    "ast_hash": "48c02532ad396bfe5046784c81987646",
+    "semantic_hash": "48c02532ad396bfe5046784c81987646"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/seo/structuredData.ts": {
+    "mtime": 1781458589.735944,
+    "ast_hash": "eae891e4f1ca0a4c71438738dba47999",
+    "semantic_hash": "eae891e4f1ca0a4c71438738dba47999"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/utils/calendarPage.ts": {
+    "mtime": 1779907963.5676398,
+    "ast_hash": "cbf8e96ff004a7d8a0d2fe289b80dc2f",
+    "semantic_hash": "cbf8e96ff004a7d8a0d2fe289b80dc2f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/utils/constants.ts": {
+    "mtime": 1759788557.662813,
+    "ast_hash": "82c06b8e1e39a0ef8c02cb0ba0200aaa",
+    "semantic_hash": "82c06b8e1e39a0ef8c02cb0ba0200aaa"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/utils/contentBlockPreview.ts": {
+    "mtime": 1781186011.9874094,
+    "ast_hash": "de75176c1df31bb78557c403a4748a45",
+    "semantic_hash": "de75176c1df31bb78557c403a4748a45"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/utils/contentBlocks.ts": {
+    "mtime": 1778089203.5278008,
+    "ast_hash": "7ff55b50f3228769d16736016b35fe53",
+    "semantic_hash": "7ff55b50f3228769d16736016b35fe53"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/utils/contentCollectionEditor.ts": {
+    "mtime": 1779421474.9898562,
+    "ast_hash": "ee60055ca937675ab34315ba1aea0015",
+    "semantic_hash": "ee60055ca937675ab34315ba1aea0015"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/utils/contentCollectionMarquee.ts": {
+    "mtime": 1781181261.0240173,
+    "ast_hash": "864ceeca2ad21ddc93c50e55cbe2c11f",
+    "semantic_hash": "864ceeca2ad21ddc93c50e55cbe2c11f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/utils/contentCollections.ts": {
+    "mtime": 1779418927.028867,
+    "ast_hash": "29dcd4798c10eb1d488bb92f34ba2b93",
+    "semantic_hash": "29dcd4798c10eb1d488bb92f34ba2b93"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/utils/relatedContent.ts": {
+    "mtime": 1781462571.8325384,
+    "ast_hash": "d5269d4f40840a85dea637f6dec4174f",
+    "semantic_hash": "d5269d4f40840a85dea637f6dec4174f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/utils/richText.ts": {
+    "mtime": 1780074712.2045293,
+    "ast_hash": "994f0772960ed948b367628a65b4af1d",
+    "semantic_hash": "994f0772960ed948b367628a65b4af1d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/utils/transitions.ts": {
+    "mtime": 1780676179.7151582,
+    "ast_hash": "5360da43c3c319aafdbc459069587d75",
+    "semantic_hash": "5360da43c3c319aafdbc459069587d75"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/lib/utils/video.ts": {
+    "mtime": 1778086981.7625415,
+    "ast_hash": "1d693de7d33b2433ad7fefcba05014c9",
+    "semantic_hash": "1d693de7d33b2433ad7fefcba05014c9"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/404.astro": {
+    "mtime": 1778019081.4308062,
+    "ast_hash": "f0491c9007d57e0b0c651b9cd1309677",
+    "semantic_hash": "f0491c9007d57e0b0c651b9cd1309677"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/about.astro": {
+    "mtime": 1781456253.635477,
+    "ast_hash": "819d6afd00f57c9c4a7f31aea36ec00f",
+    "semantic_hash": "819d6afd00f57c9c4a7f31aea36ec00f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/article-variant.astro": {
+    "mtime": 1780068137.1793864,
+    "ast_hash": "ccfa743eafe3a3c95c1784deb08c424f",
+    "semantic_hash": "ccfa743eafe3a3c95c1784deb08c424f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/article/[id].astro": {
+    "mtime": 1781817475.7384796,
+    "ast_hash": "25c27d071a04e92be332a32c44b8f22c",
+    "semantic_hash": "25c27d071a04e92be332a32c44b8f22c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/building.astro": {
+    "mtime": 1780498497.630664,
+    "ast_hash": "c95891c7e5e702b3da36c21682ac6796",
+    "semantic_hash": "c95891c7e5e702b3da36c21682ac6796"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/calendar.astro": {
+    "mtime": 1781463633.6863823,
+    "ast_hash": "507676fe520c12086cce0cf97f44cdb9",
+    "semantic_hash": "507676fe520c12086cce0cf97f44cdb9"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/cancel.astro": {
+    "mtime": 1761764862.1350045,
+    "ast_hash": "8900f7a7bb35adbd15dd12f07a8424a7",
+    "semantic_hash": "8900f7a7bb35adbd15dd12f07a8424a7"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/cookies.astro": {
+    "mtime": 1780503597.2090473,
+    "ast_hash": "122514e032c7829a49fd05d94a9875a3",
+    "semantic_hash": "122514e032c7829a49fd05d94a9875a3"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/culture.astro": {
+    "mtime": 1781631673.3958685,
+    "ast_hash": "4b34931e8a0bfd8e0b5686aaae24ae55",
+    "semantic_hash": "4b34931e8a0bfd8e0b5686aaae24ae55"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/article/[id]/edit.astro": {
+    "mtime": 1780075848.1942341,
+    "ast_hash": "e293a81d5fb18e2cc172057b3728ea02",
+    "semantic_hash": "e293a81d5fb18e2cc172057b3728ea02"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/article/create.astro": {
+    "mtime": 1778948951.2518435,
+    "ast_hash": "3020fae4693384b9b9ff224ad75c02f3",
+    "semantic_hash": "3020fae4693384b9b9ff224ad75c02f3"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/article/preview.astro": {
+    "mtime": 1781710637.6884615,
+    "ast_hash": "348a27e6ed126f9d8548177ac8e30b58",
+    "semantic_hash": "348a27e6ed126f9d8548177ac8e30b58"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/articles/culture.astro": {
+    "mtime": 1778620435.7360556,
+    "ast_hash": "b8954b873296e71b1ce2de084d838eb8",
+    "semantic_hash": "b8954b873296e71b1ce2de084d838eb8"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/articles/paris.astro": {
+    "mtime": 1778620441.3926733,
+    "ast_hash": "06d6d300c2148a5fa4f234a99c2b78dd",
+    "semantic_hash": "06d6d300c2148a5fa4f234a99c2b78dd"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/calendar-editor.astro": {
+    "mtime": 1779997881.4621806,
+    "ast_hash": "16855bf49ef084dbfd7f1f0d1f0359c1",
+    "semantic_hash": "16855bf49ef084dbfd7f1f0d1f0359c1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/culture-editor.astro": {
+    "mtime": 1779996739.177659,
+    "ast_hash": "4e415d69e452543c2a9b756b53ba4ce0",
+    "semantic_hash": "4e415d69e452543c2a9b756b53ba4ce0"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/event/[id]/edit.astro": {
+    "mtime": 1760553118.822229,
+    "ast_hash": "720e014ffdb7d5de31ad5a197a38bac1",
+    "semantic_hash": "720e014ffdb7d5de31ad5a197a38bac1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/event/create.astro": {
+    "mtime": 1760553207.7191103,
+    "ast_hash": "5837969b92d286347fa275132986f38a",
+    "semantic_hash": "5837969b92d286347fa275132986f38a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/event/preview.astro": {
+    "mtime": 1781711479.500997,
+    "ast_hash": "f3b604572eed1718403f111acfebd6a1",
+    "semantic_hash": "f3b604572eed1718403f111acfebd6a1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/events/index.astro": {
+    "mtime": 1781569802.662181,
+    "ast_hash": "d1f5fae1d99ceba4122d653e335663df",
+    "semantic_hash": "d1f5fae1d99ceba4122d653e335663df"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/flippers.astro": {
+    "mtime": 1781569946.4394658,
+    "ast_hash": "19cf32598ec4a69940fcaebc4e618574",
+    "semantic_hash": "19cf32598ec4a69940fcaebc4e618574"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/flippers/create.astro": {
+    "mtime": 1781567080.6078477,
+    "ast_hash": "f513dff81d5069181d3374196d0d300a",
+    "semantic_hash": "f513dff81d5069181d3374196d0d300a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/flippers/edit/[id].astro": {
+    "mtime": 1781567080.7071836,
+    "ast_hash": "cc99494b4e325576d6648eb2bab8bf8e",
+    "semantic_hash": "cc99494b4e325576d6648eb2bab8bf8e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/flippers/preview.astro": {
+    "mtime": 1781710976.2003567,
+    "ast_hash": "8d4c0c266262edc70135bb31c12caadd",
+    "semantic_hash": "8d4c0c266262edc70135bb31c12caadd"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/guide/[id]/edit.astro": {
+    "mtime": 1778948951.389906,
+    "ast_hash": "16fd50bcae1620cd25ca3ea0743b8473",
+    "semantic_hash": "16fd50bcae1620cd25ca3ea0743b8473"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/guide/create.astro": {
+    "mtime": 1778948951.343616,
+    "ast_hash": "8f82b192646f10f291645e6d82f3f9f5",
+    "semantic_hash": "8f82b192646f10f291645e6d82f3f9f5"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/guide/preview.astro": {
+    "mtime": 1781710752.2720768,
+    "ast_hash": "66c9eff38b5a250c84ababd06462f8a1",
+    "semantic_hash": "66c9eff38b5a250c84ababd06462f8a1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/guides.astro": {
+    "mtime": 1781570165.6997082,
+    "ast_hash": "3c534fce6e2193af256e2e05f28be311",
+    "semantic_hash": "3c534fce6e2193af256e2e05f28be311"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/index.astro": {
+    "mtime": 1778716396.2738395,
+    "ast_hash": "7607f7d37ae05ebefbff1adb5390ba93",
+    "semantic_hash": "7607f7d37ae05ebefbff1adb5390ba93"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/interview/[id]/edit.astro": {
+    "mtime": 1781647271.266927,
+    "ast_hash": "4120f40fba23121e496d12afe44ac86d",
+    "semantic_hash": "4120f40fba23121e496d12afe44ac86d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/interview/create.astro": {
+    "mtime": 1761747440.5464108,
+    "ast_hash": "ff46c202c9f36a6caeb7a0514cadfeac",
+    "semantic_hash": "ff46c202c9f36a6caeb7a0514cadfeac"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/interview/preview.astro": {
+    "mtime": 1781653308.9479828,
+    "ast_hash": "93ed6f6afbd30e2abb304fd2e073dbe1",
+    "semantic_hash": "93ed6f6afbd30e2abb304fd2e073dbe1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/interviews.astro": {
+    "mtime": 1781569982.0670955,
+    "ast_hash": "07b8263b1ce8b0167a60742456a260ad",
+    "semantic_hash": "07b8263b1ce8b0167a60742456a260ad"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/landing-editor.astro": {
+    "mtime": 1780548202.623602,
+    "ast_hash": "aa15c04e7a1ef74883f68ae8e531ea04",
+    "semantic_hash": "aa15c04e7a1ef74883f68ae8e531ea04"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/le-saviez-vous/[id]/edit.astro": {
+    "mtime": 1778949034.5725641,
+    "ast_hash": "17c351d23613fd0de15fb70b32c1364f",
+    "semantic_hash": "17c351d23613fd0de15fb70b32c1364f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/le-saviez-vous/create.astro": {
+    "mtime": 1778949034.5243852,
+    "ast_hash": "9e216aad0c4a445d74f478a0af153b6f",
+    "semantic_hash": "9e216aad0c4a445d74f478a0af153b6f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/le-saviez-vous/index.astro": {
+    "mtime": 1781570077.185128,
+    "ast_hash": "4dcab11be426b28f84d271f63662486e",
+    "semantic_hash": "4dcab11be426b28f84d271f63662486e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/news/[id]/edit.astro": {
+    "mtime": 1778952002.1024942,
+    "ast_hash": "da1f6dfc1c03c5a2749659fe1a895a19",
+    "semantic_hash": "da1f6dfc1c03c5a2749659fe1a895a19"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/news/create.astro": {
+    "mtime": 1778621169.751232,
+    "ast_hash": "d010b04c65c6c72186cb199e2d7523d6",
+    "semantic_hash": "d010b04c65c6c72186cb199e2d7523d6"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/news/index.astro": {
+    "mtime": 1781569846.0253596,
+    "ast_hash": "e9580f1fcd6a9a21fd682e8db61c5a08",
+    "semantic_hash": "e9580f1fcd6a9a21fd682e8db61c5a08"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/news/preview.astro": {
+    "mtime": 1781710865.7125669,
+    "ast_hash": "051c8ffd398b625394828f98ed5a298b",
+    "semantic_hash": "051c8ffd398b625394828f98ed5a298b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/paris-editor.astro": {
+    "mtime": 1779996949.5716963,
+    "ast_hash": "3d9c95b62623b75bdd4f6f7c8d3de598",
+    "semantic_hash": "3d9c95b62623b75bdd4f6f7c8d3de598"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/photo-of-the-day/[id]/edit.astro": {
+    "mtime": 1781567080.5067115,
+    "ast_hash": "20e2c5dd2baee0b0837a5da28d9db1b2",
+    "semantic_hash": "20e2c5dd2baee0b0837a5da28d9db1b2"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/photo-of-the-day/create.astro": {
+    "mtime": 1781567080.4127479,
+    "ast_hash": "3847db44f1412a36d48d88ffbe614bae",
+    "semantic_hash": "3847db44f1412a36d48d88ffbe614bae"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/photo-of-the-day/index.astro": {
+    "mtime": 1781570119.9300022,
+    "ast_hash": "d931d46d9275f8c706da85c237044053",
+    "semantic_hash": "d931d46d9275f8c706da85c237044053"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/photo-of-the-day/preview.astro": {
+    "mtime": 1781711154.9976776,
+    "ast_hash": "70265331cd59072c363fa691211a6a75",
+    "semantic_hash": "70265331cd59072c363fa691211a6a75"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/tips/[id]/edit.astro": {
+    "mtime": 1781712488.0795684,
+    "ast_hash": "114bcb160cc11eb378521303d660938b",
+    "semantic_hash": "114bcb160cc11eb378521303d660938b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/tips/create.astro": {
+    "mtime": 1781712478.147717,
+    "ast_hash": "139aa110ce87c53d843a78f19ec30f81",
+    "semantic_hash": "139aa110ce87c53d843a78f19ec30f81"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/tips/index.astro": {
+    "mtime": 1781570040.0200157,
+    "ast_hash": "641c2b1b76430191272e245c94031b69",
+    "semantic_hash": "641c2b1b76430191272e245c94031b69"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/tips/preview.astro": {
+    "mtime": 1781710398.9789479,
+    "ast_hash": "1ce47da8276f63d7947e99ea84655e4e",
+    "semantic_hash": "1ce47da8276f63d7947e99ea84655e4e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/visual-stories.astro": {
+    "mtime": 1781570226.980677,
+    "ast_hash": "87e3ad86195edd2ca8003b3da26a7e82",
+    "semantic_hash": "87e3ad86195edd2ca8003b3da26a7e82"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/visual-story/[id]/edit.astro": {
+    "mtime": 1778948991.356694,
+    "ast_hash": "187385fae32d0da672cf408db3d6b0b1",
+    "semantic_hash": "187385fae32d0da672cf408db3d6b0b1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/visual-story/create.astro": {
+    "mtime": 1778948991.3067644,
+    "ast_hash": "866d906b3459776eacb7afd3c9538fa1",
+    "semantic_hash": "866d906b3459776eacb7afd3c9538fa1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/dashboard/visual-story/preview.astro": {
+    "mtime": 1781711368.7083426,
+    "ast_hash": "9d23d338d17f688cd112e474a3dc1290",
+    "semantic_hash": "9d23d338d17f688cd112e474a3dc1290"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/events/[id].astro": {
+    "mtime": 1781569028.0660865,
+    "ast_hash": "82fe7e281cdf376a33b07bed46629123",
+    "semantic_hash": "82fe7e281cdf376a33b07bed46629123"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/flippers/[id].astro": {
+    "mtime": 1781569028.3224237,
+    "ast_hash": "74b6aa26bc0682d618e3e13641edd4cb",
+    "semantic_hash": "74b6aa26bc0682d618e3e13641edd4cb"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/guide/[id].astro": {
+    "mtime": 1781569027.7285373,
+    "ast_hash": "b523eb95fffe11cfb3fe3b0a1cdcdb1f",
+    "semantic_hash": "b523eb95fffe11cfb3fe3b0a1cdcdb1f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/index.astro": {
+    "mtime": 1781456253.2352355,
+    "ast_hash": "c5b4fe939bbf9387e8a7529747be3f10",
+    "semantic_hash": "c5b4fe939bbf9387e8a7529747be3f10"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/interviews/[id].astro": {
+    "mtime": 1781628246.35327,
+    "ast_hash": "91c3b6d8f32906a3a30dcbc34c5c50a2",
+    "semantic_hash": "91c3b6d8f32906a3a30dcbc34c5c50a2"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/news/[id].astro": {
+    "mtime": 1781569027.932714,
+    "ast_hash": "61d9a4468e61b17a574625fa6aa0d2e6",
+    "semantic_hash": "61d9a4468e61b17a574625fa6aa0d2e6"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/paris.astro": {
+    "mtime": 1781631752.6596828,
+    "ast_hash": "649301e807bd2ce7e63feb0d0ace807e",
+    "semantic_hash": "649301e807bd2ce7e63feb0d0ace807e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/photo-of-the-day/[id].astro": {
+    "mtime": 1781569028.5755906,
+    "ast_hash": "b47d9a76ef01a0c1b3fa7b078a15de8c",
+    "semantic_hash": "b47d9a76ef01a0c1b3fa7b078a15de8c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/privacy.astro": {
+    "mtime": 1780503596.99751,
+    "ast_hash": "168acfca35ee8ced926ce942afa9c082",
+    "semantic_hash": "168acfca35ee8ced926ce942afa9c082"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/profile.astro": {
+    "mtime": 1781142309.620623,
+    "ast_hash": "48cb198ce3610f4f47e08cc95eef682b",
+    "semantic_hash": "48cb198ce3610f4f47e08cc95eef682b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/robots.txt.ts": {
+    "mtime": 1781456368.832236,
+    "ast_hash": "96eee67394bd5d62035084c96cf1930d",
+    "semantic_hash": "96eee67394bd5d62035084c96cf1930d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/sitemap-content.xml.ts": {
+    "mtime": 1781456355.1126945,
+    "ast_hash": "0cb24844e8444e945369ab6da989c4d0",
+    "semantic_hash": "0cb24844e8444e945369ab6da989c4d0"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/success.astro": {
+    "mtime": 1778714128.1384885,
+    "ast_hash": "551c88dcc4f18deebc1645813f199868",
+    "semantic_hash": "551c88dcc4f18deebc1645813f199868"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/terms.astro": {
+    "mtime": 1780503597.1027129,
+    "ast_hash": "37a4c3e17109cc0dc3a29aa93f809aaf",
+    "semantic_hash": "37a4c3e17109cc0dc3a29aa93f809aaf"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/tips/[id].astro": {
+    "mtime": 1781569027.8268466,
+    "ast_hash": "8a68359875c60187e973ede60825823d",
+    "semantic_hash": "8a68359875c60187e973ede60825823d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/pages/visual-story/[id].astro": {
+    "mtime": 1781629867.9228628,
+    "ast_hash": "a45bc7ac8445922144092cabb9823979",
+    "semantic_hash": "a45bc7ac8445922144092cabb9823979"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/stores/authStore.ts": {
+    "mtime": 1781133950.3994353,
+    "ast_hash": "0043617807f126b0205de696eb7d5142",
+    "semantic_hash": "0043617807f126b0205de696eb7d5142"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/stores/navbarStore.ts": {
+    "mtime": 1778030204.722201,
+    "ast_hash": "ea37cfc2f1f6f20892608c8c2cdc6132",
+    "semantic_hash": "ea37cfc2f1f6f20892608c8c2cdc6132"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/stores/uiStore.ts": {
+    "mtime": 1760486914.419079,
+    "ast_hash": "209339dafa15c8bcf81fd5255e0b4692",
+    "semantic_hash": "209339dafa15c8bcf81fd5255e0b4692"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/tsconfig.json": {
+    "mtime": 1757634773.9386084,
+    "ast_hash": "cf23f3ae4f2e974612b460b2c06f952f",
+    "semantic_hash": "cf23f3ae4f2e974612b460b2c06f952f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/.gitlab-ci.yml": {
+    "mtime": 1757634773.903372,
+    "ast_hash": "338666eaffab6bd24d05d6826b855e18",
+    "semantic_hash": "338666eaffab6bd24d05d6826b855e18"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/ALPINE_GUIDELINES.md": {
+    "mtime": 1757634773.9035482,
+    "ast_hash": "3eba6bd5b32ca6b52390f45f067f918f",
+    "semantic_hash": "3eba6bd5b32ca6b52390f45f067f918f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/BACKEND_DEPLOYMENT_GUIDE.md": {
+    "mtime": 1759791856.0975068,
+    "ast_hash": "25d6930662b390e632599f29a350e95c",
+    "semantic_hash": "25d6930662b390e632599f29a350e95c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/CALENDAR_PAGE_ROADMAP.md": {
+    "mtime": 1779908050.879834,
+    "ast_hash": "9445ffaa69b70b06fde9b5b6f08110e2",
+    "semantic_hash": "9445ffaa69b70b06fde9b5b6f08110e2"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/CONTENT_COLLECTIONS_ROADMAP.md": {
+    "mtime": 1779418686.740389,
+    "ast_hash": "5179516b15ddf753c2de37ccec996f0b",
+    "semantic_hash": "5179516b15ddf753c2de37ccec996f0b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/CONTENT_DISPLAY_LOGIC.md": {
+    "mtime": 1778695409.2346463,
+    "ast_hash": "fa3b3f58d318b12c82373a8edd06fc8b",
+    "semantic_hash": "fa3b3f58d318b12c82373a8edd06fc8b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/DASHBOARD_PREVIEW_REFACTOR_ROADMAP.md": {
+    "mtime": 1781564355.1781626,
+    "ast_hash": "8766375697ace542b9471f2e0c8c23b8",
+    "semantic_hash": "8766375697ace542b9471f2e0c8c23b8"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/FRONTEND_DEPLOYMENT_CHAOS.md": {
+    "mtime": 1759777678.4993312,
+    "ast_hash": "5b1b2b86279452e298d63df14bc490ad",
+    "semantic_hash": "5b1b2b86279452e298d63df14bc490ad"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/FRONTEND_DEPLOYMENT_GUIDE.md": {
+    "mtime": 1759791653.708427,
+    "ast_hash": "0491b1473972dcd8e4415c797124fd97",
+    "semantic_hash": "0491b1473972dcd8e4415c797124fd97"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/LANDING_CULTURE_PARIS_EDITORIAL_ROADMAP.md": {
+    "mtime": 1779991283.0606828,
+    "ast_hash": "37335694a1f3f980b4634732a300c8b4",
+    "semantic_hash": "37335694a1f3f980b4634732a300c8b4"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/LANDING_EDITORIAL_PLACEMENTS_ROADMAP.md": {
+    "mtime": 1779386819.4679728,
+    "ast_hash": "70d8bf6cce98ce069ec065c4b4477e07",
+    "semantic_hash": "70d8bf6cce98ce069ec065c4b4477e07"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/MENTORMATIC_ALPINE_REFACTOR_PLAN.md": {
+    "mtime": 1757634773.903647,
+    "ast_hash": "154116c9f2644d7a0cb7eb17b4fade25",
+    "semantic_hash": "154116c9f2644d7a0cb7eb17b4fade25"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/PHOTO_OF_THE_DAY_ROADMAP.md": {
+    "mtime": 1780545862.9741864,
+    "ast_hash": "f2864f88f499f60f4ce7a2f00f090150",
+    "semantic_hash": "f2864f88f499f60f4ce7a2f00f090150"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/README.md": {
+    "mtime": 1774265034.5435636,
+    "ast_hash": "44681cc702670217c91439f2e2a311fd",
+    "semantic_hash": "44681cc702670217c91439f2e2a311fd"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/SECURITY_INCIDENT_2025-01-27.md": {
+    "mtime": 1781124814.5352685,
+    "ast_hash": "d6c85be8d49280a4ad05ed6d2ba9a643",
+    "semantic_hash": "d6c85be8d49280a4ad05ed6d2ba9a643"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/SEO_ROADMAP.md": {
+    "mtime": 1781458968.7992902,
+    "ast_hash": "eeb6950d030974b8057f84614506585b",
+    "semantic_hash": "eeb6950d030974b8057f84614506585b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/VIEW_TRANSITIONS_AUDIT.md": {
+    "mtime": 1780679061.9625158,
+    "ast_hash": "df4a3736b1d8a3144eb3e3bbaa2f5586",
+    "semantic_hash": "df4a3736b1d8a3144eb3e3bbaa2f5586"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/cloudbuild.yaml": {
+    "mtime": 1780283873.6232688,
+    "ast_hash": "c7bac247252494644b9084469ffa4e53",
+    "semantic_hash": "c7bac247252494644b9084469ffa4e53"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/IMPLEMENTATION_PLAN.md": {
+    "mtime": 1781649483.4376261,
+    "ast_hash": "9b5f3f8b994669f8291da079ccbb2aba",
+    "semantic_hash": "9b5f3f8b994669f8291da079ccbb2aba"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/IMPLEMENTATION_ROADMAP.md": {
+    "mtime": 1781649493.612156,
+    "ast_hash": "2cad3e4d6bec8aceac11a285cbfe687f",
+    "semantic_hash": "2cad3e4d6bec8aceac11a285cbfe687f"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/README.md": {
+    "mtime": 1781649483.2075584,
+    "ast_hash": "ddb8c91594435c2577ea0cc22570f89b",
+    "semantic_hash": "ddb8c91594435c2577ea0cc22570f89b"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/article.md": {
+    "mtime": 1781649336.9212136,
+    "ast_hash": "85a4cc68b9fbd208a99bc2075eb08f4d",
+    "semantic_hash": "85a4cc68b9fbd208a99bc2075eb08f4d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/event.md": {
+    "mtime": 1781649405.2509751,
+    "ast_hash": "8c63e7eb6bd83d572b0dc126096953f4",
+    "semantic_hash": "8c63e7eb6bd83d572b0dc126096953f4"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/flipper.md": {
+    "mtime": 1781649405.9265168,
+    "ast_hash": "21181d4f276b19b78f43b4e9b7714efe",
+    "semantic_hash": "21181d4f276b19b78f43b4e9b7714efe"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/guide.md": {
+    "mtime": 1781649337.8228266,
+    "ast_hash": "48865acfecb1fa2036ec9a95a95d62a2",
+    "semantic_hash": "48865acfecb1fa2036ec9a95a95d62a2"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/interview.md": {
+    "mtime": 1781649405.4743023,
+    "ast_hash": "10849c9d3c98bb6c542f9af822969728",
+    "semantic_hash": "10849c9d3c98bb6c542f9af822969728"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/le-saviez-vous.md": {
+    "mtime": 1781649337.142087,
+    "ast_hash": "be549e179c326c1438f1d65614114eb1",
+    "semantic_hash": "be549e179c326c1438f1d65614114eb1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/news.md": {
+    "mtime": 1781649337.366103,
+    "ast_hash": "c8137e550cd05c89c1bb14c5345b0ad8",
+    "semantic_hash": "c8137e550cd05c89c1bb14c5345b0ad8"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/photo-of-the-day.md": {
+    "mtime": 1781649406.1492512,
+    "ast_hash": "daf2f090c6094cfe69fa90c245c23db1",
+    "semantic_hash": "daf2f090c6094cfe69fa90c245c23db1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/tips.md": {
+    "mtime": 1781649337.5953414,
+    "ast_hash": "45a1061a5322e53ea6933c0b3fc8cfbf",
+    "semantic_hash": "45a1061a5322e53ea6933c0b3fc8cfbf"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/docs/dashboard-material-audit/visual-story.md": {
+    "mtime": 1781649405.698558,
+    "ast_hash": "fbe7d0078214bd40b578ef66fac9bd03",
+    "semantic_hash": "fbe7d0078214bd40b578ef66fac9bd03"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/components/common/README.md": {
+    "mtime": 1757634773.9367158,
+    "ast_hash": "f9afcb68a27e9fdbd7e6ab4afa32fa2a",
+    "semantic_hash": "f9afcb68a27e9fdbd7e6ab4afa32fa2a"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/legal/cookie-policy.md": {
+    "mtime": 1780503868.241999,
+    "ast_hash": "62042a1f353cbae1a3535bdd45051094",
+    "semantic_hash": "62042a1f353cbae1a3535bdd45051094"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/legal/privacy-policy.md": {
+    "mtime": 1780503868.025765,
+    "ast_hash": "7477da5d09bd3f06ab44307b84f9f388",
+    "semantic_hash": "7477da5d09bd3f06ab44307b84f9f388"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/content/legal/terms-of-service.md": {
+    "mtime": 1780503868.1332033,
+    "ast_hash": "07a144c8f2c6e311d0403b194909abf5",
+    "semantic_hash": "07a144c8f2c6e311d0403b194909abf5"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/output/pdf/maag_app_summary.pdf": {
+    "mtime": 1770740100.4543357,
+    "ast_hash": "6cf2f877b5f08290decda06996caa754",
+    "semantic_hash": "6cf2f877b5f08290decda06996caa754"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/public/favicon.svg": {
+    "mtime": 1780054848.5094478,
+    "ast_hash": "97bb57ebec2a9fb8433b150e14523674",
+    "semantic_hash": "97bb57ebec2a9fb8433b150e14523674"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/common/image.jpg": {
+    "mtime": 1757634773.9139416,
+    "ast_hash": "0e9be61628a23685f002f0b935cd0ae5",
+    "semantic_hash": "0e9be61628a23685f002f0b935cd0ae5"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/howIHelp/generativeAiNet.svg": {
+    "mtime": 1757634773.9143786,
+    "ast_hash": "fd3a7014c58c641f94f77ddc1237cf31",
+    "semantic_hash": "fd3a7014c58c641f94f77ddc1237cf31"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/howIHelp/googleCloud.svg": {
+    "mtime": 1757634773.914485,
+    "ast_hash": "67669143d55dbe9fa33ca496711d88ae",
+    "semantic_hash": "67669143d55dbe9fa33ca496711d88ae"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/howIHelp/googleWorkspace.svg": {
+    "mtime": 1757634773.914804,
+    "ast_hash": "3f06ceebf5a2b0e117a9e43ade2d64f7",
+    "semantic_hash": "3f06ceebf5a2b0e117a9e43ade2d64f7"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/ai.svg": {
+    "mtime": 1757634773.9148996,
+    "ast_hash": "8e88752251d9c6b5676ed771bc145544",
+    "semantic_hash": "8e88752251d9c6b5676ed771bc145544"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/bookmark.svg": {
+    "mtime": 1757634773.9149487,
+    "ast_hash": "330fe993be33de8c3527726ab7462a70",
+    "semantic_hash": "330fe993be33de8c3527726ab7462a70"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/burger-mobile.svg": {
+    "mtime": 1757634773.9149926,
+    "ast_hash": "94ced5b8f43f053c5317d7b74abd13da",
+    "semantic_hash": "94ced5b8f43f053c5317d7b74abd13da"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/check.svg": {
+    "mtime": 1757634773.9150312,
+    "ast_hash": "addda30bde63672cfefb7f1cdee32611",
+    "semantic_hash": "addda30bde63672cfefb7f1cdee32611"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/db.svg": {
+    "mtime": 1757634773.9150689,
+    "ast_hash": "08d9723dee6e1787676c68ef4dbe2d01",
+    "semantic_hash": "08d9723dee6e1787676c68ef4dbe2d01"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/filter.svg": {
+    "mtime": 1757634773.9151099,
+    "ast_hash": "419708041dbd4c74336e872c5200a185",
+    "semantic_hash": "419708041dbd4c74336e872c5200a185"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/folder.svg": {
+    "mtime": 1757634773.915149,
+    "ast_hash": "1d02118040ad7f4e73daaecbfdd66eea",
+    "semantic_hash": "1d02118040ad7f4e73daaecbfdd66eea"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/headset.svg": {
+    "mtime": 1757634773.9151938,
+    "ast_hash": "3ac6f006a021fa9f9073058f482ec486",
+    "semantic_hash": "3ac6f006a021fa9f9073058f482ec486"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/ix_pen-filled.svg": {
+    "mtime": 1777723368.2184615,
+    "ast_hash": "5151d15d3e47df3c07183ae6aeb0c459",
+    "semantic_hash": "5151d15d3e47df3c07183ae6aeb0c459"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/location.svg": {
+    "mtime": 1757634773.9152353,
+    "ast_hash": "0dfcf339c0a82d020a224b5acb656462",
+    "semantic_hash": "0dfcf339c0a82d020a224b5acb656462"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/map-pin.svg": {
+    "mtime": 1757634773.9152763,
+    "ast_hash": "402ac082661f392dc2d2b607793e14ca",
+    "semantic_hash": "402ac082661f392dc2d2b607793e14ca"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/net.svg": {
+    "mtime": 1757634773.9153159,
+    "ast_hash": "9c963d4af33e1b6eb33c194f40aff264",
+    "semantic_hash": "9c963d4af33e1b6eb33c194f40aff264"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/new/dislike.svg": {
+    "mtime": 1771296612.957609,
+    "ast_hash": "fdf263f34d0456fc64070255c7f3d031",
+    "semantic_hash": "fdf263f34d0456fc64070255c7f3d031"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/new/idea.svg": {
+    "mtime": 1771296612.9827325,
+    "ast_hash": "5e9cdbbfffb5852e37656a3e8bba1792",
+    "semantic_hash": "5e9cdbbfffb5852e37656a3e8bba1792"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/new/like.svg": {
+    "mtime": 1771296612.9757328,
+    "ast_hash": "70f744f4b7b29318e4b0bcc66456aa3e",
+    "semantic_hash": "70f744f4b7b29318e4b0bcc66456aa3e"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/new/location.svg": {
+    "mtime": 1771296612.9844995,
+    "ast_hash": "0dfcf339c0a82d020a224b5acb656462",
+    "semantic_hash": "0dfcf339c0a82d020a224b5acb656462"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/new/money.svg": {
+    "mtime": 1771296612.9494958,
+    "ast_hash": "3fd099243ecb256b75e8795330e36270",
+    "semantic_hash": "3fd099243ecb256b75e8795330e36270"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/new/time.svg": {
+    "mtime": 1771296612.9805348,
+    "ast_hash": "6067c807320054931c5ca17492ef64ae",
+    "semantic_hash": "6067c807320054931c5ca17492ef64ae"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/quote.svg": {
+    "mtime": 1770503278.4689143,
+    "ast_hash": "6dc1015a33b4a0c4cea869e1a9826966",
+    "semantic_hash": "6dc1015a33b4a0c4cea869e1a9826966"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/search-mobile.svg": {
+    "mtime": 1757634773.9153562,
+    "ast_hash": "f7216d1847a1e2b47bfee79d648d05e9",
+    "semantic_hash": "f7216d1847a1e2b47bfee79d648d05e9"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/share.svg": {
+    "mtime": 1757634773.9154046,
+    "ast_hash": "152bbe18cc9ee41448b10c3fc548aea7",
+    "semantic_hash": "152bbe18cc9ee41448b10c3fc548aea7"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/icons/time.svg": {
+    "mtime": 1757634773.9154475,
+    "ast_hash": "fd811624593ab6446943e64430249cf8",
+    "semantic_hash": "fd811624593ab6446943e64430249cf8"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/article_content/news.jpeg": {
+    "mtime": 1757634773.9156194,
+    "ast_hash": "80a4c19542b9ac51d3b17b207a22d1c4",
+    "semantic_hash": "80a4c19542b9ac51d3b17b207a22d1c4"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/article_content/par.jpeg": {
+    "mtime": 1757634773.9158409,
+    "ast_hash": "3e8af0d0d41dfc255f38f61a1fe8cc4d",
+    "semantic_hash": "3e8af0d0d41dfc255f38f61a1fe8cc4d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/cal.jpeg": {
+    "mtime": 1757634773.9159646,
+    "ast_hash": "a90dffd2108670bda2e0dff14481e48c",
+    "semantic_hash": "a90dffd2108670bda2e0dff14481e48c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/calendar/arrow-left.svg": {
+    "mtime": 1757634773.916037,
+    "ast_hash": "3170474661d84442e1f6f49be9ceb00d",
+    "semantic_hash": "3170474661d84442e1f6f49be9ceb00d"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/calendar/arrow-right.svg": {
+    "mtime": 1757634773.9160721,
+    "ast_hash": "d903aa4f3b209a448d934d917eb6cff3",
+    "semantic_hash": "d903aa4f3b209a448d934d917eb6cff3"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/calendar/balet.png": {
+    "mtime": 1757634773.91692,
+    "ast_hash": "9f9cde4eb4a3deb05c13a6702cfb8335",
+    "semantic_hash": "9f9cde4eb4a3deb05c13a6702cfb8335"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/calendar/calendar.svg": {
+    "mtime": 1757634773.917,
+    "ast_hash": "0f087469b96e1ae282b9843a4fcf3deb",
+    "semantic_hash": "0f087469b96e1ae282b9843a4fcf3deb"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/calendar/location.svg": {
+    "mtime": 1757634773.917043,
+    "ast_hash": "0dfcf339c0a82d020a224b5acb656462",
+    "semantic_hash": "0dfcf339c0a82d020a224b5acb656462"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/calendar/small-event.png": {
+    "mtime": 1757634773.9314637,
+    "ast_hash": "5fcbd4cd593bfb45e8f728e4174cf05c",
+    "semantic_hash": "5fcbd4cd593bfb45e8f728e4174cf05c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/calendar/theatre-show.png": {
+    "mtime": 1757634773.9322767,
+    "ast_hash": "9cf7607ffd14ec426d65e3db8af757b1",
+    "semantic_hash": "9cf7607ffd14ec426d65e3db8af757b1"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/calendar/time.svg": {
+    "mtime": 1757634773.932347,
+    "ast_hash": "6067c807320054931c5ca17492ef64ae",
+    "semantic_hash": "6067c807320054931c5ca17492ef64ae"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/culture.jpg": {
+    "mtime": 1757634773.934226,
+    "ast_hash": "599d476cf74ea685db5f85e85bec1e47",
+    "semantic_hash": "599d476cf74ea685db5f85e85bec1e47"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/images/main.jpeg": {
+    "mtime": 1757634773.9345582,
+    "ast_hash": "a2d2475b66bfc0610d3541f79208e7b0",
+    "semantic_hash": "a2d2475b66bfc0610d3541f79208e7b0"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/logo/Vector.png": {
+    "mtime": 1757634773.934707,
+    "ast_hash": "9e7d7c6a6a6502bd3ca5b5d68c824919",
+    "semantic_hash": "9e7d7c6a6a6502bd3ca5b5d68c824919"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/logo/logo-mobile.svg": {
+    "mtime": 1757634773.9347742,
+    "ast_hash": "486dff9153aee7d6cd5e5f13e0cfdd44",
+    "semantic_hash": "486dff9153aee7d6cd5e5f13e0cfdd44"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/logo/logo.svg": {
+    "mtime": 1757634773.9348233,
+    "ast_hash": "170cbe5039ee42ad78b8ccaab1ee947c",
+    "semantic_hash": "170cbe5039ee42ad78b8ccaab1ee947c"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/logo/logoFull.svg": {
+    "mtime": 1757634773.9348764,
+    "ast_hash": "e922bef0ba1684556ac3f314fffc3f48",
+    "semantic_hash": "e922bef0ba1684556ac3f314fffc3f48"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/logo/m.svg": {
+    "mtime": 1780054825.4460373,
+    "ast_hash": "97bb57ebec2a9fb8433b150e14523674",
+    "semantic_hash": "97bb57ebec2a9fb8433b150e14523674"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/logo/maaglogo.svg": {
+    "mtime": 1757634773.9349256,
+    "ast_hash": "b764f9ed6a5003358cc3c0622cb7baa6",
+    "semantic_hash": "b764f9ed6a5003358cc3c0622cb7baa6"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/social/fb.svg": {
+    "mtime": 1757634773.9349966,
+    "ast_hash": "dbb8fc48ff54e1ccca7b49ee5b122305",
+    "semantic_hash": "dbb8fc48ff54e1ccca7b49ee5b122305"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/social/insta.svg": {
+    "mtime": 1757634773.935046,
+    "ast_hash": "ffac42ff6804cca5ae80c32f5ab5a189",
+    "semantic_hash": "ffac42ff6804cca5ae80c32f5ab5a189"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/social/li.svg": {
+    "mtime": 1757634773.93509,
+    "ast_hash": "1fca1cccbfa3c2c9ef6594ca703b2f14",
+    "semantic_hash": "1fca1cccbfa3c2c9ef6594ca703b2f14"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/social/x.svg": {
+    "mtime": 1757634773.9351335,
+    "ast_hash": "563b44a52f6af259296c2397ad39b6e7",
+    "semantic_hash": "563b44a52f6af259296c2397ad39b6e7"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/social/yt.svg": {
+    "mtime": 1757634773.935175,
+    "ast_hash": "4db5475da79805b7c6b735ed0a230e15",
+    "semantic_hash": "4db5475da79805b7c6b735ed0a230e15"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/svg/arrowLeft.svg": {
+    "mtime": 1770509437.0826988,
+    "ast_hash": "841495f0546405d18f033609cf38c2bb",
+    "semantic_hash": "841495f0546405d18f033609cf38c2bb"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/svg/arrowRight.svg": {
+    "mtime": 1770509441.0923028,
+    "ast_hash": "247ade0db09cb0b19fd4d496e6045373",
+    "semantic_hash": "247ade0db09cb0b19fd4d496e6045373"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/team/AM.jpeg": {
+    "mtime": 1778695763.5704021,
+    "ast_hash": "e573d835b3d8e81bffb90c7ab309bea2",
+    "semantic_hash": "e573d835b3d8e81bffb90c7ab309bea2"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/team/MS.jpeg": {
+    "mtime": 1781561097.4628446,
+    "ast_hash": "2b8490f57b62069b0d4b3175cb5d8562",
+    "semantic_hash": "2b8490f57b62069b0d4b3175cb5d8562"
+  },
+  "/Users/dimitrimakarov/Dev/maag_staging/src/assets/team/dm.jpg": {
+    "mtime": 1761759868.7415986,
+    "ast_hash": "1a2cf9365c80fe0fce7571e9d71da4d8",
+    "semantic_hash": "1a2cf9365c80fe0fce7571e9d71da4d8"
+  }
+}

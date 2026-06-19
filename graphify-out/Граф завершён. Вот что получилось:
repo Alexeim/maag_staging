@@ -1,0 +1,39 @@
+Граф завершён. Вот что получилось:
+
+  ---
+  Outputs в /Users/dimitrimakarov/Dev/maag_staging/graphify-out/
+
+  graph.html         — интерактивный граф, открывай в браузере
+  GRAPH_REPORT.md    — полный отчёт
+  graph.json         — данные графа
+
+  ---
+  God Nodes (самые связанные — твои ключевые абстракции)
+
+  1. DashboardLayout.astro — 64 рёбра
+  2. Layout.astro — 45 рёбер
+  3. Button.astro — 25 рёбер
+  4. articlesApi — 24 ребра
+  5. relatedContent utils — 24 ребра
+  6. UiStore — 22 ребра
+  7. ArticleBody.astro — 19 рёбер
+  8. contentCollections utils — 19 рёбер
+  9. updateLandingPlacements() — 18 рёбер
+
+  ---
+  Surprising Connections
+
+  - Mentormatic Alpine Refactor Plan → семантически связан с Alpine Guidelines — оба решают одну задачу lazy-load компонентов
+  - cors.json → ссылается на Google Cloud Run Deployment (явно захардкожены CORS origin'ы под Cloud Run)
+  - sitemap-content.xml → прямая зависимость от коллекций Firestore (articles, news) — SEO напрямую завязан на backend схему
+  - Импортный цикл: api.ts → relatedContent.ts → api.ts
+
+  ---
+  Suggested Questions
+
+  - Почему relatedContent utils связывает 14 разных сообществ? — высокая betweenness (0.234), это главный cross-community мост
+  - Что значит, что getDb() проходит через 13 сообществ? — Firebase DB инстанс используется напрямую во всех контроллерах без repository pattern
+  - Должен ли Alpine.js Plugin System (213 узлов, cohesion=0.009) быть разбит на меньшие модули?
+
+  ---
+  Самый интересный вопрос, который этот граф может ответить: Почему relatedContent utils является мостом между 14 сообществами — от API и dashboard logic до SEO и UI? Хочешь, прослежу этот путь?
