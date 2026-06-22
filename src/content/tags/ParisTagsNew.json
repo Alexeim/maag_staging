@@ -25,6 +25,22 @@
       "value": "architecture"
     },
     {
+      "title": "парки",
+      "value": "parks"
+    },
+    {
+      "title": "путешествия",
+      "value": "travel"
+    },
+    {
+      "title": "отели",
+      "value": "hotels"
+    },
+    {
+      "title": "фестивали",
+      "value": "festivals"
+    },
+    {
       "title": "событие",
       "value": "parisEvent"
     },

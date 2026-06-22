@@ -5,7 +5,7 @@
       "value": "theatre"
     },
     {
-      "title": "выставки",
+      "title": "выставка",
       "value": "exhibitions"
     },
     {
@@ -15,6 +15,10 @@
     {
       "title": "арт-рынок",
       "value": "artMarket"
+    },
+    {
+      "title": "фестиваль",
+      "value": "festival"
     },
     {
       "title": "дети",
@@ -37,6 +41,14 @@
       "value": "music"
     },
     {
+      "title": "классическая музыка",
+      "value": "classicalMusic"
+    },
+    {
+      "title": "концерт",
+      "value": "concert"
+    },
+    {
       "title": "некролог",
       "value": "nekrolog"
     },
@@ -51,6 +63,18 @@
     {
       "title": "кино",
       "value": "cinema"
+    },
+    {
+      "title": "кадры",
+      "value": "frames"
+    },
+    {
+      "title": "архитектура",
+      "value": "architecture"
+    },
+    {
+      "title": "аукцион",
+      "value": "auction"
     },
     {
       "title": "фотография",
