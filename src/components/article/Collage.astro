@@ -38,15 +38,15 @@ const {
           loading="lazy"
         />
         {leftPortraitImageCaption && (
-          <div class="relative z-30 mt-2 inline-flex h-8 w-8 items-center lg:absolute lg:left-0 lg:top-full">
+          <div class="absolute right-2 top-2 z-30 inline-flex h-8 w-8 items-center">
             <button
               type="button"
-              class="inline-flex h-8 w-8 items-center justify-center text-base-content transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+              class="inline-flex h-8 w-8 items-center justify-center text-white transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
               aria-label="Показать подпись к изображению"
             >
               <Info class="h-4 w-4" />
             </button>
-            <div class="pointer-events-none absolute left-full top-1/2 ml-2 max-w-[min(320px,calc(100vw-3rem))] -translate-y-1/2 translate-x-2 bg-black/75 px-3 py-2 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100">
+            <div class="pointer-events-none absolute right-0 top-full mt-2 w-max max-w-[min(360px,calc(100vw-3rem))] translate-y-2 bg-black/75 px-4 py-3 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
               {leftPortraitImageCaption}
             </div>
           </div>
@@ -65,15 +65,15 @@ const {
           loading="lazy"
         />
         {topLandscapeImageCaption && (
-          <div class="relative z-30 mt-2 inline-flex h-8 w-8 items-center lg:absolute lg:left-full lg:top-1/2 lg:ml-2 lg:mt-0 lg:-translate-y-1/2">
+          <div class="absolute right-2 top-2 z-30 inline-flex h-8 w-8 items-center">
             <button
               type="button"
-              class="inline-flex h-8 w-8 items-center justify-center text-base-content transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+              class="inline-flex h-8 w-8 items-center justify-center text-white transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
               aria-label="Показать подпись к изображению"
             >
               <Info class="h-4 w-4" />
             </button>
-            <div class="pointer-events-none absolute left-full top-1/2 ml-2 max-w-[min(360px,calc(100vw-3rem))] -translate-y-1/2 translate-x-2 bg-black/75 px-3 py-2 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100">
+            <div class="pointer-events-none absolute right-0 top-full mt-2 w-max max-w-[min(360px,calc(100vw-3rem))] translate-y-2 bg-black/75 px-4 py-3 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
               {topLandscapeImageCaption}
             </div>
           </div>
@@ -92,15 +92,15 @@ const {
           loading="lazy"
         />
         {mainLandscapeImageCaption && (
-          <div class="relative z-30 mt-2 inline-flex h-8 w-8 items-center lg:absolute lg:left-0 lg:top-full">
+          <div class="absolute right-2 top-2 z-30 inline-flex h-8 w-8 items-center">
             <button
               type="button"
-              class="inline-flex h-8 w-8 items-center justify-center text-base-content transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+              class="inline-flex h-8 w-8 items-center justify-center text-white transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
               aria-label="Показать подпись к изображению"
             >
               <Info class="h-4 w-4" />
             </button>
-            <div class="pointer-events-none absolute left-full top-1/2 ml-2 max-w-[min(420px,calc(100vw-3rem))] -translate-y-1/2 translate-x-2 bg-black/75 px-3 py-2 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100">
+            <div class="pointer-events-none absolute right-0 top-full mt-2 w-max max-w-[min(360px,calc(100vw-3rem))] translate-y-2 bg-black/75 px-4 py-3 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
               {mainLandscapeImageCaption}
             </div>
           </div>
@@ -119,13 +119,13 @@ const {
           loading="lazy"
         />
         {rightPortraitImageCaption && (
-          <div class="relative z-30 mt-2 inline-flex h-8 w-8 items-center lg:absolute lg:bottom-full lg:right-0 lg:mb-2 lg:mt-0">
-            <div class="pointer-events-none absolute right-full top-1/2 mr-2 max-w-[min(320px,calc(100vw-3rem))] -translate-x-2 -translate-y-1/2 bg-black/75 px-3 py-2 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100">
+          <div class="absolute right-2 top-2 z-30 inline-flex h-8 w-8 items-center">
+            <div class="pointer-events-none absolute right-0 top-full mt-2 w-max max-w-[min(360px,calc(100vw-3rem))] translate-y-2 bg-black/75 px-4 py-3 font-inter text-xs leading-relaxed text-white opacity-0 shadow-[0_18px_42px_rgba(0,0,0,0.22)] transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
               {rightPortraitImageCaption}
             </div>
             <button
               type="button"
-              class="inline-flex h-8 w-8 items-center justify-center text-base-content transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
+              class="inline-flex h-8 w-8 items-center justify-center text-white transition hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none"
               aria-label="Показать подпись к изображению"
             >
               <Info class="h-4 w-4" />
