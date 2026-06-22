@@ -640,6 +640,27 @@ const getWeekBounds = (today: Date) => {
   return { weekStart, weekEnd };
 };
 
+const resolveLastChanceEventIds = (events: any[], limit = 4) => {
+  const today = resetToUtcMidnight(new Date());
+  const cutoff = new Date(today);
+  cutoff.setUTCDate(today.getUTCDate() + 7);
+  cutoff.setUTCHours(23, 59, 59, 999);
+
+  return events
+    .filter((event) => {
+      const range = getComparableCalendarRange(event);
+      if (!range) return false;
+      return range.end.getTime() >= today.getTime() && range.end.getTime() <= cutoff.getTime();
+    })
+    .sort((left, right) => {
+      const leftEnd = getComparableCalendarRange(left)?.end.getTime() ?? 0;
+      const rightEnd = getComparableCalendarRange(right)?.end.getTime() ?? 0;
+      return leftEnd - rightEnd;
+    })
+    .slice(0, limit)
+    .map((event) => event.id);
+};
+
 const resolveAutoSecondaryEventIds = (events: any[], limit = 4) => {
   const today = resetToUtcMidnight(new Date());
   const { weekStart, weekEnd } = getWeekBounds(today);
@@ -710,11 +731,16 @@ const buildCalendarPagePayload = async () => {
             .filter(Boolean)
         : [];
 
+  const lastChanceCards = resolveLastChanceEventIds(events)
+    .map((id) => eventMap.get(id))
+    .filter(Boolean);
+
   return {
     calendarPagePlacements,
     events,
     featuredEventCards,
     topCards: secondaryCardEvents,
+    lastChanceCards,
   };
 };
 

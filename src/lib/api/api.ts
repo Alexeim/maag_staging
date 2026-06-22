@@ -1139,6 +1139,7 @@ export interface PublicCalendarResponse {
   events: unknown[];
   featuredEventCards: unknown[];
   topCards: unknown[];
+  lastChanceCards: unknown[];
 }
 
 export const publicCultureApi = {
