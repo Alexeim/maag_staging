@@ -303,7 +303,8 @@ export default (
   rangeFlexibleEvents: [] as NormalizedEvent[],
   filters: [] as string[],
   availableEventsCount: 0,
-  activeFilter: "все",
+  filteredEventsCount: 0,
+  activeFilters: [] as string[],
   activeFeaturedIndex: 0,
   isFeaturedEventVisible: true,
   featuredEventTransitionTimer: null as ReturnType<typeof setTimeout> | null,
@@ -582,6 +583,7 @@ export default (
       this.rangeFlexibleEvents = [];
       this.filters = [];
       this.availableEventsCount = 0;
+      this.filteredEventsCount = 0;
       return;
     }
 
@@ -606,14 +608,14 @@ export default (
     this.availableEventsCount = eventsForDate.length;
     this.filters = getUniqueFilters(eventsForDate);
 
-    if (this.activeFilter !== "все" && !this.filters.includes(this.activeFilter)) {
-      this.activeFilter = "все";
-    }
+    this.activeFilters = this.activeFilters.filter((f) => this.filters.includes(f));
 
     const filtered =
-      this.activeFilter === "все"
+      this.activeFilters.length === 0
         ? eventsForDate
-        : eventsForDate.filter((event) => event.tag === this.activeFilter);
+        : eventsForDate.filter((event) => this.activeFilters.includes(event.tag));
+
+    this.filteredEventsCount = filtered.length;
 
     if (isRange) {
       this.filteredEvents = filtered;
@@ -693,7 +695,16 @@ export default (
   },
 
   setFilter(filter: string) {
-    this.activeFilter = filter;
+    if (filter === "все") {
+      this.activeFilters = [];
+    } else {
+      const idx = this.activeFilters.indexOf(filter);
+      if (idx === -1) {
+        this.activeFilters = [...this.activeFilters, filter];
+      } else {
+        this.activeFilters = this.activeFilters.filter((f) => f !== filter);
+      }
+    }
     this.updateFilteredEvents();
   },
 

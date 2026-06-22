@@ -8,19 +8,19 @@
   <div x-show="!isLazyLoading" class="flex flex-wrap gap-3">
     <button
       @click="$dispatch('filter-changed', { filter: 'все' })"
-      :class="activeFilter === 'все' ? 'bg-[#302821] text-white border-[#302821]' : 'bg-white text-[#302821] border-[#30282133]'"
+      :class="activeFilters.length === 0 ? 'bg-[#302821] text-white border-[#302821]' : 'bg-white text-[#302821] border-[#30282133]'"
       class="flex cursor-pointer items-center gap-2 rounded-full border px-5 py-2 text-xs font-inter font-medium uppercase tracking-[0.28em] transition-colors hover:border-[#30282166]"
     >
       <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M9 1.5H1M7.6 4.5H2.4M6 7.5H4" stroke="currentColor" stroke-linecap="round"></path>
       </svg>
-      <span x-text="`${availableEventsCount} событий`"></span>
+      <span x-text="activeFilters.length === 0 ? `${availableEventsCount} событий` : `${filteredEventsCount} из ${availableEventsCount}`"></span>
     </button>
 
     <template x-for="filter in filters">
       <button
         @click="$dispatch('filter-changed', { filter })"
-        :class="activeFilter === filter ? 'bg-[#302821] text-white' : 'bg-[#f7f2ee] text-[#302821]'"
+        :class="activeFilters.includes(filter) ? 'bg-[#302821] text-white' : 'bg-[#f7f2ee] text-[#302821]'"
         class="cursor-pointer rounded-full border border-transparent px-5 py-2 text-xs font-inter font-medium uppercase tracking-[0.28em] transition-colors hover:border-[#3028211f]"
         x-text="filter"
       ></button>

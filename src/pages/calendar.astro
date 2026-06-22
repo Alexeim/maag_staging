@@ -360,7 +360,7 @@ const calendarState = JSON.stringify({
               <button
                 type="button"
                 aria-label="Предыдущее"
-                class="absolute left-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[#7d726a] md:flex cursor-pointer"
+                class="absolute left-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full text-base-content md:flex cursor-pointer"
                 x-show="hasMultipleFeaturedEvents()"
                 @click.prevent="prevFeaturedEvent()"
               >
@@ -369,7 +369,7 @@ const calendarState = JSON.stringify({
               <button
                 type="button"
                 aria-label="Следующее"
-                class="absolute right-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[#7d726a] md:flex cursor-pointer"
+                class="absolute right-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full text-base-content md:flex cursor-pointer"
                 x-show="hasMultipleFeaturedEvents()"
                 @click.prevent="nextFeaturedEvent()"
               >
