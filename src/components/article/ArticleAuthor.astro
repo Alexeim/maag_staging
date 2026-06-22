@@ -3,7 +3,7 @@
 import LazyImage from "../common/LazyImage.astro";
 
 import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
-import baloonImage from "@/assets/baloon/baloon003.png"
+import baloonImage from "@/assets/baloon/baloon003.png";
 interface Props {
   name: string;
   avatarUrl?: string;
@@ -12,45 +12,63 @@ interface Props {
 const { name, avatarUrl, isKid = false } = Astro.props;
 ---
 
-<div class="flex items-center gap-[17px] relative z-20">
+<div class="relative flex items-center gap-[17px]">
   {avatarUrl && (
-    <div
-      class="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden"
-    >
-      <div
-        class="object-cover w-full h-full"
-        x-data={`{imageError: false, avatarUrl: ${JSON.stringify(avatarUrl)}, name: ${JSON.stringify(name)}}`}
-      >
-        <template x-if="!imageError">
-          <img
-            :src="avatarUrl"
-            alt="avatar"
-            @error="imageError = true"
-            class="object-cover w-full h-full z-20 relative"
-            style="display: none"
-            x-init="$nextTick(() => { $el.style.display = 'block' })"
+    <div class="relative h-12 w-12 flex-shrink-0">
+      {
+        isKid && (
+          <LazyImage
+            src={baloonImage.src}
+            alt="baloon"
+            class="pointer-events-none absolute -top-4 -left-3 z-0 w-6 -rotate-12"
           />
-        </template>
-        <template x-if="imageError">
-          <div
-            class="flex h-full w-full items-center justify-center bg-gray-300 text-white"
-          >
-            <span x-text="name[0].toUpperCase()"></span>
-          </div>
-        </template>
+        )
+      }
+      <div
+        class="relative z-10 flex h-12 w-12 items-center justify-center overflow-hidden rounded-full"
+      >
+        <div
+          class="h-full w-full object-cover"
+          x-data={`{imageError: false, avatarUrl: ${JSON.stringify(avatarUrl)}, name: ${JSON.stringify(name)}}`}
+        >
+          <template x-if="!imageError">
+            <img
+              :src="avatarUrl"
+              alt="avatar"
+              @error="imageError = true"
+              class="h-full w-full object-cover"
+              style="display: none"
+              x-init="$nextTick(() => { $el.style.display = 'block' })"
+            />
+          </template>
+          <template x-if="imageError">
+            <div
+              class="flex h-full w-full items-center justify-center bg-gray-300 text-white"
+            >
+              <span x-text="name[0].toUpperCase()"></span>
+            </div>
+          </template>
+        </div>
       </div>
     </div>
-
   )}
-    {!avatarUrl && 
-      <AuthorIcon class="w-4 h-4" />
-    }
+  {
+    !avatarUrl && (
+      <div class="relative flex h-4 w-4 flex-shrink-0 items-center justify-center">
+        {isKid && (
+          <LazyImage
+            src={baloonImage.src}
+            alt="baloon"
+            class="pointer-events-none absolute -top-4 -left-3 z-0 w-6 -rotate-12"
+          />
+        )}
+        <AuthorIcon class="relative z-10 h-4 w-4" />
+      </div>
+    )
+  }
   <div
     class="text-base lg:text-xl font-thin font-old_standard italic text-base-content"
   >
     {name}
   </div>
-  {isKid && (
-    <LazyImage src={baloonImage.src} alt="baloon" class="absolute -top-4 -left-3 w-6 -rotate-12 z-10" />
-  )}
 </div>

@@ -1,6 +1,8 @@
 ---
 // Footer for cultural media website about Paris
 import { Instagram } from "lucide-astro";
+
+const currentYear = new Date().getFullYear();
 ---
 
 <footer class="bg-white text-base-content" x-data>
@@ -138,7 +140,7 @@ import { Instagram } from "lucide-astro";
       class="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left"
     >
       <div class="text-base lg:text-sm text-black/80 font-inter font-normal">
-        &copy; 2025 MAAG France. Все права защищены.
+        &copy; {currentYear} MAAG France. Все права защищены.
       </div>
       <div
         class="flex flex-col lg:flex-row gap-4 sm:gap-6 text-sm text-black/80 font-inter font-normal"
