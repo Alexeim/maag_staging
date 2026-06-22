@@ -209,7 +209,7 @@ const splitTitle = (t: string) => {
         </h2>
         <div class="w-full flex flex-col gap-8">
           <article
-            class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]"
+            class="grid overflow-hidden bg-white lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]"
           >
             {
               cultureHero ? (
@@ -237,7 +237,7 @@ const splitTitle = (t: string) => {
                       />
                     </div>
                   )}
-                  <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                  <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                     <p class="m-0">
                       <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                         {getPrimaryTag(cultureHero) || "Новости"}
@@ -264,7 +264,7 @@ const splitTitle = (t: string) => {
                       </h4>
                     </a>
                     {getCardLead(cultureHero) && (
-                      <p class="text-base lg:text-sm text-black/60 font-inter font-normal">
+                      <p class="text-base lg:text-sm text-base-content font-inter font-light">
                         {getCardLead(cultureHero)}
                       </p>
                     )}
@@ -280,7 +280,7 @@ const splitTitle = (t: string) => {
                       loading="eager"
                     />
                   </div>
-                  <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                  <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                     <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">
                       Балет
                     </p>
@@ -309,7 +309,6 @@ const splitTitle = (t: string) => {
                       category={getPrimaryTag(item)}
                       date={formatArticleDate(item.createdAt)}
                       hideDate={true}
-                      lead={truncateText(getCardLead(item), 120) || undefined}
                       transitionName={getTransitionName(item)}
                       imageUrl={item.imageUrl}
                       href={item.href}
@@ -367,7 +366,6 @@ const splitTitle = (t: string) => {
                   category={getPrimaryTag(item)}
                   date={formatArticleDate(item.createdAt)}
                   hideDate={true}
-                  lead={truncateText(getCardLead(item), 90) || undefined}
                   transitionName={getTransitionName(item)}
                   imageUrl={item.imageUrl}
                   href={item.href}
@@ -398,7 +396,7 @@ const splitTitle = (t: string) => {
               </h2>
 
               <div class="w-full flex flex-col gap-8">
-                <article class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
+                <article class="grid overflow-hidden bg-white lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
                   {parisHero ? (
                     <>
                       <a
@@ -413,7 +411,7 @@ const splitTitle = (t: string) => {
                           transitionName={getTransitionName(parisHero)}
                         />
                       </a>
-                      <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                      <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                         <p class="m-0">
                           <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                             {getPrimaryTag(parisHero) ||
@@ -441,7 +439,7 @@ const splitTitle = (t: string) => {
                           </h4>
                         </a>
                         {getCardLead(parisHero) && (
-                          <p class="text-base lg:text-sm text-black/60 font-inter font-normal">
+                          <p class="text-base lg:text-sm text-base-content font-inter font-light">
                             {getCardLead(parisHero)}
                           </p>
                         )}
@@ -457,7 +455,7 @@ const splitTitle = (t: string) => {
                           loading="eager"
                         />
                       </div>
-                      <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                      <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                         <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">
                           {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
                         </p>
@@ -482,7 +480,6 @@ const splitTitle = (t: string) => {
                         category={getPrimaryTag(item)}
                         date={formatArticleDate(item.createdAt)}
                         hideDate={true}
-                        lead={truncateText(getCardLead(item), 120) || undefined}
                         transitionName={getTransitionName(item)}
                         imageUrl={item.imageUrl}
                         href={item.href}
@@ -535,7 +532,6 @@ const splitTitle = (t: string) => {
                       category={getPrimaryTag(item)}
                       date={formatArticleDate(item.createdAt)}
                       hideDate={true}
-                      lead={truncateText(getCardLead(item), 120) || undefined}
                       transitionName={
                         index < carouselItems.length
                           ? getTransitionName(item)

@@ -100,12 +100,6 @@ const getPrimaryTag = (article: any) => {
   return getCategoryLabel(article?.category);
 };
 
-const getCardLead = (item: any) => {
-  const cardLead =
-    typeof item?.cardLead === "string" ? item.cardLead.trim() : "";
-  return cardLead;
-};
-
 const splitTitle = (t: string) => {
   const s = t.trimEnd();
   const i = s.lastIndexOf(" ");
@@ -335,11 +329,6 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
                   )}
                 </h2>
               </a>
-              {getCardLead(mainArticle) ? (
-                <p class="text-base text-black/70 font-inter font-light leading-[20px]">
-                  {getCardLead(mainArticle)}
-                </p>
-              ) : null}
             </div>
           </div>
         ) : (

@@ -206,7 +206,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
         <div class="grid gap-8 lg:col-span-9">
           {
             primaryParisArticle ? (
-              <article class="grid overflow-hidden bg-white/70 lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]">
+              <article class="grid overflow-hidden bg-white lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)] mb-2 lg:mb-4">
                 <a
                   href={primaryParisArticle.href}
                   class="linked-image-hover aspect-[3/2]"
@@ -220,7 +220,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                   />
                 </a>
 
-                <div class="grid content-start gap-[0.55rem] bg-white/90 p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                   <p class="m-0">
                     <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                       {getPrimaryTag(primaryParisArticle) || "Париж"}
@@ -249,7 +249,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                   </a>
 
                   {getCardLead(primaryParisArticle) && (
-                    <p class="m-0 text-base text-black/60 font-inter font-normal">
+                    <p class="text-base lg:text-sm text-base-content font-inter font-light">
                       {truncateText(getCardLead(primaryParisArticle), 280)}
                     </p>
                   )}
@@ -260,7 +260,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                 </div>
               </article>
             ) : (
-              <article class="border border-base-content/15 bg-white/70 p-5 text-[1.05rem] font-light leading-[1.5]">
+              <article class="border border-base-content/15 bg-white p-5 text-[1.05rem] font-light leading-[1.5]">
                 Пока нет материалов категории «Париж».
               </article>
             )
@@ -268,7 +268,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
 
           {
             secondaryStories.length > 0 && (
-              <div class="grid gap-4 sm:grid-cols-2 sm:items-stretch">
+              <div class="grid gap-x-4 gap-y-8 sm:grid-cols-2 sm:items-stretch">
                 {secondaryStories.map((item) => (
                   <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                     <a
@@ -313,12 +313,6 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                           })()}
                         </h3>
                       </a>
-
-                      {getCardLead(item) && (
-                        <p class="m-0 line-clamp-3 text-sm text-black/60 font-inter font-normal">
-                          {truncateText(getCardLead(item), 120)}
-                        </p>
-                      )}
 
                       <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
                         {formatDate(item.createdAt)}
@@ -384,7 +378,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                     <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                       <a
                         href={item.href}
-                        class="linked-image-hover bg-white/50 aspect-[1.02/1]"
+                        class="linked-image-hover bg-white aspect-[1.02/1]"
                         aria-label={item.title}
                       >
                         <img
@@ -447,7 +441,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                           <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                             <a
                               href={item.href}
-                              class="linked-image-hover bg-white/50 aspect-[1.02/1]"
+                              class="linked-image-hover bg-white aspect-[1.02/1]"
                               aria-label={item.title}
                             >
                               <img
@@ -489,7 +483,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                 )}
               </>
             ) : (
-              <article class="bg-white/70 p-5 text-[1.05rem] font-light leading-[1.5]">
+              <article class="bg-white p-5 text-[1.05rem] font-light leading-[1.5]">
                 Больше материалов пока нет.
               </article>
             )

@@ -64,7 +64,7 @@ const orderedTips = sortTips(preparedTips);
 {
   orderedTips.length > 0 && (
     <section class="max-w-[826px] mx-auto mt-12">
-      <div class="border border-base-300 bg-white/85">
+      <div class="border border-base-300 bg-white">
         {orderedTips.map((tip) => {
           const isLink = tip.type === "link" && tip.url;
           return (
