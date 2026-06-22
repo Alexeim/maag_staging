@@ -627,20 +627,23 @@ const calendarState = JSON.stringify({
                   </a>
 
                   <div class="grid h-full grid-rows-[auto_auto_1fr_auto] gap-[0.55rem] content-start p-4 lg:p-[1.15rem]">
-                    <div class="mb-2 flex flex-col items-start justify-center">
-                      <p class="m-0 font-old_standard text-[0.9rem] italic text-black/50 lg:text-[1rem]">
-                        до
-                      </p>
-                      <p class="m-0 font-old_standard text-[3rem] leading-[0.9] tracking-[-0.06em] uppercase text-black lg:text-[3.3rem]">
-                        {event.isDateRange ? event.dateEndDay : event.dateDay}
-                      </p>
-                      <p class="m-0 -mt-1 font-inter text-[0.82rem] font-bold uppercase tracking-[0.18em] text-black/80 lg:text-[0.95rem]">
-                        → {event.isDateRange ? event.dateEndMonth : event.dateMonth}
-                      </p>
-                      <div class="mb-1 mt-1 w-full border-t border-black/30"></div>
-                      <p class="m-0 font-old_standard text-[0.9rem] italic text-black/70 lg:text-[1rem]">
-                        {event.isDateRange ? event.dateEndWeekday : event.dateWeekday}
-                      </p>
+                    <div class="mb-2 flex flex-row items-center justify-start gap-4">
+                      <div class="flex flex-col items-center justify-center gap-0">
+                        <p class="m-0 font-old_standard text-lg italic text-base-content lg:text-3xl">до</p>
+                        <p class="m-0 font-inter text-xl font-bold uppercase tracking-[0.18em] text-black/80 lg:text-4xl">
+                          →
+                        </p>
+                      </div>
+                      <div>
+                          <p class="m-0 font-old_standard text-[3rem] leading-[0.9] tracking-[-0.06em] uppercase text-base-content lg:text-[3.3rem]">
+                            {event.isDateRange ? event.dateEndDay : event.dateDay}
+                          </p>
+                        <p class="m-0 -mt-1 font-inter text-[0.82rem] font-bold uppercase tracking-[0.18em] text-base-content lg:text-[0.95rem]">{event.isDateRange ? event.dateEndMonth : event.dateMonth}</p>
+                        <div class="mb-1 mt-1 w-full border-t border-black/30"></div>
+                        <p class="m-0 font-old_standard text-[0.9rem] italic text-base-content lg:text-[1rem]">
+                          {event.isDateRange ? event.dateEndWeekday : event.dateWeekday}
+                        </p>
+                      </div>
                     </div>
 
                     <p class="m-0">

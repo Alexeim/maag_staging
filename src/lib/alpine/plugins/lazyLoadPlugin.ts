@@ -85,7 +85,8 @@ export default function(Alpine: Alpine) {
       events: [],
       featuredEvents: [],
       filters: [],
-      activeFilter: 'все',
+      filteredEventsCount: 0,
+      activeFilters: [],
       activeFeaturedIndex: 0,
       isFeaturedEventVisible: true,
       featuredAutoplayIntervalMs: 4500,
@@ -136,6 +137,8 @@ export default function(Alpine: Alpine) {
       nextFeaturedEvent() {},
       destroy() {},
       filteredEvents: [],
+      rangeSpecificEvents: [],
+      rangeFlexibleEvents: [],
       smallEvents: [],
       availableEventsCount: 0,
       // --- Article Creator properties ---

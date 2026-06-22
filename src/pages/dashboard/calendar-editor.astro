@@ -200,13 +200,13 @@ const secondaryCardsSummary = (() => {
       ) : null}
     </div>
 
-    <div class="grid gap-4 lg:grid-cols-2">
+    <div class="grid gap-4 lg:grid-cols-3">
       <article class="bg-base-100 border border-base-300 rounded-xl p-6">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <h3 class="text-lg font-semibold">Main Cards</h3>
+            <h3 class="text-lg font-semibold">Главные события</h3>
             <p class="mt-1 text-sm text-base-content/70">
-              Верхние 4 карточки календарной страницы.
+              Верхняя секция — большая карточка с каруселью.
             </p>
           </div>
           <span class={getBadgeClass(mainCardsSummary.modeLabel)}>{mainCardsSummary.modeLabel}</span>
@@ -217,22 +217,37 @@ const secondaryCardsSummary = (() => {
       <article class="bg-base-100 border border-base-300 rounded-xl p-6">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <h3 class="text-lg font-semibold">Secondary Cards</h3>
+            <h3 class="text-lg font-semibold">Обязательная программа</h3>
             <p class="mt-1 text-sm text-base-content/70">
-              Нижние 4 карточки под основным блоком календаря.
+              Горизонтальная сетка из 4 карточек под главными событиями.
             </p>
           </div>
           <span class={getBadgeClass(secondaryCardsSummary.modeLabel)}>{secondaryCardsSummary.modeLabel}</span>
         </div>
         <p class="mt-4 text-sm leading-6 text-base-content/80">{secondaryCardsSummary.details}</p>
       </article>
+
+      <article class="bg-base-100 border border-base-300 rounded-xl p-6">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-semibold">Последний шанс</h3>
+            <p class="mt-1 text-sm text-base-content/70">
+              Авто-секция — события, заканчивающиеся в течение 7 дней.
+            </p>
+          </div>
+          <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-600 border-emerald-200">Auto</span>
+        </div>
+        <p class="mt-4 text-sm leading-6 text-base-content/80">
+          Формируется автоматически сервером. Показывает до 4 событий с датой окончания в ближайшие 7 дней, отсортированных по дате окончания. Редактирование недоступно.
+        </p>
+      </article>
     </div>
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Main Cards Controls</h3>
+        <h3 class="text-lg font-semibold">Главные события — управление</h3>
         <p class="text-sm text-base-content/70">
-          Верхний блок поддерживает только empty или manual режим.
+          Поддерживает только empty или manual режим.
         </p>
       </div>
 
@@ -300,7 +315,7 @@ const secondaryCardsSummary = (() => {
             @click="saveMainCards()"
             :disabled="mainCardsSaving"
           >
-            Сохранить main cards
+            Сохранить
           </button>
           <span x-show="mainCardsSaving" class="text-sm text-base-content/70">
             Сохраняем...
@@ -311,9 +326,9 @@ const secondaryCardsSummary = (() => {
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Secondary Cards Controls</h3>
+        <h3 class="text-lg font-semibold">Обязательная программа — управление</h3>
         <p class="text-sm text-base-content/70">
-          Нижний блок поддерживает empty, manual и auto current single-day priority режимы.
+          Поддерживает empty, manual и auto (приоритет одного дня текущей недели) режимы.
         </p>
       </div>
 
@@ -400,7 +415,7 @@ const secondaryCardsSummary = (() => {
             @click="saveSecondaryCards()"
             :disabled="secondaryCardsSaving"
           >
-            Сохранить secondary cards
+            Сохранить
           </button>
           <span x-show="secondaryCardsSaving" class="text-sm text-base-content/70">
             Сохраняем...
