@@ -1,5 +1,32 @@
 import type { Alpine } from 'alpinejs';
 
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const getSkeletonRichTextInitialHtml = (block?: { html?: unknown; text?: unknown } | null) => {
+  const html = typeof block?.html === 'string' ? block.html.trim() : '';
+  if (html && html !== '<p><br></p>') {
+    return html;
+  }
+
+  const text = typeof block?.text === 'string' ? block.text.trim() : '';
+  if (!text) {
+    return '';
+  }
+
+  return text
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br>')}</p>`)
+    .join('');
+};
+
 const components: Record<string, () => Promise<any>> = {
   layout: () => import('@/Layouts/layoutLogic'),
   navbar: () => import('@/components/common/navbarLogic'),
@@ -212,6 +239,9 @@ export default function(Alpine: Alpine) {
       isEditMode: false,
       onSaveRedirect: null,
       categoryLabels: {},
+      getRichTextInitialHtml(block?: { html?: unknown; text?: unknown } | null) {
+        return getSkeletonRichTextInitialHtml(block);
+      },
       contentListsLoading: false,
       landingPlacements: {
         schemaVersion: 2,
@@ -596,6 +626,7 @@ export default function(Alpine: Alpine) {
       story: {
         title: '',
         lead: '',
+        leadHtml: '',
         cardLead: '',
         imageUrl: '',
         imageCaption: '',

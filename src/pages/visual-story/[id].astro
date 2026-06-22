@@ -7,6 +7,7 @@ import ContentActions from "@/components/common/ContentActions.astro";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
 import { ApiError, visualStoriesApi } from "@/lib/api/api";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import { getTransitionName } from "@/lib/utils/transitions";
 import { Info, MoveRight, MoveLeft } from "lucide-astro";
 
@@ -41,6 +42,7 @@ const slides: Array<{
   imageUrl: string;
   contentType: "text" | "quote";
   text: string;
+  html?: string;
   caption?: string;
   quote?: string;
   quoteAuthor?: string;
@@ -49,6 +51,7 @@ const slides: Array<{
       imageUrl: typeof slide?.imageUrl === "string" ? slide.imageUrl : "",
       contentType: slide?.contentType === "quote" ? "quote" : "text",
       text: typeof slide?.text === "string" ? slide.text : "",
+      html: typeof slide?.html === "string" ? slide.html : "",
       caption: typeof slide?.caption === "string" ? slide.caption : "",
       quote: typeof slide?.quote === "string" ? slide.quote : "",
       quoteAuthor:
@@ -58,6 +61,10 @@ const slides: Array<{
 
 const title = storyData?.title || "Визуальная история";
 const lead = storyData?.lead || "";
+const leadHtml = getInitialRichTextHtml({
+  html: storyData?.leadHtml,
+  text: lead,
+});
 const category = storyData?.category || "";
 const authorName = storyData?.author
   ? `${storyData.author.firstName ?? ""} ${storyData.author.lastName ?? ""}`.trim()
@@ -365,6 +372,43 @@ const articleStructuredData = storyData
       max-width: 38rem;
     }
 
+    .visual-story-rich-text {
+      font-family: "Inter", sans-serif;
+      font-size: clamp(0.875rem, 1.7vw, 1rem);
+      font-weight: 300;
+      line-height: 1.7;
+      letter-spacing: -0.01em;
+      color: rgba(0, 0, 0, 0.8);
+      max-width: 38rem;
+    }
+
+    .visual-story-rich-text p {
+      margin: 0 0 1rem;
+      max-width: none;
+    }
+
+    .visual-story-rich-text p:last-child {
+      margin-bottom: 0;
+    }
+
+    .visual-story-rich-text a {
+      color: var(--maag-accent);
+      text-decoration: underline;
+      text-underline-offset: 0.18em;
+    }
+
+    .visual-story-rich-text strong {
+      font-weight: 700;
+    }
+
+    .visual-story-rich-text em {
+      font-style: italic;
+    }
+
+    .hero-lead.visual-story-rich-text {
+      max-width: 35rem;
+    }
+
     .slide-quote {
       width: 100%;
       max-width: 32rem;
@@ -599,7 +643,12 @@ const articleStructuredData = storyData
             <div class="slide-content bg-base-100">
               <p class="hero-category text-accent">{categoryLabel}</p>
               <h1 class="hero-title text-base-content">{title}</h1>
-              {lead && <p class="hero-lead text-base-content">{lead}</p>}
+              {leadHtml && (
+                <div
+                  class="hero-lead visual-story-rich-text text-base-content"
+                  set:html={leadHtml}
+                />
+              )}
               {(authorName || dateFormatted) && (
                 <div class="hero-meta text-base-content">
                   {authorName && (
@@ -673,7 +722,10 @@ const articleStructuredData = storyData
                       )}
                     </>
                   ) : (
-                    <p class="text-base-content">{slide.text}</p>
+                    <div
+                      class="visual-story-rich-text text-base-content"
+                      set:html={getInitialRichTextHtml(slide)}
+                    />
                   )}
                 </div>
               </div>

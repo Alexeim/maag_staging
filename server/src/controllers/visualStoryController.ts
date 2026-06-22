@@ -18,6 +18,7 @@ export interface VisualStory {
     imageUrl: string;
     contentType?: 'text' | 'quote';
     text: string;
+    html?: string;
     caption?: string;
     quote?: string;
     quoteAuthor?: string;
@@ -25,6 +26,7 @@ export interface VisualStory {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   category?: string;
   tags?: string[];
@@ -57,6 +59,43 @@ const normalizeCategory = (value: unknown): string => {
   return trimmed === 'hotContent' ? '' : trimmed;
 };
 
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const STYLE_ATTR_RE = /\s+style="[^"]*"/g;
+const ANCHOR_TAG_RE = /<a\b[^>]*\bhref=(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a>/gi;
+const SAFE_LINK_RE = /^(https?:\/\/|mailto:|tel:|\/(?!\/)|#|\/\/)/i;
+const BARE_DOMAIN_RE =
+  /^(?:www\.)?[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+(?::\d+)?(?:[/?#][^\s]*)?$/i;
+
+const normalizeRichTextHref = (value: unknown): string => {
+  const href = typeof value === 'string' ? value.trim() : '';
+  if (!href || /\s/.test(href)) return '';
+  if (SAFE_LINK_RE.test(href)) return href;
+  if (BARE_DOMAIN_RE.test(href)) return `https://${href}`;
+  return '';
+};
+
+const normalizeStoredRichTextHtml = (value: unknown): string => {
+  const html = typeof value === 'string' ? value.trim() : '';
+  if (!html || html === '<p><br></p>') return '';
+
+  return html
+    .replace(STYLE_ATTR_RE, '')
+    .replace(ANCHOR_TAG_RE, (_match, _quote, rawHref, innerHtml) => {
+      const href = normalizeRichTextHref(rawHref);
+      if (!href) return innerHtml;
+      const externalAttrs =
+        /^(https?:\/\/|\/\/)/i.test(href) ? ' target="_blank" rel="noreferrer"' : '';
+      return `<a href="${escapeHtml(href)}"${externalAttrs}>${innerHtml}</a>`;
+    });
+};
+
 const normalizeSlides = (slides: unknown): VisualStory['slides'] =>
   Array.isArray(slides)
     ? slides
@@ -67,6 +106,7 @@ const normalizeSlides = (slides: unknown): VisualStory['slides'] =>
             imageUrl: String(raw.imageUrl),
             contentType: raw.contentType === 'quote' ? 'quote' : 'text',
             text: String(raw.text ?? ''),
+            html: normalizeStoredRichTextHtml(raw.html),
             caption: String(raw.caption ?? ''),
             quote: String(raw.quote ?? ''),
             quoteAuthor: String(raw.quoteAuthor ?? ''),
@@ -82,6 +122,7 @@ const buildVisualStoryPayload = (body: Record<string, unknown>) => {
     imageUrl,
     imageCaption,
     lead,
+    leadHtml,
     cardLead,
     category,
     tags = [],
@@ -100,6 +141,7 @@ const buildVisualStoryPayload = (body: Record<string, unknown>) => {
     imageUrl: typeof imageUrl === 'string' ? imageUrl : '',
     imageCaption: typeof imageCaption === 'string' ? imageCaption : '',
     lead: typeof lead === 'string' ? lead : '',
+    leadHtml: normalizeStoredRichTextHtml(leadHtml),
     cardLead: typeof cardLead === 'string' ? cardLead : '',
     category: normalizeCategory(category),
     tags: normalizeStringArray(tags),

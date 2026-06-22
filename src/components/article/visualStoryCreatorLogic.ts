@@ -20,19 +20,35 @@ import {
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
+import {
+  getInitialRichTextHtml,
+  normalizeStoredRichTextHtml,
+  richTextHtmlToText,
+} from "@/lib/utils/richText";
 import { compressImage } from "@/lib/images/compressImage";
 
 const storage = getStorage(app);
 
-const normalizeSlide = (slide?: Record<string, unknown>): VisualStorySlide => ({
-  imageUrl: typeof slide?.imageUrl === "string" ? slide.imageUrl : "",
-  contentType: slide?.contentType === "quote" ? "quote" : "text",
-  text: typeof slide?.text === "string" ? slide.text : "",
-  caption: typeof slide?.caption === "string" ? slide.caption : "",
-  quote: typeof slide?.quote === "string" ? slide.quote : "",
-  quoteAuthor:
-    typeof slide?.quoteAuthor === "string" ? slide.quoteAuthor : "",
-});
+const normalizeSlide = (slide?: Record<string, unknown>): VisualStorySlide => {
+  const html = normalizeStoredRichTextHtml(slide?.html);
+  const text =
+    typeof slide?.text === "string"
+      ? slide.text
+      : html
+        ? richTextHtmlToText(html)
+        : "";
+
+  return {
+    imageUrl: typeof slide?.imageUrl === "string" ? slide.imageUrl : "",
+    contentType: slide?.contentType === "quote" ? "quote" : "text",
+    text,
+    html,
+    caption: typeof slide?.caption === "string" ? slide.caption : "",
+    quote: typeof slide?.quote === "string" ? slide.quote : "",
+    quoteAuthor:
+      typeof slide?.quoteAuthor === "string" ? slide.quoteAuthor : "",
+  };
+};
 
 const normalizeTags = (
   tags?: string[],
@@ -135,6 +151,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     story: {
       title: "",
       lead: "",
+      leadHtml: "",
       cardLead: "",
       imageUrl: "",
       imageCaption: "",
@@ -151,6 +168,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         imageUrl: string;
         contentType: "text" | "quote";
         text: string;
+        html: string;
         caption: string;
         quote: string;
         quoteAuthor: string;
@@ -208,6 +226,9 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     getCategoryLabel(value?: string) {
       if (!value) return "Category";
       return this.categoryLabels[value] || value;
+    },
+    getRichTextInitialHtml(block?: { html?: unknown; text?: unknown } | null) {
+      return getInitialRichTextHtml(block);
     },
 
     getAvailableTags() {
@@ -387,6 +408,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         imageUrl: "",
         contentType: "text",
         text: "",
+        html: "",
         caption: "",
         quote: "",
         quoteAuthor: "",
@@ -591,6 +613,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         const copy = JSON.parse(JSON.stringify(storyDraft));
         this.story.title = copy.title || "";
         this.story.lead = copy.lead || "";
+        this.story.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
         this.story.cardLead = copy.cardLead || "";
         this.story.imageUrl = copy.imageUrl || "";
         this.story.imageCaption =
@@ -729,6 +752,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         const payload = {
           title: this.story.title,
           lead: this.story.lead,
+          leadHtml: normalizeStoredRichTextHtml(this.story.leadHtml),
           cardLead: this.story.cardLead,
           imageUrl: this.story.imageUrl || undefined,
           imageCaption: this.story.imageCaption || "",

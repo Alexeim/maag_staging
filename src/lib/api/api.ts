@@ -970,6 +970,7 @@ export interface VisualStorySlide {
   imageUrl: string;
   contentType?: "text" | "quote";
   text: string;
+  html?: string;
   caption?: string;
   quote?: string;
   quoteAuthor?: string;
@@ -982,6 +983,7 @@ export interface VisualStoryPayload {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   category?: string;
   tags?: string[];

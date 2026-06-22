@@ -61,12 +61,15 @@ const {
 
     <div class="mt-4">
       <label class="block text-sm font-medium text-base-content mb-2">Вводка (лид)</label>
-      <textarea
-        x-model="story.lead"
-        rows="3"
-        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-        placeholder="Краткое описание, которое отображается под заголовком..."
-      ></textarea>
+      <template x-if="!isLazyLoading">
+        <div
+          class="rich-text-editor rich-text-editor--compact"
+          x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml({ html: story.leadHtml, text: story.lead }), placeholder: 'Краткое описание, которое отображается под заголовком...' })"
+          @rich-text-change="story.leadHtml = $event.detail.html; story.lead = $event.detail.text"
+        >
+          <div x-ref="editor"></div>
+        </div>
+      </template>
     </div>
 
     <div class="mt-4">
@@ -368,12 +371,13 @@ const {
 
           <div x-show="slide.contentType !== 'quote'">
             <label class="block text-sm font-medium text-base-content mb-2">Текст слайда</label>
-            <textarea
-              x-model="slide.text"
-              rows="3"
-              class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-              placeholder="Короткий, образный текст — до 2–3 предложений..."
-            ></textarea>
+            <div
+              class="rich-text-editor rich-text-editor--compact"
+              x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml(slide), placeholder: 'Короткий, образный текст — до 2–3 предложений...' })"
+              @rich-text-change="slide.html = $event.detail.html; slide.text = $event.detail.text"
+            >
+              <div x-ref="editor"></div>
+            </div>
           </div>
 
           <div x-show="slide.contentType === 'quote'" class="space-y-4">
