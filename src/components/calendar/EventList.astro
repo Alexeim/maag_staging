@@ -268,7 +268,10 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                     <p
                       class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                     >
-                      <EventMetaIcon type="location" class="h-4 w-4 shrink-0 text-accent" />
+                      <EventMetaIcon
+                        type="location"
+                        class="h-4 w-4 shrink-0 text-accent"
+                      />
                       <span x-text="event.location"></span>
                     </p>
 
@@ -276,7 +279,10 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                     <p
                       class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                     >
-                      <EventMetaIcon type="time" class="h-4 w-4 shrink-0 text-accent" />
+                      <EventMetaIcon
+                        type="time"
+                        class="h-4 w-4 shrink-0 text-accent"
+                      />
                       <span x-text="event.time"></span>
                     </p>
 
@@ -288,7 +294,10 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                         <p
                           class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
                         >
-                          <EventMetaIcon type="date" class="h-4 w-4 shrink-0 text-accent" />
+                          <EventMetaIcon
+                            type="date"
+                            class="h-4 w-4 shrink-0 text-accent"
+                          />
                           <span
                             x-text="'до ' + event.endDate.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', timeZone: 'UTC'})"
                           ></span>
@@ -350,12 +359,15 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                   </h4>
                 </a>
 
-                <p
+                <!-- <p
                   class="m-0 flex items-center gap-2 font-inter text-[0.82rem] text-[#302821bd]"
                 >
-                  <EventMetaIcon type="location" class="h-4 w-4 shrink-0 text-accent" />
+                  <EventMetaIcon
+                    type="location"
+                    class="h-4 w-4 shrink-0 text-accent"
+                  />
                   <span x-text="event.location"></span>
-                </p>
+                </p> -->
               </div>
             </article>
           </template>
