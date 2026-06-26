@@ -101,7 +101,7 @@ const decoratedEvents = events.map((event) => {
 
 <DashboardLayout title="Управление событиями" active="events">
   <div
-    class="bg-base-100 border border-base-300 rounded-xl p-6"
+    class="min-w-0 max-w-full rounded-xl border border-base-300 bg-base-100 p-4 sm:p-6"
     x-data={`$lazy('eventList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
   >
     <div class="flex items-center justify-between mb-6">
@@ -116,14 +116,14 @@ const decoratedEvents = events.map((event) => {
 
     {
       decoratedEvents.length > 0 ? (
-        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <div class="relative w-full max-w-full overflow-x-auto shadow-md sm:rounded-lg">
           <table class="w-full text-sm text-left text-base-content">
             <thead class="text-xs text-base-content/70 uppercase bg-base-200">
               <tr>
                 <th scope="col" class="px-6 py-3">
                   Событие
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="min-w-44 px-6 py-3">
                   Даты
                 </th>
                 <th scope="col" class="px-6 py-3 hidden lg:table-cell">
@@ -159,24 +159,24 @@ const decoratedEvents = events.map((event) => {
                   >
                     <th
                       scope="row"
-                      class="px-6 py-4 font-medium text-base-content whitespace-nowrap"
+                      class="max-w-64 px-4 py-4 font-medium text-base-content sm:px-6"
                     >
                       <div
-                        class="font-semibold truncate max-w-xs"
+                        class="truncate font-semibold"
                         title={eventItem.title}
                       >
                         {eventItem.title}
                       </div>
                       <div
-                        class="text-xs text-base-content/60 mt-1 truncate"
+                        class="mt-1 truncate text-xs text-base-content/60"
                         title={eventItem.id}
                       >
                         ID: {eventItem.id}
                       </div>
                     </th>
-                    <td class="px-6 py-4">
+                    <td class="px-4 py-4 sm:px-6">
                       <div class="flex flex-col gap-1">
-                        <span class="font-semibold">
+                        <span class="font-semibold whitespace-normal">
                           {eventItem.dateRangeLabel}
                         </span>
                       </div>
@@ -186,7 +186,7 @@ const decoratedEvents = events.map((event) => {
                         <span class="font-semibold">
                           {eventItem.categoryLabel}
                         </span>
-                        <span class="text-xs text-base-content/70">
+                        <span class="max-w-64 break-words text-xs text-base-content/70">
                           {tagsLabel}
                         </span>
                       </div>

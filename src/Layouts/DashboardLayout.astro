@@ -184,7 +184,7 @@ const { title = "MAAG Dashboard", active = "articles-overview" } =
           }
         </nav>
       </aside>
-      <div class="flex-1 flex flex-col" x-data>
+      <div class="min-w-0 flex-1 flex flex-col" x-data>
         <header
           class="w-full bg-base-100 border-b border-base-300 px-4 sm:px-6 py-4 flex items-center justify-between"
         >
@@ -193,7 +193,7 @@ const { title = "MAAG Dashboard", active = "articles-overview" } =
           </h1>
           <a href="/" class="text-sm text-primary hover:underline">На сайт</a>
         </header>
-        <main class="flex-1 px-4 sm:px-6 py-6">
+        <main class="min-w-0 flex-1 px-4 py-6 sm:px-6">
           <slot />
         </main>
       </div>
