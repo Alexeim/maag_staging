@@ -117,16 +117,21 @@ export async function request<T>(
   return responseBody as T;
 }
 
+export interface TipsMetaItem {
+  icon: string;
+  text: string;
+  isLink?: boolean;
+  url?: string;
+}
+
 export interface TipsItemBlock {
   type: 'tips-item';
   heading: string;
   imageUrl?: string;
   imageCaption?: string;
-  meta1?: string;       // First info line (location, time, price, etc.)
-  meta2?: string;       // Second info line (link text or extra info)
-  meta2IsLink?: boolean;
-  meta2Url?: string;    // URL when meta2 is a link
-  text?: string;        // Main paragraph text
+  metaItems?: TipsMetaItem[];
+  html?: string;        // Rich text HTML from Quill editor
+  text?: string;        // Plain text fallback
 }
 
 export interface ArticlePayload {

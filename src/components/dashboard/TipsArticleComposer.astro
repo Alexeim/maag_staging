@@ -1,12 +1,21 @@
 ---
 import Button from "@/components/common/Button.astro";
-import { CloudUpload } from "lucide-astro";
+import {
+  CalendarDays,
+  CircleAlert,
+  Clock3,
+  CloudUpload,
+  Crown,
+  Info,
+  Lightbulb,
+  MapPin,
+  NotebookPen,
+  Star,
+} from "lucide-astro";
 import {
   categoryTags,
   parisDistrictTags,
 } from "@/content/tags/parisTags";
-import locationIcon from "@/assets/icons/new/location.svg?raw";
-import timeIcon from "@/assets/icons/new/time.svg?raw";
 import RelatedContentEditor from "@/components/dashboard/RelatedContentEditor.astro";
 import LandingPlacementPanel from "@/components/dashboard/LandingPlacementPanel.astro";
 import ContentCollectionsEditor from "@/components/dashboard/ContentCollectionsEditor.astro";
@@ -331,17 +340,15 @@ const allParisDistricts = parisDistrictTags;
                 <!-- Right: content -->
                 <div class="flex flex-col justify-start gap-2 p-4" :class="block.imageUrl ? 'sm:w-[58%]' : 'w-full'">
                   <p class="font-bold font-oswald tracking-wide leading-snug" x-text="block.heading || '(без заголовка)'"></p>
-                  <template x-if="block.meta1">
-                    <p class="flex items-center gap-1.5 text-xs text-base-content/60 font-oswald">
-                      <span class="opacity-50" set:html={locationIcon} />
-                      <span x-text="block.meta1"></span>
-                    </p>
-                  </template>
-                  <template x-if="block.meta2">
-                    <p class="flex items-center gap-1.5 text-xs text-base-content/60 font-oswald">
-                      <span class="opacity-50" set:html={timeIcon} />
-                      <span x-text="block.meta2"></span>
-                    </p>
+                  <template x-if="block.metaItems && block.metaItems.length > 0">
+                    <div class="flex flex-col gap-0.5">
+                      <template x-for="(mi, mii) in block.metaItems" :key="mii">
+                        <p class="flex items-center gap-1.5 text-xs text-base-content/60 font-oswald">
+                          <span class="opacity-40">·</span>
+                          <span x-text="mi.text"></span>
+                        </p>
+                      </template>
+                    </div>
                   </template>
                   <p class="text-xs text-base-content/50 font-oswald font-thin line-clamp-2" x-show="block.text" x-text="block.text"></p>
                 </div>
@@ -433,62 +440,169 @@ const allParisDistricts = parisDistrictTags;
                 </div>
               </div>
 
-              <!-- Meta 1 -->
-              <div>
-                <label class="block text-sm font-medium text-base-content mb-1">
-                  Мета-строка 1
-                  <span class="text-base-content/50 font-normal">(место, время, цена и т.д.)</span>
-                </label>
-                <input
-                  type="text"
-                  x-model="editingBlock.meta1"
-                  class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-                  placeholder="Например: ул. Театральная пл., 1 / с 14:00 до 18:00"
-                />
-              </div>
-
-              <!-- Meta 2 -->
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-base-content mb-1">
-                  Мета-строка 2
-                  <span class="text-base-content/50 font-normal">(ссылка или доп. инфо)</span>
-                </label>
-                <input
-                  type="text"
-                  x-model="editingBlock.meta2"
-                  class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-                  placeholder="Текст строки или текст ссылки"
-                />
-                <div class="flex items-center gap-3">
-                  <input
-                    :id="'meta2-link-' + index"
-                    type="checkbox"
-                    x-model="editingBlock.meta2IsLink"
-                    class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
-                  />
-                  <label :for="'meta2-link-' + index" class="text-sm text-base-content cursor-pointer">
-                    Это ссылка
+              <!-- Meta items -->
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <label class="block text-sm font-medium text-base-content">
+                    Мета-строки
+                    <span class="text-base-content/50 font-normal">(место, время, цена и т.д.)</span>
                   </label>
+                  <button
+                    type="button"
+                    class="px-3 py-1.5 rounded-lg border border-base-300 bg-base-100 text-xs text-base-content transition hover:bg-base-200 cursor-pointer"
+                    @click="editingBlock.metaItems.push({ icon: 'location', text: '', isLink: false, url: '' })"
+                  >
+                    + Добавить строку
+                  </button>
                 </div>
-                <div x-show="editingBlock.meta2IsLink">
-                  <input
-                    type="url"
-                    x-model="editingBlock.meta2Url"
-                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-                    placeholder="https://..."
-                  />
-                </div>
+
+                <template x-for="(metaItem, mi) in editingBlock.metaItems" :key="mi">
+                  <div class="rounded-lg border border-base-300 bg-base-100 p-4 space-y-3">
+                    <!-- Icon picker -->
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
+                        :class="metaItem.icon === 'location' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        title="Место"
+                        @click="metaItem.icon = 'location'"
+                      >
+                        <MapPin class="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
+                        :class="metaItem.icon === 'clock' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        title="Время"
+                        @click="metaItem.icon = 'clock'"
+                      >
+                        <Clock3 class="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
+                        :class="metaItem.icon === 'calendar' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        title="Дата"
+                        @click="metaItem.icon = 'calendar'"
+                      >
+                        <CalendarDays class="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
+                        :class="metaItem.icon === 'bulb' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        title="Идея"
+                        @click="metaItem.icon = 'bulb'"
+                      >
+                        <Lightbulb class="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
+                        :class="metaItem.icon === 'pen' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        title="Примечание"
+                        @click="metaItem.icon = 'pen'"
+                      >
+                        <NotebookPen class="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
+                        :class="metaItem.icon === 'crown' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        title="Особое"
+                        @click="metaItem.icon = 'crown'"
+                      >
+                        <Crown class="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
+                        :class="metaItem.icon === 'star' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        title="Рекомендовано"
+                        @click="metaItem.icon = 'star'"
+                      >
+                        <Star class="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
+                        :class="metaItem.icon === 'alert' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        title="Внимание"
+                        @click="metaItem.icon = 'alert'"
+                      >
+                        <CircleAlert class="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
+                        :class="metaItem.icon === 'info' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        title="Инфо"
+                        @click="metaItem.icon = 'info'"
+                      >
+                        <Info class="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <!-- Text input -->
+                    <input
+                      type="text"
+                      x-model="metaItem.text"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="Текст строки или текст ссылки"
+                    />
+
+                    <!-- Link toggle -->
+                    <div class="flex items-center justify-between gap-3">
+                      <div class="flex items-center gap-3">
+                        <input
+                          :id="'meta-link-' + index + '-' + mi"
+                          type="checkbox"
+                          x-model="metaItem.isLink"
+                          class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+                        />
+                        <label :for="'meta-link-' + index + '-' + mi" class="text-sm text-base-content cursor-pointer">
+                          Это ссылка
+                        </label>
+                      </div>
+                      <button
+                        type="button"
+                        class="text-xs text-error hover:underline cursor-pointer"
+                        @click="editingBlock.metaItems.splice(mi, 1)"
+                      >
+                        Удалить
+                      </button>
+                    </div>
+
+                    <!-- URL input -->
+                    <div x-show="metaItem.isLink">
+                      <input
+                        type="url"
+                        x-model="metaItem.url"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </div>
+                </template>
+
+                <p
+                  x-show="!editingBlock.metaItems || editingBlock.metaItems.length === 0"
+                  class="text-xs text-base-content/40 italic"
+                >
+                  Нет мета-строк. Нажми «+ Добавить строку» чтобы добавить место, время, цену...
+                </p>
               </div>
 
-              <!-- Body text -->
+              <!-- Body text (Quill rich text editor) -->
               <div>
                 <label class="block text-sm font-medium text-base-content mb-1">Текст</label>
-                <textarea
-                  x-model="editingBlock.text"
-                  rows="5"
-                  class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-                  placeholder="Основной текст пункта..."
-                ></textarea>
+                <div
+                  class="rich-text-editor"
+                  x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml(editingBlock), placeholder: 'Основной текст пункта...' })"
+                  @rich-text-change="editingBlock.html = $event.detail.html; editingBlock.text = $event.detail.text"
+                >
+                  <div x-ref="editor"></div>
+                </div>
               </div>
 
               <div class="flex justify-end gap-3">

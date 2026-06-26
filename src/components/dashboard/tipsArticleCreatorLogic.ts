@@ -17,6 +17,7 @@ import { createLandingPlacementManager } from "@/components/dashboard/landingPla
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 import { compressImage } from "@/lib/images/compressImage";
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
 
 const storage = getStorage(app);
 
@@ -81,22 +82,33 @@ const createTipsItem = () => ({
   heading: "",
   imageUrl: "",
   imageCaption: "",
-  meta1: "",
-  meta2: "",
-  meta2IsLink: false,
-  meta2Url: "",
+  metaItems: [] as Array<{ icon: string; text: string; isLink: boolean; url: string }>,
+  html: "",
   text: "",
 });
+
+// Migrates old meta1/meta2 fields to the metaItems array format
+const normalizeBlock = (block: any) => {
+  if (!block || block.type !== "tips-item") return block;
+  if (!Array.isArray(block.metaItems)) {
+    const migrated: Array<{ icon: string; text: string; isLink: boolean; url: string }> = [];
+    if (block.meta1) migrated.push({ icon: "location", text: block.meta1, isLink: false, url: "" });
+    if (block.meta2) migrated.push({ icon: "clock", text: block.meta2, isLink: Boolean(block.meta2IsLink), url: block.meta2Url || "" });
+    block.metaItems = migrated;
+  }
+  return block;
+};
 
 const normalizeLoadedArticle = (data: any) => {
   if (!data || typeof data !== "object") return null;
   // JSON round-trip strips Alpine reactive proxies — structuredClone does not work on them
   const copy = JSON.parse(JSON.stringify(data));
-  copy.contentBlocks = Array.isArray(copy.content)
+  const rawBlocks = Array.isArray(copy.content)
     ? copy.content
     : Array.isArray(copy.contentBlocks)
       ? copy.contentBlocks
       : [];
+  copy.contentBlocks = rawBlocks.map(normalizeBlock);
   copy.tags = normalizeTags(copy.tags);
   copy.imageCaption = copy.imageCaption ?? "";
   copy.lead = copy.lead ?? "";
@@ -345,9 +357,11 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         "article",
         this.articleId,
       );
-      this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
-        ? this.article.contentBlocks
-        : [];
+      this.article.contentBlocks = (
+        Array.isArray(this.article.contentBlocks)
+          ? this.article.contentBlocks
+          : []
+      ).map(normalizeBlock);
 
       if (!restoredPreviewAuthorState) {
         this.selectedAuthorId =
@@ -647,6 +661,11 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       );
       normalized[type] = normalized[type].filter((itemId) => itemId !== id);
       (this.article as any).relatedContent = normalized;
+    },
+
+    // ── Rich text helpers ─────────────────────────────────────────────────────
+    getRichTextInitialHtml(block: { html?: unknown; text?: unknown } | null) {
+      return getInitialRichTextHtml(block);
     },
 
     // ── Tips-item blocks ──────────────────────────────────────────────────────

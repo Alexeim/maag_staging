@@ -1,11 +1,24 @@
 ---
-import { Clock3, MapPin } from "lucide-astro";
+import {
+  CalendarDays,
+  CircleAlert,
+  Clock3,
+  Crown,
+  Info,
+  Lightbulb,
+  MapPin,
+  NotebookPen,
+  Star,
+} from "lucide-astro";
 
 interface Props {
   contentExpression?: string;
 }
 
 const { contentExpression = "article.contentBlocks" } = Astro.props as Props;
+
+const iconClass = "mt-0.5 h-5 w-5 shrink-0 text-accent";
+const iconStroke = 1.75;
 ---
 
 <div class="max-w-[826px] mx-auto">
@@ -30,45 +43,96 @@ const { contentExpression = "article.contentBlocks" } = Astro.props as Props;
         ></h2>
         <hr class="text-gray-300" />
 
-        <div class="flex flex-col gap-1.5">
-          <template x-if="item.meta1">
-            <div>
-              <p class="flex items-start gap-4 text-sm font-oswald tracking-wide text-base-content/70">
-                <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} aria-hidden="true" />
-                <span x-text="item.meta1"></span>
-              </p>
-              <hr class="text-gray-300" />
-            </div>
-          </template>
+        <template x-if="item.metaItems && item.metaItems.length > 0">
+          <div class="flex flex-col gap-1.5">
+            <template x-for="(metaItem, mi) in item.metaItems" :key="mi">
+              <div>
+                <p class="flex items-start gap-4 text-sm font-oswald tracking-wide text-base-content/70">
+                  <!-- All icons pre-rendered at build time; Alpine shows the matching one -->
+                  <span x-show="metaItem.icon === 'location'" class="contents">
+                    <MapPin class={iconClass} strokeWidth={iconStroke} aria-hidden="true" />
+                  </span>
+                  <span x-show="metaItem.icon === 'clock'" class="contents">
+                    <Clock3 class={iconClass} strokeWidth={iconStroke} aria-hidden="true" />
+                  </span>
+                  <span x-show="metaItem.icon === 'calendar'" class="contents">
+                    <CalendarDays class={iconClass} strokeWidth={iconStroke} aria-hidden="true" />
+                  </span>
+                  <span x-show="metaItem.icon === 'bulb'" class="contents">
+                    <Lightbulb class={iconClass} strokeWidth={iconStroke} aria-hidden="true" />
+                  </span>
+                  <span x-show="metaItem.icon === 'pen'" class="contents">
+                    <NotebookPen class={iconClass} strokeWidth={iconStroke} aria-hidden="true" />
+                  </span>
+                  <span x-show="metaItem.icon === 'crown'" class="contents">
+                    <Crown class={iconClass} strokeWidth={iconStroke} aria-hidden="true" />
+                  </span>
+                  <span x-show="metaItem.icon === 'star'" class="contents">
+                    <Star class={iconClass} strokeWidth={iconStroke} aria-hidden="true" />
+                  </span>
+                  <span x-show="metaItem.icon === 'alert'" class="contents">
+                    <CircleAlert class={iconClass} strokeWidth={iconStroke} aria-hidden="true" />
+                  </span>
+                  <span x-show="metaItem.icon === 'info'" class="contents">
+                    <Info class={iconClass} strokeWidth={iconStroke} aria-hidden="true" />
+                  </span>
 
-          <template x-if="item.meta2">
-            <div>
-              <p class="flex items-start gap-4 text-sm font-oswald tracking-wide text-base-content/70">
-                <Clock3 class="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} aria-hidden="true" />
-                <a
-                  x-show="item.meta2IsLink && item.meta2Url"
-                  :href="item.meta2Url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="underline hover:text-base-content transition-colors"
-                  x-text="item.meta2"
-                ></a>
-                <span
-                  x-show="!item.meta2IsLink || !item.meta2Url"
-                  x-text="item.meta2"
-                ></span>
-              </p>
-              <hr class="text-gray-300" />
-            </div>
-          </template>
-        </div>
+                  <a
+                    x-show="metaItem.isLink && metaItem.url"
+                    :href="metaItem.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="underline hover:text-base-content transition-colors"
+                    x-text="metaItem.text"
+                  ></a>
+                  <span
+                    x-show="!metaItem.isLink || !metaItem.url"
+                    x-text="metaItem.text"
+                  ></span>
+                </p>
+                <hr class="text-gray-300" />
+              </div>
+            </template>
+          </div>
+        </template>
 
-        <p
-          x-show="item.text"
-          x-text="item.text"
-          class="text-sm font-inter text-base-content/80 mt-1"
-        ></p>
+        <div
+          x-show="item.html || item.text"
+          x-html="item.html || item.text"
+          class="tips-rich-text text-sm font-inter text-base-content/80 mt-1"
+        ></div>
       </div>
     </article>
   </template>
 </div>
+
+<style>
+  .tips-rich-text :global(p) {
+    margin: 0 0 0.6rem;
+  }
+
+  .tips-rich-text :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .tips-rich-text :global(strong) {
+    font-weight: 600;
+  }
+
+  .tips-rich-text :global(em) {
+    font-style: italic;
+  }
+
+  .tips-rich-text :global(u) {
+    text-decoration: underline;
+  }
+
+  .tips-rich-text :global(a) {
+    text-decoration: underline;
+    transition: opacity 0.15s;
+  }
+
+  .tips-rich-text :global(a:hover) {
+    opacity: 0.7;
+  }
+</style>

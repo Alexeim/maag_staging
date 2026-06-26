@@ -1,15 +1,21 @@
 ---
-import { Clock3, MapPin } from "lucide-astro";
+import TipsMetaIcon from "@/components/article/TipsMetaIcon.astro";
+import { plainTextToRichTextHtml } from "@/lib/utils/richText";
+
+interface TipsMetaItem {
+  icon: string;
+  text: string;
+  isLink?: boolean;
+  url?: string;
+}
 
 interface TipsItemBlock {
   type: "tips-item";
   heading?: string;
   imageUrl?: string;
   imageCaption?: string;
-  meta1?: string;
-  meta2?: string;
-  meta2IsLink?: boolean;
-  meta2Url?: string;
+  metaItems?: TipsMetaItem[];
+  html?: string;
   text?: string;
 }
 
@@ -53,41 +59,74 @@ const items = contentBlocks.filter((b) => b != null && b.type === "tips-item");
           <hr class="text-gray-300" />
 
           {/* Meta lines */}
-          <div class="flex flex-col gap-1.5">
-            {item.meta1 && (
-              <p class="flex items-start gap-4 text-sm font-oswald tracking-wide text-base-content/70">
-                <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} aria-hidden="true" />
-                <span>{item.meta1}</span>
-              </p>
-              <hr class="text-gray-300" />
-            )}
-            {item.meta2 && (
-              <p class="flex items-start gap-4 text-sm font-oswald tracking-wide text-base-content/70">
-                <Clock3 class="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} aria-hidden="true" />
-                {item.meta2IsLink && item.meta2Url ? (
-                  <a
-                    href={item.meta2Url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="underline hover:text-base-content transition-colors"
-                  >
-                    {item.meta2}
-                  </a>
-                ) : (
-                  <span>{item.meta2}</span>
-                )}
-              </p>
-              <hr class="text-gray-300" />
-            )}
-          </div>
+          {item.metaItems && item.metaItems.length > 0 && (
+            <div class="flex flex-col gap-1.5">
+              {item.metaItems.map((metaItem) => (
+                <>
+                  <p class="flex items-start gap-4 text-sm font-oswald tracking-wide text-base-content/70">
+                    <TipsMetaIcon
+                      type={metaItem.icon}
+                      class="mt-0.5 h-5 w-5 shrink-0 text-accent"
+                      strokeWidth={1.75}
+                    />
+                    {metaItem.isLink && metaItem.url ? (
+                      <a
+                        href={metaItem.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="underline hover:text-base-content transition-colors"
+                      >
+                        {metaItem.text}
+                      </a>
+                    ) : (
+                      <span>{metaItem.text}</span>
+                    )}
+                  </p>
+                  <hr class="text-gray-300" />
+                </>
+              ))}
+            </div>
+          )}
 
-          {item.text && (
-            <p class="text-sm font-inter text-base-content/80 mt-1">
-              {item.text}
-            </p>
+          {(item.html || item.text) && (
+            <div
+              class="tips-rich-text text-sm font-inter text-base-content/80 mt-1"
+              set:html={item.html || plainTextToRichTextHtml(item.text)}
+            />
           )}
         </div>
       </article>
     ))
   }
 </div>
+
+<style>
+  .tips-rich-text :global(p) {
+    margin: 0 0 0.6rem;
+  }
+
+  .tips-rich-text :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .tips-rich-text :global(strong) {
+    font-weight: 600;
+  }
+
+  .tips-rich-text :global(em) {
+    font-style: italic;
+  }
+
+  .tips-rich-text :global(u) {
+    text-decoration: underline;
+  }
+
+  .tips-rich-text :global(a) {
+    text-decoration: underline;
+    transition: opacity 0.15s;
+  }
+
+  .tips-rich-text :global(a:hover) {
+    opacity: 0.7;
+  }
+</style>
