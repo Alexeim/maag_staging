@@ -64,6 +64,7 @@ let loadError = "";
 
 const heroOptions: Array<{ id: string; title: string; type: string; typeLabel: string }> = [];
 const interviewOptions: Array<{ id: string; title: string }> = [];
+const sidebarOptions: Array<{ id: string; title: string; type: string; typeLabel: string }> = [];
 
 try {
   const [culturePagePlacements, articles, guides, flippers, visualStories, interviews] =
@@ -88,11 +89,26 @@ try {
     .forEach((a) => {
       heroOptions.push({ id: `article:${a.id}`, title: a.title, type: "article", typeLabel: CONTENT_TYPE_LABELS.article });
     });
+  articles
+    .filter(
+      (a) =>
+        normalizeCategoryKey(a.category) === "culture" &&
+        a.articleType !== "le_saviez_vous" &&
+        Boolean(a.isHotContent),
+    )
+    .forEach((a) => {
+      sidebarOptions.push({ id: `article:${a.id}`, title: a.title, type: "article", typeLabel: CONTENT_TYPE_LABELS.article });
+    });
 
   guides
     .filter((g) => normalizeCategoryKey(g.category) === "culture")
     .forEach((g) => {
       heroOptions.push({ id: `guide:${g.id}`, title: g.title, type: "guide", typeLabel: CONTENT_TYPE_LABELS.guide });
+    });
+  guides
+    .filter((g) => normalizeCategoryKey(g.category) === "culture" && Boolean(g.isHotContent))
+    .forEach((g) => {
+      sidebarOptions.push({ id: `guide:${g.id}`, title: g.title, type: "guide", typeLabel: CONTENT_TYPE_LABELS.guide });
     });
 
   flippers
@@ -100,19 +116,33 @@ try {
     .forEach((f) => {
       heroOptions.push({ id: `flipper:${f.id}`, title: f.title, type: "flipper", typeLabel: CONTENT_TYPE_LABELS.flipper });
     });
+  flippers
+    .filter((f) => normalizeCategoryKey(f.category) === "culture" && Boolean(f.isHotContent))
+    .forEach((f) => {
+      sidebarOptions.push({ id: `flipper:${f.id}`, title: f.title, type: "flipper", typeLabel: CONTENT_TYPE_LABELS.flipper });
+    });
 
   visualStories
     .filter((s) => normalizeCategoryKey(s.category) === "culture")
     .forEach((s) => {
       heroOptions.push({ id: `visual-story:${s.id}`, title: s.title, type: "visual-story", typeLabel: CONTENT_TYPE_LABELS["visual-story"] });
     });
+  visualStories
+    .filter((s) => normalizeCategoryKey(s.category) === "culture" && Boolean(s.isHotContent))
+    .forEach((s) => {
+      sidebarOptions.push({ id: `visual-story:${s.id}`, title: s.title, type: "visual-story", typeLabel: CONTENT_TYPE_LABELS["visual-story"] });
+    });
 
   interviews.forEach((i) => {
     heroOptions.push({ id: `interview:${i.id}`, title: i.title, type: "interview", typeLabel: CONTENT_TYPE_LABELS.interview });
     interviewOptions.push({ id: i.id, title: i.title });
+    if (i.isHotContent) {
+      sidebarOptions.push({ id: `interview:${i.id}`, title: i.title, type: "interview", typeLabel: CONTENT_TYPE_LABELS.interview });
+    }
   });
 
   heroOptions.sort((a, b) => a.typeLabel.localeCompare(b.typeLabel, "ru-RU") || a.title.localeCompare(b.title, "ru-RU"));
+  sidebarOptions.sort((a, b) => a.typeLabel.localeCompare(b.typeLabel, "ru-RU") || a.title.localeCompare(b.title, "ru-RU"));
 } catch (error) {
   loadError = error instanceof Error ? error.message : "Не удалось загрузить данные.";
 }
@@ -140,11 +170,19 @@ const initialSecondaryStoriesLimit =
 
 const initialSidebarMode = (() => {
   if (!placements.sidebarRail) return "empty" as const;
-  return placements.sidebarRail.mode as "auto-hot";
+  return placements.sidebarRail.mode;
 })();
 
 const initialSidebarLimit =
   placements.sidebarRail?.mode === "auto-hot" ? placements.sidebarRail.limit : 4;
+
+const availableSidebarKeys = new Set(sidebarOptions.map((item) => item.id));
+const initialSidebarKeys =
+  placements.sidebarRail?.mode === "manual"
+    ? placements.sidebarRail.items
+        .map((item) => `${item.type}:${item.id}`)
+        .filter((key) => availableSidebarKeys.has(key))
+    : [];
 ---
 
 <DashboardLayout title="Редактор «Культура»" active="culture-editor">
@@ -159,6 +197,8 @@ const initialSidebarLimit =
       initialSecondaryStoriesLimit,
       initialSidebarMode,
       initialSidebarLimit,
+      sidebarOptions,
+      initialSidebarKeys,
     })})`}
   >
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
@@ -330,7 +370,7 @@ const initialSidebarLimit =
       </div>
 
       <div class="mt-5 grid gap-5">
-        <div class="grid gap-3 sm:grid-cols-2">
+        <div class="grid gap-3 sm:grid-cols-3">
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
             <input type="radio" name="culture-sidebar-mode" value="empty" x-model="sidebarMode" />
             <span class="text-sm">Empty</span>
@@ -338,6 +378,10 @@ const initialSidebarLimit =
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
             <input type="radio" name="culture-sidebar-mode" value="auto-hot" x-model="sidebarMode" />
             <span class="text-sm">Auto hot</span>
+          </label>
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-sidebar-mode" value="manual" x-model="sidebarMode" />
+            <span class="text-sm">Manual</span>
           </label>
         </div>
 
@@ -356,6 +400,37 @@ const initialSidebarLimit =
             <option value="7">7</option>
             <option value="8">8</option>
           </select>
+        </div>
+
+        <div x-show="sidebarMode === 'manual'" class="grid gap-3">
+          <p class="text-sm font-medium">
+            Выбери материалы с флагом «Самое читаемое». Порядок выбора сохранится в rail.
+          </p>
+          {
+            sidebarOptions.length > 0 ? (
+              <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
+                {sidebarOptions.map((item) => (
+                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      :checked={`isManualSidebarSelected(${JSON.stringify(item.id)})`}
+                      @change={`toggleSidebarItem(${JSON.stringify(item.id)})`}
+                    />
+                    <span class="flex flex-col gap-1 text-sm leading-6">
+                      <span class="font-medium">{item.title}</span>
+                      <span class="text-xs uppercase tracking-[0.22em] text-base-content/55">
+                        {item.typeLabel}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p class="text-sm text-base-content/60">
+                Нет материалов с флагом «Самое читаемое».
+              </p>
+            )
+          }
         </div>
 
         <p x-show="sidebarError" class="text-sm text-error" x-text="sidebarError"></p>

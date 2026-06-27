@@ -463,9 +463,7 @@ const selectSectionSidebarItems = async (
     const items = await fetchByTargets(
       Array.isArray(selection.items) ? selection.items : [],
     );
-    return flag === 'isNotebookContent'
-      ? items.filter((item: any) => item.isNotebookContent)
-      : items;
+    return items.filter((item: any) => item[flag]);
   }
 
   return candidates

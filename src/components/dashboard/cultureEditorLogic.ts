@@ -29,8 +29,10 @@ interface CultureEditorInitialState {
   initialFeaturedInterview: { mode: "empty" | "auto-latest" | "manual"; id: string };
   initialSecondaryStoriesMode: "empty" | "auto-latest";
   initialSecondaryStoriesLimit: number;
-  initialSidebarMode: "empty" | "auto-hot";
+  initialSidebarMode: "empty" | "auto-hot" | "manual";
   initialSidebarLimit: number;
+  sidebarOptions: ContentOption[];
+  initialSidebarKeys: string[];
 }
 
 const parseContentKey = (key: string) => {
@@ -62,6 +64,8 @@ export default (initialState: CultureEditorInitialState) => ({
 
   sidebarMode: initialState.initialSidebarMode ?? "auto-hot",
   sidebarLimit: initialState.initialSidebarLimit ?? 4,
+  sidebarOptions: initialState.sidebarOptions ?? [],
+  selectedSidebarKeys: [...(initialState.initialSidebarKeys ?? [])],
   sidebarSaving: false,
   sidebarError: "",
 
@@ -76,6 +80,20 @@ export default (initialState: CultureEditorInitialState) => ({
     } else {
       window.alert(message);
     }
+  },
+
+  isManualSidebarSelected(key: string) {
+    return this.selectedSidebarKeys.includes(key);
+  },
+
+  toggleSidebarItem(key: string) {
+    if (this.selectedSidebarKeys.includes(key)) {
+      this.selectedSidebarKeys = this.selectedSidebarKeys.filter(
+        (selectedKey: string) => selectedKey !== key,
+      );
+      return;
+    }
+    this.selectedSidebarKeys = [key, ...this.selectedSidebarKeys];
   },
 
   async saveHero() {
@@ -177,6 +195,23 @@ export default (initialState: CultureEditorInitialState) => ({
         sidebarRail = {
           mode: "auto-hot",
           limit: Number(this.sidebarLimit) || 4,
+        };
+      } else if (this.sidebarMode === "manual") {
+        if (this.selectedSidebarKeys.length === 0) {
+          throw new Error("Для ручного режима выбери хотя бы один материал.");
+        }
+        sidebarRail = {
+          mode: "manual",
+          items: this.selectedSidebarKeys.map((key: string) => {
+            const parsed = parseContentKey(key);
+            if (!parsed) {
+              throw new Error("Не удалось распознать выбранный материал.");
+            }
+            return {
+              type: parsed.type as SectionPageHeroType,
+              id: parsed.id,
+            };
+          }),
         };
       }
 
