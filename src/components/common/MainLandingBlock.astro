@@ -4,6 +4,7 @@ import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
 import { getTransitionName } from "../../lib/utils/transitions";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getCalendarToday } from "@/lib/utils/calendarDate";
 
 interface MainLandingBlockProps {
   data?: {
@@ -198,7 +199,7 @@ function getLandingEventDisplayDate(event: any) {
   const startDay = resetToUtcMidnight(new Date(startDate));
   const endDate = toDate(event?.endDate) ?? startDate;
   const endDay = resetToUtcMidnight(new Date(endDate));
-  const today = resetToUtcMidnight(new Date());
+  const today = getCalendarToday();
   const isRangeEvent =
     event?.dateType === "duration" || startDay.getTime() !== endDay.getTime();
 

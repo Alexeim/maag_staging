@@ -15,6 +15,7 @@ import {
   type PublicContentCardItem,
 } from "@/lib/utils/contentCollectionMarquee";
 import { buildEventStructuredData } from "@/lib/seo/structuredData";
+import { getCalendarToday } from "@/lib/utils/calendarDate";
 
 const { id } = Astro.params;
 
@@ -468,7 +469,7 @@ if (!error && eventData?.published !== true) {
 if (!error && eventData) {
   try {
     const allEvents = await eventsApi.list();
-    const today = toUtcDayStart(new Date());
+    const today = getCalendarToday();
 
     relatedEvents = allEvents
       .filter((item) => item?.published === true)

@@ -1,3 +1,5 @@
+import { getCalendarToday } from "./calendarDate";
+
 export interface CalendarPageAutoEventCandidate {
   id: string;
   startDate: string | Date;
@@ -81,7 +83,7 @@ const sortByStartDateAsc = (left: CalendarPageAutoEventCandidate, right: Calenda
 export const resolveAutoSecondaryEventIds = (
   events: CalendarPageAutoEventCandidate[],
   limit = 4,
-  today = resetToUtcMidnight(new Date()),
+  today = getCalendarToday(),
 ) => {
   const { weekStart, weekEnd } = getWeekBounds(today);
   const currentWeekSingleDay: CalendarPageAutoEventCandidate[] = [];

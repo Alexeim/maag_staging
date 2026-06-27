@@ -1,3 +1,5 @@
+import { getCalendarToday } from "@/lib/utils/calendarDate";
+
 const EVENT_CATEGORY_LABELS: Record<string, string> = {
   exhibition: "Выставки",
   exhibitions: "Выставки",
@@ -122,8 +124,6 @@ const resetToUtcMidnight = (date: Date) => {
   date.setUTCHours(0, 0, 0, 0);
   return date;
 };
-
-const getTodayUtc = () => resetToUtcMidnight(new Date());
 
 const formatRangeLabel = (start: Date, end: Date): string => {
   const format = (date: Date, withYear = false) =>
@@ -325,7 +325,7 @@ export default (
       .filter((event): event is NormalizedEvent => Boolean(event))
       .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
 
-    const today = getTodayUtc();
+    const today = getCalendarToday();
     const ongoingToday = this.events.some((event) => isDateWithinRange(today, event));
     const nearestUpcoming = this.events.find(
       (event) =>
@@ -560,7 +560,7 @@ export default (
   },
 
   getDefaultDateForMonth(year: number, month: number) {
-    const today = getTodayUtc();
+    const today = getCalendarToday();
     if (
       today.getUTCFullYear() === year &&
       today.getUTCMonth() === month

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDb } from '../services/firebase';
+import { getCalendarToday } from '../utils/calendarDate';
 
 type LandingContentType =
   | 'article'
@@ -258,7 +259,7 @@ const sortByCreatedAtDesc = (left: any, right: any) =>
 
 const selectAutoLandingEvent = async () => {
   const events = await fetchLatest('event', 100);
-  const today = resetToUtcMidnight(new Date());
+  const today = getCalendarToday();
   const normalizedEvents = normalizeEvents(events);
 
   const singleDayEventsForToday = normalizedEvents
@@ -641,7 +642,7 @@ const getWeekBounds = (today: Date) => {
 };
 
 const resolveLastChanceEventIds = (events: any[], limit = 4) => {
-  const today = resetToUtcMidnight(new Date());
+  const today = getCalendarToday();
   const cutoff = new Date(today);
   cutoff.setUTCDate(today.getUTCDate() + 7);
   cutoff.setUTCHours(23, 59, 59, 999);
@@ -662,7 +663,7 @@ const resolveLastChanceEventIds = (events: any[], limit = 4) => {
 };
 
 const resolveAutoSecondaryEventIds = (events: any[], limit = 4) => {
-  const today = resetToUtcMidnight(new Date());
+  const today = getCalendarToday();
   const { weekStart, weekEnd } = getWeekBounds(today);
   const currentWeekSingleDay: any[] = [];
   const currentWeekDuration: any[] = [];
