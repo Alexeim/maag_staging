@@ -151,6 +151,7 @@ export interface ArticlePayload {
   binaryForGuide?: boolean;
   isHotContent?: boolean;
   isNotebookContent?: boolean;
+  isMaagChoice?: boolean;
   isMainInCategory?: boolean;
   isNews?: boolean;
   published?: boolean;
@@ -594,6 +595,7 @@ export interface FlipperPayload {
   binaryForGuide?: boolean;
   isHotContent?: boolean;
   isNotebookContent?: boolean;
+  isMaagChoice?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
   carouselContent: { imageUrl: string; caption: string }[];
@@ -621,6 +623,7 @@ export interface InterviewPayload {
   tags?: string[];
   isHotContent?: boolean;
   isNotebookContent?: boolean;
+  isMaagChoice?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
   relatedContent?: RelatedContent;
@@ -650,6 +653,7 @@ export interface GuidePayload {
   binaryForGuide?: boolean;
   isHotContent?: boolean;
   isNotebookContent?: boolean;
+  isMaagChoice?: boolean;
   isMainInCategory?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
@@ -1001,6 +1005,7 @@ export interface VisualStoryPayload {
   binaryForGuide?: boolean;
   isHotContent?: boolean;
   isNotebookContent?: boolean;
+  isMaagChoice?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
   relatedContent?: RelatedContent;
@@ -1112,7 +1117,7 @@ export interface PublicLandingResponse {
     cultureCardItems: unknown[];
     parisHero: unknown | null;
     parisCardItems: unknown[];
-    hotContentItems: unknown[];
+    maagChoiceItems: unknown[];
     latestInterview: unknown | null;
     carouselItems: unknown[];
     leSaviezVousArticle: unknown | null;

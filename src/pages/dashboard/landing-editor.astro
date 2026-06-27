@@ -101,6 +101,14 @@ const isLeSaviezVousArticle = (item: { articleType?: string }) =>
 const isHotContentItem = (item: { isHotContent?: boolean }) =>
   Boolean(item.isHotContent);
 
+const isMaagChoiceItem = (item: { isMaagChoice?: boolean }) =>
+  Boolean(item.isMaagChoice);
+
+const isLandingPrimaryEligible = (item: {
+  isHotContent?: boolean;
+  isMaagChoice?: boolean;
+}) => !isHotContentItem(item) && !isMaagChoiceItem(item);
+
 const normalizeCategoryKey = (value?: string) => value?.trim().toLowerCase() ?? "";
 
 const toDate = (value: unknown): Date | null => {
@@ -232,8 +240,10 @@ try {
   articles.forEach((item) => {
     const key = `article:${item.id}`;
     const articleBucket = normalizeArticleBucket(item);
-    contentTitleMaps.mainHero.set(key, item.title);
-    if (isHotContentItem(item)) {
+    if (isLandingPrimaryEligible(item)) {
+      contentTitleMaps.mainHero.set(key, item.title);
+    }
+    if (isMaagChoiceItem(item)) {
       contentTitleMaps.netlenka.set(key, item.title);
       netlenkaOptionItems.push({
         id: key,
@@ -251,8 +261,10 @@ try {
     }
   });
   guides.forEach((item) => {
-    contentTitleMaps.mainHero.set(`guide:${item.id}`, item.title);
-    if (isHotContentItem(item)) {
+    if (isLandingPrimaryEligible(item)) {
+      contentTitleMaps.mainHero.set(`guide:${item.id}`, item.title);
+    }
+    if (isMaagChoiceItem(item)) {
       contentTitleMaps.netlenka.set(`guide:${item.id}`, item.title);
       netlenkaOptionItems.push({
         id: `guide:${item.id}`,
@@ -264,8 +276,10 @@ try {
     }
   });
   interviews.forEach((item) => {
-    contentTitleMaps.mainHero.set(`interview:${item.id}`, item.title);
-    if (isHotContentItem(item)) {
+    if (isLandingPrimaryEligible(item)) {
+      contentTitleMaps.mainHero.set(`interview:${item.id}`, item.title);
+    }
+    if (isMaagChoiceItem(item)) {
       contentTitleMaps.netlenka.set(`interview:${item.id}`, item.title);
       netlenkaOptionItems.push({
         id: `interview:${item.id}`,
@@ -275,11 +289,15 @@ try {
         createdAt: item.createdAt,
       });
     }
-    contentTitleMaps.interviews.set(item.id, item.title);
+    if (isLandingPrimaryEligible(item)) {
+      contentTitleMaps.interviews.set(item.id, item.title);
+    }
   });
   flippers.forEach((item) => {
-    contentTitleMaps.mainHero.set(`flipper:${item.id}`, item.title);
-    if (isHotContentItem(item)) {
+    if (isLandingPrimaryEligible(item)) {
+      contentTitleMaps.mainHero.set(`flipper:${item.id}`, item.title);
+    }
+    if (isMaagChoiceItem(item)) {
       contentTitleMaps.netlenka.set(`flipper:${item.id}`, item.title);
       netlenkaOptionItems.push({
         id: `flipper:${item.id}`,
@@ -291,8 +309,10 @@ try {
     }
   });
   visualStories.forEach((item) => {
-    contentTitleMaps.mainHero.set(`visual-story:${item.id}`, item.title);
-    if (isHotContentItem(item)) {
+    if (isLandingPrimaryEligible(item)) {
+      contentTitleMaps.mainHero.set(`visual-story:${item.id}`, item.title);
+    }
+    if (isMaagChoiceItem(item)) {
       contentTitleMaps.netlenka.set(`visual-story:${item.id}`, item.title);
       netlenkaOptionItems.push({
         id: `visual-story:${item.id}`,
@@ -309,7 +329,7 @@ try {
   events.forEach((item) => contentTitleMaps.events.set(item.id, item.title));
 
   leSaviezVousItems = articles
-    .filter((item) => isLeSaviezVousArticle(item))
+    .filter((item) => isLeSaviezVousArticle(item) && isLandingPrimaryEligible(item))
     .sort((a, b) => {
       const aTime = toDate(a.createdAt)?.getTime() ?? 0;
       const bTime = toDate(b.createdAt)?.getTime() ?? 0;
@@ -327,6 +347,7 @@ try {
         createdAt: item.createdAt,
         category: normalizeCategoryKey(item.category),
         isHotContent: isHotContentItem(item),
+        isMaagChoice: isMaagChoiceItem(item),
       })),
     ...guides.map((item) => ({
       id: `guide:${item.id}`,
@@ -336,6 +357,7 @@ try {
       createdAt: item.createdAt,
       category: normalizeCategoryKey(item.category),
       isHotContent: isHotContentItem(item),
+      isMaagChoice: isMaagChoiceItem(item),
     })),
     ...flippers.map((item) => ({
       id: `flipper:${item.id}`,
@@ -345,6 +367,7 @@ try {
       createdAt: item.createdAt,
       category: normalizeCategoryKey(item.category),
       isHotContent: isHotContentItem(item),
+      isMaagChoice: isMaagChoiceItem(item),
     })),
     ...visualStories.map((item) => ({
       id: `visual-story:${item.id}`,
@@ -354,9 +377,10 @@ try {
       createdAt: item.createdAt,
       category: normalizeCategoryKey(item.category),
       isHotContent: isHotContentItem(item),
+      isMaagChoice: isMaagChoiceItem(item),
     })),
   ]
-    .filter((item) => !item.isHotContent && item.id !== currentMainHeroKey)
+    .filter((item) => !item.isHotContent && !item.isMaagChoice && item.id !== currentMainHeroKey)
     .sort((left, right) => {
       const leftDate = toDate(left.createdAt)?.getTime() ?? 0;
       const rightDate = toDate(right.createdAt)?.getTime() ?? 0;
@@ -464,14 +488,14 @@ const netlenkaRailSummary = (() => {
   if (!landingPlacements.netlenkaRail) {
     return {
       modeLabel: "Пусто",
-      details: "Блок «Самое Читаемое» сейчас пуст.",
+      details: "Блок «Выбор MAAG» сейчас пуст.",
     };
   }
 
   if (landingPlacements.netlenkaRail.mode === "auto-latest") {
     return {
       modeLabel: "Auto latest",
-      details: `Последние ${landingPlacements.netlenkaRail.limit} материала(ов) из «Самое Читаемое».`,
+      details: `Последние ${landingPlacements.netlenkaRail.limit} материала(ов) из «Выбор MAAG».`,
     };
   }
 
@@ -636,8 +660,8 @@ const slotCards = [
     details: newsRailSummary.details,
   },
   {
-    title: "Netlenka Rail",
-    description: "Блок «Самое Читаемое» в landing body.",
+    title: "MAAG Choice Rail",
+    description: "Блок «Выбор MAAG» в landing body.",
     modeLabel: netlenkaRailSummary.modeLabel,
     details: netlenkaRailSummary.details,
   },
@@ -1392,9 +1416,9 @@ const initialMainHeroState = (() => {
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Netlenka Rail Controls</h3>
+        <h3 class="text-lg font-semibold">MAAG Choice Rail Controls</h3>
         <p class="text-sm text-base-content/70">
-          Блок «Самое Читаемое» в правой колонке landing.
+          Блок «Выбор MAAG» в правой колонке landing.
         </p>
       </div>
 
@@ -1451,7 +1475,7 @@ const initialMainHeroState = (() => {
 
         <div x-show="netlenkaRailMode === 'manual'" class="grid gap-3">
           <p class="text-sm font-medium">
-            Выбери материалы вручную. Порядок выбора сохранится в rail.
+            Выбери материалы с флагом «Выбор MAAG». Порядок выбора сохранится в rail.
           </p>
 
           {netlenkaOptions.length > 0 ? (
@@ -1490,7 +1514,7 @@ const initialMainHeroState = (() => {
             @click="saveNetlenkaRail()"
             :disabled="netlenkaSaving"
           >
-            Сохранить netlenka rail
+            Сохранить MAAG choice rail
           </button>
           <span x-show="netlenkaSaving" class="text-sm text-base-content/70">
             Сохраняем...

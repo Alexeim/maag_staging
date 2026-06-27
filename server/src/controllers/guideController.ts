@@ -24,6 +24,7 @@ export interface Guide {
   tags?: string[];
   isHotContent?: boolean;
   isNotebookContent?: boolean;
+  isMaagChoice?: boolean;
   isMainInCategory?: boolean;
   paid?: boolean;
   published: boolean;
@@ -84,6 +85,7 @@ export const createGuide = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       isNotebookContent = false,
+      isMaagChoice = false,
       isMainInCategory = false,
       paid = false,
       relatedContent,
@@ -117,6 +119,7 @@ export const createGuide = async (req: Request, res: Response) => {
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isNotebookContent: Boolean(isNotebookContent),
+      isMaagChoice: Boolean(isMaagChoice),
       isMainInCategory: Boolean(isMainInCategory),
       paid: Boolean(paid),
       ...buildPublicationFieldsForCreate(req.body, now),
@@ -231,6 +234,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       isNotebookContent = false,
+      isMaagChoice = false,
       isMainInCategory = false,
       paid = false,
       relatedContent,
@@ -266,6 +270,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isNotebookContent: Boolean(isNotebookContent),
+      isMaagChoice: Boolean(isMaagChoice),
       isMainInCategory: Boolean(isMainInCategory),
       paid: Boolean(paid),
       ...buildPublicationFieldsForUpdate(req.body, guideDoc.data(), now),

@@ -137,6 +137,7 @@ export default function flipperCreatorLogic(initialState = {}) {
         : normalizedCategory;
     copy.isHotContent = isHotContentLegacy;
     copy.isNotebookContent = Boolean(copy.isNotebookContent);
+    copy.isMaagChoice = Boolean(copy.isMaagChoice);
     copy.paid = Boolean(copy.paid);
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
@@ -166,6 +167,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       category: "",
       isHotContent: false,
       isNotebookContent: false,
+      isMaagChoice: false,
       paid: false,
       published: false,
       publishedAt: null,
@@ -712,6 +714,7 @@ export default function flipperCreatorLogic(initialState = {}) {
           binaryForGuide: false,
           isHotContent: Boolean(this.flipper.isHotContent),
           isNotebookContent: Boolean(this.flipper.isNotebookContent),
+          isMaagChoice: Boolean(this.flipper.isMaagChoice),
           paid: Boolean(this.flipper.paid),
           relatedContent: sanitizeRelatedContent(
             this.flipper.relatedContent,

@@ -88,10 +88,12 @@ const withAuthor = async (newsDoc: FirebaseFirestore.QueryDocumentSnapshot | Fir
   const {
     isHotContent: _ignoredHotContent,
     isNotebookContent: _ignoredNotebookContent,
+    isMaagChoice: _ignoredMaagChoice,
     ...safeNewsData
   } = newsData as NewsItem & {
     isHotContent?: unknown;
     isNotebookContent?: unknown;
+    isMaagChoice?: unknown;
   };
 
   let authorData = null;

@@ -110,6 +110,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.mainQuote = copy.mainQuote ?? "";
     copy.isHotContent = Boolean(copy.isHotContent);
     copy.isNotebookContent = Boolean(copy.isNotebookContent);
+    copy.isMaagChoice = Boolean(copy.isMaagChoice);
     copy.paid = Boolean(copy.paid);
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
@@ -139,6 +140,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       mainQuote: "",
       isHotContent: false,
       isNotebookContent: false,
+      isMaagChoice: false,
       paid: false,
       published: false,
       publishedAt: null,
@@ -583,6 +585,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.interview.tags = this.interview.tags ?? [];
       this.interview.isHotContent = Boolean(this.interview.isHotContent);
       this.interview.isNotebookContent = Boolean(this.interview.isNotebookContent);
+      this.interview.isMaagChoice = Boolean(this.interview.isMaagChoice);
       this.interview.relatedContent = sanitizeRelatedContent(
         this.interview.relatedContent,
         "interview",
@@ -1027,6 +1030,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           mainQuote: this.interview.mainQuote,
           isHotContent: Boolean(this.interview.isHotContent),
           isNotebookContent: Boolean(this.interview.isNotebookContent),
+          isMaagChoice: Boolean(this.interview.isMaagChoice),
           paid: Boolean(this.interview.paid),
           published: Boolean(this.interview.published),
           imageUrl: this.interview.imageUrl,

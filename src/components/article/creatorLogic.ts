@@ -274,6 +274,7 @@ export default function articleCreatorLogic(initialState = {}) {
         : normalizedCategory;
     copy.isHotContent = isHotContentLegacy;
     copy.isNotebookContent = Boolean(copy.isNotebookContent);
+    copy.isMaagChoice = Boolean(copy.isMaagChoice);
     const blocks = Array.isArray(copy.content)
       ? copy.content
       : Array.isArray(copy.contentBlocks)
@@ -354,6 +355,7 @@ export default function articleCreatorLogic(initialState = {}) {
       category: "", // <-- Added category
       isHotContent: false,
       isNotebookContent: false,
+      isMaagChoice: false,
       isMainInCategory: false,
       paid: false,
       published: false,
@@ -1126,6 +1128,7 @@ export default function articleCreatorLogic(initialState = {}) {
         this.article.articleType ?? articleType ?? "standard";
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isNotebookContent = Boolean(this.article.isNotebookContent);
+      this.article.isMaagChoice = Boolean(this.article.isMaagChoice);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.relatedContent = sanitizeRelatedContent(
         this.article.relatedContent,
@@ -1673,6 +1676,7 @@ export default function articleCreatorLogic(initialState = {}) {
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,
           isNotebookContent: Boolean(this.article.isNotebookContent),
+          isMaagChoice: Boolean(this.article.isMaagChoice),
           isMainInCategory: this.article.isMainInCategory,
           paid: this.article.paid,
           published: Boolean(this.article.published),

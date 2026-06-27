@@ -21,6 +21,7 @@ export interface Interview {
   mainQuote?: string;
   isHotContent?: boolean;
   isNotebookContent?: boolean;
+  isMaagChoice?: boolean;
   paid?: boolean;
   published: boolean;
   publishedAt: Date | null;
@@ -57,6 +58,7 @@ export const createInterview = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       isNotebookContent = false,
+      isMaagChoice = false,
       paid = false,
       relatedContent,
       contentCollectionId,
@@ -81,6 +83,7 @@ export const createInterview = async (req: Request, res: Response) => {
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
       isNotebookContent: Boolean(isNotebookContent),
+      isMaagChoice: Boolean(isMaagChoice),
       paid: Boolean(paid),
       ...buildPublicationFieldsForCreate(req.body, now),
       content,
@@ -201,6 +204,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       isNotebookContent = false,
+      isMaagChoice = false,
       paid = false,
       relatedContent,
       contentCollectionId,
@@ -227,6 +231,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
       isNotebookContent: Boolean(isNotebookContent),
+      isMaagChoice: Boolean(isMaagChoice),
       paid: Boolean(paid),
       ...buildPublicationFieldsForUpdate(req.body, interviewDoc.data(), now),
       content,

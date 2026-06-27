@@ -21,6 +21,7 @@ export interface Flipper {
   tags?: string[];
   isHotContent?: boolean;
   isNotebookContent?: boolean;
+  isMaagChoice?: boolean;
   paid?: boolean;
   published: boolean;
   publishedAt: Date | null;
@@ -50,6 +51,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       isNotebookContent = false,
+      isMaagChoice = false,
       paid = false,
       carouselContent = [],
       relatedContent,
@@ -80,6 +82,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isNotebookContent: Boolean(isNotebookContent),
+      isMaagChoice: Boolean(isMaagChoice),
       paid: Boolean(paid),
       ...buildPublicationFieldsForCreate(req.body, now),
       carouselContent,
@@ -188,6 +191,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       isNotebookContent = false,
+      isMaagChoice = false,
       paid = false,
       carouselContent = [],
       relatedContent,
@@ -223,6 +227,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isNotebookContent: Boolean(isNotebookContent),
+      isMaagChoice: Boolean(isMaagChoice),
       paid: Boolean(paid),
       ...buildPublicationFieldsForUpdate(req.body, doc.data(), now),
       carouselContent,

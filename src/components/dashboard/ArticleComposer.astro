@@ -200,6 +200,18 @@ const {
 
     <div class="mt-4 flex items-center gap-3">
       <input
+        id="maag-choice-flag"
+        type="checkbox"
+        x-model="article.isMaagChoice"
+        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+      />
+      <label for="maag-choice-flag" class="text-sm font-medium text-base-content cursor-pointer">
+        Добавить в «Выбор MAAG»
+      </label>
+    </div>
+
+    <div class="mt-4 flex items-center gap-3">
+      <input
         id="article-paid-flag"
         type="checkbox"
         x-model="article.paid"

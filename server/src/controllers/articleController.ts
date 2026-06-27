@@ -26,6 +26,7 @@ export interface Article {
   tags?: string[];
   isHotContent?: boolean;
   isNotebookContent?: boolean;
+  isMaagChoice?: boolean;
   isMainInCategory?: boolean;
   isNews?: boolean;
   paid?: boolean;
@@ -102,6 +103,7 @@ export const createArticle = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       isNotebookContent = false,
+      isMaagChoice = false,
       isMainInCategory = false,
       isNews = false,
       paid = false,
@@ -139,6 +141,7 @@ export const createArticle = async (req: Request, res: Response) => {
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isNotebookContent: Boolean(isNotebookContent),
+      isMaagChoice: Boolean(isMaagChoice),
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
       paid: Boolean(paid),
@@ -258,6 +261,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       tags = [],
       isHotContent = false,
       isNotebookContent = false,
+      isMaagChoice = false,
       isMainInCategory = false,
       isNews = false,
       paid = false,
@@ -297,6 +301,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
       isNotebookContent: Boolean(isNotebookContent),
+      isMaagChoice: Boolean(isMaagChoice),
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
       paid: Boolean(paid),

@@ -886,7 +886,7 @@ const assertDocumentsExist = async (collectionName: string, ids: string[]) => {
 
 interface NetlenkaItemStatus extends LandingNetlenkaItemTarget {
   exists: boolean;
-  isHotContent: boolean;
+  isMaagChoice: boolean;
 }
 
 interface CategoryCardsItemStatus extends LandingCategoryCardsItemTarget {
@@ -908,7 +908,7 @@ const getNetlenkaItemStatuses = async (
       return {
         ...item,
         exists: doc.exists,
-        isHotContent: doc.exists && data?.isHotContent === true,
+        isMaagChoice: doc.exists && data?.isMaagChoice === true,
       };
     }),
   );
@@ -946,7 +946,7 @@ const sanitizeNetlenkaRailSelection = async (
   const statuses = await getNetlenkaItemStatuses(netlenkaRail.items);
   const allowedKeys = new Set(
     statuses
-      .filter((item) => item.exists && item.isHotContent)
+      .filter((item) => item.exists && item.isMaagChoice)
       .map((item) => `${item.type}:${item.id}`),
   );
 
@@ -1157,13 +1157,13 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
             });
           }
 
-          const nonHotItems = statuses
-            .filter((item) => item.exists && !item.isHotContent)
+          const nonMaagChoiceItems = statuses
+            .filter((item) => item.exists && !item.isMaagChoice)
             .map(({ type, id }) => ({ type, id }));
-          if (nonHotItems.length > 0) {
+          if (nonMaagChoiceItems.length > 0) {
             return res.status(400).json({
-              message: 'Referenced netlenka rail documents must have isHotContent=true',
-              nonHotItems,
+              message: 'Referenced netlenka rail documents must have isMaagChoice=true',
+              nonMaagChoiceItems,
             });
           }
         }

@@ -34,6 +34,7 @@ export interface VisualStory {
   parisDistrict?: string | null;
   isHotContent?: boolean;
   isNotebookContent?: boolean;
+  isMaagChoice?: boolean;
   paid?: boolean;
   published: boolean;
   publishedAt: Date | null;
@@ -131,6 +132,7 @@ const buildVisualStoryPayload = (body: Record<string, unknown>) => {
     parisDistrict,
     isHotContent = false,
     isNotebookContent = false,
+    isMaagChoice = false,
     paid = false,
     relatedContent,
     contentCollectionId,
@@ -154,6 +156,7 @@ const buildVisualStoryPayload = (body: Record<string, unknown>) => {
         : null,
     isHotContent: Boolean(isHotContent),
     isNotebookContent: Boolean(isNotebookContent),
+    isMaagChoice: Boolean(isMaagChoice),
     paid: Boolean(paid),
     relatedContent: normalizeRelatedContent(relatedContent),
     contentCollectionId: normalizeContentCollectionId(contentCollectionId),

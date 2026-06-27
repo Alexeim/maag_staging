@@ -162,6 +162,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       binaryForGuide: false,
       isHotContent: false,
       isNotebookContent: false,
+      isMaagChoice: false,
       paid: false,
       published: false,
       publishedAt: null,
@@ -630,6 +631,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.binaryForGuide = Boolean(copy.binaryForGuide);
         this.story.isHotContent = Boolean(copy.isHotContent);
         this.story.isNotebookContent = Boolean(copy.isNotebookContent);
+        this.story.isMaagChoice = Boolean(copy.isMaagChoice);
         this.story.paid = Boolean(copy.paid);
         this.story.published = Boolean(copy.published);
         this.story.publishedAt = copy.publishedAt ?? null;
@@ -767,6 +769,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           binaryForGuide: false,
           isHotContent: this.story.isHotContent,
           isNotebookContent: Boolean(this.story.isNotebookContent),
+          isMaagChoice: Boolean(this.story.isMaagChoice),
           paid: this.story.paid,
           published: Boolean(this.story.published),
           relatedContent: sanitizeRelatedContent(

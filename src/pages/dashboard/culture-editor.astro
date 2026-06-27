@@ -84,7 +84,8 @@ try {
       (a) =>
         normalizeCategoryKey(a.category) === "culture" &&
         a.articleType !== "le_saviez_vous" &&
-        a.articleType !== "tips",
+        a.articleType !== "tips" &&
+        !a.isHotContent,
     )
     .forEach((a) => {
       heroOptions.push({ id: `article:${a.id}`, title: a.title, type: "article", typeLabel: CONTENT_TYPE_LABELS.article });
@@ -101,7 +102,7 @@ try {
     });
 
   guides
-    .filter((g) => normalizeCategoryKey(g.category) === "culture")
+    .filter((g) => normalizeCategoryKey(g.category) === "culture" && !g.isHotContent)
     .forEach((g) => {
       heroOptions.push({ id: `guide:${g.id}`, title: g.title, type: "guide", typeLabel: CONTENT_TYPE_LABELS.guide });
     });
@@ -112,7 +113,7 @@ try {
     });
 
   flippers
-    .filter((f) => normalizeCategoryKey(f.category) === "culture")
+    .filter((f) => normalizeCategoryKey(f.category) === "culture" && !f.isHotContent)
     .forEach((f) => {
       heroOptions.push({ id: `flipper:${f.id}`, title: f.title, type: "flipper", typeLabel: CONTENT_TYPE_LABELS.flipper });
     });
@@ -123,7 +124,7 @@ try {
     });
 
   visualStories
-    .filter((s) => normalizeCategoryKey(s.category) === "culture")
+    .filter((s) => normalizeCategoryKey(s.category) === "culture" && !s.isHotContent)
     .forEach((s) => {
       heroOptions.push({ id: `visual-story:${s.id}`, title: s.title, type: "visual-story", typeLabel: CONTENT_TYPE_LABELS["visual-story"] });
     });
@@ -134,8 +135,10 @@ try {
     });
 
   interviews.forEach((i) => {
-    heroOptions.push({ id: `interview:${i.id}`, title: i.title, type: "interview", typeLabel: CONTENT_TYPE_LABELS.interview });
-    interviewOptions.push({ id: i.id, title: i.title });
+    if (!i.isHotContent) {
+      heroOptions.push({ id: `interview:${i.id}`, title: i.title, type: "interview", typeLabel: CONTENT_TYPE_LABELS.interview });
+      interviewOptions.push({ id: i.id, title: i.title });
+    }
     if (i.isHotContent) {
       sidebarOptions.push({ id: `interview:${i.id}`, title: i.title, type: "interview", typeLabel: CONTENT_TYPE_LABELS.interview });
     }

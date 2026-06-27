@@ -212,6 +212,7 @@ export default function guideCreatorLogic(initialState = {}) {
         : normalizedCategory;
     copy.isHotContent = isHotContentLegacy;
     copy.isNotebookContent = Boolean(copy.isNotebookContent);
+    copy.isMaagChoice = Boolean(copy.isMaagChoice);
     copy.paid = Boolean(copy.paid);
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
@@ -287,6 +288,7 @@ export default function guideCreatorLogic(initialState = {}) {
       category: "",
       isHotContent: false,
       isNotebookContent: false,
+      isMaagChoice: false,
       isMainInCategory: false,
       paid: false,
       published: false,
@@ -895,6 +897,7 @@ export default function guideCreatorLogic(initialState = {}) {
       this.article.cardLead = this.article.cardLead ?? "";
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isNotebookContent = Boolean(this.article.isNotebookContent);
+      this.article.isMaagChoice = Boolean(this.article.isMaagChoice);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.relatedContent = sanitizeRelatedContent(
         this.article.relatedContent,
@@ -1398,6 +1401,7 @@ export default function guideCreatorLogic(initialState = {}) {
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,
           isNotebookContent: Boolean(this.article.isNotebookContent),
+          isMaagChoice: Boolean(this.article.isMaagChoice),
           isMainInCategory: this.article.isMainInCategory,
           paid: this.article.paid,
           published: Boolean(this.article.published),

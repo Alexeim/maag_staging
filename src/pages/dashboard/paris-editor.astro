@@ -80,13 +80,24 @@ try {
   placements = parisPagePlacements;
 
   articles
-    .filter((a) => normalizeCategoryKey(a.category) === "paris" && a.articleType !== "le_saviez_vous")
+    .filter(
+      (a) =>
+        normalizeCategoryKey(a.category) === "paris" &&
+        a.articleType !== "le_saviez_vous" &&
+        !a.isHotContent &&
+        !a.isNotebookContent,
+    )
     .forEach((a) => {
       heroOptions.push({ id: `article:${a.id}`, title: a.title, type: "article", typeLabel: CONTENT_TYPE_LABELS.article });
     });
 
   articles
-    .filter((a) => a.articleType === "le_saviez_vous")
+    .filter(
+      (a) =>
+        a.articleType === "le_saviez_vous" &&
+        !a.isHotContent &&
+        !a.isNotebookContent,
+    )
     .sort((a, b) => {
       const aDate = toDate(a.createdAt)?.getTime() ?? 0;
       const bDate = toDate(b.createdAt)?.getTime() ?? 0;
@@ -102,7 +113,12 @@ try {
     });
 
   guides
-    .filter((g) => normalizeCategoryKey(g.category) === "paris")
+    .filter(
+      (g) =>
+        normalizeCategoryKey(g.category) === "paris" &&
+        !g.isHotContent &&
+        !g.isNotebookContent,
+    )
     .forEach((g) => {
       heroOptions.push({ id: `guide:${g.id}`, title: g.title, type: "guide", typeLabel: CONTENT_TYPE_LABELS.guide });
     });
@@ -113,7 +129,12 @@ try {
     });
 
   flippers
-    .filter((f) => normalizeCategoryKey(f.category) === "paris")
+    .filter(
+      (f) =>
+        normalizeCategoryKey(f.category) === "paris" &&
+        !f.isHotContent &&
+        !f.isNotebookContent,
+    )
     .forEach((f) => {
       heroOptions.push({ id: `flipper:${f.id}`, title: f.title, type: "flipper", typeLabel: CONTENT_TYPE_LABELS.flipper });
     });
@@ -124,7 +145,12 @@ try {
     });
 
   visualStories
-    .filter((s) => normalizeCategoryKey(s.category) === "paris")
+    .filter(
+      (s) =>
+        normalizeCategoryKey(s.category) === "paris" &&
+        !s.isHotContent &&
+        !s.isNotebookContent,
+    )
     .forEach((s) => {
       heroOptions.push({ id: `visual-story:${s.id}`, title: s.title, type: "visual-story", typeLabel: CONTENT_TYPE_LABELS["visual-story"] });
     });
