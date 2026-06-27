@@ -273,6 +273,7 @@ export default function articleCreatorLogic(initialState = {}) {
         ? ""
         : normalizedCategory;
     copy.isHotContent = isHotContentLegacy;
+    copy.isNotebookContent = Boolean(copy.isNotebookContent);
     const blocks = Array.isArray(copy.content)
       ? copy.content
       : Array.isArray(copy.contentBlocks)
@@ -352,6 +353,7 @@ export default function articleCreatorLogic(initialState = {}) {
       tips: [] as TipItem[],
       category: "", // <-- Added category
       isHotContent: false,
+      isNotebookContent: false,
       isMainInCategory: false,
       paid: false,
       published: false,
@@ -1123,6 +1125,7 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.articleType =
         this.article.articleType ?? articleType ?? "standard";
       this.article.isHotContent = Boolean(this.article.isHotContent);
+      this.article.isNotebookContent = Boolean(this.article.isNotebookContent);
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.relatedContent = sanitizeRelatedContent(
         this.article.relatedContent,
@@ -1669,6 +1672,7 @@ export default function articleCreatorLogic(initialState = {}) {
           binaryForGuide: false,
           tips: this.article.tips,
           isHotContent: this.article.isHotContent,
+          isNotebookContent: Boolean(this.article.isNotebookContent),
           isMainInCategory: this.article.isMainInCategory,
           paid: this.article.paid,
           published: Boolean(this.article.published),

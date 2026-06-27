@@ -161,6 +161,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       parisDistrict: "",
       binaryForGuide: false,
       isHotContent: false,
+      isNotebookContent: false,
       paid: false,
       published: false,
       publishedAt: null,
@@ -628,6 +629,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
         this.story.binaryForGuide = Boolean(copy.binaryForGuide);
         this.story.isHotContent = Boolean(copy.isHotContent);
+        this.story.isNotebookContent = Boolean(copy.isNotebookContent);
         this.story.paid = Boolean(copy.paid);
         this.story.published = Boolean(copy.published);
         this.story.publishedAt = copy.publishedAt ?? null;
@@ -764,6 +766,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           parisDistrict: isParisCategory ? this.story.parisDistrict || null : null,
           binaryForGuide: false,
           isHotContent: this.story.isHotContent,
+          isNotebookContent: Boolean(this.story.isNotebookContent),
           paid: this.story.paid,
           published: Boolean(this.story.published),
           relatedContent: sanitizeRelatedContent(

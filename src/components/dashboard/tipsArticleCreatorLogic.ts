@@ -114,6 +114,7 @@ const normalizeLoadedArticle = (data: any) => {
   copy.lead = copy.lead ?? "";
   copy.cardLead = copy.cardLead ?? "";
   copy.isHotContent = Boolean(copy.isHotContent);
+  copy.isNotebookContent = Boolean(copy.isNotebookContent);
   copy.isMainInCategory = Boolean(copy.isMainInCategory);
   copy.published = Boolean(copy.published);
   copy.publishedAt = copy.publishedAt ?? null;
@@ -171,6 +172,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       parisDistrict: "",
       binaryForGuide: false,
       isHotContent: false,
+      isNotebookContent: false,
       isMainInCategory: false,
       published: false,
       publishedAt: null,
@@ -894,6 +896,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
             : null,
           binaryForGuide: false,
           isHotContent: Boolean(this.article.isHotContent),
+          isNotebookContent: Boolean(this.article.isNotebookContent),
           isMainInCategory: Boolean(this.article.isMainInCategory),
           published: Boolean(this.article.published),
           content: this.article.contentBlocks,

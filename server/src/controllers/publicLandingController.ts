@@ -49,6 +49,18 @@ const CATEGORY_CONTENT_TYPES: LandingContentType[] = [
   'visual-story',
 ];
 
+const NOTEBOOK_CONTENT_TYPES: LandingContentType[] = [
+  'article',
+  'guide',
+  'flipper',
+  'interview',
+  'visual-story',
+];
+
+const NOTEBOOK_CONTENT_TYPE_SET = new Set<LandingContentType>(
+  NOTEBOOK_CONTENT_TYPES,
+);
+
 const DEFAULT_LANDING_PLACEMENTS = {
   mainHero: null,
   newsRail: { mode: 'auto-latest', limit: 4 },
@@ -133,7 +145,11 @@ const toLandingItem = (
     updatedAt: data.updatedAt ?? null,
     published: Boolean(data.published),
     publishedAt: data.publishedAt ?? null,
-    isHotContent: Boolean(data.isHotContent) || data.category === 'hotContent',
+    isHotContent:
+      type !== 'news' &&
+      (Boolean(data.isHotContent) || data.category === 'hotContent'),
+    isNotebookContent:
+      NOTEBOOK_CONTENT_TYPE_SET.has(type) && Boolean(data.isNotebookContent),
     isMainInCategory: Boolean(data.isMainInCategory),
     isNews: type === 'news',
     articleType: data.articleType ?? null,
@@ -441,13 +457,19 @@ const selectSectionSidebarItems = async (
   selection: any,
   candidates: any[],
   excludedIds: Set<string>,
+  flag: 'isHotContent' | 'isNotebookContent' = 'isHotContent',
 ) => {
   if (selection?.mode === 'manual') {
-    return fetchByTargets(Array.isArray(selection.items) ? selection.items : []);
+    const items = await fetchByTargets(
+      Array.isArray(selection.items) ? selection.items : [],
+    );
+    return flag === 'isNotebookContent'
+      ? items.filter((item: any) => item.isNotebookContent)
+      : items;
   }
 
   return candidates
-    .filter((item: any) => item.isHotContent && !excludedIds.has(item.id))
+    .filter((item: any) => item[flag] && !excludedIds.has(item.id))
     .slice(0, selection?.limit ?? 4);
 };
 
@@ -525,9 +547,10 @@ const buildCulturePagePayload = async () => {
 };
 
 const buildParisPagePayload = async () => {
-  const [placementsDoc, candidates] = await Promise.all([
+  const [placementsDoc, candidates, notebookCandidates] = await Promise.all([
     parisPagePlacementsRef.get(),
     fetchSectionCandidates('paris'),
+    fetchLatestFromTypes(NOTEBOOK_CONTENT_TYPES, SECTION_FETCH_LIMIT_PER_TYPE),
   ]);
   const parisPagePlacements = {
     ...DEFAULT_PARIS_PAGE_PLACEMENTS,
@@ -545,8 +568,9 @@ const buildParisPagePayload = async () => {
   );
   const editorialSidebarItems = await selectSectionSidebarItems(
     parisPagePlacements.sidebarRail,
-    candidates,
+    notebookCandidates,
     topIds,
+    'isNotebookContent',
   );
   const sidebarIds = new Set(editorialSidebarItems.map((item: any) => item.id));
   const parisFeed = candidates.filter(

@@ -144,6 +144,7 @@ export default function newsCreatorLogic(
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
     delete copy.isHotContent;
+    delete copy.isNotebookContent;
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     return copy;
   };

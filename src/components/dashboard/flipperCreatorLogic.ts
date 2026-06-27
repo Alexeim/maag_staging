@@ -136,6 +136,7 @@ export default function flipperCreatorLogic(initialState = {}) {
         ? ""
         : normalizedCategory;
     copy.isHotContent = isHotContentLegacy;
+    copy.isNotebookContent = Boolean(copy.isNotebookContent);
     copy.paid = Boolean(copy.paid);
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
@@ -164,6 +165,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       cardLead: "",
       category: "",
       isHotContent: false,
+      isNotebookContent: false,
       paid: false,
       published: false,
       publishedAt: null,
@@ -709,6 +711,7 @@ export default function flipperCreatorLogic(initialState = {}) {
           parisDistrict: isParisCategory ? this.flipper.parisDistrict || null : null,
           binaryForGuide: false,
           isHotContent: Boolean(this.flipper.isHotContent),
+          isNotebookContent: Boolean(this.flipper.isNotebookContent),
           paid: Boolean(this.flipper.paid),
           relatedContent: sanitizeRelatedContent(
             this.flipper.relatedContent,

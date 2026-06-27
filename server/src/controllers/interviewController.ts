@@ -20,6 +20,7 @@ export interface Interview {
   cardLead?: string;
   mainQuote?: string;
   isHotContent?: boolean;
+  isNotebookContent?: boolean;
   paid?: boolean;
   published: boolean;
   publishedAt: Date | null;
@@ -55,6 +56,7 @@ export const createInterview = async (req: Request, res: Response) => {
       mainQuote,
       tags = [],
       isHotContent = false,
+      isNotebookContent = false,
       paid = false,
       relatedContent,
       contentCollectionId,
@@ -78,6 +80,7 @@ export const createInterview = async (req: Request, res: Response) => {
       cardLead: cardLead || '',
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
+      isNotebookContent: Boolean(isNotebookContent),
       paid: Boolean(paid),
       ...buildPublicationFieldsForCreate(req.body, now),
       content,
@@ -197,6 +200,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       mainQuote,
       tags = [],
       isHotContent = false,
+      isNotebookContent = false,
       paid = false,
       relatedContent,
       contentCollectionId,
@@ -222,6 +226,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       cardLead: cardLead || '',
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
+      isNotebookContent: Boolean(isNotebookContent),
       paid: Boolean(paid),
       ...buildPublicationFieldsForUpdate(req.body, interviewDoc.data(), now),
       content,

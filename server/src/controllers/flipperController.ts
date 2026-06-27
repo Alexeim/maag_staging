@@ -20,6 +20,7 @@ export interface Flipper {
   category?: string;
   tags?: string[];
   isHotContent?: boolean;
+  isNotebookContent?: boolean;
   paid?: boolean;
   published: boolean;
   publishedAt: Date | null;
@@ -48,6 +49,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
+      isNotebookContent = false,
       paid = false,
       carouselContent = [],
       relatedContent,
@@ -77,6 +79,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
+      isNotebookContent: Boolean(isNotebookContent),
       paid: Boolean(paid),
       ...buildPublicationFieldsForCreate(req.body, now),
       carouselContent,
@@ -184,6 +187,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       category,
       tags = [],
       isHotContent = false,
+      isNotebookContent = false,
       paid = false,
       carouselContent = [],
       relatedContent,
@@ -218,6 +222,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
+      isNotebookContent: Boolean(isNotebookContent),
       paid: Boolean(paid),
       ...buildPublicationFieldsForUpdate(req.body, doc.data(), now),
       carouselContent,

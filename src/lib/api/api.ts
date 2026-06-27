@@ -150,6 +150,7 @@ export interface ArticlePayload {
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
   isHotContent?: boolean;
+  isNotebookContent?: boolean;
   isMainInCategory?: boolean;
   isNews?: boolean;
   published?: boolean;
@@ -592,6 +593,7 @@ export interface FlipperPayload {
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
   isHotContent?: boolean;
+  isNotebookContent?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
   carouselContent: { imageUrl: string; caption: string }[];
@@ -618,6 +620,7 @@ export interface InterviewPayload {
   mainQuote?: string;
   tags?: string[];
   isHotContent?: boolean;
+  isNotebookContent?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
   relatedContent?: RelatedContent;
@@ -646,6 +649,7 @@ export interface GuidePayload {
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
   isHotContent?: boolean;
+  isNotebookContent?: boolean;
   isMainInCategory?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
@@ -996,6 +1000,7 @@ export interface VisualStoryPayload {
   parisDistrict?: string | null;
   binaryForGuide?: boolean;
   isHotContent?: boolean;
+  isNotebookContent?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
   relatedContent?: RelatedContent;

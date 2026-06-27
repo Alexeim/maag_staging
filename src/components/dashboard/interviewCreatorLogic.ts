@@ -109,6 +109,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.cardLead = copy.cardLead ?? "";
     copy.mainQuote = copy.mainQuote ?? "";
     copy.isHotContent = Boolean(copy.isHotContent);
+    copy.isNotebookContent = Boolean(copy.isNotebookContent);
     copy.paid = Boolean(copy.paid);
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
@@ -137,6 +138,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       cardLead: "",
       mainQuote: "",
       isHotContent: false,
+      isNotebookContent: false,
       paid: false,
       published: false,
       publishedAt: null,
@@ -580,6 +582,7 @@ export default function interviewCreatorLogic(initialState = {}) {
 
       this.interview.tags = this.interview.tags ?? [];
       this.interview.isHotContent = Boolean(this.interview.isHotContent);
+      this.interview.isNotebookContent = Boolean(this.interview.isNotebookContent);
       this.interview.relatedContent = sanitizeRelatedContent(
         this.interview.relatedContent,
         "interview",
@@ -1023,6 +1026,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           cardLead: this.interview.cardLead,
           mainQuote: this.interview.mainQuote,
           isHotContent: Boolean(this.interview.isHotContent),
+          isNotebookContent: Boolean(this.interview.isNotebookContent),
           paid: Boolean(this.interview.paid),
           published: Boolean(this.interview.published),
           imageUrl: this.interview.imageUrl,

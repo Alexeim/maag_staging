@@ -162,6 +162,18 @@ const {
 
     <div class="mt-4 flex items-center gap-3">
       <input
+        id="vs-notebook-content"
+        type="checkbox"
+        x-model="story.isNotebookContent"
+        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+      />
+      <label for="vs-notebook-content" class="text-sm font-medium text-base-content cursor-pointer">
+        Добавить в «Записную книжку»
+      </label>
+    </div>
+
+    <div class="mt-4 flex items-center gap-3">
+      <input
         id="vs-paid-flag"
         type="checkbox"
         x-model="story.paid"
