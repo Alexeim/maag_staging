@@ -4,33 +4,14 @@ import "../styles/quill-editor.css";
 import "quill/dist/quill.snow.css";
 import Toast from "@/components/common/Toast.astro";
 import ConfirmationModal from "@/components/common/ConfirmationModal.astro";
+import { Pencil } from "@lucide/astro";
 
 interface Props {
   title?: string;
   active?: string;
 }
 
-const navItems = [
-  {
-    href: "/dashboard/landing-editor",
-    label: "Редактор лендинга",
-    id: "landing-editor",
-  },
-  {
-    href: "/dashboard/calendar-editor",
-    label: "Редактор календаря",
-    id: "calendar-editor",
-  },
-  {
-    href: "/dashboard/culture-editor",
-    label: "Редактор «Культура»",
-    id: "culture-editor",
-  },
-  {
-    href: "/dashboard/paris-editor",
-    label: "Редактор «Париж»",
-    id: "paris-editor",
-  },
+const listItems = [
   { href: "/dashboard", label: "Статьи", id: "articles-overview" },
   {
     href: "/dashboard/articles/culture",
@@ -51,6 +32,44 @@ const navItems = [
     href: "/dashboard/le-saviez-vous",
     label: "Le saviez-vous",
     id: "le-saviez-vous",
+  },
+  {
+    href: "/dashboard/photo-of-the-day",
+    label: "Фото дня",
+    id: "photo-of-the-day",
+  },
+  { href: "/dashboard/guides", label: "Путеводители", id: "guides" },
+  {
+    href: "/dashboard/visual-stories",
+    label: "Визуальные истории",
+    id: "visual-stories",
+  },
+];
+
+const editorItems = [
+  {
+    href: "/dashboard/landing-editor",
+    label: "Редактор лендинга",
+    id: "landing-editor",
+    bold: "xl",
+  },
+  {
+    href: "/dashboard/calendar-editor",
+    label: "Редактор календаря",
+    id: "calendar-editor",
+    bold: "xl",
+  },
+  {
+    href: "/dashboard/culture-editor",
+    label: "Редактор «Культура»",
+    id: "culture-editor",
+    bold: "md",
+  },
+  {
+    href: "/dashboard/paris-editor",
+    label: "Редактор «Париж»",
+    id: "paris-editor",
+    bold: "md",
   },
   {
     href: "/dashboard/article/create",
@@ -88,25 +107,14 @@ const navItems = [
     id: "create-le-saviez-vous",
   },
   {
-    href: "/dashboard/photo-of-the-day",
-    label: "Фото дня",
-    id: "photo-of-the-day",
-  },
-  {
     href: "/dashboard/photo-of-the-day/create",
     label: "Создать фото дня",
     id: "create-photo-of-the-day",
   },
-  { href: "/dashboard/guides", label: "Путеводители", id: "guides" },
   {
     href: "/dashboard/guide/create",
     label: "Создать путеводитель",
     id: "create-guide",
-  },
-  {
-    href: "/dashboard/visual-stories",
-    label: "Визуальные истории",
-    id: "visual-stories",
   },
   {
     href: "/dashboard/visual-story/create",
@@ -154,9 +162,12 @@ const { title = "MAAG Dashboard", active = "articles-overview" } =
             Dashboard
           </p>
         </div>
-        <nav class="flex-1 px-4 py-6 space-y-2">
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          <p class="px-4 pb-1 text-xs font-semibold uppercase tracking-widest text-base-content/40">
+            Списки
+          </p>
           {
-            navItems.map((item) => (
+            listItems.map((item) => (
               <a
                 href={item.href}
                 class:list={[
@@ -166,22 +177,39 @@ const { title = "MAAG Dashboard", active = "articles-overview" } =
                     : "text-base-content/80 hover:bg-base-200",
                 ]}
               >
-                <p
-                  class:list={[
-                    item.id === "landing-editor" ||
-                    item.id === "calendar-editor"
-                      ? "font-bold text-lg"
-                      : "",
-                    item.id === "culture-editor" || item.id === "paris-editor"
-                      ? "font-bold"
-                      : "",
-                  ]}
-                >
-                  {item.label}
-                </p>
+                {item.label}
               </a>
             ))
           }
+
+          <div class="pt-4">
+            <p class="px-4 pb-1 text-xs font-semibold uppercase tracking-widest text-base-content/40 flex items-center gap-1.5">
+              <Pencil size={11} />
+              Редакторы и создание
+            </p>
+            {
+              editorItems.map((item) => (
+                <a
+                  href={item.href}
+                  class:list={[
+                    "block px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                    active === item.id
+                      ? "bg-primary text-primary-content"
+                      : "text-base-content/80 hover:bg-base-200",
+                  ]}
+                >
+                  <span
+                    class:list={[
+                      item.bold === "xl" ? "font-bold text-lg" : "",
+                      item.bold === "md" ? "font-bold" : "",
+                    ]}
+                  >
+                    {item.label}
+                  </span>
+                </a>
+              ))
+            }
+          </div>
         </nav>
       </aside>
       <div class="min-w-0 flex-1 flex flex-col" x-data>

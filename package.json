@@ -20,6 +20,7 @@
     "@astrojs/node": "^10.1.0",
     "@astrojs/partytown": "^2.1.7",
     "@astrojs/sitemap": "^3.7.3",
+    "@lucide/astro": "^1.21.0",
     "@tailwindcss/vite": "^4.1.8",
     "@types/alpinejs": "^3.13.11",
     "alpinejs": "^3.14.9",
@@ -30,7 +31,6 @@
     "firebase": "^12.3.0",
     "firebase-tools": "^15.16.0",
     "heic2any": "^0.0.4",
-    "lucide-astro": "^0.532.0",
     "quill": "^2.0.3",
     "tailwindcss": "^4.1.8",
     "typescript": "^5.9.3"
