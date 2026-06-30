@@ -325,6 +325,18 @@ const {
                 <textarea x-model="editingBlock.text" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" rows="5"></textarea>
               </template>
 
+              <template x-if="editingBlock.type === 'quote'">
+                <div class="mt-3">
+                  <label class="block text-sm font-medium mb-1">Автор цитаты</label>
+                  <input
+                    type="text"
+                    x-model="editingBlock.quoteAuthor"
+                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    placeholder="Имя автора (необязательно)"
+                  />
+                </div>
+              </template>
+
               <template x-if="editingBlock.type === 'image'">
                 <div x-data="{ blockFileName: '' }" class="space-y-3">
                   <label class="block text-sm font-medium">Изображение</label>
@@ -665,7 +677,7 @@ const {
                       </template>
 
                       <template x-if="editingBlock.left.type === 'quote'">
-                        <div>
+                        <div class="space-y-3">
                           <label class="block text-sm font-medium">Цитата</label>
                           <textarea
                             x-model="editingBlock.left.content"
@@ -674,6 +686,13 @@ const {
                           <p class="mt-2 text-xs text-base-content/60">
                             Цитата отрендерится с красной кавычкой, курсивом и размером как у aside-текста.
                           </p>
+                          <label class="block text-sm font-medium">Автор цитаты</label>
+                          <input
+                            type="text"
+                            x-model="editingBlock.left.quoteAuthor"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Имя автора (необязательно)"
+                          />
                         </div>
                       </template>
 
@@ -742,7 +761,7 @@ const {
                       </template>
 
                       <template x-if="editingBlock.center.type === 'quote'">
-                        <div>
+                        <div class="space-y-3">
                           <label class="block text-sm font-medium">Цитата</label>
                           <textarea
                             x-model="editingBlock.center.content"
@@ -751,6 +770,13 @@ const {
                           <p class="mt-2 text-xs text-base-content/60">
                             Цитата отрендерится с красной кавычкой, курсивом и размером как у aside-текста.
                           </p>
+                          <label class="block text-sm font-medium">Автор цитаты</label>
+                          <input
+                            type="text"
+                            x-model="editingBlock.center.quoteAuthor"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Имя автора (необязательно)"
+                          />
                         </div>
                       </template>
 
@@ -820,7 +846,7 @@ const {
                       </template>
 
                       <template x-if="editingBlock.right.type === 'quote'">
-                        <div>
+                        <div class="space-y-3">
                           <label class="block text-sm font-medium">Цитата</label>
                           <textarea
                             x-model="editingBlock.right.content"
@@ -829,6 +855,13 @@ const {
                           <p class="mt-2 text-xs text-base-content/60">
                             Цитата отрендерится с красной кавычкой, курсивом и размером как у aside-текста.
                           </p>
+                          <label class="block text-sm font-medium">Автор цитаты</label>
+                          <input
+                            type="text"
+                            x-model="editingBlock.right.quoteAuthor"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Имя автора (необязательно)"
+                          />
                         </div>
                       </template>
 

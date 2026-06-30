@@ -1099,7 +1099,7 @@ export default function guideCreatorLogic(initialState = {}) {
         case "h2":
         case "h3":
         case "quote":
-          newBlockData = { text: "" };
+          newBlockData = { text: "", quoteAuthor: "" };
           break;
         case "image":
           newBlockData = { url: "", caption: "" };
@@ -1114,15 +1114,15 @@ export default function guideCreatorLogic(initialState = {}) {
           break;
         case "two-columns":
           newBlockData = {
-            left: { type: "text", content: "", html: "", caption: "" },
-            right: { type: "text", content: "", html: "", caption: "" },
+            left: { type: "text", content: "", html: "", caption: "", quoteAuthor: "" },
+            right: { type: "text", content: "", html: "", caption: "", quoteAuthor: "" },
           };
           break;
         case "three-columns":
           newBlockData = {
-            left: { type: "text", content: "", html: "", caption: "" },
-            center: { type: "text", content: "", html: "", caption: "" },
-            right: { type: "text", content: "", html: "", caption: "" },
+            left: { type: "text", content: "", html: "", caption: "", quoteAuthor: "" },
+            center: { type: "text", content: "", html: "", caption: "", quoteAuthor: "" },
+            right: { type: "text", content: "", html: "", caption: "", quoteAuthor: "" },
           };
           break;
         case "link":

@@ -258,6 +258,11 @@ if (currentProseGroup.length > 0) {
                           {block.text}
                         </blockquote>
                         <QuoteIcon class="w-8 h-8 rotate-180" />
+                        {block.quoteAuthor && (
+                          <p class="mt-2 font-['Inter'] text-[0.8rem] font-bold uppercase tracking-[0.22em] text-base-content/50 text-center">
+                            {block.quoteAuthor}
+                          </p>
+                        )}
                       </div>
                     );
                   case "image":
