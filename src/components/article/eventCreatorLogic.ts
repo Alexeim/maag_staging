@@ -36,6 +36,7 @@ const EVENT_TAGS: Array<{ value: string; title: string }> = [
   { value: "visit", title: "Визит" },
   { value: "excursion", title: "Экскурсия" },
   { value: "kids", title: "Дети" },
+  { value: "paris", title: "Париж" },
 ];
 
 const toDate = (value: unknown): Date | null => {
