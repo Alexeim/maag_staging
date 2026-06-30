@@ -5,10 +5,9 @@ interface PhotoOfTheDayCardProps {
   id: string;
   title: string;
   imageUrl: string;
-  caption?: string;
 }
 
-const { id, title, imageUrl, caption } = Astro.props as PhotoOfTheDayCardProps;
+const { id, title, imageUrl } = Astro.props as PhotoOfTheDayCardProps;
 ---
 
 <section class="grid gap-4">
@@ -17,36 +16,22 @@ const { id, title, imageUrl, caption } = Astro.props as PhotoOfTheDayCardProps;
   >
     Фото дня
   </h3>
-  <article class="overflow-hidden bg-white">
-    <a
-      href={`/photo-of-the-day/${id}`}
-      class="linked-image-hover block aspect-[2/3] overflow-hidden"
-      aria-label={title}
-    >
+  <a
+    href={`/photo-of-the-day/${id}`}
+    class="block w-full border border-base-content/10 bg-white pt-3 px-3 pb-6"
+    aria-label={title}
+  >
+    <span class="linked-image-hover block aspect-[2/3] overflow-hidden">
       <LazyImage
         src={imageUrl}
         alt={title}
         class="linked-image-hover__media w-full h-full object-cover object-center"
       />
-    </a>
-    <div class="grid gap-[0.55rem] p-4 lg:px-4 lg:py-6">
-      <a
-        href={`/photo-of-the-day/${id}`}
-        class="text-current no-underline hover:underline"
-      >
-        <h4
-          class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.16]"
-        >
-          {title}
-        </h4>
-      </a>
-      {
-        caption && (
-          <p class="m-0 border-t-2 pt-1 pl-1 border-black/50 text-xs text-black font-inter font-light line-clamp-2">
-            {caption}
-          </p>
-        )
-      }
-    </div>
-  </article>
+    </span>
+    <h4
+      class="m-0 mt-4 text-center italic text-base font-old_standard tracking-[-0.01em] text-base-content/80"
+    >
+      {title}
+    </h4>
+  </a>
 </section>

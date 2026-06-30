@@ -461,7 +461,9 @@ if (!error && eventData) {
         };
       })
       .filter((item): item is NonNullable<typeof item> => Boolean(item))
-      .filter((item) => item.id !== id && item.endDay.getTime() >= today.getTime())
+      .filter(
+        (item) => item.id !== id && item.endDay.getTime() >= today.getTime(),
+      )
       .sort((left, right) => left.sortTime - right.sortTime)
       .slice(0, 3);
   } catch (relatedError) {
@@ -851,14 +853,16 @@ const eventStructuredData = eventData
                                     <p class="m-0 -mt-1 font-inter text-[0.78rem] font-bold uppercase tracking-[0.16em] text-black/80">
                                       {item.dateMonth}
                                     </p>
-                                    <div class="mb-1 mt-1 w-full border-t border-black/30"></div>
+                                    <div class="mb-1 mt-1 w-full border-t border-black/30" />
                                     <p class="m-0 font-old_standard text-[0.9rem] italic text-black/70">
                                       {item.dateWeekday}
                                     </p>
                                   </div>
 
                                   <div class="mt-[1.1rem] flex items-center text-black/75">
-                                    <span class="font-old_standard text-[1.35rem] leading-none">→</span>
+                                    <span class="font-old_standard text-[1.35rem] leading-none">
+                                      →
+                                    </span>
                                   </div>
 
                                   <div class="flex flex-col items-start justify-center">
@@ -868,7 +872,7 @@ const eventStructuredData = eventData
                                     <p class="m-0 -mt-1 font-inter text-[0.78rem] font-bold uppercase tracking-[0.16em] text-black/80">
                                       {item.dateEndMonth}
                                     </p>
-                                    <div class="mb-1 mt-1 w-full border-t border-black/30"></div>
+                                    <div class="mb-1 mt-1 w-full border-t border-black/30" />
                                     <p class="m-0 font-old_standard text-[0.9rem] italic text-black/70">
                                       {item.dateEndWeekday}
                                     </p>
@@ -882,7 +886,7 @@ const eventStructuredData = eventData
                                   <p class="m-0 -mt-1 font-inter text-[0.78rem] font-bold uppercase tracking-[0.16em] text-black/80">
                                     {item.dateMonth}
                                   </p>
-                                  <div class="mb-1 mt-1 w-[4.25rem] border-t border-black/30"></div>
+                                  <div class="mb-1 mt-1 w-[4.25rem] border-t border-black/30" />
                                   <p class="m-0 font-old_standard text-[0.9rem] italic text-black/70">
                                     {item.dateWeekday}
                                   </p>
@@ -903,14 +907,6 @@ const eventStructuredData = eventData
                                   {item.title}
                                 </h3>
                               </a>
-
-                              <div class="mt-1 flex items-center gap-2 font-inter text-sm text-base-content/65">
-                                <EventMetaIcon
-                                  type="location"
-                                  class="h-4 w-4 shrink-0 text-[#302821bd]"
-                                />
-                                <span>{item.address}</span>
-                              </div>
                             </div>
                           </article>
                         ))}
