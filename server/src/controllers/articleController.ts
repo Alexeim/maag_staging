@@ -30,6 +30,7 @@ export interface Article {
   isMainInCategory?: boolean;
   isNews?: boolean;
   paid?: boolean;
+  heroOrientation?: 'image-left' | 'image-right';
   published: boolean;
   publishedAt: Date | null;
   relatedContent?: RelatedContent;
@@ -107,6 +108,7 @@ export const createArticle = async (req: Request, res: Response) => {
       isMainInCategory = false,
       isNews = false,
       paid = false,
+      heroOrientation = 'image-right',
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -145,6 +147,7 @@ export const createArticle = async (req: Request, res: Response) => {
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
       paid: Boolean(paid),
+      heroOrientation: heroOrientation === 'image-left' ? 'image-left' : 'image-right',
       ...buildPublicationFieldsForCreate(req.body, now),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizedContentCollectionId,
@@ -265,6 +268,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       isMainInCategory = false,
       isNews = false,
       paid = false,
+      heroOrientation = 'image-right',
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -305,6 +309,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       isMainInCategory: Boolean(isMainInCategory),
       isNews: Boolean(isNews),
       paid: Boolean(paid),
+      heroOrientation: heroOrientation === 'image-left' ? 'image-left' : 'image-right',
       ...buildPublicationFieldsForUpdate(req.body, articleDoc.data(), now),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizedContentCollectionId,

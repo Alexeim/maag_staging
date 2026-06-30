@@ -233,6 +233,7 @@ export default function guideCreatorLogic(initialState = {}) {
     copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.cardLead = copy.cardLead ?? "";
+    copy.heroOrientation = copy.heroOrientation === "image-left" ? "image-left" : "image-right";
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     return copy;
   };
@@ -279,6 +280,7 @@ export default function guideCreatorLogic(initialState = {}) {
       cardLead: "",
       imageUrl: "",
       imageCaption: "",
+      heroOrientation: "image-right" as "image-left" | "image-right",
       contentBlocks: [],
       tags: [],
       parisSubCategories: [],
@@ -895,6 +897,7 @@ export default function guideCreatorLogic(initialState = {}) {
       this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
       this.article.cardLead = this.article.cardLead ?? "";
+      this.article.heroOrientation = this.article.heroOrientation === "image-left" ? "image-left" : "image-right";
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isNotebookContent = Boolean(this.article.isNotebookContent);
       this.article.isMaagChoice = Boolean(this.article.isMaagChoice);
@@ -1387,6 +1390,7 @@ export default function guideCreatorLogic(initialState = {}) {
           cardLead: this.article.cardLead,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
+          heroOrientation: this.article.heroOrientation === "image-left" ? "image-left" : "image-right",
           authorId: resolvedAuthorId,
           content: this.article.contentBlocks,
           category: this.article.category,

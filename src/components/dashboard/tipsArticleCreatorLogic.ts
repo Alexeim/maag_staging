@@ -111,6 +111,7 @@ const normalizeLoadedArticle = (data: any) => {
   copy.contentBlocks = rawBlocks.map(normalizeBlock);
   copy.tags = normalizeTags(copy.tags);
   copy.imageCaption = copy.imageCaption ?? "";
+  copy.heroOrientation = copy.heroOrientation === "image-left" ? "image-left" : "image-right";
   copy.lead = copy.lead ?? "";
   copy.cardLead = copy.cardLead ?? "";
   copy.isHotContent = Boolean(copy.isHotContent);
@@ -167,6 +168,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       cardLead: "",
       imageUrl: "",
       imageCaption: "",
+      heroOrientation: "image-right" as "image-left" | "image-right",
       category: "culture",
       tags: [] as string[],
       parisSubCategories: [] as string[],
@@ -353,6 +355,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       this.article.parisDistrict = normalizeParisDistrict(
         (this.article as any).parisDistrict,
       );
+      this.article.heroOrientation = this.article.heroOrientation === "image-left" ? "image-left" : "image-right";
       this.article.binaryForGuide = Boolean(
         (this.article as any).binaryForGuide,
       );
@@ -888,6 +891,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           articleType: "tips" as const,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
+          heroOrientation: this.article.heroOrientation === "image-left" ? "image-left" : "image-right",
           category: this.article.category,
           tags: selectedCategoryTags.map((tag) => this.getTagLabel(tag)),
           parisSubCategories: isParisCategory

@@ -27,6 +27,7 @@ export interface Guide {
   isMaagChoice?: boolean;
   isMainInCategory?: boolean;
   paid?: boolean;
+  heroOrientation?: 'image-left' | 'image-right';
   published: boolean;
   publishedAt: Date | null;
   relatedContent?: RelatedContent;
@@ -88,6 +89,7 @@ export const createGuide = async (req: Request, res: Response) => {
       isMaagChoice = false,
       isMainInCategory = false,
       paid = false,
+      heroOrientation = 'image-right',
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -122,6 +124,7 @@ export const createGuide = async (req: Request, res: Response) => {
       isMaagChoice: Boolean(isMaagChoice),
       isMainInCategory: Boolean(isMainInCategory),
       paid: Boolean(paid),
+      heroOrientation: heroOrientation === 'image-left' ? 'image-left' : 'image-right',
       ...buildPublicationFieldsForCreate(req.body, now),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
@@ -237,6 +240,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       isMaagChoice = false,
       isMainInCategory = false,
       paid = false,
+      heroOrientation = 'image-right',
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -273,6 +277,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       isMaagChoice: Boolean(isMaagChoice),
       isMainInCategory: Boolean(isMainInCategory),
       paid: Boolean(paid),
+      heroOrientation: heroOrientation === 'image-left' ? 'image-left' : 'image-right',
       ...buildPublicationFieldsForUpdate(req.body, guideDoc.data(), now),
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),

@@ -23,6 +23,7 @@ export interface Interview {
   isNotebookContent?: boolean;
   isMaagChoice?: boolean;
   paid?: boolean;
+  heroOrientation?: 'image-left' | 'image-right';
   published: boolean;
   publishedAt: Date | null;
   content: any[]; // Array of content blocks
@@ -60,6 +61,7 @@ export const createInterview = async (req: Request, res: Response) => {
       isNotebookContent = false,
       isMaagChoice = false,
       paid = false,
+      heroOrientation = 'image-left',
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -85,6 +87,7 @@ export const createInterview = async (req: Request, res: Response) => {
       isNotebookContent: Boolean(isNotebookContent),
       isMaagChoice: Boolean(isMaagChoice),
       paid: Boolean(paid),
+      heroOrientation: heroOrientation === 'image-left' ? 'image-left' : 'image-right',
       ...buildPublicationFieldsForCreate(req.body, now),
       content,
       imageUrl,
@@ -206,6 +209,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       isNotebookContent = false,
       isMaagChoice = false,
       paid = false,
+      heroOrientation = 'image-left',
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -233,6 +237,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       isNotebookContent: Boolean(isNotebookContent),
       isMaagChoice: Boolean(isMaagChoice),
       paid: Boolean(paid),
+      heroOrientation: heroOrientation === 'image-left' ? 'image-left' : 'image-right',
       ...buildPublicationFieldsForUpdate(req.body, interviewDoc.data(), now),
       content,
       imageUrl,

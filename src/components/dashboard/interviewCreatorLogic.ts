@@ -105,6 +105,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.content = copy.contentBlocks;
     copy.tags = normalizeTags(copy.tags);
     copy.imageCaption = copy.imageCaption ?? "";
+    copy.heroOrientation = copy.heroOrientation === "image-right" ? "image-right" : "image-left";
     copy.lead = copy.lead ?? "";
     copy.cardLead = copy.cardLead ?? "";
     copy.mainQuote = copy.mainQuote ?? "";
@@ -146,6 +147,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       publishedAt: null,
       imageUrl: "",
       imageCaption: "",
+      heroOrientation: "image-left" as "image-left" | "image-right",
       contentBlocks: [],
       tags: [],
       relatedContent: createEmptyRelatedContent(),
@@ -583,6 +585,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       }
 
       this.interview.tags = this.interview.tags ?? [];
+      this.interview.heroOrientation = this.interview.heroOrientation === "image-right" ? "image-right" : "image-left";
       this.interview.isHotContent = Boolean(this.interview.isHotContent);
       this.interview.isNotebookContent = Boolean(this.interview.isNotebookContent);
       this.interview.isMaagChoice = Boolean(this.interview.isMaagChoice);
@@ -1035,6 +1038,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           published: Boolean(this.interview.published),
           imageUrl: this.interview.imageUrl,
           imageCaption: this.interview.imageCaption,
+          heroOrientation: this.interview.heroOrientation === "image-right" ? "image-right" : "image-left",
           authorId: resolvedAuthorId,
           content: this.interview.contentBlocks,
           tags: this.interview.tags,

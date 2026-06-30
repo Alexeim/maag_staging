@@ -1,9 +1,6 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
-import ArticleHeader from "../../components/article/ArticleHeader.astro";
-import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
-import ArticleDate from "@/components/article/ArticleDate.astro";
-import ArticleImage from "../../components/article/ArticleImage.astro";
+import ArticleHero from "../../components/article/ArticleHero.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import ArticleTips from "../../components/article/ArticleTips.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
@@ -264,58 +261,41 @@ const isAKid = displayArticle.authorName === "Саша Макарова";
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}
       {!error && articleData && (
         <>
-          <!-- Article Header Section -->
-          <div class="pt-[50px] pb-[70px] px-4 lg:px-0 flex flex-col items-center gap-[50px]">
-            <div class="flex flex-col gap-4 max-w-[825px] w-full">
-              <ArticleHeader
-                category={displayArticle.category}
-                title={displayArticle.title}
-                lead={displayArticle.lead}
-              />
-              <div class="flex flex-col items-start justify-center gap-4">
-                <div class="flex flex-row items-center justify-center gap-2">
-                  <ArticleAuthor
-                    name={displayArticle.authorName}
-                    avatarUrl={displayArticle.authorAvatar}
-                    isKid={isAKid}
-                  />
-                  <p class="font-inter text-base-content/50">|</p>
-                  <ArticleDate createdAt={articleData.createdAt} />
-                </div>
-                <ContentActions
-                  contentType="article"
-                  contentId={id!}
-                  title={displayArticle.title}
-                  href={`/article/${id}`}
-                  category={bookmarkCategory}
-                  tag={bookmarkTag}
-                  imageUrl={displayArticle.imageUrl}
-                />
-              </div>
-            </div>
-
-            {displayArticle.imageUrl && (
-              <ArticleImage
-                src={displayArticle.imageUrl}
-                alt={displayArticle.imageAlt}
-                caption={displayArticle.imageCaption}
-                transitionName={`main-article-image-${id}`}
-                figureClass="max-w-[1200px]"
-                imageClass="shadow-lg"
-                figcaptionClass="text-center text-gray-500 mt-2"
-              />
-            )}
-          </div>
+          <ArticleHero
+            category={displayArticle.category}
+            title={displayArticle.title}
+            lead={displayArticle.lead}
+            authorName={displayArticle.authorName}
+            authorAvatar={displayArticle.authorAvatar}
+            isKid={isAKid}
+            createdAt={articleData.createdAt}
+            imageUrl={displayArticle.imageUrl}
+            imageAlt={displayArticle.imageAlt}
+            imageCaption={displayArticle.imageCaption}
+            transitionName={`main-article-image-${id}`}
+            heroOrientation={articleData?.heroOrientation ?? "image-right"}
+          />
 
           <!-- Article Content -->
-          <div class="w-full px-4 lg:px-14 pb-[100px]">
+          <div class="w-full px-4 lg:px-14 pt-10 pb-[100px] lg:pt-16">
+            <div class="mx-auto mb-10 max-w-[826px]">
+              <ContentActions
+                contentType="article"
+                contentId={id!}
+                title={displayArticle.title}
+                href={`/article/${id}`}
+                category={bookmarkCategory}
+                tag={bookmarkTag}
+                imageUrl={displayArticle.imageUrl}
+                align="center"
+              />
+            </div>
             <ArticleBody
               contentBlocks={displayArticle.contentBlocks}
               linkedContentLookup={linkedContentLookup}
             />
             <ArticleTips tips={displayArticle.tips} />
-            
-            {/* Conditionally render EventDetails only if the data exists */}
+
             {(articleData?.eventDetails) && (
               <EventDetails
                 address={articleData.eventDetails.address}

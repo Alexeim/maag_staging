@@ -295,6 +295,7 @@ export default function articleCreatorLogic(initialState = {}) {
     copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.cardLead = copy.cardLead ?? "";
+    copy.heroOrientation = copy.heroOrientation === "image-left" ? "image-left" : "image-right";
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     copy.contentCollectionId = normalizeContentCollectionId(
       copy.contentCollectionId,
@@ -345,6 +346,7 @@ export default function articleCreatorLogic(initialState = {}) {
       articleType,
       imageUrl: "",
       imageCaption: "", // <-- Added caption for the main image
+      heroOrientation: "image-right" as "image-left" | "image-right",
       // --- REFACTORED: from 'paragraphs' to 'contentBlocks' ---
       contentBlocks: [],
       tags: [],
@@ -1124,6 +1126,7 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
       this.article.cardLead = this.article.cardLead ?? "";
+      this.article.heroOrientation = this.article.heroOrientation === "image-left" ? "image-left" : "image-right";
       this.article.articleType =
         this.article.articleType ?? articleType ?? "standard";
       this.article.isHotContent = Boolean(this.article.isHotContent);
@@ -1662,6 +1665,7 @@ export default function articleCreatorLogic(initialState = {}) {
           articleType: this.article.articleType || articleType || "standard",
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
+          heroOrientation: this.article.heroOrientation === "image-left" ? "image-left" : "image-right",
           authorId: resolvedAuthorId,
           content: this.article.contentBlocks,
           category: this.article.category,
