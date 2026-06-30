@@ -1,0 +1,24 @@
+---
+import { Info } from "@lucide/astro";
+
+interface Props {
+  caption: string;
+}
+
+const { caption } = Astro.props;
+---
+
+<div class="group absolute bottom-2 right-2 z-10">
+  <p
+    class="pointer-events-none absolute bottom-full right-0 mb-2 w-max max-w-xs translate-y-1 bg-black/75 px-3 py-2 text-xs leading-relaxed text-white opacity-0 shadow-xl transition-[opacity,transform] duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 sm:max-w-sm"
+  >
+    {caption}
+  </p>
+  <button
+    type="button"
+    class="flex h-8 w-8 items-center justify-center text-white transition-transform duration-200 hover:scale-110 focus-visible:outline-none"
+    aria-label="Показать подпись к изображению"
+  >
+    <Info class="h-4 w-4" />
+  </button>
+</div>
