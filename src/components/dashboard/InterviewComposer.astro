@@ -995,6 +995,8 @@ const {
                 ></p>
               </template>
 
+              <p x-show="block.type === 'quote' && block.quoteAuthor" x-text="block.quoteAuthor" class="w-full mt-2 font-['Inter'] text-[0.8rem] font-bold uppercase tracking-[0.22em] text-base-content/50 text-right"></p>
+
               <template x-if="block.type === 'image'">
                 <figure class="space-y-2">
                   <img x-show="block.url" :src="block.url" alt="Содержимое интервью" class="rounded-md w-full object-cover" />
@@ -1136,6 +1138,7 @@ const {
                       class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"
                     ></blockquote>
                     <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                    <p x-show="block.left?.quoteAuthor" x-text="block.left?.quoteAuthor" class="w-full mt-4 font-['Inter'] text-[0.8rem] font-bold uppercase tracking-[0.22em] text-base-content/50 text-right"></p>
                   </div>
                   <span x-show="block.left?.type === 'image' && block.left?.caption" x-text="block.left?.caption" class="text-xs text-base-content/60 mt-1"></span>
                 </div>
@@ -1159,6 +1162,7 @@ const {
                       class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"
                     ></blockquote>
                     <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                    <p x-show="block.center?.quoteAuthor" x-text="block.center?.quoteAuthor" class="w-full mt-4 font-['Inter'] text-[0.8rem] font-bold uppercase tracking-[0.22em] text-base-content/50 text-right"></p>
                   </div>
                   <span x-show="block.center?.type === 'image' && block.center?.caption" x-text="block.center?.caption" class="text-xs text-base-content/60 mt-1"></span>
                 </div>
@@ -1182,6 +1186,7 @@ const {
                       class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"
                     ></blockquote>
                     <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                    <p x-show="block.right?.quoteAuthor" x-text="block.right?.quoteAuthor" class="w-full mt-4 font-['Inter'] text-[0.8rem] font-bold uppercase tracking-[0.22em] text-base-content/50 text-right"></p>
                   </div>
                   <span x-show="block.right?.type === 'image' && block.right?.caption" x-text="block.right?.caption" class="text-xs text-base-content/60 mt-1"></span>
                 </div>
