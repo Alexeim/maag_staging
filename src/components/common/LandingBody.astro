@@ -47,9 +47,7 @@ const getPrimaryTag = (item: any) => {
     (tag: unknown) =>
       typeof tag === "string" && tag.trim().length > 0 && !isLegacyParisTag(tag),
   );
-  return item?.isHotContent
-    ? "Самое Читаемое"
-    : getPrimaryBadgeLabel({ ...item, tags });
+  return getPrimaryBadgeLabel({ ...item, tags });
 };
 
 const getCardLead = (item: any) => {

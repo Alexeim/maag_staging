@@ -16,8 +16,7 @@ interface MainLandingBlockProps {
 
 const { data: publicLandingData } = Astro.props as MainLandingBlockProps;
 
-const getPrimaryTag = (article: any) =>
-  article?.isHotContent ? "Самое Читаемое" : getPrimaryBadgeLabel(article);
+const getPrimaryTag = (article: any) => getPrimaryBadgeLabel(article);
 
 const splitTitle = (t: string) => {
   const s = t.trimEnd();

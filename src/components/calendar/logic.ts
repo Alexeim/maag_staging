@@ -1,42 +1,5 @@
 import { getCalendarToday } from "@/lib/utils/calendarDate";
 
-const EVENT_CATEGORY_LABELS: Record<string, string> = {
-  exhibition: "Выставки",
-  exhibitions: "Выставки",
-  concert: "Классическая музыка",
-  concerts: "Классическая музыка",
-  performance: "Театр",
-  performances: "Театр",
-  theatre: "Театр",
-  theatres: "Театр",
-  theater: "Театр",
-  theaters: "Театр",
-  event: "Событие",
-  events: "События",
-  culture: "Событие",
-  paris: "Событие",
-  books: "Событие",
-  artMarket: "Арт-рынок",
-  artmarket: "Арт-рынок",
-  kids: "Дети",
-  opera: "Опера",
-  ballet: "Балет",
-  dance: "Танец",
-  music: "Классическая музыка",
-  route: "Экскурсия",
-  address: "Событие",
-  notebook: "Событие",
-  place: "Событие",
-  cinema: "Кино",
-  festival: "Фестиваль",
-  fashion: "Мода",
-  meetup: "Встреча",
-  visit: "Визит",
-  excursion: "Экскурсия",
-  classicalmusic: "Классическая музыка",
-  classical_music: "Классическая музыка",
-};
-
 type ImagePaths = {
   theatreShowSrc?: string;
   smallEventSrc?: string;
@@ -207,9 +170,7 @@ const createEventNormalizer =
 
     const tagLabel = ensureString(
       incoming?.tagLabel,
-      EVENT_CATEGORY_LABELS[incoming?.category as keyof typeof EVENT_CATEGORY_LABELS] ||
-        incoming?.categoryLabel ||
-        "Событие",
+      ensureString(incoming?.categoryLabel, "Событие"),
     );
 
     const description = ensureString(incoming?.description, "Описание появится позже.");

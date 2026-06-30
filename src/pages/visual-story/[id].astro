@@ -4,7 +4,7 @@ import QuoteIcon from "@/assets/icons/quote.svg";
 import logo from "@/assets/logo/logo.svg";
 import VisualStoryLayout from "@/Layouts/VisualStoryLayout.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
 import { ApiError, visualStoriesApi } from "@/lib/api/api";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
@@ -70,13 +70,16 @@ const authorName = storyData?.author
   ? `${storyData.author.firstName ?? ""} ${storyData.author.lastName ?? ""}`.trim()
   : "";
 
+// Paris/Culture site-section labels, used only for the bookmark section
+// indicator below — unrelated to the visual story's tag badge.
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
   paris: "Париж",
-  hotContent: "Самое Читаемое",
 };
-const categoryLabel =
-  CATEGORY_LABELS[category] || category || "Визуальная история";
+const categoryLabel = getPrimaryBadgeLabel({
+  contentType: "visual-story",
+  tags: storyData?.tags,
+});
 
 const normalizeDate = (value: any): Date | null => {
   if (!value) return null;
@@ -116,7 +119,7 @@ const firstBookmarkTag =
   Array.isArray(storyData?.tags) && typeof storyData.tags[0] === "string"
     ? storyData.tags[0]
     : "";
-const bookmarkTag = firstBookmarkTag ? getKnownTagLabel(firstBookmarkTag) : "";
+const bookmarkTag = firstBookmarkTag ? getTagLabel(firstBookmarkTag) : "";
 const articleStructuredData = storyData
   ? buildArticleStructuredData({
       siteOrigin: Astro.site?.origin ?? Astro.url.origin,
