@@ -1,5 +1,5 @@
 ---
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
 
 interface ContentCardItem {
   id: string;
@@ -24,58 +24,6 @@ const {
   categoryItems = [],
   fallbackImageSrc,
 } = Astro.props as Props;
-
-const TAG_LABEL_ALIASES: Record<string, string> = {
-  exhibition: "Выставка",
-  exhibitions: "Выставка",
-  concert: "Концерт",
-  concerts: "Концерт",
-  performance: "Спектакль",
-  performances: "Спектакль",
-  theatre: "Театр",
-  theater: "Театр",
-  theatres: "Театры",
-  theaters: "Театры",
-  culture: "Культура",
-  paris: "Париж",
-  books: "Книги",
-  artmarket: "Арт-рынок",
-  architecture: "Архитектура",
-  museums: "Музеи",
-  tourism: "Туризм",
-  strike: "Забастовка",
-  kids: "Дети",
-  opera: "Опера",
-  ballet: "Балет",
-  dance: "Танец",
-  music: "Музыка",
-  route: "Маршрут",
-  address: "Адрес",
-  notebook: "Записная книжка",
-  place: "Место",
-  interview: "Интервью",
-  news: "Новости",
-  guide: "Гид",
-  flipper: "Флиппер",
-  "visual-story": "Visual Story",
-  event: "Событие",
-  ...Object.fromEntries(
-    Array.from({ length: 20 }, (_, i) => [
-      `district-${i + 1}`,
-      `${i + 1}-й округ`,
-    ]),
-  ),
-};
-
-const normalizeTags = (value: unknown): string[] => {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
-    .filter(Boolean);
-};
 
 const toDate = (value: unknown): Date | null => {
   if (!value) {
@@ -128,25 +76,6 @@ const truncateText = (text?: string, maxLength: number = 72) => {
   const safeText =
     lastSpaceIndex > 0 ? truncated.slice(0, lastSpaceIndex) : truncated;
   return `${safeText.trim()}...`;
-};
-
-const getPrimaryTag = (item: ContentCardItem): string => {
-  const tags = normalizeTags(item?.tags);
-  if (item?.contentType === "interview") {
-    return "Интервью";
-  }
-  if (tags.length === 0) {
-    if (item?.isNews) {
-      return "Новости";
-    }
-    const category =
-      typeof item?.category === "string" ? item.category.trim() : "";
-    const normalizedCategory = category.toLowerCase();
-    return TAG_LABEL_ALIASES[normalizedCategory] ?? category;
-  }
-  const firstTag = tags[0];
-  const normalized = firstTag.toLowerCase();
-  return TAG_LABEL_ALIASES[normalized] ?? getKnownTagLabel(firstTag);
 };
 
 const hasCollectionItems = collectionItems.length > 0;
@@ -258,7 +187,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                             >
                               <p class="m-0">
                                 <span class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
-                                  {getPrimaryTag(entry.item) || "Материал"}
+                                  {getPrimaryBadgeLabel(entry.item) || "Материал"}
                                 </span>
                               </p>
 
@@ -360,7 +289,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                         >
                           <p class="m-0">
                             <span class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
-                              {getPrimaryTag(entry.item) || "Материал"}
+                              {getPrimaryBadgeLabel(entry.item) || "Материал"}
                             </span>
                           </p>
 

@@ -4,7 +4,7 @@ import { getTransitionName } from "../lib/utils/transitions";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import NetlenkaCardOne from "@/components/common/NetlenkaCardOne.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
 import picture1 from "../assets/images/culture.jpg";
 import { publicCultureApi } from "@/lib/api/api";
 
@@ -26,43 +26,6 @@ const normalizeCategory = (value?: string) => {
       label.toLowerCase() === lowerCaseValue,
   );
   return entry ? entry[0] : lowerCaseValue;
-};
-
-const TAG_LABEL_ALIASES: Record<string, string> = {
-  exhibition: "Выставка",
-  exhibitions: "Выставка",
-  concert: "Концерт",
-  concerts: "Концерт",
-  performance: "Спектакль",
-  performances: "Спектакль",
-  theatre: "Театр",
-  theater: "Театр",
-  theatres: "Театры",
-  theaters: "Театры",
-  culture: "Культура",
-  paris: "Париж",
-  books: "Книги",
-  artMarket: "Арт-рынок",
-  artmarket: "Арт-рынок",
-  architecture: "Архитектура",
-  museums: "Музеи",
-  tourism: "Туризм",
-  strike: "Забастовка",
-  kids: "Дети",
-  opera: "Опера",
-  ballet: "Балет",
-  dance: "Танец",
-  music: "Музыка",
-  route: "Маршрут",
-  address: "Адрес",
-  notebook: "Записная книжка",
-  place: "Место",
-  ...Object.fromEntries(
-    Array.from({ length: 20 }, (_, i) => [
-      `district-${i + 1}`,
-      `${i + 1}-й округ`,
-    ]),
-  ),
 };
 
 const isHotContent = (item: any) =>
@@ -100,28 +63,6 @@ const formatDate = (value: unknown) => {
       year: "numeric",
     })
     .replace(" г.", "");
-};
-
-const normalizeTags = (value: unknown): string[] => {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-  return value
-    .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
-    .filter(Boolean);
-};
-
-const getPrimaryTag = (item: any): string => {
-  const tags = normalizeTags(item?.tags);
-  if (item?.contentType === "interview") {
-    return "Интервью";
-  }
-  if (tags.length === 0) {
-    return item?.isNews ? "Новости" : "";
-  }
-  const firstTag = tags[0];
-  const normalized = firstTag.toLowerCase();
-  return TAG_LABEL_ALIASES[normalized] ?? getKnownTagLabel(firstTag);
 };
 
 const getCardLead = (item: any): string => {
@@ -246,7 +187,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                 <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                   <p class="m-0">
                     <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {getPrimaryTag(primaryCultureArticle) || "Культура"}
+                      {getPrimaryBadgeLabel(primaryCultureArticle)}
                     </span>
                   </p>
 
@@ -310,7 +251,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                     <div class="grid h-full content-start gap-[0.55rem]">
                       <p class="m-0">
                         <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryTag(item) || "Культура"}
+                          {getPrimaryBadgeLabel(item)}
                         </span>
                       </p>
 
@@ -363,7 +304,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                 editorialSidebarItems.map((item) => (
                   <NetlenkaCardOne
                     title={item.title}
-                    category={getPrimaryTag(item) || "Культура"}
+                    category={getPrimaryBadgeLabel(item)}
                     imageUrl={item.imageUrl}
                     href={item.href}
                     transitionName={getTransitionName(item)}
@@ -440,7 +381,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                     >
                       <p class="m-0">
                         <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryTag(item) || "Культура"}
+                          {getPrimaryBadgeLabel(item)}
                         </span>
                       </p>
 
@@ -521,7 +462,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                             >
                               <p class="m-0">
                                 <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                                  {getPrimaryTag(item) || "Культура"}
+                                  {getPrimaryBadgeLabel(item)}
                                 </span>
                               </p>
 

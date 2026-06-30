@@ -827,6 +827,15 @@ export default function newsCreatorLogic(
         return;
       }
 
+      if (!Array.isArray(this.article.tags) || this.article.tags.length === 0) {
+        (window as any).Alpine.store("ui").showToast(
+          "Добавь хотя бы один тег — без него новость не сохранится.",
+          "error",
+        );
+        this.isSaving = false;
+        return;
+      }
+
       if (!this.article.imageUrl) {
         (window as any).Alpine.store("ui").showToast(
           "Загрузи обложку новости!",

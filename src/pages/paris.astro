@@ -4,7 +4,8 @@ import { getTransitionName } from "../lib/utils/transitions";
 import NetlenkaCardThree from "@/components/common/NetlenkaCardThree.astro";
 import PhotoOfTheDayCard from "@/components/common/PhotoOfTheDayCard.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
-import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
+import { isLegacyParisTag } from "@/content/tags/parisTags";
+import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
 import picture1 from "../assets/images/culture.jpg";
 import { publicParisApi } from "@/lib/api/api";
 
@@ -26,43 +27,6 @@ const normalizeCategory = (value?: string) => {
       label.toLowerCase() === lowerCaseValue,
   );
   return entry ? entry[0] : lowerCaseValue;
-};
-
-const TAG_LABEL_ALIASES: Record<string, string> = {
-  exhibition: "Выставка",
-  exhibitions: "Выставка",
-  concert: "Концерт",
-  concerts: "Концерт",
-  performance: "Спектакль",
-  performances: "Спектакль",
-  theatre: "Театр",
-  theater: "Театр",
-  theatres: "Театры",
-  theaters: "Театры",
-  culture: "Культура",
-  paris: "Париж",
-  books: "Книги",
-  artMarket: "Арт-рынок",
-  artmarket: "Арт-рынок",
-  architecture: "Архитектура",
-  museums: "Музеи",
-  tourism: "Туризм",
-  strike: "Забастовка",
-  kids: "Дети",
-  opera: "Опера",
-  ballet: "Балет",
-  dance: "Танец",
-  music: "Музыка",
-  route: "Маршрут",
-  address: "Адрес",
-  notebook: "Записная книжка",
-  place: "Место",
-  ...Object.fromEntries(
-    Array.from({ length: 20 }, (_, i) => [
-      `district-${i + 1}`,
-      `${i + 1}-й округ`,
-    ]),
-  ),
 };
 
 const isHotContent = (item: any) =>
@@ -111,15 +75,10 @@ const normalizeTags = (value: unknown): string[] => {
     .filter((tag) => Boolean(tag) && !isLegacyParisTag(tag));
 };
 
-const getPrimaryTag = (item: any): string => {
-  const tags = normalizeTags(item?.tags);
-  if (tags.length === 0) {
-    return item?.isNews ? "Новости" : "";
-  }
-  const firstTag = tags[0];
-  const normalized = firstTag.toLowerCase();
-  return TAG_LABEL_ALIASES[normalized] ?? getKnownTagLabel(firstTag);
-};
+// Paris-specific: strips legacy "Le Saviez-Vous" tag values before picking
+// the primary badge, then defers to the shared news/interview/tag rules.
+const getPrimaryTag = (item: any): string =>
+  getPrimaryBadgeLabel({ ...item, tags: normalizeTags(item?.tags) });
 
 const getCardLead = (item: any): string => {
   const cardLead =
@@ -223,7 +182,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                 <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                   <p class="m-0">
                     <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {getPrimaryTag(primaryParisArticle) || "Париж"}
+                      {getPrimaryTag(primaryParisArticle)}
                     </span>
                   </p>
 
@@ -287,7 +246,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                     <div class="grid h-full content-start gap-[0.55rem]">
                       <p class="m-0">
                         <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryTag(item) || "Париж"}
+                          {getPrimaryTag(item)}
                         </span>
                       </p>
 
@@ -351,7 +310,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                 editorialSidebarItems.map((item) => (
                   <NetlenkaCardThree
                     title={item.title}
-                    category={getPrimaryTag(item) || "Париж"}
+                    category={getPrimaryTag(item)}
                     imageUrl={item.imageUrl}
                     href={item.href}
                     transitionName={getTransitionName(item)}
@@ -392,7 +351,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                       <div class="grid h-full content-start gap-[0.55rem]">
                         <p class="m-0">
                           <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                            {getPrimaryTag(item) || "Париж"}
+                            {getPrimaryTag(item)}
                           </span>
                         </p>
 
@@ -455,7 +414,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                             <div class="grid h-full content-start gap-[0.55rem]">
                               <p class="m-0">
                                 <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                                  {getPrimaryTag(item) || "Париж"}
+                                  {getPrimaryTag(item)}
                                 </span>
                               </p>
 

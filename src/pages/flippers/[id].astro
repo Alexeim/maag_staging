@@ -4,7 +4,7 @@ import ArticleHeader from "../../components/article/ArticleHeader.astro";
 import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
 import { flippersApi } from "../../lib/api/api";
 import { ChevronLeft, ChevronRight } from "@lucide/astro";
 import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
@@ -27,43 +27,10 @@ if ((flipper as any).published !== true) {
   return Astro.redirect("/404");
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  culture: "Культура",
-  paris: "Париж",
-  hotContent: "Самое Читаемое",
-  ballet: "Балет",
-  books: "Книги",
-  artMarket: "Арт-рынок",
-  artmarket: "Арт-рынок",
-  dance: "Танец",
-  music: "Музыка",
-  opera: "Опера",
-  theatre: "Театр",
-  theater: "Театр",
-  performance: "Спектакль",
-  performances: "Спектакль",
-  concert: "Концерт",
-  concerts: "Концерт",
-  exhibition: "Выставка",
-  exhibitions: "Выставка",
-  route: "Маршрут",
-  address: "Адрес",
-  notebook: "Записная книжка",
-  place: "Место",
-};
+const getFlipperCategory = () =>
+  getPrimaryBadgeLabel({ contentType: "flipper", tags: flipper.tags });
 
-const getFlipperCategory = () => {
-  const firstTag =
-    Array.isArray(flipper.tags) && flipper.tags.length > 0
-      ? flipper.tags[0]
-      : flipper.category;
-
-  if (!firstTag || typeof firstTag !== "string") {
-    return "Листалка";
-  }
-
-  return CATEGORY_LABELS[firstTag] || getKnownTagLabel(firstTag);
-};
+// Paris/Culture site-section indicator for bookmarks — unrelated to the badge above.
 const bookmarkCategory =
   flipper.category === "culture"
     ? "Культура"
@@ -74,7 +41,7 @@ const firstBookmarkTag =
   Array.isArray(flipper.tags) && typeof flipper.tags[0] === "string"
     ? flipper.tags[0]
     : "";
-const bookmarkTag = firstBookmarkTag ? getKnownTagLabel(firstBookmarkTag) : "";
+const bookmarkTag = firstBookmarkTag ? getTagLabel(firstBookmarkTag) : "";
 
 const flipperState = JSON.stringify({
   activeSlide: 0,

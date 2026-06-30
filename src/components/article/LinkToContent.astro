@@ -1,16 +1,6 @@
 ---
 import type { PublicContentCardItem } from "@/lib/utils/contentCollectionMarquee";
-
-const CONTENT_LABELS: Record<string, string> = {
-  article: "Статья",
-  news: "Новости",
-  event: "Событие",
-  interview: "Интервью",
-  flipper: "Флиппер",
-  guide: "Гид",
-  "visual-story": "Visual Story",
-  photoOfTheDay: "Фото дня",
-};
+import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
 
 interface Props {
   item: PublicContentCardItem;
@@ -21,7 +11,7 @@ const { item } = Astro.props as Props;
 const isInterview = item.contentType === "interview";
 const imageSrc = item.imageUrl || "";
 const lead = item.cardLead || item.lead || item.mainQuote || "";
-const label = item.category || CONTENT_LABELS[item.contentType] || "Материал";
+const label = getPrimaryBadgeLabel(item);
 ---
 
 <article class="border-y border-base-content/30 py-4">

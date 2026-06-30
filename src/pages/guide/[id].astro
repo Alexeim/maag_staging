@@ -4,7 +4,7 @@ import ArticleBody from "../../components/article/ArticleBody.astro";
 import ArticleTips from "../../components/article/ArticleTips.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import GuideHero from "@/components/guide/GuideHero.astro";
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
 import { ApiError, guidesApi } from "@/lib/api/api";
 import {
   buildLinkedContentLookup,
@@ -50,9 +50,7 @@ const rawCategory = guideData?.category ?? null;
 const displayGuide = {
   title: guideData?.title || 'Путеводитель',
   lead: guideData?.lead || '',
-  category: rawCategory
-    ? CATEGORY_LABELS[rawCategory] || rawCategory
-    : 'Путеводитель',
+  category: getPrimaryBadgeLabel({ contentType: "guide", tags: guideData?.tags }),
   authorName: guideData?.author ? `${guideData.author.firstName} ${guideData.author.lastName}` : 'Автор',
   authorAvatar: guideData?.author?.avatar,
   imageUrl: guideData?.imageUrl,
@@ -64,7 +62,7 @@ const displayGuide = {
 
 const firstBookmarkTag =
   Array.isArray(guideData?.tags) && typeof guideData.tags[0] === "string"
-    ? getKnownTagLabel(guideData.tags[0]) || ""
+    ? getTagLabel(guideData.tags[0])
     : "";
 const bookmarkCategory =
   rawCategory === "culture" || rawCategory === "paris"

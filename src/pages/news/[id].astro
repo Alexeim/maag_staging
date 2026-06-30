@@ -9,7 +9,11 @@ import ArticleBody from "@/components/article/ArticleBody.astro";
 import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import picture1 from "@/assets/images/culture.jpg";
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import {
+  getNewsDetailBadgeLabel,
+  getPrimaryBadgeLabel,
+  getTagLabel,
+} from "@/lib/utils/contentBadge";
 import { ApiError, newsApi } from "@/lib/api/api";
 import {
   buildLinkedContentLookup,
@@ -21,87 +25,11 @@ import {
 
 const { id } = Astro.params;
 
+// Paris/Culture site-section labels, used only for the bookmark section
+// indicator below — unrelated to the news item's tag badge.
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
   paris: "Париж",
-  hotContent: "Самое Читаемое",
-  interview: "Интервью",
-  ballet: "Балет",
-  opera: "Опера",
-  dance: "Танец",
-  music: "Музыка",
-  theatre: "Театр",
-  theater: "Театр",
-  performance: "Спектакль",
-  performances: "Спектакль",
-  concert: "Концерт",
-  concerts: "Концерт",
-  exhibition: "Выставка",
-  exhibitions: "Выставка",
-  books: "Книги",
-  artMarket: "Арт-рынок",
-  artmarket: "Арт-рынок",
-  architecture: "Архитектура",
-  museums: "Музеи",
-  tourism: "Туризм",
-  strike: "Забастовка",
-  kids: "Дети",
-  route: "Маршрут",
-  address: "Адрес",
-  notebook: "Записная книжка",
-  place: "Место",
-  news: "Новости",
-  ...Object.fromEntries(
-    Array.from({ length: 20 }, (_, i) => [
-      `district-${i + 1}`,
-      `${i + 1}-й округ`,
-    ]),
-  ),
-};
-
-const normalizeCategory = (value?: string) => {
-  if (!value) {
-    return value;
-  }
-  const lowerCaseValue = value.toLowerCase();
-  const entry = Object.entries(CATEGORY_LABELS).find(
-    ([key, label]) =>
-      key.toLowerCase() === lowerCaseValue ||
-      label.toLowerCase() === lowerCaseValue,
-  );
-  return entry ? entry[0] : value;
-};
-
-const getCategoryLabel = (value?: string) => {
-  const normalized = normalizeCategory(value);
-  if (normalized && CATEGORY_LABELS[normalized]) {
-    return CATEGORY_LABELS[normalized];
-  }
-  return value ?? "";
-};
-
-const getPrimaryTag = (article: any) => {
-  const rawTags = Array.isArray(article?.tags)
-    ? article.tags
-    : typeof article?.tags === "string"
-      ? [article.tags]
-      : [];
-
-  const firstTag = rawTags.find(
-    (tag) => typeof tag === "string" && tag.trim().length > 0,
-  );
-
-  if (firstTag) {
-    return (
-      getKnownTagLabel(firstTag.trim()) || getCategoryLabel(firstTag.trim())
-    );
-  }
-
-  if (article?.isHotContent) {
-    return CATEGORY_LABELS.hotContent;
-  }
-
-  return getCategoryLabel(article?.category);
 };
 
 let articleData: any;
@@ -129,7 +57,7 @@ if (!error && articleData?.published !== true) {
 const displayArticle = {
   title: articleData?.title || "Новость",
   lead: articleData?.lead || "",
-  category: getPrimaryTag(articleData) || "Новость",
+  category: getNewsDetailBadgeLabel(articleData?.tags),
   authorName: articleData?.author
     ? `${articleData.author.firstName} ${articleData.author.lastName}`
     : "Автор",
@@ -142,15 +70,13 @@ const displayArticle = {
 
 const bookmarkCategory =
   articleData?.category === "culture" || articleData?.category === "paris"
-    ? getCategoryLabel(articleData.category)
+    ? CATEGORY_LABELS[articleData.category]
     : "";
 const firstBookmarkTag =
   Array.isArray(articleData?.tags) && typeof articleData.tags[0] === "string"
     ? articleData.tags[0].trim()
     : "";
-const bookmarkTag = firstBookmarkTag
-  ? getKnownTagLabel(firstBookmarkTag) || getCategoryLabel(firstBookmarkTag)
-  : "";
+const bookmarkTag = firstBookmarkTag ? getTagLabel(firstBookmarkTag) : "";
 
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
 const canonicalUrl = new URL(`/news/${id}`, siteOrigin).toString();
@@ -352,7 +278,7 @@ if (!error && articleData) {
                               <div class="flex-1 max-w-max">
                                 <div class="mb-1 flex items-start">
                                   <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                                    {getPrimaryTag(newsItem) || "Новости"}
+                                    {getPrimaryBadgeLabel(newsItem)}
                                   </span>
                                 </div>
                                 <a

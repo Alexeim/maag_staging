@@ -697,9 +697,18 @@ export default function flipperCreatorLogic(initialState = {}) {
         return;
       }
 
+      const selectedCategoryTags = this.getSelectedCategoryTags();
+      if (!Array.isArray(selectedCategoryTags) || selectedCategoryTags.length === 0) {
+        window.Alpine.store("ui").showToast(
+          "Добавь хотя бы один тег — без него листалка не сохранится.",
+          "error",
+        );
+        this.isSaving = false;
+        return;
+      }
+
       try {
         const resolvedAuthorId = await this.resolveAuthorId();
-        const selectedCategoryTags = this.getSelectedCategoryTags();
         const tagsForDb = selectedCategoryTags.map((tag) => this.getTagLabel(tag));
         const isParisCategory = this.isParisCategory();
         const payload = {

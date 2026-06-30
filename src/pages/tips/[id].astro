@@ -5,7 +5,7 @@ import ContentCollectionMarquee from "@/components/article/ContentCollectionMarq
 import ContentActions from "@/components/common/ContentActions.astro";
 import TipsHero from "@/components/tips/TipsHero.astro";
 import picture1 from "@/assets/images/culture.jpg";
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
 import {
   ApiError,
   articlesApi,
@@ -53,9 +53,7 @@ const rawCategory =
 const displayArticle = {
   title: articleData?.header?.title || articleData?.title || "Статья",
   lead: articleData?.lead || "",
-  category: rawCategory
-    ? CATEGORY_LABELS[rawCategory] || rawCategory
-    : "Категория",
+  category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }),
   authorName: articleData?.author
     ? `${articleData.author.firstName} ${articleData.author.lastName}`
     : "Автор",
@@ -68,7 +66,7 @@ const displayArticle = {
 
 const firstBookmarkTag =
   Array.isArray(articleData?.tags) && typeof articleData.tags[0] === "string"
-    ? getKnownTagLabel(articleData.tags[0]) || ""
+    ? getTagLabel(articleData.tags[0])
     : "";
 const bookmarkCategory =
   rawCategory === "culture" || rawCategory === "paris"

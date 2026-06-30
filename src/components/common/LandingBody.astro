@@ -1,7 +1,8 @@
 ---
 import { Image } from "astro:assets";
 import { getTransitionName } from "../../lib/utils/transitions";
-import { getKnownTagLabel, isLegacyParisTag } from "@/content/tags/parisTags";
+import { isLegacyParisTag } from "@/content/tags/parisTags";
+import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
 
 import NetlenkaCardOne from "./NetlenkaCardOne.astro";
 import ArticleCard from "./ArticleCard.astro";
@@ -30,86 +31,25 @@ interface LandingBodyProps {
 const { isLanding = true, data: publicLandingData } =
   Astro.props as LandingBodyProps;
 
-const CATEGORY_LABELS: Record<string, string> = {
-  culture: "Культура",
-  paris: "Париж",
-  hotContent: "Самое Читаемое",
-  ballet: "Балет",
-  interview: "Интервью",
-  performance: "Спектакль",
-  performances: "Спектакль",
-  concert: "Концерт",
-  concerts: "Концерт",
-  exhibition: "Выставка",
-  exhibitions: "Выставка",
-  theatre: "Театр",
-  theater: "Театр",
-  books: "Книги",
-  artMarket: "Арт-рынок",
-  artmarket: "Арт-рынок",
-  architecture: "Архитектура",
-  museums: "Музеи",
-  tourism: "Туризм",
-  strike: "Забастовка",
-  kids: "Дети",
-  opera: "Опера",
-  dance: "Танец",
-  music: "Музыка",
-  route: "Маршрут",
-  address: "Адрес",
-  notebook: "Записная книжка",
-  place: "Место",
-  ...Object.fromEntries(
-    Array.from({ length: 20 }, (_, i) => [
-      `district-${i + 1}`,
-      `${i + 1}-й округ`,
-    ]),
-  ),
-};
+// Section heading labels (not material badges) used for the culture/paris blocks below.
+const CULTURE_CATEGORY_LABEL = "Культура";
+const PARIS_CATEGORY_LABEL = "Париж";
 
-const CULTURE_CATEGORY_KEY = "culture";
-const CULTURE_CATEGORY_LABEL = CATEGORY_LABELS[CULTURE_CATEGORY_KEY];
-const PARIS_CATEGORY_KEY = "paris";
-const HOT_CONTENT_CATEGORY_KEY = "hotContent";
-
-const normalizeCategory = (value?: string) => {
-  if (!value) return null;
-  const lowerCaseValue = value.toLowerCase();
-  const entry = Object.entries(CATEGORY_LABELS).find(
-    ([key, label]) =>
-      key === lowerCaseValue || label.toLowerCase() === lowerCaseValue,
-  );
-  return entry ? entry[0] : lowerCaseValue;
-};
-
-const getCategoryLabel = (value?: string) => {
-  if (!value) return CATEGORY_LABELS[CULTURE_CATEGORY_KEY];
-  const normalized = normalizeCategory(value);
-  return normalized ? CATEGORY_LABELS[normalized] || value : value;
-};
-
+// Strips legacy "Le Saviez-Vous" tag values before picking the primary
+// badge, then defers to the shared news/interview/tag rules.
 const getPrimaryTag = (item: any) => {
-  if (item?.type === "interview" || item?.contentType === "interview") {
-    return CATEGORY_LABELS.interview;
-  }
   const rawTags = Array.isArray(item?.tags)
     ? item.tags
     : typeof item?.tags === "string"
       ? [item.tags]
       : [];
-  const firstTag = rawTags.find(
-    (tag: string) =>
-      typeof tag === "string" &&
-      tag.trim().length > 0 &&
-      !isLegacyParisTag(tag),
+  const tags = rawTags.filter(
+    (tag: unknown) =>
+      typeof tag === "string" && tag.trim().length > 0 && !isLegacyParisTag(tag),
   );
-  if (firstTag)
-    return (
-      getKnownTagLabel(firstTag.trim()) || getCategoryLabel(firstTag.trim())
-    );
-  if (item?.isNews) return "Новости";
-  if (item?.isHotContent) return CATEGORY_LABELS[HOT_CONTENT_CATEGORY_KEY];
-  return getCategoryLabel(item?.category);
+  return item?.isHotContent
+    ? "Самое Читаемое"
+    : getPrimaryBadgeLabel({ ...item, tags });
 };
 
 const getCardLead = (item: any) => {
@@ -204,7 +144,7 @@ const splitTitle = (t: string) => {
         <h2
           class="text-lg font-semibold mb-6 uppercase tracking-[0.3em] font-old_standard"
         >
-          {CATEGORY_LABELS[CULTURE_CATEGORY_KEY]}
+          {CULTURE_CATEGORY_LABEL}
         </h2>
         <div class="w-full flex flex-col gap-8">
           <article
@@ -239,7 +179,7 @@ const splitTitle = (t: string) => {
                   <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                     <p class="m-0">
                       <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                        {getPrimaryTag(cultureHero) || "Новости"}
+                        {getPrimaryTag(cultureHero)}
                       </span>
                     </p>
                     <a
@@ -391,7 +331,7 @@ const splitTitle = (t: string) => {
           <div class="order-2 lg:order-none lg:col-span-9 flex flex-col">
             <div class="pl-0 pr-0">
               <h2 class="text-lg font-semibold mb-6 uppercase tracking-[0.3em] font-old_standard">
-                {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
+                {PARIS_CATEGORY_LABEL}
               </h2>
 
               <div class="w-full flex flex-col gap-8">
@@ -413,8 +353,7 @@ const splitTitle = (t: string) => {
                       <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                         <p class="m-0">
                           <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                            {getPrimaryTag(parisHero) ||
-                              CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
+                            {getPrimaryTag(parisHero)}
                           </span>
                         </p>
                         <a
@@ -456,7 +395,7 @@ const splitTitle = (t: string) => {
                       </div>
                       <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                         <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">
-                          {CATEGORY_LABELS[PARIS_CATEGORY_KEY]}
+                          {PARIS_CATEGORY_LABEL}
                         </p>
                         <h4 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
                           Нет статей в категории

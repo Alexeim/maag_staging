@@ -16,43 +16,9 @@ import {
 } from "@/lib/utils/contentCollectionMarquee";
 import { buildEventStructuredData } from "@/lib/seo/structuredData";
 import { getCalendarToday } from "@/lib/utils/calendarDate";
+import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
 
 const { id } = Astro.params;
-
-const TAG_LABEL_ALIASES: Record<string, string> = {
-  exhibition: "Выставка",
-  exhibitions: "Выставки",
-  concert: "Концерт",
-  concerts: "Концерты",
-  performance: "Спектакль",
-  performances: "Спектакли",
-  theatre: "Театр",
-  theatres: "Театры",
-  theater: "Театр",
-  theaters: "Театры",
-  event: "Событие",
-  events: "События",
-  culture: "Культура",
-  paris: "Париж",
-  books: "Книги",
-  artMarket: "Арт-рынок",
-  artmarket: "Арт-рынок",
-  kids: "Дети",
-  opera: "Опера",
-  ballet: "Балет",
-  dance: "Танец",
-  music: "Музыка",
-  route: "Маршрут",
-  address: "Адрес",
-  notebook: "Записная книжка",
-  place: "Место",
-  article: "Статья",
-  interview: "Интервью",
-  guide: "Гид",
-  news: "Новости",
-  flipper: "Флиппер",
-  "visual-story": "Visual Story",
-};
 
 const toDate = (value: unknown): Date | null => {
   if (!value) {
@@ -224,20 +190,8 @@ const normalizeTags = (value: unknown): string[] => {
     .filter(Boolean);
 };
 
-const resolveTagLabel = (rawTag: unknown, fallback: string): string => {
-  if (typeof rawTag !== "string") {
-    return fallback;
-  }
-  const trimmed = rawTag.trim();
-  if (!trimmed) {
-    return fallback;
-  }
-  const normalized = trimmed.toLowerCase();
-  if (/^district[-\s_]?\d{1,2}$/i.test(normalized)) {
-    return fallback;
-  }
-  return TAG_LABEL_ALIASES[normalized] ?? fallback;
-};
+const resolveTagLabel = (rawTag: unknown, fallback: string): string =>
+  typeof rawTag === "string" && rawTag.trim() ? getTagLabel(rawTag) : fallback;
 
 const extractTextFromContent = (blocks: unknown): string => {
   if (!Array.isArray(blocks)) {
@@ -997,7 +951,7 @@ const eventStructuredData = eventData
                         <div class="grid gap-[0.55rem]">
                           <p class="m-0">
                             <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                              {resolveTagLabel(item.contentType, "Материал")}
+                              {getPrimaryBadgeLabel(item)}
                             </span>
                           </p>
                           <a

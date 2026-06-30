@@ -10,45 +10,7 @@ import theatreShowImage from "../assets/images/calendar/theatre-show.png";
 import smallEventImage from "../assets/images/calendar/small-event.png";
 import picture1 from "../assets/images/culture.jpg";
 import { publicCalendarApi } from "@/lib/api/api";
-
-const TAG_LABEL_ALIASES: Record<string, string> = {
-  exhibition: "Выставки",
-  exhibitions: "Выставки",
-  выставка: "Выставки",
-  выставки: "Выставки",
-  concert: "Классическая музыка",
-  concerts: "Классическая музыка",
-  performance: "Театр",
-  performances: "Театр",
-  theatre: "Театр",
-  theatres: "Театр",
-  theater: "Театр",
-  theaters: "Театр",
-  event: "Событие",
-  events: "События",
-  culture: "Событие",
-  paris: "Событие",
-  books: "Событие",
-  artMarket: "Арт-рынок",
-  artmarket: "Арт-рынок",
-  kids: "Дети",
-  opera: "Опера",
-  ballet: "Балет",
-  dance: "Танец",
-  music: "Классическая музыка",
-  route: "Экскурсия",
-  address: "Событие",
-  notebook: "Событие",
-  place: "Событие",
-  cinema: "Кино",
-  festival: "Фестиваль",
-  fashion: "Мода",
-  meetup: "Встреча",
-  visit: "Визит",
-  excursion: "Экскурсия",
-  classicalmusic: "Классическая музыка",
-  classical_music: "Классическая музыка",
-};
+import { getTagLabel } from "@/lib/utils/contentBadge";
 
 const toDate = (value: unknown): Date | null => {
   if (!value) {
@@ -96,30 +58,17 @@ const extractDescription = (blocks: any): string => {
   return text.length > 180 ? `${text.slice(0, 177).trim()}...` : text;
 };
 
-const resolveTagLabel = (rawTag: unknown, fallback: string): string => {
-  if (typeof rawTag !== "string") {
-    return fallback;
-  }
-  const trimmed = rawTag.trim();
-  if (!trimmed) {
-    return fallback;
-  }
-  const normalized = trimmed.toLowerCase();
-  if (/^district[-\s_]?\d{1,2}$/i.test(normalized)) {
-    return fallback;
-  }
-  return TAG_LABEL_ALIASES[normalized] ?? fallback;
-};
-
+// Calendar payload only carries the event's primary tag (raw value) as
+// tagLabel/categoryLabel, not the full tags array — resolve it through the
+// shared tag dictionary instead of category, which events don't use.
 const normalizeCalendarEventLabels = (event: any) => {
-  const fallbackLabel = resolveTagLabel(event?.category, "Событие");
-  const tagLabel = resolveTagLabel(event?.tagLabel, fallbackLabel);
-  const categoryLabel = resolveTagLabel(event?.categoryLabel, tagLabel);
+  const rawTag = typeof event?.tagLabel === "string" ? event.tagLabel.trim() : "";
+  const label = rawTag ? getTagLabel(rawTag) : "Событие";
 
   return {
     ...event,
-    tagLabel,
-    categoryLabel,
+    tagLabel: label,
+    categoryLabel: label,
   };
 };
 

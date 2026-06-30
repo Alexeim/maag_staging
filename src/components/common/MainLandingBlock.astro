@@ -3,7 +3,7 @@ import { Image } from "astro:assets";
 import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
 import { getTransitionName } from "../../lib/utils/transitions";
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
 import { getCalendarToday } from "@/lib/utils/calendarDate";
 
 interface MainLandingBlockProps {
@@ -16,90 +16,8 @@ interface MainLandingBlockProps {
 
 const { data: publicLandingData } = Astro.props as MainLandingBlockProps;
 
-const CATEGORY_LABELS: Record<string, string> = {
-  culture: "Культура",
-  paris: "Париж",
-  hotContent: "Самое Читаемое",
-  interview: "Интервью",
-  ballet: "Балет",
-  opera: "Опера",
-  dance: "Танец",
-  music: "Музыка",
-  theatre: "Театр",
-  theater: "Театр",
-  performance: "Спектакль",
-  performances: "Спектакль",
-  concert: "Концерт",
-  concerts: "Концерт",
-  exhibition: "Выставка",
-  exhibitions: "Выставка",
-  books: "Книги",
-  artMarket: "Арт-рынок",
-  artmarket: "Арт-рынок",
-  architecture: "Архитектура",
-  museums: "Музеи",
-  tourism: "Туризм",
-  strike: "Забастовка",
-  kids: "Дети",
-  route: "Маршрут",
-  address: "Адрес",
-  notebook: "Записная книжка",
-  place: "Место",
-  ...Object.fromEntries(
-    Array.from({ length: 20 }, (_, i) => [
-      `district-${i + 1}`,
-      `${i + 1}-й округ`,
-    ]),
-  ),
-};
-
-const normalizeCategory = (value?: string) => {
-  if (!value) {
-    return value;
-  }
-  const lowerCaseValue = value.toLowerCase();
-  const entry = Object.entries(CATEGORY_LABELS).find(
-    ([key, label]) =>
-      key.toLowerCase() === lowerCaseValue ||
-      label.toLowerCase() === lowerCaseValue,
-  );
-  return entry ? entry[0] : value;
-};
-
-const getCategoryLabel = (value?: string) => {
-  const normalized = normalizeCategory(value);
-  if (normalized && CATEGORY_LABELS[normalized]) {
-    return CATEGORY_LABELS[normalized];
-  }
-  return value ?? "";
-};
-
-const getPrimaryTag = (article: any) => {
-  if (article?.contentType === "interview") {
-    return CATEGORY_LABELS.interview;
-  }
-  const rawTags = Array.isArray(article?.tags)
-    ? article.tags
-    : typeof article?.tags === "string"
-      ? [article.tags]
-      : [];
-
-  const firstTag = rawTags.find(
-    (tag) => typeof tag === "string" && tag.trim().length > 0,
-  );
-
-  if (firstTag) {
-    return (
-      getKnownTagLabel(firstTag.trim()) || getCategoryLabel(firstTag.trim())
-    );
-  }
-
-  if (article?.isHotContent) {
-    return CATEGORY_LABELS.hotContent;
-  }
-
-  return getCategoryLabel(article?.category);
-};
+const getPrimaryTag = (article: any) =>
+  article?.isHotContent ? "Самое Читаемое" : getPrimaryBadgeLabel(article);
 
 const splitTitle = (t: string) => {
   const s = t.trimEnd();
@@ -113,12 +31,6 @@ const splitTitle = (t: string) => {
 const mainArticle = publicLandingData?.mainArticle ?? null;
 const newsArticles = publicLandingData?.newsArticles ?? [];
 const landingEvent = publicLandingData?.landingEvent ?? null;
-
-const eventCategoryLabels: Record<string, string> = {
-  exhibition: "Выставка",
-  concert: "Концерт",
-  performance: "Спектакль",
-};
 
 function toDate(value: unknown): Date | null {
   if (!value) {
@@ -252,7 +164,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
                 <div class="flex-1 max-w-max">
                   <div class="mb-1 flex items-start">
                     <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {getPrimaryTag(newsItem) || "Новости"}
+                      {getPrimaryTag(newsItem)}
                     </span>
                   </div>
                   <a
@@ -301,7 +213,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
             <div class="p-4 lg:p-0">
               <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em]">
                 <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mt-2 lg:mt-4">
-                  {getPrimaryTag(mainArticle) || "Новости"}
+                  {getPrimaryTag(mainArticle)}
                 </span>
                 <span class="hidden text-black text-lg font-bold font-['Inter']">
                   ·
@@ -397,7 +309,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
             )}
             <div class="px-4 py-4">
               <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                {eventCategoryLabels[landingEvent.category] || "Событие"}
+                {getPrimaryBadgeLabel(landingEvent)}
               </p>
               <h2 class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mt-2">
                 {landingEvent.title}

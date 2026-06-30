@@ -7,7 +7,7 @@ import EventDetails from "../../components/article/EventDetails.astro";
 import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import picture1 from "@/assets/images/culture.jpg";
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
 import {
   ApiError,
   articlesApi,
@@ -22,52 +22,12 @@ import {
 
 const { id } = Astro.params;
 
+// Paris/Culture site-section labels, used for related-content grouping and
+// the bookmark section indicator below — unrelated to the material's tag badge.
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
   paris: "Париж",
   hotContent: "Самое Читаемое",
-};
-
-const TAG_LABEL_ALIASES: Record<string, string> = {
-  exhibition: "Выставка",
-  exhibitions: "Выставка",
-  concert: "Концерт",
-  concerts: "Концерт",
-  performance: "Спектакль",
-  performances: "Спектакль",
-  theatre: "Театр",
-  theater: "Театр",
-  theatres: "Театры",
-  theaters: "Театры",
-  culture: "Культура",
-  paris: "Париж",
-  books: "Книги",
-  artmarket: "Арт-рынок",
-  architecture: "Архитектура",
-  museums: "Музеи",
-  tourism: "Туризм",
-  strike: "Забастовка",
-  kids: "Дети",
-  opera: "Опера",
-  ballet: "Балет",
-  dance: "Танец",
-  music: "Музыка",
-  route: "Маршрут",
-  address: "Адрес",
-  notebook: "Записная книжка",
-  place: "Место",
-  interview: "Интервью",
-  news: "Новости",
-  guide: "Гид",
-  flipper: "Флиппер",
-  "visual-story": "Visual Story",
-  event: "Событие",
-  ...Object.fromEntries(
-    Array.from({ length: 20 }, (_, i) => [
-      `district-${i + 1}`,
-      `${i + 1}-й округ`,
-    ]),
-  ),
 };
 
 const normalizeCategory = (value?: string | null) => {
@@ -81,24 +41,6 @@ const normalizeCategory = (value?: string | null) => {
       label.toLowerCase() === normalizedValue,
   );
   return entry ? entry[0] : normalizedValue;
-};
-
-const getPrimaryTag = (item: any): string => {
-  const tags = Array.isArray(item?.tags) ? item.tags : [];
-  if (item?.contentType === "interview") {
-    return "Интервью";
-  }
-  if (tags.length === 0) {
-    if (item?.isNews) {
-      return "Новости";
-    }
-    const category = typeof item?.category === "string" ? item.category.trim() : "";
-    const normalizedCategory = category.toLowerCase();
-    return TAG_LABEL_ALIASES[normalizedCategory] ?? category;
-  }
-  const firstTag = tags[0];
-  const normalized = firstTag.toLowerCase();
-  return TAG_LABEL_ALIASES[normalized] ?? getKnownTagLabel(firstTag);
 };
 
 let articleData: any;
@@ -138,9 +80,7 @@ const rawCategory =
 const displayArticle = {
   title: articleData?.header?.title || articleData?.title || 'Article',
   lead: articleData?.lead || '',
-  category: rawCategory
-    ? CATEGORY_LABELS[rawCategory] || rawCategory
-    : 'Category',
+  category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }),
   authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : 'Author',
   authorAvatar: articleData?.author?.avatar,
   readTime: articleData?.meta?.readTime || '5 min read',
@@ -159,10 +99,7 @@ const firstBookmarkTag =
   Array.isArray(articleData?.tags) && typeof articleData.tags[0] === "string"
     ? articleData.tags[0]
     : "";
-const bookmarkTag = firstBookmarkTag
-  ? TAG_LABEL_ALIASES[firstBookmarkTag.toLowerCase()] ||
-    getKnownTagLabel(firstBookmarkTag)
-  : "";
+const bookmarkTag = firstBookmarkTag ? getTagLabel(firstBookmarkTag) : "";
 
 const isStandardCategoryArticle = (item: any) =>
   !item?.isNews &&
