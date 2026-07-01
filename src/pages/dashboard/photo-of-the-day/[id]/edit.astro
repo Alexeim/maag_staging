@@ -1,28 +1,54 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import PhotoOfTheDayComposer from "@/components/dashboard/PhotoOfTheDayComposer.astro";
-import { photosOfTheDayApi } from "@/lib/api/api";
+import { photosOfTheDayApi, authorsApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
-const photo = await photosOfTheDayApi.getById(id!);
 
-if (!photo) {
+let photo = null;
+let authors: any[] = [];
+let loadFailed = false;
+
+try {
+  [photo, authors] = await Promise.all([
+    photosOfTheDayApi.getById(id!),
+    authorsApi.list(),
+  ]);
+} catch (error) {
+  console.error("Failed to fetch photo of the day or authors", error);
+  loadFailed = true;
+}
+
+if (!loadFailed && !photo) {
   return Astro.redirect("/404");
 }
 
 const creatorState = JSON.stringify({
   initialPhoto: photo,
+  initialAuthors: authors,
   photoId: id,
   isEditMode: true,
   onSaveRedirect: "/dashboard/photo-of-the-day",
 });
+
+const photoHeading = photo
+  ? `Редактировать: ${photo.title}`
+  : "Редактировать фото дня";
 ---
 
-<DashboardLayout title={`Редактировать: ${photo.title}`} active="photo-of-the-day">
-  <PhotoOfTheDayComposer
-    heading={`Редактировать: ${photo.title}`}
-    submitLabel="Обновить фото"
-    creatorState={creatorState}
-    cancelHref="/dashboard/photo-of-the-day"
-  />
+<DashboardLayout title={photoHeading} active="photo-of-the-day">
+  {loadFailed ? (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Не удалось загрузить данные для редактирования</h2>
+      <p class="text-base-content/70">Обнови страницу — похоже, произошёл временный сбой сети.</p>
+      <a href="/dashboard/photo-of-the-day" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Вернуться к списку</a>
+    </div>
+  ) : (
+    <PhotoOfTheDayComposer
+      heading={photoHeading}
+      submitLabel="Обновить фото"
+      creatorState={creatorState}
+      cancelHref="/dashboard/photo-of-the-day"
+    />
+  )}
 </DashboardLayout>

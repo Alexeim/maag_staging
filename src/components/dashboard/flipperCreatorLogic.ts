@@ -37,6 +37,7 @@ const stripCarouselItemUiState = (item: Record<string, unknown> = {}) => ({
 export default function flipperCreatorLogic(initialState = {}) {
   const {
     initialFlipper = null,
+    initialAuthors = [],
     flipperId = null,
     isEditMode = false,
     isPreview = false,
@@ -45,6 +46,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     parisDistrictOptions = [],
   } = initialState as {
     initialFlipper?: any;
+    initialAuthors?: Array<Record<string, unknown>>;
     flipperId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
@@ -195,7 +197,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     categoryTags,
     parisDistrictOptions,
     authorsLoading: false,
-    authors: [],
+    authors: initialAuthors,
     selectedAuthorId: "",
     useNewAuthor: false,
     newAuthorFirstName: "",

@@ -129,6 +129,7 @@ const ui = () => (globalThis as any).Alpine?.store("ui");
 export default function tipsArticleCreatorLogic(initialState = {}) {
   const {
     initialArticle = null,
+    initialAuthors = [],
     articleId = null,
     isEditMode = false,
     isPreview = false,
@@ -137,6 +138,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     parisDistrictOptions = [],
   } = initialState as {
     initialArticle?: Record<string, unknown> | null;
+    initialAuthors?: Array<Record<string, unknown>>;
     articleId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
@@ -208,7 +210,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     ...createContentCollectionEditorState("article"),
 
     // Author state
-    authors: [] as any[],
+    authors: initialAuthors as any[],
     authorsLoading: false,
     selectedAuthorId: "",
     useNewAuthor: false,

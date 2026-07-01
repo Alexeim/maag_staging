@@ -2,20 +2,40 @@
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import GuideComposer from "@/components/dashboard/GuideComposer.astro";
 import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
+import { authorsApi } from "@/lib/api/api";
+
+let authors: any[] = [];
+let loadFailed = false;
+
+try {
+  authors = await authorsApi.list();
+} catch (error) {
+  console.error("Failed to fetch authors", error);
+  loadFailed = true;
+}
 
 const guideCreatorState = JSON.stringify({
   categoryTags,
   parisDistrictOptions: parisDistrictTags,
+  initialAuthors: authors,
   isEditMode: false,
   onSaveRedirect: "/dashboard/guides",
 });
 ---
 
 <DashboardLayout title="Создать путеводитель" active="create-guide">
-  <GuideComposer
-    heading="Создать новый путеводитель"
-    submitLabel="Сохранить путеводитель"
-    guideCreatorState={guideCreatorState}
-    cancelHref="/dashboard/guides"
-  />
+  {loadFailed ? (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Не удалось загрузить данные для редактирования</h2>
+      <p class="text-base-content/70">Обнови страницу — похоже, произошёл временный сбой сети.</p>
+      <a href="/dashboard/guides" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Вернуться к путеводителям</a>
+    </div>
+  ) : (
+    <GuideComposer
+      heading="Создать новый путеводитель"
+      submitLabel="Сохранить путеводитель"
+      guideCreatorState={guideCreatorState}
+      cancelHref="/dashboard/guides"
+    />
+  )}
 </DashboardLayout>

@@ -2,21 +2,29 @@
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import ArticleComposer from "@/components/dashboard/ArticleComposer.astro";
 import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
-import { articlesApi } from "@/lib/api/api";
+import { articlesApi, authorsApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
 
 let article = null;
+let authors: any[] = [];
+let loadFailed = false;
+
 try {
-  article = await articlesApi.getById(id);
+  [article, authors] = await Promise.all([
+    articlesApi.getById(id),
+    authorsApi.list(),
+  ]);
 } catch (error) {
-  console.error("Failed to fetch Le saviez-vous article", error);
+  console.error("Failed to fetch Le saviez-vous article or authors", error);
+  loadFailed = true;
 }
 
 const articleCreatorState = JSON.stringify({
   categoryTags,
   parisDistrictOptions: parisDistrictTags,
   initialArticle: article,
+  initialAuthors: authors,
   articleId: id,
   articleType: "le_saviez_vous",
   isEditMode: true,
@@ -28,7 +36,13 @@ const articleCreatorState = JSON.stringify({
 ---
 
 <DashboardLayout title="Редактировать Le saviez-vous" active="le-saviez-vous">
-  {article ? (
+  {loadFailed ? (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Не удалось загрузить данные для редактирования</h2>
+      <p class="text-base-content/70">Обнови страницу — похоже, произошёл временный сбой сети.</p>
+      <a href="/dashboard/le-saviez-vous" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Вернуться к списку</a>
+    </div>
+  ) : article ? (
     <ArticleComposer
       heading="Редактировать Le saviez-vous"
       submitLabel="Сохранить материал"

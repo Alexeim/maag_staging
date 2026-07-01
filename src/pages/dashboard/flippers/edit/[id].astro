@@ -1,32 +1,56 @@
 ---
 import DashboardLayout from "../../../../Layouts/DashboardLayout.astro";
 import FlipperComposer from "../../../../components/dashboard/FlipperComposer.astro";
-import { flippersApi } from "../../../../lib/api/api";
+import { flippersApi, authorsApi } from "../../../../lib/api/api";
 import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
 
 const { id } = Astro.params;
-const flipper = await flippersApi.getById(id);
 
-if (!flipper) {
+let flipper = null;
+let authors: any[] = [];
+let loadFailed = false;
+
+try {
+  [flipper, authors] = await Promise.all([
+    flippersApi.getById(id),
+    authorsApi.list(),
+  ]);
+} catch (error) {
+  console.error("Failed to fetch flipper or authors", error);
+  loadFailed = true;
+}
+
+if (!loadFailed && !flipper) {
   return Astro.redirect("/404");
 }
 
 const creatorState = JSON.stringify({
   initialFlipper: flipper,
+  initialAuthors: authors,
   flipperId: id,
   isEditMode: true,
   onSaveRedirect: "/dashboard/flippers",
   categoryTags,
   parisDistrictOptions: parisDistrictTags,
 });
+
+const flipperHeading = flipper
+  ? `Редактирование: ${flipper.title}`
+  : "Редактирование листалки";
 ---
 
-<DashboardLayout title={`Редактирование: ${flipper.title}`} active="flippers">
-  <FlipperComposer
-    heading={`Редактирование: ${flipper.title}`}
-    submitLabel="Обновить листалку"
-    creatorState={creatorState}
-    cancelHref="/dashboard/flippers"
-    deleteFlipperId={id}
-  />
+<DashboardLayout title={flipperHeading} active="flippers">
+  {loadFailed ? (
+    <div class="p-8 text-center text-base-content/70">
+      <p>Не удалось загрузить данные для редактирования. Обнови страницу.</p>
+    </div>
+  ) : (
+    <FlipperComposer
+      heading={flipperHeading}
+      submitLabel="Обновить листалку"
+      creatorState={creatorState}
+      cancelHref="/dashboard/flippers"
+      deleteFlipperId={id}
+    />
+  )}
 </DashboardLayout>

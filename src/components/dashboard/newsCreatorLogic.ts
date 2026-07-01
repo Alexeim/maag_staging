@@ -45,6 +45,7 @@ export default function newsCreatorLogic(
   const {
     categoryTags = {},
     initialArticle = null,
+    initialAuthors = [],
     articleId = null,
     isEditMode = false,
     isPreview = false,
@@ -53,6 +54,7 @@ export default function newsCreatorLogic(
   } = initialState as {
     categoryTags?: Record<string, Array<{ title: string; value: string }>>;
     initialArticle?: Record<string, unknown> | null;
+    initialAuthors?: Array<Record<string, unknown>>;
     articleId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
@@ -195,7 +197,7 @@ export default function newsCreatorLogic(
     isEditMode,
     onSaveRedirect,
     authorsLoading: false,
-    authors: [],
+    authors: initialAuthors,
     selectedAuthorId: "",
     useNewAuthor: false,
     newAuthorFirstName: "",

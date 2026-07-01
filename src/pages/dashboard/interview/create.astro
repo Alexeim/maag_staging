@@ -1,19 +1,37 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import InterviewComposer from "@/components/dashboard/InterviewComposer.astro";
+import { authorsApi } from "@/lib/api/api";
+
+let authors: any[] = [];
+let loadFailed = false;
+
+try {
+  authors = await authorsApi.list();
+} catch (error) {
+  console.error("Failed to fetch authors", error);
+  loadFailed = true;
+}
 
 const interviewCreatorState = JSON.stringify({
   isEditMode: false,
   interviewId: null,
   initialInterview: null,
+  initialAuthors: authors,
 });
 ---
 
 <DashboardLayout title="Создать интервью" active="create-interview">
-  <InterviewComposer
-    heading="Создать новое интервью"
-    submitLabel="Опубликовать"
-    interviewCreatorState={interviewCreatorState}
-    cancelHref="/dashboard/interviews"
-  />
+  {loadFailed ? (
+    <div class="p-8 text-center text-base-content/70">
+      <p>Не удалось загрузить данные для редактирования. Обнови страницу.</p>
+    </div>
+  ) : (
+    <InterviewComposer
+      heading="Создать новое интервью"
+      submitLabel="Опубликовать"
+      interviewCreatorState={interviewCreatorState}
+      cancelHref="/dashboard/interviews"
+    />
+  )}
 </DashboardLayout>

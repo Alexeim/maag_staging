@@ -11,12 +11,14 @@ const storage = getStorage(app);
 export default function photoOfTheDayCreatorLogic(initialState: Record<string, unknown> = {}) {
   const {
     initialPhoto = null,
+    initialAuthors = [],
     photoId = null,
     isEditMode = false,
     onSaveRedirect = null,
     isPreview = false,
   } = initialState as {
     initialPhoto?: any;
+    initialAuthors?: Array<Record<string, unknown>>;
     photoId?: string | null;
     isEditMode?: boolean;
     onSaveRedirect?: string | null;
@@ -48,7 +50,7 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
     isPreview: isPreview as boolean,
     onSaveRedirect: onSaveRedirect as string | null,
 
-    authors: [] as any[],
+    authors: initialAuthors as any[],
     authorsLoading: false,
     selectedAuthorId:
       (isPreview ? previewState?.selectedAuthorId : photoDraft?.authorId) || "",

@@ -2,20 +2,38 @@
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import TipsArticleComposer from "@/components/dashboard/TipsArticleComposer.astro";
 import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
+import { authorsApi } from "@/lib/api/api";
+
+let authors: any[] = [];
+let loadFailed = false;
+
+try {
+  authors = await authorsApi.list();
+} catch (error) {
+  console.error("Failed to fetch authors", error);
+  loadFailed = true;
+}
 
 const tipsCreatorState = JSON.stringify({
   categoryTags,
   parisDistrictOptions: parisDistrictTags,
+  initialAuthors: authors,
   isEditMode: false,
   onSaveRedirect: "/dashboard/tips",
 });
 ---
 
 <DashboardLayout title="Создать tips-статью" active="create-tips">
-  <TipsArticleComposer
-    heading="Создать tips-статью"
-    submitLabel="Сохранить статью"
-    tipsCreatorState={tipsCreatorState}
-    cancelHref="/dashboard/tips"
-  />
+  {loadFailed ? (
+    <div class="p-8 text-center text-base-content/70">
+      <p>Не удалось загрузить данные для редактирования. Обнови страницу.</p>
+    </div>
+  ) : (
+    <TipsArticleComposer
+      heading="Создать tips-статью"
+      submitLabel="Сохранить статью"
+      tipsCreatorState={tipsCreatorState}
+      cancelHref="/dashboard/tips"
+    />
+  )}
 </DashboardLayout>

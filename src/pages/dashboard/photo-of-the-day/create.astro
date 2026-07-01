@@ -1,9 +1,21 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import PhotoOfTheDayComposer from "@/components/dashboard/PhotoOfTheDayComposer.astro";
+import { authorsApi } from "@/lib/api/api";
+
+let authors: any[] = [];
+let loadFailed = false;
+
+try {
+  authors = await authorsApi.list();
+} catch (error) {
+  console.error("Failed to fetch authors", error);
+  loadFailed = true;
+}
 
 const creatorState = JSON.stringify({
   initialPhoto: null,
+  initialAuthors: authors,
   photoId: null,
   isEditMode: false,
   onSaveRedirect: "/dashboard/photo-of-the-day",
@@ -11,10 +23,18 @@ const creatorState = JSON.stringify({
 ---
 
 <DashboardLayout title="Создать фото дня" active="create-photo-of-the-day">
-  <PhotoOfTheDayComposer
-    heading="Создать фото дня"
-    submitLabel="Сохранить фото"
-    creatorState={creatorState}
-    cancelHref="/dashboard/photo-of-the-day"
-  />
+  {loadFailed ? (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Не удалось загрузить данные для редактирования</h2>
+      <p class="text-base-content/70">Обнови страницу — похоже, произошёл временный сбой сети.</p>
+      <a href="/dashboard/photo-of-the-day" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Вернуться к списку</a>
+    </div>
+  ) : (
+    <PhotoOfTheDayComposer
+      heading="Создать фото дня"
+      submitLabel="Сохранить фото"
+      creatorState={creatorState}
+      cancelHref="/dashboard/photo-of-the-day"
+    />
+  )}
 </DashboardLayout>

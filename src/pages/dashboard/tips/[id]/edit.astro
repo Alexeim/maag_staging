@@ -1,17 +1,24 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import TipsArticleComposer from "@/components/dashboard/TipsArticleComposer.astro";
-import { articlesApi } from "@/lib/api/api";
+import { articlesApi, authorsApi } from "@/lib/api/api";
 import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
 
 const { id } = Astro.params;
 
 let article = null;
+let authors: any[] = [];
+let loadFailed = false;
+
 if (id) {
   try {
-    article = await articlesApi.getById(id);
+    [article, authors] = await Promise.all([
+      articlesApi.getById(id),
+      authorsApi.list(),
+    ]);
   } catch (error) {
     console.error(`Failed to load tips article with id ${id}`, error);
+    loadFailed = true;
   }
 }
 
@@ -21,12 +28,17 @@ const tipsCreatorState = JSON.stringify({
   isEditMode: true,
   articleId: id,
   initialArticle: article,
+  initialAuthors: authors,
   onSaveRedirect: "/dashboard/tips",
 });
 ---
 
 <DashboardLayout title="Редактировать tips-статью" active="create-tips">
-  {article ? (
+  {loadFailed ? (
+    <div class="p-8 text-center text-base-content/70">
+      <p>Не удалось загрузить данные для редактирования. Обнови страницу.</p>
+    </div>
+  ) : article ? (
     <TipsArticleComposer
       heading="Редактировать tips-статью"
       submitLabel="Сохранить изменения"
@@ -37,7 +49,7 @@ const tipsCreatorState = JSON.stringify({
     />
   ) : (
     <div class="p-8 text-center text-base-content/70">
-      <p>Статья не найдена или произошла ошибка загрузки.</p>
+      <p>Статья не найдена.</p>
     </div>
   )}
 </DashboardLayout>

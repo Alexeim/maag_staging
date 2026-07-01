@@ -61,6 +61,7 @@ export default function guideCreatorLogic(initialState = {}) {
     categoryTags = {},
     parisDistrictOptions = [],
     initialArticle = null,
+    initialAuthors = [],
     articleId = null,
     isEditMode = false,
     onSaveRedirect = null,
@@ -69,6 +70,7 @@ export default function guideCreatorLogic(initialState = {}) {
     categoryTags?: Record<string, Array<{ title: string; value: string }>>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
     initialArticle?: Record<string, unknown> | null;
+    initialAuthors?: Array<Record<string, unknown>>;
     articleId?: string | null;
     isEditMode?: boolean;
     onSaveRedirect?: string | null;
@@ -307,7 +309,7 @@ export default function guideCreatorLogic(initialState = {}) {
     selectedRelatedContentId: "",
     ...createContentCollectionEditorState("article"),
     authorsLoading: false,
-    authors: [],
+    authors: initialAuthors,
     selectedAuthorId: "",
     useNewAuthor: false,
     newAuthorFirstName: "",

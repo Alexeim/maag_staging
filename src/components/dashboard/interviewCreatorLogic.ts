@@ -52,6 +52,7 @@ const createBlock = (type, data, position = 0) =>
 export default function interviewCreatorLogic(initialState = {}) {
   const {
     initialInterview = null,
+    initialAuthors = [],
     interviewId = null,
     isEditMode = false,
     isPreview = false,
@@ -59,6 +60,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     ...restInitialState
   } = initialState as {
     initialInterview?: Record<string, unknown> | null;
+    initialAuthors?: Array<Record<string, unknown>>;
     interviewId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
@@ -179,7 +181,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     selectedRelatedContentId: "",
     ...createContentCollectionEditorState("interview"),
     authorsLoading: false,
-    authors: [],
+    authors: initialAuthors,
     selectedAuthorId: "",
     useNewAuthor: false,
     newAuthorFirstName: "",

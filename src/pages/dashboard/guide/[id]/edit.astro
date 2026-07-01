@@ -2,21 +2,29 @@
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import GuideComposer from "@/components/dashboard/GuideComposer.astro";
 import { categoryTags, parisDistrictTags } from "@/content/tags/parisTags";
-import { guidesApi } from "@/lib/api/api";
+import { guidesApi, authorsApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
 
 let guide = null;
+let authors: any[] = [];
+let loadFailed = false;
+
 try {
-  guide = await guidesApi.getById(id);
+  [guide, authors] = await Promise.all([
+    guidesApi.getById(id),
+    authorsApi.list(),
+  ]);
 } catch (error) {
-  console.error("Failed to fetch guide", error);
+  console.error("Failed to fetch guide or authors", error);
+  loadFailed = true;
 }
 
 const guideCreatorState = JSON.stringify({
   categoryTags,
   parisDistrictOptions: parisDistrictTags,
   initialArticle: guide,
+  initialAuthors: authors,
   articleId: id,
   isEditMode: true,
   onSaveRedirect: "/dashboard/guides",
@@ -24,7 +32,13 @@ const guideCreatorState = JSON.stringify({
 ---
 
 <DashboardLayout title="Редактировать путеводитель" active="guides">
-  {guide ? (
+  {loadFailed ? (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Не удалось загрузить данные для редактирования</h2>
+      <p class="text-base-content/70">Обнови страницу — похоже, произошёл временный сбой сети.</p>
+      <a href="/dashboard/guides" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Вернуться к путеводителям</a>
+    </div>
+  ) : guide ? (
     <GuideComposer
       heading="Редактировать путеводитель"
       submitLabel="Обновить путеводитель"

@@ -107,6 +107,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     categoryTags = {},
     parisDistrictOptions = [],
     initialStory = null,
+    initialAuthors = [],
     storyId = null,
     isEditMode = false,
     onSaveRedirect = null,
@@ -115,6 +116,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     categoryTags?: Record<string, Array<{ title: string; value: string }>>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
     initialStory?: Record<string, unknown> | null;
+    initialAuthors?: Array<Record<string, unknown>>;
     storyId?: string | null;
     isEditMode?: boolean;
     onSaveRedirect?: string | null;
@@ -188,7 +190,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     categoryLabels,
 
     authorsLoading: false,
-    authors: [] as any[],
+    authors: initialAuthors as any[],
     selectedAuthorId: "",
     useNewAuthor: false,
     newAuthorFirstName: "",
