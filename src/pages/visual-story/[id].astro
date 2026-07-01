@@ -1,9 +1,9 @@
 ---
-import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
 import QuoteIcon from "@/assets/icons/quote.svg";
 import logo from "@/assets/logo/logo.svg";
 import VisualStoryLayout from "@/Layouts/VisualStoryLayout.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
+import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
 import { ApiError, visualStoriesApi } from "@/lib/api/api";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
@@ -306,18 +306,6 @@ const articleStructuredData = storyData
     .hero-meta-author {
       display: inline-flex;
       align-items: center;
-      gap: 17px;
-      font-family: "Old Standard TT", serif;
-      font-size: 1.25rem;
-      font-style: italic;
-      line-height: 1.2;
-      color: var(--maag-text);
-    }
-
-    .hero-meta-author-icon {
-      width: 1rem;
-      height: 1rem;
-      flex-shrink: 0;
     }
 
     .hero-meta-date {
@@ -444,7 +432,7 @@ const articleStructuredData = storyData
       line-height: 1.2;
       font-weight: 700;
       letter-spacing: 0.22em;
-      text-transform: uppercase;
+      text-transform: capitalize;
       color: var(--maag-muted);
       text-align: center;
     }
@@ -593,10 +581,6 @@ const articleStructuredData = storyData
         font-size: 2.25rem;
       }
 
-      .hero-meta-author {
-        font-size: 1.1rem;
-      }
-
       .hero-meta-date {
         font-size: 0.75rem;
       }
@@ -655,10 +639,12 @@ const articleStructuredData = storyData
               {(authorName || dateFormatted) && (
                 <div class="hero-meta text-base-content">
                   {authorName && (
-                    <span class="hero-meta-author">
-                      <AuthorIcon class="hero-meta-author-icon" />
-                      <span>{authorName}</span>
-                    </span>
+                    <div class="hero-meta-author">
+                      <ArticleAuthor
+                        name={authorName}
+                        avatarUrl={storyData?.author?.avatar}
+                      />
+                    </div>
                   )}
                   <p class="font-inter text-base-content/50">|</p>
                   {dateFormatted && (
