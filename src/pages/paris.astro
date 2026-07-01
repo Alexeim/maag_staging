@@ -334,7 +334,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
               <>
                 <div class="grid grid-cols-2 gap-x-4 gap-y-[1.4rem] lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
                   {editorialGridItems.map((item) => (
-                    <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
+                    <article class="grid h-full min-w-0 grid-rows-[auto_1fr] gap-[0.8rem]">
                       <a
                         href={item.href}
                         class="linked-image-hover bg-white aspect-[1.02/1]"
@@ -359,14 +359,14 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                           href={item.href}
                           class="block text-current no-underline hover:underline"
                         >
-                          <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
+                          <h3 class="line-clamp-2 text-xl lg:text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
                             {(() => {
                               const t = truncateText(item.title, 72);
                               const { start, last } = splitTitle(t);
                               return item.paid ? (
                                 <>
                                   {start && <>{start} </>}
-                                  <span class="whitespace-nowrap">
+                                  <span class="inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap align-bottom">
                                     {last}{" "}
                                     <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
                                   </span>

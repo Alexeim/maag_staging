@@ -55,7 +55,10 @@ const {
 const description = rawDescription.trim() || fallbackDescription;
 const canonicalUrl = toAbsoluteUrl(canonicalPath);
 const imageUrl = toAbsoluteUrl(image);
-const globalStructuredData = buildGlobalStructuredData(siteOrigin, toAbsoluteUrl);
+const globalStructuredData = buildGlobalStructuredData(
+  siteOrigin,
+  toAbsoluteUrl,
+);
 const allStructuredData = [
   ...globalStructuredData,
   ...toStructuredDataArray(structuredData),
@@ -188,11 +191,6 @@ const allStructuredData = [
         >
           <a href="/calendar">Календарь</a>
         </li>
-        <li
-          class="font-navbar uppercase text-[18px] tracking-[4px] font-normal"
-        >
-          <a href="/about">О проекте</a>
-        </li>
       </ul>
 
       <!-- Bottom Section -->
@@ -230,14 +228,23 @@ const allStructuredData = [
         </template>
 
         <div class="flex items-center justify-center gap-5">
-          <a href="#">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+          <a href="https://www.instagram.com/stories/maag_france/">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
             </svg>
           </a>
-          <a href="#"><X class="h-6 w-6" /></a>
         </div>
       </div>
     </div>
