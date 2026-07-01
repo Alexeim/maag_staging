@@ -1,11 +1,10 @@
 ---
 import Layout from "@/Layouts/Layout.astro";
-import ArticleHeader from "@/components/article/ArticleHeader.astro";
-import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
-import ArticleDate from "@/components/article/ArticleDate.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import { ApiError, photosOfTheDayApi } from "@/lib/api/api";
 import { buildImageStructuredData } from "@/lib/seo/structuredData";
+import { X } from "@lucide/astro";
+import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
 
 const { id } = Astro.params;
 
@@ -16,7 +15,8 @@ try {
   photo = await photosOfTheDayApi.getById(id!);
 } catch (e: any) {
   if (e instanceof ApiError) {
-    error = e.status === 404 ? "Фото не найдено." : `Ошибка загрузки: ${e.message}`;
+    error =
+      e.status === 404 ? "Фото не найдено." : `Ошибка загрузки: ${e.message}`;
   } else {
     error = `Ошибка загрузки: ${e.message}`;
   }
@@ -30,6 +30,33 @@ if (!error && photo?.published !== true) {
 const authorName = photo?.author
   ? `${photo.author.firstName} ${photo.author.lastName}`
   : "Автор";
+
+// Same date-normalizing logic as ArticleDate.astro, duplicated here because
+// the hero overlay needs light (white) text and ArticleDate hardcodes gray-600.
+const normalizeCreatedAt = (value: any): Date | null => {
+  if (!value) return null;
+  if (typeof value === "object") {
+    if ("toDate" in value && typeof value.toDate === "function") {
+      return value.toDate();
+    }
+    if ("_seconds" in value && typeof value._seconds === "number") {
+      return new Date(value._seconds * 1000);
+    }
+    return new Date(value as any);
+  }
+  return new Date(value);
+};
+const createdAtDate = photo ? normalizeCreatedAt(photo.createdAt) : null;
+const formattedCreatedAt =
+  createdAtDate && !isNaN(createdAtDate.getTime())
+    ? createdAtDate
+        .toLocaleDateString("ru-RU", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+        .replace(" г.", "")
+    : "";
 const imageStructuredData = photo
   ? buildImageStructuredData({
       siteOrigin: Astro.site?.origin ?? Astro.url.origin,
@@ -44,7 +71,8 @@ const imageStructuredData = photo
   : [];
 
 // Alpine lazy-load init — same pattern as LazyImage.astro
-const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('load', () => $el.style.opacity='1')";
+const xInit =
+  "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('load', () => $el.style.opacity='1')";
 ---
 
 <Layout
@@ -62,55 +90,130 @@ const xInit = "$el.complete ? ($el.style.opacity='1') : $el.addEventListener('lo
     <div class="max-w-[1512px] mx-auto">
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}
 
-      {!error && photo && (
-        <>
-          <div class="pt-[50px] pb-[40px] px-4 lg:px-0 flex flex-col items-center">
-            <div class="flex flex-col gap-4 max-w-[825px] w-full">
-              <ArticleHeader
-                category="Фото дня"
-                title={photo.title}
-                titleClass="text-3xl lg:text-[42px]"
+      {
+        !error && photo && (
+          <div
+            class="w-full pb-[100px] px-4 lg:px-14 flex flex-col items-center gap-6"
+            x-data="{ lightboxOpen: false }"
+          >
+            {/* Hero shot — the photo is the point of the page, so it goes first and big */}
+            <button
+              type="button"
+              class="group relative w-full max-w-[1200px] h-[460px] lg:h-[calc(100svh-90px)] overflow-hidden bg-base-200 cursor-zoom-in"
+              @click="lightboxOpen = true"
+              aria-label="Открыть фото на весь экран"
+            >
+              <img
+                src={photo.imageUrl}
+                alt={photo.title}
+                class="opacity-0 transition duration-500 ease-out w-full h-full object-cover object-center shadow-lg group-hover:scale-[1.03]"
+                loading="lazy"
+                x-data=""
+                x-init={xInit}
               />
-              <div class="h-10 flex flex-row items-center justify-start gap-4">
-                <ArticleAuthor
-                  name={authorName}
-                  avatarUrl={photo.author?.avatar}
-                />
-                <ArticleDate createdAt={photo.createdAt} />
+
+              {/* Permanent bottom scrim so the title/credits stay legible even on bright/white photos */}
+              <div class="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/90 via-black/55 to-transparent pointer-events-none" />
+
+              {/* Title + credits overlay, pinned to the shot itself */}
+              <div class="absolute inset-x-0 bottom-0 p-4 lg:p-6 flex flex-col-reverse lg:flex-row lg:items-end lg:justify-between gap-3 lg:gap-6 text-left">
+                <div class="flex items-center gap-3 flex-shrink-0">
+                  {photo.author?.avatar ? (
+                    <img
+                      src={photo.author.avatar}
+                      alt={authorName}
+                      class="h-8 w-8 lg:h-10 lg:w-10 rounded-full object-cover flex-shrink-0 ring-1 ring-white/30"
+                      onerror="this.style.display='none'"
+                    />
+                  ) : (
+                    <AuthorIcon class="h-4 w-4 flex-shrink-0 invert" />
+                  )}
+                  <span class="text-sm lg:text-base font-thin font-old_standard italic text-white whitespace-nowrap">
+                    {authorName}
+                  </span>
+                  {formattedCreatedAt && (
+                    <>
+                      <span class="text-white/40 font-inter">|</span>
+                      <span class="text-xs lg:text-sm font-inter text-white/70 whitespace-nowrap">
+                        {formattedCreatedAt}
+                      </span>
+                    </>
+                  )}
+                </div>
+                <h1 class="text-2xl lg:text-5xl leading-tight font-old_standard text-white text-left lg:text-right lg:max-w-[65%]">
+                  {photo.title}
+                </h1>
               </div>
+
+              {/* Hover affordance — invites the click into the lightbox */}
+              <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-xs font-bold font-['Inter'] uppercase tracking-[0.25em] bg-black/50 px-5 py-2.5 rounded-full">
+                  Смотреть полностью
+                </span>
+              </div>
+            </button>
+
+            <div class="flex flex-col items-center gap-4 max-w-[700px] w-full">
+              {photo.caption && (
+                <p class="text-sm text-black/60 font-inter font-normal italic text-center max-w-[600px]">
+                  {photo.caption}
+                </p>
+              )}
+
+              <hr class="w-full max-w-[300px] border-t border-neutral-200" />
+
               <ContentActions
                 contentType="photoOfTheDay"
                 contentId={id!}
                 title={photo.title}
                 href={`/photo-of-the-day/${id}`}
                 imageUrl={photo.imageUrl}
+                align="center"
               />
             </div>
-          </div>
 
-          <div class="w-full px-4 lg:px-14 pb-[100px] flex flex-col items-center gap-4">
-            <div class="w-full max-w-[1200px] h-[460px] lg:h-[700px] overflow-hidden bg-base-200">
+            {/* Fullscreen lightbox — same transition pattern as ConfirmationModal.astro */}
+            <div
+              x-show="lightboxOpen"
+              x-transition:enter="transition ease-out duration-300"
+              x-transition:enter-start="opacity-0"
+              x-transition:enter-end="opacity-100"
+              x-transition:leave="transition ease-in duration-200"
+              x-transition:leave-start="opacity-100"
+              x-transition:leave-end="opacity-0"
+              class="fixed inset-0 z-[900] flex items-center justify-center p-4 lg:p-12"
+              style="display: none;"
+              @keydown.escape.window="lightboxOpen = false"
+              x-cloak
+            >
+              <div
+                class="absolute inset-0 bg-black/90 backdrop-blur-sm"
+                @click="lightboxOpen = false"
+              />
+
+              <button
+                type="button"
+                class="absolute top-4 right-4 lg:top-8 lg:right-8 text-white/70 hover:text-white transition-colors z-10"
+                @click="lightboxOpen = false"
+                aria-label="Закрыть"
+              >
+                <X class="w-8 h-8" />
+              </button>
+
               <img
                 src={photo.imageUrl}
                 alt={photo.title}
-                class="opacity-0 transition-opacity duration-300 w-full h-full object-cover object-center shadow-lg"
-                loading="lazy"
-                x-data=""
-                x-init={xInit}
+                class="relative max-w-full max-h-full object-contain shadow-2xl"
+                x-show="lightboxOpen"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                @click.stop
               />
             </div>
-
-            {photo.caption && (
-              <div class="max-w-[826px] w-full">
-                <p class="text-sm text-black/60 font-inter font-normal text-center">
-                  {photo.caption}
-                </p>
-                <hr class="w-full border-t border-neutral-200 mt-3" />
-              </div>
-            )}
           </div>
-        </>
-      )}
+        )
+      }
     </div>
   </main>
 </Layout>
