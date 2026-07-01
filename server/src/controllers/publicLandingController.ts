@@ -180,7 +180,7 @@ const fetchByTargets = async (targets: LandingTarget[]) => {
 const fetchLatest = async (type: LandingContentType, limit: number) => {
   const snapshot = await db
     .collection(COLLECTION_BY_TYPE[type])
-    .orderBy('createdAt', 'desc')
+    .orderBy('publishedAt', 'desc')
     .limit(Math.max(limit * 3, 10))
     .get();
 
@@ -197,7 +197,7 @@ const fetchLatestFromTypes = async (
   const groups = await Promise.all(types.map((type) => fetchLatest(type, perTypeLimit)));
   return groups
     .flat()
-    .sort((left, right) => getTime(right?.createdAt) - getTime(left?.createdAt));
+    .sort((left, right) => getTime(right?.publishedAt) - getTime(left?.publishedAt));
 };
 
 const selectNewsRail = async (selection: any) => {
@@ -273,8 +273,8 @@ const normalizeEvents = (events: any[]) =>
 const isSingleDayEvent = (event: any) =>
   event.startDay.getTime() === event.endDay.getTime();
 
-const sortByCreatedAtDesc = (left: any, right: any) =>
-  getTime(right?.createdAt) - getTime(left?.createdAt);
+const sortByPublishedAtDesc = (left: any, right: any) =>
+  getTime(right?.publishedAt) - getTime(left?.publishedAt);
 
 const selectAutoLandingEvent = async () => {
   const events = await fetchLatest('event', 100);
@@ -286,7 +286,7 @@ const selectAutoLandingEvent = async () => {
       (event: any) =>
         isSingleDayEvent(event) && event.startDay.getTime() === today.getTime(),
     )
-    .sort(sortByCreatedAtDesc);
+    .sort(sortByPublishedAtDesc);
 
   if (singleDayEventsForToday[0]) return singleDayEventsForToday[0];
 
@@ -297,7 +297,7 @@ const selectAutoLandingEvent = async () => {
         event.startDay.getTime() <= today.getTime() &&
         event.endDay.getTime() >= today.getTime(),
     )
-    .sort(sortByCreatedAtDesc);
+    .sort(sortByPublishedAtDesc);
 
   if (activeRangeEvents[0]) return activeRangeEvents[0];
 
@@ -430,7 +430,7 @@ const normalizeSectionCandidates = (
     .filter((item: any) => normalizeCategory(item.category) === category)
     .sort(
       (left: any, right: any) =>
-        getTime(right?.createdAt) - getTime(left?.createdAt),
+        getTime(right?.publishedAt) - getTime(left?.publishedAt),
     );
 
 const isMainInCategoryItem = (item: any) =>
