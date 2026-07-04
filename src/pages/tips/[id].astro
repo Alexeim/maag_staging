@@ -1,7 +1,7 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
 import TipsArticleBody from "../../components/article/TipsArticleBody.astro";
-import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
+import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import TipsHero from "@/components/tips/TipsHero.astro";
 import picture1 from "@/assets/images/culture.jpg";
@@ -15,6 +15,7 @@ import {
   fetchPublicContentPools,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
+import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params as { id: string };
@@ -87,6 +88,7 @@ const articleStructuredData = articleData
   : [];
 
 let collectionContentItems: any[] = [];
+let relatedContentItems: any[] = [];
 let sameCategoryItems: any[] = [];
 
 if (!error && articleData) {
@@ -100,8 +102,22 @@ if (!error && articleData) {
       pools,
     });
 
+    relatedContentItems = buildRelatedContentItems({
+      relatedContent: articleData?.relatedContent,
+      currentContentType: "article",
+      currentId: id,
+      pools,
+      excludeKeys: new Set(
+        collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
+      ),
+    });
+
     const currentCategory = rawCategory?.toLowerCase() ?? null;
-    const relatedArticleIds = new Set(collectionContentItems.filter((i) => i.contentType === "article").map((i) => i.id));
+    const relatedArticleIds = new Set(
+      [...collectionContentItems, ...relatedContentItems]
+        .filter((i) => i.contentType === "article")
+        .map((i) => i.id),
+    );
     sameCategoryItems = allArticles
       .filter((i) => i.id !== id && !relatedArticleIds.has(i.id))
       .filter((i) => i?.articleType === "tips")
@@ -159,8 +175,9 @@ if (!error && articleData) {
               />
             </div>
             <TipsArticleBody contentBlocks={displayArticle.contentBlocks} />
-            <ContentCollectionMarquee
+            <RelatedMaterialsMarquee
               collectionItems={collectionContentItems}
+              relatedItems={relatedContentItems}
               categoryItems={sameCategoryItems}
               fallbackImageSrc={picture1.src}
             />

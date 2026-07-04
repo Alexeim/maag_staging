@@ -4,14 +4,19 @@ import ArticleBody from "../../components/article/ArticleBody.astro";
 import ArticleTips from "../../components/article/ArticleTips.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import GuideHero from "@/components/guide/GuideHero.astro";
+import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
+import picture1 from "@/assets/images/culture.jpg";
 import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
 import { ApiError, guidesApi } from "@/lib/api/api";
 import {
+  buildContentCollectionItems,
   buildLinkedContentLookup,
   fetchPublicContentPools,
   hasLinkedContentBlocks,
+  toDate,
   type LinkedContentLookup,
 } from "@/lib/utils/contentCollectionMarquee";
+import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
@@ -25,6 +30,9 @@ const CATEGORY_LABELS: Record<string, string> = {
 let guideData: any;
 let error: string | null = null;
 let linkedContentLookup: LinkedContentLookup = {};
+let collectionContentItems: any[] = [];
+let relatedContentItems: any[] = [];
+let sameCategoryItems: any[] = [];
 
 try {
   guideData = await guidesApi.getById(id);
@@ -82,12 +90,49 @@ const articleStructuredData = guideData
     })
   : [];
 
-if (!error && hasLinkedContentBlocks(displayGuide.contentBlocks)) {
+if (!error && guideData) {
   try {
     const pools = await fetchPublicContentPools();
-    linkedContentLookup = buildLinkedContentLookup(pools);
-  } catch (linkedContentError) {
-    console.error("Failed to fetch linked content for guide page:", linkedContentError);
+
+    if (hasLinkedContentBlocks(displayGuide.contentBlocks)) {
+      linkedContentLookup = buildLinkedContentLookup(pools);
+    }
+
+    collectionContentItems = await buildContentCollectionItems({
+      contentCollectionId: guideData?.contentCollectionId,
+      currentContentType: "guide",
+      currentId: id,
+      pools,
+    });
+
+    relatedContentItems = buildRelatedContentItems({
+      relatedContent: guideData?.relatedContent,
+      currentContentType: "guide",
+      currentId: id,
+      pools,
+      excludeKeys: new Set(
+        collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
+      ),
+    });
+
+    const relatedGuideIds = new Set(
+      [...collectionContentItems, ...relatedContentItems]
+        .filter((item) => item.contentType === "guide")
+        .map((item) => item.id),
+    );
+
+    sameCategoryItems = pools.allGuides
+      .filter((item) => item.id !== id && !relatedGuideIds.has(item.id))
+      .filter((item) => !rawCategory || item?.category === rawCategory)
+      .sort(
+        (a, b) =>
+          (toDate(b?.createdAt)?.getTime() ?? 0) -
+          (toDate(a?.createdAt)?.getTime() ?? 0),
+      )
+      .slice(0, 12)
+      .map((item) => ({ ...item }));
+  } catch (relatedError) {
+    console.error("Failed to fetch related content for guide page:", relatedError);
   }
 }
 ---
@@ -140,6 +185,13 @@ if (!error && hasLinkedContentBlocks(displayGuide.contentBlocks)) {
               linkedContentLookup={linkedContentLookup}
             />
             <ArticleTips tips={displayGuide.tips} />
+
+            <RelatedMaterialsMarquee
+              collectionItems={collectionContentItems}
+              relatedItems={relatedContentItems}
+              categoryItems={sameCategoryItems}
+              fallbackImageSrc={picture1.src}
+            />
           </div>
         </>
       )}

@@ -3,6 +3,7 @@ import Layout from "../../Layouts/Layout.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import EventMetaIcon from "../../components/common/EventMetaIcon.astro";
+import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import picture1 from "../../assets/images/culture.jpg";
 import { CalendarPlus } from "@lucide/astro";
 import { ApiError, eventsApi } from "@/lib/api/api";
@@ -14,9 +15,13 @@ import {
   type LinkedContentLookup,
   type PublicContentCardItem,
 } from "@/lib/utils/contentCollectionMarquee";
+import {
+  buildRelatedContentItems,
+  hasRelatedContentEntries,
+} from "@/lib/utils/relatedMaterialsMarquee";
 import { buildEventStructuredData } from "@/lib/seo/structuredData";
 import { getCalendarToday } from "@/lib/utils/calendarDate";
-import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
+import { getTagLabel } from "@/lib/utils/contentBadge";
 
 const { id } = Astro.params;
 
@@ -474,11 +479,6 @@ if (!error && eventData) {
   }
 }
 
-const hasRelatedContentEntries = (rc: unknown): boolean => {
-  if (!rc || typeof rc !== "object") return false;
-  return Object.values(rc).some((v) => Array.isArray(v) && v.length > 0);
-};
-
 if (
   !error &&
   eventData &&
@@ -499,40 +499,15 @@ if (
       });
     }
 
-    // Build related content items from eventData.relatedContent
-    const rc = eventData?.relatedContent;
-    if (rc && typeof rc === "object") {
-      const poolMaps: Record<string, Map<string, PublicContentCardItem>> = {
-        article: new Map(pools.allArticles.map((i) => [i.id, i])),
-        event: new Map(pools.allEvents.map((i) => [i.id, i])),
-        news: new Map(pools.allNews.map((i) => [i.id, i])),
-        interview: new Map(pools.allInterviews.map((i) => [i.id, i])),
-        guide: new Map(pools.allGuides.map((i) => [i.id, i])),
-        flipper: new Map(pools.allFlippers.map((i) => [i.id, i])),
-        visualStory: new Map(pools.allVisualStories.map((i) => [i.id, i])),
-      };
-
-      // Deduplicate against collection items already fetched
-      const seenKeys = new Set(
-        collectionContentItems.map((i) => `${i.contentType}:${i.id}`),
-      );
-
-      for (const [type, ids] of Object.entries(rc)) {
-        if (!Array.isArray(ids)) continue;
-        const map = poolMaps[type];
-        if (!map) continue;
-        for (const itemId of ids as string[]) {
-          if (type === "event" && itemId === id) continue;
-          const key = `${type}:${itemId}`;
-          if (seenKeys.has(key)) continue;
-          const item = map.get(itemId);
-          if (item) {
-            seenKeys.add(key);
-            relatedContentItems.push(item);
-          }
-        }
-      }
-    }
+    relatedContentItems = buildRelatedContentItems({
+      relatedContent: eventData?.relatedContent,
+      currentContentType: "event",
+      currentId: id!,
+      pools,
+      excludeKeys: new Set(
+        collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
+      ),
+    });
   } catch (collectionError) {
     console.error(
       "Failed to fetch collection content for event page:",
@@ -921,49 +896,11 @@ const eventStructuredData = eventData
               </aside>
             </section>
 
-            {(collectionContentItems.length > 0 ||
-              relatedContentItems.length > 0) && (
-              <section class="mt-16 border-t border-base-content/10 pt-10">
-                <h2 class="m-0 mb-8 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
-                  Читайте также
-                </h2>
-                <div class="grid grid-cols-2 gap-6 md:grid-cols-4">
-                  {[...collectionContentItems, ...relatedContentItems]
-                    .slice(0, 4)
-                    .map((item) => (
-                      <article class="grid gap-4">
-                        <a
-                          href={item.href}
-                          class="block aspect-[3/2] overflow-hidden"
-                          aria-label={item.title}
-                        >
-                          <img
-                            src={item.imageUrl || picture1.src}
-                            alt={item.title}
-                            class="block h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                        </a>
-                        <div class="grid gap-[0.55rem]">
-                          <p class="m-0">
-                            <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                              {getPrimaryBadgeLabel(item)}
-                            </span>
-                          </p>
-                          <a
-                            href={item.href}
-                            class="text-current no-underline hover:underline"
-                          >
-                            <h3 class="m-0 font-old_standard text-[1.3rem] font-normal leading-[1.12] text-base-content">
-                              {item.title}
-                            </h3>
-                          </a>
-                        </div>
-                      </article>
-                    ))}
-                </div>
-              </section>
-            )}
+            <RelatedMaterialsMarquee
+              collectionItems={collectionContentItems}
+              relatedItems={relatedContentItems}
+              fallbackImageSrc={picture1.src}
+            />
           </>
         )
       }

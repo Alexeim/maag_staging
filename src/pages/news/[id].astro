@@ -6,7 +6,7 @@ import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
 import ArticleImage from "@/components/article/ArticleImage.astro";
 import ArticleBody from "@/components/article/ArticleBody.astro";
-import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
+import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import {
@@ -15,6 +15,7 @@ import {
   getTagLabel,
 } from "@/lib/utils/contentBadge";
 import { ApiError, newsApi } from "@/lib/api/api";
+import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
 import {
   buildLinkedContentLookup,
   buildContentCollectionItems,
@@ -116,6 +117,7 @@ const articleStructuredData = articleData
   : [];
 
 let collectionContentItems: any[] = [];
+let relatedContentItems: any[] = [];
 let sameCategoryItems: any[] = [];
 let moreNewsItems: any[] = [];
 let linkedContentLookup: LinkedContentLookup = {};
@@ -132,9 +134,19 @@ if (!error && articleData) {
       pools,
     });
 
+    relatedContentItems = buildRelatedContentItems({
+      relatedContent: articleData?.relatedContent,
+      currentContentType: "news",
+      currentId: id,
+      pools,
+      excludeKeys: new Set(
+        collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
+      ),
+    });
+
     const currentCategory = articleData?.category?.toLowerCase?.() ?? null;
     const relatedNewsIds = new Set(
-      collectionContentItems
+      [...collectionContentItems, ...relatedContentItems]
         .filter((i) => i.contentType === "news")
         .map((i) => i.id),
     );
@@ -168,6 +180,7 @@ if (!error && articleData) {
     };
 
     appendUniqueNewsItems(collectionContentItems);
+    appendUniqueNewsItems(relatedContentItems);
     appendUniqueNewsItems(sameCategoryItems);
     moreNewsItems = moreNewsItems.slice(0, 6);
   } catch (e) {
@@ -303,8 +316,9 @@ if (!error && articleData) {
                 </aside>
               </section>
 
-              <ContentCollectionMarquee
+              <RelatedMaterialsMarquee
                 collectionItems={collectionContentItems}
+                relatedItems={relatedContentItems}
                 categoryItems={sameCategoryItems}
                 fallbackImageSrc={picture1.src}
               />

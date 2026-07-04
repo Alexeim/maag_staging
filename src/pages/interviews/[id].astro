@@ -2,7 +2,7 @@
 import Layout from "../../Layouts/Layout.astro";
 import { interviewsApi } from "../../lib/api/api";
 import ArticleBody from "../../components/article/ArticleBody.astro";
-import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
+import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import InterviewHero from "@/components/interview/InterviewHero.astro";
 import { getKnownTagLabel } from "@/content/tags/parisTags";
@@ -14,6 +14,7 @@ import {
   type LinkedContentLookup,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
+import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
@@ -67,6 +68,7 @@ const articleStructuredData = buildArticleStructuredData({
 });
 
 let collectionContentItems: any[] = [];
+let relatedContentItems: any[] = [];
 let recentInterviewItems: any[] = [];
 let linkedContentLookup: LinkedContentLookup = {};
 
@@ -81,8 +83,18 @@ try {
     pools,
   });
 
+  relatedContentItems = buildRelatedContentItems({
+    relatedContent: (interview as any)?.relatedContent,
+    currentContentType: "interview",
+    currentId: id,
+    pools,
+    excludeKeys: new Set(
+      collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
+    ),
+  });
+
   const relatedInterviewIds = new Set(
-    collectionContentItems
+    [...collectionContentItems, ...relatedContentItems]
       .filter((i) => i.contentType === "interview")
       .map((i) => i.id),
   );
@@ -145,8 +157,9 @@ try {
           contentBlocks={Array.isArray(content) ? content : []}
           linkedContentLookup={linkedContentLookup}
         />
-        <ContentCollectionMarquee
+        <RelatedMaterialsMarquee
           collectionItems={collectionContentItems}
+          relatedItems={relatedContentItems}
           categoryItems={recentInterviewItems}
           fallbackImageSrc={picture1.src}
         />

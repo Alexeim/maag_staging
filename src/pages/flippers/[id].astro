@@ -7,13 +7,14 @@ import ContentActions from "@/components/common/ContentActions.astro";
 import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
 import { flippersApi } from "../../lib/api/api";
 import { ChevronLeft, ChevronRight } from "@lucide/astro";
-import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
+import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import {
   buildContentCollectionItems,
   fetchPublicContentPools,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
+import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
@@ -62,6 +63,7 @@ const articleStructuredData = buildArticleStructuredData({
 });
 
 let collectionContentItems: any[] = [];
+let relatedContentItems: any[] = [];
 let recentFlipperItems: any[] = [];
 
 try {
@@ -74,8 +76,18 @@ try {
     pools,
   });
 
+  relatedContentItems = buildRelatedContentItems({
+    relatedContent: (flipper as any)?.relatedContent,
+    currentContentType: "flipper",
+    currentId: id,
+    pools,
+    excludeKeys: new Set(
+      collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
+    ),
+  });
+
   const relatedFlipperIds = new Set(
-    collectionContentItems
+    [...collectionContentItems, ...relatedContentItems]
       .filter((i) => i.contentType === "flipper")
       .map((i) => i.id),
   );
@@ -213,8 +225,9 @@ try {
             </template>
           </div>
         </div>
-        <ContentCollectionMarquee
+        <RelatedMaterialsMarquee
           collectionItems={collectionContentItems}
+          relatedItems={relatedContentItems}
           categoryItems={recentFlipperItems}
           fallbackImageSrc={picture1.src}
         />

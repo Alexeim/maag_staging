@@ -4,7 +4,7 @@ import ArticleHero from "../../components/article/ArticleHero.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import ArticleTips from "../../components/article/ArticleTips.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
-import ContentCollectionMarquee from "@/components/article/ContentCollectionMarquee.astro";
+import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
@@ -19,6 +19,7 @@ import {
   type LinkedContentLookup,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
+import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
 
 const { id } = Astro.params;
 
@@ -45,6 +46,7 @@ const normalizeCategory = (value?: string | null) => {
 
 let articleData: any;
 let collectionContentItems: any[] = [];
+let relatedContentItems: any[] = [];
 let sameCategoryItems: any[] = [];
 let linkedContentLookup: LinkedContentLookup = {};
 let error: string | null = null;
@@ -156,9 +158,19 @@ if (!error && articleData) {
       pools,
     });
 
+    relatedContentItems = buildRelatedContentItems({
+      relatedContent: articleData?.relatedContent,
+      currentContentType: "article",
+      currentId: id,
+      pools,
+      excludeKeys: new Set(
+        collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
+      ),
+    });
+
     const currentCategory = normalizeCategory(articleData?.category);
     const relatedArticleIds = new Set(
-      collectionContentItems
+      [...collectionContentItems, ...relatedContentItems]
         .filter((item) => item.contentType === "article")
         .map((item) => item.id),
     );
@@ -240,8 +252,9 @@ const isAKid = displayArticle.authorName === "Саша Макарова";
               />
             )}
 
-            <ContentCollectionMarquee
+            <RelatedMaterialsMarquee
               collectionItems={collectionContentItems}
+              relatedItems={relatedContentItems}
               categoryItems={sameCategoryItems}
               fallbackImageSrc={picture1.src}
             />
