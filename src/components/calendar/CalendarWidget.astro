@@ -88,6 +88,13 @@ import { ChevronLeft, ChevronRight } from "@lucide/astro";
           >
           </div>
 
+          <!-- Pending range-start marker: shown between the first and second tap -->
+          <div
+            x-show="cell.isCurrentMonth && isPendingRangeAnchor(cell)"
+            class="pointer-events-none absolute h-10 w-10 rounded-full border-2 border-error sm:h-11 sm:w-11 md:h-12 md:w-12"
+          >
+          </div>
+
           <div
             :class="{
               'bg-error text-error-content': cell.isCurrentMonth && (isSelectedDate(cell) || isRangeBoundary(cell)),

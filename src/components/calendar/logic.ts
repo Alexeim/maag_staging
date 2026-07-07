@@ -615,11 +615,11 @@ export default (
 
     if (this.isRangeSelecting) {
       if (this.isSameDay(this.rangeStartDate, nextSelectedDate)) {
-        // Clicked start date again — cancel range mode, back to single day
+        // Second tap on the same date — confirm as a single day
         this.isRangeSelecting = false;
         this.rangeEndDate = null;
       } else {
-        // Different date — complete the range
+        // Second tap on a different date — complete the range
         if (nextSelectedDate.getTime() < (this.rangeStartDate?.getTime() ?? 0)) {
           this.rangeEndDate = new Date(this.rangeStartDate!);
           this.rangeStartDate = new Date(nextSelectedDate);
@@ -628,14 +628,12 @@ export default (
         }
         this.isRangeSelecting = false;
       }
-    } else if (this.isSameDay(this.rangeStartDate, nextSelectedDate) && !this.rangeEndDate) {
-      // Clicked already-selected date — enter range selection mode
-      this.isRangeSelecting = true;
     } else {
-      // New date — just select it as single day, clear any range
+      // First tap on a fresh date — always start a new pending range from here,
+      // discarding whatever was selected before. Resolved on the next tap.
       this.rangeStartDate = new Date(nextSelectedDate);
       this.rangeEndDate = null;
-      this.isRangeSelecting = false;
+      this.isRangeSelecting = true;
     }
 
     this.hoverDate = null;
@@ -689,10 +687,18 @@ export default (
   },
 
   isSelectedDate(value: number | Date | CalendarDay) {
-    if (this.hasCompletedRange()) {
+    if (this.hasCompletedRange() || this.isRangeSelecting) {
       return false;
     }
     return this.isSameDay(this.selectedDate, this.resolveCalendarDate(value));
+  },
+
+  // True only while the anchor date is awaiting a second tap — renders as the
+  // half-circle "pending" marker instead of a confirmed full circle.
+  isPendingRangeAnchor(value: number | Date | CalendarDay) {
+    return Boolean(
+      this.isRangeSelecting && this.isSameDay(this.rangeStartDate, this.resolveCalendarDate(value)),
+    );
   },
 
   isRangeStart(value: number | Date | CalendarDay) {
@@ -704,6 +710,9 @@ export default (
   },
 
   isRangeBoundary(value: number | Date | CalendarDay) {
+    if (this.isRangeSelecting) {
+      return false;
+    }
     return this.isRangeStart(value) || this.isRangeEnd(value);
   },
 
