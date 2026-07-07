@@ -6,7 +6,11 @@ import ContentActions from "@/components/common/ContentActions.astro";
 import GuideHero from "@/components/guide/GuideHero.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import picture1 from "@/assets/images/culture.jpg";
-import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
+import {
+  getPrimaryBadgeHref,
+  getPrimaryBadgeLabel,
+  getTagLabel,
+} from "@/lib/utils/contentBadge";
 import { ApiError, guidesApi } from "@/lib/api/api";
 import {
   buildContentCollectionItems,
@@ -59,6 +63,7 @@ const displayGuide = {
   title: guideData?.title || 'Путеводитель',
   lead: guideData?.lead || '',
   category: getPrimaryBadgeLabel({ contentType: "guide", tags: guideData?.tags }),
+  categoryHref: getPrimaryBadgeHref({ contentType: "guide", tags: guideData?.tags }),
   authorName: guideData?.author ? `${guideData.author.firstName} ${guideData.author.lastName}` : 'Автор',
   authorAvatar: guideData?.author?.avatar,
   imageUrl: guideData?.imageUrl,
@@ -155,6 +160,7 @@ if (!error && guideData) {
         <>
           <GuideHero
             category={displayGuide.category}
+            categoryHref={displayGuide.categoryHref}
             title={displayGuide.title}
             lead={displayGuide.lead}
             authorName={displayGuide.authorName}

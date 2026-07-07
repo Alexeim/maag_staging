@@ -10,6 +10,7 @@ import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarque
 import ContentActions from "@/components/common/ContentActions.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import {
+  getNewsDetailBadgeHref,
   getNewsDetailBadgeLabel,
   getPrimaryBadgeLabel,
   getTagLabel,
@@ -59,6 +60,7 @@ const displayArticle = {
   title: articleData?.title || "Новость",
   lead: articleData?.lead || "",
   category: getNewsDetailBadgeLabel(articleData?.tags),
+  categoryHref: getNewsDetailBadgeHref(articleData?.tags),
   authorName: articleData?.author
     ? `${articleData.author.firstName} ${articleData.author.lastName}`
     : "Автор",
@@ -213,6 +215,7 @@ if (!error && articleData) {
                     <div class="mx-auto flex w-full max-w-[825px] flex-col gap-4 lg:mx-0">
                       <ArticleHeader
                         category={displayArticle.category}
+                        categoryHref={displayArticle.categoryHref}
                         title={displayArticle.title}
                         lead={displayArticle.lead}
                         titleClass="text-3xl lg:text-[42px]"

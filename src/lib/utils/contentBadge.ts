@@ -96,6 +96,12 @@ export const getNewsDetailBadgeLabel = (tags?: unknown): string => {
   return normalized.length > 0 ? getTagLabel(normalized[0]) : "Новость";
 };
 
+// Href counterpart to getNewsDetailBadgeLabel above.
+export const getNewsDetailBadgeHref = (tags?: unknown): string | null => {
+  const normalized = normalizeTags(tags);
+  return normalized.length > 0 ? `/tag/${encodeURIComponent(normalized[0])}` : null;
+};
+
 // Where clicking the primary badge (see getPrimaryBadgeLabel above) should
 // lead. News/interview badges show a content-type label rather than a real
 // tag, so they point at that type's listing page instead of a tag page.

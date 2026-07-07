@@ -21,7 +21,7 @@ import {
 } from "@/lib/utils/relatedMaterialsMarquee";
 import { buildEventStructuredData } from "@/lib/seo/structuredData";
 import { getCalendarToday } from "@/lib/utils/calendarDate";
-import { getTagLabel } from "@/lib/utils/contentBadge";
+import { getPrimaryBadgeHref, getTagLabel } from "@/lib/utils/contentBadge";
 
 const { id } = Astro.params;
 
@@ -542,6 +542,7 @@ const displayEvent = {
   title: eventData?.title || "Событие",
   lead,
   category: topMetaTag,
+  categoryHref: getPrimaryBadgeHref({ tags: normalizedTags }),
   authorName: eventData?.author
     ? `${eventData.author.firstName} ${eventData.author.lastName}`
     : "MAAG",
@@ -604,9 +605,18 @@ const eventStructuredData = eventData
                 <article class="grid gap-8">
                   <div class="grid gap-6">
                     <div class="grid gap-3">
-                      <p class="m-0 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                        {displayEvent.category}
-                      </p>
+                      {displayEvent.categoryHref ? (
+                        <a
+                          href={displayEvent.categoryHref}
+                          class="m-0 w-fit text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                        >
+                          {displayEvent.category}
+                        </a>
+                      ) : (
+                        <p class="m-0 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                          {displayEvent.category}
+                        </p>
+                      )}
 
                       <h1 class="m-0 max-w-[980px] font-old_standard text-3xl font-normal leading-[1.02] text-base-content lg:text-[52px]">
                         {displayEvent.title}

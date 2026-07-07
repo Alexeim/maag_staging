@@ -5,7 +5,11 @@ import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarque
 import ContentActions from "@/components/common/ContentActions.astro";
 import TipsHero from "@/components/tips/TipsHero.astro";
 import picture1 from "@/assets/images/culture.jpg";
-import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
+import {
+  getPrimaryBadgeHref,
+  getPrimaryBadgeLabel,
+  getTagLabel,
+} from "@/lib/utils/contentBadge";
 import {
   ApiError,
   articlesApi,
@@ -55,6 +59,7 @@ const displayArticle = {
   title: articleData?.header?.title || articleData?.title || "Статья",
   lead: articleData?.lead || "",
   category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }),
+  categoryHref: getPrimaryBadgeHref({ contentType: "article", tags: articleData?.tags }),
   authorName: articleData?.author
     ? `${articleData.author.firstName} ${articleData.author.lastName}`
     : "Автор",
@@ -149,6 +154,7 @@ if (!error && articleData) {
         <>
           <TipsHero
             category={displayArticle.category}
+            categoryHref={displayArticle.categoryHref}
             title={displayArticle.title}
             lead={displayArticle.lead}
             authorName={displayArticle.authorName}

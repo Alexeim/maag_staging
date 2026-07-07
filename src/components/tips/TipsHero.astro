@@ -9,6 +9,7 @@ import ImageCaptionHint from "@/components/common/ImageCaptionHint.astro";
 
 interface Props {
   category: string;
+  categoryHref?: string | null;
   title: string;
   lead?: string;
   authorName: string;
@@ -23,6 +24,7 @@ interface Props {
 
 const {
   category,
+  categoryHref = null,
   title,
   lead,
   authorName,
@@ -47,6 +49,7 @@ const isStacked = heroOrientation === "image-bottom";
         <div class="flex w-full flex-col gap-4">
           <ArticleHeader
             category={category}
+            categoryHref={categoryHref}
             title={title}
             lead={lead}
             titleClass={isLongTitle ? "text-3xl lg:text-4xl" : "text-3xl lg:text-[52px]"}
@@ -86,11 +89,20 @@ const isStacked = heroOrientation === "image-bottom";
           imageUrl && imageOnLeft ? "order-1 lg:order-2" : "",
         ]}
       >
-        <p
-          class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm"
-        >
-          {category}
-        </p>
+        {categoryHref ? (
+          <a
+            href={categoryHref}
+            class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent hover:underline sm:text-sm"
+          >
+            {category}
+          </a>
+        ) : (
+          <p
+            class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm"
+          >
+            {category}
+          </p>
+        )}
         <h1
           class:list={[
             "mt-8 font-old_standard font-normal leading-[1.05] text-base-content",

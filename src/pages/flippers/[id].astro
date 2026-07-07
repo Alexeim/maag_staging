@@ -4,7 +4,11 @@ import ArticleHeader from "../../components/article/ArticleHeader.astro";
 import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
-import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
+import {
+  getPrimaryBadgeHref,
+  getPrimaryBadgeLabel,
+  getTagLabel,
+} from "@/lib/utils/contentBadge";
 import { flippersApi } from "../../lib/api/api";
 import { ChevronLeft, ChevronRight } from "@lucide/astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
@@ -30,6 +34,8 @@ if ((flipper as any).published !== true) {
 
 const getFlipperCategory = () =>
   getPrimaryBadgeLabel({ contentType: "flipper", tags: flipper.tags });
+const getFlipperCategoryHref = () =>
+  getPrimaryBadgeHref({ contentType: "flipper", tags: flipper.tags });
 
 // Paris/Culture site-section indicator for bookmarks — unrelated to the badge above.
 const bookmarkCategory =
@@ -124,6 +130,7 @@ try {
         <div class="flex flex-col gap-4 max-w-[825px] w-full">
           <ArticleHeader
             category={getFlipperCategory()}
+            categoryHref={getFlipperCategoryHref()}
             title={flipper.title}
             lead={flipper.lead}
           />
