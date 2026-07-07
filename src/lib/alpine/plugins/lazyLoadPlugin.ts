@@ -144,6 +144,7 @@ export default function(Alpine: Alpine) {
       isHoverRangeEnd() { return false; },
       isWithinHoverRange() { return false; },
       isSelectedDate() { return false; },
+      isPendingRangeAnchor() { return false; },
       isRangeStart() { return false; },
       isRangeEnd() { return false; },
       isRangeBoundary() { return false; },
