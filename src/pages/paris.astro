@@ -5,7 +5,10 @@ import NetlenkaCardThree from "@/components/common/NetlenkaCardThree.astro";
 import PhotoOfTheDayCard from "@/components/common/PhotoOfTheDayCard.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { isLegacyParisTag } from "@/content/tags/parisTags";
-import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
+import {
+  getPrimaryBadgeHref,
+  getPrimaryBadgeLabel,
+} from "@/lib/utils/contentBadge";
 import picture1 from "../assets/images/culture.jpg";
 import { publicParisApi } from "@/lib/api/api";
 
@@ -79,6 +82,9 @@ const normalizeTags = (value: unknown): string[] => {
 // the primary badge, then defers to the shared news/interview/tag rules.
 const getPrimaryTag = (item: any): string =>
   getPrimaryBadgeLabel({ ...item, tags: normalizeTags(item?.tags) });
+
+const getPrimaryTagHref = (item: any): string | null =>
+  getPrimaryBadgeHref({ ...item, tags: normalizeTags(item?.tags) });
 
 const getCardLead = (item: any): string => {
   const cardLead =
@@ -181,9 +187,18 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
 
                 <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                   <p class="m-0">
-                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {getPrimaryTag(primaryParisArticle)}
-                    </span>
+                    {getPrimaryTagHref(primaryParisArticle) ? (
+                      <a
+                        href={getPrimaryTagHref(primaryParisArticle)}
+                        class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                      >
+                        {getPrimaryTag(primaryParisArticle)}
+                      </a>
+                    ) : (
+                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        {getPrimaryTag(primaryParisArticle)}
+                      </span>
+                    )}
                   </p>
 
                   <a
@@ -245,9 +260,18 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
 
                     <div class="grid h-full content-start gap-[0.55rem]">
                       <p class="m-0">
-                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryTag(item)}
-                        </span>
+                        {getPrimaryTagHref(item) ? (
+                          <a
+                            href={getPrimaryTagHref(item)}
+                            class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                          >
+                            {getPrimaryTag(item)}
+                          </a>
+                        ) : (
+                          <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                            {getPrimaryTag(item)}
+                          </span>
+                        )}
                       </p>
 
                       <a
@@ -311,6 +335,7 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                   <NetlenkaCardThree
                     title={item.title}
                     category={getPrimaryTag(item)}
+                    categoryHref={getPrimaryTagHref(item)}
                     imageUrl={item.imageUrl}
                     href={item.href}
                     transitionName={getTransitionName(item)}
@@ -350,9 +375,18 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
 
                       <div class="grid h-full content-start gap-[0.55rem]">
                         <p class="m-0">
-                          <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                            {getPrimaryTag(item)}
-                          </span>
+                          {getPrimaryTagHref(item) ? (
+                            <a
+                              href={getPrimaryTagHref(item)}
+                              class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                            >
+                              {getPrimaryTag(item)}
+                            </a>
+                          ) : (
+                            <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                              {getPrimaryTag(item)}
+                            </span>
+                          )}
                         </p>
 
                         <a
@@ -413,9 +447,18 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
 
                             <div class="grid h-full content-start gap-[0.55rem]">
                               <p class="m-0">
-                                <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                                  {getPrimaryTag(item)}
-                                </span>
+                                {getPrimaryTagHref(item) ? (
+                                  <a
+                                    href={getPrimaryTagHref(item)}
+                                    class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                                  >
+                                    {getPrimaryTag(item)}
+                                  </a>
+                                ) : (
+                                  <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                    {getPrimaryTag(item)}
+                                  </span>
+                                )}
                               </p>
 
                               <a

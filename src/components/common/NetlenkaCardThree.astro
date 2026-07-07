@@ -7,6 +7,7 @@ import MIcon from "../../assets/logo/m.svg";
 interface NetlenkaCardThreeProps {
   title?: string;
   category?: string;
+  categoryHref?: string | null;
   date?: string;
   hideDate?: boolean;
   lead?: string;
@@ -18,6 +19,7 @@ interface NetlenkaCardThreeProps {
 const {
   title = "Без названия",
   category = "Самое Читаемое",
+  categoryHref = null,
   lead = "",
   transitionName,
   imageUrl,
@@ -28,11 +30,7 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
 ---
 
 <div class="w-full">
-  <a
-    href={href}
-    class="linked-image-hover block relative aspect-[3/4] overflow-hidden"
-    aria-label={title}
-  >
+  <div class="linked-image-hover relative block aspect-[3/4] overflow-hidden">
     <LazyImage
       src={imageUrl || picture3}
       alt={imageUrl ? title : "Editorial image"}
@@ -42,12 +40,22 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
     />
     {
       category && (
-        <span class="absolute top-3 left-3 text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter']">
-          {category}
-        </span>
+        categoryHref ? (
+          <a
+            href={categoryHref}
+            class="absolute top-3 left-3 z-[2] text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter'] hover:underline"
+          >
+            {category}
+          </a>
+        ) : (
+          <span class="absolute top-3 left-3 z-[2] text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter']">
+            {category}
+          </span>
+        )
       )
     }
-  </a>
+    <a href={href} class="absolute inset-0 z-[1]" aria-label={title} />
+  </div>
   <div class="relative bg-maag-beige px-4 pt-4 pb-5 overflow-hidden min-h-24">
     <!-- M logo fills the panel as background texture, bleeds off the right edge -->
     <MIcon

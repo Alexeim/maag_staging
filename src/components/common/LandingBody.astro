@@ -2,7 +2,10 @@
 import { Image } from "astro:assets";
 import { getTransitionName } from "../../lib/utils/transitions";
 import { isLegacyParisTag } from "@/content/tags/parisTags";
-import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
+import {
+  getPrimaryBadgeHref,
+  getPrimaryBadgeLabel,
+} from "@/lib/utils/contentBadge";
 
 import NetlenkaCardOne from "./NetlenkaCardOne.astro";
 import ArticleCard from "./ArticleCard.astro";
@@ -48,6 +51,19 @@ const getPrimaryTag = (item: any) => {
       typeof tag === "string" && tag.trim().length > 0 && !isLegacyParisTag(tag),
   );
   return getPrimaryBadgeLabel({ ...item, tags });
+};
+
+const getPrimaryTagHref = (item: any) => {
+  const rawTags = Array.isArray(item?.tags)
+    ? item.tags
+    : typeof item?.tags === "string"
+      ? [item.tags]
+      : [];
+  const tags = rawTags.filter(
+    (tag: unknown) =>
+      typeof tag === "string" && tag.trim().length > 0 && !isLegacyParisTag(tag),
+  );
+  return getPrimaryBadgeHref({ ...item, tags });
 };
 
 const getCardLead = (item: any) => {
@@ -176,9 +192,18 @@ const splitTitle = (t: string) => {
                   )}
                   <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                     <p class="m-0">
-                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                        {getPrimaryTag(cultureHero)}
-                      </span>
+                      {getPrimaryTagHref(cultureHero) ? (
+                        <a
+                          href={getPrimaryTagHref(cultureHero)}
+                          class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                        >
+                          {getPrimaryTag(cultureHero)}
+                        </a>
+                      ) : (
+                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                          {getPrimaryTag(cultureHero)}
+                        </span>
+                      )}
                     </p>
                     <a
                       href={cultureHero.href}
@@ -244,6 +269,7 @@ const splitTitle = (t: string) => {
                       isNetlenka={false}
                       title={item.title}
                       category={getPrimaryTag(item)}
+                      categoryHref={getPrimaryTagHref(item)}
                       date={formatArticleDate(item.createdAt)}
                       hideDate={true}
                       transitionName={getTransitionName(item)}
@@ -301,6 +327,7 @@ const splitTitle = (t: string) => {
                   key={item.id}
                   title={item.title}
                   category={getPrimaryTag(item)}
+                  categoryHref={getPrimaryTagHref(item)}
                   date={formatArticleDate(item.createdAt)}
                   hideDate={true}
                   transitionName={getTransitionName(item)}
@@ -350,9 +377,18 @@ const splitTitle = (t: string) => {
                       </a>
                       <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                         <p class="m-0">
-                          <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                            {getPrimaryTag(parisHero)}
-                          </span>
+                          {getPrimaryTagHref(parisHero) ? (
+                            <a
+                              href={getPrimaryTagHref(parisHero)}
+                              class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                            >
+                              {getPrimaryTag(parisHero)}
+                            </a>
+                          ) : (
+                            <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                              {getPrimaryTag(parisHero)}
+                            </span>
+                          )}
                         </p>
                         <a
                           href={parisHero.href}
@@ -414,6 +450,7 @@ const splitTitle = (t: string) => {
                         isNetlenka={false}
                         title={item.title}
                         category={getPrimaryTag(item)}
+                      categoryHref={getPrimaryTagHref(item)}
                         date={formatArticleDate(item.createdAt)}
                         hideDate={true}
                         transitionName={getTransitionName(item)}
@@ -465,6 +502,7 @@ const splitTitle = (t: string) => {
                       isNetlenka={false}
                       title={item.title}
                       category={getPrimaryTag(item)}
+                      categoryHref={getPrimaryTagHref(item)}
                       date={formatArticleDate(item.createdAt)}
                       hideDate={true}
                       transitionName={

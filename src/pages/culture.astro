@@ -4,7 +4,10 @@ import { getTransitionName } from "../lib/utils/transitions";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import NetlenkaCardOne from "@/components/common/NetlenkaCardOne.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
-import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
+import {
+  getPrimaryBadgeHref,
+  getPrimaryBadgeLabel,
+} from "@/lib/utils/contentBadge";
 import picture1 from "../assets/images/culture.jpg";
 import { publicCultureApi } from "@/lib/api/api";
 
@@ -186,9 +189,18 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
 
                 <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                   <p class="m-0">
-                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {getPrimaryBadgeLabel(primaryCultureArticle)}
-                    </span>
+                    {getPrimaryBadgeHref(primaryCultureArticle) ? (
+                      <a
+                        href={getPrimaryBadgeHref(primaryCultureArticle)}
+                        class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                      >
+                        {getPrimaryBadgeLabel(primaryCultureArticle)}
+                      </a>
+                    ) : (
+                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        {getPrimaryBadgeLabel(primaryCultureArticle)}
+                      </span>
+                    )}
                   </p>
 
                   <a
@@ -250,9 +262,18 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
 
                     <div class="grid h-full content-start gap-[0.55rem]">
                       <p class="m-0">
-                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryBadgeLabel(item)}
-                        </span>
+                        {getPrimaryBadgeHref(item) ? (
+                          <a
+                            href={getPrimaryBadgeHref(item)}
+                            class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                          >
+                            {getPrimaryBadgeLabel(item)}
+                          </a>
+                        ) : (
+                          <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                            {getPrimaryBadgeLabel(item)}
+                          </span>
+                        )}
                       </p>
 
                       <a
@@ -305,6 +326,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                   <NetlenkaCardOne
                     title={item.title}
                     category={getPrimaryBadgeLabel(item)}
+                    categoryHref={getPrimaryBadgeHref(item)}
                     imageUrl={item.imageUrl}
                     href={item.href}
                     transitionName={getTransitionName(item)}
@@ -380,9 +402,18 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                       ]}
                     >
                       <p class="m-0">
-                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryBadgeLabel(item)}
-                        </span>
+                        {getPrimaryBadgeHref(item) ? (
+                          <a
+                            href={getPrimaryBadgeHref(item)}
+                            class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                          >
+                            {getPrimaryBadgeLabel(item)}
+                          </a>
+                        ) : (
+                          <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                            {getPrimaryBadgeLabel(item)}
+                          </span>
+                        )}
                       </p>
 
                       <a
@@ -461,9 +492,18 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                               ]}
                             >
                               <p class="m-0">
-                                <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                                  {getPrimaryBadgeLabel(item)}
-                                </span>
+                                {getPrimaryBadgeHref(item) ? (
+                                  <a
+                                    href={getPrimaryBadgeHref(item)}
+                                    class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                                  >
+                                    {getPrimaryBadgeLabel(item)}
+                                  </a>
+                                ) : (
+                                  <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                    {getPrimaryBadgeLabel(item)}
+                                  </span>
+                                )}
                               </p>
 
                               <a

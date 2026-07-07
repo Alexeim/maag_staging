@@ -3,7 +3,10 @@ import { Image } from "astro:assets";
 import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import picture2 from "../../assets/images/cal.jpeg";
 import { getTransitionName } from "../../lib/utils/transitions";
-import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
+import {
+  getPrimaryBadgeHref,
+  getPrimaryBadgeLabel,
+} from "@/lib/utils/contentBadge";
 import { getCalendarToday } from "@/lib/utils/calendarDate";
 
 interface MainLandingBlockProps {
@@ -17,6 +20,7 @@ interface MainLandingBlockProps {
 const { data: publicLandingData } = Astro.props as MainLandingBlockProps;
 
 const getPrimaryTag = (article: any) => getPrimaryBadgeLabel(article);
+const getPrimaryTagHref = (article: any) => getPrimaryBadgeHref(article);
 
 const splitTitle = (t: string) => {
   const s = t.trimEnd();
@@ -162,9 +166,18 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
                 </a>
                 <div class="flex-1 max-w-max">
                   <div class="mb-1 flex items-start">
-                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {getPrimaryTag(newsItem)}
-                    </span>
+                    {getPrimaryTagHref(newsItem) ? (
+                      <a
+                        href={getPrimaryTagHref(newsItem)}
+                        class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                      >
+                        {getPrimaryTag(newsItem)}
+                      </a>
+                    ) : (
+                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        {getPrimaryTag(newsItem)}
+                      </span>
+                    )}
                   </div>
                   <a
                     href={`/news/${newsItem.id}`}
@@ -211,9 +224,18 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
             </div>
             <div class="p-4 lg:p-0">
               <div class="flex flex-row items-center gap-2 text-xs text-base-content/55 font-inter uppercase tracking-[0.22em]">
-                <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mt-2 lg:mt-4">
-                  {getPrimaryTag(mainArticle)}
-                </span>
+                {getPrimaryTagHref(mainArticle) ? (
+                  <a
+                    href={getPrimaryTagHref(mainArticle)}
+                    class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline mt-2 lg:mt-4"
+                  >
+                    {getPrimaryTag(mainArticle)}
+                  </a>
+                ) : (
+                  <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mt-2 lg:mt-4">
+                    {getPrimaryTag(mainArticle)}
+                  </span>
+                )}
                 <span class="hidden text-black text-lg font-bold font-['Inter']">
                   ·
                 </span>
@@ -264,10 +286,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
       </h2>
       {
         landingEvent ? (
-          <a
-            href={`/events/${landingEvent.id}`}
-            class="linked-image-hover bg-white"
-          >
+          <div class="linked-image-hover relative bg-white">
             <div class="px-4 py-2 flex items-center gap-3">
               <div class="w-fill flex flex-row gap-2 items-center justify-center mt-2 mb-1">
                 <div class="flex items-center justify-center h-full">
@@ -307,14 +326,28 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
               />
             )}
             <div class="px-4 py-4">
-              <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                {getPrimaryBadgeLabel(landingEvent)}
-              </p>
+              {getPrimaryBadgeHref(landingEvent) ? (
+                <a
+                  href={getPrimaryBadgeHref(landingEvent)}
+                  class="relative z-[2] text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                >
+                  {getPrimaryBadgeLabel(landingEvent)}
+                </a>
+              ) : (
+                <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                  {getPrimaryBadgeLabel(landingEvent)}
+                </p>
+              )}
               <h2 class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mt-2">
                 {landingEvent.title}
               </h2>
             </div>
-          </a>
+            <a
+              href={`/events/${landingEvent.id}`}
+              class="absolute inset-0 z-[1]"
+              aria-label={landingEvent.title}
+            />
+          </div>
         ) : (
           <div class="bg-white p-4 lg:p-6">
             <p class="text-sm text-base-content/70">

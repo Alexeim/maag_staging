@@ -1182,3 +1182,76 @@ export const publicCalendarApi = {
     });
   },
 };
+
+export type MaterialContentType =
+  | "article"
+  | "news"
+  | "guide"
+  | "event"
+  | "flipper"
+  | "interview"
+  | "visual-story";
+
+export interface PublicMaterialItem {
+  id: string;
+  contentType: MaterialContentType;
+  href: string;
+  title: string;
+  imageUrl: string | null;
+  authorId: string | null;
+  authorName: string;
+  publishedAt: ApiTimestamp;
+  tags: string[];
+}
+
+export interface PublicMaterialGroup {
+  contentType: MaterialContentType;
+  label: string;
+  count: number;
+  page: number;
+  totalPages: number;
+  pageParam: string;
+  items: PublicMaterialItem[];
+}
+
+export interface PublicMaterialsByTagResponse {
+  tag: string;
+  totalCount: number;
+  groups: PublicMaterialGroup[];
+}
+
+export const publicMaterialsByTagApi = {
+  // pageByType keys are the groups' own `pageParam`, e.g. { eventPage: 2 }
+  get(tag: string, pageByType?: Record<string, number>) {
+    return request<PublicMaterialsByTagResponse>("/api/public/materials-by-tag", {
+      public: true,
+      query: { tag, ...pageByType },
+    });
+  },
+};
+
+export interface PublicFlatListingResponse {
+  label: string;
+  count: number;
+  page: number;
+  totalPages: number;
+  items: PublicMaterialItem[];
+}
+
+export const publicNewsListingApi = {
+  get(page = 1) {
+    return request<PublicFlatListingResponse>("/api/public/news", {
+      public: true,
+      query: { page },
+    });
+  },
+};
+
+export const publicInterviewsListingApi = {
+  get(page = 1) {
+    return request<PublicFlatListingResponse>("/api/public/interviews", {
+      public: true,
+      query: { page },
+    });
+  },
+};

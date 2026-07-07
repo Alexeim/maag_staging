@@ -1,0 +1,82 @@
+---
+// Result-row for /tag/[tag], /news and /interviews listings — visual reference: ref/Frame 300.png
+import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
+import ArticleDate from "@/components/article/ArticleDate.astro";
+import {
+  getPrimaryBadgeHref,
+  getPrimaryBadgeLabel,
+} from "@/lib/utils/contentBadge";
+import type { PublicMaterialItem } from "@/lib/api/api";
+
+interface Props {
+  item: PublicMaterialItem;
+}
+
+const { item } = Astro.props;
+
+const badgeLabel = getPrimaryBadgeLabel(item);
+const badgeHref = getPrimaryBadgeHref(item);
+---
+
+<article
+  class="grid grid-cols-1 gap-4 border-b border-base-content/10 pb-8 sm:grid-cols-[minmax(0,300px)_1fr] sm:gap-8 sm:pb-10"
+>
+  <a
+    href={item.href}
+    class="linked-image-hover block aspect-[3/2] overflow-hidden bg-base-200"
+    aria-label={item.title}
+  >
+    {
+      item.imageUrl && (
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          class="linked-image-hover__media h-full w-full object-cover"
+          loading="lazy"
+        />
+      )
+    }
+  </a>
+
+  <div class="grid content-center gap-3">
+    {
+      badgeLabel &&
+        (badgeHref ? (
+          <a
+            href={badgeHref}
+            class="w-fit font-['Inter'] text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1"
+          >
+            {badgeLabel}
+          </a>
+        ) : (
+          <span class="w-fit font-['Inter'] text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1">
+            {badgeLabel}
+          </span>
+        ))
+    }
+
+    <a href={item.href} class="block text-current no-underline hover:underline">
+      <h3
+        class="m-0 font-old_standard text-2xl font-normal leading-tight lg:text-3xl"
+      >
+        {item.title}
+      </h3>
+    </a>
+
+    <div class="flex flex-wrap items-center gap-3">
+      {
+        item.authorName && (
+          <div class="flex items-center gap-2">
+            <AuthorIcon class="h-4 w-4" />
+            <span class="font-old_standard text-base italic text-base-content">
+              {item.authorName}
+            </span>
+          </div>
+        )
+      }
+      <div class="font-inter text-xs uppercase tracking-[0.22em] text-base-content/55">
+        <ArticleDate createdAt={item.publishedAt as any} />
+      </div>
+    </div>
+  </div>
+</article>

@@ -6,6 +6,7 @@ import LazyImage from "./LazyImage.astro";
 interface NetlenkaCardTwoProps {
   title?: string;
   category?: string;
+  categoryHref?: string | null;
   date?: string;
   hideDate?: boolean;
   lead?: string;
@@ -17,6 +18,7 @@ interface NetlenkaCardTwoProps {
 const {
   title = "Без названия",
   category = "Самое Читаемое",
+  categoryHref = null,
   lead = "",
   transitionName,
   imageUrl,
@@ -43,9 +45,18 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
 
   <div class="border-l-[3px] border-accent pl-3 pt-3 pb-3">
     {category && (
-      <p class="m-0 mb-2 text-[0.6rem] font-bold uppercase tracking-[0.28em] text-accent font-['Inter']">
-        {category}
-      </p>
+      categoryHref ? (
+        <a
+          href={categoryHref}
+          class="m-0 mb-2 block w-fit text-[0.6rem] font-bold uppercase tracking-[0.28em] text-accent font-['Inter'] hover:underline"
+        >
+          {category}
+        </a>
+      ) : (
+        <p class="m-0 mb-2 text-[0.6rem] font-bold uppercase tracking-[0.28em] text-accent font-['Inter']">
+          {category}
+        </p>
+      )
     )}
     <a href={href} class="text-current no-underline hover:underline">
       <h3 class="m-0 text-xl font-normal font-old_standard tracking-[-0.02em] leading-[1.2]">

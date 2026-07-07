@@ -6,6 +6,7 @@ import LazyImage from "./LazyImage.astro";
 interface NetlenkaCardOneProps {
   title?: string;
   category?: string;
+  categoryHref?: string | null;
   date?: string;
   hideDate?: boolean;
   lead?: string;
@@ -17,6 +18,7 @@ interface NetlenkaCardOneProps {
 const {
   title = "Без названия",
   category = "Самое Читаемое",
+  categoryHref = null,
   lead = "",
   transitionName,
   imageUrl,
@@ -27,11 +29,7 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
 ---
 
 <div class="w-full">
-  <a
-    href={href}
-    class="linked-image-hover block relative aspect-[2/3] overflow-hidden"
-    aria-label={title}
-  >
+  <div class="linked-image-hover relative block aspect-[2/3] overflow-hidden">
     <LazyImage
       src={imageUrl || picture3}
       alt={imageUrl ? title : "Editorial image"}
@@ -47,9 +45,18 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
 
     {
       category && (
-        <span class="absolute top-3 left-3 text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter']">
-          {category}
-        </span>
+        categoryHref ? (
+          <a
+            href={categoryHref}
+            class="absolute top-3 left-3 z-[2] text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter'] hover:underline"
+          >
+            {category}
+          </a>
+        ) : (
+          <span class="absolute top-3 left-3 z-[2] text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter']">
+            {category}
+          </span>
+        )
       )
     }
 
@@ -67,5 +74,7 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
         )
       } -->
     </div>
-  </a>
+
+    <a href={href} class="absolute inset-0 z-[1]" aria-label={title} />
+  </div>
 </div>

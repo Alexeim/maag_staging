@@ -1,0 +1,90 @@
+---
+import Layout from "@/Layouts/Layout.astro";
+import MaterialResultRow from "@/components/common/MaterialResultRow.astro";
+import { publicNewsListingApi } from "@/lib/api/api";
+
+const requestedPage = Number(Astro.url.searchParams.get("page"));
+const page = Number.isFinite(requestedPage) && requestedPage >= 1 ? Math.floor(requestedPage) : 1;
+
+let items: Awaited<ReturnType<typeof publicNewsListingApi.get>>["items"] = [];
+let count = 0;
+let totalPages = 1;
+let loadError = false;
+
+try {
+  const response = await publicNewsListingApi.get(page);
+  items = response.items;
+  count = response.count;
+  totalPages = response.totalPages;
+} catch (error) {
+  console.error("Failed to load news listing:", error);
+  loadError = true;
+}
+
+const buildPageHref = (targetPage: number) => {
+  const url = new URL(Astro.url);
+  url.searchParams.set("page", String(targetPage));
+  return `${url.pathname}${url.search}`;
+};
+---
+
+<Layout title="Новости — MAAG France" description="Все новости MAAG France">
+  <main class="min-h-screen bg-base-200">
+    <div class="mx-auto max-w-[1200px] px-4 py-16 sm:px-6 lg:px-10">
+      <div class="mb-12 space-y-3">
+        <h1
+          class="m-0 font-old_standard text-4xl uppercase tracking-[0.08em] text-base-content lg:text-5xl"
+        >
+          Новости
+        </h1>
+        {
+          !loadError && (
+            <p class="m-0 font-inter text-xs uppercase tracking-[0.25em] text-base-content/50">
+              Всего материалов: {count}
+            </p>
+          )
+        }
+      </div>
+
+      {
+        loadError && (
+          <p class="font-inter text-base-content/70">
+            Не удалось загрузить новости. Попробуйте обновить страницу.
+          </p>
+        )
+      }
+
+      {
+        !loadError && items.length === 0 && (
+          <p class="font-inter text-base-content/70">Пока нет новостей.</p>
+        )
+      }
+
+      <div class="space-y-8">
+        {items.map((item) => <MaterialResultRow item={item} />)}
+      </div>
+
+      {
+        totalPages > 1 && (
+          <nav class="flex items-center justify-center gap-2 pt-12">
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+              (pageNum) => (
+                <a
+                  href={buildPageHref(pageNum)}
+                  class:list={[
+                    "flex h-9 w-9 items-center justify-center font-inter text-sm transition",
+                    pageNum === page
+                      ? "bg-accent text-white"
+                      : "text-base-content/60 hover:text-base-content",
+                  ]}
+                >
+                  {pageNum}
+                </a>
+              ),
+            )}
+          </nav>
+        )
+      }
+    </div>
+  </main>
+</Layout>

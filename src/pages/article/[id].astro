@@ -7,7 +7,11 @@ import EventDetails from "../../components/article/EventDetails.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import picture1 from "@/assets/images/culture.jpg";
-import { getPrimaryBadgeLabel, getTagLabel } from "@/lib/utils/contentBadge";
+import {
+  getPrimaryBadgeHref,
+  getPrimaryBadgeLabel,
+  getTagLabel,
+} from "@/lib/utils/contentBadge";
 import {
   ApiError,
   articlesApi,
@@ -83,6 +87,7 @@ const displayArticle = {
   title: articleData?.header?.title || articleData?.title || 'Article',
   lead: articleData?.lead || '',
   category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }),
+  categoryHref: getPrimaryBadgeHref({ contentType: "article", tags: articleData?.tags }),
   authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : 'Author',
   authorAvatar: articleData?.author?.avatar,
   readTime: articleData?.meta?.readTime || '5 min read',
@@ -212,6 +217,7 @@ const isAKid = displayArticle.authorName === "Саша Макарова";
         <>
           <ArticleHero
             category={displayArticle.category}
+            categoryHref={displayArticle.categoryHref}
             title={displayArticle.title}
             lead={displayArticle.lead}
             authorName={displayArticle.authorName}

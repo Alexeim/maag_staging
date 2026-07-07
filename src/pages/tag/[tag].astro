@@ -1,0 +1,146 @@
+---
+import Layout from "@/Layouts/Layout.astro";
+import MaterialResultRow from "@/components/common/MaterialResultRow.astro";
+import { getTagLabel } from "@/lib/utils/contentBadge";
+import {
+  publicMaterialsByTagApi,
+  type PublicMaterialGroup,
+} from "@/lib/api/api";
+
+const PAGE_PARAMS = [
+  "articlePage",
+  "newsPage",
+  "guidePage",
+  "eventPage",
+  "flipperPage",
+  "interviewPage",
+  "visualStoryPage",
+];
+
+const { tag: rawTag } = Astro.params;
+const tag = decodeURIComponent(rawTag ?? "").trim();
+const tagLabel = tag ? getTagLabel(tag) : "";
+
+const pageByType: Record<string, number> = {};
+PAGE_PARAMS.forEach((param) => {
+  const parsed = Number(Astro.url.searchParams.get(param));
+  if (Number.isFinite(parsed) && parsed >= 1) {
+    pageByType[param] = Math.floor(parsed);
+  }
+});
+
+let groups: PublicMaterialGroup[] = [];
+let totalCount = 0;
+let loadError = false;
+
+if (tag) {
+  try {
+    const response = await publicMaterialsByTagApi.get(tag, pageByType);
+    groups = response.groups;
+    totalCount = response.totalCount;
+  } catch (error) {
+    console.error("Failed to load materials by tag:", error);
+    loadError = true;
+  }
+}
+
+// Russian plural forms: 1 результат / 2 результата / 5 результатов
+const resultsWord = (count: number) => {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) return "результат";
+  if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return "результата";
+  return "результатов";
+};
+
+const buildPageHref = (group: PublicMaterialGroup, page: number) => {
+  const url = new URL(Astro.url);
+  url.searchParams.set(group.pageParam, String(page));
+  return `${url.pathname}${url.search}`;
+};
+---
+
+<Layout
+  title={`${tagLabel || tag} — MAAG France`}
+  description={`Материалы с тегом «${tagLabel || tag}»`}
+>
+  <main class="min-h-screen bg-base-200">
+    <div class="mx-auto max-w-[1200px] px-4 py-16 sm:px-6 lg:px-10">
+      <div class="mb-12 space-y-3">
+        <h1
+          class="m-0 font-old_standard text-4xl uppercase tracking-[0.08em] text-base-content lg:text-5xl"
+        >
+          {tagLabel || tag}
+        </h1>
+        {
+          !loadError && (
+            <p class="m-0 font-inter text-xs uppercase tracking-[0.25em] text-base-content/50">
+              Найдено {totalCount} {resultsWord(totalCount)}
+            </p>
+          )
+        }
+      </div>
+
+      {
+        loadError && (
+          <p class="font-inter text-base-content/70">
+            Не удалось загрузить материалы. Попробуйте обновить страницу.
+          </p>
+        )
+      }
+
+      {
+        !loadError && groups.length === 0 && (
+          <p class="font-inter text-base-content/70">
+            По этому тегу пока ничего нет.
+          </p>
+        )
+      }
+
+      <div class="space-y-16">
+        {
+          groups.map((group) => (
+            <section class="space-y-8">
+              <div class="flex items-center gap-4">
+                <h2 class="m-0 font-old_standard text-2xl font-normal uppercase tracking-[0.24em] text-base-content">
+                  {group.label}
+                </h2>
+                <div class="h-px flex-1 bg-neutral-200" />
+                <span class="font-inter text-xs text-base-content/50">
+                  {group.count}
+                </span>
+              </div>
+
+              <div class="space-y-8">
+                {group.items.map((item) => (
+                  <MaterialResultRow item={item} />
+                ))}
+              </div>
+
+              {group.totalPages > 1 && (
+                <nav class="flex items-center justify-center gap-2 pt-4">
+                  {Array.from(
+                    { length: group.totalPages },
+                    (_, index) => index + 1,
+                  ).map((pageNum) => (
+                    <a
+                      href={buildPageHref(group, pageNum)}
+                      class:list={[
+                        "flex h-9 w-9 items-center justify-center font-inter text-sm transition",
+                        pageNum === group.page
+                          ? "bg-accent text-white"
+                          : "text-base-content/60 hover:text-base-content",
+                      ]}
+                    >
+                      {pageNum}
+                    </a>
+                  ))}
+                </nav>
+              )}
+            </section>
+          ))
+        }
+      </div>
+    </div>
+  </main>
+</Layout>

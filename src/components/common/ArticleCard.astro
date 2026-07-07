@@ -7,6 +7,7 @@ interface ArticleCardProps {
   isNetlenka?: boolean;
   title?: string;
   category?: string;
+  categoryHref?: string | null;
   date?: string;
   hideDate?: boolean;
   lead?: string;
@@ -20,6 +21,7 @@ const {
   isNetlenka = true,
   title = "Без названия",
   category = "Культура",
+  categoryHref = null,
   date = "",
   hideDate = false,
   lead = "",
@@ -71,9 +73,18 @@ const lastWord =
           </span>
         )}
         {category && (
-          <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-            {category}
-          </span>
+          categoryHref ? (
+            <a
+              href={categoryHref}
+              class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+            >
+              {category}
+            </a>
+          ) : (
+            <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+              {category}
+            </span>
+          )
         )}
       </div>
     )

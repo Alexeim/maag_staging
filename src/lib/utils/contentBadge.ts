@@ -95,3 +95,18 @@ export const getNewsDetailBadgeLabel = (tags?: unknown): string => {
   const normalized = normalizeTags(tags);
   return normalized.length > 0 ? getTagLabel(normalized[0]) : "Новость";
 };
+
+// Where clicking the primary badge (see getPrimaryBadgeLabel above) should
+// lead. News/interview badges show a content-type label rather than a real
+// tag, so they point at that type's listing page instead of a tag page.
+export const getPrimaryBadgeHref = (item: BadgeSourceItem): string | null => {
+  if (item?.contentType === "news" || item?.isNews) {
+    return "/news";
+  }
+  if (item?.contentType === "interview") {
+    return "/interviews";
+  }
+
+  const tags = normalizeTags(item?.tags);
+  return tags.length > 0 ? `/tag/${encodeURIComponent(tags[0])}` : null;
+};

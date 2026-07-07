@@ -1,6 +1,7 @@
 ---
 interface Props {
   category: string;
+  categoryHref?: string | null;
   title?: string;
   lead?: string;
   titleClass?: string;
@@ -8,6 +9,7 @@ interface Props {
 
 const {
   category,
+  categoryHref = null,
   title,
   lead,
   titleClass = "text-3xl lg:text-[52px]",
@@ -16,11 +18,20 @@ const {
 
 <div class="flex flex-col gap-8 w-full">
   <div class="flex flex-col items-start gap-2">
-    <p
-      class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mt-2"
-    >
-      {category}
-    </p>
+    {categoryHref ? (
+      <a
+        href={categoryHref}
+        class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mt-2 hover:underline"
+      >
+        {category}
+      </a>
+    ) : (
+      <p
+        class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mt-2"
+      >
+        {category}
+      </p>
+    )}
     <h1
       class:list={[
         titleClass,
