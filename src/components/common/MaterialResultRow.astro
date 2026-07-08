@@ -2,6 +2,7 @@
 // Result-row for /tag/[tag], /news and /interviews listings — visual reference: ref/Frame 300.png
 import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
 import ArticleDate from "@/components/article/ArticleDate.astro";
+import ArticleAuthor from "../article/ArticleAuthor.astro";
 import {
   getPrimaryBadgeHref,
   getPrimaryBadgeLabel,
@@ -38,18 +39,18 @@ const badgeHref = getPrimaryBadgeHref(item);
     }
   </a>
 
-  <div class="grid content-center gap-3">
+  <div class="grid content-start gap-3">
     {
       badgeLabel &&
         (badgeHref ? (
           <a
             href={badgeHref}
-            class="w-fit font-['Inter'] text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1"
+            class="w-fit font-['Inter'] text-xs font-semibold uppercase tracking-[0.25em] text-accent px-2 py-1"
           >
             {badgeLabel}
           </a>
         ) : (
-          <span class="w-fit font-['Inter'] text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1">
+          <span class="w-fit font-['Inter'] text-xs font-semibold uppercase tracking-[0.25em] text-accent px-2 py-1">
             {badgeLabel}
           </span>
         ))
@@ -57,7 +58,7 @@ const badgeHref = getPrimaryBadgeHref(item);
 
     <a href={item.href} class="block text-current no-underline hover:underline">
       <h3
-        class="m-0 font-old_standard text-2xl font-normal leading-tight lg:text-3xl"
+        class="m-0 font-old_standard text-2xl lg:text-3xl font-normal leading-tight"
       >
         {item.title}
       </h3>
@@ -66,17 +67,13 @@ const badgeHref = getPrimaryBadgeHref(item);
     <div class="flex flex-wrap items-center gap-3">
       {
         item.authorName && (
-          <div class="flex items-center gap-2">
-            <AuthorIcon class="h-4 w-4" />
-            <span class="font-old_standard text-base italic text-base-content">
-              {item.authorName}
-            </span>
+          <div class="flex flex-row items-center justify-center gap-2">
+            <ArticleAuthor name={item.authorName} />
+            <p class="font-inter text-base-content/50">|</p>
+            <ArticleDate createdAt={item.publishedAt} />
           </div>
         )
       }
-      <div class="font-inter text-xs uppercase tracking-[0.22em] text-base-content/55">
-        <ArticleDate createdAt={item.publishedAt as any} />
-      </div>
     </div>
   </div>
 </article>

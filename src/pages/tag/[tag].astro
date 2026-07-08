@@ -49,7 +49,8 @@ const resultsWord = (count: number) => {
   const mod10 = count % 10;
   const mod100 = count % 100;
   if (mod10 === 1 && mod100 !== 11) return "результат";
-  if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return "результата";
+  if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14))
+    return "результата";
   return "результатов";
 };
 
@@ -68,7 +69,7 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
     <div class="mx-auto max-w-[1200px] px-4 py-16 sm:px-6 lg:px-10">
       <div class="mb-12 space-y-3">
         <h1
-          class="m-0 font-old_standard text-4xl uppercase tracking-[0.08em] text-base-content lg:text-5xl"
+          class="text-3xl lg:text-[28px] font-old_standard font-semibold uppercase tracking-[0.46em] text-base-content w-full"
         >
           {tagLabel || tag}
         </h1>
@@ -102,7 +103,7 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
           groups.map((group) => (
             <section class="space-y-8">
               <div class="flex items-center gap-4">
-                <h2 class="m-0 font-old_standard text-2xl font-normal uppercase tracking-[0.24em] text-base-content">
+                <h2 class="m-0 font-old_standard text-[1.05rem] font-semibold uppercase tracking-[0.5em] text-black !leading-8 !lg:leading-none">
                   {group.label}
                 </h2>
                 <div class="h-px flex-1 bg-neutral-200" />
