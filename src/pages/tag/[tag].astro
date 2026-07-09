@@ -75,7 +75,7 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
         </h1>
         {
           !loadError && (
-            <p class="m-0 font-inter text-xs uppercase tracking-[0.25em] text-base-content/50">
+            <p class="m-0 font-inter text-xs uppercase tracking-[0.25em] text-base-content/50 hidden">
               Найдено {totalCount} {resultsWord(totalCount)}
             </p>
           )
@@ -112,7 +112,7 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
                 </span>
               </div>
 
-              <div class="space-y-8">
+              <div class="space-y-4 sm:space-y-6">
                 {group.items.map((item) => (
                   <MaterialResultRow item={item} />
                 ))}

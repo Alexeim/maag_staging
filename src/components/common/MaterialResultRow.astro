@@ -20,11 +20,11 @@ const badgeHref = getPrimaryBadgeHref(item);
 ---
 
 <article
-  class="grid grid-cols-1 gap-4 border-b border-base-content/10 pb-8 sm:grid-cols-[minmax(0,300px)_1fr] sm:gap-8 sm:pb-10"
+  class="flex items-start gap-4 border-b border-base-content/10 pb-6 sm:grid sm:grid-cols-[minmax(0,300px)_1fr] sm:gap-6 sm:pb-6"
 >
   <a
     href={item.href}
-    class="linked-image-hover block aspect-[3/2] overflow-hidden bg-base-200"
+    class="linked-image-hover block aspect-[3/2] w-28 flex-shrink-0 overflow-hidden bg-base-200 sm:w-full sm:flex-shrink"
     aria-label={item.title}
   >
     {
@@ -45,12 +45,12 @@ const badgeHref = getPrimaryBadgeHref(item);
         (badgeHref ? (
           <a
             href={badgeHref}
-            class="w-fit font-['Inter'] text-xs font-semibold uppercase tracking-[0.25em] text-accent px-2 py-1"
+            class="w-fit font-['Inter'] text-[10px] font-semibold uppercase tracking-[0.25em] text-accent px-1.5 py-0.5 sm:text-xs sm:px-2 sm:py-1"
           >
             {badgeLabel}
           </a>
         ) : (
-          <span class="w-fit font-['Inter'] text-xs font-semibold uppercase tracking-[0.25em] text-accent px-2 py-1">
+          <span class="w-fit font-['Inter'] text-[10px] font-semibold uppercase tracking-[0.25em] text-accent px-1.5 py-0.5 sm:text-xs sm:px-2 sm:py-1">
             {badgeLabel}
           </span>
         ))
@@ -58,13 +58,13 @@ const badgeHref = getPrimaryBadgeHref(item);
 
     <a href={item.href} class="block text-current no-underline hover:underline">
       <h3
-        class="m-0 font-old_standard text-2xl lg:text-3xl font-normal leading-tight"
+        class="m-0 font-old_standard text-base sm:text-2xl lg:text-3xl font-normal leading-tight"
       >
         {item.title}
       </h3>
     </a>
 
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="hidden flex-wrap items-center gap-3 sm:flex">
       {
         item.authorName && (
           <div class="flex flex-row items-center justify-center gap-2">
