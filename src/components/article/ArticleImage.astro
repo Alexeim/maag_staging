@@ -11,6 +11,7 @@ interface Props {
   imageClass?: string;
   figcaptionClass?: string;
   objectFit?: "contain" | "cover";
+  showDivider?: boolean;
 }
 const {
   src,
@@ -21,6 +22,7 @@ const {
   imageClass,
   figcaptionClass,
   objectFit = "contain",
+  showDivider = true,
 } = Astro.props;
 
 const defaultImageClasses =
@@ -60,6 +62,6 @@ const finalFigcaptionClasses = `${defaultFigcaptionClasses} ${figcaptionClass ||
     <p class={finalFigcaptionClasses}>
       {caption}
     </p>
-    <hr class="w-full border-t border-neutral-200 mt-[13px]" />
+    {showDivider && <hr class="w-full border-t border-neutral-200 mt-[13px]" />}
   </div>
 </div>

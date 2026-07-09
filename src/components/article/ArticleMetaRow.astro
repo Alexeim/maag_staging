@@ -1,0 +1,41 @@
+---
+// src/components/article/ArticleMetaRow.astro
+import ArticleAuthor from "./ArticleAuthor.astro";
+import ArticleDate from "./ArticleDate.astro";
+
+interface Props {
+  authorName: string;
+  authorAvatar?: string;
+  isKid?: boolean;
+  createdAt: string | Date | { toDate: () => Date } | { _seconds: number };
+  // "center" matches the side-by-side hero; "start" matches the old
+  // stacked layout where the title/lead are already left-aligned.
+  align?: "center" | "start";
+  showSeparator?: boolean;
+  wrap?: boolean;
+}
+
+const {
+  authorName,
+  authorAvatar,
+  isKid = false,
+  createdAt,
+  align = "center",
+  showSeparator = true,
+  wrap = false,
+} = Astro.props;
+---
+
+<div
+  class:list={[
+    "flex flex-row items-center gap-2 text-base-content",
+    wrap && "flex-wrap",
+    align === "start"
+      ? "self-start justify-start"
+      : "self-center justify-center",
+  ]}
+>
+  <ArticleAuthor name={authorName} avatarUrl={authorAvatar} isKid={isKid} />
+  {showSeparator && <p class="font-inter text-base-content/50">|</p>}
+  <ArticleDate createdAt={createdAt} />
+</div>
