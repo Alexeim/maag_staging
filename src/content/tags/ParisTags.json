@@ -1,5 +1,5 @@
 {
-  "parisTags": [
+  "parisSubCategories": [
     {
       "title": "маршрут",
       "value": "route"
@@ -25,6 +25,22 @@
       "value": "architecture"
     },
     {
+      "title": "парки",
+      "value": "parks"
+    },
+    {
+      "title": "путешествия",
+      "value": "travel"
+    },
+    {
+      "title": "отели",
+      "value": "hotels"
+    },
+    {
+      "title": "фестивали",
+      "value": "festivals"
+    },
+    {
       "title": "событие",
       "value": "parisEvent"
     },
@@ -37,8 +53,20 @@
       "value": "food"
     },
     {
-      "title": "le saviez-vous?",
-      "value": "did_you_know"
+      "title": "мода",
+      "value": "fashion"
+    },
+    {
+      "title": "арт",
+      "value": "art"
+    },
+    {
+      "title": "путеводитель",
+      "value": "guide"
+    },
+    {
+      "title": "дети",
+      "value": "kids"
     }
   ]
 }

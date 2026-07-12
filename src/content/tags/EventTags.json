@@ -1,0 +1,64 @@
+{
+  "eventTags": [
+    {
+      "title": "Балет",
+      "value": "ballet"
+    },
+    {
+      "title": "Танец",
+      "value": "dance"
+    },
+    {
+      "title": "Опера",
+      "value": "opera"
+    },
+    {
+      "title": "Классическая музыка",
+      "value": "classicalMusic"
+    },
+    {
+      "title": "Кино",
+      "value": "cinema"
+    },
+    {
+      "title": "Театр",
+      "value": "theatre"
+    },
+    {
+      "title": "Выставки",
+      "value": "exhibitions"
+    },
+    {
+      "title": "Фестиваль",
+      "value": "festival"
+    },
+    {
+      "title": "Арт-рынок",
+      "value": "artMarket"
+    },
+    {
+      "title": "Мода",
+      "value": "fashion"
+    },
+    {
+      "title": "Встреча",
+      "value": "meetup"
+    },
+    {
+      "title": "Визит",
+      "value": "visit"
+    },
+    {
+      "title": "Экскурсия",
+      "value": "excursion"
+    },
+    {
+      "title": "Дети",
+      "value": "kids"
+    },
+    {
+      "title": "Париж",
+      "value": "paris"
+    }
+  ]
+}

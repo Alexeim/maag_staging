@@ -1,8 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import EventComposer from "@/components/dashboard/EventComposer.astro";
-import cultureTags from "@/content/tags/CultureTags.json";
-import parisTags from "@/content/tags/ParisTags.json";
 import { authorsApi } from "@/lib/api/api";
 
 let authors: any[] = [];
@@ -16,10 +14,6 @@ try {
 }
 
 const eventCreatorState = JSON.stringify({
-  categoryTags: {
-    culture: cultureTags.cultureTags,
-    paris: parisTags.parisTags,
-  },
   initialAuthors: authors,
   isEditMode: false,
   onSaveRedirect: "/dashboard/events",

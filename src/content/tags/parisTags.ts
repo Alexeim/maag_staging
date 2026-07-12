@@ -1,6 +1,6 @@
 import cultureTagsData from "./CultureTags.json";
 import parisDistrictsData from "./ParisDistricts.json";
-import parisSubCategoriesData from "./ParisTagsNew.json";
+import parisSubCategoriesData from "./ParisTags.json";
 
 export interface TagOption {
   title: string;

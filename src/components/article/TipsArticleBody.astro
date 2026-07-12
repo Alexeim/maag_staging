@@ -52,9 +52,7 @@ const items = contentBlocks.filter((b) => b != null && b.type === "tips-item");
           ]}
         >
           {item.heading && (
-            <h2 class="text-xl font-bold font-old_standard">
-              {item.heading}
-            </h2>
+            <h2 class="text-xl font-bold font-old_standard">{item.heading}</h2>
           )}
           <hr class="text-gray-300" />
 
@@ -90,7 +88,7 @@ const items = contentBlocks.filter((b) => b != null && b.type === "tips-item");
 
           {(item.html || item.text) && (
             <div
-              class="tips-rich-text text-sm font-inter text-base-content/80 mt-1"
+              class="article-rich-text text-base font-article-body text-justify"
               set:html={item.html || plainTextToRichTextHtml(item.text)}
             />
           )}
