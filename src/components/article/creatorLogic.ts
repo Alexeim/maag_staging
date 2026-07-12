@@ -1,6 +1,9 @@
 import { articlesApi, authorsApi, contentCollectionsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
-import { getInitialRichTextHtml } from "@/lib/utils/richText";
+import {
+  getInitialRichTextHtml,
+  normalizeStoredRichTextHtml,
+} from "@/lib/utils/richText";
 import {
   fetchContentCollections,
   normalizeContentCollection,
@@ -296,6 +299,7 @@ export default function articleCreatorLogic(initialState = {}) {
     copy.publishedAt = copy.publishedAt ?? null;
     copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
+    copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
     copy.heroOrientation = copy.heroOrientation === "image-left" || copy.heroOrientation === "image-bottom" ? copy.heroOrientation : "image-right";
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
@@ -343,7 +347,8 @@ export default function articleCreatorLogic(initialState = {}) {
   return {
     article: {
       title: "",
-      lead: "", // Вводка — краткое описание под заголовком
+      lead: "", // Вводка — краткое описание под заголовком (plain text)
+      leadHtml: "", // Вводка — rich text от Quill
       cardLead: "",
       articleType,
       imageUrl: "",
@@ -1127,6 +1132,7 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.binaryForGuide = Boolean(this.article.binaryForGuide);
       this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
+      this.article.leadHtml = normalizeStoredRichTextHtml(this.article.leadHtml);
       this.article.cardLead = this.article.cardLead ?? "";
       this.article.heroOrientation = this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : "image-right";
       this.article.articleType =
@@ -1663,6 +1669,7 @@ export default function articleCreatorLogic(initialState = {}) {
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
+          leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
           cardLead: this.article.cardLead,
           articleType: this.article.articleType || articleType || "standard",
           imageUrl: this.article.imageUrl,

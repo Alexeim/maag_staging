@@ -86,6 +86,7 @@ const rawCategory =
 const displayArticle = {
   title: articleData?.header?.title || articleData?.title || 'Article',
   lead: articleData?.lead || '',
+  leadHtml: articleData?.leadHtml || '',
   category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }),
   categoryHref: getPrimaryBadgeHref({ contentType: "article", tags: articleData?.tags }),
   authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : 'Author',
@@ -220,6 +221,7 @@ const isAKid = displayArticle.authorName === "Саша Макарова";
             categoryHref={displayArticle.categoryHref}
             title={displayArticle.title}
             lead={displayArticle.lead}
+            leadHtml={displayArticle.leadHtml}
             authorName={displayArticle.authorName}
             authorAvatar={displayArticle.authorAvatar}
             isKid={isAKid}

@@ -47,6 +47,7 @@ const {
   imageUrl,
   imageCaption,
   lead,
+  leadHtml,
 } = interview;
 const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
 const firstBookmarkTag =
@@ -130,6 +131,7 @@ try {
         categoryHref="/interviews"
         title={title}
         lead={lead}
+        leadHtml={leadHtml}
         authorName={authorName}
         authorAvatar={author?.avatar}
         interviewee={interviewee}

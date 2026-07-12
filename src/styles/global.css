@@ -103,6 +103,12 @@ a * {
   text-decoration: underline;
 }
 
+/* Tailwind preflight zeroes paragraph margins; this only matters when a lead
+   has more than one paragraph, so consecutive ones don't run together. */
+.article-rich-text p + p {
+  margin-top: 0.75em;
+}
+
 /* Mobile Menu Styles */
 .mobile-menu-panel {
   position: fixed;

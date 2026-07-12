@@ -58,6 +58,7 @@ const rawCategory =
 const displayArticle = {
   title: articleData?.header?.title || articleData?.title || "Статья",
   lead: articleData?.lead || "",
+  leadHtml: articleData?.leadHtml || "",
   category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }),
   categoryHref: getPrimaryBadgeHref({ contentType: "article", tags: articleData?.tags }),
   authorName: articleData?.author
@@ -157,6 +158,7 @@ if (!error && articleData) {
             categoryHref={displayArticle.categoryHref}
             title={displayArticle.title}
             lead={displayArticle.lead}
+            leadHtml={displayArticle.leadHtml}
             authorName={displayArticle.authorName}
             authorAvatar={displayArticle.authorAvatar}
             createdAt={articleData.createdAt}

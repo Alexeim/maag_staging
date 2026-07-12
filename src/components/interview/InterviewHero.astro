@@ -4,6 +4,7 @@ import type { ImageMetadata } from "astro";
 import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
 import ImageCaptionHint from "@/components/common/ImageCaptionHint.astro";
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
 
 interface Props {
   category: string;
@@ -12,6 +13,7 @@ interface Props {
   interviewee: string;
   mainQuote: string;
   lead?: string;
+  leadHtml?: string;
   authorName: string;
   authorAvatar?: string;
   createdAt: string | Date | { toDate: () => Date } | { _seconds: number };
@@ -29,6 +31,7 @@ const {
   interviewee,
   mainQuote,
   lead,
+  leadHtml,
   authorName,
   authorAvatar,
   createdAt,
@@ -41,6 +44,7 @@ const {
 
 const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
 const imageOnLeft = heroOrientation === "image-left";
+const resolvedLeadHtml = getInitialRichTextHtml({ html: leadHtml, text: lead });
 ---
 
 <section class="w-full px-4 sm:px-6 lg:px-10">
@@ -117,10 +121,11 @@ const imageOnLeft = heroOrientation === "image-left";
           "{mainQuote}"
         </h2>
         {
-          lead && (
-            <p class="mx-auto mt-8 max-w-[34rem] font-article-body text-base font-light text-base-content lg:mt-10">
-              {lead}
-            </p>
+          resolvedLeadHtml && (
+            <div
+              class="article-rich-text mx-auto mt-8 max-w-[34rem] font-article-body text-base font-light text-base-content lg:mt-10"
+              set:html={resolvedLeadHtml}
+            />
           )
         }
         <div

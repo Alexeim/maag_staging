@@ -59,6 +59,7 @@ if (!error && articleData?.published !== true) {
 const displayArticle = {
   title: articleData?.title || "Новость",
   lead: articleData?.lead || "",
+  leadHtml: articleData?.leadHtml || "",
   category: getNewsDetailBadgeLabel(articleData?.tags),
   categoryHref: getNewsDetailBadgeHref(articleData?.tags),
   authorName: articleData?.author
@@ -218,6 +219,7 @@ if (!error && articleData) {
                         categoryHref={displayArticle.categoryHref}
                         title={displayArticle.title}
                         lead={displayArticle.lead}
+                        leadHtml={displayArticle.leadHtml}
                         titleClass="text-3xl lg:text-[42px]"
                       />
                       <div class="flex flex-col items-start justify-center gap-4">

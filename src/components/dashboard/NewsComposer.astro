@@ -77,12 +77,15 @@ const {
       <label class="block text-sm font-medium text-base-content mb-2"
         >Главный абзац (лид)</label
       >
-      <textarea
-        x-model="article.lead"
-        rows="4"
-        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-        placeholder="Текст, который отображается рядом с картинкой в шапке новости..."
-      ></textarea>
+      <template x-if="!isLazyLoading">
+        <div
+          class="rich-text-editor rich-text-editor--compact"
+          x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml({ html: article.leadHtml, text: article.lead }), placeholder: 'Текст, который отображается рядом с картинкой в шапке новости...' })"
+          @rich-text-change="article.leadHtml = $event.detail.html; article.lead = $event.detail.text"
+        >
+          <div x-ref="editor"></div>
+        </div>
+      </template>
     </div>
 
     <div class="mt-4">
@@ -326,10 +329,13 @@ const {
               <h3 class="text-lg font-semibold capitalize" x-text="getBlockTypeLabel(editingBlock.type)"></h3>
 
               <template x-if="editingBlock.type === 'paragraph'">
-                <textarea
-                  x-model="editingBlock.text"
-                  class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-                  rows="5"></textarea>
+                <div
+                  class="rich-text-editor"
+                  x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml(editingBlock), placeholder: 'Введите текст абзаца...' })"
+                  @rich-text-change="editingBlock.html = $event.detail.html; editingBlock.text = $event.detail.text"
+                >
+                  <div x-ref="editor"></div>
+                </div>
               </template>
 
               <template x-if="editingBlock.type === 'link'">
@@ -409,7 +415,7 @@ const {
                 </div>
               </div>
               <template x-if="block.type === 'paragraph'">
-                <p class="text-base" x-text="block.text"></p>
+                <div class="article-rich-text text-base" x-html="getRichTextInitialHtml(block)"></div>
               </template>
               <template x-if="block.type === 'link'">
                 <div class="rounded-lg border border-base-300 bg-base-200/40 p-4 space-y-2">

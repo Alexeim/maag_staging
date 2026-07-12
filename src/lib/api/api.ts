@@ -143,6 +143,7 @@ export interface ArticlePayload {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   category?: string;
   tags?: string[];
@@ -195,6 +196,7 @@ export interface NewsPayload {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   category?: string;
   tags?: string[];
@@ -219,6 +221,7 @@ export interface EventPayload {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   tags: string[];
   startDate: string | Date;
@@ -587,6 +590,7 @@ export interface FlipperPayload {
   title: string;
   authorId: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   category?: string;
   tags?: string[];
@@ -618,6 +622,7 @@ export interface InterviewPayload {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   mainQuote?: string;
   tags?: string[];
@@ -645,6 +650,7 @@ export interface GuidePayload {
   imageUrl?: string;
   imageCaption?: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   category?: string;
   tags?: string[];

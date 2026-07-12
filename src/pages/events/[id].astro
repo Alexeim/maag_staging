@@ -22,6 +22,7 @@ import {
 import { buildEventStructuredData } from "@/lib/seo/structuredData";
 import { getCalendarToday } from "@/lib/utils/calendarDate";
 import { getPrimaryBadgeHref, getTagLabel } from "@/lib/utils/contentBadge";
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
 
 const { id } = Astro.params;
 
@@ -523,6 +524,7 @@ const address =
     ? eventData.address.trim()
     : "Место уточняется";
 const lead = typeof eventData?.lead === "string" ? eventData.lead : "";
+const leadHtml = getInitialRichTextHtml({ html: eventData?.leadHtml, text: lead });
 const readTime = estimateReadTime(lead, eventData?.content);
 const createdAtLabel = formatCreatedAt(eventData?.createdAt);
 const mapsUrl = buildMapsUrl(address);
@@ -541,6 +543,7 @@ const topMetaTag = resolveTagLabel(normalizedTags[0], "Событие");
 const displayEvent = {
   title: eventData?.title || "Событие",
   lead,
+  leadHtml,
   category: topMetaTag,
   categoryHref: getPrimaryBadgeHref({ tags: normalizedTags }),
   authorName: eventData?.author
@@ -622,10 +625,11 @@ const eventStructuredData = eventData
                         {displayEvent.title}
                       </h1>
 
-                      {displayEvent.lead && (
-                        <p class="m-0 max-w-[760px] font-article-body text-lg leading-[1.55] text-base-content/75 lg:text-xl">
-                          {displayEvent.lead}
-                        </p>
+                      {displayEvent.leadHtml && (
+                        <div
+                          class="article-rich-text m-0 max-w-[760px] font-article-body text-lg leading-[1.55] text-base-content/75 lg:text-xl"
+                          set:html={displayEvent.leadHtml}
+                        />
                       )}
                     </div>
 

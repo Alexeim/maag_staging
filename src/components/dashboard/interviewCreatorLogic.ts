@@ -2,7 +2,10 @@ import {
   interviewsApi,
   authorsApi,
 } from "@/lib/api/api";
-import { getInitialRichTextHtml } from "@/lib/utils/richText";
+import {
+  getInitialRichTextHtml,
+  normalizeStoredRichTextHtml,
+} from "@/lib/utils/richText";
 import {
   MATERIAL_LINK_TYPE_OPTIONS,
   RELATED_CONTENT_TYPE_OPTIONS,
@@ -109,6 +112,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.imageCaption = copy.imageCaption ?? "";
     copy.heroOrientation = copy.heroOrientation === "image-right" ? "image-right" : "image-left";
     copy.lead = copy.lead ?? "";
+    copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
     copy.mainQuote = copy.mainQuote ?? "";
     copy.isHotContent = Boolean(copy.isHotContent);
@@ -139,6 +143,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       title: "",
       interviewee: "",
       lead: "",
+      leadHtml: "",
       cardLead: "",
       mainQuote: "",
       isHotContent: false,
@@ -1031,6 +1036,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           title: this.interview.title,
           interviewee: this.interview.interviewee,
           lead: this.interview.lead,
+          leadHtml: normalizeStoredRichTextHtml(this.interview.leadHtml),
           cardLead: this.interview.cardLead,
           mainQuote: this.interview.mainQuote,
           isHotContent: Boolean(this.interview.isHotContent),

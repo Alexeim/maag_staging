@@ -62,6 +62,7 @@ const rawCategory = guideData?.category ?? null;
 const displayGuide = {
   title: guideData?.title || 'Путеводитель',
   lead: guideData?.lead || '',
+  leadHtml: guideData?.leadHtml || '',
   category: getPrimaryBadgeLabel({ contentType: "guide", tags: guideData?.tags }),
   categoryHref: getPrimaryBadgeHref({ contentType: "guide", tags: guideData?.tags }),
   authorName: guideData?.author ? `${guideData.author.firstName} ${guideData.author.lastName}` : 'Автор',
@@ -163,6 +164,7 @@ if (!error && guideData) {
             categoryHref={displayGuide.categoryHref}
             title={displayGuide.title}
             lead={displayGuide.lead}
+            leadHtml={displayGuide.leadHtml}
             authorName={displayGuide.authorName}
             authorAvatar={displayGuide.authorAvatar}
             createdAt={guideData.createdAt}

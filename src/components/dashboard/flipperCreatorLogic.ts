@@ -1,6 +1,10 @@
 import { flippersApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
+  getInitialRichTextHtml,
+  normalizeStoredRichTextHtml,
+} from "@/lib/utils/richText";
+import {
   RELATED_CONTENT_TYPE_OPTIONS,
   createEmptyRelatedContent,
   createEmptyRelatedContentLists,
@@ -144,6 +148,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
     copy.lead = copy.lead ?? "";
+    copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
     copy.tags = normalizeTags(copy.tags, copy.category);
     copy.parisSubCategories = normalizeTags(
@@ -165,6 +170,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     flipper: {
       title: "",
       lead: "",
+      leadHtml: "",
       cardLead: "",
       category: "",
       isHotContent: false,
@@ -326,6 +332,10 @@ export default function flipperCreatorLogic(initialState = {}) {
       this.syncCurrentContentCollection();
       this.loadContentCollections();
       this.loadLandingPlacements();
+    },
+
+    getRichTextInitialHtml(block: { html?: unknown; text?: unknown } | null) {
+      return getInitialRichTextHtml(block);
     },
 
     getCategoryLabel(value?: string) {
@@ -718,6 +728,7 @@ export default function flipperCreatorLogic(initialState = {}) {
           authorId: resolvedAuthorId,
           carouselContent: this.flipper.carouselContent.map(stripCarouselItemUiState),
           lead: this.flipper.lead,
+          leadHtml: normalizeStoredRichTextHtml(this.flipper.leadHtml),
           cardLead: this.flipper.cardLead,
           tags: tagsForDb,
           parisSubCategories: isParisCategory ? this.flipper.parisSubCategories : [],

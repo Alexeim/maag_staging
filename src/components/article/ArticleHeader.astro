@@ -1,9 +1,12 @@
 ---
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
+
 interface Props {
   category: string;
   categoryHref?: string | null;
   title?: string;
   lead?: string;
+  leadHtml?: string;
   titleClass?: string;
 }
 
@@ -12,8 +15,11 @@ const {
   categoryHref = null,
   title,
   lead,
+  leadHtml,
   titleClass = "text-3xl lg:text-[52px]",
 } = Astro.props;
+
+const resolvedLeadHtml = getInitialRichTextHtml({ html: leadHtml, text: lead });
 ---
 
 <div class="flex flex-col gap-8 w-full">
@@ -41,10 +47,11 @@ const {
       {title}
     </h1>
     {
-      lead && (
-        <p class="text-base font-light text-base-content font-article-body mt-2">
-          {lead}
-        </p>
+      resolvedLeadHtml && (
+        <div
+          class="article-rich-text text-base font-light text-base-content font-article-body mt-2"
+          set:html={resolvedLeadHtml}
+        />
       )
     }
   </div>

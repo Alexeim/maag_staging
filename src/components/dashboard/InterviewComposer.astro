@@ -53,12 +53,15 @@ const {
 
     <div class="mt-4">
       <label class="block text-sm font-medium text-base-content mb-2">Вводка (лид)</label>
-      <textarea
-        x-model="interview.lead"
-        rows="3"
-        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-        placeholder="Краткое описание интервью, которое отображается под заголовком..."
-      ></textarea>
+      <template x-if="!isLazyLoading">
+        <div
+          class="rich-text-editor rich-text-editor--compact"
+          x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml({ html: interview.leadHtml, text: interview.lead }), placeholder: 'Краткое описание интервью, которое отображается под заголовком...' })"
+          @rich-text-change="interview.leadHtml = $event.detail.html; interview.lead = $event.detail.text"
+        >
+          <div x-ref="editor"></div>
+        </div>
+      </template>
     </div>
 
     <div class="mt-4">

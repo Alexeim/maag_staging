@@ -17,7 +17,10 @@ import { createLandingPlacementManager } from "@/components/dashboard/landingPla
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 import { compressImage } from "@/lib/images/compressImage";
-import { getInitialRichTextHtml } from "@/lib/utils/richText";
+import {
+  getInitialRichTextHtml,
+  normalizeStoredRichTextHtml,
+} from "@/lib/utils/richText";
 
 const storage = getStorage(app);
 
@@ -113,6 +116,7 @@ const normalizeLoadedArticle = (data: any) => {
   copy.imageCaption = copy.imageCaption ?? "";
   copy.heroOrientation = copy.heroOrientation === "image-left" || copy.heroOrientation === "image-bottom" ? copy.heroOrientation : "image-right";
   copy.lead = copy.lead ?? "";
+  copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
   copy.cardLead = copy.cardLead ?? "";
   copy.isHotContent = Boolean(copy.isHotContent);
   copy.isNotebookContent = Boolean(copy.isNotebookContent);
@@ -167,6 +171,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     article: {
       title: "",
       lead: "",
+      leadHtml: "",
       cardLead: "",
       imageUrl: "",
       imageCaption: "",
@@ -888,6 +893,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
+          leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
           cardLead: this.article.cardLead,
           authorId,
           articleType: "tips" as const,

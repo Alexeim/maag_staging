@@ -5,12 +5,14 @@ import ArticleHeader from "@/components/article/ArticleHeader.astro";
 import ArticleMetaRow from "@/components/article/ArticleMetaRow.astro";
 import ArticleImage from "@/components/article/ArticleImage.astro";
 import ImageCaptionHint from "@/components/common/ImageCaptionHint.astro";
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
 
 interface Props {
   category: string;
   categoryHref?: string | null;
   title: string;
   lead?: string;
+  leadHtml?: string;
   authorName: string;
   authorAvatar?: string;
   isKid?: boolean;
@@ -27,6 +29,7 @@ const {
   categoryHref = null,
   title,
   lead,
+  leadHtml,
   authorName,
   authorAvatar,
   isKid = false,
@@ -41,6 +44,7 @@ const {
 const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
 const imageOnLeft = heroOrientation === "image-left";
 const isStacked = heroOrientation === "image-bottom";
+const resolvedLeadHtml = getInitialRichTextHtml({ html: leadHtml, text: lead });
 ---
 
 {
@@ -52,7 +56,7 @@ const isStacked = heroOrientation === "image-bottom";
             category={category}
             categoryHref={categoryHref}
             title={title}
-            lead={lead}
+            leadHtml={resolvedLeadHtml}
             titleClass={isLongTitle ? "text-3xl lg:text-4xl" : "text-3xl lg:text-[52px]"}
           />
           <ArticleMetaRow
@@ -118,10 +122,11 @@ const isStacked = heroOrientation === "image-bottom";
           {title}
         </h1>
         {
-          lead && (
-            <p class="mx-auto mt-8 max-w-[34rem] font-article-body text-base font-light text-base-content lg:mt-10">
-              {lead}
-            </p>
+          resolvedLeadHtml && (
+            <div
+              class="article-rich-text mx-auto mt-8 max-w-[34rem] font-article-body text-base font-light text-base-content lg:mt-10"
+              set:html={resolvedLeadHtml}
+            />
           )
         }
         <div

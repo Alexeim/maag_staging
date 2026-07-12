@@ -9,6 +9,7 @@ import {
 import { sanitizeRelatedContent } from "@/lib/utils/relatedContent";
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
+import { normalizeStoredRichTextHtml } from "@/lib/utils/richText";
 
 type EventDateType = "single" | "duration";
 type EventTimeMode = "none" | "start" | "range";
@@ -211,6 +212,7 @@ export default function eventCreatorLogic(initialState = {}) {
     copy.imageCaption =
       typeof copy.imageCaption === "string" ? copy.imageCaption : "";
     copy.lead = copy.lead ?? "";
+    copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
@@ -644,6 +646,7 @@ export default function eventCreatorLogic(initialState = {}) {
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
           lead: this.article.lead,
+          leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
           cardLead: this.article.cardLead,
           tags: this.article.tags,
           startDate: this.eventForm.startDate,

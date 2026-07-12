@@ -1,6 +1,10 @@
 import { newsApi, authorsApi } from "@/lib/api/api";
 import { app } from "../../lib/firebase/client";
 import {
+  getInitialRichTextHtml,
+  normalizeStoredRichTextHtml,
+} from "@/lib/utils/richText";
+import {
   MATERIAL_LINK_TYPE_OPTIONS,
   RELATED_CONTENT_TYPE_OPTIONS,
   createEmptyRelatedContent,
@@ -142,6 +146,7 @@ export default function newsCreatorLogic(
     copy.tags = normalizeTags(copy.tags, copy.category);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.lead = copy.lead ?? "";
+    copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
@@ -156,6 +161,7 @@ export default function newsCreatorLogic(
     article: {
       title: "",
       lead: "",
+      leadHtml: "",
       cardLead: "",
       imageUrl: "",
       imageCaption: "",
@@ -211,6 +217,9 @@ export default function newsCreatorLogic(
     getCategoryLabel(value?: string) {
       if (!value) return "Category";
       return this.categoryLabels[value] || value;
+    },
+    getRichTextInitialHtml(block: { html?: unknown; text?: unknown } | null) {
+      return getInitialRichTextHtml(block);
     },
     getBlockTypeLabel(type?: string) {
       return resolveBlockTypeLabel(type);
@@ -552,6 +561,7 @@ export default function newsCreatorLogic(
 
       this.article.tags = this.article.tags ?? [];
       this.article.lead = this.article.lead ?? "";
+      this.article.leadHtml = normalizeStoredRichTextHtml(this.article.leadHtml);
       this.article.cardLead = this.article.cardLead ?? "";
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.relatedContent = sanitizeRelatedContent(
@@ -855,6 +865,7 @@ export default function newsCreatorLogic(
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
+          leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
           cardLead: this.article.cardLead,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
