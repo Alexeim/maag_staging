@@ -97,6 +97,12 @@ a * {
   text-underline-offset: 0.14em;
 }
 
+/* Minimal link affordance inside rendered rich-text (Quill) content — just an
+   underline, no color change, so links don't compete visually with the copy. */
+.article-rich-text a {
+  text-decoration: underline;
+}
+
 /* Mobile Menu Styles */
 .mobile-menu-panel {
   position: fixed;

@@ -1,3 +1,5 @@
+import { SITE_HOST } from "@/lib/utils/constants";
+
 type RichTextBlock = {
   html?: unknown;
   text?: unknown;
@@ -39,6 +41,24 @@ const normalizeRichTextHref = (value?: unknown) => {
   return "";
 };
 
+// Internal links (same site, incl. relative paths/anchors/mailto/tel) stay in
+// the current tab; only genuinely external domains get target="_blank".
+const isInternalLink = (href: string) => {
+  if (/^(mailto:|tel:)/i.test(href) || href.startsWith("#")) {
+    return true;
+  }
+  if (href.startsWith("/") && !href.startsWith("//")) {
+    return true;
+  }
+
+  try {
+    const { hostname } = new URL(href, `https://${SITE_HOST}`);
+    return hostname.replace(/^www\./i, "").toLowerCase() === SITE_HOST;
+  } catch {
+    return false;
+  }
+};
+
 const sanitizeAnchorTags = (html: string) =>
   html.replace(ANCHOR_TAG_RE, (_match, _quote, rawHref, innerHtml) => {
     const href = normalizeRichTextHref(rawHref);
@@ -47,8 +67,9 @@ const sanitizeAnchorTags = (html: string) =>
       return innerHtml;
     }
 
-    const externalAttrs =
-      /^(https?:\/\/|\/\/)/i.test(href) ? ' target="_blank" rel="noreferrer"' : "";
+    const externalAttrs = isInternalLink(href)
+      ? ""
+      : ' target="_blank" rel="noopener noreferrer"';
 
     return `<a href="${escapeHtml(href)}"${externalAttrs}>${innerHtml}</a>`;
   });
