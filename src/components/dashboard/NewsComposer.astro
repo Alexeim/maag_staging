@@ -177,14 +177,14 @@ const {
 
       <template x-if="getAvailableTags().length > 0">
         <div class="flex flex-wrap gap-2">
-          <template x-for="tag in getAvailableTags()" :key="tag.value">
+          <template x-for="tag in getAvailableTags()" :key="tag">
             <button
               type="button"
               class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
-              :class="isTagSelected(tag.value) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
-              @click="toggleTag(tag.value)"
+              :class="isTagSelected(tag) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+              @click="toggleTag(tag)"
             >
-              <span x-text="tag.title"></span>
+              <span x-text="tag"></span>
             </button>
           </template>
         </div>
@@ -201,7 +201,7 @@ const {
                 <span
                   class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm"
                 >
-                  <span x-text="getTagLabel(tag)"></span>
+                  <span x-text="tag"></span>
                   <button
                     type="button"
                     class="text-base-content/60 hover:text-base-content cursor-pointer"

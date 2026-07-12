@@ -26,6 +26,7 @@ import {
   richTextHtmlToText,
 } from "@/lib/utils/richText";
 import { compressImage } from "@/lib/images/compressImage";
+import { normalizeTagList } from "@/content/tags/tags";
 
 const storage = getStorage(app);
 
@@ -50,58 +51,6 @@ const normalizeSlide = (slide?: Record<string, unknown>): VisualStorySlide => {
   };
 };
 
-const normalizeTags = (
-  tags?: string[],
-  categoryTags?: Record<string, Array<{ title: string; value: string }>>,
-  category?: string,
-) => {
-  if (!Array.isArray(tags)) return [];
-  const legacyMap: Record<string, string> = {};
-  if (category && categoryTags?.[category]) {
-    for (const tag of normalizeTagOptions(categoryTags[category])) {
-      legacyMap[tag.title] = tag.value;
-    }
-  }
-  const deduped = new Set<string>();
-  const result: string[] = [];
-  for (const raw of tags) {
-    if (typeof raw !== "string") continue;
-    const trimmed = raw.trim();
-    if (!trimmed) continue;
-    const mapped = legacyMap[trimmed] || trimmed;
-    if (!deduped.has(mapped)) {
-      deduped.add(mapped);
-      result.push(mapped);
-    }
-  }
-  return result;
-};
-
-const normalizeTagOptions = (tags?: unknown) => {
-  if (!Array.isArray(tags)) return [];
-  const seen = new Set<string>();
-  const normalized: Array<{ title: string; value: string }> = [];
-  for (const raw of tags) {
-    const value =
-      typeof raw === "string"
-        ? raw.trim()
-        : typeof raw?.value === "string"
-          ? raw.value.trim()
-          : "";
-    const title =
-      typeof raw === "object" &&
-      raw !== null &&
-      typeof raw.title === "string" &&
-      raw.title.trim()
-        ? raw.title.trim()
-        : value;
-    if (!value || seen.has(value)) continue;
-    seen.add(value);
-    normalized.push({ title, value });
-  }
-  return normalized;
-};
-
 export default function visualStoryCreatorLogic(initialState = {}) {
   const {
     categoryTags = {},
@@ -113,7 +62,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     onSaveRedirect = null,
     isPreview = false,
   } = initialState as {
-    categoryTags?: Record<string, Array<{ title: string; value: string }>>;
+    categoryTags?: Record<string, string[]>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
     initialStory?: Record<string, unknown> | null;
     initialAuthors?: Array<Record<string, unknown>>;
@@ -237,7 +186,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
 
     getAvailableTags() {
       if (!this.story?.category) return [];
-      return normalizeTagOptions(this.categoryTags[this.story.category]);
+      return normalizeTagList(this.categoryTags[this.story.category]);
     },
     isParisCategory() {
       return this.story?.category === "paris";
@@ -255,20 +204,12 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       return this.story.tags;
     },
 
-    getTagLabel(value: string) {
-      for (const tags of Object.values(this.categoryTags as Record<string, Array<{ title: string; value: string }>>)) {
-        const found = tags.find((t) => t.value === value);
-        if (found) return found.title;
-      }
-      return value;
-    },
-
     isTagSelected(value: string) {
       return this.getSelectedCategoryTags().includes(value);
     },
 
     toggleTag(value: string) {
-      const normalized = normalizeTags([value], this.categoryTags, this.story.category)[0] || value;
+      const normalized = normalizeTagList([value])[0] || value;
       const targetTags = this.getSelectedCategoryTags();
       const idx = targetTags.indexOf(normalized);
       if (idx >= 0) {
@@ -277,17 +218,11 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         targetTags.push(normalized);
       }
       if (this.isParisCategory()) {
-        this.story.parisSubCategories = normalizeTags(
+        this.story.parisSubCategories = normalizeTagList(
           this.story.parisSubCategories,
-          this.categoryTags,
-          "paris",
         );
       } else {
-        this.story.tags = normalizeTags(
-          this.story.tags,
-          this.categoryTags,
-          this.story.category,
-        );
+        this.story.tags = normalizeTagList(this.story.tags);
       }
     },
 
@@ -299,11 +234,9 @@ export default function visualStoryCreatorLogic(initialState = {}) {
 
     handleCategoryChange(value: string) {
       this.story.category = value;
-      this.story.tags = normalizeTags(this.story.tags, this.categoryTags, value);
-      this.story.parisSubCategories = normalizeTags(
+      this.story.tags = normalizeTagList(this.story.tags);
+      this.story.parisSubCategories = normalizeTagList(
         this.story.parisSubCategories,
-        this.categoryTags,
-        "paris",
       );
       this.story.parisDistrict = normalizeParisDistrict(this.story.parisDistrict);
     },
@@ -623,11 +556,9 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.imageCaption =
           typeof copy.imageCaption === "string" ? copy.imageCaption : "";
         this.story.category = copy.category || "";
-        this.story.tags = normalizeTags(copy.tags, this.categoryTags, copy.category);
-        this.story.parisSubCategories = normalizeTags(
+        this.story.tags = normalizeTagList(copy.tags);
+        this.story.parisSubCategories = normalizeTagList(
           copy.parisSubCategories ?? (copy.category === "paris" ? copy.tags : []),
-          this.categoryTags,
-          "paris",
         );
         this.story.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
         this.story.binaryForGuide = Boolean(copy.binaryForGuide);
@@ -653,10 +584,8 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           (typeof copy.authorId === "string" ? copy.authorId : "");
       }
       this.story.tags = Array.isArray(this.story.tags) ? this.story.tags : [];
-      this.story.parisSubCategories = normalizeTags(
+      this.story.parisSubCategories = normalizeTagList(
         this.story.parisSubCategories,
-        this.categoryTags,
-        "paris",
       );
       this.story.parisDistrict = normalizeParisDistrict(this.story.parisDistrict);
       this.story.binaryForGuide = Boolean(this.story.binaryForGuide);
@@ -762,7 +691,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
 
       try {
         const resolvedAuthorId = await this.resolveAuthorId();
-        const tagsForDb = selectedCategoryTags.map((tag: string) => this.getTagLabel(tag));
         const isParisCategory = this.isParisCategory();
         const payload = {
           title: this.story.title,
@@ -774,7 +702,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           authorId: resolvedAuthorId,
           slides: this.story.slides.map((slide) => normalizeSlide(slide)),
           category: this.story.category,
-          tags: tagsForDb,
+          tags: selectedCategoryTags,
           parisSubCategories: isParisCategory ? this.story.parisSubCategories : [],
           parisDistrict: isParisCategory ? this.story.parisDistrict || null : null,
           binaryForGuide: false,

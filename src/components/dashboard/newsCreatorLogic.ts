@@ -34,6 +34,7 @@ import {
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 import { compressImage } from "@/lib/images/compressImage";
+import { normalizeTagList } from "@/content/tags/tags";
 
 const storage = getStorage(app);
 
@@ -56,7 +57,7 @@ export default function newsCreatorLogic(
     onSaveRedirect = null,
     ...restInitialState
   } = initialState as {
-    categoryTags?: Record<string, Array<{ title: string; value: string }>>;
+    categoryTags?: Record<string, string[]>;
     initialArticle?: Record<string, unknown> | null;
     initialAuthors?: Array<Record<string, unknown>>;
     articleId?: string | null;
@@ -79,58 +80,7 @@ export default function newsCreatorLogic(
     return categoryMapLegacy[value] || value;
   };
 
-  const buildLegacyTagMap = (category?: string) => {
-    if (!category) return {};
-    const tags = normalizeTagOptions(
-      (
-        categoryTags as Record<string, Array<{ title: string; value: string }>>
-      )[category],
-    );
-    return Object.fromEntries(tags.map((tag) => [tag.title, tag.value]));
-  };
-
-  const normalizeTagOptions = (tags?: unknown) => {
-    if (!Array.isArray(tags)) return [];
-    const seen = new Set<string>();
-    const normalized: Array<{ title: string; value: string }> = [];
-    for (const raw of tags) {
-      const value =
-        typeof raw === "string"
-          ? raw.trim()
-          : typeof raw?.value === "string"
-            ? raw.value.trim()
-            : "";
-      const title =
-        typeof raw === "object" &&
-        raw !== null &&
-        typeof raw.title === "string" &&
-        raw.title.trim()
-          ? raw.title.trim()
-          : value;
-      if (!value || seen.has(value)) continue;
-      seen.add(value);
-      normalized.push({ title, value });
-    }
-    return normalized;
-  };
-
-  const normalizeTags = (tags?: string[], category?: string) => {
-    if (!Array.isArray(tags)) return [];
-    const legacyMap = buildLegacyTagMap(category);
-    const deduped = new Set<string>();
-    const normalized: string[] = [];
-    for (const rawTag of tags) {
-      if (typeof rawTag !== "string") continue;
-      const trimmed = rawTag.trim();
-      if (!trimmed) continue;
-      const mapped = legacyMap[trimmed] || trimmed;
-      if (!deduped.has(mapped)) {
-        deduped.add(mapped);
-        normalized.push(mapped);
-      }
-    }
-    return normalized;
-  };
+  const normalizeTags = (tags?: string[]) => normalizeTagList(tags);
 
   const normalizeLoadedArticle = (data: any) => {
     if (!data || typeof data !== "object") return null;
@@ -143,7 +93,7 @@ export default function newsCreatorLogic(
         : [];
     copy.contentBlocks = sortAndNormalizeContentBlocks(blocks);
     copy.content = copy.contentBlocks;
-    copy.tags = normalizeTags(copy.tags, copy.category);
+    copy.tags = normalizeTags(copy.tags);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.lead = copy.lead ?? "";
     copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
@@ -260,17 +210,7 @@ export default function newsCreatorLogic(
     },
     getAvailableTags() {
       if (!this.article?.category) return [];
-      return normalizeTagOptions(this.categoryTags[this.article.category]);
-    },
-    getTagLabel(value: string) {
-      const availableForCurrent = this.getAvailableTags();
-      const match = availableForCurrent.find((tag: any) => tag.value === value);
-      if (match) return match.title;
-      for (const tags of Object.values(this.categoryTags)) {
-        const found = (tags as any[]).find((tag: any) => tag.value === value);
-        if (found) return found.title;
-      }
-      return value;
+      return normalizeTagList(this.categoryTags[this.article.category]);
     },
     async fetchContentLists() {
       this.contentListsLoading = true;
@@ -337,18 +277,14 @@ export default function newsCreatorLogic(
       return this.article.tags.includes(value);
     },
     toggleTag(value: string) {
-      const normalized =
-        normalizeTags([value], this.article.category)[0] || value;
+      const normalized = normalizeTags([value])[0] || value;
       const idx = this.article.tags.indexOf(normalized);
       if (idx >= 0) {
         this.article.tags.splice(idx, 1);
       } else {
         this.article.tags.push(normalized);
       }
-      this.article.tags = normalizeTags(
-        this.article.tags,
-        this.article.category,
-      );
+      this.article.tags = normalizeTags(this.article.tags);
     },
     removeTag(value: string) {
       const idx = this.article.tags.indexOf(value);
@@ -356,7 +292,7 @@ export default function newsCreatorLogic(
     },
     handleCategoryChange(value: string) {
       this.article.category = value;
-      this.article.tags = normalizeTags(this.article.tags, value);
+      this.article.tags = normalizeTags(this.article.tags);
     },
     getAuthorLabel(author: any) {
       const firstName =
@@ -825,10 +761,7 @@ export default function newsCreatorLogic(
       this.article.contentBlocks = reindexContentBlocks(
         this.article.contentBlocks,
       );
-      this.article.tags = normalizeTags(
-        this.article.tags,
-        this.article.category,
-      );
+      this.article.tags = normalizeTags(this.article.tags);
 
       if (!this.article.category) {
         (window as any).Alpine.store("ui").showToast(
@@ -859,9 +792,6 @@ export default function newsCreatorLogic(
 
       try {
         const resolvedAuthorId = await this.resolveAuthorId();
-        const tagsForDb = this.article.tags.map((tag: string) =>
-          this.getTagLabel(tag),
-        );
         const payload = {
           title: this.article.title,
           lead: this.article.lead,
@@ -872,7 +802,7 @@ export default function newsCreatorLogic(
           authorId: resolvedAuthorId,
           content: this.article.contentBlocks,
           category: this.article.category,
-          tags: tagsForDb,
+          tags: this.article.tags,
           isMainInCategory: Boolean(this.article.isMainInCategory),
           published: Boolean(this.article.published),
           relatedContent: sanitizeRelatedContent(

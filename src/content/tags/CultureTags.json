@@ -1,84 +1,24 @@
 {
   "cultureTags": [
-    {
-      "title": "театр",
-      "value": "theatre"
-    },
-    {
-      "title": "выставка",
-      "value": "exhibitions"
-    },
-    {
-      "title": "книги",
-      "value": "books"
-    },
-    {
-      "title": "арт-рынок",
-      "value": "artMarket"
-    },
-    {
-      "title": "фестиваль",
-      "value": "festival"
-    },
-    {
-      "title": "дети",
-      "value": "kids"
-    },
-    {
-      "title": "опера",
-      "value": "opera"
-    },
-    {
-      "title": "балет",
-      "value": "ballet"
-    },
-    {
-      "title": "танец",
-      "value": "dance"
-    },
-    {
-      "title": "музыка",
-      "value": "music"
-    },
-    {
-      "title": "классическая музыка",
-      "value": "classicalMusic"
-    },
-    {
-      "title": "концерт",
-      "value": "concert"
-    },
-    {
-      "title": "некролог",
-      "value": "nekrolog"
-    },
-    {
-      "title": "назначение",
-      "value": "naznachenie"
-    },
-    {
-      "title": "арт",
-      "value": "art"
-    },
-    {
-      "title": "кино",
-      "value": "cinema"
-    },
-    {
-      "title": "кадры",
-      "value": "frames"
-    },
-    {
-      "title": "архитектура",
-      "value": "architecture"
-    },
-    {
-      "title": "аукцион",
-      "value": "auction"
-    },
-    {
-      "title": "фотография",
-      "value": "photo"
-    }
+    "театр",
+    "выставка",
+    "книги",
+    "арт-рынок",
+    "фестиваль",
+    "дети",
+    "опера",
+    "балет",
+    "танец",
+    "музыка",
+    "классическая музыка",
+    "концерт",
+    "некролог",
+    "назначение",
+    "арт",
+    "кино",
+    "кадры",
+    "архитектура",
+    "аукцион",
+    "фотография"
   ]
 }

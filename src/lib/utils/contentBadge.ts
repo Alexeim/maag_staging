@@ -1,4 +1,4 @@
-import { getKnownTagLabel } from "@/content/tags/parisTags";
+import { getKnownTagLabel } from "@/content/tags/tags";
 import { normalizeTags } from "@/lib/utils/contentCollectionMarquee";
 
 // Aliases for tag values not covered by the Paris/Culture tag dictionaries

@@ -21,63 +21,9 @@ import {
   getInitialRichTextHtml,
   normalizeStoredRichTextHtml,
 } from "@/lib/utils/richText";
+import { normalizeTagList } from "@/content/tags/tags";
 
 const storage = getStorage(app);
-
-const normalizeTags = (tags?: string[]) => {
-  if (!Array.isArray(tags)) return [];
-  const deduped = new Set<string>();
-  const result: string[] = [];
-  for (const raw of tags) {
-    if (typeof raw !== "string") continue;
-    const t = raw.trim();
-    if (t && !deduped.has(t)) {
-      deduped.add(t);
-      result.push(t);
-    }
-  }
-  return result;
-};
-
-const normalizeCategoryTags = (
-  tags: string[] | undefined,
-  categoryTags: Record<string, Array<{ title: string; value: string }>>,
-  category?: string,
-) => {
-  if (!Array.isArray(tags)) return [];
-  const legacyMap: Record<string, string> = {};
-  if (category && categoryTags?.[category]) {
-    for (const tag of normalizeTagOptions(categoryTags[category])) {
-      legacyMap[tag.title] = tag.value;
-    }
-  }
-  return normalizeTags(tags.map((tag) => legacyMap[tag] || tag));
-};
-
-const normalizeTagOptions = (tags?: unknown) => {
-  if (!Array.isArray(tags)) return [];
-  const seen = new Set<string>();
-  const normalized: Array<{ title: string; value: string }> = [];
-  for (const raw of tags) {
-    const value =
-      typeof raw === "string"
-        ? raw.trim()
-        : typeof raw?.value === "string"
-          ? raw.value.trim()
-          : "";
-    const title =
-      typeof raw === "object" &&
-      raw !== null &&
-      typeof raw.title === "string" &&
-      raw.title.trim()
-        ? raw.title.trim()
-        : value;
-    if (!value || seen.has(value)) continue;
-    seen.add(value);
-    normalized.push({ title, value });
-  }
-  return normalized;
-};
 
 // Creates a blank tips-item block
 const createTipsItem = () => ({
@@ -112,7 +58,7 @@ const normalizeLoadedArticle = (data: any) => {
       ? copy.contentBlocks
       : [];
   copy.contentBlocks = rawBlocks.map(normalizeBlock);
-  copy.tags = normalizeTags(copy.tags);
+  copy.tags = normalizeTagList(copy.tags);
   copy.imageCaption = copy.imageCaption ?? "";
   copy.heroOrientation = copy.heroOrientation === "image-left" || copy.heroOrientation === "image-bottom" ? copy.heroOrientation : "image-right";
   copy.lead = copy.lead ?? "";
@@ -147,7 +93,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     isEditMode?: boolean;
     isPreview?: boolean;
     onSaveRedirect?: string | null;
-    categoryTags?: Record<string, Array<{ title: string; value: string }>>;
+    categoryTags?: Record<string, string[]>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
   };
 
@@ -348,16 +294,10 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         restoredPreviewAuthorState = true;
       }
 
-      this.article.tags = normalizeCategoryTags(
-        this.article.tags,
-        this.categoryTags,
-        this.article.category,
-      );
-      this.article.parisSubCategories = normalizeCategoryTags(
+      this.article.tags = normalizeTagList(this.article.tags);
+      this.article.parisSubCategories = normalizeTagList(
         (this.article as any).parisSubCategories ??
           (this.article.category === "paris" ? this.article.tags : []),
-        this.categoryTags,
-        "paris",
       );
       this.article.parisDistrict = normalizeParisDistrict(
         (this.article as any).parisDistrict,
@@ -446,14 +386,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     // ── Tags ─────────────────────────────────────────────────────────────────
     getAvailableTags() {
       if (!this.article?.category) return [];
-      return normalizeTagOptions(this.categoryTags[this.article.category]);
-    },
-    getTagLabel(value: string) {
-      for (const tags of Object.values(this.categoryTags)) {
-        const found = tags.find((tag) => tag.value === value);
-        if (found) return found.title;
-      }
-      return value;
+      return normalizeTagList(this.categoryTags[this.article.category]);
     },
     isParisCategory() {
       return this.article.category === "paris";
@@ -484,17 +417,11 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         targetTags.push(value);
       }
       if (this.isParisCategory()) {
-        this.article.parisSubCategories = normalizeCategoryTags(
+        this.article.parisSubCategories = normalizeTagList(
           this.article.parisSubCategories,
-          this.categoryTags,
-          "paris",
         );
       } else {
-        this.article.tags = normalizeCategoryTags(
-          this.article.tags,
-          this.categoryTags,
-          this.article.category,
-        );
+        this.article.tags = normalizeTagList(this.article.tags);
       }
     },
     removeTag(value: string) {
@@ -504,15 +431,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     },
     handleCategoryChange(value: string) {
       this.article.category = value;
-      this.article.tags = normalizeCategoryTags(
-        this.article.tags,
-        this.categoryTags,
-        value,
-      );
-      this.article.parisSubCategories = normalizeCategoryTags(
+      this.article.tags = normalizeTagList(this.article.tags);
+      this.article.parisSubCategories = normalizeTagList(
         this.article.parisSubCategories,
-        this.categoryTags,
-        "paris",
       );
       this.article.parisDistrict = normalizeParisDistrict(
         this.article.parisDistrict,
@@ -856,15 +777,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       if (this.isSaving) return;
       this.isSaving = true;
 
-      this.article.tags = normalizeCategoryTags(
-        this.article.tags,
-        this.categoryTags,
-        this.article.category,
-      );
-      this.article.parisSubCategories = normalizeCategoryTags(
+      this.article.tags = normalizeTagList(this.article.tags);
+      this.article.parisSubCategories = normalizeTagList(
         this.article.parisSubCategories,
-        this.categoryTags,
-        "paris",
       );
       this.article.parisDistrict = normalizeParisDistrict(
         this.article.parisDistrict,
@@ -901,7 +816,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           imageCaption: this.article.imageCaption,
           heroOrientation: this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : "image-right",
           category: this.article.category,
-          tags: selectedCategoryTags.map((tag) => this.getTagLabel(tag)),
+          tags: selectedCategoryTags,
           parisSubCategories: isParisCategory
             ? this.article.parisSubCategories
             : [],

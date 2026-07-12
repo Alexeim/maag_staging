@@ -1,32 +1,11 @@
 {
   "newsTags": [
-    {
-      "title": "забастовка",
-      "value": "strike"
-    },
-    {
-      "title": "туризм",
-      "value": "tourism"
-    },
-    {
-      "title": "музеи",
-      "value": "museums"
-    },
-    {
-      "title": "архитектура",
-      "value": "architecture"
-    },
-    {
-      "title": "париж",
-      "value": "paris"
-    },
-    {
-      "title": "культура",
-      "value": "culture"
-    },
-    {
-      "title": "арт-рынок",
-      "value": "artMarket"
-    }
+    "забастовка",
+    "туризм",
+    "музеи",
+    "архитектура",
+    "париж",
+    "культура",
+    "арт-рынок"
   ]
 }

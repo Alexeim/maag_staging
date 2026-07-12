@@ -10,6 +10,8 @@ import { sanitizeRelatedContent } from "@/lib/utils/relatedContent";
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 import { normalizeStoredRichTextHtml } from "@/lib/utils/richText";
+import eventTagsData from "@/content/tags/EventTags.json";
+import { normalizeTagList } from "@/content/tags/tags";
 
 type EventDateType = "single" | "duration";
 type EventTimeMode = "none" | "start" | "range";
@@ -22,23 +24,7 @@ const EVENT_INFO_ICONS: EventInfoIcon[] = [
   "bulb",
 ];
 
-const EVENT_TAGS: Array<{ value: string; title: string }> = [
-  { value: "ballet", title: "Балет" },
-  { value: "dance", title: "Танец" },
-  { value: "opera", title: "Опера" },
-  { value: "classicalMusic", title: "Классическая музыка" },
-  { value: "cinema", title: "Кино" },
-  { value: "theatre", title: "Театр" },
-  { value: "exhibitions", title: "Выставки" },
-  { value: "festival", title: "Фестиваль" },
-  { value: "artMarket", title: "Арт-рынок" },
-  { value: "fashion", title: "Мода" },
-  { value: "meetup", title: "Встреча" },
-  { value: "visit", title: "Визит" },
-  { value: "excursion", title: "Экскурсия" },
-  { value: "kids", title: "Дети" },
-  { value: "paris", title: "Париж" },
-];
+const EVENT_TAGS: string[] = eventTagsData.eventTags;
 
 const toDate = (value: unknown): Date | null => {
   if (!value) {
@@ -427,11 +413,7 @@ export default function eventCreatorLogic(initialState = {}) {
     },
 
     getAvailableTags() {
-      return EVENT_TAGS;
-    },
-
-    getTagLabel(value: string) {
-      return EVENT_TAGS.find((t) => t.value === value)?.title ?? value;
+      return normalizeTagList(EVENT_TAGS);
     },
 
     setStartDate(value: string) {

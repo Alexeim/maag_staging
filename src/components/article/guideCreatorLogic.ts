@@ -1,4 +1,5 @@
 import { guidesApi, authorsApi } from "@/lib/api/api";
+import { normalizeTagList } from "@/content/tags/tags";
 import { app } from "../../lib/firebase/client";
 import {
   getInitialRichTextHtml,
@@ -70,7 +71,7 @@ export default function guideCreatorLogic(initialState = {}) {
     onSaveRedirect = null,
     ...restInitialState
   } = initialState as {
-    categoryTags?: Record<string, Array<{ title: string; value: string }>>;
+    categoryTags?: Record<string, string[]>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
     initialArticle?: Record<string, unknown> | null;
     initialAuthors?: Array<Record<string, unknown>>;
@@ -96,43 +97,6 @@ export default function guideCreatorLogic(initialState = {}) {
     return categoryMapLegacy[value] || value;
   };
 
-  const buildLegacyTagMap = (category?: string) => {
-    if (!category) {
-      return {};
-    }
-    const tags = normalizeTagOptions(categoryTags[category]);
-    return Object.fromEntries(tags.map((tag) => [tag.title, tag.value]));
-  };
-
-  const normalizeTagOptions = (tags?: unknown) => {
-    if (!Array.isArray(tags)) {
-      return [];
-    }
-    const seen = new Set<string>();
-    const normalized: Array<{ title: string; value: string }> = [];
-    for (const raw of tags) {
-      const value =
-        typeof raw === "string"
-          ? raw.trim()
-          : typeof raw?.value === "string"
-            ? raw.value.trim()
-            : "";
-      const title =
-        typeof raw === "object" &&
-        raw !== null &&
-        typeof raw.title === "string" &&
-        raw.title.trim()
-          ? raw.title.trim()
-          : value;
-      if (!value || seen.has(value)) {
-        continue;
-      }
-      seen.add(value);
-      normalized.push({ title, value });
-    }
-    return normalized;
-  };
-
   const buildParisDistrictMap = () =>
     Object.fromEntries(
       parisDistrictOptions.flatMap((district) => [
@@ -141,31 +105,7 @@ export default function guideCreatorLogic(initialState = {}) {
       ]),
     );
 
-  const normalizeTags = (tags?: string[], category?: string) => {
-    if (!Array.isArray(tags)) {
-      return [];
-    }
-    const legacyMap = buildLegacyTagMap(category);
-    const deduped = new Set<string>();
-    const normalized: string[] = [];
-
-    for (const rawTag of tags) {
-      if (typeof rawTag !== "string") {
-        continue;
-      }
-      const trimmed = rawTag.trim();
-      if (!trimmed) {
-        continue;
-      }
-      const mapped = legacyMap[trimmed] || trimmed;
-      if (!deduped.has(mapped)) {
-        deduped.add(mapped);
-        normalized.push(mapped);
-      }
-    }
-
-    return normalized;
-  };
+  const normalizeTags = (tags?: string[]) => normalizeTagList(tags);
 
   const normalizeParisDistrict = (value?: unknown) => {
     if (typeof value !== "string") {
@@ -228,10 +168,9 @@ export default function guideCreatorLogic(initialState = {}) {
         : [];
     copy.contentBlocks = normalizeContentBlocks(blocks);
     copy.content = copy.contentBlocks;
-    copy.tags = normalizeTags(copy.tags, copy.category);
+    copy.tags = normalizeTags(copy.tags);
     copy.parisSubCategories = normalizeTags(
       copy.parisSubCategories ?? (copy.category === "paris" ? copy.tags : []),
-      "paris",
     );
     copy.parisDistrict = normalizeParisDistrict(copy.parisDistrict);
     copy.binaryForGuide = Boolean(copy.binaryForGuide);
@@ -477,7 +416,7 @@ export default function guideCreatorLogic(initialState = {}) {
       if (!this.article?.category) {
         return [];
       }
-      return normalizeTagOptions(this.categoryTags[this.article.category]);
+      return normalizeTagList(this.categoryTags[this.article.category]);
     },
     isParisCategory() {
       return this.article?.category === "paris";
@@ -496,26 +435,11 @@ export default function guideCreatorLogic(initialState = {}) {
         : [];
       return this.article.tags;
     },
-    getTagLabel(value: string) {
-      const availableForCurrent = this.getAvailableTags();
-      const match = availableForCurrent.find((tag) => tag.value === value);
-      if (match) {
-        return match.title;
-      }
-      for (const tags of Object.values(this.categoryTags)) {
-        const found = tags.find((tag) => tag.value === value);
-        if (found) {
-          return found.title;
-        }
-      }
-      return value;
-    },
     isTagSelected(value: string) {
       return this.getSelectedCategoryTags().includes(value);
     },
     toggleTag(value: string) {
-      const normalized =
-        normalizeTags([value], this.article.category)[0] || value;
+      const normalized = normalizeTags([value])[0] || value;
       const targetTags = this.getSelectedCategoryTags();
       const idx = targetTags.indexOf(normalized);
       if (idx >= 0) {
@@ -526,13 +450,9 @@ export default function guideCreatorLogic(initialState = {}) {
       if (this.isParisCategory()) {
         this.article.parisSubCategories = normalizeTags(
           this.article.parisSubCategories,
-          "paris",
         );
       } else {
-        this.article.tags = normalizeTags(
-          this.article.tags,
-          this.article.category,
-        );
+        this.article.tags = normalizeTags(this.article.tags);
       }
     },
     removeTag(value: string) {
@@ -544,10 +464,9 @@ export default function guideCreatorLogic(initialState = {}) {
     },
     handleCategoryChange(value: string) {
       this.article.category = value;
-      this.article.tags = normalizeTags(this.article.tags, value);
+      this.article.tags = normalizeTags(this.article.tags);
       this.article.parisSubCategories = normalizeTags(
         this.article.parisSubCategories,
-        "paris",
       );
       this.article.parisDistrict = normalizeParisDistrict(
         this.article.parisDistrict,
@@ -898,7 +817,6 @@ export default function guideCreatorLogic(initialState = {}) {
       this.article.tags = this.article.tags ?? [];
       this.article.parisSubCategories = normalizeTags(
         this.article.parisSubCategories,
-        "paris",
       );
       this.article.parisDistrict = normalizeParisDistrict(
         this.article.parisDistrict,
@@ -1337,13 +1255,9 @@ export default function guideCreatorLogic(initialState = {}) {
       this.article.contentBlocks = normalizeEditableContentBlocks(
         this.article.contentBlocks,
       );
-      this.article.tags = normalizeTags(
-        this.article.tags,
-        this.article.category,
-      );
+      this.article.tags = normalizeTags(this.article.tags);
       this.article.parisSubCategories = normalizeTags(
         this.article.parisSubCategories,
-        "paris",
       );
       this.article.parisDistrict = normalizeParisDistrict(
         this.article.parisDistrict,
@@ -1391,9 +1305,6 @@ export default function guideCreatorLogic(initialState = {}) {
 
       try {
         const resolvedAuthorId = await this.resolveAuthorId();
-        const tagsForDb = selectedCategoryTags.map((tag) =>
-          this.getTagLabel(tag),
-        );
         const isParisCategory = this.isParisCategory();
         const payload = {
           title: this.article.title,
@@ -1406,7 +1317,7 @@ export default function guideCreatorLogic(initialState = {}) {
           authorId: resolvedAuthorId,
           content: this.article.contentBlocks,
           category: this.article.category,
-          tags: tagsForDb,
+          tags: selectedCategoryTags,
           parisSubCategories: isParisCategory
             ? this.article.parisSubCategories
             : [],

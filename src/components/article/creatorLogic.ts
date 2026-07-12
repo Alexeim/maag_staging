@@ -25,7 +25,7 @@ import {
   getVideoRenderMode as resolveVideoRenderMode,
   normalizeVideoBlock,
 } from "@/lib/utils/video";
-import { isLegacyParisTag } from "@/content/tags/parisTags";
+import { normalizeTagList } from "@/content/tags/tags";
 import {
   getBlockSummary as buildBlockSummary,
   getBlockTypeLabel as resolveBlockTypeLabel,
@@ -137,7 +137,7 @@ export default function articleCreatorLogic(initialState = {}) {
     createRoute = "/dashboard/article/create",
     ...restInitialState
   } = initialState as {
-    categoryTags?: Record<string, Array<{ title: string; value: string }>>;
+    categoryTags?: Record<string, string[]>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
     initialArticle?: Record<string, unknown> | null;
     initialAuthors?: Array<Record<string, unknown>>;
@@ -167,43 +167,6 @@ export default function articleCreatorLogic(initialState = {}) {
     return categoryMapLegacy[value] || value;
   };
 
-  const buildLegacyTagMap = (category?: string) => {
-    if (!category) {
-      return {};
-    }
-    const tags = normalizeTagOptions(categoryTags[category]);
-    return Object.fromEntries(tags.map((tag) => [tag.title, tag.value]));
-  };
-
-  const normalizeTagOptions = (tags?: unknown) => {
-    if (!Array.isArray(tags)) {
-      return [];
-    }
-    const seen = new Set<string>();
-    const normalized: Array<{ title: string; value: string }> = [];
-    for (const raw of tags) {
-      const value =
-        typeof raw === "string"
-          ? raw.trim()
-          : typeof raw?.value === "string"
-            ? raw.value.trim()
-            : "";
-      const title =
-        typeof raw === "object" &&
-        raw !== null &&
-        typeof raw.title === "string" &&
-        raw.title.trim()
-          ? raw.title.trim()
-          : value;
-      if (!value || seen.has(value)) {
-        continue;
-      }
-      seen.add(value);
-      normalized.push({ title, value });
-    }
-    return normalized;
-  };
-
   const buildParisDistrictMap = () =>
     Object.fromEntries(
       parisDistrictOptions.flatMap((district) => [
@@ -212,34 +175,8 @@ export default function articleCreatorLogic(initialState = {}) {
       ]),
     );
 
-  const normalizeTags = (tags?: string[], category?: string) => {
-    if (!Array.isArray(tags)) {
-      return [];
-    }
-    const legacyMap = buildLegacyTagMap(category);
-    const deduped = new Set<string>();
-    const normalized: string[] = [];
-
-    for (const rawTag of tags) {
-      if (typeof rawTag !== "string") {
-        continue;
-      }
-      const trimmed = rawTag.trim();
-      if (!trimmed) {
-        continue;
-      }
-      if (category === "paris" && isLegacyParisTag(trimmed)) {
-        continue;
-      }
-      const mapped = legacyMap[trimmed] || trimmed;
-      if (!deduped.has(mapped)) {
-        deduped.add(mapped);
-        normalized.push(mapped);
-      }
-    }
-
-    return normalized;
-  };
+  const normalizeTags = (tags?: string[], category?: string) =>
+    normalizeTagList(tags, { excludeLegacyParis: category === "paris" });
 
   const normalizeParisDistrict = (value?: unknown) => {
     if (typeof value !== "string") {
@@ -557,7 +494,7 @@ export default function articleCreatorLogic(initialState = {}) {
       if (!this.article?.category) {
         return [];
       }
-      return normalizeTagOptions(this.categoryTags[this.article.category]);
+      return normalizeTagList(this.categoryTags[this.article.category]);
     },
     isParisCategory() {
       return this.article?.category === "paris";
@@ -575,21 +512,6 @@ export default function articleCreatorLogic(initialState = {}) {
         ? this.article.tags
         : [];
       return this.article.tags;
-    },
-    getTagLabel(value: string) {
-      const availableForCurrent = this.getAvailableTags();
-      const match = availableForCurrent.find((tag) => tag.value === value);
-      if (match) {
-        return match.title;
-      }
-      // Fallback: try other categories
-      for (const tags of Object.values(this.categoryTags)) {
-        const found = tags.find((tag) => tag.value === value);
-        if (found) {
-          return found.title;
-        }
-      }
-      return value;
     },
     isTagSelected(value: string) {
       return this.getSelectedCategoryTags().includes(value);
@@ -1662,9 +1584,6 @@ export default function articleCreatorLogic(initialState = {}) {
 
       try {
         const resolvedAuthorId = await this.resolveAuthorId();
-        const tagsForDb = selectedCategoryTags.map((tag) =>
-          this.getTagLabel(tag),
-        );
         const isParisCategory = this.isParisCategory();
         const payload = {
           title: this.article.title,
@@ -1678,7 +1597,7 @@ export default function articleCreatorLogic(initialState = {}) {
           authorId: resolvedAuthorId,
           content: this.article.contentBlocks,
           category: this.article.category,
-          tags: tagsForDb,
+          tags: selectedCategoryTags,
           parisSubCategories: isParisCategory
             ? this.article.parisSubCategories
             : [],

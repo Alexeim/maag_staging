@@ -1,72 +1,21 @@
 {
   "parisSubCategories": [
-    {
-      "title": "маршрут",
-      "value": "route"
-    },
-    {
-      "title": "адрес",
-      "value": "address"
-    },
-    {
-      "title": "записная книжка",
-      "value": "notebook"
-    },
-    {
-      "title": "место",
-      "value": "place"
-    },
-    {
-      "title": "история",
-      "value": "story"
-    },
-    {
-      "title": "архитектура",
-      "value": "architecture"
-    },
-    {
-      "title": "парки",
-      "value": "parks"
-    },
-    {
-      "title": "путешествия",
-      "value": "travel"
-    },
-    {
-      "title": "отели",
-      "value": "hotels"
-    },
-    {
-      "title": "фестивали",
-      "value": "festivals"
-    },
-    {
-      "title": "событие",
-      "value": "parisEvent"
-    },
-    {
-      "title": "рестораны",
-      "value": "restaurants"
-    },
-    {
-      "title": "еда",
-      "value": "food"
-    },
-    {
-      "title": "мода",
-      "value": "fashion"
-    },
-    {
-      "title": "арт",
-      "value": "art"
-    },
-    {
-      "title": "путеводитель",
-      "value": "guide"
-    },
-    {
-      "title": "дети",
-      "value": "kids"
-    }
+    "маршрут",
+    "адрес",
+    "записная книжка",
+    "место",
+    "история",
+    "архитектура",
+    "парки",
+    "путешествия",
+    "отели",
+    "фестивали",
+    "событие",
+    "рестораны",
+    "еда",
+    "мода",
+    "арт",
+    "путеводитель",
+    "дети"
   ]
 }

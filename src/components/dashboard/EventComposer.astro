@@ -319,14 +319,14 @@ const {
       <label class="block text-sm font-medium text-base-content mb-3">Теги на календарь</label>
 
       <div class="flex flex-wrap gap-2">
-        <template x-for="tag in getAvailableTags()" :key="tag.value">
+        <template x-for="tag in getAvailableTags()" :key="tag">
           <button
             type="button"
             class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
-            :class="isTagSelected(tag.value) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
-            @click="toggleTag(tag.value)"
+            :class="isTagSelected(tag) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+            @click="toggleTag(tag)"
           >
-            <span x-text="tag.title"></span>
+            <span x-text="tag"></span>
           </button>
         </template>
       </div>
