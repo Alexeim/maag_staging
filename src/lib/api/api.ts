@@ -586,6 +586,16 @@ export interface AuthorResponse extends AuthorPayload {
   createdAt: string | Date;
 }
 
+export interface AddressPayload {
+  title: string;
+  address: string;
+}
+
+export interface AddressResponse extends AddressPayload {
+  id: string;
+  createdAt: string | Date;
+}
+
 export interface FlipperPayload {
   title: string;
   authorId: string;
@@ -953,6 +963,19 @@ export const authorsApi = {
   },
   create(payload: AuthorPayload, token?: string) {
     return request<AuthorResponse>("/api/authors", {
+      method: "POST",
+      body: payload,
+      token,
+    });
+  },
+};
+
+export const addressesApi = {
+  list(token?: string) {
+    return request<AddressResponse[]>("/api/addresses", { token });
+  },
+  create(payload: AddressPayload, token?: string) {
+    return request<AddressResponse>("/api/addresses", {
       method: "POST",
       body: payload,
       token,

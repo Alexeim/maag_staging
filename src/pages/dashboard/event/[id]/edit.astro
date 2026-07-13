@@ -1,27 +1,30 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import EventComposer from "@/components/dashboard/EventComposer.astro";
-import { eventsApi, authorsApi } from "@/lib/api/api";
+import { eventsApi, authorsApi, addressesApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
 
 let eventData = null;
 let authors: any[] = [];
+let addresses: any[] = [];
 let loadFailed = false;
 
 try {
-  [eventData, authors] = await Promise.all([
+  [eventData, authors, addresses] = await Promise.all([
     eventsApi.getById(id),
     authorsApi.list(),
+    addressesApi.list(),
   ]);
 } catch (error) {
-  console.error("Failed to fetch event or authors", error);
+  console.error("Failed to fetch event, authors or addresses", error);
   loadFailed = true;
 }
 
 const eventCreatorState = JSON.stringify({
   initialEvent: eventData,
   initialAuthors: authors,
+  initialAddresses: addresses,
   eventId: id,
   isEditMode: true,
   onSaveRedirect: "/dashboard/events",

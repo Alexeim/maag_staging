@@ -188,14 +188,61 @@ const {
       </div>
     </div>
 
-    <div class="mt-6">
-      <label class="block text-sm font-medium text-base-content mb-2">Адрес / место</label>
-      <textarea
-        x-model="eventForm.address"
-        rows="3"
-        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-        placeholder="Например: Paris, Grand Palais, Avenue Winston Churchill, 75008"
-      ></textarea>
+    <div class="mt-6 space-y-3">
+      <label class="block text-sm font-medium text-base-content">Адрес / место</label>
+
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          @click="useNewAddress = false"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          :class="!useNewAddress ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          Выбрать из списка
+        </button>
+        <button
+          type="button"
+          @click="useNewAddress = true"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          :class="useNewAddress ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          Новый адрес
+        </button>
+      </div>
+
+      <div x-show="!useNewAddress">
+        <select
+          x-model="selectedAddressId"
+          @change="applySelectedAddress()"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+        >
+          <option value="">Выберите адрес...</option>
+          <template x-for="addressEntry in addresses" :key="addressEntry.id">
+            <option :value="addressEntry.id" x-text="getAddressLabel(addressEntry)"></option>
+          </template>
+        </select>
+        <p x-show="addressesLoading" class="text-xs text-base-content/60 mt-1">Загружаем адреса...</p>
+        <p
+          x-show="selectedAddressId"
+          class="text-xs text-base-content/60 mt-1"
+          x-text="eventForm.address"
+        ></p>
+      </div>
+
+      <div x-show="useNewAddress" class="space-y-3">
+        <input
+          type="text"
+          x-model="newAddressTitle"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+          placeholder="Название места (необязательно, чтобы сохранить адрес для повторного использования)"
+        />
+        <textarea
+          x-model="eventForm.address"
+          rows="3"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+          placeholder="Например: Grand Palais, 17 Avenue du Général Eisenhower, 75008 Paris"
+        ></textarea>
+      </div>
     </div>
 
     <div class="mt-6">

@@ -1,0 +1,32 @@
+[
+  { "title": "Fondation Louis Vuitton", "address": "Fondation Louis Vuitton, 8 Avenue du Mahatma Gandhi, Bois de Boulogne, 75116 Paris" },
+  { "title": "Opéra Bastille", "address": "Opéra Bastille, Place de la Bastille, 75012 Paris" },
+  { "title": "Opéra Bastille — Salle Modulable", "address": "Opéra Bastille, Salle Modulable, 110 rue de Lyon, 75012 Paris" },
+  { "title": "Théâtre de la Ville — Sarah Bernhardt", "address": "Théâtre de la Ville - Sarah Bernhardt, 2 Place du Châtelet, 75004 Paris" },
+  { "title": "Théâtre des Champs-Élysées", "address": "Théâtre des Champs-Élysées, 15 Avenue Montaigne, 75008 Paris" },
+  { "title": "Bourse de Commerce", "address": "Bourse de Commerce, 2 Rue de Viarmes, 75001 Paris" },
+  { "title": "Cinémathèque française", "address": "Cinémathèque française, 51 Rue de Bercy, 75012 Paris" },
+
+  { "title": "Grand Palais — вход со стороны Eisenhower", "address": "Grand Palais, 17 Avenue du Général Eisenhower, 75008 Paris" },
+  { "title": "Grand Palais — вход со стороны Winston Churchill", "address": "Grand Palais, 7 Avenue Winston Churchill, 75008 Paris" },
+
+  { "title": "Jardin des Tuileries — вход Solférino", "address": "Jardin des Tuileries, Domaine du Louvre, Entrée Solférino, 4 Quai des Tuileries, Paris 1er" },
+  { "title": "Jardin des Tuileries — вход Place de la Concorde", "address": "Jardin des Tuileries, 1 Place de la Concorde, 75001 Paris" },
+
+  { "title": "Pont Neuf", "address": "Pont Neuf, Quai du Louvre, 75001 Paris" },
+  { "title": "Musée Maillol", "address": "Musée Maillol, 59-61 Rue de Grenelle, 75007 Paris" },
+  { "title": "Petit Palais", "address": "Petit Palais, Av. Winston Churchill, 75008 Paris" },
+  { "title": "Palais Garnier", "address": "Palais Garnier, 8 rue Scribe, 75009 Paris" },
+  { "title": "Monnaie de Paris", "address": "Monnaie de Paris, 11 Quai de Conti, 75006 Paris" },
+  { "title": "Musée Jacquemart-André", "address": "Musée Jacquemart-André, 158 Bd Haussmann, 75008 Paris" },
+  { "title": "Parc Villa Windsor", "address": "Парк Villa Windsor, Булонский лес" },
+  { "title": "Hôtel de Ville", "address": "Hôtel de Ville, 75004 Paris" },
+  { "title": "le19M", "address": "le19M, 2 place Skanderbeg, 75019 Paris" },
+  { "title": "Musée du quai Branly - Jacques Chirac", "address": "Musée du quai Branly - Jacques Chirac, 37 Quai Jacques Chirac, 75007 Paris" },
+  { "title": "Palais Galliera", "address": "Palais Galliera, musée de la Mode de Paris, 10 Avenue Pierre Ier de Serbie, 75116 Paris" },
+  { "title": "Musée d'Art Moderne de Paris", "address": "Musée d'Art Moderne de Paris, 11 Avenue du Président Wilson, 75116 Paris" },
+  { "title": "MC93 - Maison de la culture de Seine-Saint-Denis", "address": "MC93 - Maison de la culture de Seine-Saint-Denis, 9 Boulevard Lénine, 93000 Bobigny" },
+  { "title": "Théâtre L'Échangeur", "address": "Théâtre L'Échangeur, 59 avenue du Général de Gaulle, 93170 Bagnolet" },
+  { "title": "Musée Marmottan Monet", "address": "Musée Marmottan Monet, 2 Rue Louis-Boilly, 75016 Paris" },
+  { "title": "Quartier Général", "address": "Quartier Général, 71 Rue de la Fontaine-au-Roi, 75011 Paris" }
+]

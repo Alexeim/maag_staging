@@ -1,20 +1,25 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import EventComposer from "@/components/dashboard/EventComposer.astro";
-import { authorsApi } from "@/lib/api/api";
+import { authorsApi, addressesApi } from "@/lib/api/api";
 
 let authors: any[] = [];
+let addresses: any[] = [];
 let loadFailed = false;
 
 try {
-  authors = await authorsApi.list();
+  [authors, addresses] = await Promise.all([
+    authorsApi.list(),
+    addressesApi.list(),
+  ]);
 } catch (error) {
-  console.error("Failed to fetch authors", error);
+  console.error("Failed to fetch authors or addresses", error);
   loadFailed = true;
 }
 
 const eventCreatorState = JSON.stringify({
   initialAuthors: authors,
+  initialAddresses: addresses,
   isEditMode: false,
   onSaveRedirect: "/dashboard/events",
 }).replace(/</g, "\\u003c");

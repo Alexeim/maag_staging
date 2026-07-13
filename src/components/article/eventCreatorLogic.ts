@@ -1,4 +1,4 @@
-import { eventsApi } from "@/lib/api/api";
+import { addressesApi, eventsApi } from "@/lib/api/api";
 import articleCreatorLogic from "@/components/article/creatorLogic";
 import { normalizeVideoBlock } from "@/lib/utils/video";
 import {
@@ -152,6 +152,7 @@ export default function eventCreatorLogic(initialState = {}) {
     isPreview = false,
     onSaveRedirect = null,
     initialEvent = null,
+    initialAddresses = [],
     ...restInitial
   } = initialState as {
     eventId?: string | null;
@@ -159,6 +160,7 @@ export default function eventCreatorLogic(initialState = {}) {
     isPreview?: boolean;
     onSaveRedirect?: string | null;
     initialEvent?: Record<string, unknown> | null;
+    initialAddresses?: Array<Record<string, unknown>>;
   };
 
   const normalizeIncoming = (input: any) => {
@@ -241,6 +243,11 @@ export default function eventCreatorLogic(initialState = {}) {
         text: string;
       }>,
     },
+    addressesLoading: false,
+    addresses: initialAddresses as any[],
+    selectedAddressId: "",
+    useNewAddress: true,
+    newAddressTitle: "",
     ...createLandingPlacementManager({
       getEntityId() {
         return this.eventId;
@@ -374,6 +381,8 @@ export default function eventCreatorLogic(initialState = {}) {
       this.article.contentBlocks = Array.isArray(this.article.contentBlocks)
         ? reindexContentBlocks(this.article.contentBlocks)
         : [];
+
+      this.loadAddresses();
     },
 
     returnToEdit() {
@@ -499,6 +508,55 @@ export default function eventCreatorLogic(initialState = {}) {
       block.icon = normalizeInfoIcon(icon);
     },
 
+    getAddressLabel(addressEntry: any) {
+      return typeof addressEntry?.title === "string" ? addressEntry.title : "";
+    },
+
+    async loadAddresses() {
+      this.addressesLoading = true;
+      try {
+        const addresses = await addressesApi.list();
+        this.addresses = Array.isArray(addresses) ? addresses : [];
+      } catch (error) {
+        console.error("Failed to fetch addresses:", error);
+      } finally {
+        this.addressesLoading = false;
+      }
+    },
+
+    applySelectedAddress() {
+      const found = this.addresses.find(
+        (addressEntry: any) => addressEntry.id === this.selectedAddressId,
+      );
+      if (found) {
+        this.eventForm.address = found.address;
+      }
+    },
+
+    async resolveAddress() {
+      if (this.useNewAddress) {
+        const text = (this.eventForm.address || "").trim();
+        if (!text) {
+          throw new Error("Укажи адрес события.");
+        }
+        const title = this.newAddressTitle.trim();
+        if (title) {
+          const createdAddress = await addressesApi.create({ title, address: text });
+          this.addresses.unshift(createdAddress);
+          this.selectedAddressId = createdAddress.id;
+          this.newAddressTitle = "";
+        }
+        return text;
+      }
+      if (!this.selectedAddressId) {
+        throw new Error("Выбери адрес из списка или впиши новый.");
+      }
+      const found = this.addresses.find(
+        (addressEntry: any) => addressEntry.id === this.selectedAddressId,
+      );
+      return (found?.address || "").trim();
+    },
+
     async saveEvent() {
       await this.saveArticle(); // Reuse validation for tags/image/title etc.
     },
@@ -621,6 +679,7 @@ export default function eventCreatorLogic(initialState = {}) {
 
       try {
         const resolvedAuthorId = await this.resolveAuthorId();
+        const resolvedAddress = await this.resolveAddress();
         const payload = {
           title: this.article.title,
           authorId: resolvedAuthorId,
@@ -634,7 +693,7 @@ export default function eventCreatorLogic(initialState = {}) {
           startDate: this.eventForm.startDate,
           endDate: normalizedEndDate,
           dateType: this.eventForm.dateType,
-          address: this.eventForm.address?.trim() || "",
+          address: resolvedAddress,
           timeMode,
           startTime: startTime || null,
           endTime: timeMode === "range" ? endTime : null,

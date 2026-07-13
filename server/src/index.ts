@@ -7,6 +7,7 @@ import userRoutes from './routes/userRoutes'; // Import user routes
 import flipperRoutes from './routes/flipperRoutes'; // Import flipper routes
 import interviewRoutes from './routes/interviewRoutes'; // Import interview routes
 import authorRoutes from './routes/authorRoutes';
+import addressRoutes from './routes/addressRoutes';
 import guideRoutes from './routes/guideRoutes';
 import visualStoryRoutes from './routes/visualStoryRoutes';
 import newsRoutes from './routes/newsRoutes';
@@ -52,6 +53,9 @@ app.use('/api/interviews', interviewRoutes);
 
 // Use the authors routes
 app.use('/api/authors', authorRoutes);
+
+// Use the addresses routes
+app.use('/api/addresses', addressRoutes);
 
 // Use the guide routes
 app.use('/api/guides', guideRoutes);
