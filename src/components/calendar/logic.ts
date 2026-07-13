@@ -53,6 +53,41 @@ type CalendarDay = {
   isCurrentMonth: boolean;
 };
 
+// Generic index-based fade carousel: powers "Главные события" on all
+// breakpoints, and the mobile-only single-card view for other event
+// sections. One state object per carousel name, keyed in `this.carousels`.
+type CarouselState = {
+  items: unknown[];
+  activeIndex: number;
+  isVisible: boolean;
+  transitionTimer: ReturnType<typeof setTimeout> | null;
+  autoplayIntervalMs: number;
+  autoplayResumeDelayMs: number;
+  autoplayTimer: ReturnType<typeof setInterval> | null;
+  autoplayResumeTimer: ReturnType<typeof setTimeout> | null;
+  isHovered: boolean;
+  isFocused: boolean;
+  isAutoplayPausedByUser: boolean;
+};
+
+const createCarouselState = (
+  items: unknown[],
+  autoplayIntervalMs = 4500,
+  autoplayResumeDelayMs = 8000,
+): CarouselState => ({
+  items,
+  activeIndex: 0,
+  isVisible: true,
+  transitionTimer: null,
+  autoplayIntervalMs,
+  autoplayResumeDelayMs,
+  autoplayTimer: null,
+  autoplayResumeTimer: null,
+  isHovered: false,
+  isFocused: false,
+  isAutoplayPausedByUser: false,
+});
+
 const toDate = (value: unknown): Date | null => {
   if (!value) {
     return null;
@@ -235,6 +270,8 @@ export default (
     imagePaths?: ImagePaths;
     events?: IncomingEvent[];
     featuredEvents?: FeaturedEvent[];
+    topCards?: FeaturedEvent[];
+    lastChanceCards?: FeaturedEvent[];
   } = {},
 ) => ({
   // Raw bootstrap data
@@ -242,6 +279,10 @@ export default (
   rawEvents: Array.isArray(initialState.events) ? initialState.events : [],
   featuredEvents: Array.isArray(initialState.featuredEvents)
     ? initialState.featuredEvents
+    : [],
+  topCards: Array.isArray(initialState.topCards) ? initialState.topCards : [],
+  lastChanceCards: Array.isArray(initialState.lastChanceCards)
+    ? initialState.lastChanceCards
     : [],
 
   // State
@@ -266,18 +307,9 @@ export default (
   availableEventsCount: 0,
   filteredEventsCount: 0,
   activeFilters: [] as string[],
-  activeFeaturedIndex: 0,
-  isFeaturedEventVisible: true,
-  featuredEventTransitionTimer: null as ReturnType<typeof setTimeout> | null,
-  featuredAutoplayIntervalMs: 4500,
-  featuredAutoplayResumeDelayMs: 8000,
-  featuredAutoplayTimer: null as ReturnType<typeof setInterval> | null,
-  featuredAutoplayResumeTimer: null as ReturnType<typeof setTimeout> | null,
-  isFeaturedHovered: false,
-  isFeaturedFocused: false,
-  isFeaturedAutoplayPausedByUser: false,
+  carousels: {} as Record<string, CarouselState>,
   prefersReducedMotion: false,
-  featuredVisibilityHandler: null as (() => void) | null,
+  carouselVisibilityHandler: null as (() => void) | null,
 
   init() {
     const normalizeEvent = createEventNormalizer(this.imagePaths);
@@ -310,8 +342,12 @@ export default (
 
     this.updateCalendarDisplay();
     this.updateFilteredEvents();
-    this.activeFeaturedIndex = 0;
-    this.isFeaturedEventVisible = true;
+
+    this.carousels = {
+      featured: createCarouselState(this.featuredEvents),
+      topCards: createCarouselState(this.topCards),
+      lastChance: createCarouselState(this.lastChanceCards),
+    };
 
     if (typeof globalThis.matchMedia === "function") {
       this.prefersReducedMotion = globalThis
@@ -320,149 +356,179 @@ export default (
     }
 
     if (typeof document !== "undefined") {
-      this.featuredVisibilityHandler = () => {
-        this.updateFeaturedAutoplayState();
+      this.carouselVisibilityHandler = () => {
+        Object.keys(this.carousels).forEach((name) =>
+          this.updateCarouselAutoplayState(name),
+        );
       };
       document.addEventListener(
         "visibilitychange",
-        this.featuredVisibilityHandler,
+        this.carouselVisibilityHandler,
       );
     }
 
-    this.updateFeaturedAutoplayState();
-  },
-
-  destroy() {
-    this.stopFeaturedAutoplay();
-
-    if (this.featuredEventTransitionTimer) {
-      clearTimeout(this.featuredEventTransitionTimer);
-      this.featuredEventTransitionTimer = null;
-    }
-
-    if (this.featuredAutoplayResumeTimer) {
-      clearTimeout(this.featuredAutoplayResumeTimer);
-      this.featuredAutoplayResumeTimer = null;
-    }
-
-    if (
-      typeof document !== "undefined" &&
-      this.featuredVisibilityHandler
-    ) {
-      document.removeEventListener(
-        "visibilitychange",
-        this.featuredVisibilityHandler,
-      );
-      this.featuredVisibilityHandler = null;
-    }
-  },
-
-  getCurrentFeaturedEvent() {
-    return this.featuredEvents[this.activeFeaturedIndex] ?? null;
-  },
-
-  hasMultipleFeaturedEvents() {
-    return this.featuredEvents.length > 1;
-  },
-
-  canAutoplayFeaturedEvents() {
-    return (
-      this.hasMultipleFeaturedEvents() &&
-      !this.prefersReducedMotion &&
-      !this.isFeaturedHovered &&
-      !this.isFeaturedFocused &&
-      !this.isFeaturedAutoplayPausedByUser &&
-      (typeof document === "undefined" || document.visibilityState === "visible")
+    Object.keys(this.carousels).forEach((name) =>
+      this.updateCarouselAutoplayState(name),
     );
   },
 
-  startFeaturedAutoplay() {
-    if (this.featuredAutoplayTimer || !this.canAutoplayFeaturedEvents()) {
+  destroy() {
+    Object.keys(this.carousels).forEach((name) => {
+      this.stopCarouselAutoplay(name);
+      const carousel = this.carousels[name];
+
+      if (carousel.transitionTimer) {
+        clearTimeout(carousel.transitionTimer);
+        carousel.transitionTimer = null;
+      }
+
+      if (carousel.autoplayResumeTimer) {
+        clearTimeout(carousel.autoplayResumeTimer);
+        carousel.autoplayResumeTimer = null;
+      }
+    });
+
+    if (
+      typeof document !== "undefined" &&
+      this.carouselVisibilityHandler
+    ) {
+      document.removeEventListener(
+        "visibilitychange",
+        this.carouselVisibilityHandler,
+      );
+      this.carouselVisibilityHandler = null;
+    }
+  },
+
+  getCarouselItem(name: string) {
+    const carousel = this.carousels[name];
+    return carousel?.items[carousel.activeIndex] ?? null;
+  },
+
+  isCarouselItemVisible(name: string) {
+    return this.carousels[name]?.isVisible ?? false;
+  },
+
+  hasMultipleCarouselItems(name: string) {
+    return (this.carousels[name]?.items.length ?? 0) > 1;
+  },
+
+  canAutoplayCarousel(name: string) {
+    const carousel = this.carousels[name];
+    return Boolean(
+      carousel &&
+        this.hasMultipleCarouselItems(name) &&
+        !this.prefersReducedMotion &&
+        !carousel.isHovered &&
+        !carousel.isFocused &&
+        !carousel.isAutoplayPausedByUser &&
+        (typeof document === "undefined" || document.visibilityState === "visible"),
+    );
+  },
+
+  startCarouselAutoplay(name: string) {
+    const carousel = this.carousels[name];
+    if (!carousel || carousel.autoplayTimer || !this.canAutoplayCarousel(name)) {
       return;
     }
 
-    this.featuredAutoplayTimer = setInterval(() => {
-      this.nextFeaturedEvent(false);
-    }, this.featuredAutoplayIntervalMs);
+    carousel.autoplayTimer = setInterval(() => {
+      this.nextCarouselItem(name, false);
+    }, carousel.autoplayIntervalMs);
   },
 
-  stopFeaturedAutoplay() {
-    if (!this.featuredAutoplayTimer) {
+  stopCarouselAutoplay(name: string) {
+    const carousel = this.carousels[name];
+    if (!carousel?.autoplayTimer) {
       return;
     }
 
-    clearInterval(this.featuredAutoplayTimer);
-    this.featuredAutoplayTimer = null;
+    clearInterval(carousel.autoplayTimer);
+    carousel.autoplayTimer = null;
   },
 
-  updateFeaturedAutoplayState() {
-    if (this.canAutoplayFeaturedEvents()) {
-      this.startFeaturedAutoplay();
+  updateCarouselAutoplayState(name: string) {
+    if (this.canAutoplayCarousel(name)) {
+      this.startCarouselAutoplay(name);
       return;
     }
 
-    this.stopFeaturedAutoplay();
+    this.stopCarouselAutoplay(name);
   },
 
-  pauseFeaturedAutoplayTemporarily() {
-    this.isFeaturedAutoplayPausedByUser = true;
-    this.stopFeaturedAutoplay();
-
-    if (this.featuredAutoplayResumeTimer) {
-      clearTimeout(this.featuredAutoplayResumeTimer);
-    }
-
-    this.featuredAutoplayResumeTimer = setTimeout(() => {
-      this.isFeaturedAutoplayPausedByUser = false;
-      this.featuredAutoplayResumeTimer = null;
-      this.updateFeaturedAutoplayState();
-    }, this.featuredAutoplayResumeDelayMs);
-  },
-
-  setFeaturedHover(isHovered: boolean) {
-    this.isFeaturedHovered = isHovered;
-    this.updateFeaturedAutoplayState();
-  },
-
-  setFeaturedFocus(isFocused: boolean) {
-    this.isFeaturedFocused = isFocused;
-    this.updateFeaturedAutoplayState();
-  },
-
-  switchFeaturedEvent(direction: 1 | -1) {
-    if (this.featuredEvents.length < 2) {
+  pauseCarouselAutoplayTemporarily(name: string) {
+    const carousel = this.carousels[name];
+    if (!carousel) {
       return;
     }
 
-    if (this.featuredEventTransitionTimer) {
-      clearTimeout(this.featuredEventTransitionTimer);
-      this.featuredEventTransitionTimer = null;
+    carousel.isAutoplayPausedByUser = true;
+    this.stopCarouselAutoplay(name);
+
+    if (carousel.autoplayResumeTimer) {
+      clearTimeout(carousel.autoplayResumeTimer);
+    }
+
+    carousel.autoplayResumeTimer = setTimeout(() => {
+      carousel.isAutoplayPausedByUser = false;
+      carousel.autoplayResumeTimer = null;
+      this.updateCarouselAutoplayState(name);
+    }, carousel.autoplayResumeDelayMs);
+  },
+
+  setCarouselHover(name: string, isHovered: boolean) {
+    const carousel = this.carousels[name];
+    if (!carousel) {
+      return;
+    }
+    carousel.isHovered = isHovered;
+    this.updateCarouselAutoplayState(name);
+  },
+
+  setCarouselFocus(name: string, isFocused: boolean) {
+    const carousel = this.carousels[name];
+    if (!carousel) {
+      return;
+    }
+    carousel.isFocused = isFocused;
+    this.updateCarouselAutoplayState(name);
+  },
+
+  switchCarouselItem(name: string, direction: 1 | -1) {
+    const carousel = this.carousels[name];
+    if (!carousel || carousel.items.length < 2) {
+      return;
+    }
+
+    if (carousel.transitionTimer) {
+      clearTimeout(carousel.transitionTimer);
+      carousel.transitionTimer = null;
     }
 
     const nextIndex =
-      (this.activeFeaturedIndex + direction + this.featuredEvents.length) %
-      this.featuredEvents.length;
+      (carousel.activeIndex + direction + carousel.items.length) %
+      carousel.items.length;
 
-    this.isFeaturedEventVisible = false;
-    this.featuredEventTransitionTimer = setTimeout(() => {
-      this.activeFeaturedIndex = nextIndex;
-      this.isFeaturedEventVisible = true;
-      this.featuredEventTransitionTimer = null;
+    carousel.isVisible = false;
+    carousel.transitionTimer = setTimeout(() => {
+      carousel.activeIndex = nextIndex;
+      carousel.isVisible = true;
+      carousel.transitionTimer = null;
     }, 160);
   },
 
-  prevFeaturedEvent(userInitiated = true) {
+  prevCarouselItem(name: string, userInitiated = true) {
     if (userInitiated) {
-      this.pauseFeaturedAutoplayTemporarily();
+      this.pauseCarouselAutoplayTemporarily(name);
     }
-    this.switchFeaturedEvent(-1);
+    this.switchCarouselItem(name, -1);
   },
 
-  nextFeaturedEvent(userInitiated = true) {
+  nextCarouselItem(name: string, userInitiated = true) {
     if (userInitiated) {
-      this.pauseFeaturedAutoplayTemporarily();
+      this.pauseCarouselAutoplayTemporarily(name);
     }
-    this.switchFeaturedEvent(1);
+    this.switchCarouselItem(name, 1);
   },
 
   updateCalendarDisplay() {

@@ -204,22 +204,28 @@ const lastChanceCards = lastChanceSourceCards.map((event, index) =>
   buildCardPayload(event, index + 2),
 );
 
+// Shared shape for every mobile/desktop carousel card driven by Alpine
+// (Главные события, Обязательная программа, Последний шанс).
+const toCarouselPayload = (event: (typeof featuredEventCards)[number]) => ({
+  id: event.id,
+  title: event.title,
+  imageUrl: event.imageUrl ?? event.fallbackImage.src,
+  address: event.address || "Место",
+  categoryLabel: event.categoryLabel,
+  dateLabel: formatCardDateRange(event.startDate, event.endDate),
+  url: event.url,
+  ...getDateParts(event.startDate, event.endDate),
+});
+
 const calendarState = JSON.stringify({
   imagePaths: {
     theatreShowSrc: theatreShowImage.src,
     smallEventSrc: smallEventImage.src,
   },
   events: normalizedEvents,
-  featuredEvents: featuredEventCards.map((event) => ({
-    id: event.id,
-    title: event.title,
-    imageUrl: event.imageUrl ?? event.fallbackImage.src,
-    address: event.address || "Место",
-    categoryLabel: event.categoryLabel,
-    dateLabel: formatCardDateRange(event.startDate, event.endDate),
-    url: event.url,
-    ...getDateParts(event.startDate, event.endDate),
-  })),
+  featuredEvents: featuredEventCards.map(toCarouselPayload),
+  topCards: topCards.map(toCarouselPayload),
+  lastChanceCards: lastChanceCards.map(toCarouselPayload),
 }).replace(/</g, "\\u003c");
 ---
 
@@ -301,17 +307,17 @@ const calendarState = JSON.stringify({
 
             <div
               class="relative mt-8"
-              @mouseenter="setFeaturedHover(true)"
-              @mouseleave="setFeaturedHover(false)"
-              @focusin="setFeaturedFocus(true)"
-              @focusout="if (!$event.relatedTarget || !$el.contains($event.relatedTarget)) setFeaturedFocus(false)"
+              @mouseenter="setCarouselHover('featured', true)"
+              @mouseleave="setCarouselHover('featured', false)"
+              @focusin="setCarouselFocus('featured', true)"
+              @focusout="if (!$event.relatedTarget || !$el.contains($event.relatedTarget)) setCarouselFocus('featured', false)"
             >
               <button
                 type="button"
                 aria-label="Предыдущее"
                 class="absolute left-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full text-base-content md:flex cursor-pointer"
-                x-show="hasMultipleFeaturedEvents()"
-                @click.prevent="prevFeaturedEvent()"
+                x-show="hasMultipleCarouselItems('featured')"
+                @click.prevent="prevCarouselItem('featured')"
               >
                 <ChevronLeft class="h-5 w-5" />
               </button>
@@ -319,65 +325,65 @@ const calendarState = JSON.stringify({
                 type="button"
                 aria-label="Следующее"
                 class="absolute right-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full text-base-content md:flex cursor-pointer"
-                x-show="hasMultipleFeaturedEvents()"
-                @click.prevent="nextFeaturedEvent()"
+                x-show="hasMultipleCarouselItems('featured')"
+                @click.prevent="nextCarouselItem('featured')"
               >
                 <ChevronRight class="h-5 w-5" />
               </button>
 
               <div class="mx-auto max-w-[1052px] lg:min-h-[21rem]">
                 <article
-                  x-show="isFeaturedEventVisible && getCurrentFeaturedEvent()"
+                  x-show="isCarouselItemVisible('featured') && getCarouselItem('featured')"
                   x-transition.opacity.duration.220ms
                   class="grid overflow-hidden bg-white lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)]"
                 >
                   <a
-                    :href="getCurrentFeaturedEvent()?.url || '#'"
+                    :href="getCarouselItem('featured')?.url || '#'"
                     class="linked-image-hover aspect-[3/2]"
-                    :aria-label="getCurrentFeaturedEvent()?.title || 'Событие месяца'"
+                    :aria-label="getCarouselItem('featured')?.title || 'Событие месяца'"
                   >
                     <img
-                      :src="getCurrentFeaturedEvent()?.imageUrl || ''"
-                      :alt="getCurrentFeaturedEvent()?.title || 'Событие месяца'"
+                      :src="getCarouselItem('featured')?.imageUrl || ''"
+                      :alt="getCarouselItem('featured')?.title || 'Событие месяца'"
                       class="linked-image-hover__media block h-full w-full object-cover"
                     />
                   </a>
 
                   <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-8 lg:pt-[1.35rem] lg:pb-[1.1rem]">
                     <div class="mb-6 flex w-full items-start justify-start">
-                      <template x-if="!getCurrentFeaturedEvent()?.isDateRange">
+                      <template x-if="!getCarouselItem('featured')?.isDateRange">
                         <div class="flex flex-col items-start justify-center">
                           <p
                             class="mx-0 mt-4 font-old_standard text-7xl tracking-[-0.06em] uppercase text-black"
-                            x-text="getCurrentFeaturedEvent()?.dateDay || ''"
+                            x-text="getCarouselItem('featured')?.dateDay || ''"
                           ></p>
                           <p
                             class="m-0 -mt-2 font-inter text-xl font-bold uppercase text-black/70"
-                            x-text="getCurrentFeaturedEvent()?.dateMonth || ''"
+                            x-text="getCarouselItem('featured')?.dateMonth || ''"
                           ></p>
                           <div class="mb-1 w-full border-t border-black/30"></div>
                           <p
                             class="m-0 mb-1 font-old_standard text-xl font-bold italic text-black/70"
-                            x-text="getCurrentFeaturedEvent()?.dateWeekday || ''"
+                            x-text="getCarouselItem('featured')?.dateWeekday || ''"
                           ></p>
                         </div>
                       </template>
 
-                      <template x-if="getCurrentFeaturedEvent()?.isDateRange">
+                      <template x-if="getCarouselItem('featured')?.isDateRange">
                         <div class="w-full flex items-center justify-between gap-4 sm:gap-5">
                           <div class="flex flex-col items-start justify-center">
                             <p
                               class="mx-0 mt-4 font-old_standard text-6xl tracking-[-0.06em] uppercase text-black sm:text-7xl"
-                              x-text="getCurrentFeaturedEvent()?.dateDay || ''"
+                              x-text="getCarouselItem('featured')?.dateDay || ''"
                             ></p>
                             <p
                               class="m-0 -mt-2 font-inter text-lg font-bold uppercase text-black/70 sm:text-xl"
-                              x-text="getCurrentFeaturedEvent()?.dateMonth || ''"
+                              x-text="getCarouselItem('featured')?.dateMonth || ''"
                             ></p>
                             <div class="mb-1 w-full border-t border-black/30"></div>
                             <p
                               class="m-0 mb-1 font-old_standard text-lg font-bold italic text-black/70 sm:text-xl"
-                              x-text="getCurrentFeaturedEvent()?.dateWeekday || ''"
+                              x-text="getCarouselItem('featured')?.dateWeekday || ''"
                             ></p>
                           </div>
 
@@ -388,16 +394,16 @@ const calendarState = JSON.stringify({
                           <div class="flex flex-col items-start justify-center">
                             <p
                               class="mx-0 mt-4 font-old_standard text-6xl tracking-[-0.06em] uppercase text-black sm:text-7xl"
-                              x-text="getCurrentFeaturedEvent()?.dateEndDay || ''"
+                              x-text="getCarouselItem('featured')?.dateEndDay || ''"
                             ></p>
                             <p
                               class="m-0 -mt-2 font-inter text-lg font-bold uppercase text-black/70 sm:text-xl"
-                              x-text="getCurrentFeaturedEvent()?.dateEndMonth || ''"
+                              x-text="getCarouselItem('featured')?.dateEndMonth || ''"
                             ></p>
                             <div class="mb-1 w-full border-t border-black/30"></div>
                             <p
                               class="m-0 mb-1 font-old_standard text-lg font-bold italic text-black/70 sm:text-xl"
-                              x-text="getCurrentFeaturedEvent()?.dateEndWeekday || ''"
+                              x-text="getCarouselItem('featured')?.dateEndWeekday || ''"
                             ></p>
                           </div>
                         </div>
@@ -406,23 +412,23 @@ const calendarState = JSON.stringify({
                     <p class="m-0">
                       <span
                         class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']"
-                        x-text="getCurrentFeaturedEvent()?.categoryLabel || ''"
+                        x-text="getCarouselItem('featured')?.categoryLabel || ''"
                       ></span>
                     </p>
 
                     <a
-                      :href="getCurrentFeaturedEvent()?.url || '#'"
+                      :href="getCarouselItem('featured')?.url || '#'"
                       class="text-current no-underline hover:underline"
                     >
                       <h2
                         class="m-0 font-old_standard text-[clamp(1.4rem,2.2vw,1.9rem)] font-normal leading-[1.04]"
-                        x-text="getCurrentFeaturedEvent()?.title || ''"
+                        x-text="getCarouselItem('featured')?.title || ''"
                       ></h2>
                     </a>
 
                     {/* <div class="mt-[0.4rem] flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
                       <EventMetaIcon type="location" class="h-4 w-4 shrink-0 text-accent" />
-                      <span x-text="getCurrentFeaturedEvent()?.address || 'Место'"></span>
+                      <span x-text="getCarouselItem('featured')?.address || 'Место'"></span>
                     </div> */}
                   </div>
                 </article>
@@ -430,13 +436,13 @@ const calendarState = JSON.stringify({
 
               <div
                 class="flex md:hidden justify-center items-center gap-6 mt-4"
-                x-show="hasMultipleFeaturedEvents()"
+                x-show="hasMultipleCarouselItems('featured')"
               >
                 <button
                   type="button"
                   aria-label="Предыдущее"
                   class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
-                  @click.prevent="prevFeaturedEvent()"
+                  @click.prevent="prevCarouselItem('featured')"
                 >
                   <ChevronLeft class="h-5 w-5" />
                 </button>
@@ -444,7 +450,7 @@ const calendarState = JSON.stringify({
                   type="button"
                   aria-label="Следующее"
                   class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
-                  @click.prevent="nextFeaturedEvent()"
+                  @click.prevent="nextCarouselItem('featured')"
                 >
                   <ChevronRight class="h-5 w-5" />
                 </button>
@@ -461,7 +467,7 @@ const calendarState = JSON.stringify({
               Обязательная программа
             </h2>
 
-            <div class="mt-8 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
+            <div class="mt-8 hidden md:grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
               {topCards.map((event) => (
                 <article class="grid h-full grid-rows-[auto_1fr] overflow-hidden bg-white">
                   <a
@@ -549,6 +555,98 @@ const calendarState = JSON.stringify({
                 </article>
               ))}
             </div>
+
+            <div
+              class="mt-8 md:hidden"
+              @mouseenter="setCarouselHover('topCards', true)"
+              @mouseleave="setCarouselHover('topCards', false)"
+              @focusin="setCarouselFocus('topCards', true)"
+              @focusout="if (!$event.relatedTarget || !$el.contains($event.relatedTarget)) setCarouselFocus('topCards', false)"
+            >
+              <article
+                x-show="isCarouselItemVisible('topCards') && getCarouselItem('topCards')"
+                x-transition.opacity.duration.220ms
+                class="grid h-full grid-rows-[auto_1fr] overflow-hidden bg-white"
+              >
+                <a
+                  :href="getCarouselItem('topCards')?.url || '#'"
+                  class="linked-image-hover aspect-[1.12/1]"
+                  :aria-label="getCarouselItem('topCards')?.title || 'Событие'"
+                >
+                  <img
+                    :src="getCarouselItem('topCards')?.imageUrl || ''"
+                    :alt="getCarouselItem('topCards')?.title || 'Событие'"
+                    class="linked-image-hover__media block h-full w-full object-cover"
+                  />
+                </a>
+
+                <div class="grid h-full grid-rows-[auto_auto_1fr_auto] gap-[0.55rem] content-start p-4">
+                  <template x-if="!getCarouselItem('topCards')?.isDateRange">
+                    <div class="mb-2 flex flex-col items-start justify-center">
+                      <p class="m-0 font-old_standard text-[3rem] leading-[0.9] tracking-[-0.06em] uppercase text-black" x-text="getCarouselItem('topCards')?.dateDay || ''"></p>
+                      <p class="m-0 -mt-1 font-inter text-[0.82rem] font-bold uppercase tracking-[0.18em] text-black/80" x-text="getCarouselItem('topCards')?.dateMonth || ''"></p>
+                      <div class="mb-1 mt-1 w-full border-t border-black/30"></div>
+                      <p class="m-0 font-old_standard text-[0.9rem] italic text-black/70" x-text="getCarouselItem('topCards')?.dateWeekday || ''"></p>
+                    </div>
+                  </template>
+
+                  <template x-if="getCarouselItem('topCards')?.isDateRange">
+                    <div class="mb-2 flex w-full items-start justify-between gap-3">
+                      <div class="flex flex-col items-start justify-center">
+                        <p class="m-0 font-old_standard text-[3rem] leading-[0.9] tracking-[-0.06em] uppercase text-black" x-text="getCarouselItem('topCards')?.dateDay || ''"></p>
+                        <p class="m-0 -mt-1 font-inter text-[0.82rem] font-bold uppercase tracking-[0.18em] text-black/80" x-text="getCarouselItem('topCards')?.dateMonth || ''"></p>
+                        <div class="mb-1 mt-1 w-full border-t border-black/30"></div>
+                        <p class="m-0 font-old_standard text-[0.9rem] italic text-black/70" x-text="getCarouselItem('topCards')?.dateWeekday || ''"></p>
+                      </div>
+
+                      <div class="mt-[1.45rem] flex items-center text-black/80">
+                        <span class="font-old_standard text-[1.6rem] leading-none">→</span>
+                      </div>
+
+                      <div class="flex flex-col items-start justify-center">
+                        <p class="m-0 font-old_standard text-[3rem] leading-[0.9] tracking-[-0.06em] uppercase text-black" x-text="getCarouselItem('topCards')?.dateEndDay || ''"></p>
+                        <p class="m-0 -mt-1 font-inter text-[0.82rem] font-bold uppercase tracking-[0.18em] text-black/80" x-text="getCarouselItem('topCards')?.dateEndMonth || ''"></p>
+                        <div class="mb-1 mt-1 w-full border-t border-black/30"></div>
+                        <p class="m-0 font-old_standard text-[0.9rem] italic text-black/70" x-text="getCarouselItem('topCards')?.dateEndWeekday || ''"></p>
+                      </div>
+                    </div>
+                  </template>
+
+                  <p class="m-0">
+                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']" x-text="getCarouselItem('topCards')?.categoryLabel || ''"></span>
+                  </p>
+
+                  <a
+                    :href="getCarouselItem('topCards')?.url || '#'"
+                    class="text-current no-underline hover:underline"
+                  >
+                    <h3 class="m-0 line-clamp-3 font-old_standard text-[1.2rem] font-normal leading-[1.08]" x-text="getCarouselItem('topCards')?.title || ''"></h3>
+                  </a>
+                </div>
+              </article>
+
+              <div
+                class="flex justify-center items-center gap-6 mt-4"
+                x-show="hasMultipleCarouselItems('topCards')"
+              >
+                <button
+                  type="button"
+                  aria-label="Предыдущее"
+                  class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
+                  @click.prevent="prevCarouselItem('topCards')"
+                >
+                  <ChevronLeft class="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Следующее"
+                  class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
+                  @click.prevent="nextCarouselItem('topCards')"
+                >
+                  <ChevronRight class="h-5 w-5" />
+                </button>
+              </div>
+            </div>
           </section>
         )
       }
@@ -560,7 +658,7 @@ const calendarState = JSON.stringify({
               Последний шанс
             </h2>
 
-            <div class="mt-8 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
+            <div class="mt-8 hidden md:grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
               {lastChanceCards.map((event) => (
                 <article class="grid h-full grid-rows-[auto_1fr] overflow-hidden bg-white">
                   <a
@@ -617,6 +715,89 @@ const calendarState = JSON.stringify({
                   </div>
                 </article>
               ))}
+            </div>
+
+            <div
+              class="mt-8 md:hidden"
+              @mouseenter="setCarouselHover('lastChance', true)"
+              @mouseleave="setCarouselHover('lastChance', false)"
+              @focusin="setCarouselFocus('lastChance', true)"
+              @focusout="if (!$event.relatedTarget || !$el.contains($event.relatedTarget)) setCarouselFocus('lastChance', false)"
+            >
+              <article
+                x-show="isCarouselItemVisible('lastChance') && getCarouselItem('lastChance')"
+                x-transition.opacity.duration.220ms
+                class="grid h-full grid-rows-[auto_1fr] overflow-hidden bg-white"
+              >
+                <a
+                  :href="getCarouselItem('lastChance')?.url || '#'"
+                  class="linked-image-hover aspect-[1.12/1]"
+                  :aria-label="getCarouselItem('lastChance')?.title || 'Событие'"
+                >
+                  <img
+                    :src="getCarouselItem('lastChance')?.imageUrl || ''"
+                    :alt="getCarouselItem('lastChance')?.title || 'Событие'"
+                    class="linked-image-hover__media block h-full w-full object-cover"
+                  />
+                </a>
+
+                <div class="grid h-full grid-rows-[auto_auto_1fr_auto] gap-[0.55rem] content-start p-4">
+                  <div class="mb-2 flex flex-row items-center justify-start gap-4">
+                    <div class="flex flex-col items-center justify-center gap-0">
+                      <p class="m-0 font-old_standard text-lg italic text-base-content">до</p>
+                      <p class="m-0 font-inter text-xl font-bold uppercase tracking-[0.18em] text-black/80">→</p>
+                    </div>
+                    <div>
+                      <p
+                        class="m-0 font-old_standard text-[3rem] leading-[0.9] tracking-[-0.06em] uppercase text-base-content"
+                        x-text="getCarouselItem('lastChance')?.isDateRange ? getCarouselItem('lastChance')?.dateEndDay : getCarouselItem('lastChance')?.dateDay"
+                      ></p>
+                      <p
+                        class="m-0 -mt-1 font-inter text-[0.82rem] font-bold uppercase tracking-[0.18em] text-base-content"
+                        x-text="getCarouselItem('lastChance')?.isDateRange ? getCarouselItem('lastChance')?.dateEndMonth : getCarouselItem('lastChance')?.dateMonth"
+                      ></p>
+                      <div class="mb-1 mt-1 w-full border-t border-black/30"></div>
+                      <p
+                        class="m-0 font-old_standard text-[0.9rem] italic text-base-content"
+                        x-text="getCarouselItem('lastChance')?.isDateRange ? getCarouselItem('lastChance')?.dateEndWeekday : getCarouselItem('lastChance')?.dateWeekday"
+                      ></p>
+                    </div>
+                  </div>
+
+                  <p class="m-0">
+                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']" x-text="getCarouselItem('lastChance')?.categoryLabel || ''"></span>
+                  </p>
+
+                  <a
+                    :href="getCarouselItem('lastChance')?.url || '#'"
+                    class="text-current no-underline hover:underline"
+                  >
+                    <h3 class="m-0 line-clamp-3 font-old_standard text-[1.2rem] font-normal leading-[1.08]" x-text="getCarouselItem('lastChance')?.title || ''"></h3>
+                  </a>
+                </div>
+              </article>
+
+              <div
+                class="flex justify-center items-center gap-6 mt-4"
+                x-show="hasMultipleCarouselItems('lastChance')"
+              >
+                <button
+                  type="button"
+                  aria-label="Предыдущее"
+                  class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
+                  @click.prevent="prevCarouselItem('lastChance')"
+                >
+                  <ChevronLeft class="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Следующее"
+                  class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
+                  @click.prevent="nextCarouselItem('lastChance')"
+                >
+                  <ChevronRight class="h-5 w-5" />
+                </button>
+              </div>
             </div>
           </section>
         )
