@@ -30,7 +30,7 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
           <div class="flex flex-col gap-4 max-w-[825px] w-full">
             <p
               class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mt-2"
-              x-text="article.tags?.length ? getTagLabel(article.tags[0]) : 'Событие'"
+              x-text="article.tags?.length ? article.tags[0] : 'Событие'"
             ></p>
             <h1
               class="text-3xl lg:text-[52px] leading-tight font-old_standard text-base-content w-full"

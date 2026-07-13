@@ -32,12 +32,14 @@ const TYPE_LABELS: Record<MaterialContentType, string> = {
   'visual-story': 'Visual Story',
 };
 
-// Order in which sections appear on the /tag/[tag] page, mirrors profileLogic.ts's BOOKMARK_TYPE_ORDER.
+// Order in which sections appear on the /tag/[tag] page. Events lead the
+// page on purpose (no longer mirrors profileLogic.ts's BOOKMARK_TYPE_ORDER,
+// which is a separate "my bookmarks" listing).
 const TYPE_ORDER: MaterialContentType[] = [
+  'event',
   'article',
   'news',
   'guide',
-  'event',
   'flipper',
   'interview',
   'visual-story',

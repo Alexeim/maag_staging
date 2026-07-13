@@ -17,6 +17,7 @@ import {
 import {
   buildContentCollectionItems,
   fetchPublicContentPools,
+  normalizeTags,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
 import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
@@ -71,10 +72,7 @@ const displayArticle = {
   contentBlocks: articleData?.content || [],
 };
 
-const firstBookmarkTag =
-  Array.isArray(articleData?.tags) && typeof articleData.tags[0] === "string"
-    ? getTagLabel(articleData.tags[0])
-    : "";
+const firstBookmarkTag = getTagLabel(normalizeTags(articleData?.tags)[0] ?? "");
 const bookmarkCategory =
   rawCategory === "culture" || rawCategory === "paris"
     ? CATEGORY_LABELS[rawCategory]

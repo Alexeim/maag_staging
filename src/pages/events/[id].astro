@@ -187,13 +187,19 @@ const toUtcDayStart = (date: Date): Date => {
   return normalized;
 };
 
+// Paris district codes (e.g. "district-16") live in a separate parisDistrict
+// field for dashboard-created content and should never stand in as a
+// category badge — but records written outside this app's creator forms
+// have been seen with a district code as their only "tag".
+const isDistrictTag = (value: string): boolean => /^district-\d+$/i.test(value);
+
 const normalizeTags = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
     return [];
   }
   return value
     .map((item) => (typeof item === "string" ? item.trim() : ""))
-    .filter(Boolean);
+    .filter((tag) => Boolean(tag) && !isDistrictTag(tag));
 };
 
 const resolveTagLabel = (rawTag: unknown, fallback: string): string =>
@@ -454,9 +460,7 @@ if (!error && eventData) {
               ? item.address.trim()
               : "Место уточняется",
           categoryLabel: resolveTagLabel(
-            Array.isArray(item?.tags) && item.tags.length > 0
-              ? item.tags[0]
-              : null,
+            normalizeTags(item?.tags)[0] ?? null,
             "Событие",
           ),
           startDate: itemStart,

@@ -11,6 +11,7 @@ import {
   buildContentCollectionItems,
   buildLinkedContentLookup,
   fetchPublicContentPools,
+  normalizeTags,
   type LinkedContentLookup,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
@@ -50,11 +51,7 @@ const {
   leadHtml,
 } = interview;
 const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
-const firstBookmarkTag =
-  Array.isArray((interview as any)?.tags) &&
-  typeof (interview as any).tags[0] === "string"
-    ? (interview as any).tags[0]
-    : "";
+const firstBookmarkTag = normalizeTags((interview as any)?.tags)[0] ?? "";
 const bookmarkTag = firstBookmarkTag ? getKnownTagLabel(firstBookmarkTag) : "";
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
 const articleStructuredData = buildArticleStructuredData({

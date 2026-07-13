@@ -66,6 +66,12 @@ export interface PublicContentPools {
   allPhotosOfTheDay: PublicContentCardItem[];
 }
 
+// Paris district codes (e.g. "district-16") live in a separate parisDistrict
+// field for dashboard-created content and should never appear as a tag — but
+// records written outside this app's creator forms have been seen with a
+// district code as their only "tag", which then got shown as a badge.
+const isDistrictTag = (value: string): boolean => /^district-\d+$/i.test(value);
+
 export const normalizeTags = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
     return [];
@@ -73,7 +79,7 @@ export const normalizeTags = (value: unknown): string[] => {
 
   return value
     .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
-    .filter(Boolean);
+    .filter((tag) => Boolean(tag) && !isDistrictTag(tag));
 };
 
 export const toDate = (value: unknown): Date | null => {

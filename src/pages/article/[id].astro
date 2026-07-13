@@ -20,6 +20,7 @@ import {
   buildContentCollectionItems,
   buildLinkedContentLookup,
   fetchPublicContentPools,
+  normalizeTags,
   type LinkedContentLookup,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
@@ -103,10 +104,7 @@ const bookmarkCategory =
   rawCategory === "culture" || rawCategory === "paris"
     ? CATEGORY_LABELS[rawCategory]
     : "";
-const firstBookmarkTag =
-  Array.isArray(articleData?.tags) && typeof articleData.tags[0] === "string"
-    ? articleData.tags[0]
-    : "";
+const firstBookmarkTag = normalizeTags(articleData?.tags)[0] ?? "";
 const bookmarkTag = firstBookmarkTag ? getTagLabel(firstBookmarkTag) : "";
 
 const isStandardCategoryArticle = (item: any) =>

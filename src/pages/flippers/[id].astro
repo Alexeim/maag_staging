@@ -16,6 +16,7 @@ import picture1 from "@/assets/images/culture.jpg";
 import {
   buildContentCollectionItems,
   fetchPublicContentPools,
+  normalizeTags,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
 import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
@@ -44,10 +45,7 @@ const bookmarkCategory =
     : flipper.category === "paris"
       ? "Париж"
       : "";
-const firstBookmarkTag =
-  Array.isArray(flipper.tags) && typeof flipper.tags[0] === "string"
-    ? flipper.tags[0]
-    : "";
+const firstBookmarkTag = normalizeTags(flipper.tags)[0] ?? "";
 const bookmarkTag = firstBookmarkTag ? getTagLabel(firstBookmarkTag) : "";
 
 const flipperState = JSON.stringify({

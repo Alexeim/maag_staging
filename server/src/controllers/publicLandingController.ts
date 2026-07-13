@@ -659,6 +659,13 @@ const extractDescription = (blocks: any): string => {
   return text.length > 180 ? `${text.slice(0, 177).trim()}...` : text;
 };
 
+// Paris district codes (e.g. "district-16") live in a separate parisDistrict
+// field for dashboard-created content and should never appear as a tag — but
+// records written outside the dashboard have been seen with a district code
+// as their only "tag", which then got shown as the calendar badge.
+const isDistrictTag = (value: unknown): boolean =>
+  typeof value === 'string' && /^district-\d+$/i.test(value);
+
 const toPublicCalendarEvent = (doc: FirebaseFirestore.DocumentSnapshot) => {
   const data = doc.data();
   if (!doc.exists || !data) return null;
@@ -669,7 +676,10 @@ const toPublicCalendarEvent = (doc: FirebaseFirestore.DocumentSnapshot) => {
   startDate.setUTCHours(0, 0, 0, 0);
   if (endDate) endDate.setUTCHours(0, 0, 0, 0);
 
-  const primaryTag = Array.isArray(data.tags) && data.tags.length > 0 ? data.tags[0] : null;
+  const realTags = Array.isArray(data.tags)
+    ? data.tags.filter((tag: unknown) => typeof tag === 'string' && !isDistrictTag(tag))
+    : [];
+  const primaryTag = realTags.length > 0 ? realTags[0] : null;
 
   return {
     id: doc.id,

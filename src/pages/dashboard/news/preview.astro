@@ -35,7 +35,7 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
                     <div class="flex flex-col items-start gap-2">
                       <p
                         class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']"
-                        x-text="article.tags?.length ? getTagLabel(article.tags[0]) : getCategoryLabel(article.category)"
+                        x-text="article.tags?.length ? article.tags[0] : getCategoryLabel(article.category)"
                       ></p>
                       <h1
                         class="text-3xl lg:text-[42px] leading-tight font-old_standard text-base-content w-full"

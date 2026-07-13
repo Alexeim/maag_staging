@@ -13,6 +13,7 @@ import { ApiError, visualStoriesApi } from "@/lib/api/api";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import { getTransitionName } from "@/lib/utils/transitions";
+import { normalizeTags } from "@/lib/utils/contentCollectionMarquee";
 import { Info, MoveRight, MoveLeft } from "@lucide/astro";
 
 const { id } = Astro.params;
@@ -123,10 +124,7 @@ const bookmarkCategory =
   category === "culture" || category === "paris"
     ? CATEGORY_LABELS[category]
     : "";
-const firstBookmarkTag =
-  Array.isArray(storyData?.tags) && typeof storyData.tags[0] === "string"
-    ? storyData.tags[0]
-    : "";
+const firstBookmarkTag = normalizeTags(storyData?.tags)[0] ?? "";
 const bookmarkTag = firstBookmarkTag ? getTagLabel(firstBookmarkTag) : "";
 const articleStructuredData = storyData
   ? buildArticleStructuredData({

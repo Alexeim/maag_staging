@@ -21,6 +21,7 @@ import {
   buildLinkedContentLookup,
   buildContentCollectionItems,
   fetchPublicContentPools,
+  normalizeTags,
   toDate,
   type LinkedContentLookup,
 } from "@/lib/utils/contentCollectionMarquee";
@@ -76,10 +77,7 @@ const bookmarkCategory =
   articleData?.category === "culture" || articleData?.category === "paris"
     ? CATEGORY_LABELS[articleData.category]
     : "";
-const firstBookmarkTag =
-  Array.isArray(articleData?.tags) && typeof articleData.tags[0] === "string"
-    ? articleData.tags[0].trim()
-    : "";
+const firstBookmarkTag = normalizeTags(articleData?.tags)[0] ?? "";
 const bookmarkTag = firstBookmarkTag ? getTagLabel(firstBookmarkTag) : "";
 
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;

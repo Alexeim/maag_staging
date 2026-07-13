@@ -17,6 +17,7 @@ import {
   buildLinkedContentLookup,
   fetchPublicContentPools,
   hasLinkedContentBlocks,
+  normalizeTags,
   toDate,
   type LinkedContentLookup,
 } from "@/lib/utils/contentCollectionMarquee";
@@ -74,10 +75,7 @@ const displayGuide = {
   tips: Array.isArray(guideData?.tips) ? guideData.tips : [],
 };
 
-const firstBookmarkTag =
-  Array.isArray(guideData?.tags) && typeof guideData.tags[0] === "string"
-    ? getTagLabel(guideData.tags[0])
-    : "";
+const firstBookmarkTag = getTagLabel(normalizeTags(guideData?.tags)[0] ?? "");
 const bookmarkCategory =
   rawCategory === "culture" || rawCategory === "paris"
     ? CATEGORY_LABELS[rawCategory]
