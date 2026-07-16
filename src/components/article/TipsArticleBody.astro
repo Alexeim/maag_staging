@@ -31,16 +31,27 @@ const items = contentBlocks.filter((b) => b != null && b.type === "tips-item");
 <div class="max-w-[826px] mx-auto">
   {
     items.map((item, i) => (
-      <article class="flex flex-col sm:flex-row py-8 gap-6">
+      <article class="flex flex-col sm:flex-row sm:items-start py-8 gap-6">
         {/* Left: image */}
         {item.imageUrl && (
-          <div class="sm:w-[42%] shrink-0">
-            <img
-              src={item.imageUrl}
-              alt={item.imageCaption || item.heading || `Пункт ${i + 1}`}
-              class="w-full h-full object-cover"
-              style="min-height: 200px; max-height: 340px;"
-            />
+          <div class="sm:w-[42%] shrink-0 sm:sticky sm:top-[80px] lg:top-[90px]">
+            <div class="group relative" x-data="{ open: false }" @click="open = !open">
+              <img
+                src={item.imageUrl}
+                alt={item.imageCaption || item.heading || `Пункт ${i + 1}`}
+                class="w-full aspect-square object-cover"
+              />
+              {item.imageCaption && (
+                <div
+                  class="absolute inset-x-0 bottom-0 flex h-20 items-end justify-end bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 transition-opacity duration-200 sm:group-hover:opacity-100"
+                  x-bind:class="open && 'opacity-100'"
+                >
+                  <p class="max-w-[85%] text-right text-[11px] leading-snug text-white">
+                    {item.imageCaption}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
