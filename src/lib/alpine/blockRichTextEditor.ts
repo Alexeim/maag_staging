@@ -60,7 +60,6 @@ export default function blockRichTextEditor(
         placeholder: config.placeholder || "Введите текст...",
         modules: {
           clipboard: {
-            matchVisual: false,
             matchers: [[Node.ELEMENT_NODE, stripCosmeticFormats]],
           },
           toolbar: [["bold", "italic", "underline"], ["link"], ["clean"]],

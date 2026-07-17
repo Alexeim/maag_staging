@@ -313,12 +313,8 @@ const wideBreakoutRailClass = "w-full lg:max-w-[1356px] my-12 px-4 lg:px-0";
 </div>
 
 <style>
-  .article-rich-text :global(p) {
-    margin: 0 0 1rem;
-  }
-
-  .article-rich-text :global(p:last-child) {
-    margin-bottom: 0;
+  .article-rich-text :global(p + p) {
+    margin-top: 1rem;
   }
 
   .article-rich-text--dropcap :global(p:first-child::first-letter) {
