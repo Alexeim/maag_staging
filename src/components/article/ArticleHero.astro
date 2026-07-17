@@ -154,7 +154,7 @@ const resolvedLeadHtml = getInitialRichTextHtml({ html: leadHtml, text: lead });
             ]}
           >
             <div class="flex items-center justify-center overflow-hidden lg:min-h-0 lg:flex-1">
-              <div class="relative w-full lg:h-full lg:w-auto">
+              <div class="group relative w-full lg:h-full lg:w-auto" x-data="{ open: false }" @click="open = !open">
                 <img
                   src={imageUrl}
                   alt={imageAlt}
