@@ -7,7 +7,7 @@ import ArticleHeader from "@/components/article/ArticleHeader.astro";
 import ArticleMetaRow from "@/components/article/ArticleMetaRow.astro";
 import ArticleImage from "@/components/article/ArticleImage.astro";
 import ImageCaptionHint from "@/components/common/ImageCaptionHint.astro";
-import { getInitialRichTextHtml } from "@/lib/utils/richText";
+import { getInitialRichTextHtml, richTextHtmlToText } from "@/lib/utils/richText";
 
 interface Props {
   category: string;
@@ -45,6 +45,9 @@ const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
 const imageOnLeft = heroOrientation === "image-left";
 const isStacked = heroOrientation === "image-bottom";
 const resolvedLeadHtml = getInitialRichTextHtml({ html: leadHtml, text: lead });
+// Long leads blow past the hero's fixed 100svh height on desktop, so we scale
+// the font down once the lead outgrows a comfortable couple of sentences.
+const isLongLead = richTextHtmlToText(resolvedLeadHtml).length > 220;
 ---
 
 {
@@ -124,7 +127,10 @@ const resolvedLeadHtml = getInitialRichTextHtml({ html: leadHtml, text: lead });
         {
           resolvedLeadHtml && (
             <div
-              class="article-rich-text mx-auto mt-8 max-w-[34rem] font-article-body text-base font-light text-base-content lg:mt-10"
+              class:list={[
+                "article-rich-text mx-auto mt-8 max-w-[34rem] font-article-body font-light text-base-content lg:mt-10",
+                isLongLead ? "text-sm" : "text-base",
+              ]}
               set:html={resolvedLeadHtml}
             />
           )
