@@ -237,10 +237,12 @@ export interface CulturePagePlacementsDocument {
 }
 
 export interface ParisPagePlacementsDocument {
-  schemaVersion: 1;
+  schemaVersion: 2;
   hero: SectionPageHeroManualSelection | null;
+  twoImageArticle: SectionPageHeroManualSelection | null;
+  interviewFeature: SectionPageFeaturedInterviewSelection | null;
   secondaryStories: SectionPageSecondaryStoriesSelection | null;
-  leSaviezVousFeature: SectionPageLeSaviezVousSelection | null;
+  photoOfTheDayFeature: PhotoOfTheDayFeatureSelection | null;
   sidebarRail: SectionPageSidebarRailSelection | null;
   updatedAt: Date | null;
   updatedBy: string | null;
@@ -279,6 +281,7 @@ const MAX_CATEGORY_CARDS_LIMIT = 3;
 const CALENDAR_PAGE_CARD_LIMIT = 4;
 const DEFAULT_SECTION_PAGE_SECONDARY_LIMIT = 3;
 const MAX_SECTION_PAGE_SECONDARY_LIMIT = 6;
+const DEFAULT_PARIS_SECONDARY_LIMIT = 2;
 const DEFAULT_SECTION_PAGE_SIDEBAR_LIMIT = 4;
 const MAX_SECTION_PAGE_SIDEBAR_LIMIT = 8;
 
@@ -1475,10 +1478,12 @@ const createDefaultCulturePagePlacements = (): CulturePagePlacementsDocument => 
 });
 
 const createDefaultParisPagePlacements = (): ParisPagePlacementsDocument => ({
-  schemaVersion: 1,
+  schemaVersion: 2,
   hero: null,
-  secondaryStories: { mode: 'auto-latest', limit: DEFAULT_SECTION_PAGE_SECONDARY_LIMIT },
-  leSaviezVousFeature: { mode: 'auto-latest' },
+  twoImageArticle: null,
+  interviewFeature: { mode: 'auto-latest' },
+  secondaryStories: { mode: 'auto-latest', limit: DEFAULT_PARIS_SECONDARY_LIMIT },
+  photoOfTheDayFeature: { mode: 'auto-latest' },
   sidebarRail: { mode: 'auto-hot', limit: DEFAULT_SECTION_PAGE_SIDEBAR_LIMIT },
   updatedAt: null,
   updatedBy: null,
@@ -1647,15 +1652,25 @@ const normalizeParisPagePlacements = (
     ? null
     : (normalizeSectionPageHeroSelection(heroRaw) ?? defaults.hero);
 
+  const twoImageArticleRaw = 'twoImageArticle' in value ? value.twoImageArticle : undefined;
+  const twoImageArticle = twoImageArticleRaw === null
+    ? null
+    : (normalizeSectionPageHeroSelection(twoImageArticleRaw) ?? defaults.twoImageArticle);
+
+  const interviewFeatureRaw = 'interviewFeature' in value ? value.interviewFeature : undefined;
+  const interviewFeature = interviewFeatureRaw === null
+    ? null
+    : (normalizeSectionPageFeaturedInterviewSelection(interviewFeatureRaw) ?? defaults.interviewFeature);
+
   const secondaryStoriesRaw = 'secondaryStories' in value ? value.secondaryStories : undefined;
   const secondaryStories = secondaryStoriesRaw === null
     ? null
     : (normalizeSectionPageSecondaryStoriesSelection(secondaryStoriesRaw) ?? defaults.secondaryStories);
 
-  const leSaviezVousRaw = 'leSaviezVousFeature' in value ? value.leSaviezVousFeature : undefined;
-  const leSaviezVousFeature = leSaviezVousRaw === null
+  const photoOfTheDayRaw = 'photoOfTheDayFeature' in value ? value.photoOfTheDayFeature : undefined;
+  const photoOfTheDayFeature = photoOfTheDayRaw === null
     ? null
-    : (normalizeSectionPageLeSaviezVousSelection(leSaviezVousRaw) ?? defaults.leSaviezVousFeature);
+    : (normalizePhotoOfTheDayFeatureSelection(photoOfTheDayRaw) ?? defaults.photoOfTheDayFeature);
 
   const sidebarRailRaw = 'sidebarRail' in value ? value.sidebarRail : undefined;
   const sidebarRail = sidebarRailRaw === null
@@ -1663,10 +1678,12 @@ const normalizeParisPagePlacements = (
     : (normalizeSectionPageSidebarRailSelection(sidebarRailRaw) ?? defaults.sidebarRail);
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     hero,
+    twoImageArticle,
+    interviewFeature,
     secondaryStories,
-    leSaviezVousFeature,
+    photoOfTheDayFeature,
     sidebarRail,
     updatedAt: value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
     updatedBy: normalizeStringId(value.updatedBy),
@@ -1793,7 +1810,7 @@ export const updateParisPagePlacements = async (req: Request, res: Response) => 
     const current = normalizeParisPagePlacements(currentDoc.data());
     const payload = req.body && typeof req.body === 'object' ? req.body : {};
 
-    let { hero, secondaryStories, leSaviezVousFeature, sidebarRail } = current;
+    let { hero, twoImageArticle, interviewFeature, secondaryStories, photoOfTheDayFeature, sidebarRail } = current;
 
     if ('hero' in payload) {
       if (payload.hero === null) {
@@ -1807,6 +1824,35 @@ export const updateParisPagePlacements = async (req: Request, res: Response) => 
         );
         if (!exists) return res.status(404).json({ message: 'Referenced hero document not found' });
         hero = normalized;
+      }
+    }
+
+    if ('twoImageArticle' in payload) {
+      if (payload.twoImageArticle === null) {
+        twoImageArticle = null;
+      } else {
+        const normalized = normalizeSectionPageHeroSelection(payload.twoImageArticle);
+        if (!normalized) return res.status(400).json({ message: 'Invalid twoImageArticle payload' });
+        const exists = await assertDocumentExists(
+          SECTION_PAGE_HERO_COLLECTIONS[normalized.type],
+          normalized.id,
+        );
+        if (!exists) return res.status(404).json({ message: 'Referenced twoImageArticle document not found' });
+        twoImageArticle = normalized;
+      }
+    }
+
+    if ('interviewFeature' in payload) {
+      if (payload.interviewFeature === null) {
+        interviewFeature = null;
+      } else {
+        const normalized = normalizeSectionPageFeaturedInterviewSelection(payload.interviewFeature);
+        if (!normalized) return res.status(400).json({ message: 'Invalid interviewFeature payload' });
+        if (normalized.mode === 'manual') {
+          const exists = await assertDocumentExists('interviews', normalized.id);
+          if (!exists) return res.status(404).json({ message: 'Referenced interview not found' });
+        }
+        interviewFeature = normalized;
       }
     }
 
@@ -1833,17 +1879,17 @@ export const updateParisPagePlacements = async (req: Request, res: Response) => 
       }
     }
 
-    if ('leSaviezVousFeature' in payload) {
-      if (payload.leSaviezVousFeature === null) {
-        leSaviezVousFeature = null;
+    if ('photoOfTheDayFeature' in payload) {
+      if (payload.photoOfTheDayFeature === null) {
+        photoOfTheDayFeature = null;
       } else {
-        const normalized = normalizeSectionPageLeSaviezVousSelection(payload.leSaviezVousFeature);
-        if (!normalized) return res.status(400).json({ message: 'Invalid leSaviezVousFeature payload' });
+        const normalized = normalizePhotoOfTheDayFeatureSelection(payload.photoOfTheDayFeature);
+        if (!normalized) return res.status(400).json({ message: 'Invalid photoOfTheDayFeature payload' });
         if (normalized.mode === 'manual') {
-          const exists = await assertDocumentExists('articles', normalized.id);
-          if (!exists) return res.status(404).json({ message: 'Referenced article not found' });
+          const exists = await assertDocumentExists('photosOfTheDay', normalized.id);
+          if (!exists) return res.status(404).json({ message: 'Referenced photo of the day was not found' });
         }
-        leSaviezVousFeature = normalized;
+        photoOfTheDayFeature = normalized;
       }
     }
 
@@ -1858,10 +1904,12 @@ export const updateParisPagePlacements = async (req: Request, res: Response) => 
     }
 
     const nextValue: ParisPagePlacementsDocument = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       hero,
+      twoImageArticle,
+      interviewFeature,
       secondaryStories,
-      leSaviezVousFeature,
+      photoOfTheDayFeature,
       sidebarRail,
       updatedAt: new Date(),
       updatedBy: null,

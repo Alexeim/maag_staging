@@ -2,7 +2,7 @@
 import Layout from "../Layouts/Layout.astro";
 import { getTransitionName } from "../lib/utils/transitions";
 import NetlenkaCardThree from "@/components/common/NetlenkaCardThree.astro";
-import PhotoOfTheDayCard from "@/components/common/PhotoOfTheDayCard.astro";
+import LatestInterview from "@/components/HomePage/LatestInterview.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { isLegacyParisTag } from "@/content/tags/tags";
 import {
@@ -11,39 +11,13 @@ import {
 } from "@/lib/utils/contentBadge";
 import picture1 from "../assets/images/culture.jpg";
 import { publicParisApi } from "@/lib/api/api";
+import parisTagsData from "@/content/tags/ParisTags.json";
 
-const CATEGORY_LABELS: Record<string, string> = {
-  paris: "Париж",
-  hotContent: "Самое Читаемое",
-};
-
-const PARIS_CATEGORY_KEY = "paris";
-const HOT_CONTENT_CATEGORY_KEY = "hotContent";
 const MAX_EDITORIAL_GRID_ITEMS = 12;
 
-const normalizeCategory = (value?: string) => {
-  if (!value) return null;
-  const lowerCaseValue = value.toLowerCase().trim();
-  const entry = Object.entries(CATEGORY_LABELS).find(
-    ([key, label]) =>
-      key.toLowerCase() === lowerCaseValue ||
-      label.toLowerCase() === lowerCaseValue,
-  );
-  return entry ? entry[0] : lowerCaseValue;
-};
-
-const isHotContent = (item: any) =>
-  Boolean(item?.isHotContent) ||
-  normalizeCategory(item?.category) === HOT_CONTENT_CATEGORY_KEY;
-
-const isMainInCategoryItem = (item: any) =>
-  item?.isMainInCategory === true ||
-  item?.isMainInCategory === "true" ||
-  item?.isMainInCategory === 1 ||
-  item?.isMainInCategory === "1";
-
-const isLeSaviezVousArticle = (item: any) =>
-  item?.articleType === "le_saviez_vous";
+// Quick nav under the page title — pulled straight from ParisTags.json so the
+// links always point at tags that actually exist in the system.
+const PARIS_TOP_NAV_TAGS = parisTagsData.parisSubCategories;
 
 const getDate = (timestamp: any): Date => {
   if (timestamp instanceof Date) {
@@ -92,19 +66,6 @@ const getCardLead = (item: any): string => {
   return cardLead;
 };
 
-const toContentHref = (item: any) => {
-  if (item?.contentType === "flipper") {
-    return `/flippers/${item.id}`;
-  }
-  if (item?.contentType === "guide") {
-    return `/guide/${item.id}`;
-  }
-  if (item?.contentType === "visual-story") {
-    return `/visual-story/${item.id}`;
-  }
-  return `/${item?.isNews ? "news" : "article"}/${item.id}`;
-};
-
 const truncateText = (text?: string, maxLength: number = 220) => {
   if (!text) return "";
   if (text.length <= maxLength) return text;
@@ -116,6 +77,8 @@ const truncateText = (text?: string, maxLength: number = 220) => {
 };
 
 let primaryParisArticle: any = null;
+let twoImageArticle: any = null;
+let interviewFeature: any = null;
 let secondaryStories: any[] = [];
 let editorialSidebarItems: any[] = [];
 let parisFeed: any[] = [];
@@ -124,6 +87,8 @@ let photoOfTheDay: any = null;
 try {
   const parisPage = await publicParisApi.get();
   primaryParisArticle = parisPage.primaryParisArticle;
+  twoImageArticle = parisPage.twoImageArticle;
+  interviewFeature = parisPage.interviewFeature;
   secondaryStories = parisPage.secondaryStories as any[];
   editorialSidebarItems = parisPage.editorialSidebarItems as any[];
   parisFeed = parisPage.parisFeed as any[];
@@ -148,6 +113,32 @@ const primaryParisTrunc = primaryParisArticle
   ? truncateText(primaryParisArticle.title, 96)
   : "";
 const primaryParisSplit = splitTitle(primaryParisTrunc);
+
+const twoImageArticleTrunc = twoImageArticle
+  ? truncateText(twoImageArticle.title, 88)
+  : "";
+const twoImageArticleSplit = splitTitle(twoImageArticleTrunc);
+
+// Mirrors culture.astro's featuredInterview handling: interviews store their
+// headline quote in mainQuote (falling back to the first quote/qa content
+// block for older records), and the interviewee's name in `interviewee`.
+const extractInterviewQuote = (interview: any): string | null => {
+  if (!interview) return null;
+  if (interview.mainQuote) return interview.mainQuote;
+  if (!Array.isArray(interview.content)) return interview.lead ?? null;
+  const quoteBlock = interview.content.find(
+    (block: any) => block.type === "quote" && block.text,
+  );
+  if (quoteBlock) return quoteBlock.text;
+  const qaBlock = interview.content.find(
+    (block: any) => block.type === "qa" && block.answer,
+  );
+  return qaBlock?.answer ?? interview.lead ?? null;
+};
+
+const interviewQuote = extractInterviewQuote(interviewFeature);
+const interviewName =
+  interviewFeature?.interviewee ?? interviewFeature?.title ?? "";
 ---
 
 <Layout
@@ -161,31 +152,33 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
     <div
       class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
     >
-      <h1
-        class="text-3xl lg:text-[28px] font-old_standard font-semibold uppercase tracking-[0.46em] text-base-content w-full mb-10"
-      >
-        Париж
-      </h1>
+      <div class="mb-10">
+        <h1
+          class="m-0 text-3xl lg:text-[28px] font-old_standard font-semibold uppercase tracking-[0.46em] text-base-content"
+        >
+          Париж
+        </h1>
+
+        {PARIS_TOP_NAV_TAGS.length > 0 && (
+          <nav class="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+            {PARIS_TOP_NAV_TAGS.map((tag) => (
+              <a
+                href={`/tag/${encodeURIComponent(tag)}`}
+                class="text-xs font-semibold uppercase tracking-[0.25em] text-base-content/70 font-['Inter'] hover:text-accent hover:underline"
+              >
+                {tag}
+              </a>
+            ))}
+          </nav>
+        )}
+      </div>
 
       <section class="mt-6 grid gap-7 lg:grid-cols-12 lg:gap-4 lg:items-start">
         <div class="grid gap-8 lg:col-span-9">
           {
             primaryParisArticle ? (
-              <article class="grid overflow-hidden bg-white lg:min-h-[21rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.95fr)] mb-2 lg:mb-4">
-                <a
-                  href={primaryParisArticle.href}
-                  class="linked-image-hover aspect-[3/2]"
-                  aria-label={primaryParisArticle.title}
-                >
-                  <img
-                    src={primaryParisArticle.imageUrl || picture1.src}
-                    alt={primaryParisArticle.title}
-                    class="linked-image-hover__media block h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                </a>
-
-                <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+              <article class="grid gap-6 border-b border-base-content/15 pb-8">
+                <div class="grid justify-items-center gap-3 text-center">
                   <p class="m-0">
                     {getPrimaryTagHref(primaryParisArticle) ? (
                       <a
@@ -203,9 +196,9 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
 
                   <a
                     href={primaryParisArticle.href}
-                    class="text-current no-underline hover:underline"
+                    class="max-w-2xl text-current no-underline hover:underline"
                   >
-                    <h2 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
+                    <h2 class="text-3xl lg:text-4xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
                       {primaryParisArticle.paid ? (
                         <>
                           {primaryParisSplit.start && (
@@ -221,22 +214,153 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                       )}
                     </h2>
                   </a>
+                </div>
 
-                  {getCardLead(primaryParisArticle) && (
-                    <p class="text-base lg:text-sm text-base-content font-inter font-light">
-                      {truncateText(getCardLead(primaryParisArticle), 280)}
+                <div class="grid gap-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(18rem,1fr)] lg:items-start">
+                  <div class="grid content-start gap-4">
+                    {getCardLead(primaryParisArticle) && (
+                      <p class="text-base text-base-content/70 font-inter font-light">
+                        {truncateText(getCardLead(primaryParisArticle), 280)}
+                      </p>
+                    )}
+
+                    <a
+                      href={primaryParisArticle.href}
+                      class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200"
+                    >
+                      Читать дальше
+                    </a>
+
+                    <p class="hidden font-inter text-[0.68rem] uppercase tracking-[0.18em] text-base-content/40">
+                      {formatDate(primaryParisArticle.publishedAt)}
                     </p>
-                  )}
+                  </div>
 
-                  <p class="hidden mt-[0.4rem] font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]">
-                    {formatDate(primaryParisArticle.publishedAt)}
-                  </p>
+                  <a
+                    href={primaryParisArticle.href}
+                    class="linked-image-hover block aspect-[4/5] overflow-hidden"
+                    aria-label={primaryParisArticle.title}
+                  >
+                    <img
+                      src={primaryParisArticle.imageUrl || picture1.src}
+                      alt={primaryParisArticle.title}
+                      class="linked-image-hover__media block h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </a>
                 </div>
               </article>
             ) : (
               <article class="border border-base-content/15 bg-white p-5 text-[1.05rem] font-light leading-[1.5]">
                 Пока нет материалов категории «Париж».
               </article>
+            )
+          }
+
+          {
+            twoImageArticle && (
+              <article class="grid gap-6 border-b border-base-content/15 pb-8">
+                <div class="grid justify-items-center gap-3 text-center">
+                  <p class="m-0">
+                    {getPrimaryTagHref(twoImageArticle) ? (
+                      <a
+                        href={getPrimaryTagHref(twoImageArticle)}
+                        class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                      >
+                        {getPrimaryTag(twoImageArticle)}
+                      </a>
+                    ) : (
+                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                        {getPrimaryTag(twoImageArticle)}
+                      </span>
+                    )}
+                  </p>
+
+                  <a
+                    href={twoImageArticle.href}
+                    class="max-w-2xl text-current no-underline hover:underline"
+                  >
+                    <h3 class="text-3xl lg:text-4xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
+                      {twoImageArticle.paid ? (
+                        <>
+                          {twoImageArticleSplit.start && (
+                            <>{twoImageArticleSplit.start} </>
+                          )}
+                          <span class="whitespace-nowrap">
+                            {twoImageArticleSplit.last}{" "}
+                            <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                          </span>
+                        </>
+                      ) : (
+                        twoImageArticleTrunc
+                      )}
+                    </h3>
+                  </a>
+                </div>
+
+                <div class="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(16rem,0.85fr)]">
+                  <a
+                    href={twoImageArticle.href}
+                    class="linked-image-hover col-start-1 row-start-1 block aspect-[3/2] overflow-hidden"
+                    aria-label={twoImageArticle.title}
+                  >
+                    <img
+                      src={twoImageArticle.imageUrl || picture1.src}
+                      alt={twoImageArticle.title}
+                      class="linked-image-hover__media block h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </a>
+
+                  <div class="col-start-1 row-start-2 grid content-start gap-4 self-start lg:col-start-2 lg:row-start-1">
+                    {getCardLead(twoImageArticle) && (
+                      <p class="text-base text-base-content/70 font-inter font-light">
+                        {truncateText(getCardLead(twoImageArticle), 220)}
+                      </p>
+                    )}
+
+                    <a
+                      href={twoImageArticle.href}
+                      class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200"
+                    >
+                      Читать дальше
+                    </a>
+                  </div>
+
+                  {/* No two-image layout in the creator yet — the second slot reuses a generic image until that's built. */}
+                  <a
+                    href={twoImageArticle.href}
+                    class="col-start-1 row-start-3 block aspect-[3/2] overflow-hidden linked-image-hover lg:row-start-2"
+                    aria-label={twoImageArticle.title}
+                  >
+                    <img
+                      src={picture1.src}
+                      alt=""
+                      class="linked-image-hover__media block h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </a>
+                </div>
+              </article>
+            )
+          }
+
+          {
+            interviewFeature && (
+              <LatestInterview
+                tag="Интервью"
+                interviewee={interviewName}
+                quote={
+                  interviewQuote ? truncateText(interviewQuote, 130) : undefined
+                }
+                imageUrl={interviewFeature.imageUrl || picture1.src}
+                href={`/interviews/${interviewFeature.id}`}
+                transitionName={getTransitionName({
+                  id: interviewFeature.id,
+                  href: `/interviews/${interviewFeature.id}`,
+                })}
+                inversed
+              />
             )
           }
 
@@ -304,6 +428,39 @@ const primaryParisSplit = splitTitle(primaryParisTrunc);
                   </article>
                 ))}
               </div>
+            )
+          }
+
+          {
+            photoOfTheDay && (
+              <article class="grid overflow-hidden bg-white lg:grid-cols-[12rem_minmax(0,1fr)]">
+                <div class="grid content-center gap-3 p-6">
+                  <p class="m-0 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                    Фото дня
+                  </p>
+                  <a
+                    href={`/photo-of-the-day/${photoOfTheDay.id}`}
+                    class="text-current no-underline hover:underline"
+                  >
+                    <h3 class="m-0 text-2xl font-normal font-old_standard tracking-[-0.02em] leading-[1.2]">
+                      {photoOfTheDay.title}
+                    </h3>
+                  </a>
+                </div>
+
+                <a
+                  href={`/photo-of-the-day/${photoOfTheDay.id}`}
+                  class="linked-image-hover block aspect-[3/2] overflow-hidden"
+                  aria-label={photoOfTheDay.title}
+                >
+                  <img
+                    src={photoOfTheDay.imageUrl}
+                    alt={photoOfTheDay.title}
+                    class="linked-image-hover__media block h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </a>
+              </article>
             )
           }
         </div>

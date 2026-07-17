@@ -9,6 +9,7 @@ interface Props {
   imageUrl?: string;
   href?: string;
   transitionName?: string;
+  inversed?: boolean;
 }
 
 const {
@@ -18,12 +19,16 @@ const {
   imageUrl = picture1,
   href = "#",
   transitionName,
+  inversed = false,
 } = Astro.props;
 ---
 
 <div
   id="interview-box"
-  class="w-full bg-white flex flex-col gap-6 lg:flex-row lg:gap-8 items-center justify-start py-8 px-4 min-h-[100px]"
+  class:list={[
+    "w-full bg-white flex flex-col gap-6 lg:gap-8 items-center py-8 px-4 min-h-[100px]",
+    inversed ? "lg:flex-row-reverse lg:justify-end" : "lg:flex-row lg:justify-start",
+  ]}
 >
   <a
     href={href}

@@ -383,10 +383,12 @@ const DEFAULT_CULTURE_PAGE_PLACEMENTS = {
 };
 
 const DEFAULT_PARIS_PAGE_PLACEMENTS = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   hero: null,
-  secondaryStories: { mode: 'auto-latest', limit: 4 },
-  leSaviezVousFeature: { mode: 'auto-latest' },
+  twoImageArticle: null,
+  interviewFeature: { mode: 'auto-latest' },
+  secondaryStories: { mode: 'auto-latest', limit: 2 },
+  photoOfTheDayFeature: { mode: 'auto-latest' },
   sidebarRail: { mode: 'auto-hot', limit: 4 },
 };
 
@@ -604,6 +606,11 @@ const buildParisPagePayload = async () => {
   const notebookCandidates = allCandidates.filter(
     (item: any) => item.isNotebookContent,
   );
+  // Interviews carry no `category`, so they never survive the paris category
+  // filter above — pull them straight from the raw fetch, same as landing does.
+  const interviewCandidates = allCandidates.filter(
+    (item: any) => item.contentType === 'interview',
+  );
   const parisPagePlacements = {
     ...DEFAULT_PARIS_PAGE_PLACEMENTS,
     ...(placementsDoc.exists ? placementsDoc.data() : {}),
@@ -614,34 +621,57 @@ const buildParisPagePayload = async () => {
     candidates,
     ['isHotContent', 'isNotebookContent'],
   );
+
+  const twoImageArticle = await fetchSectionHero(
+    parisPagePlacements.twoImageArticle,
+    candidates.filter((item: any) => item.id !== primaryParisArticle?.id),
+    ['isHotContent', 'isNotebookContent'],
+  );
+
   const secondaryStories = await selectSectionSecondaryStories(
     parisPagePlacements.secondaryStories,
-    candidates,
+    candidates.filter((item: any) => item.id !== twoImageArticle?.id),
     primaryParisArticle,
     ['isHotContent', 'isNotebookContent'],
   );
+
   const topIds = new Set(
-    [primaryParisArticle?.id, ...secondaryStories.map((item: any) => item?.id)].filter(Boolean),
+    [
+      primaryParisArticle?.id,
+      twoImageArticle?.id,
+      ...secondaryStories.map((item: any) => item?.id),
+    ].filter(Boolean),
   );
+
+  const interviewFeature = await selectSectionFeaturedInterview(
+    parisPagePlacements.interviewFeature,
+    interviewCandidates,
+    topIds,
+    ['isHotContent', 'isNotebookContent'],
+  );
+
+  const excludedIds = new Set([...topIds, interviewFeature?.id].filter(Boolean));
   const editorialSidebarItems = await selectSectionSidebarItems(
     parisPagePlacements.sidebarRail,
     notebookCandidates,
-    topIds,
+    excludedIds,
     'isNotebookContent',
   );
   const sidebarIds = new Set(editorialSidebarItems.map((item: any) => item.id));
   const parisFeed = candidates.filter(
     (item: any) =>
-      !topIds.has(item.id) &&
+      !excludedIds.has(item.id) &&
       !sidebarIds.has(item.id) &&
       !item.isHotContent &&
       !item.isNotebookContent,
   );
-  const photoOfTheDay = await selectPhotoOfTheDay({ mode: 'auto-latest' });
+  const photoOfTheDay = await selectPhotoOfTheDay(parisPagePlacements.photoOfTheDayFeature);
 
   return {
     parisPagePlacements,
     primaryParisArticle,
+    twoImageArticle,
+    interviewFeature,
     secondaryStories,
     editorialSidebarItems,
     parisFeed,

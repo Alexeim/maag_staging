@@ -521,10 +521,12 @@ export interface UpdateCulturePagePlacementsPayload {
 }
 
 export interface ParisPagePlacementsResponse {
-  schemaVersion: 1;
+  schemaVersion: 2;
   hero: SectionPageHeroManualSelection | null;
+  twoImageArticle: SectionPageHeroManualSelection | null;
+  interviewFeature: SectionPageFeaturedInterviewSelection | null;
   secondaryStories: SectionPageSecondaryStoriesSelection | null;
-  leSaviezVousFeature: SectionPageLeSaviezVousSelection | null;
+  photoOfTheDayFeature: PhotoOfTheDayFeatureSelection | null;
   sidebarRail: SectionPageSidebarRailSelection | null;
   updatedAt?: string | Date | null;
   updatedBy?: string | null;
@@ -532,8 +534,10 @@ export interface ParisPagePlacementsResponse {
 
 export interface UpdateParisPagePlacementsPayload {
   hero?: SectionPageHeroManualSelection | null;
+  twoImageArticle?: SectionPageHeroManualSelection | null;
+  interviewFeature?: SectionPageFeaturedInterviewSelection | null;
   secondaryStories?: SectionPageSecondaryStoriesSelection | null;
-  leSaviezVousFeature?: SectionPageLeSaviezVousSelection | null;
+  photoOfTheDayFeature?: PhotoOfTheDayFeatureSelection | null;
   sidebarRail?: SectionPageSidebarRailSelection | null;
 }
 
@@ -1174,6 +1178,8 @@ export interface PublicCultureResponse {
 export interface PublicParisResponse {
   parisPagePlacements: ParisPagePlacementsResponse;
   primaryParisArticle: unknown | null;
+  twoImageArticle: unknown | null;
+  interviewFeature: unknown | null;
   secondaryStories: unknown[];
   editorialSidebarItems: unknown[];
   parisFeed: unknown[];

@@ -1,8 +1,9 @@
 import {
   editorialPlacementsApi,
+  type PhotoOfTheDayFeatureSelection,
+  type SectionPageFeaturedInterviewSelection,
   type SectionPageHeroManualSelection,
   type SectionPageHeroType,
-  type SectionPageLeSaviezVousSelection,
   type SectionPageSecondaryStoriesSelection,
   type SectionPageSidebarRailSelection,
 } from "@/lib/api/api";
@@ -25,10 +26,13 @@ interface ArticleOption {
 interface ParisEditorInitialState {
   heroOptions: ContentOption[];
   initialHero: { mode: "empty" | "manual"; key: string };
-  leSaviezVousOptions: ArticleOption[];
-  initialLeSaviezVous: { mode: "empty" | "auto-latest" | "manual"; id: string };
+  initialTwoImageArticle: { mode: "empty" | "manual"; key: string };
+  interviewOptions: ArticleOption[];
+  initialInterviewFeature: { mode: "empty" | "auto-latest" | "manual"; id: string };
   initialSecondaryStoriesMode: "empty" | "auto-latest";
   initialSecondaryStoriesLimit: number;
+  photoOfTheDayOptions: ArticleOption[];
+  initialPhotoOfTheDay: { mode: "empty" | "auto-latest" | "manual"; id: string };
   initialSidebarMode: "empty" | "auto-hot" | "manual";
   initialSidebarLimit: number;
   sidebarOptions: ContentOption[];
@@ -51,16 +55,27 @@ export default (initialState: ParisEditorInitialState) => ({
   heroSaving: false,
   heroError: "",
 
-  leSaviezVousOptions: initialState.leSaviezVousOptions ?? [],
-  leSaviezVousMode: initialState.initialLeSaviezVous?.mode ?? "auto-latest",
-  selectedLeSaviezVousId: initialState.initialLeSaviezVous?.id ?? "",
-  leSaviezVousSaving: false,
-  leSaviezVousError: "",
+  twoImageArticleMode: initialState.initialTwoImageArticle?.mode ?? "empty",
+  selectedTwoImageArticleKey: initialState.initialTwoImageArticle?.key ?? "",
+  twoImageArticleSaving: false,
+  twoImageArticleError: "",
+
+  interviewOptions: initialState.interviewOptions ?? [],
+  interviewFeatureMode: initialState.initialInterviewFeature?.mode ?? "auto-latest",
+  selectedInterviewFeatureId: initialState.initialInterviewFeature?.id ?? "",
+  interviewFeatureSaving: false,
+  interviewFeatureError: "",
 
   secondaryStoriesMode: initialState.initialSecondaryStoriesMode ?? "auto-latest",
-  secondaryStoriesLimit: initialState.initialSecondaryStoriesLimit ?? 3,
+  secondaryStoriesLimit: initialState.initialSecondaryStoriesLimit ?? 2,
   secondaryStoriesSaving: false,
   secondaryStoriesError: "",
+
+  photoOfTheDayOptions: initialState.photoOfTheDayOptions ?? [],
+  photoOfTheDayMode: initialState.initialPhotoOfTheDay?.mode ?? "auto-latest",
+  selectedPhotoOfTheDayId: initialState.initialPhotoOfTheDay?.id ?? "",
+  photoOfTheDaySaving: false,
+  photoOfTheDayError: "",
 
   sidebarMode: initialState.initialSidebarMode ?? "auto-hot",
   sidebarLimit: initialState.initialSidebarLimit ?? 4,
@@ -126,33 +141,61 @@ export default (initialState: ParisEditorInitialState) => ({
     }
   },
 
-  async saveLeSaviezVous() {
-    this.leSaviezVousSaving = true;
-    this.leSaviezVousError = "";
+  async saveTwoImageArticle() {
+    this.twoImageArticleSaving = true;
+    this.twoImageArticleError = "";
 
     try {
-      let leSaviezVousFeature: SectionPageLeSaviezVousSelection | null = null;
+      let twoImageArticle: SectionPageHeroManualSelection | null = null;
 
-      if (this.leSaviezVousMode === "auto-latest") {
-        leSaviezVousFeature = { mode: "auto-latest" };
-      } else if (this.leSaviezVousMode === "manual") {
-        if (!this.selectedLeSaviezVousId) {
+      if (this.twoImageArticleMode === "manual") {
+        if (!this.selectedTwoImageArticleKey) {
           throw new Error("Для ручного режима выбери материал.");
         }
-        leSaviezVousFeature = { mode: "manual", id: this.selectedLeSaviezVousId };
+        const parsed = parseContentKey(this.selectedTwoImageArticleKey);
+        if (!parsed) {
+          throw new Error("Не удалось распознать выбранный материал.");
+        }
+        twoImageArticle = { mode: "manual", type: parsed.type as SectionPageHeroType, id: parsed.id };
       }
 
-      await editorialPlacementsApi.updateParisPage({ leSaviezVousFeature });
-      this.notify("Le saviez-vous страницы «Париж» обновлён.");
+      await editorialPlacementsApi.updateParisPage({ twoImageArticle });
+      this.notify("Two-image article страницы «Париж» обновлён.");
       window.location.reload();
     } catch (error) {
-      this.leSaviezVousError =
-        error instanceof Error
-          ? error.message
-          : "Не удалось сохранить le saviez-vous.";
-      this.notify(this.leSaviezVousError, "error");
+      this.twoImageArticleError =
+        error instanceof Error ? error.message : "Не удалось сохранить two-image article.";
+      this.notify(this.twoImageArticleError, "error");
     } finally {
-      this.leSaviezVousSaving = false;
+      this.twoImageArticleSaving = false;
+    }
+  },
+
+  async saveInterviewFeature() {
+    this.interviewFeatureSaving = true;
+    this.interviewFeatureError = "";
+
+    try {
+      let interviewFeature: SectionPageFeaturedInterviewSelection | null = null;
+
+      if (this.interviewFeatureMode === "auto-latest") {
+        interviewFeature = { mode: "auto-latest" };
+      } else if (this.interviewFeatureMode === "manual") {
+        if (!this.selectedInterviewFeatureId) {
+          throw new Error("Для ручного режима выбери интервью.");
+        }
+        interviewFeature = { mode: "manual", id: this.selectedInterviewFeatureId };
+      }
+
+      await editorialPlacementsApi.updateParisPage({ interviewFeature });
+      this.notify("Interview страницы «Париж» обновлён.");
+      window.location.reload();
+    } catch (error) {
+      this.interviewFeatureError =
+        error instanceof Error ? error.message : "Не удалось сохранить interview.";
+      this.notify(this.interviewFeatureError, "error");
+    } finally {
+      this.interviewFeatureSaving = false;
     }
   },
 
@@ -166,7 +209,7 @@ export default (initialState: ParisEditorInitialState) => ({
       if (this.secondaryStoriesMode === "auto-latest") {
         secondaryStories = {
           mode: "auto-latest",
-          limit: Number(this.secondaryStoriesLimit) || 3,
+          limit: Number(this.secondaryStoriesLimit) || 2,
         };
       }
 
@@ -181,6 +224,34 @@ export default (initialState: ParisEditorInitialState) => ({
       this.notify(this.secondaryStoriesError, "error");
     } finally {
       this.secondaryStoriesSaving = false;
+    }
+  },
+
+  async savePhotoOfTheDay() {
+    this.photoOfTheDaySaving = true;
+    this.photoOfTheDayError = "";
+
+    try {
+      let photoOfTheDayFeature: PhotoOfTheDayFeatureSelection | null = null;
+
+      if (this.photoOfTheDayMode === "auto-latest") {
+        photoOfTheDayFeature = { mode: "auto-latest" };
+      } else if (this.photoOfTheDayMode === "manual") {
+        if (!this.selectedPhotoOfTheDayId) {
+          throw new Error("Для ручного режима выбери фото.");
+        }
+        photoOfTheDayFeature = { mode: "manual", id: this.selectedPhotoOfTheDayId };
+      }
+
+      await editorialPlacementsApi.updateParisPage({ photoOfTheDayFeature });
+      this.notify("Фото дня страницы «Париж» обновлено.");
+      window.location.reload();
+    } catch (error) {
+      this.photoOfTheDayError =
+        error instanceof Error ? error.message : "Не удалось сохранить фото дня.";
+      this.notify(this.photoOfTheDayError, "error");
+    } finally {
+      this.photoOfTheDaySaving = false;
     }
   },
 
