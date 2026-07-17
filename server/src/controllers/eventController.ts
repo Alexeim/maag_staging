@@ -9,12 +9,14 @@ import {
   buildPublicationFieldsForCreate,
   buildPublicationFieldsForUpdate,
 } from '../utils/publication';
+import { normalizeStoredRichTextHtml } from '../utils/richText';
 
 export interface EventItem {
   id?: string;
   title: string;
   authorId: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   content: any[];
   imageUrl?: string;
@@ -130,6 +132,7 @@ export const createEvent = async (req: Request, res: Response) => {
       imageCaption,
       authorId,
       lead,
+      leadHtml,
       cardLead,
       tags = [],
       startDate,
@@ -186,6 +189,7 @@ export const createEvent = async (req: Request, res: Response) => {
       title,
       authorId,
       lead: lead || '',
+      leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
       content,
       imageUrl,
@@ -292,6 +296,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       imageCaption,
       authorId,
       lead,
+      leadHtml,
       cardLead,
       tags = [],
       startDate,
@@ -352,6 +357,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       title,
       authorId,
       lead: lead || '',
+      leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
       content,
       imageUrl,

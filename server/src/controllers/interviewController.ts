@@ -9,6 +9,7 @@ import {
   buildPublicationFieldsForCreate,
   buildPublicationFieldsForUpdate,
 } from '../utils/publication';
+import { normalizeStoredRichTextHtml } from '../utils/richText';
 
 // Interface for our Interview structure
 export interface Interview {
@@ -17,6 +18,7 @@ export interface Interview {
   authorId: string;
   interviewee: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   mainQuote?: string;
   isHotContent?: boolean;
@@ -54,6 +56,7 @@ export const createInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead,
+      leadHtml,
       cardLead,
       mainQuote,
       tags = [],
@@ -81,6 +84,7 @@ export const createInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead: lead || '',
+      leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
@@ -202,6 +206,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead,
+      leadHtml,
       cardLead,
       mainQuote,
       tags = [],
@@ -231,6 +236,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       authorId,
       interviewee,
       lead: lead || '',
+      leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),

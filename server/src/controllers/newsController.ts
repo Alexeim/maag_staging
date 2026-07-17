@@ -9,11 +9,13 @@ import {
   buildPublicationFieldsForCreate,
   buildPublicationFieldsForUpdate,
 } from '../utils/publication';
+import { normalizeStoredRichTextHtml } from '../utils/richText';
 
 export interface NewsItem {
   id?: string;
   title: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   authorId: string;
   content: any[];
@@ -51,6 +53,7 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
   const {
     title,
     lead,
+    leadHtml,
     cardLead,
     content,
     imageUrl,
@@ -66,6 +69,7 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
   return {
     title: typeof title === 'string' ? title : '',
     lead: typeof lead === 'string' ? lead : '',
+    leadHtml: normalizeStoredRichTextHtml(leadHtml),
     cardLead: typeof cardLead === 'string' ? cardLead : '',
     authorId: typeof authorId === 'string' ? authorId : '',
     content: Array.isArray(content) ? content : [],

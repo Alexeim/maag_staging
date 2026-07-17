@@ -9,11 +9,13 @@ import {
   buildPublicationFieldsForCreate,
   buildPublicationFieldsForUpdate,
 } from '../utils/publication';
+import { normalizeStoredRichTextHtml } from '../utils/richText';
 
 export interface Guide {
   id?: string;
   title: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   authorId: string;
   content: any[];
@@ -76,6 +78,7 @@ export const createGuide = async (req: Request, res: Response) => {
     const {
       title,
       lead,
+      leadHtml,
       cardLead,
       content,
       tips = [],
@@ -111,6 +114,7 @@ export const createGuide = async (req: Request, res: Response) => {
     const newGuide: Omit<Guide, 'id'> = {
       title,
       lead: lead || '',
+      leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
       authorId,
       content,
@@ -227,6 +231,7 @@ export const updateGuide = async (req: Request, res: Response) => {
     const {
       title,
       lead,
+      leadHtml,
       cardLead,
       content,
       tips = [],
@@ -264,6 +269,7 @@ export const updateGuide = async (req: Request, res: Response) => {
     const updatedGuide = {
       title,
       lead: lead || '',
+      leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
       authorId,
       content,

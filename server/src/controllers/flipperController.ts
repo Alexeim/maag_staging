@@ -9,12 +9,14 @@ import {
   buildPublicationFieldsForCreate,
   buildPublicationFieldsForUpdate,
 } from '../utils/publication';
+import { normalizeStoredRichTextHtml } from '../utils/richText';
 
 // Interface for Flipper structure
 export interface Flipper {
   id?: string;
   title: string;
   lead?: string;
+  leadHtml?: string;
   cardLead?: string;
   authorId: string;
   category?: string;
@@ -46,6 +48,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       title,
       authorId,
       lead,
+      leadHtml,
       cardLead,
       category,
       tags = [],
@@ -77,6 +80,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       title,
       authorId,
       lead: lead || '',
+      leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
       category: persistedCategory,
       tags: normalizedTags,
@@ -186,6 +190,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       title,
       authorId,
       lead,
+      leadHtml,
       cardLead,
       category,
       tags = [],
@@ -222,6 +227,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       title,
       authorId,
       lead: lead || '',
+      leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
       category: persistedCategory,
       tags: normalizedTags,

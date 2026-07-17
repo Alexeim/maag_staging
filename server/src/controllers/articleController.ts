@@ -9,12 +9,14 @@ import {
   buildPublicationFieldsForCreate,
   buildPublicationFieldsForUpdate,
 } from '../utils/publication';
+import { normalizeStoredRichTextHtml } from '../utils/richText';
 
 // Interface for our Article structure
 export interface Article {
   id?: string;
   title: string;
   lead?: string; // Вводка — краткое описание под заголовком
+  leadHtml?: string;
   cardLead?: string;
   authorId: string;
   articleType?: 'standard' | 'tips' | 'le_saviez_vous'; // Type of article layout
@@ -93,6 +95,7 @@ export const createArticle = async (req: Request, res: Response) => {
     const {
       title,
       lead,
+      leadHtml,
       cardLead,
       content,
       tips = [],
@@ -132,6 +135,7 @@ export const createArticle = async (req: Request, res: Response) => {
     const newArticle: Omit<Article, 'id'> = {
       title,
       lead: lead || '',
+      leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
       authorId,
       articleType: normalizeArticleType(articleType),
@@ -253,6 +257,7 @@ export const updateArticle = async (req: Request, res: Response) => {
     const {
       title,
       lead,
+      leadHtml,
       cardLead,
       content,
       tips = [],
@@ -294,6 +299,7 @@ export const updateArticle = async (req: Request, res: Response) => {
     const updatedArticle = {
       title,
       lead: lead || '',
+      leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
       authorId,
       articleType: normalizeArticleType(articleType),
