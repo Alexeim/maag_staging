@@ -1,0 +1,14 @@
+---
+interface ReadMoreButtonProps {
+  link: string;
+}
+
+const { link } = Astro.props as ReadMoreButtonProps;
+---
+
+<a
+  href={link}
+  class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200"
+>
+  Читать дальше
+</a>

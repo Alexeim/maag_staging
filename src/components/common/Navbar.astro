@@ -19,7 +19,7 @@ const {
   showLogoInNav = true,
 } = Astro.props as NavbarProps;
 
-const navbarClasses = variant === "default" ? "bg-base-100" : "bg-transparent";
+const navbarClasses = variant === "default" ? "bg-base-200" : "bg-transparent";
 const positionClasses =
   variant === "default" ? "sticky top-0 z-20" : "absolute";
 const colorClasses = "text-base-content";
@@ -145,11 +145,21 @@ const currentPath = Astro.url.pathname;
         class="hover:text-gray-500 transition-colors"
         aria-label="Instagram"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
-          </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+        </svg>
       </a>
       <div class="flex items-center gap-4" x-data="$lazy('navbar')">
         <!-- Loading State -->
@@ -160,7 +170,7 @@ const currentPath = Astro.url.pathname;
         <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
           <button
             @click.prevent="$store.auth.openAuthModal()"
-            class="border border-primary bg-primary text-primary-content rounded-[9px] py-1.5 px-4 text-center font-oswald text-[14px] w-full cursor-pointer hover:bg-primary/80 transition-colors"
+            class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200 cursor-pointer"
           >
             Войти
           </button>
@@ -180,7 +190,7 @@ const currentPath = Astro.url.pathname;
             </a>
             <button
               @click.prevent="handleSignOut()"
-              class="cursor-pointer p-2 rounded-xl text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+              class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200 cursor-pointer"
             >
               Выйти
             </button>

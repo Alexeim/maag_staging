@@ -1,6 +1,7 @@
 ---
 import type { PublicContentCardItem } from "@/lib/utils/contentCollectionMarquee";
 import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
+import ReadMoreButton from "../common/ReadMoreButton.astro";
 
 interface Props {
   item: PublicContentCardItem;
@@ -17,7 +18,7 @@ const label = getPrimaryBadgeLabel(item);
 <article class="border-y border-base-content/30 py-4">
   <a
     href={item.href}
-    class="group flex items-start gap-4 text-current no-underline"
+    class="group flex items-start gap-4 text-current no-underline relative"
     aria-label={item.title}
   >
     <div
@@ -71,6 +72,11 @@ const label = getPrimaryBadgeLabel(item);
           </p>
         )
       } -->
+    </div>
+    <div
+      class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200 absolute right-0 bottom-0"
+    >
+      <span>Читать дальше</span>
     </div>
   </a>
 </article>
