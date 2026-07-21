@@ -395,12 +395,12 @@ const interviewName =
                 </a>
               </div>
               <div />
-              <div class="w-full flex flex-col lg:flex-row border border-accent">
-                <div class="w-1/2 border border-green-400">
-                  <div class="h-[700px] border border-cyan-300 relative">
+              <div class="w-full flex flex-col lg:flex-row">
+                <div class="w-1/2">
+                  <div class="h-[700px] relative">
                     <a
                       href={twoImageArticle.href}
-                      class="linked-image-hover aspect-[2/3] h-[420px] overflow-hidden absolute left-1/2 -translate-x-1/2 -rotate-6"
+                      class="linked-image-hover aspect-[2/3] h-[460px] overflow-hidden absolute left-1/2 translate-x-[calc(-50%-120px)] -rotate-6 border-[10px] border-white"
                       aria-label={twoImageArticle.title}
                     >
                       <img
@@ -412,7 +412,7 @@ const interviewName =
                     </a>
                     <a
                       href={twoImageArticle.href}
-                      class="aspect-[2/3] h-[420px] overflow-hidden linked-image-hover absolute bottom-0 left-1/2 -translate-x-1/2 rotate-12"
+                      class="aspect-[2/3] h-[460px] overflow-hidden linked-image-hover absolute bottom-0 left-1/2 translate-x-[calc(-50%+120px)] rotate-12 border-[10px] border-white"
                       aria-label={twoImageArticle.title}
                     >
                       <img
@@ -424,7 +424,7 @@ const interviewName =
                     </a>
                   </div>
                 </div>
-                <div class="w-1/2 border border-violet-400">
+                <div class="w-1/2">
                   <div>
                     {getCardLead(twoImageArticle) && (
                       <p class="text-base text-base-content/70 font-inter font-light">
