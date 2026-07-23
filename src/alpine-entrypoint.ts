@@ -35,7 +35,19 @@ onAuthStateChanged(auth, async (user) => {
       console.error("Failed to fetch user profile:", error);
       getStore()?.setUser(user);
     }
+
+    try {
+      const token = await user.getIdToken();
+      await fetch("/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: token }),
+      });
+    } catch (error) {
+      console.error("Failed to establish server session:", error);
+    }
   } else {
     getStore()?.clearUser();
+    fetch("/api/session", { method: "DELETE" }).catch(() => {});
   }
 });

@@ -15,6 +15,7 @@ import editorialPlacementsRoutes from './routes/editorialPlacementsRoutes';
 import contentCollectionsRoutes from './routes/contentCollectionsRoutes';
 import photoOfTheDayRoutes from './routes/photoOfTheDayRoutes';
 import publicRoutes from './routes/publicRoutes';
+import authRoutes from './routes/authRoutes';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -74,6 +75,9 @@ app.use('/api/photos-of-the-day', photoOfTheDayRoutes);
 
 // Use public read-model routes
 app.use('/api/public', publicRoutes);
+
+// Session-cookie auth bridge, used by the Astro server to gate pages
+app.use('/api/auth', authRoutes);
 
 // Test route to verify Firebase connection
 app.get('/api/test-firebase', async (req, res) => {

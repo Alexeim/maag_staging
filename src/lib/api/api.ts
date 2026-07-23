@@ -1202,6 +1202,28 @@ export const publicCultureApi = {
   },
 };
 
+export interface SessionVerifyResponse {
+  uid: string;
+  email: string | null;
+  role: string;
+}
+
+export const authSessionApi = {
+  create(idToken: string) {
+    return request<{ sessionCookie: string; expiresIn: number }>(
+      "/api/auth/session",
+      { method: "POST", body: { idToken }, public: true }
+    );
+  },
+  verify(sessionCookie: string) {
+    return request<SessionVerifyResponse>("/api/auth/verify-session", {
+      method: "POST",
+      body: { sessionCookie },
+      public: true,
+    });
+  },
+};
+
 export const publicParisApi = {
   get() {
     return request<PublicParisResponse>("/api/public/paris", {
