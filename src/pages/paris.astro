@@ -3,6 +3,7 @@ import Layout from "../Layouts/Layout.astro";
 import { getTransitionName } from "../lib/utils/transitions";
 import NetlenkaCardOne from "@/components/common/NetlenkaCardOne.astro";
 import LatestInterview from "@/components/HomePage/LatestInterview.astro";
+import ZapisnayaKnijkaCard from "@/components/common/ZapisnayaKnijkaCard.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { isLegacyParisTag } from "@/content/tags/tags";
 import {
@@ -243,7 +244,7 @@ const interviewName =
         {
           primaryParisArticle ? (
             <article class="lg:h-full">
-              <div class="grid gap-6 lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,0.8fr)_minmax(18rem,1fr)] lg:grid-rows-1 lg:items-stretch">
+              <div class="grid gap-6 lg:h-full lg:min-h-0 lg:grid-cols-2 lg:grid-rows-1 lg:items-stretch">
                 <div class="grid content-start gap-10 lg:h-full lg:min-h-0 lg:content-center">
                   <div class="inline-flex w-fit flex-col items-center gap-3">
                     <p class="m-0">
@@ -336,7 +337,7 @@ const interviewName =
 
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:gap-6">
               {editorialSidebarItems.map((item) => (
-                <NetlenkaCardOne
+                <ZapisnayaKnijkaCard
                   title={item.title}
                   category={getPrimaryTag(item)}
                   categoryHref={getPrimaryTagHref(item)}
@@ -344,61 +345,26 @@ const interviewName =
                   href={item.href}
                   transitionName={getTransitionName(item)}
                   hideDate={true}
+                  lead={getCardLead(item)}
                 />
               ))}
             </div>
           </section>
         )
       }
-
+      <div class="w-full my-8 lg:my-10">
+        <hr class="h-px border-1" />
+      </div>
       <div class="grid gap-2">
         {
           twoImageArticle && (
             <article class="grid gap-6 pb-8">
-              <div class="inline-flex w-fit flex-col items-center gap-3">
-                <p class="m-0">
-                  {getPrimaryTagHref(twoImageArticle) ? (
-                    <a
-                      href={getPrimaryTagHref(twoImageArticle)}
-                      class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
-                    >
-                      {getPrimaryTag(twoImageArticle)}
-                    </a>
-                  ) : (
-                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                      {getPrimaryTag(twoImageArticle)}
-                    </span>
-                  )}
-                </p>
-
-                <a
-                  href={twoImageArticle.href}
-                  class="text-left text-current no-underline hover:underline"
-                >
-                  <h3 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                    {twoImageArticle.paid ? (
-                      <>
-                        {twoImageArticleSplit.start && (
-                          <>{twoImageArticleSplit.start} </>
-                        )}
-                        <span class="whitespace-nowrap">
-                          {twoImageArticleSplit.last}{" "}
-                          <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
-                        </span>
-                      </>
-                    ) : (
-                      twoImageArticleTrunc
-                    )}
-                  </h3>
-                </a>
-              </div>
-              <div />
               <div class="w-full flex flex-col lg:flex-row">
                 <div class="w-full lg:w-1/2">
                   <div class="h-[420px] lg:h-[700px] relative">
                     <a
                       href={twoImageArticle.href}
-                      class="linked-image-hover aspect-[2/3] h-[260px] lg:h-[460px] overflow-hidden absolute left-1/2 translate-x-[calc(-50%-50px)] lg:translate-x-[calc(-50%-120px)] -rotate-6 border-[10px] border-white"
+                      class="linked-image-hover aspect-[2/3] h-[260px] lg:h-[380px] overflow-hidden absolute left-1/2 translate-x-[calc(-50%-50px)] lg:translate-x-[calc(-50%-100px)] -rotate-6 border-[10px] border-white"
                       aria-label={twoImageArticle.title}
                     >
                       <img
@@ -410,7 +376,7 @@ const interviewName =
                     </a>
                     <a
                       href={twoImageArticle.href}
-                      class="aspect-[2/3] h-[260px] lg:h-[460px] overflow-hidden linked-image-hover absolute bottom-0 left-1/2 translate-x-[calc(-50%+50px)] lg:translate-x-[calc(-50%+120px)] rotate-12 border-[10px] border-white"
+                      class="aspect-[2/3] h-[260px] lg:h-[380px] overflow-hidden linked-image-hover absolute bottom-0 left-1/2 translate-x-[calc(-50%+50px)] lg:translate-x-[calc(-50%+100px)] rotate-12 border-[10px] border-white"
                       aria-label={twoImageArticle.title}
                     >
                       <img
@@ -422,7 +388,44 @@ const interviewName =
                     </a>
                   </div>
                 </div>
-                <div class="w-full lg:w-1/2">
+                <div class="w-full lg:w-1/2 flex flex-col justify-center items-end gap-4">
+                  <div class="inline-flex w-fit flex-col items-center gap-3">
+                    <p class="m-0">
+                      {getPrimaryTagHref(twoImageArticle) ? (
+                        <a
+                          href={getPrimaryTagHref(twoImageArticle)}
+                          class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                        >
+                          {getPrimaryTag(twoImageArticle)}
+                        </a>
+                      ) : (
+                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                          {getPrimaryTag(twoImageArticle)}
+                        </span>
+                      )}
+                    </p>
+
+                    <a
+                      href={twoImageArticle.href}
+                      class="text-left text-current no-underline hover:underline"
+                    >
+                      <h3 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
+                        {twoImageArticle.paid ? (
+                          <>
+                            {twoImageArticleSplit.start && (
+                              <>{twoImageArticleSplit.start} </>
+                            )}
+                            <span class="whitespace-nowrap">
+                              {twoImageArticleSplit.last}{" "}
+                              <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                            </span>
+                          </>
+                        ) : (
+                          twoImageArticleTrunc
+                        )}
+                      </h3>
+                    </a>
+                  </div>
                   <div>
                     {getCardLead(twoImageArticle) && (
                       <p class="text-[19px] text-base-content/70 font-inter font-light">
