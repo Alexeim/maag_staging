@@ -242,51 +242,49 @@ const interviewName =
       <div class="mt-8 overflow-visible lg:h-[calc(100svh-90px)]">
         {
           primaryParisArticle ? (
-            <article class="flex flex-col gap-6 lg:h-full">
-              <div class="lg:flex-none">
-                <div class="inline-flex w-fit flex-col items-center gap-3">
-                  <p class="m-0">
-                    {getPrimaryTagHref(primaryParisArticle) ? (
-                      <a
-                        href={getPrimaryTagHref(primaryParisArticle)}
-                        class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
-                      >
-                        {getPrimaryTag(primaryParisArticle)}
-                      </a>
-                    ) : (
-                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                        {getPrimaryTag(primaryParisArticle)}
-                      </span>
-                    )}
-                  </p>
-
-                  <a
-                    href={primaryParisArticle.href}
-                    class="text-left text-current no-underline hover:underline"
-                  >
-                    <h2 class="text-3xl lg:text-[44px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                      {primaryParisArticle.paid ? (
-                        <>
-                          {primaryParisSplit.start && (
-                            <>{primaryParisSplit.start} </>
-                          )}
-                          <span class="whitespace-nowrap">
-                            {primaryParisSplit.last}{" "}
-                            <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
-                          </span>
-                        </>
-                      ) : (
-                        primaryParisTrunc
-                      )}
-                    </h2>
-                  </a>
-                </div>
-              </div>
-
-              <div class="grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,0.8fr)_minmax(18rem,1fr)] lg:grid-rows-1 lg:items-stretch">
+            <article class="lg:h-full">
+              <div class="grid gap-6 lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,0.8fr)_minmax(18rem,1fr)] lg:grid-rows-1 lg:items-stretch">
                 <div class="grid content-start gap-10 lg:h-full lg:min-h-0 lg:content-center">
+                  <div class="inline-flex w-fit flex-col items-center gap-3">
+                    <p class="m-0">
+                      {getPrimaryTagHref(primaryParisArticle) ? (
+                        <a
+                          href={getPrimaryTagHref(primaryParisArticle)}
+                          class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                        >
+                          {getPrimaryTag(primaryParisArticle)}
+                        </a>
+                      ) : (
+                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                          {getPrimaryTag(primaryParisArticle)}
+                        </span>
+                      )}
+                    </p>
+
+                    <a
+                      href={primaryParisArticle.href}
+                      class="text-left text-current no-underline hover:underline"
+                    >
+                      <h2 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
+                        {primaryParisArticle.paid ? (
+                          <>
+                            {primaryParisSplit.start && (
+                              <>{primaryParisSplit.start} </>
+                            )}
+                            <span class="whitespace-nowrap">
+                              {primaryParisSplit.last}{" "}
+                              <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                            </span>
+                          </>
+                        ) : (
+                          primaryParisTrunc
+                        )}
+                      </h2>
+                    </a>
+                  </div>
+
                   {getCardLead(primaryParisArticle) && (
-                    <p class="text-[30px] text-base-content/70 font-old_standard font-light">
+                    <p class="text-[19px] text-base-content/70 font-old_standard font-light">
                       {truncateText(getCardLead(primaryParisArticle), 280)}
                     </p>
                   )}
@@ -377,7 +375,7 @@ const interviewName =
                   href={twoImageArticle.href}
                   class="text-left text-current no-underline hover:underline"
                 >
-                  <h3 class="text-3xl lg:text-[44px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
+                  <h3 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
                     {twoImageArticle.paid ? (
                       <>
                         {twoImageArticleSplit.start && (
@@ -396,11 +394,11 @@ const interviewName =
               </div>
               <div />
               <div class="w-full flex flex-col lg:flex-row">
-                <div class="w-1/2">
-                  <div class="h-[700px] relative">
+                <div class="w-full lg:w-1/2">
+                  <div class="h-[420px] lg:h-[700px] relative">
                     <a
                       href={twoImageArticle.href}
-                      class="linked-image-hover aspect-[2/3] h-[460px] overflow-hidden absolute left-1/2 translate-x-[calc(-50%-120px)] -rotate-6 border-[10px] border-white"
+                      class="linked-image-hover aspect-[2/3] h-[260px] lg:h-[460px] overflow-hidden absolute left-1/2 translate-x-[calc(-50%-50px)] lg:translate-x-[calc(-50%-120px)] -rotate-6 border-[10px] border-white"
                       aria-label={twoImageArticle.title}
                     >
                       <img
@@ -412,7 +410,7 @@ const interviewName =
                     </a>
                     <a
                       href={twoImageArticle.href}
-                      class="aspect-[2/3] h-[460px] overflow-hidden linked-image-hover absolute bottom-0 left-1/2 translate-x-[calc(-50%+120px)] rotate-12 border-[10px] border-white"
+                      class="aspect-[2/3] h-[260px] lg:h-[460px] overflow-hidden linked-image-hover absolute bottom-0 left-1/2 translate-x-[calc(-50%+50px)] lg:translate-x-[calc(-50%+120px)] rotate-12 border-[10px] border-white"
                       aria-label={twoImageArticle.title}
                     >
                       <img
@@ -424,17 +422,17 @@ const interviewName =
                     </a>
                   </div>
                 </div>
-                <div class="w-1/2">
+                <div class="w-full lg:w-1/2">
                   <div>
                     {getCardLead(twoImageArticle) && (
-                      <p class="text-base text-base-content/70 font-inter font-light">
+                      <p class="text-[19px] text-base-content/70 font-inter font-light">
                         {truncateText(getCardLead(twoImageArticle), 220)}
                       </p>
                     )}
 
                     <a
                       href={twoImageArticle.href}
-                      class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200"
+                      class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200 mt-4 lg:mt-0"
                     >
                       Читать дальше
                     </a>
@@ -470,7 +468,7 @@ const interviewName =
 
         {
           secondaryStories.length > 0 && (
-            <div class="grid gap-x-4 gap-y-8 sm:grid-cols-2 sm:items-stretch mt-4 mb-6">
+            <div class="grid gap-x-4 gap-y-8 sm:grid-cols-3 sm:items-stretch mt-4 mb-6">
               {secondaryStories.map((item) => (
                 <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                   <a
