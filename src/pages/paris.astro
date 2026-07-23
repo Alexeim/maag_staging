@@ -358,7 +358,7 @@ const interviewName =
       <div class="grid gap-2">
         {
           twoImageArticle && (
-            <article class="grid gap-6 pb-8">
+            <article class="grid gap-6 pb-8 mb-4">
               <div class="w-full flex flex-col lg:flex-row">
                 <div class="w-full lg:w-1/2">
                   <div class="h-[420px] lg:h-[700px] relative">
@@ -442,10 +442,6 @@ const interviewName =
                   </div>
                 </div>
               </div>
-
-              <div class="w-full mb-8">
-                <hr class="h-px border-1" />
-              </div>
             </article>
           )
         }
@@ -471,7 +467,7 @@ const interviewName =
 
         {
           secondaryStories.length > 0 && (
-            <div class="grid gap-x-4 gap-y-8 sm:grid-cols-3 sm:items-stretch mt-4 mb-6">
+            <div class="grid gap-x-4 gap-y-8 sm:grid-cols-3 sm:items-stretch mt-8 mb-12">
               {secondaryStories.map((item) => (
                 <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
                   <a
@@ -538,7 +534,7 @@ const interviewName =
 
         {
           photoOfTheDay && (
-            <article class="grid overflow-hidden bg-white lg:grid-cols-[12rem_minmax(0,1fr)]">
+            <article class="grid overflow-hidden bg-white lg:grid-cols-[12rem_minmax(0,1fr)] mb-6">
               <div class="grid content-center gap-3 p-6">
                 <p class="m-0 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
                   Фото дня

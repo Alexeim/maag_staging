@@ -27,7 +27,7 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
 const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
 ---
 
-<div class="w-full">
+<div class="linked-image-hover w-full">
   <div class="relative flex aspect-[2/3] w-full flex-row bg-base-100">
     <div class="w-1/5 flex items-center justify-center">
       {
@@ -46,10 +46,10 @@ const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
           ))
       }
     </div>
-    <div class="grid w-4/5 grid-rows-[1fr_155px_1fr]">
-      <div class="w-full overflow-hidden pt-4 pb-2">
+    <div class="grid w-4/5 grid-rows-[3fr_6fr_3fr]">
+      <div class="w-full overflow-hidden flex items-center justify-center pr-2">
         <h3
-          class={`m-0 font-light font-old_standard tracking-[-0.02em] leading-[1.15] text-base-content ${isLongTitle ? "text-[21px]" : "text-[32px]"}`}
+          class={`m-0 font-light font-old_standard tracking-[-0.02em] leading-[1.15] text-base-content ${isLongTitle ? "text-[24px]" : "text-[36px]"}`}
         >
           {title}
         </h3>
@@ -58,14 +58,14 @@ const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
         <LazyImage
           src={imageUrl || picture3}
           alt={imageUrl ? title : "Editorial image"}
-          class="h-full w-full object-cover object-center"
+          class="linked-image-hover__media h-full w-full object-cover object-center"
           loading={imageLoading}
         />
       </div>
       <div class="w-full overflow-hidden pt-3 pb-3">
         {
           lead && (
-            <p class="m-0 text-[13px] font-inter font-normal leading-[1.4] text-neutral-400 line-clamp-5">
+            <p class="m-0 text-[16px] pr-1 font-inter font-light leading-[1.4] text-neutral-400 line-clamp-3 lg:line-clamp-4">
               {lead}
             </p>
           )
