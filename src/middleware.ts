@@ -3,7 +3,7 @@ import { authSessionApi } from "@/lib/api/api";
 
 const SESSION_COOKIE_NAME = "session";
 
-// Кто пришёл с запросом — кладём сюда, чтобы любая страница могла посмотреть.
+// Whoever made the request — stored here so any page can read it.
 interface SessionUser {
   uid: string;
   email: string | null;
@@ -19,8 +19,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (sessionCookie) {
     try {
       locals.user = await authSessionApi.verify(sessionCookie);
-    } catch {
-      // Записка недействительна/просрочена — просто чистим её, юзер остаётся гостем.
+    } catch (error) {
+      // Cookie is invalid/expired, or the Express call itself failed — clear it either way.
+      console.error("[middleware] session verify failed:", error);
       context.cookies.delete(SESSION_COOKIE_NAME, { path: "/" });
     }
   }
