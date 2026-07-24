@@ -208,13 +208,13 @@ const interviewName =
           )
         } -->
 
-        <div class="mt-6 flex flex-wrap items-center gap-3 ml-20">
+        <div class="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:ml-20">
           {
             PARIS_MOCK_DROPDOWNS.map((dropdown) => {
               const Icon = dropdown.icon;
               return (
-                <details name="paris-quick-filters" class="group relative">
-                  <summary class="flex cursor-pointer list-none items-center gap-2 border border-primary p-4 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content transition-colors hover:border-base-content [&::-webkit-details-marker]:hidden">
+                <details name="paris-quick-filters" class="group relative w-full sm:w-auto">
+                  <summary class="flex w-full cursor-pointer list-none items-center justify-center gap-2 border border-primary p-4 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content transition-colors hover:border-base-content sm:w-auto sm:justify-start [&::-webkit-details-marker]:hidden">
                     <Icon class="h-4 w-4" />
                     {dropdown.label}
                     <span class="text-[10px] transition-transform duration-200 group-open:rotate-180">
@@ -246,7 +246,7 @@ const interviewName =
             <article class="lg:h-full">
               <div class="grid gap-6 lg:h-full lg:min-h-0 lg:grid-cols-2 lg:grid-rows-1 lg:items-stretch">
                 <div class="grid content-start gap-10 lg:h-full lg:min-h-0 lg:content-center">
-                  <div class="inline-flex w-fit flex-col items-center gap-3">
+                  <div class="inline-flex w-fit flex-col items-start gap-3">
                     <p class="m-0">
                       {getPrimaryTagHref(primaryParisArticle) ? (
                         <a
@@ -335,7 +335,7 @@ const interviewName =
               записная книжка
             </p>
 
-            <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:gap-6">
+            <div class="hidden gap-4 lg:grid lg:grid-cols-4 lg:gap-6">
               {editorialSidebarItems.map((item) => (
                 <ZapisnayaKnijkaCard
                   title={item.title}
@@ -349,16 +349,199 @@ const interviewName =
                 />
               ))}
             </div>
+
+            <div
+              class="zapisnaya-carousel min-w-0 w-full max-w-full lg:hidden [touch-action:pan-y]"
+              data-zapisnaya-carousel-root
+              data-zapisnaya-carousel-swipe="true"
+              data-page-count={editorialSidebarItems.length}
+            >
+              <div class="min-w-0 w-full max-w-full overflow-hidden">
+                <div
+                  class="zapisnaya-carousel__track flex w-full transition-transform duration-700 ease-out"
+                  data-zapisnaya-carousel-track
+                >
+                  {editorialSidebarItems.map((item, index) => (
+                    <div
+                      class="zapisnaya-carousel__page min-w-full w-full max-w-full flex-shrink-0"
+                      data-zapisnaya-carousel-page
+                      aria-hidden={index === 0 ? "false" : "true"}
+                    >
+                      <div class="mx-auto w-full max-w-[280px]">
+                        <ZapisnayaKnijkaCard
+                          title={item.title}
+                          category={getPrimaryTag(item)}
+                          categoryHref={getPrimaryTagHref(item)}
+                          imageUrl={item.imageUrl}
+                          href={item.href}
+                          transitionName={getTransitionName(item)}
+                          hideDate={true}
+                          lead={getCardLead(item)}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {editorialSidebarItems.length > 1 && (
+                <div class="flex items-center justify-center gap-2 pt-4">
+                  {editorialSidebarItems.map((_, index) => (
+                    <button
+                      type="button"
+                      class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
+                      data-zapisnaya-carousel-dot
+                      data-page-index={index}
+                      aria-label={`Показать карточку ${index + 1}`}
+                      aria-pressed={index === 0 ? "true" : "false"}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </section>
         )
       }
-      <div class="w-full my-8 lg:my-10">
+
+      <script is:inline>
+        const initZapisnayaCarousels = () => {
+          const roots = document.querySelectorAll(
+            "[data-zapisnaya-carousel-root]",
+          );
+
+          roots.forEach((root) => {
+            if (
+              !(root instanceof HTMLElement) ||
+              root.dataset.initialized === "true"
+            ) {
+              return;
+            }
+
+            const track = root.querySelector(
+              "[data-zapisnaya-carousel-track]",
+            );
+            const pages = Array.from(
+              root.querySelectorAll("[data-zapisnaya-carousel-page]"),
+            );
+            const dots = Array.from(
+              root.querySelectorAll("[data-zapisnaya-carousel-dot]"),
+            );
+            const pageCount = Number(
+              root.dataset.pageCount || pages.length || 0,
+            );
+            const isSwipeEnabled =
+              root.dataset.zapisnayaCarouselSwipe === "true";
+
+            if (!(track instanceof HTMLElement) || pageCount <= 1) {
+              root.dataset.initialized = "true";
+              return;
+            }
+
+            let currentPage = 0;
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            const syncUi = () => {
+              track.style.transform = `translateX(-${currentPage * 100}%)`;
+
+              pages.forEach((page, index) => {
+                page.setAttribute(
+                  "aria-hidden",
+                  index === currentPage ? "false" : "true",
+                );
+              });
+
+              dots.forEach((dot, index) => {
+                if (!(dot instanceof HTMLButtonElement)) {
+                  return;
+                }
+
+                dot.setAttribute(
+                  "aria-pressed",
+                  index === currentPage ? "true" : "false",
+                );
+              });
+            };
+
+            const goToPage = (pageIndex) => {
+              currentPage = ((pageIndex % pageCount) + pageCount) % pageCount;
+              syncUi();
+            };
+
+            dots.forEach((dot) => {
+              if (!(dot instanceof HTMLButtonElement)) {
+                return;
+              }
+
+              dot.addEventListener("click", () => {
+                const pageIndex = Number(dot.dataset.pageIndex || 0);
+                goToPage(pageIndex);
+              });
+            });
+
+            if (isSwipeEnabled) {
+              root.addEventListener(
+                "touchstart",
+                (event) => {
+                  const touch = event.touches[0];
+                  if (!touch) {
+                    return;
+                  }
+
+                  touchStartX = touch.clientX;
+                  touchStartY = touch.clientY;
+                },
+                { passive: true },
+              );
+
+              root.addEventListener(
+                "touchend",
+                (event) => {
+                  const touch = event.changedTouches[0];
+                  if (!touch) {
+                    return;
+                  }
+
+                  const deltaX = touch.clientX - touchStartX;
+                  const deltaY = touch.clientY - touchStartY;
+
+                  if (
+                    Math.abs(deltaX) > 40 &&
+                    Math.abs(deltaX) > Math.abs(deltaY)
+                  ) {
+                    goToPage(currentPage + (deltaX < 0 ? 1 : -1));
+                  }
+                },
+                { passive: true },
+              );
+            }
+
+            syncUi();
+            root.dataset.initialized = "true";
+          });
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener(
+            "DOMContentLoaded",
+            initZapisnayaCarousels,
+            {
+              once: true,
+            },
+          );
+        } else {
+          initZapisnayaCarousels();
+        }
+
+        document.addEventListener("astro:page-load", initZapisnayaCarousels);
+      </script>
+      <div class="w-full mt-8 mb-8 lg:mb-14">
         <hr class="h-px border-1" />
       </div>
       <div class="grid gap-2">
         {
           twoImageArticle && (
-            <article class="grid gap-6 pb-8 mb-4">
+            <article class="grid gap-6 pb-8 lg:pb-0">
               <div class="w-full flex flex-col lg:flex-row">
                 <div class="w-full lg:w-1/2">
                   <div class="h-[420px] lg:h-[700px] relative">
@@ -376,7 +559,7 @@ const interviewName =
                     </a>
                     <a
                       href={twoImageArticle.href}
-                      class="aspect-[2/3] h-[260px] lg:h-[380px] overflow-hidden linked-image-hover absolute bottom-0 left-1/2 translate-x-[calc(-50%+50px)] lg:translate-x-[calc(-50%+100px)] rotate-12 border-[10px] border-white"
+                      class="aspect-[2/3] h-[260px] lg:h-[380px] overflow-hidden linked-image-hover absolute bottom-20 left-1/2 translate-x-[calc(-50%+50px)] lg:translate-x-[calc(-50%+100px)] rotate-12 border-[10px] border-white"
                       aria-label={twoImageArticle.title}
                     >
                       <img
@@ -388,8 +571,8 @@ const interviewName =
                     </a>
                   </div>
                 </div>
-                <div class="w-full lg:w-1/2 flex flex-col justify-center items-end gap-4">
-                  <div class="inline-flex w-fit flex-col items-center gap-3">
+                <div class="w-full lg:w-1/2 flex flex-col justify-center items-start gap-4">
+                  <div class="inline-flex w-fit flex-col items-start gap-3">
                     <p class="m-0">
                       {getPrimaryTagHref(twoImageArticle) ? (
                         <a
@@ -404,7 +587,8 @@ const interviewName =
                         </span>
                       )}
                     </p>
-
+                  </div>
+                  <div class="grid gap-10">
                     <a
                       href={twoImageArticle.href}
                       class="text-left text-current no-underline hover:underline"
@@ -425,11 +609,9 @@ const interviewName =
                         )}
                       </h3>
                     </a>
-                  </div>
-                  <div>
                     {getCardLead(twoImageArticle) && (
-                      <p class="text-[19px] text-base-content/70 font-inter font-light">
-                        {truncateText(getCardLead(twoImageArticle), 220)}
+                      <p class="text-[19px] text-base-content/70 font-old_standard font-light">
+                        {truncateText(getCardLead(twoImageArticle), 380)}
                       </p>
                     )}
 
