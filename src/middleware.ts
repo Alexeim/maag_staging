@@ -26,17 +26,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
   }
 
-  const isDashboardRoute = context.url.pathname.startsWith("/dashboard");
+  // const isDashboardRoute = context.url.pathname.startsWith("/dashboard");
 
-  if (isDashboardRoute && locals.user?.role !== "admin") {
-    return context.redirect("/");
-  }
+  // if (isDashboardRoute && locals.user?.role !== "admin") {
+  //   return context.redirect("/");
+  // }
 
-  const isParisRoute = context.url.pathname.startsWith("/paris");
+  // const isParisRoute = context.url.pathname.startsWith("/paris");
 
-  if (isParisRoute && locals.user?.role !== "admin") {
-    return context.redirect("/");
-  }
+  // if (isParisRoute && locals.user?.role !== "admin") {
+  //   return context.redirect("/");
+  // }
 
   return next();
 });
