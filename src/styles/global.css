@@ -81,6 +81,10 @@
   line-height: 1.1;
 }
 
+.font_2_percent_negative_spacing {
+  letter-spacing: -2%;
+}
+
 .font-great-vibes {
   font-family: "Great Vibes", cursive;
 }
