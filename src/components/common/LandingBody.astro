@@ -48,7 +48,9 @@ const getPrimaryTag = (item: any) => {
       : [];
   const tags = rawTags.filter(
     (tag: unknown) =>
-      typeof tag === "string" && tag.trim().length > 0 && !isLegacyParisTag(tag),
+      typeof tag === "string" &&
+      tag.trim().length > 0 &&
+      !isLegacyParisTag(tag),
   );
   return getPrimaryBadgeLabel({ ...item, tags });
 };
@@ -61,7 +63,9 @@ const getPrimaryTagHref = (item: any) => {
       : [];
   const tags = rawTags.filter(
     (tag: unknown) =>
-      typeof tag === "string" && tag.trim().length > 0 && !isLegacyParisTag(tag),
+      typeof tag === "string" &&
+      tag.trim().length > 0 &&
+      !isLegacyParisTag(tag),
   );
   return getPrimaryBadgeHref({ ...item, tags });
 };
@@ -319,33 +323,208 @@ const splitTitle = (t: string) => {
             class="pointer-events-none absolute z-20 left-[105px] top-[-57px] w-[120px] max-w-none lg:left-[110px] lg:top-[-50px] lg:w-[142px]"
           />
         </h3>
-        <div class="flex flex-col gap-6">
-          {
-            maagChoiceItems.length > 0 ? (
-              maagChoiceItems.map((item) => (
-                <NetlenkaCardOne
-                  key={item.id}
-                  title={item.title}
-                  category={getPrimaryTag(item)}
-                  categoryHref={getPrimaryTagHref(item)}
-                  date={formatArticleDate(item.createdAt)}
-                  hideDate={true}
-                  transitionName={getTransitionName(item)}
-                  imageUrl={item.imageUrl}
-                  href={item.href}
-                />
-              ))
-            ) : (
+        {
+          maagChoiceItems.length > 0 ? (
+            <>
+              <div class="hidden gap-6 lg:flex lg:flex-col">
+                {maagChoiceItems.map((item) => (
+                  <NetlenkaCardOne
+                    key={item.id}
+                    title={item.title}
+                    category={getPrimaryTag(item)}
+                    categoryHref={getPrimaryTagHref(item)}
+                    date={formatArticleDate(item.createdAt)}
+                    hideDate={true}
+                    transitionName={getTransitionName(item)}
+                    imageUrl={item.imageUrl}
+                    href={item.href}
+                  />
+                ))}
+              </div>
+
+              <div
+                class="netlenka-carousel min-w-0 w-full max-w-full lg:hidden [touch-action:pan-y] mb-8"
+                data-netlenka-carousel-root
+                data-netlenka-carousel-swipe="true"
+                data-page-count={maagChoiceItems.length}
+              >
+                <div class="min-w-0 w-full max-w-full overflow-hidden">
+                  <div
+                    class="netlenka-carousel__track flex w-full transition-transform duration-700 ease-out"
+                    data-netlenka-carousel-track
+                  >
+                    {maagChoiceItems.map((item, index) => (
+                      <div
+                        class="netlenka-carousel__page min-w-full w-full max-w-full flex-shrink-0"
+                        data-netlenka-carousel-page
+                        aria-hidden={index === 0 ? "false" : "true"}
+                      >
+                        <NetlenkaCardOne
+                          key={item.id}
+                          title={item.title}
+                          category={getPrimaryTag(item)}
+                          categoryHref={getPrimaryTagHref(item)}
+                          date={formatArticleDate(item.createdAt)}
+                          hideDate={true}
+                          transitionName={getTransitionName(item)}
+                          imageUrl={item.imageUrl}
+                          href={item.href}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {maagChoiceItems.length > 1 && (
+                  <div class="flex items-center justify-center gap-2 pt-4">
+                    {maagChoiceItems.map((_, index) => (
+                      <button
+                        type="button"
+                        class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
+                        data-netlenka-carousel-dot
+                        data-page-index={index}
+                        aria-label={`Показать карточку ${index + 1}`}
+                        aria-pressed={index === 0 ? "true" : "false"}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div class="flex flex-col gap-6">
               <NetlenkaCardOne
                 title="Скоро появится материал"
                 category="Выбор MAAG"
               />
-            )
-          }
-        </div>
+            </div>
+          )
+        }
       </div>
     </div>
   </div>
+
+  <script is:inline>
+    const initNetlenkaCarousels = () => {
+      const roots = document.querySelectorAll("[data-netlenka-carousel-root]");
+
+      roots.forEach((root) => {
+        if (
+          !(root instanceof HTMLElement) ||
+          root.dataset.initialized === "true"
+        ) {
+          return;
+        }
+
+        const track = root.querySelector("[data-netlenka-carousel-track]");
+        const pages = Array.from(
+          root.querySelectorAll("[data-netlenka-carousel-page]"),
+        );
+        const dots = Array.from(
+          root.querySelectorAll("[data-netlenka-carousel-dot]"),
+        );
+        const pageCount = Number(root.dataset.pageCount || pages.length || 0);
+        const isSwipeEnabled = root.dataset.netlenkaCarouselSwipe === "true";
+
+        if (!(track instanceof HTMLElement) || pageCount <= 1) {
+          root.dataset.initialized = "true";
+          return;
+        }
+
+        let currentPage = 0;
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        const syncUi = () => {
+          track.style.transform = `translateX(-${currentPage * 100}%)`;
+
+          pages.forEach((page, index) => {
+            page.setAttribute(
+              "aria-hidden",
+              index === currentPage ? "false" : "true",
+            );
+          });
+
+          dots.forEach((dot) => {
+            if (!(dot instanceof HTMLButtonElement)) {
+              return;
+            }
+
+            dot.setAttribute(
+              "aria-pressed",
+              Number(dot.dataset.pageIndex) === currentPage ? "true" : "false",
+            );
+          });
+        };
+
+        const goToPage = (pageIndex) => {
+          currentPage = ((pageIndex % pageCount) + pageCount) % pageCount;
+          syncUi();
+        };
+
+        dots.forEach((dot) => {
+          if (!(dot instanceof HTMLButtonElement)) {
+            return;
+          }
+
+          dot.addEventListener("click", () => {
+            const pageIndex = Number(dot.dataset.pageIndex || 0);
+            goToPage(pageIndex);
+          });
+        });
+
+        if (isSwipeEnabled) {
+          root.addEventListener(
+            "touchstart",
+            (event) => {
+              const touch = event.touches[0];
+              if (!touch) {
+                return;
+              }
+
+              touchStartX = touch.clientX;
+              touchStartY = touch.clientY;
+            },
+            { passive: true },
+          );
+
+          root.addEventListener(
+            "touchend",
+            (event) => {
+              const touch = event.changedTouches[0];
+              if (!touch) {
+                return;
+              }
+
+              const deltaX = touch.clientX - touchStartX;
+              const deltaY = touch.clientY - touchStartY;
+
+              if (
+                Math.abs(deltaX) > 40 &&
+                Math.abs(deltaX) > Math.abs(deltaY)
+              ) {
+                goToPage(currentPage + (deltaX < 0 ? 1 : -1));
+              }
+            },
+            { passive: true },
+          );
+        }
+
+        syncUi();
+        root.dataset.initialized = "true";
+      });
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initNetlenkaCarousels, {
+        once: true,
+      });
+    } else {
+      initNetlenkaCarousels();
+    }
+
+    document.addEventListener("astro:page-load", initNetlenkaCarousels);
+  </script>
   <div class="w-full">
     <hr class="h-px my-8 border-1" />
   </div>
@@ -450,7 +629,7 @@ const splitTitle = (t: string) => {
                         isNetlenka={false}
                         title={item.title}
                         category={getPrimaryTag(item)}
-                      categoryHref={getPrimaryTagHref(item)}
+                        categoryHref={getPrimaryTagHref(item)}
                         date={formatArticleDate(item.createdAt)}
                         hideDate={true}
                         transitionName={getTransitionName(item)}
