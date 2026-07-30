@@ -1,6 +1,6 @@
 ---
 import QuoteIcon from "../../assets/icons/quote.svg";
-import { ChevronLeft, ChevronRight } from "@lucide/astro";
+import { ChevronLeft, ChevronRight, ArrowUpRight } from "@lucide/astro";
 import ArticleVideo from "./ArticleVideo.astro";
 import LinkToContent from "./LinkToContent.astro";
 import ArticleColumnContent from "./ArticleColumnContent.astro";
@@ -290,6 +290,21 @@ if (currentProseGroup.length > 0) {
                       ];
                     return linkedItem ? <LinkToContent item={linkedItem} /> : null;
                   }
+                  case "url-link":
+                    return block.url ? (
+                      <a
+                        href={block.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="group inline-flex w-fit items-center gap-2 font-old_standard text-2xl text-base-content no-underline decoration-maag-green hover:underline"
+                      >
+                        {block.text || block.url}
+                        <ArrowUpRight
+                          class="h-8 w-8 shrink-0 text-maag-green transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                          stroke-width={2.5}
+                        />
+                      </a>
+                    ) : null;
                   case "qa":
                     return (
                       <div class="space-y-4">

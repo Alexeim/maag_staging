@@ -101,10 +101,11 @@ a * {
   text-underline-offset: 0.14em;
 }
 
-/* Minimal link affordance inside rendered rich-text (Quill) content — just an
-   underline, no color change, so links don't compete visually with the copy. */
+/* Link affordance inside rendered rich-text (Quill) content — underline in
+   the maag green accent, matching the url-link content block's styling. */
 .article-rich-text a {
   text-decoration: underline;
+  text-decoration-color: var(--color-maag-green);
 }
 
 /* Tailwind preflight zeroes paragraph margins; this only matters when a lead
