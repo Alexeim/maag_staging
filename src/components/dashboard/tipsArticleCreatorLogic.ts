@@ -60,6 +60,8 @@ const normalizeLoadedArticle = (data: any) => {
   copy.contentBlocks = rawBlocks.map(normalizeBlock);
   copy.tags = normalizeTagList(copy.tags);
   copy.imageCaption = copy.imageCaption ?? "";
+  copy.secondImageUrl = copy.secondImageUrl ?? "";
+  copy.secondImageCaption = copy.secondImageCaption ?? "";
   copy.heroOrientation = copy.heroOrientation === "image-left" || copy.heroOrientation === "image-bottom" ? copy.heroOrientation : "image-right";
   copy.lead = copy.lead ?? "";
   copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
@@ -121,6 +123,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       cardLead: "",
       imageUrl: "",
       imageCaption: "",
+      secondImageUrl: "",
+      secondImageCaption: "",
       heroOrientation: "image-right" as "image-left" | "image-right" | "image-bottom",
       category: "culture",
       tags: [] as string[],
@@ -147,6 +151,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     editingTitleText: "",
     isEditingCaption: false,
     editingCaptionText: "",
+    isEditingSecondCaption: false,
+    editingSecondCaptionText: "",
 
     // Upload state
     uploading: false,
@@ -381,6 +387,19 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     },
     cancelEditCaption() {
       this.isEditingCaption = false;
+    },
+
+    // ── Second main image caption editing ───────────────────────────────────
+    editSecondCaption() {
+      this.isEditingSecondCaption = true;
+      this.editingSecondCaptionText = this.article.secondImageCaption;
+    },
+    saveSecondCaption() {
+      this.article.secondImageCaption = this.editingSecondCaptionText;
+      this.isEditingSecondCaption = false;
+    },
+    cancelEditSecondCaption() {
+      this.isEditingSecondCaption = false;
     },
 
     // ── Tags ─────────────────────────────────────────────────────────────────
@@ -690,6 +709,19 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       );
     },
 
+    handleSecondImageUpload(event: Event) {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      this._uploadFile(
+        file,
+        "tips-articles",
+        (url) => {
+          this.article.secondImageUrl = url;
+        },
+        null,
+      );
+    },
+
     handleItemImageUpload(event: Event) {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (!file || !this.editingBlock) return;
@@ -814,6 +846,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           articleType: "tips" as const,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
+          secondImageUrl: this.article.secondImageUrl,
+          secondImageCaption: this.article.secondImageCaption,
           heroOrientation: this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : "image-right",
           category: this.article.category,
           tags: selectedCategoryTags,

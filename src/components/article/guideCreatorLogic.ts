@@ -176,6 +176,8 @@ export default function guideCreatorLogic(initialState = {}) {
     copy.binaryForGuide = Boolean(copy.binaryForGuide);
     copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
+    copy.secondImageUrl = copy.secondImageUrl ?? "";
+    copy.secondImageCaption = copy.secondImageCaption ?? "";
     copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
     copy.heroOrientation = copy.heroOrientation === "image-left" || copy.heroOrientation === "image-bottom" ? copy.heroOrientation : "image-right";
@@ -226,6 +228,8 @@ export default function guideCreatorLogic(initialState = {}) {
       cardLead: "",
       imageUrl: "",
       imageCaption: "",
+      secondImageUrl: "",
+      secondImageCaption: "",
       heroOrientation: "image-right" as "image-left" | "image-right" | "image-bottom",
       contentBlocks: [],
       tags: [],
@@ -293,6 +297,9 @@ export default function guideCreatorLogic(initialState = {}) {
 
     isEditingCaption: false,
     editingCaptionText: "",
+
+    isEditingSecondCaption: false,
+    editingSecondCaptionText: "",
 
     uploading: false,
     uploadProgress: 0,
@@ -876,6 +883,18 @@ export default function guideCreatorLogic(initialState = {}) {
       this.isEditingCaption = false;
     },
 
+    editSecondCaption() {
+      this.isEditingSecondCaption = true;
+      this.editingSecondCaptionText = this.article.secondImageCaption;
+    },
+    saveSecondCaption() {
+      this.article.secondImageCaption = this.editingSecondCaptionText;
+      this.isEditingSecondCaption = false;
+    },
+    cancelEditSecondCaption() {
+      this.isEditingSecondCaption = false;
+    },
+
     async handleImageUpload(
       event,
       isCover = true,
@@ -909,7 +928,9 @@ export default function guideCreatorLogic(initialState = {}) {
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            if (isCover) {
+            if (isCover === "second") {
+              this.article.secondImageUrl = downloadURL;
+            } else if (isCover) {
               this.article.imageUrl = downloadURL;
             } else if (blockIndex !== null && this.editingBlock) {
               if (this.editingBlock.type === "image") {
@@ -1313,6 +1334,8 @@ export default function guideCreatorLogic(initialState = {}) {
           cardLead: this.article.cardLead,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
+          secondImageUrl: this.article.secondImageUrl,
+          secondImageCaption: this.article.secondImageCaption,
           heroOrientation: this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : "image-right",
           authorId: resolvedAuthorId,
           content: this.article.contentBlocks,

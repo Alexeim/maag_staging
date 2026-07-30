@@ -122,6 +122,10 @@ const getImageUrl = (type: LandingContentType, data: any): string | null => {
   return data.imageUrl ?? null;
 };
 
+// Second main image — only set for article/tips/guide/flipper/visual-story creators,
+// currently rendered exclusively in the Paris "2 фото" block.
+const getSecondImageUrl = (data: any): string | null => data.secondImageUrl ?? null;
+
 const toLandingItem = (
   doc: FirebaseFirestore.DocumentSnapshot,
   type: LandingContentType,
@@ -139,6 +143,7 @@ const toLandingItem = (
     lead: data.lead ?? '',
     cardLead: data.cardLead ?? '',
     imageUrl: getImageUrl(type, data),
+    secondImageUrl: getSecondImageUrl(data),
     category: data.category ?? '',
     tags: Array.isArray(data.tags) ? data.tags : [],
     createdAt: data.createdAt ?? null,

@@ -116,6 +116,8 @@ export default function flipperCreatorLogic(initialState = {}) {
           createCarouselItem(item),
         )
       : [createCarouselItem()];
+    copy.secondImageUrl = copy.secondImageUrl ?? "";
+    copy.secondImageCaption = copy.secondImageCaption ?? "";
     return copy;
   };
 
@@ -137,9 +139,13 @@ export default function flipperCreatorLogic(initialState = {}) {
       parisDistrict: "",
       binaryForGuide: false,
       carouselContent: [createCarouselItem()],
+      secondImageUrl: "",
+      secondImageCaption: "",
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
     },
+    isEditingSecondCaption: false,
+    editingSecondCaptionText: "",
     uploading: false,
     uploadProgress: 0,
     uploadingIndex: -1,
@@ -604,6 +610,49 @@ export default function flipperCreatorLogic(initialState = {}) {
           this.uploadingIndex = -1;
         });
       });
+    },
+
+    async handleSecondImageUpload(event) {
+      const raw = event.target.files[0];
+      if (!raw) return;
+      if (this.uploading) {
+        window.Alpine.store("ui").showToast(
+          "Подожди — текущая загрузка ещё не завершилась.",
+          "error",
+        );
+        return;
+      }
+
+      this.uploading = true;
+      this.uploadProgress = 0;
+      const file = await compressImage(raw);
+      const storageRef = ref(storage, `flippers/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on("state_changed", (snapshot) => {
+        this.uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      }, (error) => {
+        console.error("Upload failed:", error);
+        window.Alpine.store("ui").showToast("Ошибка загрузки изображения.", "error");
+        this.uploading = false;
+      }, () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          this.flipper.secondImageUrl = downloadURL;
+          window.Alpine.store("ui").showToast("Изображение успешно загружено!");
+          this.uploading = false;
+        });
+      });
+    },
+
+    editSecondCaption() {
+      this.isEditingSecondCaption = true;
+      this.editingSecondCaptionText = this.flipper.secondImageCaption;
+    },
+    saveSecondCaption() {
+      this.flipper.secondImageCaption = this.editingSecondCaptionText;
+      this.isEditingSecondCaption = false;
+    },
+    cancelEditSecondCaption() {
+      this.isEditingSecondCaption = false;
     },
 
     async saveFlipper() {

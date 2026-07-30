@@ -24,6 +24,8 @@ export interface Article {
   tips?: Array<{ type: string; text: string; url?: string }>;
   imageUrl?: string;
   imageCaption?: string;
+  secondImageUrl?: string;
+  secondImageCaption?: string;
   category?: string; // <-- Added category
   tags?: string[];
   isHotContent?: boolean;
@@ -101,6 +103,8 @@ export const createArticle = async (req: Request, res: Response) => {
       tips = [],
       imageUrl,
       imageCaption,
+      secondImageUrl,
+      secondImageCaption,
       authorId,
       articleType = 'standard',
       category,
@@ -143,6 +147,8 @@ export const createArticle = async (req: Request, res: Response) => {
       tips: normalizedTips,
       imageUrl,
       imageCaption,
+      secondImageUrl: secondImageUrl || '',
+      secondImageCaption: secondImageCaption || '',
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
@@ -263,6 +269,8 @@ export const updateArticle = async (req: Request, res: Response) => {
       tips = [],
       imageUrl,
       imageCaption,
+      secondImageUrl,
+      secondImageCaption,
       authorId,
       articleType = 'standard',
       category,
@@ -307,6 +315,8 @@ export const updateArticle = async (req: Request, res: Response) => {
       tips: normalizedTips,
       imageUrl,
       imageCaption,
+      secondImageUrl: secondImageUrl || '',
+      secondImageCaption: secondImageCaption || '',
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
@@ -364,6 +374,9 @@ export const deleteArticle = async (req: Request, res: Response) => {
     // Collect main image URL
     if (articleData.imageUrl) {
       imageUrlsToDelete.push(articleData.imageUrl);
+    }
+    if (articleData.secondImageUrl) {
+      imageUrlsToDelete.push(articleData.secondImageUrl);
     }
 
     // Collect image URLs from content blocks

@@ -142,6 +142,8 @@ export interface ArticlePayload {
   tips?: Array<{ type: string; text: string; url?: string }>;
   imageUrl?: string;
   imageCaption?: string;
+  secondImageUrl?: string;
+  secondImageCaption?: string;
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
@@ -617,6 +619,8 @@ export interface FlipperPayload {
   published?: boolean;
   publishedAt?: ApiTimestamp;
   carouselContent: { imageUrl: string; caption: string }[];
+  secondImageUrl?: string;
+  secondImageCaption?: string;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
 }
@@ -663,6 +667,8 @@ export interface GuidePayload {
   tips?: Array<{ type: string; text: string; url?: string }>;
   imageUrl?: string;
   imageCaption?: string;
+  secondImageUrl?: string;
+  secondImageCaption?: string;
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
@@ -1028,6 +1034,8 @@ export interface VisualStoryPayload {
   slides: VisualStorySlide[];
   imageUrl?: string;
   imageCaption?: string;
+  secondImageUrl?: string;
+  secondImageCaption?: string;
   lead?: string;
   leadHtml?: string;
   cardLead?: string;

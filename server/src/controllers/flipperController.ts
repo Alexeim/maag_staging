@@ -28,6 +28,8 @@ export interface Flipper {
   published: boolean;
   publishedAt: Date | null;
   carouselContent: { imageUrl: string; caption: string }[];
+  secondImageUrl?: string;
+  secondImageCaption?: string;
   relatedContent?: RelatedContent;
   contentCollectionId?: string | null;
   createdAt: Date;
@@ -57,6 +59,8 @@ export const createFlipper = async (req: Request, res: Response) => {
       isMaagChoice = false,
       paid = false,
       carouselContent = [],
+      secondImageUrl,
+      secondImageCaption,
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -90,6 +94,8 @@ export const createFlipper = async (req: Request, res: Response) => {
       paid: Boolean(paid),
       ...buildPublicationFieldsForCreate(req.body, now),
       carouselContent,
+      secondImageUrl: secondImageUrl || '',
+      secondImageCaption: secondImageCaption || '',
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       createdAt: now,
@@ -199,6 +205,8 @@ export const updateFlipper = async (req: Request, res: Response) => {
       isMaagChoice = false,
       paid = false,
       carouselContent = [],
+      secondImageUrl,
+      secondImageCaption,
       relatedContent,
       contentCollectionId,
     } = req.body;
@@ -237,6 +245,8 @@ export const updateFlipper = async (req: Request, res: Response) => {
       paid: Boolean(paid),
       ...buildPublicationFieldsForUpdate(req.body, doc.data(), now),
       carouselContent,
+      secondImageUrl: secondImageUrl || '',
+      secondImageCaption: secondImageCaption || '',
       relatedContent: normalizeRelatedContent(relatedContent),
       contentCollectionId: normalizeContentCollectionId(contentCollectionId),
       updatedAt: now,
@@ -284,6 +294,10 @@ export const deleteFlipper = async (req: Request, res: Response) => {
     const previousContentCollectionId = normalizeContentCollectionId(
       flipperData.contentCollectionId,
     );
+
+    if (flipperData.secondImageUrl) {
+      imageUrlsToDelete.push(flipperData.secondImageUrl);
+    }
 
     if (Array.isArray(flipperData.carouselContent)) {
       for (const item of flipperData.carouselContent) {

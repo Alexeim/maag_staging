@@ -26,6 +26,8 @@ export interface VisualStory {
   }>;
   imageUrl?: string;
   imageCaption?: string;
+  secondImageUrl?: string;
+  secondImageCaption?: string;
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
@@ -87,6 +89,8 @@ const buildVisualStoryPayload = (body: Record<string, unknown>) => {
     slides = [],
     imageUrl,
     imageCaption,
+    secondImageUrl,
+    secondImageCaption,
     lead,
     leadHtml,
     cardLead,
@@ -108,6 +112,8 @@ const buildVisualStoryPayload = (body: Record<string, unknown>) => {
     slides: normalizeSlides(slides),
     imageUrl: typeof imageUrl === 'string' ? imageUrl : '',
     imageCaption: typeof imageCaption === 'string' ? imageCaption : '',
+    secondImageUrl: typeof secondImageUrl === 'string' ? secondImageUrl : '',
+    secondImageCaption: typeof secondImageCaption === 'string' ? secondImageCaption : '',
     lead: typeof lead === 'string' ? lead : '',
     leadHtml: normalizeStoredRichTextHtml(leadHtml),
     cardLead: typeof cardLead === 'string' ? cardLead : '',
@@ -272,6 +278,9 @@ export const deleteVisualStory = async (req: Request, res: Response) => {
     const imageUrls: string[] = Array.isArray(storyData.slides)
       ? storyData.slides.map(s => s.imageUrl).filter(Boolean)
       : [];
+    if (storyData.secondImageUrl) {
+      imageUrls.push(storyData.secondImageUrl);
+    }
 
     if (imageUrls.length > 0) {
       await Promise.all(imageUrls.map(url => deleteFileFromStorage(url)));

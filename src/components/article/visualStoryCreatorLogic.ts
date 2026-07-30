@@ -106,6 +106,8 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       cardLead: "",
       imageUrl: "",
       imageCaption: "",
+      secondImageUrl: "",
+      secondImageCaption: "",
       category: "",
       tags: [] as string[],
       parisSubCategories: [] as string[],
@@ -394,6 +396,38 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       );
     },
 
+    async handleSecondImageUpload(event: Event) {
+      const raw = (event.target as HTMLInputElement).files?.[0];
+      if (!raw) return;
+
+      this.uploading = true;
+      this.uploadingSlideIndex = null;
+      this.uploadProgress = 0;
+
+      const file = await compressImage(raw);
+      const storageRef = ref(storage, `visual-stories/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          this.uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          window.Alpine?.store("ui")?.showToast?.(`Ошибка загрузки: ${error.message}`, "error");
+          this.uploading = false;
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            this.story.secondImageUrl = downloadURL;
+            this.uploading = false;
+            window.Alpine?.store("ui")?.showToast?.("Второе изображение успешно загружено!");
+          });
+        },
+      );
+    },
+
     async handleSlideImageUpload(event: Event, slideIndex: number) {
       const raw = (event.target as HTMLInputElement).files?.[0];
       if (!raw) return;
@@ -555,6 +589,9 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.imageUrl = copy.imageUrl || "";
         this.story.imageCaption =
           typeof copy.imageCaption === "string" ? copy.imageCaption : "";
+        this.story.secondImageUrl = copy.secondImageUrl || "";
+        this.story.secondImageCaption =
+          typeof copy.secondImageCaption === "string" ? copy.secondImageCaption : "";
         this.story.category = copy.category || "";
         this.story.tags = normalizeTagList(copy.tags);
         this.story.parisSubCategories = normalizeTagList(
@@ -699,6 +736,8 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           cardLead: this.story.cardLead,
           imageUrl: this.story.imageUrl || undefined,
           imageCaption: this.story.imageCaption || "",
+          secondImageUrl: this.story.secondImageUrl || undefined,
+          secondImageCaption: this.story.secondImageCaption || "",
           authorId: resolvedAuthorId,
           slides: this.story.slides.map((slide) => normalizeSlide(slide)),
           category: this.story.category,

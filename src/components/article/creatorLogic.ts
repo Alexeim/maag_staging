@@ -236,6 +236,8 @@ export default function articleCreatorLogic(initialState = {}) {
     copy.publishedAt = copy.publishedAt ?? null;
     copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
+    copy.secondImageUrl = copy.secondImageUrl ?? "";
+    copy.secondImageCaption = copy.secondImageCaption ?? "";
     copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
     copy.heroOrientation = copy.heroOrientation === "image-left" || copy.heroOrientation === "image-bottom" ? copy.heroOrientation : "image-right";
@@ -290,6 +292,8 @@ export default function articleCreatorLogic(initialState = {}) {
       articleType,
       imageUrl: "",
       imageCaption: "", // <-- Added caption for the main image
+      secondImageUrl: "",
+      secondImageCaption: "",
       heroOrientation: "image-right" as "image-left" | "image-right" | "image-bottom",
       // --- REFACTORED: from 'paragraphs' to 'contentBlocks' ---
       contentBlocks: [],
@@ -367,6 +371,10 @@ export default function articleCreatorLogic(initialState = {}) {
     // --- State for editing the main image caption ---
     isEditingCaption: false,
     editingCaptionText: "",
+
+    // --- State for editing the second main image caption ---
+    isEditingSecondCaption: false,
+    editingSecondCaptionText: "",
 
     uploading: false,
     uploadProgress: 0,
@@ -1113,6 +1121,19 @@ export default function articleCreatorLogic(initialState = {}) {
       this.isEditingCaption = false;
     },
 
+    // --- Second main image caption editing methods ---
+    editSecondCaption() {
+      this.isEditingSecondCaption = true;
+      this.editingSecondCaptionText = this.article.secondImageCaption;
+    },
+    saveSecondCaption() {
+      this.article.secondImageCaption = this.editingSecondCaptionText;
+      this.isEditingSecondCaption = false;
+    },
+    cancelEditSecondCaption() {
+      this.isEditingSecondCaption = false;
+    },
+
     // --- Image Upload Method ---
     async handleImageUpload(
       event,
@@ -1147,7 +1168,9 @@ export default function articleCreatorLogic(initialState = {}) {
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            if (isCover) {
+            if (isCover === "second") {
+              this.article.secondImageUrl = downloadURL;
+            } else if (isCover) {
               this.article.imageUrl = downloadURL;
             } else if (blockIndex !== null && this.editingBlock) {
               if (this.editingBlock.type === "image") {
@@ -1593,6 +1616,8 @@ export default function articleCreatorLogic(initialState = {}) {
           articleType: this.article.articleType || articleType || "standard",
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
+          secondImageUrl: this.article.secondImageUrl,
+          secondImageCaption: this.article.secondImageCaption,
           heroOrientation: this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : "image-right",
           authorId: resolvedAuthorId,
           content: this.article.contentBlocks,

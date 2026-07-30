@@ -22,6 +22,8 @@ export interface Guide {
   tips?: Array<{ type: string; text: string; url?: string }>;
   imageUrl?: string;
   imageCaption?: string;
+  secondImageUrl?: string;
+  secondImageCaption?: string;
   category?: string;
   tags?: string[];
   isHotContent?: boolean;
@@ -84,6 +86,8 @@ export const createGuide = async (req: Request, res: Response) => {
       tips = [],
       imageUrl,
       imageCaption,
+      secondImageUrl,
+      secondImageCaption,
       authorId,
       category,
       tags = [],
@@ -121,6 +125,8 @@ export const createGuide = async (req: Request, res: Response) => {
       tips: normalizedTipsData,
       imageUrl,
       imageCaption,
+      secondImageUrl: secondImageUrl || '',
+      secondImageCaption: secondImageCaption || '',
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
@@ -237,6 +243,8 @@ export const updateGuide = async (req: Request, res: Response) => {
       tips = [],
       imageUrl,
       imageCaption,
+      secondImageUrl,
+      secondImageCaption,
       authorId,
       category,
       tags = [],
@@ -276,6 +284,8 @@ export const updateGuide = async (req: Request, res: Response) => {
       tips: normalizedTipsData,
       imageUrl,
       imageCaption,
+      secondImageUrl: secondImageUrl || '',
+      secondImageCaption: secondImageCaption || '',
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
@@ -331,6 +341,9 @@ export const deleteGuide = async (req: Request, res: Response) => {
 
     if (guideData.imageUrl) {
       imageUrlsToDelete.push(guideData.imageUrl);
+    }
+    if (guideData.secondImageUrl) {
+      imageUrlsToDelete.push(guideData.secondImageUrl);
     }
 
     if (Array.isArray(guideData.content)) {
