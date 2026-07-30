@@ -46,7 +46,6 @@ export default function flipperCreatorLogic(initialState = {}) {
     flipperId = null,
     isEditMode = false,
     isPreview = false,
-    onSaveRedirect = null,
     categoryTags = {},
     parisDistrictOptions = [],
   } = initialState as {
@@ -55,7 +54,6 @@ export default function flipperCreatorLogic(initialState = {}) {
     flipperId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
-    onSaveRedirect?: string | null;
     categoryTags?: Record<string, string[]>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
   };
@@ -158,7 +156,6 @@ export default function flipperCreatorLogic(initialState = {}) {
     ...createContentCollectionEditorState("flipper"),
     flipperId,
     isEditMode,
-    onSaveRedirect,
     categoryTags,
     parisDistrictOptions,
     authorsLoading: false,
@@ -740,8 +737,7 @@ export default function flipperCreatorLogic(initialState = {}) {
           await flippersApi.update(this.flipperId, payload);
           window.localStorage.removeItem("flipperPreview");
           window.Alpine.store("ui").showToast("Листалка успешно обновлена!");
-          const redirectTo = this.onSaveRedirect || `/dashboard/flippers`;
-          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
+          setTimeout(() => { globalThis.location.href = "/dashboard/flippers"; }, 1500);
         } else {
           await flippersApi.create(payload);
           window.localStorage.removeItem("flipperPreview");
@@ -764,7 +760,7 @@ export default function flipperCreatorLogic(initialState = {}) {
           await flippersApi.delete(this.flipperId);
           window.Alpine.store("ui").showToast("Листалка удалена");
           setTimeout(() => {
-            window.location.href = this.onSaveRedirect || "/dashboard/flippers";
+            window.location.href = "/dashboard/flippers";
           }, 1000);
         } catch (error) {
           console.error("Delete flipper failed:", error);

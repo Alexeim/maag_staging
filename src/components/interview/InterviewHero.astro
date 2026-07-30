@@ -47,7 +47,7 @@ const imageOnLeft = heroOrientation === "image-left";
 const resolvedLeadHtml = getInitialRichTextHtml({ html: leadHtml, text: lead });
 // Long leads blow past the hero's fixed 100svh height on desktop, so we scale
 // the font down once the lead outgrows a comfortable couple of sentences.
-const isLongLead = richTextHtmlToText(resolvedLeadHtml).length > 220;
+const isLongLead = richTextHtmlToText(resolvedLeadHtml).length > 320;
 ---
 
 <section class="w-full px-4 sm:px-6 lg:px-10">
@@ -96,13 +96,13 @@ const isLongLead = richTextHtmlToText(resolvedLeadHtml).length > 220;
         {categoryHref ? (
           <a
             href={categoryHref}
-            class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent hover:underline sm:text-sm"
+            class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent hover:underline"
           >
             {category}
           </a>
         ) : (
           <p
-            class="font-['Inter'] text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm"
+            class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent"
           >
             {category}
           </p>
@@ -128,7 +128,7 @@ const isLongLead = richTextHtmlToText(resolvedLeadHtml).length > 220;
             <div
               class:list={[
                 "article-rich-text mx-auto mt-8 max-w-[34rem] font-article-body font-light text-base-content lg:mt-10",
-                isLongLead ? "text-sm" : "text-base",
+                isLongLead ? "text-[15px]" : "text-base",
               ]}
               set:html={resolvedLeadHtml}
             />

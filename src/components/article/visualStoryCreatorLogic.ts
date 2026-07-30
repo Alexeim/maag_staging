@@ -59,7 +59,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     initialAuthors = [],
     storyId = null,
     isEditMode = false,
-    onSaveRedirect = null,
     isPreview = false,
   } = initialState as {
     categoryTags?: Record<string, string[]>;
@@ -68,7 +67,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     initialAuthors?: Array<Record<string, unknown>>;
     storyId?: string | null;
     isEditMode?: boolean;
-    onSaveRedirect?: string | null;
     isPreview?: boolean;
   };
 
@@ -135,7 +133,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     storyId,
     isEditMode,
     isPreview,
-    onSaveRedirect,
     categoryTags,
     parisDistrictOptions,
     categoryLabels,
@@ -764,13 +761,12 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           await visualStoriesApi.update(this.storyId, payload);
           localStorage.removeItem("visualStoryPreview");
           window.Alpine?.store("ui")?.showToast?.("Визуальная история обновлена!");
-          const redirectTo = this.onSaveRedirect || `/dashboard/visual-story/${this.storyId}/edit`;
-          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
+          setTimeout(() => { globalThis.location.href = "/dashboard/visual-stories"; }, 1500);
         } else {
-          const result = await visualStoriesApi.create(payload);
+          await visualStoriesApi.create(payload);
           localStorage.removeItem("visualStoryPreview");
           window.Alpine?.store("ui")?.showToast?.("Визуальная история создана!");
-          setTimeout(() => { globalThis.location.href = `/visual-story/${result.id}`; }, 1500);
+          setTimeout(() => { globalThis.location.href = "/dashboard/visual-stories"; }, 1500);
         }
       } catch (error) {
         console.error("Save error:", error);

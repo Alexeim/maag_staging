@@ -59,7 +59,6 @@ export default function interviewCreatorLogic(initialState = {}) {
     interviewId = null,
     isEditMode = false,
     isPreview = false,
-    onSaveRedirect = null,
     ...restInitialState
   } = initialState as {
     initialInterview?: Record<string, unknown> | null;
@@ -67,7 +66,6 @@ export default function interviewCreatorLogic(initialState = {}) {
     interviewId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
-    onSaveRedirect?: string | null;
   };
 
   const normalizeTags = (tags?: string[]) => {
@@ -175,7 +173,6 @@ export default function interviewCreatorLogic(initialState = {}) {
     isSaving: false,
     interviewId,
     isEditMode,
-    onSaveRedirect,
 
     // State for managing content lists for link blocks
     contentListsLoading: false,
@@ -525,9 +522,6 @@ export default function interviewCreatorLogic(initialState = {}) {
       }
       if (typeof isEditMode === "boolean") {
         this.isEditMode = isEditMode;
-      }
-      if (onSaveRedirect) {
-        this.onSaveRedirect = onSaveRedirect;
       }
 
       const shouldApplyPreview = (() => {
@@ -1064,8 +1058,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           await interviewsApi.update(this.interviewId, payload);
           window.localStorage.removeItem("interviewPreview");
           window.Alpine.store("ui").showToast("Интервью успешно обновлено!");
-          const redirectTo = this.onSaveRedirect || `/dashboard/interviews`;
-          setTimeout(() => { globalThis.location.href = redirectTo; }, 1500);
+          setTimeout(() => { globalThis.location.href = "/dashboard/interviews"; }, 1500);
         } else {
           await interviewsApi.create(payload);
           window.localStorage.removeItem("interviewPreview");

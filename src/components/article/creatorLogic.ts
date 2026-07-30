@@ -130,8 +130,6 @@ export default function articleCreatorLogic(initialState = {}) {
     initialAuthors = [],
     articleId = null,
     isEditMode = false,
-    onSaveRedirect = null,
-    createSuccessRedirect = null,
     articleType = "standard",
     editRouteBase = "/dashboard/article",
     createRoute = "/dashboard/article/create",
@@ -143,12 +141,14 @@ export default function articleCreatorLogic(initialState = {}) {
     initialAuthors?: Array<Record<string, unknown>>;
     articleId?: string | null;
     isEditMode?: boolean;
-    onSaveRedirect?: string | null;
-    createSuccessRedirect?: string | null;
     articleType?: "standard" | "tips" | "le_saviez_vous";
     editRouteBase?: string;
     createRoute?: string;
   };
+
+  // Each articleType flavor has exactly one dashboard list it belongs to.
+  const listUrl =
+    articleType === "le_saviez_vous" ? "/dashboard/le-saviez-vous" : "/dashboard";
 
   const categoryLabels: Record<string, string> = {
     culture: "Культура",
@@ -383,8 +383,6 @@ export default function articleCreatorLogic(initialState = {}) {
     categoryTags,
     articleId,
     isEditMode,
-    onSaveRedirect,
-    createSuccessRedirect,
     editRouteBase,
     createRoute,
     parisDistrictOptions,
@@ -909,7 +907,6 @@ export default function articleCreatorLogic(initialState = {}) {
         isEditMode?: boolean;
         editRouteBase?: string;
         createRoute?: string;
-        createSuccessRedirect?: string | null;
         selectedAuthorId?: string;
         useNewAuthor?: boolean;
         newAuthorFirstName?: string;
@@ -960,9 +957,6 @@ export default function articleCreatorLogic(initialState = {}) {
       if (typeof isEditMode === "boolean") {
         this.isEditMode = isEditMode;
       }
-      if (onSaveRedirect) {
-        this.onSaveRedirect = onSaveRedirect;
-      }
 
       const shouldApplyPreview = (() => {
         if (!previewState?.article) {
@@ -1011,10 +1005,6 @@ export default function articleCreatorLogic(initialState = {}) {
           previewState.createRoute
         ) {
           this.createRoute = previewState.createRoute;
-        }
-        if ("createSuccessRedirect" in previewState) {
-          this.createSuccessRedirect =
-            previewState.createSuccessRedirect ?? null;
         }
         this.selectedAuthorId =
           typeof previewState.selectedAuthorId === "string"
@@ -1523,7 +1513,6 @@ export default function articleCreatorLogic(initialState = {}) {
         isEditMode: this.isEditMode,
         editRouteBase: this.editRouteBase,
         createRoute: this.createRoute,
-        createSuccessRedirect: this.createSuccessRedirect,
         selectedAuthorId: this.selectedAuthorId,
         useNewAuthor: this.useNewAuthor,
         newAuthorFirstName: this.newAuthorFirstName,
@@ -1651,19 +1640,17 @@ export default function articleCreatorLogic(initialState = {}) {
           await articlesApi.update(this.articleId, payload);
           localStorage.removeItem("articlePreview");
           window.Alpine.store("ui").showToast("Статья успешно обновлена!");
-          const redirectTo = this.onSaveRedirect || `/dashboard`;
           setTimeout(() => {
-            globalThis.location.href = redirectTo;
+            globalThis.location.href = listUrl;
           }, 1500);
         } else {
-          const result = await articlesApi.create(payload);
+          await articlesApi.create(payload);
           localStorage.removeItem("articlePreview");
           window.Alpine.store("ui").showToast(
             "Статья успешно создана! Молодец!",
           );
-          const redirectTo = this.createSuccessRedirect || `/dashboard`;
           setTimeout(() => {
-            globalThis.location.href = redirectTo;
+            globalThis.location.href = listUrl;
           }, 1500);
         }
       } catch (error) {

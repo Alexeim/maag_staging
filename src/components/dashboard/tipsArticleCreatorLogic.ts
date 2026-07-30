@@ -85,7 +85,6 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     articleId = null,
     isEditMode = false,
     isPreview = false,
-    onSaveRedirect = null,
     categoryTags = {},
     parisDistrictOptions = [],
   } = initialState as {
@@ -94,7 +93,6 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     articleId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
-    onSaveRedirect?: string | null;
     categoryTags?: Record<string, string[]>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
   };
@@ -201,7 +199,6 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
     articleId,
     isEditMode,
-    onSaveRedirect,
 
     // ── Init ──────────────────────────────────────────────────────────────────
     init() {
@@ -241,7 +238,6 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         this.isEditMode = true;
       }
       if (typeof isEditMode === "boolean") this.isEditMode = isEditMode;
-      if (onSaveRedirect) this.onSaveRedirect = onSaveRedirect;
 
       const shouldApplyPreview = (() => {
         if (!previewState?.article) return false;
@@ -879,7 +875,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           globalThis.localStorage.removeItem("tipsPreview");
           ui()?.showToast?.("Статья обновлена!");
           setTimeout(() => {
-            globalThis.location.href = this.onSaveRedirect || "/dashboard/tips";
+            globalThis.location.href = "/dashboard/tips";
           }, 1500);
         } else {
           await articlesApi.create(payload);

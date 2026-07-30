@@ -234,7 +234,6 @@ export default function(Alpine: Alpine) {
       categoryTags: {},
       articleId: null,
       isEditMode: false,
-      onSaveRedirect: null,
       categoryLabels: {},
       getRichTextInitialHtml(block?: { html?: unknown; text?: unknown } | null) {
         return getSkeletonRichTextInitialHtml(block);

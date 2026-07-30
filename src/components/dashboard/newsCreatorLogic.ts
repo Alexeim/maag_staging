@@ -54,7 +54,6 @@ export default function newsCreatorLogic(
     articleId = null,
     isEditMode = false,
     isPreview = false,
-    onSaveRedirect = null,
     ...restInitialState
   } = initialState as {
     categoryTags?: Record<string, string[]>;
@@ -63,7 +62,6 @@ export default function newsCreatorLogic(
     articleId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
-    onSaveRedirect?: string | null;
   };
 
   const categoryLabels: Record<string, string> = {
@@ -151,7 +149,6 @@ export default function newsCreatorLogic(
     categoryTags,
     articleId,
     isEditMode,
-    onSaveRedirect,
     authorsLoading: false,
     authors: initialAuthors,
     selectedAuthorId: "",
@@ -436,7 +433,6 @@ export default function newsCreatorLogic(
         this.isEditMode = true;
       }
       if (typeof isEditMode === "boolean") this.isEditMode = isEditMode;
-      if (onSaveRedirect) this.onSaveRedirect = onSaveRedirect;
 
       const shouldApplyPreview = (() => {
         if (!previewState?.article) return false;
@@ -819,9 +815,8 @@ export default function newsCreatorLogic(
           await newsApi.update(this.articleId, payload);
           window.localStorage.removeItem("newsPreview");
           (window as any).Alpine.store("ui").showToast("Новость обновлена!");
-          const redirectTo = this.onSaveRedirect || `/dashboard/news`;
           setTimeout(() => {
-            globalThis.location.href = redirectTo;
+            globalThis.location.href = "/dashboard/news";
           }, 1500);
         } else {
           const result = await newsApi.create(payload);

@@ -14,14 +14,12 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
     initialAuthors = [],
     photoId = null,
     isEditMode = false,
-    onSaveRedirect = null,
     isPreview = false,
   } = initialState as {
     initialPhoto?: any;
     initialAuthors?: Array<Record<string, unknown>>;
     photoId?: string | null;
     isEditMode?: boolean;
-    onSaveRedirect?: string | null;
     isPreview?: boolean;
   };
 
@@ -48,7 +46,6 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
     photoId: (isPreview ? previewState?.photoId : photoId) as string | null,
     isEditMode: (isPreview ? Boolean(previewState?.isEditMode) : isEditMode) as boolean,
     isPreview: isPreview as boolean,
-    onSaveRedirect: onSaveRedirect as string | null,
 
     authors: initialAuthors as any[],
     authorsLoading: false,
@@ -244,7 +241,7 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
         }
 
         setTimeout(() => {
-          window.location.href = this.onSaveRedirect || "/dashboard/photo-of-the-day";
+          window.location.href = "/dashboard/photo-of-the-day";
         }, 1000);
       } catch (e) {
         console.error("Save failed", e);

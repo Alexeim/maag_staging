@@ -68,7 +68,6 @@ export default function guideCreatorLogic(initialState = {}) {
     initialAuthors = [],
     articleId = null,
     isEditMode = false,
-    onSaveRedirect = null,
     ...restInitialState
   } = initialState as {
     categoryTags?: Record<string, string[]>;
@@ -77,7 +76,6 @@ export default function guideCreatorLogic(initialState = {}) {
     initialAuthors?: Array<Record<string, unknown>>;
     articleId?: string | null;
     isEditMode?: boolean;
-    onSaveRedirect?: string | null;
   };
 
   const categoryLabels: Record<string, string> = {
@@ -309,7 +307,6 @@ export default function guideCreatorLogic(initialState = {}) {
     parisDistrictOptions,
     articleId,
     isEditMode,
-    onSaveRedirect,
     categoryLabels,
     tipOptions: [
       { type: "location" as TipType, label: "Локация" },
@@ -745,9 +742,6 @@ export default function guideCreatorLogic(initialState = {}) {
       }
       if (typeof isEditMode === "boolean") {
         this.isEditMode = isEditMode;
-      }
-      if (onSaveRedirect) {
-        this.onSaveRedirect = onSaveRedirect;
       }
 
       const shouldApplyPreview = (() => {
@@ -1369,18 +1363,17 @@ export default function guideCreatorLogic(initialState = {}) {
           await guidesApi.update(this.articleId, payload);
           localStorage.removeItem("guidePreview");
           window.Alpine.store("ui").showToast("Путеводитель успешно обновлён!");
-          const redirectTo = this.onSaveRedirect || `/dashboard/guides`;
           setTimeout(() => {
-            globalThis.location.href = redirectTo;
+            globalThis.location.href = "/dashboard/guides";
           }, 1500);
         } else {
-          const result = await guidesApi.create(payload);
+          await guidesApi.create(payload);
           localStorage.removeItem("guidePreview");
           window.Alpine.store("ui").showToast(
             "Путеводитель успешно создан! Молодец!",
           );
           setTimeout(() => {
-            globalThis.location.href = `dashboard/guides`;
+            globalThis.location.href = "/dashboard/guides";
           }, 1500);
         }
       } catch (error) {

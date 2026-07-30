@@ -150,7 +150,6 @@ export default function eventCreatorLogic(initialState = {}) {
     eventId = null,
     isEditMode = false,
     isPreview = false,
-    onSaveRedirect = null,
     initialEvent = null,
     initialAddresses = [],
     ...restInitial
@@ -158,7 +157,6 @@ export default function eventCreatorLogic(initialState = {}) {
     eventId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
-    onSaveRedirect?: string | null;
     initialEvent?: Record<string, unknown> | null;
     initialAddresses?: Array<Record<string, unknown>>;
   };
@@ -369,9 +367,6 @@ export default function eventCreatorLogic(initialState = {}) {
       }
       if (typeof isEditMode === "boolean") {
         this.isEditMode = isEditMode;
-      }
-      if (onSaveRedirect) {
-        this.onSaveRedirect = onSaveRedirect;
       }
       this.article.relatedContent = sanitizeRelatedContent(
         this.article.relatedContent,
@@ -716,9 +711,8 @@ export default function eventCreatorLogic(initialState = {}) {
           (globalThis as any).Alpine.store("ui").showToast(
             "Событие обновлено, красота!",
           );
-          const redirectTo = this.onSaveRedirect || `/dashboard/events`;
           setTimeout(() => {
-            globalThis.location.href = redirectTo;
+            globalThis.location.href = "/dashboard/events";
           }, 1500);
         } else {
           const result = await eventsApi.create(payload);
