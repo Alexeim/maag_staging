@@ -529,7 +529,7 @@ const selectSectionFeaturedInterview = async (
     return item && !hasAnyFlag(item, excludedFlags) ? item : null;
   }
 
-  if (!selection || selection.mode === 'auto-latest') {
+  if (selection?.mode === 'auto-latest') {
     return (
       candidates.find(
         (item: any) =>
