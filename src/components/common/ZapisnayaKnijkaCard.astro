@@ -25,10 +25,13 @@ const {
 
 const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
 const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
+const isLongerLead = lead.trim().split(/\s+/).filter(Boolean).length > 15;
 ---
 
 <div class="linked-image-hover w-full">
-  <div class="relative flex aspect-[2/3] w-full flex-row overflow-hidden bg-base-100">
+  <div
+    class="relative flex aspect-[2/3] w-full flex-row overflow-hidden bg-base-100"
+  >
     <div class="w-1/5 flex items-center justify-center">
       {
         category &&
@@ -47,7 +50,7 @@ const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
       }
     </div>
     <div class="grid w-4/5 grid-rows-[3fr_6fr_3fr]">
-      <div class="w-full overflow-hidden flex items-center justify-center pr-2">
+      <div class="w-full overflow-hidden flex items-center justify-start pr-2">
         <h3
           class={`m-0 font-light font-old_standard tracking-[-0.02em] leading-[1.15] text-base-content ${isLongTitle ? "text-[24px]" : "text-[36px]"}`}
         >
@@ -62,10 +65,12 @@ const isLongTitle = title.trim().split(/\s+/).filter(Boolean).length > 3;
           loading={imageLoading}
         />
       </div>
-      <div class="w-full overflow-hidden pt-3 pb-3">
+      <div class="w-full overflow-hidden pt-3 pb-3 pr-1 lg:pr-2">
         {
           lead && (
-            <p class="m-0 text-[16px] pr-1 font-inter font-light leading-[1.4] text-neutral-400 line-clamp-3 lg:line-clamp-4">
+            <p
+              class={`m-0 text-sm lg:text-[16px] font-inter font-light leading-[1.4] text-neutral-400 line-clamp-4 ${isLongerLead ? "text-[14px]" : "text-[14px]"}`}
+            >
               {lead}
             </p>
           )
