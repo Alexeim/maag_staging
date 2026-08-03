@@ -107,7 +107,7 @@ const isMaagChoiceItem = (item: { isMaagChoice?: boolean }) =>
 const isLandingPrimaryEligible = (item: {
   isHotContent?: boolean;
   isMaagChoice?: boolean;
-}) => !isHotContentItem(item) && !isMaagChoiceItem(item);
+}) => !isMaagChoiceItem(item);
 
 const normalizeCategoryKey = (value?: string) => value?.trim().toLowerCase() ?? "";
 
@@ -380,7 +380,7 @@ try {
       isMaagChoice: isMaagChoiceItem(item),
     })),
   ]
-    .filter((item) => !item.isHotContent && !item.isMaagChoice && item.id !== currentMainHeroKey)
+    .filter((item) => !item.isMaagChoice && item.id !== currentMainHeroKey)
     .sort((left, right) => {
       const leftDate = toDate(left.createdAt)?.getTime() ?? 0;
       const rightDate = toDate(right.createdAt)?.getTime() ?? 0;
