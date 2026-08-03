@@ -248,49 +248,49 @@ const interviewName =
       <div class="mt-8 overflow-visible lg:h-[calc(100svh-90px)]">
         {
           primaryParisArticle ? (
-            <article class="lg:h-full">
-              <div class="grid gap-6 lg:h-full lg:min-h-0 lg:grid-cols-2 lg:grid-rows-1 lg:items-stretch">
-                <div class="grid content-start gap-10 lg:h-full lg:min-h-0 lg:content-center">
-                  <div class="inline-flex w-fit flex-col items-start gap-3">
-                    <p class="m-0">
-                      {getPrimaryTagHref(primaryParisArticle) ? (
-                        <a
-                          href={getPrimaryTagHref(primaryParisArticle)}
-                          class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
-                        >
-                          {getPrimaryTag(primaryParisArticle)}
-                        </a>
-                      ) : (
-                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryTag(primaryParisArticle)}
-                        </span>
-                      )}
-                    </p>
-
+            <article class="lg:flex lg:h-full lg:flex-col">
+              <div class="mb-6 flex flex-col items-start gap-3 lg:mb-8 lg:flex-shrink-0 lg:items-center lg:text-center">
+                <p class="m-0">
+                  {getPrimaryTagHref(primaryParisArticle) ? (
                     <a
-                      href={primaryParisArticle.href}
-                      class="text-left text-current no-underline hover:underline"
+                      href={getPrimaryTagHref(primaryParisArticle)}
+                      class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
                     >
-                      <h2 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                        {primaryParisArticle.paid ? (
-                          <>
-                            {primaryParisSplit.start && (
-                              <>{primaryParisSplit.start} </>
-                            )}
-                            <span class="whitespace-nowrap">
-                              {primaryParisSplit.last}{" "}
-                              <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
-                            </span>
-                          </>
-                        ) : (
-                          primaryParisTrunc
-                        )}
-                      </h2>
+                      {getPrimaryTag(primaryParisArticle)}
                     </a>
-                  </div>
+                  ) : (
+                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                      {getPrimaryTag(primaryParisArticle)}
+                    </span>
+                  )}
+                </p>
 
+                <a
+                  href={primaryParisArticle.href}
+                  class="text-left text-current no-underline hover:underline lg:text-center"
+                >
+                  <h2 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
+                    {primaryParisArticle.paid ? (
+                      <>
+                        {primaryParisSplit.start && (
+                          <>{primaryParisSplit.start} </>
+                        )}
+                        <span class="whitespace-nowrap">
+                          {primaryParisSplit.last}{" "}
+                          <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                        </span>
+                      </>
+                    ) : (
+                      primaryParisTrunc
+                    )}
+                  </h2>
+                </a>
+              </div>
+
+              <div class="grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-2 lg:grid-rows-1 lg:items-stretch">
+                <div class="grid content-start gap-10 lg:h-full lg:min-h-0">
                   {getCardLead(primaryParisArticle) && (
-                    <p class="text-[19px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light">
+                    <p class="text-[22px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light">
                       {truncateText(getCardLead(primaryParisArticle), 280)}
                     </p>
                   )}

@@ -3,7 +3,6 @@ import Layout from "../../Layouts/Layout.astro";
 import { interviewsApi } from "../../lib/api/api";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
-import ContentActions from "@/components/common/ContentActions.astro";
 import InterviewHero from "@/components/interview/InterviewHero.astro";
 import { getKnownTagLabel } from "@/content/tags/tags";
 import picture1 from "@/assets/images/culture.jpg";
@@ -139,20 +138,15 @@ try {
         imageCaption={imageCaption}
         transitionName={`main-article-image-${id}`}
         heroOrientation={interview?.heroOrientation ?? "image-left"}
+        actions={{
+          contentType: "interview",
+          contentId: id!,
+          href: `/interviews/${id}`,
+          tag: bookmarkTag,
+        }}
       />
 
       <div class="px-4 pb-[100px] pt-10 sm:px-6 lg:px-14 lg:pt-16">
-        <div class="mx-auto mb-10 max-w-[826px]">
-          <ContentActions
-            contentType="interview"
-            contentId={id!}
-            title={title}
-            href={`/interviews/${id}`}
-            tag={bookmarkTag}
-            imageUrl={imageUrl}
-            align="center"
-          />
-        </div>
         <ArticleBody
           contentBlocks={Array.isArray(content) ? content : []}
           linkedContentLookup={linkedContentLookup}

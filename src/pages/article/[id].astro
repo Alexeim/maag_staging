@@ -5,7 +5,6 @@ import ArticleBody from "../../components/article/ArticleBody.astro";
 import ArticleTips from "../../components/article/ArticleTips.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
-import ContentActions from "@/components/common/ContentActions.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import {
   getPrimaryBadgeHref,
@@ -229,22 +228,17 @@ const isAKid = displayArticle.authorName === "Саша Макарова";
             imageCaption={displayArticle.imageCaption}
             transitionName={`main-article-image-${id}`}
             heroOrientation={articleData?.heroOrientation ?? "image-right"}
+            actions={{
+              contentType: "article",
+              contentId: id!,
+              href: `/article/${id}`,
+              category: bookmarkCategory,
+              tag: bookmarkTag,
+            }}
           />
 
           <!-- Article Content -->
           <div class="w-full px-4 lg:px-14 pt-10 pb-[100px] lg:pt-16">
-            <div class="mx-auto mb-10 max-w-[826px]">
-              <ContentActions
-                contentType="article"
-                contentId={id!}
-                title={displayArticle.title}
-                href={`/article/${id}`}
-                category={bookmarkCategory}
-                tag={bookmarkTag}
-                imageUrl={displayArticle.imageUrl}
-                align="center"
-              />
-            </div>
             <ArticleBody
               contentBlocks={displayArticle.contentBlocks}
               linkedContentLookup={linkedContentLookup}

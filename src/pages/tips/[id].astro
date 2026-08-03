@@ -2,7 +2,6 @@
 import Layout from "../../Layouts/Layout.astro";
 import TipsArticleBody from "../../components/article/TipsArticleBody.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
-import ContentActions from "@/components/common/ContentActions.astro";
 import TipsHero from "@/components/tips/TipsHero.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import {
@@ -164,22 +163,17 @@ if (!error && articleData) {
             imageAlt={displayArticle.imageAlt}
             imageCaption={displayArticle.imageCaption}
             heroOrientation={articleData?.heroOrientation ?? "image-right"}
+            actions={{
+              contentType: "tips",
+              contentId: id!,
+              href: `/tips/${id}`,
+              category: bookmarkCategory,
+              tag: firstBookmarkTag,
+            }}
           />
 
           <!-- Tips content -->
           <div class="w-full px-4 lg:px-14 pt-10 pb-[100px] lg:pt-16">
-            <div class="mx-auto mb-10 max-w-[826px]">
-              <ContentActions
-                contentType="tips"
-                contentId={id}
-                title={displayArticle.title}
-                href={`/tips/${id}`}
-                category={bookmarkCategory}
-                tag={firstBookmarkTag}
-                imageUrl={displayArticle.imageUrl}
-                align="center"
-              />
-            </div>
             <TipsArticleBody contentBlocks={displayArticle.contentBlocks} />
             <RelatedMaterialsMarquee
               collectionItems={collectionContentItems}

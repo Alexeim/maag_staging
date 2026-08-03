@@ -1,8 +1,7 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
 import ArticleHeader from "../../components/article/ArticleHeader.astro";
-import ArticleAuthor from "../../components/article/ArticleAuthor.astro";
-import ArticleDate from "@/components/article/ArticleDate.astro";
+import ArticleMetaRow from "@/components/article/ArticleMetaRow.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import {
   getPrimaryBadgeHref,
@@ -136,19 +135,13 @@ try {
 
           <div class="flex flex-col flex-wrap items-start justify-center gap-4">
             {
-              flipper.author && (
-                <div class="flex flex-row items-center justify-center gap-2">
-                  {flipper.author && (
-                    <ArticleAuthor
-                      name={`${flipper.author.firstName} ${flipper.author.lastName}`}
-                      avatarUrl={flipper.author.avatar}
-                    />
-                  )}
-                  <p class="font-inter text-base-content/50">|</p>
-                  {flipper.createdAt && (
-                    <ArticleDate createdAt={flipper.createdAt} />
-                  )}
-                </div>
+              flipper.author && flipper.createdAt && (
+                <ArticleMetaRow
+                  authorName={`${flipper.author.firstName} ${flipper.author.lastName}`}
+                  authorAvatar={flipper.author.avatar}
+                  createdAt={flipper.createdAt}
+                  align="start"
+                />
               )
             }
             <ContentActions
