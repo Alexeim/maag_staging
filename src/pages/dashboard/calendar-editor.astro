@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import CustomSelect from "@/components/dashboard/CustomSelect.astro";
 import {
   editorialPlacementsApi,
   eventsApi,
@@ -105,6 +106,8 @@ const eventOptions = events
     id: event.id,
     title: event.title,
     dateLabel: formatRange(event.startDate, event.endDate),
+    meta: formatRange(event.startDate, event.endDate),
+    createdAtMs: toDate(event.createdAt)?.getTime() ?? null,
     sortValue: toDate(event.startDate)?.getTime() ?? Number.POSITIVE_INFINITY,
   }))
   .sort((left, right) => left.sortValue - right.sortValue || left.title.localeCompare(right.title, "ru-RU"))
@@ -268,12 +271,11 @@ const secondaryCardsSummary = (() => {
           <div class="grid gap-3 lg:grid-cols-[minmax(0,24rem)_auto] lg:items-end">
             <label class="grid gap-2">
               <span class="text-sm font-medium">Добавить событие</span>
-              <select x-model="selectedMainCardIdToAdd" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer">
-                <option value="">— выбери событие —</option>
-                <template x-for="item in getUnselectedMainEventOptions()" :key="item.id">
-                  <option :value="item.id" x-text="`${item.title} (${item.dateLabel})`"></option>
-                </template>
-              </select>
+              <CustomSelect
+                model="selectedMainCardIdToAdd"
+                itemsExpr="getUnselectedMainEventOptions()"
+                placeholder="— выбери событие —"
+              />
             </label>
 
             <button
@@ -368,12 +370,11 @@ const secondaryCardsSummary = (() => {
           <div class="grid gap-3 lg:grid-cols-[minmax(0,24rem)_auto] lg:items-end">
             <label class="grid gap-2">
               <span class="text-sm font-medium">Добавить событие</span>
-              <select x-model="selectedSecondaryCardIdToAdd" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer">
-                <option value="">— выбери событие —</option>
-                <template x-for="item in getUnselectedSecondaryEventOptions()" :key="item.id">
-                  <option :value="item.id" x-text="`${item.title} (${item.dateLabel})`"></option>
-                </template>
-              </select>
+              <CustomSelect
+                model="selectedSecondaryCardIdToAdd"
+                itemsExpr="getUnselectedSecondaryEventOptions()"
+                placeholder="— выбери событие —"
+              />
             </label>
 
             <button

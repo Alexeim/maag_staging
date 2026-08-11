@@ -10,6 +10,8 @@ interface EventOption {
   id: string;
   title: string;
   dateLabel: string;
+  meta: string;
+  createdAtMs: number | null;
 }
 
 interface CalendarEditorInitialState {

@@ -1,0 +1,184 @@
+---
+// Custom Alpine-powered replacement for native <select> material pickers.
+// Groups options by `typeLabel` (when present) and lets the editor sort
+// the list by creation date, publication date, or alphabetically.
+//
+// `model` and `disabledExpr` are read live, directly inside directive
+// expressions, on every evaluation — never cached into local x-data.
+// The pages that use this component load their real state asynchronously
+// (via the `$lazy` Alpine plugin, which mounts a skeleton object first and
+// fills it in once its module resolves), so a cached local mirror of an
+// external property can get set once from the skeleton default and never
+// pick up the real value. Reading the expression fresh every time sidesteps
+// that race entirely.
+interface Props {
+  id?: string;
+  // Alpine expression pointing at the parent x-data property to bind (e.g. "selectedEventId").
+  model: string;
+  // Alpine expression that evaluates to CustomSelectItem[] (literal JSON array or a method call).
+  itemsExpr: string;
+  placeholder?: string;
+  defaultSort?: "created" | "published" | "alpha";
+  // Alpine expression evaluating to a boolean; when true the control can't be opened.
+  disabledExpr?: string;
+  class?: string;
+}
+
+const {
+  id,
+  model,
+  itemsExpr,
+  placeholder = "— выбери —",
+  defaultSort = "created",
+  disabledExpr,
+  class: className = "",
+} = Astro.props as Props;
+
+const isDisabledExpr = disabledExpr ? `Boolean(${disabledExpr})` : "false";
+
+const rootData = `{
+  open: false,
+  sortMode: '${defaultSort}',
+  __items: [],
+  __sortedItems() {
+    const items = this.__items.slice();
+    if (this.sortMode === 'alpha') {
+      items.sort((a, b) => a.title.localeCompare(b.title, 'ru-RU'));
+      return items;
+    }
+    const field = this.sortMode === 'published' ? 'publishedAtMs' : 'createdAtMs';
+    items.sort((a, b) => {
+      const left = a[field] ?? 0;
+      const right = b[field] ?? 0;
+      if (left !== right) return right - left;
+      return a.title.localeCompare(b.title, 'ru-RU');
+    });
+    return items;
+  },
+  __groups() {
+    const groups = new Map();
+    for (const item of this.__sortedItems()) {
+      const key = item.typeLabel || '';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(item);
+    }
+    return Array.from(groups, ([label, items]) => ({ label, items }));
+  },
+  __hasCreated() { return this.__items.some((item) => item.createdAtMs != null); },
+  __hasPublished() { return this.__items.some((item) => item.publishedAtMs != null); },
+  __titleFor(id) {
+    const found = this.__items.find((item) => item.id === id);
+    return found ? found.title : '';
+  },
+}`;
+---
+
+<div
+  x-data={rootData}
+  x-effect={`__items = (${itemsExpr}) || []`}
+  @click.outside="open = false"
+  @keydown.escape.window="open = false"
+  class:list={["relative", className]}
+>
+  <button
+    type="button"
+    id={id}
+    class="w-full flex items-center justify-between gap-2 rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content text-left focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+    @click={`if (!(${isDisabledExpr})) open = !open`}
+    :aria-expanded="open"
+    :disabled={isDisabledExpr}
+  >
+    <span class="truncate" x-text={`__titleFor(${model}) || ${JSON.stringify(placeholder)}`}></span>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="shrink-0 transition-transform duration-150 text-base-content/50"
+      :class="open ? 'rotate-180' : ''"
+    >
+      <path d="m6 9 6 6 6-6"></path>
+    </svg>
+  </button>
+
+  <div
+    x-show={`open && !(${isDisabledExpr})`}
+    x-transition:enter="transition ease-out duration-150"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-100"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="absolute z-30 mt-1 w-full rounded-lg border border-base-300 bg-base-100 shadow-lg"
+    style="display: none"
+  >
+    <div class="flex items-center gap-1 border-b border-base-300 p-2" x-show="__hasCreated() || __hasPublished()">
+      <button
+        type="button"
+        class="rounded-md px-2 py-1 text-xs transition cursor-pointer"
+        :class="sortMode === 'created' ? 'bg-base-200 font-medium text-base-content' : 'text-base-content/60 hover:bg-base-200'"
+        x-show="__hasCreated()"
+        @click="sortMode = 'created'"
+      >
+        По созданию
+      </button>
+      <button
+        type="button"
+        class="rounded-md px-2 py-1 text-xs transition cursor-pointer"
+        :class="sortMode === 'published' ? 'bg-base-200 font-medium text-base-content' : 'text-base-content/60 hover:bg-base-200'"
+        x-show="__hasPublished()"
+        @click="sortMode = 'published'"
+      >
+        По публикации
+      </button>
+      <button
+        type="button"
+        class="rounded-md px-2 py-1 text-xs transition cursor-pointer"
+        :class="sortMode === 'alpha' ? 'bg-base-200 font-medium text-base-content' : 'text-base-content/60 hover:bg-base-200'"
+        @click="sortMode = 'alpha'"
+      >
+        А-Я
+      </button>
+    </div>
+
+    <div class="max-h-72 overflow-y-auto py-1">
+      <button
+        type="button"
+        class="w-full text-left px-3 py-2 text-sm text-base-content/50 hover:bg-base-200 cursor-pointer"
+        @click={`${model} = ''; open = false`}
+      >
+        {placeholder}
+      </button>
+
+      <template x-for="group in __groups()" :key="group.label">
+        <div>
+          <div
+            class="px-3 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-base-content/40"
+            x-show="group.label"
+            x-text="group.label"
+          ></div>
+          <template x-for="item in group.items" :key="item.id">
+            <button
+              type="button"
+              class="w-full text-left px-3 py-2 text-sm hover:bg-base-200 cursor-pointer flex flex-col gap-0.5"
+              :class={`item.id === (${model}) ? 'bg-base-200 font-medium' : ''`}
+              @click={`${model} = item.id; open = false`}
+            >
+              <span x-text="item.title"></span>
+              <span class="text-xs text-base-content/50" x-show="item.meta" x-text="item.meta"></span>
+            </button>
+          </template>
+        </div>
+      </template>
+
+      <template x-if="__items.length === 0">
+        <p class="px-3 py-2 text-sm text-base-content/50">Нет доступных вариантов</p>
+      </template>
+    </div>
+  </div>
+</div>

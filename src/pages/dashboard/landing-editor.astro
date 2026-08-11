@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import CustomSelect from "@/components/dashboard/CustomSelect.astro";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 import {
   articlesApi,
@@ -158,8 +159,10 @@ const formatUpdatedAt = (value: unknown) => {
 
 let landingPlacements = DEFAULT_LANDING_PLACEMENTS;
 let loadError = "";
-let leSaviezVousItems: Array<{ id: string; title: string; createdAt: unknown }> = [];
-let photoOfTheDayItems: Array<{ id: string; title: string }> = [];
+let leSaviezVousItems: Array<{ id: string; title: string; createdAt: unknown; publishedAt?: unknown }> = [];
+let photoOfTheDayItems: Array<{ id: string; title: string; createdAtMs: number | null; publishedAtMs: number | null }> = [];
+
+const toMs = (value: unknown) => toDate(value)?.getTime() ?? null;
 
 const contentTitleMaps = {
   mainHero: new Map<string, string>(),
@@ -174,6 +177,8 @@ const netlenkaOptionItems: Array<{
   type: LandingNetlenkaItemType;
   typeLabel: string;
   createdAt: unknown;
+  createdAtMs: number | null;
+  publishedAtMs: number | null;
 }> = [];
 const cultureCardsOptionItems: Array<{
   id: string;
@@ -181,6 +186,8 @@ const cultureCardsOptionItems: Array<{
   type: LandingCategoryCardsItemType;
   typeLabel: string;
   createdAt: unknown;
+  createdAtMs: number | null;
+  publishedAtMs: number | null;
 }> = [];
 const parisCardsOptionItems: Array<{
   id: string;
@@ -188,6 +195,8 @@ const parisCardsOptionItems: Array<{
   type: LandingCategoryCardsItemType;
   typeLabel: string;
   createdAt: unknown;
+  createdAtMs: number | null;
+  publishedAtMs: number | null;
 }> = [];
 const cultureHeroOptionItems: Array<{
   id: string;
@@ -195,6 +204,8 @@ const cultureHeroOptionItems: Array<{
   type: LandingCategoryCardsItemType;
   typeLabel: string;
   createdAt: unknown;
+  createdAtMs: number | null;
+  publishedAtMs: number | null;
 }> = [];
 const parisHeroOptionItems: Array<{
   id: string;
@@ -202,7 +213,11 @@ const parisHeroOptionItems: Array<{
   type: LandingCategoryCardsItemType;
   typeLabel: string;
   createdAt: unknown;
+  createdAtMs: number | null;
+  publishedAtMs: number | null;
 }> = [];
+const contentDatesMap = new Map<string, { createdAtMs: number | null; publishedAtMs: number | null }>();
+const eventDatesMap = new Map<string, { createdAtMs: number | null; publishedAtMs: number | null }>();
 const mainHeroArticleMeta = new Map<
   string,
   {
@@ -242,6 +257,7 @@ try {
     const articleBucket = normalizeArticleBucket(item);
     if (isLandingPrimaryEligible(item)) {
       contentTitleMaps.mainHero.set(key, item.title);
+      contentDatesMap.set(key, { createdAtMs: toMs(item.createdAt), publishedAtMs: toMs(item.publishedAt) });
     }
     if (isMaagChoiceItem(item)) {
       contentTitleMaps.netlenka.set(key, item.title);
@@ -251,6 +267,8 @@ try {
         type: "article",
         typeLabel: NETLENKA_TYPE_LABELS.article,
         createdAt: item.createdAt,
+        createdAtMs: toMs(item.createdAt),
+        publishedAtMs: toMs(item.publishedAt),
       });
     }
     if (articleBucket) {
@@ -263,6 +281,7 @@ try {
   guides.forEach((item) => {
     if (isLandingPrimaryEligible(item)) {
       contentTitleMaps.mainHero.set(`guide:${item.id}`, item.title);
+      contentDatesMap.set(`guide:${item.id}`, { createdAtMs: toMs(item.createdAt), publishedAtMs: toMs(item.publishedAt) });
     }
     if (isMaagChoiceItem(item)) {
       contentTitleMaps.netlenka.set(`guide:${item.id}`, item.title);
@@ -272,12 +291,15 @@ try {
         type: "guide",
         typeLabel: NETLENKA_TYPE_LABELS.guide,
         createdAt: item.createdAt,
+        createdAtMs: toMs(item.createdAt),
+        publishedAtMs: toMs(item.publishedAt),
       });
     }
   });
   interviews.forEach((item) => {
     if (isLandingPrimaryEligible(item)) {
       contentTitleMaps.mainHero.set(`interview:${item.id}`, item.title);
+      contentDatesMap.set(`interview:${item.id}`, { createdAtMs: toMs(item.createdAt), publishedAtMs: toMs(item.publishedAt) });
     }
     if (isMaagChoiceItem(item)) {
       contentTitleMaps.netlenka.set(`interview:${item.id}`, item.title);
@@ -287,6 +309,8 @@ try {
         type: "interview",
         typeLabel: NETLENKA_TYPE_LABELS.interview,
         createdAt: item.createdAt,
+        createdAtMs: toMs(item.createdAt),
+        publishedAtMs: toMs(item.publishedAt),
       });
     }
     if (isLandingPrimaryEligible(item)) {
@@ -296,6 +320,7 @@ try {
   flippers.forEach((item) => {
     if (isLandingPrimaryEligible(item)) {
       contentTitleMaps.mainHero.set(`flipper:${item.id}`, item.title);
+      contentDatesMap.set(`flipper:${item.id}`, { createdAtMs: toMs(item.createdAt), publishedAtMs: toMs(item.publishedAt) });
     }
     if (isMaagChoiceItem(item)) {
       contentTitleMaps.netlenka.set(`flipper:${item.id}`, item.title);
@@ -305,12 +330,15 @@ try {
         type: "flipper",
         typeLabel: NETLENKA_TYPE_LABELS.flipper,
         createdAt: item.createdAt,
+        createdAtMs: toMs(item.createdAt),
+        publishedAtMs: toMs(item.publishedAt),
       });
     }
   });
   visualStories.forEach((item) => {
     if (isLandingPrimaryEligible(item)) {
       contentTitleMaps.mainHero.set(`visual-story:${item.id}`, item.title);
+      contentDatesMap.set(`visual-story:${item.id}`, { createdAtMs: toMs(item.createdAt), publishedAtMs: toMs(item.publishedAt) });
     }
     if (isMaagChoiceItem(item)) {
       contentTitleMaps.netlenka.set(`visual-story:${item.id}`, item.title);
@@ -319,6 +347,8 @@ try {
         title: item.title,
         type: "visual-story",
         typeLabel: NETLENKA_TYPE_LABELS["visual-story"],
+        createdAtMs: toMs(item.createdAt),
+        publishedAtMs: toMs(item.publishedAt),
         createdAt: item.createdAt,
       });
     }
@@ -326,7 +356,10 @@ try {
   newsItems.forEach((item) => {
     contentTitleMaps.news.set(item.id, item.title);
   });
-  events.forEach((item) => contentTitleMaps.events.set(item.id, item.title));
+  events.forEach((item) => {
+    contentTitleMaps.events.set(item.id, item.title);
+    eventDatesMap.set(item.id, { createdAtMs: toMs(item.createdAt), publishedAtMs: null });
+  });
 
   leSaviezVousItems = articles
     .filter((item) => isLeSaviezVousArticle(item) && isLandingPrimaryEligible(item))
@@ -345,6 +378,8 @@ try {
         type: "article" as const,
         typeLabel: CATEGORY_CARDS_TYPE_LABELS.article,
         createdAt: item.createdAt,
+        createdAtMs: toMs(item.createdAt),
+        publishedAtMs: toMs(item.publishedAt),
         category: normalizeCategoryKey(item.category),
         isHotContent: isHotContentItem(item),
         isMaagChoice: isMaagChoiceItem(item),
@@ -355,6 +390,8 @@ try {
       type: "guide" as const,
       typeLabel: CATEGORY_CARDS_TYPE_LABELS.guide,
       createdAt: item.createdAt,
+      createdAtMs: toMs(item.createdAt),
+      publishedAtMs: toMs(item.publishedAt),
       category: normalizeCategoryKey(item.category),
       isHotContent: isHotContentItem(item),
       isMaagChoice: isMaagChoiceItem(item),
@@ -365,6 +402,8 @@ try {
       type: "flipper" as const,
       typeLabel: CATEGORY_CARDS_TYPE_LABELS.flipper,
       createdAt: item.createdAt,
+      createdAtMs: toMs(item.createdAt),
+      publishedAtMs: toMs(item.publishedAt),
       category: normalizeCategoryKey(item.category),
       isHotContent: isHotContentItem(item),
       isMaagChoice: isMaagChoiceItem(item),
@@ -375,6 +414,8 @@ try {
       type: "visual-story" as const,
       typeLabel: CATEGORY_CARDS_TYPE_LABELS["visual-story"],
       createdAt: item.createdAt,
+      createdAtMs: toMs(item.createdAt),
+      publishedAtMs: toMs(item.publishedAt),
       category: normalizeCategoryKey(item.category),
       isHotContent: isHotContentItem(item),
       isMaagChoice: isMaagChoiceItem(item),
@@ -424,7 +465,12 @@ try {
 
 try {
   const photos = await photosOfTheDayApi.list();
-  photoOfTheDayItems = photos.map((p) => ({ id: p.id, title: p.title }));
+  photoOfTheDayItems = photos.map((p) => ({
+    id: p.id,
+    title: p.title,
+    createdAtMs: toMs(p.createdAt),
+    publishedAtMs: toMs(p.publishedAt),
+  }));
 } catch (e) {
   console.error("Failed to fetch photos of the day for landing editor:", e);
 }
@@ -941,6 +987,8 @@ const mainHeroOptions = Array.from(contentTitleMaps.mainHero.entries())
       type,
       typeLabel: MAIN_HERO_TYPE_LABELS[type],
       entityId: id,
+      createdAtMs: contentDatesMap.get(key)?.createdAtMs ?? null,
+      publishedAtMs: contentDatesMap.get(key)?.publishedAtMs ?? null,
       ...(type === "article" ? mainHeroArticleMeta.get(key) : {}),
     };
   })
@@ -966,11 +1014,15 @@ const mainHeroOptions = Array.from(contentTitleMaps.mainHero.entries())
 const eventOptions = Array.from(contentTitleMaps.events.entries()).map(([id, title]) => ({
   id,
   title,
+  createdAtMs: eventDatesMap.get(id)?.createdAtMs ?? null,
+  publishedAtMs: eventDatesMap.get(id)?.publishedAtMs ?? null,
 }));
 
 const interviewOptions = Array.from(contentTitleMaps.interviews.entries()).map(([id, title]) => ({
   id,
   title,
+  createdAtMs: contentDatesMap.get(`interview:${id}`)?.createdAtMs ?? null,
+  publishedAtMs: contentDatesMap.get(`interview:${id}`)?.publishedAtMs ?? null,
 }));
 
 const initialEventCardState = (() => {
@@ -996,6 +1048,8 @@ const initialCultureInterviewState = (() => {
 const leSaviezVousOptions = leSaviezVousItems.map((item) => ({
   id: item.id,
   title: item.title,
+  createdAtMs: toMs(item.createdAt),
+  publishedAtMs: toMs(item.publishedAt),
 }));
 
 const initialLeSaviezVousState = (() => {
@@ -1181,19 +1235,13 @@ const initialMainHeroState = (() => {
             >
               Сначала выбери раздел статьи, чтобы сузить список материалов.
             </p>
-            <select
+            <CustomSelect
               id="main-hero-select"
-              x-model="selectedMainHeroKey"
-              class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="!selectedMainHeroType || (selectedMainHeroType === 'article' && !selectedMainHeroArticleBucket)"
-            >
-              <option value="">
-                — выбери материал —
-              </option>
-              <template x-for="item in getFilteredMainHeroOptions()" :key="item.id">
-                <option :value="item.id" x-text="item.title"></option>
-              </template>
-            </select>
+              model="selectedMainHeroKey"
+              itemsExpr="getFilteredMainHeroOptions()"
+              placeholder="— выбери материал —"
+              disabledExpr="!selectedMainHeroType || (selectedMainHeroType === 'article' && !selectedMainHeroArticleBucket)"
+            />
           </div>
         </div>
 
@@ -1325,18 +1373,12 @@ const initialMainHeroState = (() => {
           <label for="culture-hero-select" class="text-sm font-medium">
             Выбери материал для culture hero
           </label>
-          <select
+          <CustomSelect
             id="culture-hero-select"
-            x-model="selectedCultureHeroKey"
-            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <option value="">
-              — выбери материал —
-            </option>
-            {cultureHeroOptions.map((item) => (
-              <option value={item.id}>[{item.typeLabel}] {item.title}</option>
-            ))}
-          </select>
+            model="selectedCultureHeroKey"
+            itemsExpr={JSON.stringify(cultureHeroOptions)}
+            placeholder="— выбери материал —"
+          />
         </div>
 
         <p x-show="cultureHeroError" class="text-sm text-error" x-text="cultureHeroError"></p>
@@ -1382,18 +1424,12 @@ const initialMainHeroState = (() => {
           <label for="paris-hero-select" class="text-sm font-medium">
             Выбери материал для paris hero
           </label>
-          <select
+          <CustomSelect
             id="paris-hero-select"
-            x-model="selectedParisHeroKey"
-            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <option value="">
-              — выбери материал —
-            </option>
-            {parisHeroOptions.map((item) => (
-              <option value={item.id}>[{item.typeLabel}] {item.title}</option>
-            ))}
-          </select>
+            model="selectedParisHeroKey"
+            itemsExpr={JSON.stringify(parisHeroOptions)}
+            placeholder="— выбери материал —"
+          />
         </div>
 
         <p x-show="parisHeroError" class="text-sm text-error" x-text="parisHeroError"></p>
@@ -1551,12 +1587,12 @@ const initialMainHeroState = (() => {
 
         <div x-show="eventCardMode === 'manual'" class="grid gap-2 max-w-sm">
           <label for="event-select" class="text-sm font-medium">Выбери событие</label>
-          <select id="event-select" x-model="selectedEventId" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-            <option value="">— выбери событие —</option>
-            {eventOptions.map((item) => (
-              <option value={item.id}>{item.title}</option>
-            ))}
-          </select>
+          <CustomSelect
+            id="event-select"
+            model="selectedEventId"
+            itemsExpr={JSON.stringify(eventOptions)}
+            placeholder="— выбери событие —"
+          />
         </div>
 
         <p x-show="eventError" class="text-sm text-error" x-text="eventError"></p>
@@ -1781,12 +1817,12 @@ const initialMainHeroState = (() => {
 
         <div x-show="cultureInterviewMode === 'manual'" class="grid gap-2 max-w-sm">
           <label for="interview-select" class="text-sm font-medium">Выбери интервью</label>
-          <select id="interview-select" x-model="selectedInterviewId" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-            <option value="">— выбери интервью —</option>
-            {interviewOptions.map((item) => (
-              <option value={item.id}>{item.title}</option>
-            ))}
-          </select>
+          <CustomSelect
+            id="interview-select"
+            model="selectedInterviewId"
+            itemsExpr={JSON.stringify(interviewOptions)}
+            placeholder="— выбери интервью —"
+          />
         </div>
 
         <p x-show="cultureInterviewError" class="text-sm text-error" x-text="cultureInterviewError"></p>
@@ -1830,12 +1866,12 @@ const initialMainHeroState = (() => {
 
         <div x-show="leSaviezVousMode === 'manual'" class="grid gap-2 max-w-sm">
           <label for="le-saviez-vous-select" class="text-sm font-medium">Выбери материал</label>
-          <select id="le-saviez-vous-select" x-model="selectedLeSaviezVousId" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-            <option value="">— выбери материал —</option>
-            {leSaviezVousOptions.map((item) => (
-              <option value={item.id}>{item.title}</option>
-            ))}
-          </select>
+          <CustomSelect
+            id="le-saviez-vous-select"
+            model="selectedLeSaviezVousId"
+            itemsExpr={JSON.stringify(leSaviezVousOptions)}
+            placeholder="— выбери материал —"
+          />
         </div>
 
         <p x-show="leSaviezVousError" class="text-sm text-error" x-text="leSaviezVousError"></p>
@@ -1880,12 +1916,12 @@ const initialMainHeroState = (() => {
 
         <div x-show="photoOfTheDayMode === 'manual'" class="grid gap-2 max-w-sm">
           <label for="photo-of-the-day-select" class="text-sm font-medium">Выбери фото</label>
-          <select id="photo-of-the-day-select" x-model="selectedPhotoOfTheDayId" class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-            <option value="">— выбери фото —</option>
-            {photoOfTheDayOptions.map((item) => (
-              <option value={item.id}>{item.title}</option>
-            ))}
-          </select>
+          <CustomSelect
+            id="photo-of-the-day-select"
+            model="selectedPhotoOfTheDayId"
+            itemsExpr={JSON.stringify(photoOfTheDayOptions)}
+            placeholder="— выбери фото —"
+          />
         </div>
 
         <p x-show="photoOfTheDayError" class="text-sm text-error" x-text="photoOfTheDayError"></p>

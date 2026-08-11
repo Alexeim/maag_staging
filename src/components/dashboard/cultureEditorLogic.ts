@@ -15,11 +15,15 @@ interface ContentOption {
   title: string;
   type: string;
   typeLabel: string;
+  createdAtMs: number | null;
+  publishedAtMs: number | null;
 }
 
 interface InterviewOption {
   id: string;
   title: string;
+  createdAtMs: number | null;
+  publishedAtMs: number | null;
 }
 
 interface CultureEditorInitialState {

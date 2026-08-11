@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import CustomSelect from "@/components/dashboard/CustomSelect.astro";
 import {
   articlesApi,
   editorialPlacementsApi,
@@ -62,9 +63,20 @@ const normalizeCategoryKey = (value?: string) => value?.trim().toLowerCase() ?? 
 let placements = DEFAULT_PLACEMENTS;
 let loadError = "";
 
-const heroOptions: Array<{ id: string; title: string; type: string; typeLabel: string }> = [];
-const interviewOptions: Array<{ id: string; title: string }> = [];
-const sidebarOptions: Array<{ id: string; title: string; type: string; typeLabel: string }> = [];
+type MaterialOption = {
+  id: string;
+  title: string;
+  type: string;
+  typeLabel: string;
+  createdAtMs: number | null;
+  publishedAtMs: number | null;
+};
+
+const toMs = (value: unknown) => toDate(value)?.getTime() ?? null;
+
+const heroOptions: MaterialOption[] = [];
+const interviewOptions: Array<{ id: string; title: string; createdAtMs: number | null; publishedAtMs: number | null }> = [];
+const sidebarOptions: MaterialOption[] = [];
 
 try {
   const [culturePagePlacements, articles, guides, flippers, visualStories, interviews] =
@@ -88,7 +100,7 @@ try {
         !a.isHotContent,
     )
     .forEach((a) => {
-      heroOptions.push({ id: `article:${a.id}`, title: a.title, type: "article", typeLabel: CONTENT_TYPE_LABELS.article });
+      heroOptions.push({ id: `article:${a.id}`, title: a.title, type: "article", typeLabel: CONTENT_TYPE_LABELS.article, createdAtMs: toMs(a.createdAt), publishedAtMs: toMs(a.publishedAt) });
     });
   articles
     .filter(
@@ -98,49 +110,49 @@ try {
         Boolean(a.isHotContent),
     )
     .forEach((a) => {
-      sidebarOptions.push({ id: `article:${a.id}`, title: a.title, type: "article", typeLabel: CONTENT_TYPE_LABELS.article });
+      sidebarOptions.push({ id: `article:${a.id}`, title: a.title, type: "article", typeLabel: CONTENT_TYPE_LABELS.article, createdAtMs: toMs(a.createdAt), publishedAtMs: toMs(a.publishedAt) });
     });
 
   guides
     .filter((g) => normalizeCategoryKey(g.category) === "culture" && !g.isHotContent)
     .forEach((g) => {
-      heroOptions.push({ id: `guide:${g.id}`, title: g.title, type: "guide", typeLabel: CONTENT_TYPE_LABELS.guide });
+      heroOptions.push({ id: `guide:${g.id}`, title: g.title, type: "guide", typeLabel: CONTENT_TYPE_LABELS.guide, createdAtMs: toMs(g.createdAt), publishedAtMs: toMs(g.publishedAt) });
     });
   guides
     .filter((g) => normalizeCategoryKey(g.category) === "culture" && Boolean(g.isHotContent))
     .forEach((g) => {
-      sidebarOptions.push({ id: `guide:${g.id}`, title: g.title, type: "guide", typeLabel: CONTENT_TYPE_LABELS.guide });
+      sidebarOptions.push({ id: `guide:${g.id}`, title: g.title, type: "guide", typeLabel: CONTENT_TYPE_LABELS.guide, createdAtMs: toMs(g.createdAt), publishedAtMs: toMs(g.publishedAt) });
     });
 
   flippers
     .filter((f) => normalizeCategoryKey(f.category) === "culture" && !f.isHotContent)
     .forEach((f) => {
-      heroOptions.push({ id: `flipper:${f.id}`, title: f.title, type: "flipper", typeLabel: CONTENT_TYPE_LABELS.flipper });
+      heroOptions.push({ id: `flipper:${f.id}`, title: f.title, type: "flipper", typeLabel: CONTENT_TYPE_LABELS.flipper, createdAtMs: toMs(f.createdAt), publishedAtMs: toMs(f.publishedAt) });
     });
   flippers
     .filter((f) => normalizeCategoryKey(f.category) === "culture" && Boolean(f.isHotContent))
     .forEach((f) => {
-      sidebarOptions.push({ id: `flipper:${f.id}`, title: f.title, type: "flipper", typeLabel: CONTENT_TYPE_LABELS.flipper });
+      sidebarOptions.push({ id: `flipper:${f.id}`, title: f.title, type: "flipper", typeLabel: CONTENT_TYPE_LABELS.flipper, createdAtMs: toMs(f.createdAt), publishedAtMs: toMs(f.publishedAt) });
     });
 
   visualStories
     .filter((s) => normalizeCategoryKey(s.category) === "culture" && !s.isHotContent)
     .forEach((s) => {
-      heroOptions.push({ id: `visual-story:${s.id}`, title: s.title, type: "visual-story", typeLabel: CONTENT_TYPE_LABELS["visual-story"] });
+      heroOptions.push({ id: `visual-story:${s.id}`, title: s.title, type: "visual-story", typeLabel: CONTENT_TYPE_LABELS["visual-story"], createdAtMs: toMs(s.createdAt), publishedAtMs: toMs(s.publishedAt) });
     });
   visualStories
     .filter((s) => normalizeCategoryKey(s.category) === "culture" && Boolean(s.isHotContent))
     .forEach((s) => {
-      sidebarOptions.push({ id: `visual-story:${s.id}`, title: s.title, type: "visual-story", typeLabel: CONTENT_TYPE_LABELS["visual-story"] });
+      sidebarOptions.push({ id: `visual-story:${s.id}`, title: s.title, type: "visual-story", typeLabel: CONTENT_TYPE_LABELS["visual-story"], createdAtMs: toMs(s.createdAt), publishedAtMs: toMs(s.publishedAt) });
     });
 
   interviews.forEach((i) => {
     if (!i.isHotContent) {
-      heroOptions.push({ id: `interview:${i.id}`, title: i.title, type: "interview", typeLabel: CONTENT_TYPE_LABELS.interview });
-      interviewOptions.push({ id: i.id, title: i.title });
+      heroOptions.push({ id: `interview:${i.id}`, title: i.title, type: "interview", typeLabel: CONTENT_TYPE_LABELS.interview, createdAtMs: toMs(i.createdAt), publishedAtMs: toMs(i.publishedAt) });
+      interviewOptions.push({ id: i.id, title: i.title, createdAtMs: toMs(i.createdAt), publishedAtMs: toMs(i.publishedAt) });
     }
     if (i.isHotContent) {
-      sidebarOptions.push({ id: `interview:${i.id}`, title: i.title, type: "interview", typeLabel: CONTENT_TYPE_LABELS.interview });
+      sidebarOptions.push({ id: `interview:${i.id}`, title: i.title, type: "interview", typeLabel: CONTENT_TYPE_LABELS.interview, createdAtMs: toMs(i.createdAt), publishedAtMs: toMs(i.publishedAt) });
     }
   });
 
@@ -236,16 +248,12 @@ const initialSidebarKeys =
 
         <div x-show="heroMode === 'manual'" class="grid gap-2 max-w-xl">
           <label for="culture-hero-select" class="text-sm font-medium">Выбери материал</label>
-          <select
+          <CustomSelect
             id="culture-hero-select"
-            x-model="selectedHeroKey"
-            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer"
-          >
-            <option value="">— выбери материал —</option>
-            {heroOptions.map((item) => (
-              <option value={item.id}>[{item.typeLabel}] {item.title}</option>
-            ))}
-          </select>
+            model="selectedHeroKey"
+            itemsExpr={JSON.stringify(heroOptions)}
+            placeholder="— выбери материал —"
+          />
         </div>
 
         <p x-show="heroError" class="text-sm text-error" x-text="heroError"></p>
@@ -288,16 +296,12 @@ const initialSidebarKeys =
 
         <div x-show="featuredInterviewMode === 'manual'" class="grid gap-2 max-w-sm">
           <label for="culture-interview-select" class="text-sm font-medium">Выбери интервью</label>
-          <select
+          <CustomSelect
             id="culture-interview-select"
-            x-model="selectedInterviewId"
-            class="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer"
-          >
-            <option value="">— выбери интервью —</option>
-            {interviewOptions.map((item) => (
-              <option value={item.id}>{item.title}</option>
-            ))}
-          </select>
+            model="selectedInterviewId"
+            itemsExpr={JSON.stringify(interviewOptions)}
+            placeholder="— выбери интервью —"
+          />
         </div>
 
         <p x-show="featuredInterviewError" class="text-sm text-error" x-text="featuredInterviewError"></p>

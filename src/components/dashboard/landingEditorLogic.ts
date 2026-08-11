@@ -21,6 +21,8 @@ const ARTICLE_BUCKET_ORDER = ["culture", "paris", "tips"];
 interface ContentOption {
   id: string;
   title: string;
+  createdAtMs?: number | null;
+  publishedAtMs?: number | null;
 }
 
 interface NetlenkaOption extends ContentOption {
