@@ -288,19 +288,21 @@ const interviewName =
               </div>
 
               <div class="grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-2 lg:grid-rows-1 lg:items-stretch">
-                <div class="grid content-start gap-10 lg:h-full lg:min-h-0">
+                <div class="grid content-start gap-10 lg:h-full lg:min-h-0 pt-12">
                   {getCardLead(primaryParisArticle) && (
-                    <p class="text-[22px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light">
+                    <p class="text-[22px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light text-center px-16">
                       {truncateText(getCardLead(primaryParisArticle), 280)}
                     </p>
                   )}
 
-                  <a
-                    href={primaryParisArticle.href}
-                    class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200"
-                  >
-                    Читать дальше
-                  </a>
+                  <div class="w-full flex flex-row justify-center">
+                    <a
+                      href={primaryParisArticle.href}
+                      class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200"
+                    >
+                      Читать дальше
+                    </a>
+                  </div>
 
                   <p class="hidden font-inter text-[0.68rem] uppercase tracking-[0.18em] text-base-content/40">
                     {formatDate(primaryParisArticle.publishedAt)}
@@ -574,7 +576,7 @@ const interviewName =
                     </a>
                   </div>
                 </div>
-                <div class="w-full lg:w-1/2 flex flex-col justify-center items-start gap-4">
+                <div class="w-full lg:w-1/2 flex flex-col justify-center items-center gap-4">
                   <div class="inline-flex w-fit flex-col items-start gap-3">
                     <p class="m-0">
                       {getPrimaryTagHref(twoImageArticle) ? (
@@ -594,7 +596,7 @@ const interviewName =
                   <div class="grid gap-10">
                     <a
                       href={twoImageArticle.href}
-                      class="text-left text-current no-underline hover:underline"
+                      class="text-center text-current no-underline hover:underline"
                     >
                       <h3 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
                         {twoImageArticle.paid ? (
@@ -613,17 +615,18 @@ const interviewName =
                       </h3>
                     </a>
                     {getCardLead(twoImageArticle) && (
-                      <p class="text-[19px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light">
+                      <p class="text-[22px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light text-center px-16">
                         {truncateText(getCardLead(twoImageArticle), 380)}
                       </p>
                     )}
-
-                    <a
-                      href={twoImageArticle.href}
-                      class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200 mt-4 lg:mt-0"
-                    >
-                      Читать дальше
-                    </a>
+                    <div class="w-full flex flex-row justify-center">
+                      <a
+                        href={twoImageArticle.href}
+                        class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200 mt-4 lg:mt-0"
+                      >
+                        Читать дальше
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
