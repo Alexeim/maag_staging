@@ -481,6 +481,12 @@ const articleStructuredData = storyData
     }
 
     /* ── back link ────────────────────────────────── */
+    .nav button.back-link {
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
     .back-link {
       text-decoration: none;
       display: inline-flex;
@@ -735,9 +741,14 @@ const articleStructuredData = storyData
         </div>
 
         <div class="nav" id="visual-story-nav">
-          <a href="/" class="back-link" aria-label="На главную">
+          <button
+            id="home-button"
+            type="button"
+            class="back-link"
+            aria-label="К началу истории"
+          >
             <img src={logo.src} alt="MAAG France" class="w-10" />
-          </a>
+          </button>
           <button
             id="prev-button"
             type="button"
@@ -761,6 +772,9 @@ const articleStructuredData = storyData
 
   <script>
     const slider = document.getElementById("slider");
+    const homeBtn = document.getElementById(
+      "home-button",
+    ) as HTMLButtonElement | null;
     const prevBtn = document.getElementById(
       "prev-button",
     ) as HTMLButtonElement | null;
@@ -801,6 +815,12 @@ const articleStructuredData = storyData
       syncNavPlacement();
     };
 
+    homeBtn?.addEventListener("click", () => {
+      if (index !== 0) {
+        index = 0;
+        update();
+      }
+    });
     prevBtn?.addEventListener("click", () => {
       if (index > 0) {
         index--;

@@ -10,6 +10,7 @@ interface HeaderProps {
   aboutText?: string;
   languagesText?: string;
   buttonText?: string;
+  hoverReveal?: boolean;
 }
 const {
   variant,
@@ -20,6 +21,7 @@ const {
   aboutText,
   languagesText,
   buttonText,
+  hoverReveal,
 } = Astro.props as HeaderProps;
 
 console.log("Header render, variant:", variant);
@@ -32,7 +34,7 @@ console.log("Header render, languagesText:", languagesText);
 console.log("Header render, buttonText:", buttonText);
 ---
 
-<Navbar variant={variant} languages={languagesText}>
+<Navbar variant={variant} languages={languagesText} hoverReveal={hoverReveal}>
   <span slot="culture">{cultureText}</span>
   <span slot="guide">{guideText}</span>
   <span slot="children">{childrenText}</span>

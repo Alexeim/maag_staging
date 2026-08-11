@@ -10,6 +10,10 @@ interface NavbarProps {
   languages: string;
   user?: boolean;
   showLogoInNav?: boolean;
+  // Desktop-only "peekaboo" mode: header stays hidden above an invisible
+  // fixed strip until hovered/focused, then slides down. Opt-in per usage
+  // site (e.g. visual story), independent from `variant` (bg/positioning).
+  hoverReveal?: boolean;
 }
 
 const {
@@ -17,189 +21,208 @@ const {
   languages,
   user = true,
   showLogoInNav = true,
+  hoverReveal = false,
 } = Astro.props as NavbarProps;
 
-const navbarClasses = variant === "default" ? "bg-base-200" : "bg-transparent";
-const positionClasses =
-  variant === "default" ? "sticky top-0 z-20" : "absolute";
+const isDefaultVariant = variant === "default";
+
+const navbarClasses = isDefaultVariant ? "bg-base-200" : "bg-transparent";
+
+const wrapperPositionClasses = hoverReveal
+  ? "sticky top-0 z-20 lg:fixed lg:inset-x-0 lg:top-0 lg:z-30"
+  : isDefaultVariant
+    ? "sticky top-0 z-20"
+    : "absolute";
+
+const headerRevealClasses = hoverReveal
+  ? "lg:-translate-y-full lg:group-hover/navreveal:translate-y-0 lg:group-focus-within/navreveal:translate-y-0"
+  : "";
+
 const colorClasses = "text-base-content";
 const borderClasses = "border-none";
-const headerScrollClasses =
-  variant === "default"
-    ? "$store.navbar.isScrolled ? 'z-20 shadow-[0_10px_30px_rgba(0,0,0,0.08)]' : 'z-20 shadow-none'"
-    : "";
+const headerScrollClasses = isDefaultVariant
+  ? "$store.navbar.isScrolled ? 'shadow-[0_10px_30px_rgba(0,0,0,0.08)]' : 'shadow-none'"
+  : "";
 
 const logoSrc = logo.src;
 const currentPath = Astro.url.pathname;
 ---
 
-<header
-  x-data="{}"
-  x-bind:class={headerScrollClasses}
+<div
   class:list={[
-    "w-full h-[80px] lg:h-[90px] transition-shadow duration-300 ease-out",
-    positionClasses,
+    "group/navreveal w-full h-[80px] lg:h-[90px]",
+    wrapperPositionClasses,
   ]}
 >
-  <!-- Background Layer -->
-  <div class:list={["absolute inset-0 w-full h-full z-0", navbarClasses]}></div>
-
-  <!-- Content Layer -->
-  <nav
+  <header
+    x-data="{}"
+    x-bind:class={headerScrollClasses}
     class:list={[
-      "relative z-10 w-full h-full px-4 lg:px-[57px] flex items-center justify-between",
-      colorClasses,
-      borderClasses,
+      "w-full h-full transition-[transform,box-shadow] duration-300 ease-out",
+      headerRevealClasses,
     ]}
   >
-    <!-- Left Side Group (Logo + Menu) -->
-    <div class="flex items-center relative">
-      {
-        showLogoInNav && (
-          <a
-            class="cursor-pointer transition-transform duration-200 ease-out hover:scale-105 inline-block"
-            href="/"
-          >
-            <img src={logo.src} alt="MAAG France" class="w-12 lg:w-16" />
-          </a>
-        )
-      }
-      <!-- Desktop Menu -->
-      <div
-        class="hidden lg:flex absolute top-1/2 left-full -translate-y-1/2 ml-12"
-      >
-        <ul class="flex items-center text-base-content whitespace-nowrap">
-          <li
-            class:list={[
-              "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
-              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
-              "hover:after:scale-x-100",
-              currentPath.startsWith("/culture")
-                ? "after:scale-x-100"
-                : "after:scale-x-0",
-            ]}
-          >
-            <a href="/culture">Культура</a>
-          </li>
-          <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
-          {/* TODO remove the template here!!! */}
-          <template x-if="$store.auth.profile?.role === 'admin'">
+    <!-- Background Layer -->
+    <div class:list={["absolute inset-0 w-full h-full z-0", navbarClasses]}
+    ></div>
+
+    <!-- Content Layer -->
+    <nav
+      class:list={[
+        "relative z-10 w-full h-full px-4 lg:px-[57px] flex items-center justify-between",
+        colorClasses,
+        borderClasses,
+      ]}
+    >
+      <!-- Left Side Group (Logo + Menu) -->
+      <div class="flex items-center relative">
+        {
+          showLogoInNav && (
+            <a
+              class="cursor-pointer transition-transform duration-200 ease-out hover:scale-105 inline-block"
+              href="/"
+            >
+              <img src={logo.src} alt="MAAG France" class="w-12 lg:w-16" />
+            </a>
+          )
+        }
+        <!-- Desktop Menu -->
+        <div
+          class="hidden lg:flex absolute top-1/2 left-full -translate-y-1/2 ml-12"
+        >
+          <ul class="flex items-center text-base-content whitespace-nowrap">
             <li
               class:list={[
                 "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
                 "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
                 "hover:after:scale-x-100",
-                currentPath.startsWith("/paris")
+                currentPath.startsWith("/culture")
                   ? "after:scale-x-100"
                   : "after:scale-x-0",
               ]}
             >
-              <a href="/paris">Париж</a>
+              <a href="/culture">Культура</a>
             </li>
-          </template>
-          <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
-          <li
-            class:list={[
-              "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
-              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
-              "hover:after:scale-x-100",
-              currentPath.startsWith("/calendar")
-                ? "after:scale-x-100"
-                : "after:scale-x-0",
-            ]}
-          >
-            <a href="/calendar">Календарь</a>
-          </li>
-          <!-- <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
-          <li
-            class="nav-item font-oswald uppercase tracking-[.46em] text-base font-normal hover:border-b hover:border-base-content pb-0.5"
-          >
-            <a href="/about" class="">О проекте</a>
-          </li> -->
-        </ul>
-      </div>
-    </div>
-
-    <!-- Mobile Controls -->
-    <div x-data="{}" class="flex items-center gap-4 lg:hidden">
-      <button type="button" class="p-2">
-        <Search />
-      </button>
-      <button
-        type="button"
-        class="p-2"
-        @click="$store.navbar.toggle()"
-        aria-controls="mobile-menu"
-        x-bind:aria-expanded="$store.navbar.isOpen"
-      >
-        <img src={burgerIcon.src} alt="Открыть меню" class="h-5 w-5" />
-      </button>
-    </div>
-
-    <!-- Right Side -->
-    <div class="hidden lg:flex items-center gap-[19px]">
-      <!-- TODO remove 'hidden' -->
-      <button class="p-2 hidden">
-        <Search />
-      </button>
-      <a
-        href="https://www.instagram.com/stories/maag_france/"
-        target="_blank"
-        class="hover:text-gray-500 transition-colors"
-        aria-label="Instagram"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
-          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
-        </svg>
-      </a>
-      <div class="flex items-center gap-4" x-data="$lazy('navbar')">
-        <!-- Loading State -->
-        <template x-if="$store.auth.isLoading">
-          <button class="btn btn-outline btn-primary" disabled>...</button>
-        </template>
-        <!-- Logged Out State -->
-        <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
-          <button
-            @click.prevent="$store.auth.openAuthModal()"
-            class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200 cursor-pointer"
-          >
-            Войти
-          </button>
-        </template>
-        <!-- Logged In State -->
-        <template x-if="!$store.auth.isLoading && $store.auth.isLoggedIn">
-          <div class="flex items-center gap-4">
-            <a
-              href="/profile"
-              class="flex items-center justify-center w-10 h-10 text-primary-content rounded-full font-bold text-lg hover:drop-shadow-lg transition-shadow"
-              :class="$store.auth.profile?.role === 'admin' ? 'bg-error/50' : 'bg-primary'"
-            >
-              <div
-                x-text="($store.auth.profile?.firstName?.[0] || '') + ($store.auth.profile?.lastName?.[0] || '')"
+            <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
+            {/* TODO remove the template here!!! */}
+            <template x-if="$store.auth.profile?.role === 'admin'">
+              <li
+                class:list={[
+                  "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
+                  "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
+                  "hover:after:scale-x-100",
+                  currentPath.startsWith("/paris")
+                    ? "after:scale-x-100"
+                    : "after:scale-x-0",
+                ]}
               >
-              </div>
-            </a>
+                <a href="/paris">Париж</a>
+              </li>
+            </template>
+            <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
+            <li
+              class:list={[
+                "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
+                "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
+                "hover:after:scale-x-100",
+                currentPath.startsWith("/calendar")
+                  ? "after:scale-x-100"
+                  : "after:scale-x-0",
+              ]}
+            >
+              <a href="/calendar">Календарь</a>
+            </li>
+            <!-- <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
+            <li
+              class="nav-item font-oswald uppercase tracking-[.46em] text-base font-normal hover:border-b hover:border-base-content pb-0.5"
+            >
+              <a href="/about" class="">О проекте</a>
+            </li> -->
+          </ul>
+        </div>
+      </div>
+  
+      <!-- Mobile Controls -->
+      <div x-data="{}" class="flex items-center gap-4 lg:hidden">
+        <button type="button" class="p-2">
+          <Search />
+        </button>
+        <button
+          type="button"
+          class="p-2"
+          @click="$store.navbar.toggle()"
+          aria-controls="mobile-menu"
+          x-bind:aria-expanded="$store.navbar.isOpen"
+        >
+          <img src={burgerIcon.src} alt="Открыть меню" class="h-5 w-5" />
+        </button>
+      </div>
+  
+      <!-- Right Side -->
+      <div class="hidden lg:flex items-center gap-[19px]">
+        <!-- TODO remove 'hidden' -->
+        <button class="p-2 hidden">
+          <Search />
+        </button>
+        <a
+          href="https://www.instagram.com/stories/maag_france/"
+          target="_blank"
+          class="hover:text-gray-500 transition-colors"
+          aria-label="Instagram"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+          </svg>
+        </a>
+        <div class="flex items-center gap-4" x-data="$lazy('navbar')">
+          <!-- Loading State -->
+          <template x-if="$store.auth.isLoading">
+            <button class="btn btn-outline btn-primary" disabled>...</button>
+          </template>
+          <!-- Logged Out State -->
+          <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
             <button
-              @click.prevent="handleSignOut()"
+              @click.prevent="$store.auth.openAuthModal()"
               class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200 cursor-pointer"
             >
-              Выйти
+              Войти
             </button>
-          </div>
-        </template>
+          </template>
+          <!-- Logged In State -->
+          <template x-if="!$store.auth.isLoading && $store.auth.isLoggedIn">
+            <div class="flex items-center gap-4">
+              <a
+                href="/profile"
+                class="flex items-center justify-center w-10 h-10 text-primary-content rounded-full font-bold text-lg hover:drop-shadow-lg transition-shadow"
+                :class="$store.auth.profile?.role === 'admin' ? 'bg-error/50' : 'bg-primary'"
+              >
+                <div
+                  x-text="($store.auth.profile?.firstName?.[0] || '') + ($store.auth.profile?.lastName?.[0] || '')"
+                >
+                </div>
+              </a>
+              <button
+                @click.prevent="handleSignOut()"
+                class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200 cursor-pointer"
+              >
+                Выйти
+              </button>
+            </div>
+          </template>
+        </div>
       </div>
-    </div>
-  </nav>
-</header>
+    </nav>
+  </header>
+</div>

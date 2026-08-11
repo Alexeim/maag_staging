@@ -1,10 +1,12 @@
 ---
 import "../styles/global.css";
 
+import Header from "../components/common/Header.astro";
 import AuthModal from "../components/auth/AuthModal.astro";
 import Toast from "../components/common/Toast.astro";
 import ConfirmationModal from "../components/common/ConfirmationModal.astro";
 import StructuredData from "../components/seo/StructuredData.astro";
+import { navbarContent } from "../content/navbar/RU/Navbar.json";
 import {
   buildGlobalStructuredData,
   toStructuredDataArray,
@@ -112,6 +114,17 @@ const allStructuredData = [
     <title>{title}</title>
   </head>
   <body class="bg-base-100 text-base-content">
+    <Header
+      variant="default"
+      hoverReveal
+      cultureText={navbarContent.items[0].label}
+      guideText={navbarContent.items[1].label}
+      childrenText={navbarContent.items[2].label}
+      calendarText={navbarContent.items[3].label}
+      aboutText={navbarContent.items[4].label}
+      languagesText={navbarContent.languages[0]}
+      buttonText={navbarContent.button.label}
+    />
     <slot />
 
     <AuthModal />
