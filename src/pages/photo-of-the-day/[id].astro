@@ -30,6 +30,10 @@ if (!error && photo?.published !== true) {
 const authorName = photo?.author
   ? `${photo.author.firstName} ${photo.author.lastName}`
   : "Автор";
+const authorHref =
+  photo?.author && photo?.authorId ? `/author/${photo.authorId}` : undefined;
+// Link the credit row to the author page when we know who it is, plain div otherwise.
+const AuthorWrapper = authorHref ? "a" : "div";
 
 // Same date-normalizing logic as ArticleDate.astro, duplicated here because
 // the hero overlay needs light (white) text and ArticleDate hardcodes gray-600.
@@ -117,7 +121,13 @@ const xInit =
 
               {/* Title + credits overlay, pinned to the shot itself */}
               <div class="absolute inset-x-0 bottom-0 p-4 lg:p-6 flex flex-col-reverse lg:flex-row lg:items-end lg:justify-between gap-3 lg:gap-6 text-left">
-                <div class="flex items-center gap-3 flex-shrink-0">
+                <AuthorWrapper
+                  href={authorHref}
+                  class:list={[
+                    "flex items-center gap-3 flex-shrink-0",
+                    authorHref && "hover:underline",
+                  ]}
+                >
                   {photo.author?.avatar ? (
                     <img
                       src={photo.author.avatar}
@@ -131,6 +141,8 @@ const xInit =
                   <span class="text-sm lg:text-base font-thin font-old_standard italic text-white whitespace-nowrap">
                     {authorName}
                   </span>
+                </AuthorWrapper>
+                <div class="flex items-center gap-3 flex-shrink-0">
                   {formattedCreatedAt && (
                     <>
                       <span class="text-white/40 font-inter">|</span>

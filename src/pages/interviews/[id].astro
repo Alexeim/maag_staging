@@ -41,6 +41,7 @@ console.log("here --------------------->>>>>>>>>", Object.keys(interview));
 const {
   title,
   author,
+  authorId,
   interviewee,
   mainQuote,
   content,
@@ -50,6 +51,7 @@ const {
   leadHtml,
 } = interview;
 const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
+const resolvedAuthorId = author ? authorId : undefined;
 const firstBookmarkTag = normalizeTags((interview as any)?.tags)[0] ?? "";
 const bookmarkTag = firstBookmarkTag ? getKnownTagLabel(firstBookmarkTag) : "";
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
@@ -130,6 +132,7 @@ try {
         leadHtml={leadHtml}
         authorName={authorName}
         authorAvatar={author?.avatar}
+        authorId={resolvedAuthorId}
         interviewee={interviewee}
         mainQuote={mainQuote || ""}
         createdAt={interview.createdAt}

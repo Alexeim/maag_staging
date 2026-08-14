@@ -67,6 +67,7 @@ const displayGuide = {
   categoryHref: getPrimaryBadgeHref({ contentType: "guide", tags: guideData?.tags }),
   authorName: guideData?.author ? `${guideData.author.firstName} ${guideData.author.lastName}` : 'Автор',
   authorAvatar: guideData?.author?.avatar,
+  authorId: guideData?.author ? guideData?.authorId : undefined,
   imageUrl: guideData?.imageUrl,
   imageCaption: guideData?.imageCaption || '',
   imageAlt: 'Guide image',
@@ -164,6 +165,7 @@ if (!error && guideData) {
             leadHtml={displayGuide.leadHtml}
             authorName={displayGuide.authorName}
             authorAvatar={displayGuide.authorAvatar}
+            authorId={displayGuide.authorId}
             createdAt={guideData.createdAt}
             imageUrl={displayGuide.imageUrl}
             imageAlt={displayGuide.imageAlt}

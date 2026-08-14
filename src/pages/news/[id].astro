@@ -66,6 +66,7 @@ const displayArticle = {
     ? `${articleData.author.firstName} ${articleData.author.lastName}`
     : "Автор",
   authorAvatar: articleData?.author?.avatar,
+  authorId: articleData?.author ? articleData?.authorId : undefined,
   imageUrl: articleData?.imageUrl,
   imageCaption: articleData?.imageCaption || "",
   imageAlt: articleData?.title || "News image",
@@ -223,6 +224,7 @@ if (!error && articleData) {
                         <ArticleMetaRow
                           authorName={displayArticle.authorName}
                           authorAvatar={displayArticle.authorAvatar}
+                          authorId={displayArticle.authorId}
                           createdAt={articleData.createdAt}
                           align="start"
                         />

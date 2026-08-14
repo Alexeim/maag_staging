@@ -91,6 +91,7 @@ const displayArticle = {
   categoryHref: getPrimaryBadgeHref({ contentType: "article", tags: articleData?.tags }),
   authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : 'Author',
   authorAvatar: articleData?.author?.avatar,
+  authorId: articleData?.author ? articleData?.authorId : undefined,
   readTime: articleData?.meta?.readTime || '5 min read',
   imageUrl: articleData?.imageUrl, // For dynamic articles
   imageCaption: articleData?.imageCaption || '', // <-- Get the caption
@@ -221,6 +222,7 @@ const isAKid = displayArticle.authorName === "Саша Макарова";
             leadHtml={displayArticle.leadHtml}
             authorName={displayArticle.authorName}
             authorAvatar={displayArticle.authorAvatar}
+            authorId={displayArticle.authorId}
             isKid={isAKid}
             createdAt={articleData.createdAt}
             imageUrl={displayArticle.imageUrl}
