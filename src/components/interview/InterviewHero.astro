@@ -16,6 +16,7 @@ interface Props {
   lead?: string;
   leadHtml?: string;
   authorName: string;
+  authorId?: string;
   authorAvatar?: string;
   createdAt: string | Date | { toDate: () => Date } | { _seconds: number };
   imageUrl?: ImageMetadata | string;
@@ -41,6 +42,7 @@ const {
   lead,
   leadHtml,
   authorName,
+  authorId,
   authorAvatar,
   createdAt,
   imageUrl,
@@ -150,6 +152,7 @@ const isLongLead = richTextHtmlToText(resolvedLeadHtml).length > 320;
           <ArticleMetaRow
             authorName={authorName}
             authorAvatar={authorAvatar}
+            authorId={authorId}
             createdAt={createdAt}
             align="center"
           />

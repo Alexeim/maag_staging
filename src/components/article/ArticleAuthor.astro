@@ -8,11 +8,21 @@ interface Props {
   name: string;
   avatarUrl?: string;
   isKid?: boolean;
+  authorId?: string;
 }
-const { name, avatarUrl, isKid = false } = Astro.props;
+const { name, avatarUrl, isKid = false, authorId } = Astro.props;
+const authorHref = authorId ? `/author/${authorId}` : undefined;
+// Renders as a link when we know the author's id, plain div otherwise (e.g. "MAAG" placeholder author).
+const Wrapper = authorHref ? "a" : "div";
 ---
 
-<div class="relative flex items-center gap-[17px]">
+<Wrapper
+  href={authorHref}
+  class:list={[
+    "relative flex items-center gap-[17px]",
+    authorHref && "hover:underline",
+  ]}
+>
   {avatarUrl && (
     <div class="relative h-12 w-12 flex-shrink-0">
       {
@@ -71,4 +81,4 @@ const { name, avatarUrl, isKid = false } = Astro.props;
   >
     {name}
   </div>
-</div>
+</Wrapper>

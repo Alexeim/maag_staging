@@ -68,7 +68,7 @@ const badgeHref = getPrimaryBadgeHref(item);
       {
         item.authorName && (
           <div class="flex flex-row items-center justify-center gap-2">
-            <ArticleAuthor name={item.authorName} />
+            <ArticleAuthor name={item.authorName} authorId={item.authorId ?? undefined} />
             <p class="font-inter text-base-content/50">|</p>
             <ArticleDate createdAt={item.publishedAt} />
           </div>

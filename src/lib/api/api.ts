@@ -1295,6 +1295,29 @@ export const publicMaterialsByTagApi = {
   },
 };
 
+export interface PublicAuthorProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatar: string;
+}
+
+export interface PublicMaterialsByAuthorResponse {
+  author: PublicAuthorProfile;
+  totalCount: number;
+  groups: PublicMaterialGroup[];
+}
+
+export const publicMaterialsByAuthorApi = {
+  // pageByType keys are the groups' own `pageParam`, e.g. { eventPage: 2 }
+  get(authorId: string, pageByType?: Record<string, number>) {
+    return request<PublicMaterialsByAuthorResponse>("/api/public/materials-by-author", {
+      public: true,
+      query: { authorId, ...pageByType },
+    });
+  },
+};
+
 export interface PublicFlatListingResponse {
   label: string;
   count: number;

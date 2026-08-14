@@ -6,6 +6,7 @@ import ArticleDate from "./ArticleDate.astro";
 interface Props {
   authorName: string;
   authorAvatar?: string;
+  authorId?: string;
   isKid?: boolean;
   createdAt: string | Date | { toDate: () => Date } | { _seconds: number };
   // "center" matches the side-by-side hero; "start" matches the old
@@ -18,6 +19,7 @@ interface Props {
 const {
   authorName,
   authorAvatar,
+  authorId,
   isKid = false,
   createdAt,
   align = "center",
@@ -35,7 +37,12 @@ const {
       : "self-center justify-center",
   ]}
 >
-  <ArticleAuthor name={authorName} avatarUrl={authorAvatar} isKid={isKid} />
+  <ArticleAuthor
+    name={authorName}
+    avatarUrl={authorAvatar}
+    authorId={authorId}
+    isKid={isKid}
+  />
   {showSeparator && <p class="font-inter text-base-content/50">|</p>}
   <ArticleDate createdAt={createdAt} />
 </div>
