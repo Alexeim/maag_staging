@@ -1,0 +1,165 @@
+---
+import Layout from "@/Layouts/Layout.astro";
+import MaterialResultRow from "@/components/common/MaterialResultRow.astro";
+import {
+  ApiError,
+  publicMaterialsByAuthorApi,
+  type PublicAuthorProfile,
+  type PublicMaterialGroup,
+} from "@/lib/api/api";
+
+const PAGE_PARAMS = [
+  "articlePage",
+  "newsPage",
+  "guidePage",
+  "eventPage",
+  "flipperPage",
+  "interviewPage",
+  "visualStoryPage",
+];
+
+const { id: authorId } = Astro.params;
+
+const pageByType: Record<string, number> = {};
+PAGE_PARAMS.forEach((param) => {
+  const parsed = Number(Astro.url.searchParams.get(param));
+  if (Number.isFinite(parsed) && parsed >= 1) {
+    pageByType[param] = Math.floor(parsed);
+  }
+});
+
+let author: PublicAuthorProfile | null = null;
+let groups: PublicMaterialGroup[] = [];
+let notFound = false;
+let loadError = false;
+
+if (authorId) {
+  try {
+    const response = await publicMaterialsByAuthorApi.get(authorId, pageByType);
+    author = response.author;
+    groups = response.groups;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      notFound = true;
+    } else {
+      console.error("Failed to load materials by author:", error);
+      loadError = true;
+    }
+  }
+}
+
+const authorName = author ? `${author.firstName} ${author.lastName}`.trim() : "";
+const authorInitials = author
+  ? `${author.firstName?.[0] ?? ""}${author.lastName?.[0] ?? ""}`.toUpperCase()
+  : "";
+
+const buildPageHref = (group: PublicMaterialGroup, page: number) => {
+  const url = new URL(Astro.url);
+  url.searchParams.set(group.pageParam, String(page));
+  return `${url.pathname}${url.search}`;
+};
+---
+
+<Layout
+  title={`${authorName || "Автор"} — MAAG France`}
+  description={`Материалы автора ${authorName}`}
+>
+  <main class="min-h-screen bg-base-200">
+    <div class="mx-auto max-w-[1200px] px-4 py-16 sm:px-6 lg:px-10">
+      {
+        notFound && (
+          <p class="font-inter text-base-content/70">Автор не найден.</p>
+        )
+      }
+
+      {
+        loadError && (
+          <p class="font-inter text-base-content/70">
+            Не удалось загрузить материалы. Попробуйте обновить страницу.
+          </p>
+        )
+      }
+
+      {
+        author && (
+          <>
+            <h1 class="mb-12 text-3xl lg:text-[28px] font-old_standard font-semibold uppercase tracking-[0.46em] text-base-content w-full">
+              {authorName}
+            </h1>
+
+            <div class="grid gap-12 lg:grid-cols-[200px_1fr] lg:gap-16">
+              <aside class="space-y-5">
+                {author.avatar ? (
+                  <img
+                    src={author.avatar}
+                    alt={authorName}
+                    class="h-28 w-28 lg:h-44 lg:w-44 rounded-full object-cover"
+                  />
+                ) : (
+                  <div class="flex h-28 w-28 lg:h-44 lg:w-44 items-center justify-center rounded-full bg-maag-beige">
+                    <span class="font-old_standard text-5xl lg:text-6xl text-maag-green">
+                      {authorInitials}
+                    </span>
+                  </div>
+                )}
+              </aside>
+
+              <div class="space-y-16">
+                {
+                  groups.length === 0 && (
+                    <p class="font-inter text-base-content/70">
+                      У этого автора пока нет материалов.
+                    </p>
+                  )
+                }
+
+                {
+                  groups.map((group) => (
+                    <section class="space-y-8">
+                      <div class="flex items-center gap-4">
+                        <h2 class="m-0 font-old_standard text-[1.05rem] font-semibold uppercase tracking-[0.5em] text-black !leading-8 !lg:leading-none">
+                          {group.label}
+                        </h2>
+                        <div class="h-px flex-1 bg-neutral-200" />
+                        <span class="font-inter text-xs text-base-content/50">
+                          {group.count}
+                        </span>
+                      </div>
+
+                      <div class="space-y-4 sm:space-y-6">
+                        {group.items.map((item) => (
+                          <MaterialResultRow item={item} />
+                        ))}
+                      </div>
+
+                      {group.totalPages > 1 && (
+                        <nav class="flex items-center justify-center gap-2 pt-4">
+                          {Array.from(
+                            { length: group.totalPages },
+                            (_, index) => index + 1,
+                          ).map((pageNum) => (
+                            <a
+                              href={buildPageHref(group, pageNum)}
+                              class:list={[
+                                "flex h-9 w-9 items-center justify-center font-inter text-sm transition",
+                                pageNum === group.page
+                                  ? "bg-accent text-white"
+                                  : "text-base-content/60 hover:text-base-content",
+                              ]}
+                            >
+                              {pageNum}
+                            </a>
+                          ))}
+                        </nav>
+                      )}
+                    </section>
+                  ))
+                }
+              </div>
+            </div>
+          </>
+        )
+      }
+    </div>
+  </main>
+</Layout>
