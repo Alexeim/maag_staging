@@ -45,6 +45,18 @@ const TYPE_ORDER: MaterialContentType[] = [
   'visual-story',
 ];
 
+// Order in which sections appear on the /author/[id] page — articles lead,
+// since that's the main thing an author is known for; events go second.
+const AUTHOR_TYPE_ORDER: MaterialContentType[] = [
+  'article',
+  'event',
+  'news',
+  'guide',
+  'flipper',
+  'interview',
+  'visual-story',
+];
+
 // Each section paginates independently, so every type needs its own query param.
 const PAGE_PARAM_BY_TYPE: Record<MaterialContentType, string> = {
   article: 'articlePage',
@@ -171,6 +183,19 @@ const fetchTaggedItems = async (
   return snapshot.docs.map((doc) => toMaterialItem(doc, type));
 };
 
+const fetchAuthoredItems = async (
+  type: MaterialContentType,
+  authorId: string,
+): Promise<MaterialItem[]> => {
+  const snapshot = await db
+    .collection(COLLECTION_BY_TYPE[type])
+    .where('authorId', '==', authorId)
+    .where('published', '==', true)
+    .get();
+
+  return snapshot.docs.map((doc) => toMaterialItem(doc, type));
+};
+
 /**
  * @description Get all published materials tagged with a given tag, grouped by content type
  * @route GET /api/public/materials-by-tag
@@ -222,6 +247,71 @@ export const getMaterialsByTag = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error getting materials by tag:', error);
     res.status(500).json({ message: 'Server error while getting materials by tag' });
+  }
+};
+
+/**
+ * @description Get all published materials by a given author, grouped by content type
+ * @route GET /api/public/materials-by-author
+ */
+export const getMaterialsByAuthor = async (req: Request, res: Response) => {
+  try {
+    const authorId = typeof req.query.authorId === 'string' ? req.query.authorId.trim() : '';
+    if (!authorId) {
+      return res.status(400).json({ message: 'Query param "authorId" is required' });
+    }
+
+    const authorDoc = await db.collection('authors').doc(authorId).get();
+    if (!authorDoc.exists) {
+      return res.status(404).json({ message: 'Author not found' });
+    }
+    const authorData = authorDoc.data() as { firstName?: string; lastName?: string; avatar?: string };
+
+    const itemsByTypeArrays = await Promise.all(
+      AUTHOR_TYPE_ORDER.map((type) => fetchAuthoredItems(type, authorId)),
+    );
+    const allItems = await attachAuthorNames(itemsByTypeArrays.flat());
+
+    const itemsByType = new Map<MaterialContentType, MaterialItem[]>();
+    allItems.forEach((item) => {
+      const list = itemsByType.get(item.contentType) ?? [];
+      list.push(item);
+      itemsByType.set(item.contentType, list);
+    });
+
+    const groups = AUTHOR_TYPE_ORDER.map((type) => {
+      const items = (itemsByType.get(type) ?? []).sort(sortByPublishedAtDesc);
+      if (items.length === 0) return null;
+
+      const pageParam = PAGE_PARAM_BY_TYPE[type];
+      const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+      const page = Math.min(parsePage(req.query[pageParam]), totalPages);
+      const start = (page - 1) * PAGE_SIZE;
+
+      return {
+        contentType: type,
+        label: TYPE_LABELS[type],
+        count: items.length,
+        page,
+        totalPages,
+        pageParam,
+        items: items.slice(start, start + PAGE_SIZE),
+      };
+    }).filter((group): group is NonNullable<typeof group> => group !== null);
+
+    res.status(200).json({
+      author: {
+        id: authorDoc.id,
+        firstName: authorData?.firstName ?? '',
+        lastName: authorData?.lastName ?? '',
+        avatar: authorData?.avatar ?? '',
+      },
+      totalCount: allItems.length,
+      groups,
+    });
+  } catch (error) {
+    console.error('Error getting materials by author:', error);
+    res.status(500).json({ message: 'Server error while getting materials by author' });
   }
 };
 

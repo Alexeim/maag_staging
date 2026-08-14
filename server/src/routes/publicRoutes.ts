@@ -6,6 +6,7 @@ import {
   getPublicParis,
 } from '../controllers/publicLandingController';
 import {
+  getMaterialsByAuthor,
   getMaterialsByTag,
   getPublicInterviews,
   getPublicNews,
@@ -18,6 +19,7 @@ router.get('/culture', getPublicCulture);
 router.get('/paris', getPublicParis);
 router.get('/calendar', getPublicCalendar);
 router.get('/materials-by-tag', getMaterialsByTag);
+router.get('/materials-by-author', getMaterialsByAuthor);
 router.get('/news', getPublicNews);
 router.get('/interviews', getPublicInterviews);
 
