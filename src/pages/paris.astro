@@ -100,6 +100,12 @@ const getCardLead = (item: any): string => {
   return cardLead;
 };
 
+const getCardTitle = (item: any): string => {
+  const cardTitle =
+    typeof item?.cardTitle === "string" ? item.cardTitle.trim() : "";
+  return cardTitle || item?.title || "";
+};
+
 const truncateText = (text?: string, maxLength: number = 220) => {
   if (!text) return "";
   if (text.length <= maxLength) return text;
@@ -249,7 +255,7 @@ const interviewName =
         {
           primaryParisArticle ? (
             <article class="lg:flex lg:h-full lg:flex-col">
-              <div class="mb-6 flex flex-col items-start gap-3 lg:mb-8 lg:flex-shrink-0 lg:items-center lg:text-center">
+              <div class="mb-6 flex flex-col items-center gap-3 lg:mb-8 lg:flex-shrink-0 lg:text-center">
                 <p class="m-0">
                   {getPrimaryTagHref(primaryParisArticle) ? (
                     <a
@@ -267,7 +273,7 @@ const interviewName =
 
                 <a
                   href={primaryParisArticle.href}
-                  class="text-left text-current no-underline hover:underline lg:text-center"
+                  class="text-current no-underline hover:underline text-center"
                 >
                   <h2 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
                     {primaryParisArticle.paid ? (
@@ -288,9 +294,9 @@ const interviewName =
               </div>
 
               <div class="grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-2 lg:grid-rows-1 lg:items-stretch">
-                <div class="grid content-start gap-10 lg:h-full lg:min-h-0 pt-12">
+                <div class="grid content-start gap-10 lg:h-full lg:min-h-0 pt-2 lg:pt-12">
                   {getCardLead(primaryParisArticle) && (
-                    <p class="text-[22px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light text-center px-16">
+                    <p class="text-[22px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light text-center px-1 lg:px-16">
                       {truncateText(getCardLead(primaryParisArticle), 280)}
                     </p>
                   )}
@@ -345,7 +351,7 @@ const interviewName =
             <div class="hidden gap-4 lg:grid lg:grid-cols-4 lg:gap-6">
               {editorialSidebarItems.map((item) => (
                 <ZapisnayaKnijkaCard
-                  title={item.title}
+                  title={getCardTitle(item)}
                   category={getPrimaryTag(item)}
                   categoryHref={getPrimaryTagHref(item)}
                   imageUrl={item.imageUrl}
@@ -376,7 +382,7 @@ const interviewName =
                     >
                       <div class="mx-auto w-full max-w-[280px]">
                         <ZapisnayaKnijkaCard
-                          title={item.title}
+                          title={getCardTitle(item)}
                           category={getPrimaryTag(item)}
                           categoryHref={getPrimaryTagHref(item)}
                           imageUrl={item.imageUrl}
@@ -615,7 +621,7 @@ const interviewName =
                       </h3>
                     </a>
                     {getCardLead(twoImageArticle) && (
-                      <p class="text-[22px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light text-center px-16">
+                      <p class="text-[22px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light text-center px-1 lg:px-16">
                         {truncateText(getCardLead(twoImageArticle), 380)}
                       </p>
                     )}
@@ -661,11 +667,11 @@ const interviewName =
                   <a
                     href={item.href}
                     class="linked-image-hover aspect-[3/2]"
-                    aria-label={item.title}
+                    aria-label={getCardTitle(item)}
                   >
                     <img
                       src={item.imageUrl || picture1.src}
-                      alt={item.title}
+                      alt={getCardTitle(item)}
                       class="linked-image-hover__media block h-full w-full object-cover"
                       loading="lazy"
                     />
@@ -693,7 +699,7 @@ const interviewName =
                     >
                       <h3 class="m-0 line-clamp-3 text-[1.4rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.12]">
                         {(() => {
-                          const t = truncateText(item.title, 88);
+                          const t = truncateText(getCardTitle(item), 88);
                           const { start, last } = splitTitle(t);
                           return item.paid ? (
                             <>
@@ -767,11 +773,11 @@ const interviewName =
                       <a
                         href={item.href}
                         class="linked-image-hover bg-white aspect-[1.02/1]"
-                        aria-label={item.title}
+                        aria-label={getCardTitle(item)}
                       >
                         <img
                           src={item.imageUrl || picture1.src}
-                          alt={item.title}
+                          alt={getCardTitle(item)}
                           class="linked-image-hover__media block h-full w-full object-cover"
                           loading="lazy"
                         />
@@ -799,7 +805,7 @@ const interviewName =
                         >
                           <h3 class="line-clamp-2 text-xl lg:text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
                             {(() => {
-                              const t = truncateText(item.title, 72);
+                              const t = truncateText(getCardTitle(item), 72);
                               const { start, last } = splitTitle(t);
                               return item.paid ? (
                                 <>
@@ -839,11 +845,11 @@ const interviewName =
                             <a
                               href={item.href}
                               class="linked-image-hover bg-white aspect-[1.02/1]"
-                              aria-label={item.title}
+                              aria-label={getCardTitle(item)}
                             >
                               <img
                                 src={item.imageUrl || picture1.src}
-                                alt={item.title}
+                                alt={getCardTitle(item)}
                                 class="linked-image-hover__media block h-full w-full object-cover"
                                 loading="lazy"
                               />
@@ -870,7 +876,7 @@ const interviewName =
                                 class="block text-current no-underline hover:underline"
                               >
                                 <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                                  {truncateText(item.title, 72)}{" "}
+                                  {truncateText(getCardTitle(item), 72)}{" "}
                                   {item.paid && (
                                     <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
                                   )}

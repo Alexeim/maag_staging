@@ -23,6 +23,7 @@ export interface PublicContentCardItem {
   articleType?: string;
   lead?: string;
   cardLead?: string;
+  cardTitle?: string;
   interviewee?: string;
   mainQuote?: string;
 }

@@ -12,6 +12,7 @@ const { item } = Astro.props as Props;
 const isInterview = item.contentType === "interview";
 const imageSrc = item.imageUrl || "";
 const lead = item.cardLead || item.lead || item.mainQuote || "";
+const title = item.cardTitle || item.title;
 const label = getPrimaryBadgeLabel(item);
 ---
 
@@ -19,7 +20,7 @@ const label = getPrimaryBadgeLabel(item);
   <a
     href={item.href}
     class="group flex items-start gap-4 text-current no-underline relative"
-    aria-label={item.title}
+    aria-label={title}
   >
     <div
       class:list={[
@@ -31,7 +32,7 @@ const label = getPrimaryBadgeLabel(item);
         imageSrc ? (
           <img
             src={imageSrc}
-            alt={item.title}
+            alt={title}
             class:list={[
               "h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]",
               isInterview && "rounded-full",
@@ -62,7 +63,7 @@ const label = getPrimaryBadgeLabel(item);
       <h3
         class="font-old_standard text-[1.3rem] lg:text-3xl leading-[1.05] font-normal tracking-[-0.02em] transition-opacity duration-200 group-hover:underline"
       >
-        {item.title}
+        {title}
       </h3>
 
       <!-- {

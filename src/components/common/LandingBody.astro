@@ -73,6 +73,12 @@ const getCardLead = (item: any) => {
   return cardLead;
 };
 
+const getCardTitle = (item: any): string => {
+  const cardTitle =
+    typeof item?.cardTitle === "string" ? item.cardTitle.trim() : "";
+  return cardTitle || item?.title || "";
+};
+
 const maagChoiceItems = publicLandingData?.maagChoiceItems ?? [];
 const latestInterview = publicLandingData?.latestInterview ?? null;
 
@@ -267,7 +273,7 @@ const splitTitle = (t: string) => {
                     <ArticleCard
                       key={item.id}
                       isNetlenka={false}
-                      title={item.title}
+                      title={getCardTitle(item)}
                       category={getPrimaryTag(item)}
                       categoryHref={getPrimaryTagHref(item)}
                       date={formatArticleDate(item.createdAt)}
@@ -320,7 +326,7 @@ const splitTitle = (t: string) => {
                 {maagChoiceItems.map((item) => (
                   <NetlenkaCardOne
                     key={item.id}
-                    title={item.title}
+                    title={getCardTitle(item)}
                     category={getPrimaryTag(item)}
                     categoryHref={getPrimaryTagHref(item)}
                     date={formatArticleDate(item.createdAt)}
@@ -351,7 +357,7 @@ const splitTitle = (t: string) => {
                       >
                         <NetlenkaCardOne
                           key={item.id}
-                          title={item.title}
+                          title={getCardTitle(item)}
                           category={getPrimaryTag(item)}
                           categoryHref={getPrimaryTagHref(item)}
                           date={formatArticleDate(item.createdAt)}
@@ -491,7 +497,7 @@ const splitTitle = (t: string) => {
                 <ArticleCard
                   key={item.id}
                   isNetlenka={false}
-                  title={item.title}
+                  title={getCardTitle(item)}
                   category={getPrimaryTag(item)}
                   categoryHref={getPrimaryTagHref(item)}
                   date={formatArticleDate(item.createdAt)}
@@ -653,7 +659,7 @@ const splitTitle = (t: string) => {
             <div class="w-[320px] flex-shrink-0">
               <ArticleCard
                 isNetlenka={false}
-                title={item.title}
+                title={getCardTitle(item)}
                 category={getPrimaryTag(item)}
                 categoryHref={getPrimaryTagHref(item)}
                 date={formatArticleDate(item.createdAt)}

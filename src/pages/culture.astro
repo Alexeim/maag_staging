@@ -74,6 +74,12 @@ const getCardLead = (item: any): string => {
   return cardLead;
 };
 
+const getCardTitle = (item: any): string => {
+  const cardTitle =
+    typeof item?.cardTitle === "string" ? item.cardTitle.trim() : "";
+  return cardTitle || item?.title || "";
+};
+
 const toContentHref = (item: any) => {
   if (item?.contentType === "interview") {
     return `/interviews/${item.id}`;
@@ -250,11 +256,11 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                     <a
                       href={item.href}
                       class="linked-image-hover aspect-[3/2]"
-                      aria-label={item.title}
+                      aria-label={getCardTitle(item)}
                     >
                       <img
                         src={item.imageUrl || picture1.src}
-                        alt={item.title}
+                        alt={getCardTitle(item)}
                         class="linked-image-hover__media block h-full w-full object-cover"
                         loading="lazy"
                       />
@@ -282,7 +288,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                       >
                         <h3 class="m-0 line-clamp-3 text-[1.4rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.12]">
                           {(() => {
-                            const t = truncateText(item.title, 88);
+                            const t = truncateText(getCardTitle(item), 88);
                             const { start, last } = splitTitle(t);
                             return item.paid ? (
                               <>
@@ -324,7 +330,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
               editorialSidebarItems.length > 0 ? (
                 editorialSidebarItems.map((item) => (
                   <NetlenkaCardOne
-                    title={item.title}
+                    title={getCardTitle(item)}
                     category={getPrimaryBadgeLabel(item)}
                     categoryHref={getPrimaryBadgeHref(item)}
                     imageUrl={item.imageUrl}
@@ -382,11 +388,11 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                         item.contentType === "interview" &&
                           "w-full aspect-square rounded-full bg-transparent",
                       ]}
-                      aria-label={item.title}
+                      aria-label={getCardTitle(item)}
                     >
                       <img
                         src={item.imageUrl || picture1.src}
-                        alt={item.title}
+                        alt={getCardTitle(item)}
                         class:list={[
                           "linked-image-hover__media block h-full w-full object-cover",
                           item.contentType === "interview" && "rounded-full",
@@ -422,7 +428,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                       >
                         <h3 class="line-clamp-2 text-xl lg:text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
                           {(() => {
-                            const t = truncateText(item.title, 72);
+                            const t = truncateText(getCardTitle(item), 72);
                             const { start, last } = splitTitle(t);
                             return item.paid ? (
                               <>
@@ -470,11 +476,11 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                                 item.contentType === "interview" &&
                                   "w-full aspect-square rounded-full bg-transparent",
                               ]}
-                              aria-label={item.title}
+                              aria-label={getCardTitle(item)}
                             >
                               <img
                                 src={item.imageUrl || picture1.src}
-                                alt={item.title}
+                                alt={getCardTitle(item)}
                                 class:list={[
                                   "linked-image-hover__media block h-full w-full object-cover",
                                   item.contentType === "interview" &&
@@ -511,7 +517,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                                 class="block text-current no-underline hover:underline"
                               >
                                 <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                                  {truncateText(item.title, 72)}{" "}
+                                  {truncateText(getCardTitle(item), 72)}{" "}
                                   {item.paid && (
                                     <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
                                   )}
