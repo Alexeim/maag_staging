@@ -66,6 +66,7 @@ const normalizeLoadedArticle = (data: any) => {
   copy.lead = copy.lead ?? "";
   copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
   copy.cardLead = copy.cardLead ?? "";
+  copy.cardTitle = copy.cardTitle ?? "";
   copy.isHotContent = Boolean(copy.isHotContent);
   copy.isNotebookContent = Boolean(copy.isNotebookContent);
   copy.isMaagChoice = Boolean(copy.isMaagChoice);
@@ -119,6 +120,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       lead: "",
       leadHtml: "",
       cardLead: "",
+      cardTitle: "",
       imageUrl: "",
       imageCaption: "",
       secondImageUrl: "",
@@ -838,6 +840,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           lead: this.article.lead,
           leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
           cardLead: this.article.cardLead,
+          cardTitle: this.article.cardTitle,
           authorId,
           articleType: "tips" as const,
           imageUrl: this.article.imageUrl,

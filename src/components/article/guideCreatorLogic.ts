@@ -178,6 +178,7 @@ export default function guideCreatorLogic(initialState = {}) {
     copy.secondImageCaption = copy.secondImageCaption ?? "";
     copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
+    copy.cardTitle = copy.cardTitle ?? "";
     copy.heroOrientation = copy.heroOrientation === "image-left" || copy.heroOrientation === "image-bottom" ? copy.heroOrientation : "image-right";
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     return copy;
@@ -224,6 +225,7 @@ export default function guideCreatorLogic(initialState = {}) {
       lead: "",
       leadHtml: "",
       cardLead: "",
+      cardTitle: "",
       imageUrl: "",
       imageCaption: "",
       secondImageUrl: "",
@@ -827,6 +829,7 @@ export default function guideCreatorLogic(initialState = {}) {
       this.article.lead = this.article.lead ?? "";
       this.article.leadHtml = normalizeStoredRichTextHtml(this.article.leadHtml);
       this.article.cardLead = this.article.cardLead ?? "";
+      this.article.cardTitle = this.article.cardTitle ?? "";
       this.article.heroOrientation = this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : "image-right";
       this.article.isHotContent = Boolean(this.article.isHotContent);
       this.article.isNotebookContent = Boolean(this.article.isNotebookContent);
@@ -1326,6 +1329,7 @@ export default function guideCreatorLogic(initialState = {}) {
           lead: this.article.lead,
           leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
           cardLead: this.article.cardLead,
+          cardTitle: this.article.cardTitle,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
           secondImageUrl: this.article.secondImageUrl,

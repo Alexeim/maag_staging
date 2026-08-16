@@ -102,6 +102,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     copy.lead = copy.lead ?? "";
     copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
+    copy.cardTitle = copy.cardTitle ?? "";
     copy.tags = normalizeTags(copy.tags);
     copy.parisSubCategories = normalizeTags(
       copy.parisSubCategories ?? (copy.category === "paris" ? copy.tags : []),
@@ -125,6 +126,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       lead: "",
       leadHtml: "",
       cardLead: "",
+      cardTitle: "",
       category: "",
       isHotContent: false,
       isNotebookContent: false,
@@ -715,6 +717,7 @@ export default function flipperCreatorLogic(initialState = {}) {
           lead: this.flipper.lead,
           leadHtml: normalizeStoredRichTextHtml(this.flipper.leadHtml),
           cardLead: this.flipper.cardLead,
+          cardTitle: this.flipper.cardTitle,
           tags: selectedCategoryTags,
           parisSubCategories: isParisCategory ? this.flipper.parisSubCategories : [],
           parisDistrict: isParisCategory ? this.flipper.parisDistrict || null : null,

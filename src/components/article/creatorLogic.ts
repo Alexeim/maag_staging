@@ -240,6 +240,7 @@ export default function articleCreatorLogic(initialState = {}) {
     copy.secondImageCaption = copy.secondImageCaption ?? "";
     copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
+    copy.cardTitle = copy.cardTitle ?? "";
     copy.heroOrientation = copy.heroOrientation === "image-left" || copy.heroOrientation === "image-bottom" ? copy.heroOrientation : "image-right";
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     copy.contentCollectionId = normalizeContentCollectionId(
@@ -289,6 +290,7 @@ export default function articleCreatorLogic(initialState = {}) {
       lead: "", // Вводка — краткое описание под заголовком (plain text)
       leadHtml: "", // Вводка — rich text от Quill
       cardLead: "",
+      cardTitle: "",
       articleType,
       imageUrl: "",
       imageCaption: "", // <-- Added caption for the main image
@@ -1054,6 +1056,7 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.lead = this.article.lead ?? "";
       this.article.leadHtml = normalizeStoredRichTextHtml(this.article.leadHtml);
       this.article.cardLead = this.article.cardLead ?? "";
+      this.article.cardTitle = this.article.cardTitle ?? "";
       this.article.heroOrientation = this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : "image-right";
       this.article.articleType =
         this.article.articleType ?? articleType ?? "standard";
@@ -1602,6 +1605,7 @@ export default function articleCreatorLogic(initialState = {}) {
           lead: this.article.lead,
           leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
           cardLead: this.article.cardLead,
+          cardTitle: this.article.cardTitle,
           articleType: this.article.articleType || articleType || "standard",
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,

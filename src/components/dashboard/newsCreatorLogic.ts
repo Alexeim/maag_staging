@@ -96,6 +96,7 @@ export default function newsCreatorLogic(
     copy.lead = copy.lead ?? "";
     copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
+    copy.cardTitle = copy.cardTitle ?? "";
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
     delete copy.isHotContent;
@@ -111,6 +112,7 @@ export default function newsCreatorLogic(
       lead: "",
       leadHtml: "",
       cardLead: "",
+      cardTitle: "",
       imageUrl: "",
       imageCaption: "",
       contentBlocks: [] as any[],
@@ -495,6 +497,7 @@ export default function newsCreatorLogic(
       this.article.lead = this.article.lead ?? "";
       this.article.leadHtml = normalizeStoredRichTextHtml(this.article.leadHtml);
       this.article.cardLead = this.article.cardLead ?? "";
+      this.article.cardTitle = this.article.cardTitle ?? "";
       this.article.isMainInCategory = Boolean(this.article.isMainInCategory);
       this.article.relatedContent = sanitizeRelatedContent(
         this.article.relatedContent,
@@ -793,6 +796,7 @@ export default function newsCreatorLogic(
           lead: this.article.lead,
           leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
           cardLead: this.article.cardLead,
+          cardTitle: this.article.cardTitle,
           imageUrl: this.article.imageUrl,
           imageCaption: this.article.imageCaption,
           authorId: resolvedAuthorId,

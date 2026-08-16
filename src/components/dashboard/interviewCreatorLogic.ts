@@ -112,6 +112,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     copy.lead = copy.lead ?? "";
     copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
+    copy.cardTitle = copy.cardTitle ?? "";
     copy.mainQuote = copy.mainQuote ?? "";
     copy.isHotContent = Boolean(copy.isHotContent);
     copy.isNotebookContent = Boolean(copy.isNotebookContent);
@@ -143,6 +144,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       lead: "",
       leadHtml: "",
       cardLead: "",
+      cardTitle: "",
       mainQuote: "",
       isHotContent: false,
       isNotebookContent: false,
@@ -1032,6 +1034,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           lead: this.interview.lead,
           leadHtml: normalizeStoredRichTextHtml(this.interview.leadHtml),
           cardLead: this.interview.cardLead,
+          cardTitle: this.interview.cardTitle,
           mainQuote: this.interview.mainQuote,
           isHotContent: Boolean(this.interview.isHotContent),
           isNotebookContent: Boolean(this.interview.isNotebookContent),

@@ -102,6 +102,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       lead: "",
       leadHtml: "",
       cardLead: "",
+      cardTitle: "",
       imageUrl: "",
       imageCaption: "",
       secondImageUrl: "",
@@ -583,6 +584,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.lead = copy.lead || "";
         this.story.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
         this.story.cardLead = copy.cardLead || "";
+        this.story.cardTitle = copy.cardTitle || "";
         this.story.imageUrl = copy.imageUrl || "";
         this.story.imageCaption =
           typeof copy.imageCaption === "string" ? copy.imageCaption : "";
@@ -731,6 +733,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           lead: this.story.lead,
           leadHtml: normalizeStoredRichTextHtml(this.story.leadHtml),
           cardLead: this.story.cardLead,
+          cardTitle: this.story.cardTitle,
           imageUrl: this.story.imageUrl || undefined,
           imageCaption: this.story.imageCaption || "",
           secondImageUrl: this.story.secondImageUrl || undefined,

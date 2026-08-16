@@ -200,6 +200,7 @@ export default function eventCreatorLogic(initialState = {}) {
     copy.lead = copy.lead ?? "";
     copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
     copy.cardLead = copy.cardLead ?? "";
+    copy.cardTitle = copy.cardTitle ?? "";
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
@@ -684,6 +685,7 @@ export default function eventCreatorLogic(initialState = {}) {
           lead: this.article.lead,
           leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
           cardLead: this.article.cardLead,
+          cardTitle: this.article.cardTitle,
           tags: this.article.tags,
           startDate: this.eventForm.startDate,
           endDate: normalizedEndDate,
