@@ -142,6 +142,7 @@ const toLandingItem = (
     title: data.title ?? '',
     lead: data.lead ?? '',
     cardLead: data.cardLead ?? '',
+    cardTitle: data.cardTitle ?? '',
     imageUrl: getImageUrl(type, data),
     secondImageUrl: getSecondImageUrl(data),
     category: data.category ?? '',
