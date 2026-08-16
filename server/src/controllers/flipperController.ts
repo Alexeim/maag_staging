@@ -18,6 +18,7 @@ export interface Flipper {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   authorId: string;
   category?: string;
   tags?: string[];
@@ -52,6 +53,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       lead,
       leadHtml,
       cardLead,
+      cardTitle,
       category,
       tags = [],
       isHotContent = false,
@@ -86,6 +88,7 @@ export const createFlipper = async (req: Request, res: Response) => {
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
+      cardTitle: cardTitle || '',
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,
@@ -198,6 +201,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       lead,
       leadHtml,
       cardLead,
+      cardTitle,
       category,
       tags = [],
       isHotContent = false,
@@ -237,6 +241,7 @@ export const updateFlipper = async (req: Request, res: Response) => {
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
+      cardTitle: cardTitle || '',
       category: persistedCategory,
       tags: normalizedTags,
       isHotContent: Boolean(isHotContent) || legacyHotContent,

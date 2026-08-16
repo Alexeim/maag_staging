@@ -17,6 +17,7 @@ export interface Guide {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   authorId: string;
   content: any[];
   tips?: Array<{ type: string; text: string; url?: string }>;
@@ -82,6 +83,7 @@ export const createGuide = async (req: Request, res: Response) => {
       lead,
       leadHtml,
       cardLead,
+      cardTitle,
       content,
       tips = [],
       imageUrl,
@@ -120,6 +122,7 @@ export const createGuide = async (req: Request, res: Response) => {
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
+      cardTitle: cardTitle || '',
       authorId,
       content,
       tips: normalizedTipsData,
@@ -239,6 +242,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       lead,
       leadHtml,
       cardLead,
+      cardTitle,
       content,
       tips = [],
       imageUrl,
@@ -279,6 +283,7 @@ export const updateGuide = async (req: Request, res: Response) => {
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
+      cardTitle: cardTitle || '',
       authorId,
       content,
       tips: normalizedTipsData,

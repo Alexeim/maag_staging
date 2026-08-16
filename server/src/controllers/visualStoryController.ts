@@ -31,6 +31,7 @@ export interface VisualStory {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   category?: string;
   tags?: string[];
   parisSubCategories?: string[];
@@ -94,6 +95,7 @@ const buildVisualStoryPayload = (body: Record<string, unknown>) => {
     lead,
     leadHtml,
     cardLead,
+    cardTitle,
     category,
     tags = [],
     parisSubCategories = [],
@@ -117,6 +119,7 @@ const buildVisualStoryPayload = (body: Record<string, unknown>) => {
     lead: typeof lead === 'string' ? lead : '',
     leadHtml: normalizeStoredRichTextHtml(leadHtml),
     cardLead: typeof cardLead === 'string' ? cardLead : '',
+    cardTitle: typeof cardTitle === 'string' ? cardTitle : '',
     category: normalizeCategory(category),
     tags: normalizeStringArray(tags),
     parisSubCategories: normalizeStringArray(parisSubCategories),

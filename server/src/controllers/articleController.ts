@@ -18,6 +18,7 @@ export interface Article {
   lead?: string; // Вводка — краткое описание под заголовком
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   authorId: string;
   articleType?: 'standard' | 'tips' | 'le_saviez_vous'; // Type of article layout
   content: any[]; // Array of content blocks (e.g., { type: 'paragraph', text: '...' })
@@ -99,6 +100,7 @@ export const createArticle = async (req: Request, res: Response) => {
       lead,
       leadHtml,
       cardLead,
+      cardTitle,
       content,
       tips = [],
       imageUrl,
@@ -141,6 +143,7 @@ export const createArticle = async (req: Request, res: Response) => {
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
+      cardTitle: cardTitle || '',
       authorId,
       articleType: normalizeArticleType(articleType),
       content,
@@ -265,6 +268,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       lead,
       leadHtml,
       cardLead,
+      cardTitle,
       content,
       tips = [],
       imageUrl,
@@ -309,6 +313,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
+      cardTitle: cardTitle || '',
       authorId,
       articleType: normalizeArticleType(articleType),
       content,

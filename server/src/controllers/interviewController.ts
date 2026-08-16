@@ -20,6 +20,7 @@ export interface Interview {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   mainQuote?: string;
   isHotContent?: boolean;
   isNotebookContent?: boolean;
@@ -58,6 +59,7 @@ export const createInterview = async (req: Request, res: Response) => {
       lead,
       leadHtml,
       cardLead,
+      cardTitle,
       mainQuote,
       tags = [],
       isHotContent = false,
@@ -86,6 +88,7 @@ export const createInterview = async (req: Request, res: Response) => {
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
+      cardTitle: cardTitle || '',
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
       isNotebookContent: Boolean(isNotebookContent),
@@ -208,6 +211,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       lead,
       leadHtml,
       cardLead,
+      cardTitle,
       mainQuote,
       tags = [],
       isHotContent = false,
@@ -238,6 +242,7 @@ export const updateInterview = async (req: Request, res: Response) => {
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
+      cardTitle: cardTitle || '',
       mainQuote: mainQuote || '',
       isHotContent: Boolean(isHotContent),
       isNotebookContent: Boolean(isNotebookContent),

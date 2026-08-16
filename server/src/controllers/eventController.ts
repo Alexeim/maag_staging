@@ -18,6 +18,7 @@ export interface EventItem {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   content: any[];
   imageUrl?: string;
   imageCaption?: string;
@@ -134,6 +135,7 @@ export const createEvent = async (req: Request, res: Response) => {
       lead,
       leadHtml,
       cardLead,
+      cardTitle,
       tags = [],
       startDate,
       endDate = null,
@@ -191,6 +193,7 @@ export const createEvent = async (req: Request, res: Response) => {
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
+      cardTitle: cardTitle || '',
       content,
       imageUrl,
       imageCaption,
@@ -298,6 +301,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       lead,
       leadHtml,
       cardLead,
+      cardTitle,
       tags = [],
       startDate,
       endDate = null,
@@ -359,6 +363,7 @@ export const updateEvent = async (req: Request, res: Response) => {
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
       cardLead: cardLead || '',
+      cardTitle: cardTitle || '',
       content,
       imageUrl,
       imageCaption,

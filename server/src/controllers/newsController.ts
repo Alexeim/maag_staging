@@ -17,6 +17,7 @@ export interface NewsItem {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   authorId: string;
   content: any[];
   imageUrl?: string;
@@ -55,6 +56,7 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     lead,
     leadHtml,
     cardLead,
+    cardTitle,
     content,
     imageUrl,
     imageCaption,
@@ -71,6 +73,7 @@ const buildNewsPayload = (body: Record<string, unknown>) => {
     lead: typeof lead === 'string' ? lead : '',
     leadHtml: normalizeStoredRichTextHtml(leadHtml),
     cardLead: typeof cardLead === 'string' ? cardLead : '',
+    cardTitle: typeof cardTitle === 'string' ? cardTitle : '',
     authorId: typeof authorId === 'string' ? authorId : '',
     content: Array.isArray(content) ? content : [],
     imageUrl: typeof imageUrl === 'string' ? imageUrl : '',

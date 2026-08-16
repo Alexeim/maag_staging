@@ -147,6 +147,7 @@ export interface ArticlePayload {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   category?: string;
   tags?: string[];
   parisSubCategories?: string[];
@@ -200,6 +201,7 @@ export interface NewsPayload {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   category?: string;
   tags?: string[];
   isMainInCategory?: boolean;
@@ -225,6 +227,7 @@ export interface EventPayload {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   tags: string[];
   startDate: string | Date;
   endDate?: string | Date | null;
@@ -608,6 +611,7 @@ export interface FlipperPayload {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   category?: string;
   tags?: string[];
   parisSubCategories?: string[];
@@ -642,6 +646,7 @@ export interface InterviewPayload {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   mainQuote?: string;
   tags?: string[];
   isHotContent?: boolean;
@@ -672,6 +677,7 @@ export interface GuidePayload {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   category?: string;
   tags?: string[];
   parisSubCategories?: string[];
@@ -1039,6 +1045,7 @@ export interface VisualStoryPayload {
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
+  cardTitle?: string;
   category?: string;
   tags?: string[];
   parisSubCategories?: string[];
