@@ -65,6 +65,8 @@ const normalizeLoadedArticle = (data: any) => {
   copy.heroOrientation = copy.heroOrientation === "image-left" || copy.heroOrientation === "image-bottom" ? copy.heroOrientation : "image-right";
   copy.lead = copy.lead ?? "";
   copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
+  copy.intro = copy.intro ?? "";
+  copy.introHtml = normalizeStoredRichTextHtml(copy.introHtml);
   copy.cardLead = copy.cardLead ?? "";
   copy.cardTitle = copy.cardTitle ?? "";
   copy.isHotContent = Boolean(copy.isHotContent);
@@ -119,6 +121,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       title: "",
       lead: "",
       leadHtml: "",
+      intro: "",
+      introHtml: "",
       cardLead: "",
       cardTitle: "",
       imageUrl: "",
@@ -839,6 +843,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           title: this.article.title,
           lead: this.article.lead,
           leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
+          intro: this.article.intro,
+          introHtml: normalizeStoredRichTextHtml(this.article.introHtml),
           cardLead: this.article.cardLead,
           cardTitle: this.article.cardTitle,
           authorId,

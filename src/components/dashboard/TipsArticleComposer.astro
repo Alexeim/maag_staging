@@ -431,6 +431,23 @@ const allParisDistricts = parisDistrictTags;
     </div>
   </section>
 
+  <!-- ── Вступительный абзац ──────────────────────────────────────────────── -->
+  <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
+    <h2 class="text-xl font-semibold mb-1">Вступительный абзац</h2>
+    <p class="text-sm text-base-content/60 mb-4">
+      Необязательный текст перед списком пунктов. Поддерживает форматирование (жирный, курсив, ссылки).
+    </p>
+    <template x-if="!isLazyLoading">
+      <div
+        class="rich-text-editor"
+        x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml({ html: article.introHtml, text: article.intro }), placeholder: 'Текст вступления перед списком пунктов (необязательно)' })"
+        @rich-text-change="article.introHtml = $event.detail.html; article.intro = $event.detail.text"
+      >
+        <div x-ref="editor"></div>
+      </div>
+    </template>
+  </section>
+
   <!-- ── Пункты списка ─────────────────────────────────────────────────────── -->
   <section class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
     <h2 class="text-xl font-semibold mb-1">Пункты статьи</h2>

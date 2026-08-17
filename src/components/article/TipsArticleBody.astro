@@ -21,14 +21,21 @@ interface TipsItemBlock {
 
 interface Props {
   contentBlocks: TipsItemBlock[];
+  introHtml?: string;
 }
 
-const { contentBlocks } = Astro.props;
+const { contentBlocks, introHtml } = Astro.props;
 
 const items = contentBlocks.filter((b) => b != null && b.type === "tips-item");
 ---
 
 <div class="max-w-[826px] mx-auto">
+  {introHtml && (
+    <div
+      class="article-rich-text mb-4 text-base font-article-body text-justify"
+      set:html={introHtml}
+    />
+  )}
   {
     items.map((item, i) => (
       <article class="flex flex-col sm:flex-row sm:items-start py-8 gap-6">

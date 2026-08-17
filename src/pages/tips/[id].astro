@@ -59,6 +59,7 @@ const displayArticle = {
   title: articleData?.header?.title || articleData?.title || "Статья",
   lead: articleData?.lead || "",
   leadHtml: articleData?.leadHtml || "",
+  introHtml: articleData?.introHtml || "",
   category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }),
   categoryHref: getPrimaryBadgeHref({ contentType: "article", tags: articleData?.tags }),
   authorName: articleData?.author
@@ -176,7 +177,10 @@ if (!error && articleData) {
 
           <!-- Tips content -->
           <div class="w-full px-4 lg:px-14 pt-10 pb-[100px] lg:pt-16">
-            <TipsArticleBody contentBlocks={displayArticle.contentBlocks} />
+            <TipsArticleBody
+              contentBlocks={displayArticle.contentBlocks}
+              introHtml={displayArticle.introHtml}
+            />
             <RelatedMaterialsMarquee
               collectionItems={collectionContentItems}
               relatedItems={relatedContentItems}

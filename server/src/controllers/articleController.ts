@@ -17,6 +17,8 @@ export interface Article {
   title: string;
   lead?: string; // Вводка — краткое описание под заголовком
   leadHtml?: string;
+  intro?: string; // Optional paragraph shown before the tips list
+  introHtml?: string;
   cardLead?: string;
   cardTitle?: string;
   authorId: string;
@@ -99,6 +101,8 @@ export const createArticle = async (req: Request, res: Response) => {
       title,
       lead,
       leadHtml,
+      intro,
+      introHtml,
       cardLead,
       cardTitle,
       content,
@@ -142,6 +146,8 @@ export const createArticle = async (req: Request, res: Response) => {
       title,
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
+      intro: intro || '',
+      introHtml: normalizeStoredRichTextHtml(introHtml),
       cardLead: cardLead || '',
       cardTitle: cardTitle || '',
       authorId,
@@ -267,6 +273,8 @@ export const updateArticle = async (req: Request, res: Response) => {
       title,
       lead,
       leadHtml,
+      intro,
+      introHtml,
       cardLead,
       cardTitle,
       content,
@@ -312,6 +320,8 @@ export const updateArticle = async (req: Request, res: Response) => {
       title,
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
+      intro: intro || '',
+      introHtml: normalizeStoredRichTextHtml(introHtml),
       cardLead: cardLead || '',
       cardTitle: cardTitle || '',
       authorId,

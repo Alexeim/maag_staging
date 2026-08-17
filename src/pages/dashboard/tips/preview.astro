@@ -67,6 +67,13 @@ import DashboardTipsBodyPreview from "@/components/dashboard/DashboardTipsBodyPr
         </section>
 
         <div class="w-full px-4 lg:px-14 pt-10 pb-[100px] lg:pt-16">
+          <div class="max-w-[826px] mx-auto">
+            <div
+              x-show="article.introHtml"
+              x-html="article.introHtml"
+              class="article-rich-text mb-4 text-base font-article-body text-justify"
+            ></div>
+          </div>
           <DashboardTipsBodyPreview />
         </div>
       </main>

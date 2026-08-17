@@ -146,6 +146,8 @@ export interface ArticlePayload {
   secondImageCaption?: string;
   lead?: string;
   leadHtml?: string;
+  intro?: string;
+  introHtml?: string;
   cardLead?: string;
   cardTitle?: string;
   category?: string;
