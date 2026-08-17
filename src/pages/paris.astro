@@ -291,6 +291,18 @@ const interviewName =
                     )}
                   </h2>
                 </a>
+                <a
+                  href={primaryParisArticle.href}
+                  class="linked-image-hover block! lg:hidden! aspect-[4/5] overflow-hidden lg:aspect-auto lg:h-full lg:min-h-0"
+                  aria-label={primaryParisArticle.title}
+                >
+                  <img
+                    src={primaryParisArticle.imageUrl || picture1.src}
+                    alt={primaryParisArticle.title}
+                    class="linked-image-hover__media block h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </a>
               </div>
 
               <div class="grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-2 lg:grid-rows-1 lg:items-stretch">
@@ -317,7 +329,7 @@ const interviewName =
 
                 <a
                   href={primaryParisArticle.href}
-                  class="linked-image-hover block aspect-[4/5] overflow-hidden lg:aspect-auto lg:h-full lg:min-h-0"
+                  class="linked-image-hover hidden! lg:block! aspect-[4/5] overflow-hidden lg:aspect-auto lg:h-full lg:min-h-0"
                   aria-label={primaryParisArticle.title}
                 >
                   <img
@@ -380,7 +392,7 @@ const interviewName =
                       data-zapisnaya-carousel-page
                       aria-hidden={index === 0 ? "false" : "true"}
                     >
-                      <div class="mx-auto w-full max-w-[280px]">
+                      <div class="w-full">
                         <ZapisnayaKnijkaCard
                           title={getCardTitle(item)}
                           category={getPrimaryTag(item)}
