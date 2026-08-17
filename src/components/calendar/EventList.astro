@@ -91,16 +91,20 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                             <span x-text="event.location"></span>
                           </p>
 
-                          <hr class="border-[#30282115]" />
-                          <p
-                            class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
-                          >
-                            <EventMetaIcon
-                              type="time"
-                              class="h-4 w-4 shrink-0 text-accent"
-                            />
-                            <span x-text="event.time"></span>
-                          </p>
+                          <template x-if="event.time">
+                            <div>
+                              <hr class="border-[#30282115]" />
+                              <p
+                                class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
+                              >
+                                <EventMetaIcon
+                                  type="time"
+                                  class="h-4 w-4 shrink-0 text-accent"
+                                />
+                                <span x-text="event.time"></span>
+                              </p>
+                            </div>
+                          </template>
 
                           <hr class="border-[#30282115]" />
                           <p
@@ -182,16 +186,20 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                             <span x-text="event.location"></span>
                           </p>
 
-                          <hr class="border-[#30282115]" />
-                          <p
-                            class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
-                          >
-                            <EventMetaIcon
-                              type="time"
-                              class="h-4 w-4 shrink-0 text-accent"
-                            />
-                            <span x-text="event.time"></span>
-                          </p>
+                          <template x-if="event.time">
+                            <div>
+                              <hr class="border-[#30282115]" />
+                              <p
+                                class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
+                              >
+                                <EventMetaIcon
+                                  type="time"
+                                  class="h-4 w-4 shrink-0 text-accent"
+                                />
+                                <span x-text="event.time"></span>
+                              </p>
+                            </div>
+                          </template>
 
                           <hr class="border-[#30282115]" />
                           <p
@@ -275,16 +283,20 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                       <span x-text="event.location"></span>
                     </p>
 
-                    <hr class="border-[#30282115]" />
-                    <p
-                      class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
-                    >
-                      <EventMetaIcon
-                        type="time"
-                        class="h-4 w-4 shrink-0 text-accent"
-                      />
-                      <span x-text="event.time"></span>
-                    </p>
+                    <template x-if="event.time">
+                      <div>
+                        <hr class="border-[#30282115]" />
+                        <p
+                          class="m-0 flex items-center gap-2 py-2 font-inter text-[0.82rem] text-[#302821bd]"
+                        >
+                          <EventMetaIcon
+                            type="time"
+                            class="h-4 w-4 shrink-0 text-accent"
+                          />
+                          <span x-text="event.time"></span>
+                        </p>
+                      </div>
+                    </template>
 
                     <template
                       x-if="event.endDate.getTime() !== event.startDate.getTime()"

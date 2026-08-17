@@ -717,6 +717,15 @@ const toPublicCalendarEvent = (doc: FirebaseFirestore.DocumentSnapshot) => {
     : [];
   const primaryTag = realTags.length > 0 ? realTags[0] : null;
 
+  // A manually typed schedule (e.g. "Пн-Вс 11:00-19:00, ...") lives in
+  // additionalInfo under the clock icon — too long for the compact calendar
+  // list row, but its presence means "Время уточняется" would be a lie.
+  const hasManualTimeInfo = Array.isArray(data.additionalInfo)
+    ? data.additionalInfo.some(
+        (info: any) => info?.icon === 'clock' && typeof info?.text === 'string' && info.text.trim(),
+      )
+    : false;
+
   return {
     id: doc.id,
     title: data.title ?? 'Событие',
@@ -729,6 +738,7 @@ const toPublicCalendarEvent = (doc: FirebaseFirestore.DocumentSnapshot) => {
       data.timeMode === 'start' || data.timeMode === 'range' ? data.timeMode : 'none',
     startTime: typeof data.startTime === 'string' ? data.startTime : null,
     endTime: typeof data.endTime === 'string' ? data.endTime : null,
+    hasManualTimeInfo,
     category: typeof data.category === 'string' ? data.category : '',
     categoryLabel: primaryTag ?? 'Событие',
     tagLabel: primaryTag ?? 'Событие',

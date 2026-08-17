@@ -15,6 +15,7 @@ type IncomingEvent = {
   timeMode?: "none" | "start" | "range";
   startTime?: string | null;
   endTime?: string | null;
+  hasManualTimeInfo?: boolean;
   category?: string;
   categoryLabel?: string;
   tagLabel?: string;
@@ -188,6 +189,11 @@ const formatTimeLabel = (incoming: IncomingEvent): string => {
   }
   if (mode === "range" && start && end) {
     return `${start} – ${end}`;
+  }
+  // A manually typed schedule exists (shown in full on the event page) —
+  // "Время уточняется" would be wrong here, so leave the row empty instead.
+  if (incoming?.hasManualTimeInfo) {
+    return "";
   }
   return "Время уточняется";
 };
