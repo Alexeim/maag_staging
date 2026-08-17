@@ -1,0 +1,17 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import AuthorComposer from "@/components/dashboard/AuthorComposer.astro";
+
+const authorCreatorState = JSON.stringify({
+  isEditMode: false,
+});
+---
+
+<DashboardLayout title="Создать автора" active="create-author">
+  <AuthorComposer
+    heading="Создать автора"
+    submitLabel="Сохранить автора"
+    authorCreatorState={authorCreatorState}
+    cancelHref="/dashboard/authors"
+  />
+</DashboardLayout>

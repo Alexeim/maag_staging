@@ -585,9 +585,20 @@ export interface UserBookmark {
   savedAt?: string | Date | { _seconds: number };
 }
 
+export interface AuthorSocialLinks {
+  instagram?: string;
+  linkedin?: string;
+  facebook?: string;
+  telegram?: string;
+  site?: string;
+}
+
 export interface AuthorPayload {
   firstName: string;
   lastName: string;
+  avatar?: string;
+  bio?: string;
+  socialLinks?: AuthorSocialLinks;
 }
 
 export interface AuthorResponse extends AuthorPayload {
@@ -986,6 +997,22 @@ export const authorsApi = {
       token,
     });
   },
+  getById(id: string, token?: string) {
+    return request<AuthorResponse>(`/api/authors/${id}`, { token });
+  },
+  update(id: string, payload: AuthorPayload, token?: string) {
+    return request<AuthorResponse>(`/api/authors/${id}`, {
+      method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+  delete(id: string, token?: string) {
+    return request<void>(`/api/authors/${id}`, {
+      method: "DELETE",
+      token,
+    });
+  },
 };
 
 export const addressesApi = {
@@ -1309,6 +1336,8 @@ export interface PublicAuthorProfile {
   firstName: string;
   lastName: string;
   avatar: string;
+  bio?: string;
+  socialLinks?: AuthorSocialLinks;
 }
 
 export interface PublicMaterialsByAuthorResponse {

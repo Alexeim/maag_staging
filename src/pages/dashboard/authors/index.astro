@@ -1,0 +1,102 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import DashboardListActions from "@/components/dashboard/DashboardListActions.astro";
+import { authorsApi } from "@/lib/api/api";
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+
+let authors: Awaited<ReturnType<typeof authorsApi.list>> = [];
+try {
+  authors = await authorsApi.list();
+} catch (error) {
+  console.error("Failed to load authors", error);
+}
+---
+
+<DashboardLayout title="Управление авторами" active="authors">
+  <div
+    class="bg-base-100 border border-base-300 rounded-xl p-6"
+    x-data={`$lazy('authorList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
+  >
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-semibold">Авторы</h2>
+        <p class="text-sm text-base-content/70 mt-1">
+          Управляй авторами материалов.
+        </p>
+      </div>
+    </div>
+
+    {
+      authors.length > 0 ? (
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table class="w-full text-sm text-left rtl:text-right text-base-content">
+            <thead class="text-xs text-base-content/70 uppercase bg-base-200">
+              <tr>
+                <th scope="col" class="px-6 py-3">
+                  Автор
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  Роль
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  <span class="sr-only">Действия</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {authors.map((author, index) => {
+                const isLast = index === authors.length - 1;
+                const fullName =
+                  `${author.firstName} ${author.lastName}`.trim() || "—";
+                return (
+                  <tr
+                    class:list={[
+                      "bg-base-100 hover:bg-base-200/50",
+                      !isLast && "border-b border-base-300",
+                    ]}
+                  >
+                    <th
+                      scope="row"
+                      class="px-6 py-4 font-medium text-base-content whitespace-nowrap"
+                    >
+                      <div class="flex items-center gap-3">
+                        {author.avatar ? (
+                          <img
+                            src={author.avatar}
+                            alt={fullName}
+                            class="h-10 w-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div class="h-10 w-10 rounded-full bg-base-200" />
+                        )}
+                        <div>
+                          <div class="font-semibold">{fullName}</div>
+                          <div
+                            class="text-xs text-base-content/60 truncate"
+                            title={author.id}
+                          >
+                            ID: {author.id}
+                          </div>
+                        </div>
+                      </div>
+                    </th>
+                    <td class="px-6 py-4">{author.role}</td>
+                    <DashboardListActions
+                      viewHref={`/author/${author.id}`}
+                      editHref={`/dashboard/authors/${author.id}/edit`}
+                      deleteClick={`handleDeleteClick('${author.id}', '${fullName.replace(/'/g, "\\'")}')`}
+                    />
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="p-8 text-center text-base-content/70">
+          <p>Пока нет авторов. Создай первого!</p>
+        </div>
+      )
+    }
+  </div>
+</DashboardLayout>

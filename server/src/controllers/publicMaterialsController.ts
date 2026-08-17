@@ -265,7 +265,19 @@ export const getMaterialsByAuthor = async (req: Request, res: Response) => {
     if (!authorDoc.exists) {
       return res.status(404).json({ message: 'Author not found' });
     }
-    const authorData = authorDoc.data() as { firstName?: string; lastName?: string; avatar?: string };
+    const authorData = authorDoc.data() as {
+      firstName?: string;
+      lastName?: string;
+      avatar?: string;
+      bio?: string;
+      socialLinks?: {
+        instagram?: string;
+        linkedin?: string;
+        facebook?: string;
+        telegram?: string;
+        site?: string;
+      };
+    };
 
     const itemsByTypeArrays = await Promise.all(
       AUTHOR_TYPE_ORDER.map((type) => fetchAuthoredItems(type, authorId)),
@@ -305,6 +317,8 @@ export const getMaterialsByAuthor = async (req: Request, res: Response) => {
         firstName: authorData?.firstName ?? '',
         lastName: authorData?.lastName ?? '',
         avatar: authorData?.avatar ?? '',
+        bio: authorData?.bio ?? '',
+        socialLinks: authorData?.socialLinks ?? {},
       },
       totalCount: allItems.length,
       groups,

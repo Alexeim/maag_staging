@@ -58,6 +58,8 @@ const components: Record<string, () => Promise<any>> = {
   visualStoryList: () => import('@/components/dashboard/visualStoryListLogic'),
   photoOfTheDayCreator: () => import('@/components/dashboard/photoOfTheDayCreatorLogic'),
   photoOfTheDayList: () => import('@/components/dashboard/photoOfTheDayListLogic'),
+  authorCreator: () => import('@/components/dashboard/authorCreatorLogic'),
+  authorList: () => import('@/components/dashboard/authorListLogic'),
 };
 
 export default function(Alpine: Alpine) {
@@ -701,6 +703,19 @@ export default function(Alpine: Alpine) {
       photoOfTheDaySaving: false,
       photoOfTheDayError: '',
       savePhotoOfTheDay() {},
+      // --- Author Creator properties ---
+      author: {
+        firstName: '',
+        lastName: '',
+        avatar: '',
+        bio: '',
+        socialLinks: { instagram: '', linkedin: '', facebook: '', telegram: '', site: '' },
+      },
+      authorId: null,
+      authorRole: '',
+      handleAvatarUpload() {},
+      saveAuthor() {},
+      deleteAuthor() {},
     };
   });
 }

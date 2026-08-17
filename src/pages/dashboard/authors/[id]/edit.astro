@@ -1,0 +1,55 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import AuthorComposer from "@/components/dashboard/AuthorComposer.astro";
+import { authorsApi } from "@/lib/api/api";
+
+const { id } = Astro.params;
+
+let author = null;
+let loadFailed = false;
+
+try {
+  author = await authorsApi.getById(id!);
+} catch (error) {
+  console.error("Failed to fetch author", error);
+  loadFailed = true;
+}
+
+const authorCreatorState = JSON.stringify({
+  initialAuthor: author,
+  authorId: id,
+  isEditMode: true,
+});
+---
+
+<DashboardLayout title="Редактировать автора" active="authors">
+  {loadFailed ? (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Не удалось загрузить данные для редактирования</h2>
+      <p class="text-base-content/70">Обнови страницу — похоже, произошёл временный сбой сети.</p>
+      <a href="/dashboard/authors" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Назад к авторам</a>
+    </div>
+  ) : author ? (
+    <AuthorComposer
+      heading="Редактировать автора"
+      submitLabel="Обновить автора"
+      authorCreatorState={authorCreatorState}
+      cancelHref="/dashboard/authors"
+      deleteAuthorId={id}
+      deleteRedirect="/dashboard/authors"
+    />
+  ) : (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Автор не найден</h2>
+      <p class="text-base-content/70">
+        Возможно, автор был удалён или указан неверный идентификатор.
+      </p>
+      <a
+        href="/dashboard/authors"
+        class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
+      >
+        Назад к авторам
+      </a>
+    </div>
+  )}
+</DashboardLayout>
