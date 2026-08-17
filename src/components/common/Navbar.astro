@@ -63,8 +63,8 @@ const currentPath = Astro.url.pathname;
     ]}
   >
     <!-- Background Layer -->
-    <div class:list={["absolute inset-0 w-full h-full z-0", navbarClasses]}
-    ></div>
+    <div class:list={["absolute inset-0 w-full h-full z-0", navbarClasses]}>
+    </div>
 
     <!-- Content Layer -->
     <nav
@@ -104,21 +104,18 @@ const currentPath = Astro.url.pathname;
               <a href="/culture">Культура</a>
             </li>
             <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
-            {/* TODO remove the template here!!! */}
-            <template x-if="$store.auth.profile?.role === 'admin'">
-              <li
-                class:list={[
-                  "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
-                  "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
-                  "hover:after:scale-x-100",
-                  currentPath.startsWith("/paris")
-                    ? "after:scale-x-100"
-                    : "after:scale-x-0",
-                ]}
-              >
-                <a href="/paris">Париж</a>
-              </li>
-            </template>
+            <li
+              class:list={[
+                "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
+                "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
+                "hover:after:scale-x-100",
+                currentPath.startsWith("/paris")
+                  ? "after:scale-x-100"
+                  : "after:scale-x-0",
+              ]}
+            >
+              <a href="/paris">Париж</a>
+            </li>
             <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
             <li
               class:list={[
@@ -141,7 +138,7 @@ const currentPath = Astro.url.pathname;
           </ul>
         </div>
       </div>
-  
+
       <!-- Mobile Controls -->
       <div x-data="{}" class="flex items-center gap-4 lg:hidden">
         <button type="button" class="p-2">
@@ -157,7 +154,7 @@ const currentPath = Astro.url.pathname;
           <img src={burgerIcon.src} alt="Открыть меню" class="h-5 w-5" />
         </button>
       </div>
-  
+
       <!-- Right Side -->
       <div class="hidden lg:flex items-center gap-[19px]">
         <!-- TODO remove 'hidden' -->
