@@ -48,12 +48,12 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
         (categoryHref ? (
           <a
             href={categoryHref}
-            class="absolute top-0 left-0 z-[2] text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter'] hover:underline"
+            class="absolute top-0 left-0 z-[2] text-xs font-semibold uppercase tracking-[0.25em] text-accent px-4 py-4 font-['Inter'] hover:underline"
           >
             {category}
           </a>
         ) : (
-          <span class="absolute top-3 left-3 z-[2] text-xs font-semibold uppercase tracking-[0.25em] text-white bg-accent px-2 py-1 font-['Inter']">
+          <span class="absolute top-3 left-3 z-[2] text-xs font-semibold uppercase tracking-[0.25em] text-accent px-2 py-2 font-['Inter']">
             {category}
           </span>
         ))
@@ -61,7 +61,7 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
 
     <div class="absolute bottom-0 left-0 right-0 p-4 pb-5">
       <h3
-        class="m-0 text-white text-[28px] font-light font-old_standard tracking-[-0.02em] leading-[1.2]"
+        class="m-0 text-white text-[28px] font-bold font-old_standard tracking-[-0.02em] leading-[1.2]"
       >
         {title}
       </h3>
