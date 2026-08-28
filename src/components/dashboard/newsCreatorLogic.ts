@@ -19,6 +19,14 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import {
+  detectVideoProvider,
+  getDirectVideoUrl as resolveVideoDirectUrl,
+  getVideoEmbedUrl as resolveVideoEmbedUrl,
+  getVideoRenderMode as resolveVideoRenderMode,
+  normalizeVideoBlock,
+} from "@/lib/utils/video";
+import { getTweetId as resolveTweetId, normalizeTweetBlock } from "@/lib/utils/tweet";
+import {
   reindexContentBlocks,
   sortAndNormalizeContentBlocks,
   withBlockMeta,
@@ -206,6 +214,66 @@ export default function newsCreatorLogic(
     },
     syncContentBlockOrder(blocks = this.article.contentBlocks) {
       this.article.contentBlocks = reindexContentBlocks(blocks);
+    },
+    getVideoProvider(url: string, sourceType = "embed") {
+      return detectVideoProvider(url, sourceType);
+    },
+    getVideoEmbedUrl(url: string) {
+      return resolveVideoEmbedUrl(url);
+    },
+    getVideoDirectUrl(url: string) {
+      return resolveVideoDirectUrl(url);
+    },
+    getVideoRenderMode(url: string, sourceType = "embed") {
+      return resolveVideoRenderMode(url, sourceType);
+    },
+    getTweetId(url: string) {
+      return resolveTweetId(url);
+    },
+    validateVideoBlock(block: Record<string, unknown> | null, showToast = true) {
+      if (!block || block.type !== "video") {
+        return true;
+      }
+      const normalized = normalizeVideoBlock(block);
+      if (!normalized.url) {
+        if (showToast) {
+          (window as any).Alpine?.store("ui")?.showToast?.(
+            "Для видео-блока добавь файл или ссылку.",
+            "error",
+          );
+        }
+        return false;
+      }
+      if (
+        normalized.sourceType === "embed" &&
+        resolveVideoRenderMode(normalized.url, normalized.sourceType) ===
+          "unknown"
+      ) {
+        if (showToast) {
+          (window as any).Alpine?.store("ui")?.showToast?.(
+            "Нужна прямая ссылка на видеофайл или готовая ссылка для встраивания, а не обычная страница с видео.",
+            "error",
+          );
+        }
+        return false;
+      }
+      return true;
+    },
+    validateTweetBlock(block: Record<string, unknown> | null, showToast = true) {
+      if (!block || block.type !== "tweet") {
+        return true;
+      }
+      const normalized = normalizeTweetBlock(block);
+      if (!normalized.url || !resolveTweetId(normalized.url)) {
+        if (showToast) {
+          (window as any).Alpine?.store("ui")?.showToast?.(
+            "Нужна ссылка на конкретный твит вида twitter.com/user/status/123.",
+            "error",
+          );
+        }
+        return false;
+      }
+      return true;
     },
     getAvailableTags() {
       if (!this.article?.category) return [];
@@ -580,8 +648,9 @@ export default function newsCreatorLogic(
       this.isEditingCaption = false;
     },
 
-    // Image upload
-    async handleImageUpload(event: Event) {
+    // Image upload. isCover=true writes to the news cover image; pass false
+    // to write into the currently-open "image" content block instead.
+    async handleImageUpload(event: Event, isCover = true) {
       const raw = (event.target as HTMLInputElement).files?.[0];
       if (!raw) return;
 
@@ -608,11 +677,54 @@ export default function newsCreatorLogic(
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            this.article.imageUrl = downloadURL;
+            if (isCover) {
+              this.article.imageUrl = downloadURL;
+            } else if (this.editingBlock?.type === "image") {
+              this.editingBlock.url = downloadURL;
+            }
             this.uploading = false;
             (window as any).Alpine.store("ui").showToast(
               "Картинка успешно загружена!",
             );
+          });
+        },
+      );
+    },
+
+    // Video upload for the currently-open "video" content block
+    handleVideoUpload(event: Event) {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      this.uploading = true;
+      this.uploadProgress = 0;
+
+      const storageRef = ref(storage, `articles/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          this.uploadProgress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          (window as any).Alpine.store("ui").showToast(
+            `Проблема загрузки видео: ${error.message}`,
+            "error",
+          );
+          this.uploading = false;
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            if (this.editingBlock?.type === "video") {
+              this.editingBlock.sourceType = "upload";
+              this.editingBlock.url = downloadURL;
+              this.editingBlock.provider = "upload";
+            }
+            this.uploading = false;
+            (window as any).Alpine.store("ui").showToast("Видео успешно загружено!");
           });
         },
       );
@@ -639,6 +751,20 @@ export default function newsCreatorLogic(
         case "url-link":
           newBlockData = { text: "", url: "" };
           break;
+        case "image":
+          newBlockData = { url: "", caption: "" };
+          break;
+        case "video":
+          newBlockData = {
+            sourceType: "embed",
+            url: "",
+            caption: "",
+            provider: "unknown",
+          };
+          break;
+        case "tweet":
+          newBlockData = { url: "" };
+          break;
         default:
           break;
       }
@@ -658,11 +784,33 @@ export default function newsCreatorLogic(
       this.editingBlock = JSON.parse(
         JSON.stringify(this.article.contentBlocks[index]),
       );
+      if (this.editingBlock?.type === "video") {
+        this.editingBlock = normalizeVideoBlock(this.editingBlock);
+      }
     },
 
     updateBlock() {
       if (this.editingIndex !== null) {
-        this.article.contentBlocks[this.editingIndex] = this.editingBlock;
+        // Normalize into a local variable instead of reassigning
+        // this.editingBlock: the edit panel's templates read
+        // editingBlock.type/.url reactively, and reassigning it here (a
+        // valid object) immediately before cancelEdit() nulls it (right
+        // after) fires those reads twice in a row while the panel is
+        // still mounted, right as it's being torn down.
+        let blockToSave = this.editingBlock;
+        if (blockToSave?.type === "video") {
+          blockToSave = normalizeVideoBlock(blockToSave);
+          if (!this.validateVideoBlock(blockToSave)) {
+            return;
+          }
+        }
+        if (blockToSave?.type === "tweet") {
+          blockToSave = normalizeTweetBlock(blockToSave);
+          if (!this.validateTweetBlock(blockToSave)) {
+            return;
+          }
+        }
+        this.article.contentBlocks[this.editingIndex] = blockToSave;
         this.syncContentBlockOrder();
         this.cancelEdit();
       }
@@ -761,6 +909,22 @@ export default function newsCreatorLogic(
         this.article.contentBlocks,
       );
       this.article.tags = normalizeTags(this.article.tags);
+
+      const hasInvalidVideoBlock = this.article.contentBlocks.some(
+        (block: Record<string, unknown>) => !this.validateVideoBlock(block),
+      );
+      if (hasInvalidVideoBlock) {
+        this.isSaving = false;
+        return;
+      }
+
+      const hasInvalidTweetBlock = this.article.contentBlocks.some(
+        (block: Record<string, unknown>) => !this.validateTweetBlock(block),
+      );
+      if (hasInvalidTweetBlock) {
+        this.isSaving = false;
+        return;
+      }
 
       if (!this.article.category) {
         (window as any).Alpine.store("ui").showToast(

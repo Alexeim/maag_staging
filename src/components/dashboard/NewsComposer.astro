@@ -350,6 +350,197 @@ const {
                 </div>
               </template>
 
+              <template x-if="editingBlock.type === 'image'">
+                <div x-data="{ blockFileName: '' }" class="space-y-3">
+                  <label class="block text-sm font-medium">Изображение</label>
+                  <div class="flex items-center gap-3">
+                    <label
+                      :for="'block-image-upload-' + index"
+                      class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                    >
+                      <CloudUpload />
+                      Загрузить файл
+                    </label>
+                    <input
+                      :id="'block-image-upload-' + index"
+                      type="file"
+                      class="hidden"
+                      @change="handleImageUpload($event, false); blockFileName = $event.target.files[0]?.name || ''"
+                      accept="image/png, image/jpeg, image/webp"
+                    />
+                    <span
+                      x-text="blockFileName || (editingBlock.url ? 'Изображение загружено' : 'Файл не выбран')"
+                      class="text-sm text-base-content/70"></span>
+                  </div>
+                  <div x-show="uploading && editingIndex === index">
+                    <p>
+                      Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"
+                      ></span>
+                    </p>
+                    <div class="w-full bg-base-200 rounded-full h-2">
+                      <div
+                        class="bg-primary h-2 rounded-full"
+                        :style="{ width: uploadProgress + '%' }"
+                      >
+                      </div>
+                    </div>
+                  </div>
+                  <img
+                    x-show="editingBlock.url && !uploading"
+                    :src="editingBlock.url"
+                    alt="Предпросмотр блока"
+                    class="rounded-md max-h-48"
+                  />
+                  <label class="block text-sm font-medium mt-2"
+                    >Подпись к изображению</label
+                  >
+                  <input
+                    type="text"
+                    x-model="editingBlock.caption"
+                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    placeholder="Введите подпись..."
+                  />
+                </div>
+              </template>
+
+              <template x-if="editingBlock.type === 'video'">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-2">Источник видео</label>
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        class="px-3 py-2 border text-sm cursor-pointer"
+                        :class="editingBlock.sourceType === 'upload' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+                        @click="editingBlock.sourceType = 'upload'; editingBlock.provider = 'upload'"
+                      >
+                        Загрузить файл
+                      </button>
+                      <button
+                        type="button"
+                        class="px-3 py-2 border text-sm cursor-pointer"
+                        :class="editingBlock.sourceType === 'embed' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+                        @click="editingBlock.sourceType = 'embed'; editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
+                      >
+                        Ссылка / Embed
+                      </button>
+                    </div>
+                  </div>
+
+                  <div x-show="editingBlock.sourceType === 'upload'" x-data="{ videoFileName: '' }" class="space-y-3">
+                    <label class="block text-sm font-medium">Видео файл</label>
+                    <div class="flex items-center gap-3">
+                      <label
+                        :for="'block-video-upload-' + index"
+                        class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                      >
+                        <CloudUpload />
+                        Загрузить видео
+                      </label>
+                      <input
+                        :id="'block-video-upload-' + index"
+                        type="file"
+                        class="hidden"
+                        @change="handleVideoUpload($event); videoFileName = $event.target.files[0]?.name || ''"
+                        accept="video/mp4,video/webm,video/quicktime"
+                      />
+                      <span
+                        x-text="videoFileName || (editingBlock.url ? 'Видео загружено' : 'Файл не выбран')"
+                        class="text-sm text-base-content/70"
+                      ></span>
+                    </div>
+                    <div x-show="uploading && editingIndex === index">
+                      <p>
+                        Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span>
+                      </p>
+                      <div class="w-full bg-base-200 rounded-full h-2">
+                        <div
+                          class="bg-primary h-2 rounded-full"
+                          :style="{ width: uploadProgress + '%' }"
+                        ></div>
+                      </div>
+                    </div>
+                    <video
+                      x-show="editingBlock.url && !uploading"
+                      :src="editingBlock.url"
+                      controls
+                      playsinline
+                      class="rounded-md max-h-48 w-full bg-black"
+                    ></video>
+                  </div>
+
+                  <div x-show="editingBlock.sourceType === 'embed'" class="space-y-3">
+                    <label class="block text-sm font-medium">Ссылка на видео или embed URL</label>
+                    <input
+                      type="url"
+                      x-model="editingBlock.url"
+                      @input="editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="https://player.example.com/embed/123 или https://cdn.example.com/video.mp4"
+                    />
+                    <p class="text-xs text-base-content/60">
+                      Поддерживаются YouTube/Vimeo, готовые embed-ссылки и прямые ссылки на видеофайлы.
+                    </p>
+                    <p class="text-xs text-base-content/50">
+                      Обычная страница с видео не подойдёт: нужна либо прямая ссылка на файл, либо готовая ссылка для встраивания.
+                    </p>
+                    <video
+                      x-show="getVideoDirectUrl(editingBlock.url)"
+                      :src="getVideoDirectUrl(editingBlock.url)"
+                      controls
+                      playsinline
+                      class="rounded-md max-h-48 w-full bg-black"
+                    ></video>
+                    <div
+                      x-show="getVideoEmbedUrl(editingBlock.url)"
+                      class="w-full aspect-video rounded-md overflow-hidden bg-black"
+                    >
+                      <iframe
+                        :src="getVideoEmbedUrl(editingBlock.url)"
+                        class="w-full h-full border-0"
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                      ></iframe>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium mt-2">Подпись к видео</label>
+                    <input
+                      type="text"
+                      x-model="editingBlock.caption"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="Введите подпись..."
+                    />
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="editingBlock.type === 'tweet'">
+                <div class="space-y-3">
+                  <label class="block text-sm font-medium">Ссылка на твит</label>
+                  <input
+                    type="url"
+                    x-model="editingBlock.url"
+                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    placeholder="https://x.com/user/status/1234567890123456789"
+                  />
+                  <p
+                    x-show="editingBlock.url && !getTweetId(editingBlock.url)"
+                    class="text-sm text-error"
+                  >
+                    Это не похоже на ссылку на конкретный твит. Нужен вид twitter.com/user/status/123 или x.com/user/status/123.
+                  </p>
+                  <p
+                    x-show="editingBlock.url && getTweetId(editingBlock.url)"
+                    class="text-sm text-success"
+                  >
+                    Ссылка распознана, твит подставится на странице новости.
+                  </p>
+                </div>
+              </template>
+
               <template x-if="editingBlock.type === 'link'">
                 <div class="space-y-4">
                   <div>
@@ -429,6 +620,86 @@ const {
               <template x-if="block.type === 'paragraph'">
                 <div class="article-rich-text text-base" x-html="getRichTextInitialHtml(block)"></div>
               </template>
+              <template x-if="block.type === 'image'">
+                <figure class="space-y-2">
+                  <img
+                    x-show="block.url"
+                    :src="block.url"
+                    alt="Содержимое новости"
+                    class="rounded-md w-full object-cover"
+                  />
+                  <div
+                    x-show="!block.url"
+                    class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-4 py-8 text-center text-sm text-base-content/60"
+                  >
+                    Изображение ещё не загружено
+                  </div>
+                  <figcaption
+                    x-show="block.caption"
+                    class="text-center text-sm text-base-content/60 mt-2"
+                    x-text="block.caption"
+                  >
+                  </figcaption>
+                </figure>
+              </template>
+              <template x-if="block.type === 'video'">
+                <figure class="space-y-2">
+                  <video
+                    x-show="block.sourceType === 'upload' && block.url"
+                    :src="block.url"
+                    controls
+                    playsinline
+                    class="rounded-md w-full max-h-64 bg-black"
+                  ></video>
+                  <video
+                    x-show="block.sourceType === 'embed' && getVideoDirectUrl(block.url)"
+                    :src="getVideoDirectUrl(block.url)"
+                    controls
+                    playsinline
+                    class="rounded-md w-full max-h-64 bg-black"
+                  ></video>
+                  <div
+                    x-show="block.sourceType === 'embed' && getVideoEmbedUrl(block.url)"
+                    class="w-full aspect-video rounded-md overflow-hidden bg-black"
+                  >
+                    <iframe
+                      :src="getVideoEmbedUrl(block.url)"
+                      class="w-full h-full border-0"
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowfullscreen
+                    ></iframe>
+                  </div>
+                  <figcaption
+                    x-show="block.caption"
+                    class="text-center text-sm text-base-content/60 mt-2"
+                    x-text="block.caption"
+                  ></figcaption>
+                </figure>
+              </template>
+              <template x-if="block.type === 'tweet'">
+                <div>
+                  <div
+                    x-show="block.url"
+                    class="rounded-md border border-base-300 bg-base-200/40 px-4 py-3 text-sm break-all"
+                  >
+                    <span class="text-base-content/60">Твит: </span>
+                    <a
+                      :href="block.url"
+                      x-text="block.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-primary underline"
+                    ></a>
+                  </div>
+                  <div
+                    x-show="!block.url"
+                    class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-4 py-8 text-center text-sm text-base-content/60"
+                  >
+                    Ссылка на твит ещё не добавлена
+                  </div>
+                </div>
+              </template>
               <template x-if="block.type === 'link'">
                 <div class="rounded-lg border border-base-300 bg-base-200/40 p-4 space-y-2">
                   <p
@@ -468,6 +739,9 @@ const {
       <template x-if="showBlockOptions">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 border border-base-300 rounded-lg bg-base-100">
           <button @click="addBlock('paragraph')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Абзац</button>
+          <button @click="addBlock('image')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Картинка</button>
+          <button @click="addBlock('video')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Видео</button>
+          <button @click="addBlock('tweet')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Твит</button>
           <button @click="addBlock('link')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Блок-ссылка</button>
           <button @click="addBlock('url-link')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Ссылка на URL</button>
         </div>
