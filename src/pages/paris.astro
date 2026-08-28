@@ -149,10 +149,17 @@ const splitTitle = (t: string) => {
   };
 };
 
-const primaryParisTrunc = primaryParisArticle
-  ? truncateText(primaryParisArticle.title, 96)
-  : "";
-const primaryParisSplit = splitTitle(primaryParisTrunc);
+// The Paris main article title is shown in full — no truncation here.
+const primaryParisTitle = primaryParisArticle?.title ?? "";
+const primaryParisSplit = splitTitle(primaryParisTitle);
+
+// Optional rich-text subtitle, rendered under the title in the Paris main
+// article only. Gate on the plain-text twin so an "empty" Quill value
+// (e.g. "<p><br></p>") doesn't render a blank line.
+const primaryParisSubtitleHtml =
+  primaryParisArticle?.subtitle?.trim() && primaryParisArticle?.subtitleHtml
+    ? primaryParisArticle.subtitleHtml
+    : "";
 
 const twoImageArticleTrunc = twoImageArticle
   ? truncateText(twoImageArticle.title, 88)
@@ -271,26 +278,34 @@ const interviewName =
                   )}
                 </p>
 
-                <a
-                  href={primaryParisArticle.href}
-                  class="text-current no-underline hover:underline text-center"
-                >
-                  <h2 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                    {primaryParisArticle.paid ? (
-                      <>
-                        {primaryParisSplit.start && (
-                          <>{primaryParisSplit.start} </>
-                        )}
-                        <span class="whitespace-nowrap">
-                          {primaryParisSplit.last}{" "}
-                          <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
-                        </span>
-                      </>
-                    ) : (
-                      primaryParisTrunc
-                    )}
-                  </h2>
-                </a>
+                <div class="mx-auto flex w-full max-w-[850px] flex-col items-center gap-3">
+                  <a
+                    href={primaryParisArticle.href}
+                    class="text-current no-underline hover:underline text-center"
+                  >
+                    <h2 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
+                      {primaryParisArticle.paid ? (
+                        <>
+                          {primaryParisSplit.start && (
+                            <>{primaryParisSplit.start} </>
+                          )}
+                          <span class="whitespace-nowrap">
+                            {primaryParisSplit.last}{" "}
+                            <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                          </span>
+                        </>
+                      ) : (
+                        primaryParisTitle
+                      )}
+                    </h2>
+                  </a>
+                  {primaryParisSubtitleHtml && (
+                    <div
+                      class="paris-hero-subtitle text-center text-lg lg:text-xl font-old_standard font-light leading-snug text-base-content/70"
+                      set:html={primaryParisSubtitleHtml}
+                    />
+                  )}
+                </div>
                 <a
                   href={primaryParisArticle.href}
                   class="linked-image-hover block! lg:hidden! aspect-[4/5] overflow-hidden lg:aspect-auto lg:h-full lg:min-h-0 w-screen"
@@ -934,5 +949,18 @@ const interviewName =
 
   .rubric-marquee-track:hover {
     animation-play-state: paused;
+  }
+
+  /* Rich-text subtitle under the Paris main article title. */
+  .paris-hero-subtitle > :first-child {
+    margin-top: 0;
+  }
+
+  .paris-hero-subtitle > :last-child {
+    margin-bottom: 0;
+  }
+
+  .paris-hero-subtitle a {
+    text-decoration: underline;
   }
 </style>

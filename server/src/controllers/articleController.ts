@@ -17,6 +17,8 @@ export interface Article {
   title: string;
   lead?: string; // Вводка — краткое описание под заголовком
   leadHtml?: string;
+  subtitle?: string; // Подзаголовок — rendered only in the Paris page main article
+  subtitleHtml?: string;
   intro?: string; // Optional paragraph shown before the tips list
   introHtml?: string;
   cardLead?: string;
@@ -101,6 +103,8 @@ export const createArticle = async (req: Request, res: Response) => {
       title,
       lead,
       leadHtml,
+      subtitle,
+      subtitleHtml,
       intro,
       introHtml,
       cardLead,
@@ -146,6 +150,8 @@ export const createArticle = async (req: Request, res: Response) => {
       title,
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
+      subtitle: subtitle || '',
+      subtitleHtml: normalizeStoredRichTextHtml(subtitleHtml),
       intro: intro || '',
       introHtml: normalizeStoredRichTextHtml(introHtml),
       cardLead: cardLead || '',
@@ -273,6 +279,8 @@ export const updateArticle = async (req: Request, res: Response) => {
       title,
       lead,
       leadHtml,
+      subtitle,
+      subtitleHtml,
       intro,
       introHtml,
       cardLead,
@@ -320,6 +328,8 @@ export const updateArticle = async (req: Request, res: Response) => {
       title,
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
+      subtitle: subtitle || '',
+      subtitleHtml: normalizeStoredRichTextHtml(subtitleHtml),
       intro: intro || '',
       introHtml: normalizeStoredRichTextHtml(introHtml),
       cardLead: cardLead || '',

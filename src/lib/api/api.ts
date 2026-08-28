@@ -146,6 +146,8 @@ export interface ArticlePayload {
   secondImageCaption?: string;
   lead?: string;
   leadHtml?: string;
+  subtitle?: string;
+  subtitleHtml?: string;
   intro?: string;
   introHtml?: string;
   cardLead?: string;
@@ -689,6 +691,8 @@ export interface GuidePayload {
   secondImageCaption?: string;
   lead?: string;
   leadHtml?: string;
+  subtitle?: string;
+  subtitleHtml?: string;
   cardLead?: string;
   cardTitle?: string;
   category?: string;
@@ -1073,6 +1077,8 @@ export interface VisualStoryPayload {
   secondImageCaption?: string;
   lead?: string;
   leadHtml?: string;
+  subtitle?: string;
+  subtitleHtml?: string;
   cardLead?: string;
   cardTitle?: string;
   category?: string;

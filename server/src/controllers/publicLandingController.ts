@@ -141,6 +141,9 @@ const toLandingItem = (
     href: getHref(type, doc.id),
     title: data.title ?? '',
     lead: data.lead ?? '',
+    // Rich-text subtitle, rendered only in the Paris page main article.
+    subtitle: data.subtitle ?? '',
+    subtitleHtml: data.subtitleHtml ?? '',
     cardLead: data.cardLead ?? '',
     cardTitle: data.cardTitle ?? '',
     imageUrl: getImageUrl(type, data),

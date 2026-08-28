@@ -101,6 +101,8 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       title: "",
       lead: "",
       leadHtml: "",
+      subtitle: "", // Подзаголовок — показывается только в главном материале Парижа
+      subtitleHtml: "",
       cardLead: "",
       cardTitle: "",
       imageUrl: "",
@@ -583,6 +585,8 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.story.title = copy.title || "";
         this.story.lead = copy.lead || "";
         this.story.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
+        this.story.subtitle = copy.subtitle || "";
+        this.story.subtitleHtml = normalizeStoredRichTextHtml(copy.subtitleHtml);
         this.story.cardLead = copy.cardLead || "";
         this.story.cardTitle = copy.cardTitle || "";
         this.story.imageUrl = copy.imageUrl || "";
@@ -732,6 +736,8 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           title: this.story.title,
           lead: this.story.lead,
           leadHtml: normalizeStoredRichTextHtml(this.story.leadHtml),
+          subtitle: this.story.subtitle,
+          subtitleHtml: normalizeStoredRichTextHtml(this.story.subtitleHtml),
           cardLead: this.story.cardLead,
           cardTitle: this.story.cardTitle,
           imageUrl: this.story.imageUrl || undefined,

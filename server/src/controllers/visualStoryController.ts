@@ -30,6 +30,8 @@ export interface VisualStory {
   secondImageCaption?: string;
   lead?: string;
   leadHtml?: string;
+  subtitle?: string; // Подзаголовок — rendered only in the Paris page main article
+  subtitleHtml?: string;
   cardLead?: string;
   cardTitle?: string;
   category?: string;
@@ -94,6 +96,8 @@ const buildVisualStoryPayload = (body: Record<string, unknown>) => {
     secondImageCaption,
     lead,
     leadHtml,
+    subtitle,
+    subtitleHtml,
     cardLead,
     cardTitle,
     category,
@@ -118,6 +122,8 @@ const buildVisualStoryPayload = (body: Record<string, unknown>) => {
     secondImageCaption: typeof secondImageCaption === 'string' ? secondImageCaption : '',
     lead: typeof lead === 'string' ? lead : '',
     leadHtml: normalizeStoredRichTextHtml(leadHtml),
+    subtitle: typeof subtitle === 'string' ? subtitle : '',
+    subtitleHtml: normalizeStoredRichTextHtml(subtitleHtml),
     cardLead: typeof cardLead === 'string' ? cardLead : '',
     cardTitle: typeof cardTitle === 'string' ? cardTitle : '',
     category: normalizeCategory(category),

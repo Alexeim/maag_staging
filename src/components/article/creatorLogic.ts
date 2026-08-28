@@ -240,6 +240,8 @@ export default function articleCreatorLogic(initialState = {}) {
     copy.secondImageUrl = copy.secondImageUrl ?? "";
     copy.secondImageCaption = copy.secondImageCaption ?? "";
     copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
+    copy.subtitle = copy.subtitle ?? "";
+    copy.subtitleHtml = normalizeStoredRichTextHtml(copy.subtitleHtml);
     copy.cardLead = copy.cardLead ?? "";
     copy.cardTitle = copy.cardTitle ?? "";
     copy.heroOrientation = copy.heroOrientation === "image-left" || copy.heroOrientation === "image-bottom" ? copy.heroOrientation : "image-right";
@@ -290,6 +292,8 @@ export default function articleCreatorLogic(initialState = {}) {
       title: "",
       lead: "", // Вводка — краткое описание под заголовком (plain text)
       leadHtml: "", // Вводка — rich text от Quill
+      subtitle: "", // Подзаголовок — plain text, показывается только в главном материале Парижа
+      subtitleHtml: "", // Подзаголовок — rich text от Quill
       cardLead: "",
       cardTitle: "",
       articleType,
@@ -1075,6 +1079,8 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
       this.article.leadHtml = normalizeStoredRichTextHtml(this.article.leadHtml);
+      this.article.subtitle = this.article.subtitle ?? "";
+      this.article.subtitleHtml = normalizeStoredRichTextHtml(this.article.subtitleHtml);
       this.article.cardLead = this.article.cardLead ?? "";
       this.article.cardTitle = this.article.cardTitle ?? "";
       this.article.heroOrientation = this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : "image-right";
@@ -1648,6 +1654,8 @@ export default function articleCreatorLogic(initialState = {}) {
           title: this.article.title,
           lead: this.article.lead,
           leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
+          subtitle: this.article.subtitle,
+          subtitleHtml: normalizeStoredRichTextHtml(this.article.subtitleHtml),
           cardLead: this.article.cardLead,
           cardTitle: this.article.cardTitle,
           articleType: this.article.articleType || articleType || "standard",

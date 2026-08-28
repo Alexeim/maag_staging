@@ -16,6 +16,8 @@ export interface Guide {
   title: string;
   lead?: string;
   leadHtml?: string;
+  subtitle?: string; // Подзаголовок — rendered only in the Paris page main article
+  subtitleHtml?: string;
   cardLead?: string;
   cardTitle?: string;
   authorId: string;
@@ -82,6 +84,8 @@ export const createGuide = async (req: Request, res: Response) => {
       title,
       lead,
       leadHtml,
+      subtitle,
+      subtitleHtml,
       cardLead,
       cardTitle,
       content,
@@ -121,6 +125,8 @@ export const createGuide = async (req: Request, res: Response) => {
       title,
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
+      subtitle: subtitle || '',
+      subtitleHtml: normalizeStoredRichTextHtml(subtitleHtml),
       cardLead: cardLead || '',
       cardTitle: cardTitle || '',
       authorId,
@@ -241,6 +247,8 @@ export const updateGuide = async (req: Request, res: Response) => {
       title,
       lead,
       leadHtml,
+      subtitle,
+      subtitleHtml,
       cardLead,
       cardTitle,
       content,
@@ -282,6 +290,8 @@ export const updateGuide = async (req: Request, res: Response) => {
       title,
       lead: lead || '',
       leadHtml: normalizeStoredRichTextHtml(leadHtml),
+      subtitle: subtitle || '',
+      subtitleHtml: normalizeStoredRichTextHtml(subtitleHtml),
       cardLead: cardLead || '',
       cardTitle: cardTitle || '',
       authorId,

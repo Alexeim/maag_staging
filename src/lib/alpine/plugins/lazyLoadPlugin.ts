@@ -167,6 +167,8 @@ export default function(Alpine: Alpine) {
       article: {
         title: '',
         lead: '',
+        subtitle: '',
+        subtitleHtml: '',
         cardLead: '',
         cardTitle: '',
         articleType: 'standard',
@@ -657,6 +659,8 @@ export default function(Alpine: Alpine) {
         title: '',
         lead: '',
         leadHtml: '',
+        subtitle: '',
+        subtitleHtml: '',
         cardLead: '',
         cardTitle: '',
         imageUrl: '',

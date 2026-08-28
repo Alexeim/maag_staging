@@ -65,6 +65,8 @@ const normalizeLoadedArticle = (data: any) => {
   copy.heroOrientation = copy.heroOrientation === "image-left" || copy.heroOrientation === "image-bottom" ? copy.heroOrientation : "image-right";
   copy.lead = copy.lead ?? "";
   copy.leadHtml = normalizeStoredRichTextHtml(copy.leadHtml);
+  copy.subtitle = copy.subtitle ?? "";
+  copy.subtitleHtml = normalizeStoredRichTextHtml(copy.subtitleHtml);
   copy.intro = copy.intro ?? "";
   copy.introHtml = normalizeStoredRichTextHtml(copy.introHtml);
   copy.cardLead = copy.cardLead ?? "";
@@ -121,6 +123,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       title: "",
       lead: "",
       leadHtml: "",
+      subtitle: "", // Подзаголовок — показывается только в главном материале Парижа
+      subtitleHtml: "",
       intro: "",
       introHtml: "",
       cardLead: "",
@@ -843,6 +847,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           title: this.article.title,
           lead: this.article.lead,
           leadHtml: normalizeStoredRichTextHtml(this.article.leadHtml),
+          subtitle: this.article.subtitle,
+          subtitleHtml: normalizeStoredRichTextHtml(this.article.subtitleHtml),
           intro: this.article.intro,
           introHtml: normalizeStoredRichTextHtml(this.article.introHtml),
           cardLead: this.article.cardLead,

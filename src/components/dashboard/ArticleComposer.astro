@@ -93,6 +93,24 @@ const {
 
     <div class="mt-4">
       <label class="block text-sm font-medium text-base-content mb-2"
+        >Подзаголовок</label
+      >
+      <template x-if="!isLazyLoading">
+        <div
+          class="rich-text-editor rich-text-editor--compact"
+          x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml({ html: article.subtitleHtml, text: article.subtitle }), placeholder: 'Подзаголовок под заголовком...' })"
+          @rich-text-change="article.subtitleHtml = $event.detail.html; article.subtitle = $event.detail.text"
+        >
+          <div x-ref="editor"></div>
+        </div>
+      </template>
+      <p class="mt-1 text-xs text-base-content/60">
+        Выводится только в главном материале страницы «Париж».
+      </p>
+    </div>
+
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-base-content mb-2"
         >Заголовок для карточки</label
       >
       <input
