@@ -62,12 +62,12 @@ const columnRichTextHtml = getInitialRichTextHtml({
   ) : column.type === "quote" ? (
     <div class="w-full max-w-[420px] flex flex-col items-center">
       <QuoteIcon class="w-8 h-8" />
-      <blockquote class="mt-4 text-base lg:text-lg text-base-content/80 font-article-body italic whitespace-pre-line">
+      <blockquote class="mt-4 text-base lg:text-lg text-base-content/80 font-old_standard italic whitespace-pre-line">
         {column.content}
       </blockquote>
       <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
       {column.quoteAuthor && (
-        <p class="w-full mt-4 font-['Inter'] text-sm font-light capitalize tracking-[0.22em] text-base-content text-left">
+        <p class="w-full mt-4 font-inter text-xs font-light capitalize text-base-content text-left">
           {column.quoteAuthor}
         </p>
       )}

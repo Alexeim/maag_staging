@@ -2,6 +2,7 @@
 import logo from "../../assets/logo/logo.svg";
 import { Search, X } from "@lucide/astro";
 import { Image } from "astro:assets";
+import InstagramLogo from "@/assets/social/new/instagram-svgrepo-com.svg";
 import burgerIcon from "../../assets/icons/burger-mobile.svg";
 import Button from "./Button.astro";
 
@@ -167,21 +168,7 @@ const currentPath = Astro.url.pathname;
           class="hover:text-gray-500 transition-colors"
           aria-label="Instagram"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
-            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
-          </svg>
+          <InstagramLogo class="w-10 h-10 lg:w-8 lg:h-8" />
         </a>
         <div class="flex items-center gap-4" x-data="$lazy('navbar')">
           <!-- Loading State -->
@@ -192,7 +179,7 @@ const currentPath = Astro.url.pathname;
           <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
             <button
               @click.prevent="$store.auth.openAuthModal()"
-              class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200 cursor-pointer"
+              class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
             >
               Войти
             </button>
@@ -212,7 +199,7 @@ const currentPath = Astro.url.pathname;
               </a>
               <button
                 @click.prevent="handleSignOut()"
-                class="inline-flex w-fit items-center border border-base-content px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] font-['Inter'] text-base-content no-underline transition-colors hover:bg-base-content hover:text-base-200 cursor-pointer"
+                class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
               >
                 Выйти
               </button>

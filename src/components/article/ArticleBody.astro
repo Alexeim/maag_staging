@@ -241,13 +241,13 @@ if (currentProseGroup.length > 0) {
                   }
                   case "h2":
                     return (
-                      <h2 class="text-2xl font-bold font-old_standard italic">
+                      <h2 class="text-[26px] font-bold font-old_standard mb-[18px]">
                         {block.text}
                       </h2>
                     );
                   case "h3":
                     return (
-                      <h3 class="text-4xl font-bold font-old_standard italic">
+                      <h3 class="text-[28px] font-bold font-old_standard mb-[18px]">
                         {block.text}
                       </h3>
                     );
@@ -255,12 +255,12 @@ if (currentProseGroup.length > 0) {
                     return (
                       <div class="p-2 flex flex-col items-center justify-center gap-2">
                         <QuoteIcon class="w-8 h-8" />
-                        <blockquote class="text-base lg:text-3xl italic font-article-body pl-4 my-4">
+                        <blockquote class="text-base lg:text-3xl italic font-old_standard pl-4 my-4">
                           {block.text}
                         </blockquote>
                         <QuoteIcon class="w-8 h-8 rotate-180" />
                         {block.quoteAuthor && (
-                          <p class="w-full mt-4 font-['Inter'] text-sm font-semibold capitalize tracking-[0.22em] text-base-content text-left">
+                          <p class="w-full mt-4 font-inter text-sm font-light capitalize text-base-content text-left">
                             {block.quoteAuthor}
                           </p>
                         )}

@@ -100,10 +100,10 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
                   <img
                     src={author.avatar}
                     alt={authorName}
-                    class="h-28 w-28 lg:h-44 lg:w-44 rounded-full object-cover"
+                    class="w-full aspect-square rounded-full object-cover"
                   />
                 ) : (
-                  <div class="flex h-28 w-28 lg:h-44 lg:w-44 items-center justify-center rounded-full bg-maag-beige">
+                  <div class="flex w-full aspect-square items-center justify-center rounded-full bg-maag-beige">
                     <span class="font-old_standard text-5xl lg:text-6xl text-maag-green">
                       {authorInitials}
                     </span>
@@ -115,16 +115,16 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
                   author.socialLinks?.facebook ||
                   author.socialLinks?.telegram ||
                   author.socialLinks?.site) && (
-                  <div class="flex flex-wrap gap-2">
+                  <div class="flex gap-4 mt-4 justify-center">
                     {author.socialLinks?.instagram && (
                       <a
                         href={author.socialLinks.instagram}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="Instagram"
-                        class="flex h-7 w-7 items-center justify-center rounded-full bg-black text-white transition-colors hover:bg-maag-green"
+                        class="hover:text-gray-500 transition-colors"
                       >
-                        <InstagramLogo class="w-10 h-10" />
+                        <InstagramLogo class="w-10 h-10 lg:w-8 lg:h-8" />
                       </a>
                     )}
                     {author.socialLinks?.linkedin && (
@@ -133,9 +133,9 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="LinkedIn"
-                        class="flex h-7 w-7 items-center justify-center rounded-full bg-black text-white transition-colors hover:bg-maag-green"
+                        class="hover:text-gray-500 transition-colors"
                       >
-                        <LinkedInLogo class="w-10 h-10" />
+                        <LinkedInLogo class="w-10 h-10 lg:w-8 lg:h-8" />
                       </a>
                     )}
                     {author.socialLinks?.facebook && (
@@ -144,9 +144,9 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="Facebook"
-                        class="flex h-7 w-7 items-center justify-center rounded-full bg-black text-white transition-colors hover:bg-maag-green"
+                        class="hover:text-gray-500 transition-colors"
                       >
-                        <FacebookLogo class="w-10 h-10" />
+                        <FacebookLogo class="w-10 h-10 lg:w-8 lg:h-8" />
                       </a>
                     )}
                     {author.socialLinks?.telegram && (
@@ -155,9 +155,9 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="Telegram"
-                        class="flex h-7 w-7 items-center justify-center rounded-full bg-black text-white transition-colors hover:bg-maag-green"
+                        class="hover:text-gray-500 transition-colors"
                       >
-                        <TelegramLogo class="w-10 h-10" />
+                        <TelegramLogo class="w-10 h-10 lg:w-8 lg:h-8" />
                       </a>
                     )}
                     {author.socialLinks?.site && (
@@ -166,16 +166,16 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="Сайт"
-                        class="flex h-7 w-7 items-center justify-center rounded-full bg-black text-white transition-colors hover:bg-maag-green"
+                        class="hover:text-gray-500 transition-colors"
                       >
-                        <Globe class="h-3.5 w-3.5" />
+                        <Globe class="h-10 w-10 lg:h-8 lg:w-8" />
                       </a>
                     )}
                   </div>
                 )}
 
                 {author.bio && (
-                  <p class="font-inter text-xs italic leading-relaxed text-base-content/70">
+                  <p class="font-inter text-sm leading-relaxed text-base-content/70">
                     {author.bio}
                   </p>
                 )}

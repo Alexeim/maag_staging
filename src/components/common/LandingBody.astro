@@ -315,9 +315,9 @@ const splitTitle = (t: string) => {
       class="relative z-10 order-1 lg:order-none lg:col-span-3 lg:row-span-3 px-0 lg:pl-4 lg:border-l lg:border-base-content/15 mt-6 lg:mt-0"
     >
       <div id="netlenka-container" class="flex flex-col">
-        <div class="flex flex-col gap-1 items-center justify-center mb-4">
+        <div class="flex flex-col gap-1 items-center justify-center mb-6">
           <NetlenkaLogo />
-          <p class="font-old_standard italic text-lg">Выбор Maag</p>
+          <p class="font-old_standard italic text-[28px]">Выбор Maag</p>
         </div>
         {
           maagChoiceItems.length > 0 ? (
@@ -404,121 +404,129 @@ const splitTitle = (t: string) => {
     </div>
     <div class="order-4 lg:order-none lg:col-span-9 flex flex-col">
       <div class="pl-0 pr-0">
-        <h2 class="text-lg font-semibold mb-6 uppercase tracking-[0.3em] font-old_standard">
+        <h2
+          class="text-lg font-semibold mb-6 uppercase tracking-[0.3em] font-old_standard"
+        >
           {PARIS_CATEGORY_LABEL}
         </h2>
 
         <div class="w-full flex flex-col gap-8">
-          <article class="grid overflow-hidden bg-white lg:min-h-[21rem] lg:grid-cols-[minmax(16rem,0.95fr)_minmax(0,1.45fr)]">
-            {parisHero ? (
-              <>
-                <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:order-1 lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
-                  <p class="m-0">
-                    {getPrimaryTagHref(parisHero) ? (
-                      <a
-                        href={getPrimaryTagHref(parisHero)}
-                        class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
-                      >
-                        {getPrimaryTag(parisHero)}
-                      </a>
-                    ) : (
-                      <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                        {getPrimaryTag(parisHero)}
-                      </span>
+          <article
+            class="grid overflow-hidden bg-white lg:min-h-[21rem] lg:grid-cols-[minmax(16rem,0.95fr)_minmax(0,1.45fr)]"
+          >
+            {
+              parisHero ? (
+                <>
+                  <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:order-1 lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                    <p class="m-0">
+                      {getPrimaryTagHref(parisHero) ? (
+                        <a
+                          href={getPrimaryTagHref(parisHero)}
+                          class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                        >
+                          {getPrimaryTag(parisHero)}
+                        </a>
+                      ) : (
+                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                          {getPrimaryTag(parisHero)}
+                        </span>
+                      )}
+                    </p>
+                    <a
+                      href={parisHero.href}
+                      class="text-current no-underline hover:underline"
+                    >
+                      <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
+                        {parisHero.paid ? (
+                          <>
+                            {splitTitle(parisHero.title).start && (
+                              <>{splitTitle(parisHero.title).start} </>
+                            )}
+                            <span class="whitespace-nowrap">
+                              {splitTitle(parisHero.title).last}{" "}
+                              <MaagLogoPaid class="w-5 h-5 inline-block align-baseline" />
+                            </span>
+                          </>
+                        ) : (
+                          parisHero.title
+                        )}
+                      </h4>
+                    </a>
+                    {getCardLead(parisHero) && (
+                      <p class="text-base lg:text-sm text-base-content font-inter font-light">
+                        {getCardLead(parisHero)}
+                      </p>
                     )}
-                  </p>
+                  </div>
                   <a
                     href={parisHero.href}
-                    class="text-current no-underline hover:underline"
+                    class="linked-image-hover aspect-[3/2] lg:order-2"
+                    aria-label={parisHero.title}
                   >
-                    <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
-                      {parisHero.paid ? (
-                        <>
-                          {splitTitle(parisHero.title).start && (
-                            <>{splitTitle(parisHero.title).start} </>
-                          )}
-                          <span class="whitespace-nowrap">
-                            {splitTitle(parisHero.title).last}{" "}
-                            <MaagLogoPaid class="w-5 h-5 inline-block align-baseline" />
-                          </span>
-                        </>
-                      ) : (
-                        parisHero.title
-                      )}
-                    </h4>
+                    <LazyImage
+                      src={parisHero.imageUrl ?? picture1}
+                      alt={parisHero.title}
+                      class="linked-image-hover__media block h-full w-full object-cover"
+                      transitionName={getTransitionName(parisHero)}
+                    />
                   </a>
-                  {getCardLead(parisHero) && (
-                    <p class="text-base lg:text-sm text-base-content font-inter font-light">
-                      {getCardLead(parisHero)}
+                </>
+              ) : (
+                <>
+                  <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:order-1 lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                    <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">
+                      {PARIS_CATEGORY_LABEL}
                     </p>
-                  )}
-                </div>
-                <a
-                  href={parisHero.href}
-                  class="linked-image-hover aspect-[3/2] lg:order-2"
-                  aria-label={parisHero.title}
-                >
-                  <LazyImage
-                    src={parisHero.imageUrl ?? picture1}
-                    alt={parisHero.title}
-                    class="linked-image-hover__media block h-full w-full object-cover"
-                    transitionName={getTransitionName(parisHero)}
-                  />
-                </a>
-              </>
-            ) : (
-              <>
-                <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:order-1 lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
-                  <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">
-                    {PARIS_CATEGORY_LABEL}
-                  </p>
-                  <h4 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
-                    Нет статей в категории
-                  </h4>
-                </div>
-                <div class="aspect-[3/2] overflow-hidden lg:order-2">
-                  <Image
-                    src={picture1}
-                    alt="Paris image"
-                    class="block h-full w-full object-cover"
-                    loading="eager"
-                  />
-                </div>
-              </>
-            )}
+                    <h4 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
+                      Нет статей в категории
+                    </h4>
+                  </div>
+                  <div class="aspect-[3/2] overflow-hidden lg:order-2">
+                    <Image
+                      src={picture1}
+                      alt="Paris image"
+                      class="block h-full w-full object-cover"
+                      loading="eager"
+                    />
+                  </div>
+                </>
+              )
+            }
           </article>
 
-          {parisCardItems.length > 0 ? (
-            <div
-              id="paris-articles-box-1"
-              class="grid gap-4 sm:grid-cols-2 sm:items-stretch py-8"
-            >
-              {parisCardItems.slice(0, 2).map((item) => (
-                <ArticleCard
-                  key={item.id}
-                  isNetlenka={false}
-                  title={getCardTitle(item)}
-                  category={getPrimaryTag(item)}
-                  categoryHref={getPrimaryTagHref(item)}
-                  date={formatArticleDate(item.createdAt)}
-                  hideDate={true}
-                  transitionName={getTransitionName(item)}
-                  imageUrl={item.imageUrl}
-                  href={item.href}
-                  paid={item.paid}
-                />
-              ))}
-            </div>
-          ) : (
-            <div
-              id="paris-articles-box-empty"
-              class="w-full py-4 px-0 min-h-[100px]"
-            >
-              <p class="text-sm text-base-content/70">
-                Пока нет дополнительных материалов в разделе «Париж».
-              </p>
-            </div>
-          )}
+          {
+            parisCardItems.length > 0 ? (
+              <div
+                id="paris-articles-box-1"
+                class="grid gap-4 sm:grid-cols-2 sm:items-stretch py-8"
+              >
+                {parisCardItems.slice(0, 2).map((item) => (
+                  <ArticleCard
+                    key={item.id}
+                    isNetlenka={false}
+                    title={getCardTitle(item)}
+                    category={getPrimaryTag(item)}
+                    categoryHref={getPrimaryTagHref(item)}
+                    date={formatArticleDate(item.createdAt)}
+                    hideDate={true}
+                    transitionName={getTransitionName(item)}
+                    imageUrl={item.imageUrl}
+                    href={item.href}
+                    paid={item.paid}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div
+                id="paris-articles-box-empty"
+                class="w-full py-4 px-0 min-h-[100px]"
+              >
+                <p class="text-sm text-base-content/70">
+                  Пока нет дополнительных материалов в разделе «Париж».
+                </p>
+              </div>
+            )
+          }
         </div>
       </div>
     </div>

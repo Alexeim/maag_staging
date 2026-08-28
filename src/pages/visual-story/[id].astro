@@ -661,7 +661,9 @@ const articleStructuredData = storyData
                       <ArticleAuthor
                         name={authorName}
                         avatarUrl={storyData?.author?.avatar}
-                        authorId={storyData?.author ? storyData?.authorId : undefined}
+                        authorId={
+                          storyData?.author ? storyData?.authorId : undefined
+                        }
                       />
                     </div>
                   )}
@@ -754,7 +756,7 @@ const articleStructuredData = storyData
             id="prev-button"
             type="button"
             aria-label="Предыдущий слайд"
-            class="border border-base-content text-base-content flex items-center justify-center"
+            class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
           >
             <MoveLeft class="w-2 h-2" />
           </button>
@@ -762,7 +764,7 @@ const articleStructuredData = storyData
             id="next-button"
             type="button"
             aria-label="Следующий слайд"
-            class="border border-base-content text-base-content flex items-center justify-center"
+            class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
           >
             <MoveRight class="w-2 h-2" />
           </button>

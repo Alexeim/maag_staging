@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import { X } from "@lucide/astro";
+import InstagramLogo from "@/assets/social/new/instagram-svgrepo-com.svg";
 
 import Header from "../components/common/Header.astro";
 import Footer from "../components/common/Footer.astro";
@@ -221,7 +222,7 @@ const allStructuredData = [
         </template>
         <!-- Logged In State -->
         <template x-if="!$store.auth.isLoading && $store.auth.isLoggedIn">
-          <div class="flex flex-col items-center gap-4 w-full">
+          <div class="flex flex-col items-center gap-7 w-full">
             <a
               href="/profile"
               class="flex items-center justify-center w-12 h-12 bg-primary text-primary-content rounded-full font-bold text-xl hover:drop-shadow-lg transition-shadow"
@@ -230,29 +231,19 @@ const allStructuredData = [
             </a>
             <button
               @click.prevent="handleSignOut(); $store.navbar.close()"
-              class="bg-transparent text-base-content/70 hover:text-base-content text-center font-oswald text-[14px] w-full"
+              class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
               >Выйти</button
             >
           </div>
         </template>
 
         <div class="flex items-center justify-center gap-5">
-          <a href="https://www.instagram.com/stories/maag_france/">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
-            </svg>
+          <a
+            href="https://www.instagram.com/stories/maag_france/"
+            class="hover:text-gray-500 transition-colors"
+            aria-label="Instagram"
+          >
+            <InstagramLogo class="w-10 h-10 lg:w-8 lg:h-8" />
           </a>
         </div>
       </div>
