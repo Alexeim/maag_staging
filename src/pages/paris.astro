@@ -375,18 +375,20 @@ const interviewName =
               записная книжка
             </p>
 
-            <div class="hidden gap-4 lg:grid lg:grid-cols-4 lg:gap-6">
+            <div class="hidden gap-4 lg:flex lg:flex-wrap lg:gap-6">
               {editorialSidebarItems.map((item) => (
-                <ZapisnayaKnijkaCard
-                  title={getCardTitle(item)}
-                  category={getPrimaryTag(item)}
-                  categoryHref={getPrimaryTagHref(item)}
-                  imageUrl={item.imageUrl}
-                  href={item.href}
-                  transitionName={getTransitionName(item)}
-                  hideDate={true}
-                  lead={getCardLead(item)}
-                />
+                <div class="w-[320px]">
+                  <ZapisnayaKnijkaCard
+                    title={getCardTitle(item)}
+                    category={getPrimaryTag(item)}
+                    categoryHref={getPrimaryTagHref(item)}
+                    imageUrl={item.imageUrl}
+                    href={item.href}
+                    transitionName={getTransitionName(item)}
+                    hideDate={true}
+                    lead={getCardLead(item)}
+                  />
+                </div>
               ))}
             </div>
 
