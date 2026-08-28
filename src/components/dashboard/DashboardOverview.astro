@@ -14,7 +14,8 @@ let counts = {
   byBucket: { culture: 0, paris: 0, events: 0, none: 0 },
   byStatus: { published: 0, draft: 0 },
 };
-let materials: Awaited<ReturnType<typeof dashboardApi.overview>>["materials"] = [];
+let materials: Awaited<ReturnType<typeof dashboardApi.overview>>["materials"] =
+  [];
 let loadError = false;
 
 try {
@@ -42,10 +43,26 @@ const categorySegments: Array<{ key: string; label: string }> = [
 
 const statCards: Array<{ label: string; value: number; click: string }> = [
   { label: "Всего", value: counts.total, click: "setCategory('all')" },
-  { label: BUCKETS.culture.label, value: counts.byBucket.culture, click: "setCategory('culture')" },
-  { label: BUCKETS.paris.label, value: counts.byBucket.paris, click: "setCategory('paris')" },
-  { label: BUCKETS.events.label, value: counts.byBucket.events, click: "setCategory('events')" },
-  { label: BUCKETS.none.label, value: counts.byBucket.none, click: "setCategory('none')" },
+  {
+    label: BUCKETS.culture.label,
+    value: counts.byBucket.culture,
+    click: "setCategory('culture')",
+  },
+  {
+    label: BUCKETS.paris.label,
+    value: counts.byBucket.paris,
+    click: "setCategory('paris')",
+  },
+  {
+    label: BUCKETS.events.label,
+    value: counts.byBucket.events,
+    click: "setCategory('events')",
+  },
+  {
+    label: BUCKETS.none.label,
+    value: counts.byBucket.none,
+    click: "setCategory('none')",
+  },
   { label: "Черновики", value: counts.byStatus.draft, click: "setDraftOnly()" },
 ];
 ---
@@ -76,89 +93,119 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
               @click={card.click}
               class="rounded-xl border border-base-300 bg-base-100 p-3 text-left transition hover:border-primary hover:shadow-sm"
             >
-              <div class="text-2xl font-semibold leading-none">{card.value}</div>
-              <div class="mt-1.5 text-xs text-base-content/60">{card.label}</div>
+              <div class="text-2xl font-semibold leading-none">
+                {card.value}
+              </div>
+              <div class="mt-1.5 text-xs text-base-content/60">
+                {card.label}
+              </div>
             </button>
           ))
         }
       </div>
 
       {/* --- filter bar --- */}
-      <div class="mb-6 space-y-3 rounded-xl border border-base-300 bg-base-100 p-4">
-        <div class="flex flex-wrap gap-1">
-          {
-            categorySegments.map((seg) => (
-              <button
-                type="button"
-                @click={`setCategory('${seg.key}')`}
-                class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
-                x-bind:class={`category === '${seg.key}' ? 'bg-primary text-primary-content' : 'text-base-content/70 hover:bg-base-200'`}
-              >
-                {seg.label}
-              </button>
-            ))
-          }
-        </div>
+      <div class="mb-6 space-y-3">
+        <fieldset class="rounded-xl border border-base-300 bg-base-100 p-4">
+          <legend
+            class="px-1.5 bg-base-100 rounded-md border border-base-300 text-[11px] font-semibold uppercase tracking-wider text-base-content/45"
+          >
+            Категория
+          </legend>
+          <div class="flex flex-wrap gap-1">
+            {
+              categorySegments.map((seg) => (
+                <button
+                  type="button"
+                  @click={`setCategory('${seg.key}')`}
+                  class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer"
+                  x-bind:class={`category === '${seg.key}' ? 'bg-primary text-primary-content' : 'text-base-content/70 hover:bg-base-200'`}
+                >
+                  {seg.label}
+                </button>
+              ))
+            }
+          </div>
+        </fieldset>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <select
-            x-model="status"
-            @change="syncFilters()"
-            class="select select-bordered select-sm bg-base-100"
+        <fieldset class="rounded-xl border border-base-300 bg-base-100 p-4">
+          <legend
+            class="px-1.5 bg-base-100 rounded-md border border-base-300 text-[11px] font-semibold uppercase tracking-wider text-base-content/45"
           >
-            <option value="all">Все статусы</option>
-            <option value="published">Опубликовано</option>
-            <option value="draft">Черновик</option>
-          </select>
-          <select
-            x-model="sort"
-            @change="syncFilters()"
-            class="select select-bordered select-sm bg-base-100"
-          >
-            <option value="updated">Сначала обновлённые</option>
-            <option value="created">Сначала новые</option>
-            <option value="title">По алфавиту</option>
-          </select>
-          <label class="flex items-center gap-1.5 text-sm text-base-content/70">
-            <input
-              type="checkbox"
-              x-model="hotOnly"
+            Статус, сортировка, поиск
+          </legend>
+          <div class="flex flex-wrap items-center gap-2">
+            <select
+              x-model="status"
               @change="syncFilters()"
-              class="checkbox checkbox-sm"
+              class="select select-bordered select-sm bg-base-100"
+            >
+              <option value="all">Все статусы</option>
+              <option value="published">Опубликовано</option>
+              <option value="draft">Черновик</option>
+            </select>
+            <select
+              x-model="sort"
+              @change="syncFilters()"
+              class="select select-bordered select-sm bg-base-100"
+            >
+              <option value="updated">Сначала обновлённые</option>
+              <option value="created">Сначала новые</option>
+              <option value="title">По алфавиту</option>
+            </select>
+            <label
+              class="flex items-center gap-1.5 text-sm text-base-content/70"
+            >
+              <input
+                type="checkbox"
+                x-model="hotOnly"
+                @change="syncFilters()"
+                class="checkbox checkbox-sm"
+              />
+              Самое читаемое
+            </label>
+            <input
+              type="search"
+              x-model="query"
+              @input.debounce.400ms="syncFilters()"
+              placeholder="Поиск по заголовку…"
+              class="input input-bordered input-sm w-full bg-base-100 sm:w-64"
             />
-            Самое читаемое
-          </label>
-          <input
-            type="search"
-            x-model="query"
-            @input.debounce.400ms="syncFilters()"
-            placeholder="Поиск по заголовку…"
-            class="input input-bordered input-sm w-full bg-base-100 sm:w-64"
-          />
-          <button
-            type="button"
-            x-show="hasSecondaryFilters()"
-            @click="clearFilters()"
-            class="text-xs text-base-content/50 hover:text-error"
-          >
-            сбросить
-          </button>
-        </div>
+            <button
+              type="button"
+              x-show="hasSecondaryFilters()"
+              @click="clearFilters()"
+              class="ml-auto shrink-0 cursor-pointer rounded-md px-2 py-1 text-xs text-base-content/50 transition-colors hover:bg-base-200 hover:text-error"
+            >
+              Сбросить фильтры
+            </button>
+          </div>
+        </fieldset>
 
-        <div class="flex flex-wrap gap-1.5">
-          {
-            MATERIAL_TYPE_ORDER.map((type) => (
-              <button
-                type="button"
-                @click={`toggleType('${type}')`}
-                class="rounded-full border px-2.5 py-1 text-xs font-medium transition-colors"
-                x-bind:class={`isTypeActive('${type}') ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 text-base-content/60 hover:border-base-content/40'`}
-              >
-                {MATERIAL_TYPES[type].label}
-              </button>
-            ))
-          }
-        </div>
+        <fieldset class="rounded-xl border border-base-300 bg-base-100 p-4">
+          <legend
+            class="px-1.5 bg-base-100 rounded-md border border-base-300 text-[11px] font-semibold uppercase tracking-wider text-base-content/45"
+          >
+            Тип материала
+          </legend>
+          <p class="mb-2 text-xs text-base-content/45">
+            Можно выбрать один или несколько — они складываются.
+          </p>
+          <div class="flex flex-wrap gap-1.5">
+            {
+              MATERIAL_TYPE_ORDER.map((type) => (
+                <button
+                  type="button"
+                  @click={`toggleType('${type}')`}
+                  class="rounded-full border px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer"
+                  x-bind:class={`isTypeActive('${type}') ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 text-base-content/60 hover:border-base-content/40'`}
+                >
+                  {MATERIAL_TYPES[type].label}
+                </button>
+              ))
+            }
+          </div>
+        </fieldset>
       </div>
 
       {/* --- list area --- */}
@@ -209,7 +256,8 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
                       @click={`setCategory('${bucket}')`}
                       class="text-xs text-base-content/50 hover:text-primary"
                     >
-                      ещё <span x-text={`${sec}.total - ${sec}.rows.length`} /> →
+                      ещё <span x-text={`${sec}.total - ${sec}.rows.length`} />{" "}
+                      →
                     </button>
                   </div>
                 </section>
@@ -228,7 +276,9 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
               class="font-semibold text-base-content"
               x-text="filteredRows().length"></span>
           </p>
-          <ul class="divide-y divide-base-300 rounded-xl border border-base-300 bg-base-100">
+          <ul
+            class="divide-y divide-base-300 rounded-xl border border-base-300 bg-base-100"
+          >
             <template x-for="row in flatRows()" x-bind:key="row.id">
               <MaterialRowTemplate />
             </template>
