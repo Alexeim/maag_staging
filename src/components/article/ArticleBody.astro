@@ -218,11 +218,12 @@ if (currentProseGroup.length > 0) {
       if (group.type === "prose-group" && group.content) {
         return (
           <div class={proseRailClass}>
-            <article class="max-w-full space-y-12">
+            <article class="max-w-full space-y-8">
               {group.content.map((block) => {
                 switch (block.type) {
                   case "first-paragraph": {
                     const html = getInitialRichTextHtml(block);
+                    if (!html) return null;
                     return (
                       <div
                         class="article-rich-text article-rich-text--dropcap text-base font-article-body text-justify"
@@ -232,6 +233,7 @@ if (currentProseGroup.length > 0) {
                   }
                   case "paragraph": {
                     const html = getInitialRichTextHtml(block);
+                    if (!html) return null;
                     return (
                       <div
                         class="article-rich-text text-base font-article-body text-justify"
@@ -260,7 +262,7 @@ if (currentProseGroup.length > 0) {
                         </blockquote>
                         <QuoteIcon class="w-8 h-8 rotate-180" />
                         {block.quoteAuthor && (
-                          <p class="w-full mt-4 font-inter text-sm font-light capitalize text-base-content text-left">
+                          <p class="w-full mt-4 font-inter text-sm font-light capitalize text-base-content/60 text-left">
                             {block.quoteAuthor}
                           </p>
                         )}
