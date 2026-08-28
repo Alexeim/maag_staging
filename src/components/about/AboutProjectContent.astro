@@ -1,218 +1,183 @@
 ---
 import { Image } from "astro:assets";
 
-import heroImage from "../../assets/images/culture.jpg";
+import maagArtwork from "../../aboutUs/about.png";
+import mariaSidelnikovaImage from "../../assets/team/MS.png";
 import alexeyMakarovImage from "../../assets/team/AM.jpeg";
 import dmitryMakarovImage from "../../assets/team/dm.jpg";
-import mariaSidelnikovaImage from "../../assets/team/MS.jpeg";
-
-const createMockAvatar = (
-  label: string,
-  startColor: string,
-  endColor: string,
-) =>
-  `data:image/svg+xml;utf8,${encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="${label}">
-      <defs>
-        <linearGradient id="avatarGradient" x1="0%" x2="100%" y1="0%" y2="100%">
-          <stop offset="0%" stop-color="${startColor}" />
-          <stop offset="100%" stop-color="${endColor}" />
-        </linearGradient>
-      </defs>
-      <rect width="240" height="240" rx="120" fill="url(#avatarGradient)" />
-      <circle cx="120" cy="92" r="40" fill="rgba(255,255,255,0.88)" />
-      <path d="M52 196c14-36 40-54 68-54s54 18 68 54" fill="rgba(255,255,255,0.88)" />
-      <text
-        x="120"
-        y="222"
-        text-anchor="middle"
-        font-family="Inter, Arial, sans-serif"
-        font-size="24"
-        letter-spacing="6"
-        fill="rgba(255,255,255,0.95)"
-      >
-        ${label}
-      </text>
-    </svg>
-  `)}`;
 
 const teamMembers = [
   {
     role: "Редакция",
-    title: "Мария Сидельникова",
-    avatar: mariaSidelnikovaImage.src,
+    name: "Мария Сидельникова",
+    photo: mariaSidelnikovaImage,
   },
   {
     role: "CEO",
-    title: "Алексей Макаров",
-    avatar: alexeyMakarovImage.src,
+    name: "Алексей Макаров",
+    photo: alexeyMakarovImage,
   },
   {
     role: "CTO",
-    title: "Дмитрий Макаров",
-    avatar: dmitryMakarovImage.src,
+    name: "Дмитрий Макаров",
+    photo: dmitryMakarovImage,
   },
 ];
+
+const sectionLabel =
+  "font-old_standard text-sm uppercase tracking-[0.42em] text-base-content/70";
 ---
 
 <main class="min-h-screen bg-base-200 text-base-content">
   <div
-    class="mx-auto w-full max-w-[1400px] px-4 pb-20 pt-10 lg:px-10 lg:pb-28 lg:pt-14"
+    class="mx-auto max-w-[1440px] px-4 pb-20 sm:px-6 lg:px-8 lg:pb-[6.5rem]"
   >
-    <section class="pb-12 lg:pb-16">
+    <div class="pt-8 lg:pt-10">
       <h1
-        class="font-old_standard text-[2.8rem] font-semibold uppercase tracking-[0.32em] text-base-content lg:text-4xl"
+        class="m-0 text-3xl lg:text-[28px] font-old_standard font-base uppercase tracking-[0.46em] text-base-content"
       >
-        О проекте
+        О нас
       </h1>
-    </section>
+    </div>
 
-    <section class="border-t border-base-content/15 py-2">
+    <section class="mt-10 py-2 lg:mt-14">
       <div class="mb-8">
-        <span
-          class="font-old_standard text-sm uppercase tracking-[0.42em] text-base-content/70"
-        >
-          Идея
-        </span>
+        <span class={sectionLabel}>О проекте</span>
       </div>
 
       <div
-        class="grid gap-x-8 gap-y-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.92fr)_minmax(0,0.95fr)] lg:items-start lg:gap-x-10 lg:gap-y-5"
+        class="grid gap-x-8 gap-y-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1fr)] lg:items-start lg:gap-x-10"
       >
-        <div
-          class="space-y-6 font-old_standard text-[2rem] text-base-content lg:text-2xl"
-        >
-          <p class="text-4xl">
-            Что делать в Париже прямо сейчас? А через месяц?
-          </p>
-          <p>
-            Чем живёт мировая культурная столица сегодня и что будет актуально
-            завтра?
-          </p>
+        <div class="bg-base-100 border-[13px] border-white">
+          <Image
+            src={maagArtwork}
+            alt="Логотип Maag на фоне рисунка Гранд-Опера"
+            class="h-auto w-full object-cover"
+          />
         </div>
 
-        <div class="overflow-hidden bg-black/5">
+        <p
+          class="font-old_standard text-[2rem] leading-[1.15] text-base-content lg:text-[2.4rem]"
+        >
+          Maag France — независимое русскоязычное медиа о современной культуре и
+          Париже.
+        </p>
+
+        <div
+          class="space-y-5 font-inter text-base-content/80 lg:text-[0.95rem]"
+        >
+          <p>
+            Что делать в Париже прямо сейчас? А через месяц? Чем живёт
+            культурная столица? Какую выставку стоит обязательно увидеть, а
+            какую можно пропустить — и почему? На какой спектакль нужно попасть
+            любой ценой, кого стоит увидеть на сцене и где поймать билеты даже в
+            последний момент? Чем занять детей? И как составить маршрут так,
+            чтобы не упустить ничего интересного — неважно, есть ли у вас на
+            Париж всего два дня или целая жизнь.
+          </p>
+          <p>
+            Но MAAG France — не только о том, чем заняться в Париже. Нам важно,
+            чтобы французская культура звучала на русском языке — во всём её
+            многообразии, сложности и современности. На страницах MAAG France вы
+            найдёте новости художественной жизни Парижа, репортажи с
+            арт-ярмарок, рецензии на театральные, балетные и оперные премьеры,
+            интервью с художниками, артистами, режиссёрами и хореографами.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-12 lg:mt-16">
+      <div class="mb-8">
+        <span class={sectionLabel}>Слово редактора</span>
+      </div>
+
+      <div class="grid gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-0">
+        <div class="flex items-center justify-center bg-base-100 p-8 lg:p-12">
           <Image
-            src={heroImage}
-            alt="Культурная сцена Парижа"
-            class="h-full w-full object-cover"
+            src={mariaSidelnikovaImage}
+            alt="Мария Сидельникова"
+            class="w-full max-w-[20rem] object-cover"
           />
         </div>
 
         <div
-          class="space-y-5 font-article-content text-base-content/78 lg:text-base"
+          class="bg-maag-beige p-8 font-inter text-base-content/85 lg:p-12 lg:text-[0.95rem]"
         >
-          <p>
-            Какие выставки стоит увидеть обязательно, а какие можно смело
-            пропустить и почему? На какой спектакль нужно попасть любой ценой,
-            кого увидеть на сцене и где найти билеты даже в последний момент?
-          </p>
-          <p>
-            Чем занять детей? Где заесть культурные впечатления, где
-            остановиться и как составить маршрут так, чтобы не упустить самого
-            интересного, не важно, есть ли у вас на Париж всего два дня или
-            целая жизнь.
-          </p>
-        </div>
-      </div>
+          <h2
+            class="mb-8 font-old_standard text-[1.9rem] leading-[1.15] text-base-content lg:text-3xl"
+          >
+            Почему я создала Maag France?
+          </h2>
 
-      <div
-        class="mt-10 max-w-[64rem] space-y-5 font-article-content text-base-content/85 mb-10"
-      >
-        <p>
-          На сайте <span class="font-semibold">Maag France</span> вы найдёте анонсы
-          культурных событий, рецензии, интервью, репортажи и путеводители - самую
-          актуальную и полную информацию о жизни Парижа, отобранную нашей командой
-          профессиональных журналистов и местных жителей.
-        </p>
-        <p>
-          <span class="font-semibold">Maag France</span> - независимое французское
-          издание о культуре и жизни Парижа на русском языке. Наши материалы - результат
-          редакционной работы.
-        </p>
+          <div class="space-y-5">
+            <p>С 2010 года я живу и работаю в Париже.</p>
+            <p>
+              Все эти годы я писала о французской культуре в российские издания
+              — от «Коммерсанта» и The Art Newspaper до Vogue. Моя специализация
+              — балет и танец, и я — единственный русскоязычный критик, много
+              лет аккредитованный в Парижской Опере, так что знаю не только её
+              парадную красоту, но и закулисье. На моих глазах сменились три
+              генеральных директора, четыре худрука балета и два поколения
+              артистов. Я видела их дебюты и прощания, удачи и провалы, видела
+              их на сцене, на баррикадах и даже на дискотеке. Брала у них
+              интервью, хвалила и журила в своих рецензиях.
+            </p>
+            <p>
+              Помимо танца я писала о главных парижских музеях и фондах, об
+              историческом наследии французских домов моды, делала интервью с
+              балетными артистами, хореографами, режиссёрами, художниками,
+              дизайнерами, руководителями крупнейших государственных и частных
+              институций, открывала для читателей нехоженые прекрасные маршруты
+              французских регионов.
+            </p>
+            <p>
+              В 2022 году началась война. За четыре года, что она длится, в
+              Россию вернулась цензура. Франция стала «недружественным
+              государством». Многие издания закрылись, те, что выжили, вынуждены
+              жить по новым законам.
+            </p>
+            <p>
+              Законы эти мне не близки. Но я люблю свою работу и знаю, как много
+              русскоязычных людей — в России, давно живущих за её пределами или
+              вынужденных покинуть страну после начала войны — ценят
+              качественную информацию, любят Францию и ее культуру.
+            </p>
+            <p>Поэтому мне кажется важным продолжать.</p>
+            <p>
+              Продолжать рассказывать без ограничений о том, что я считаю важным
+              — о современной культуре, её главных действующих лицах и о Париже,
+              который является мировой культурной столицей. Ведь культура
+              существует для того, чтобы мы могли смотреть на мир свободнее.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="border-t border-base-content/15 py-2 mb-12">
+    <section class="mt-12 py-2 lg:mt-16">
       <div class="mb-12">
-        <span
-          class="font-old_standard text-sm uppercase tracking-[0.42em] text-base-content/70"
-        >
-          Команда
-        </span>
+        <span class={sectionLabel}>Команда</span>
       </div>
 
-      <div class="grid gap-x-10 gap-y-6 lg:grid-cols-2 lg:gap-x-16 lg:gap-y-20">
+      <div class="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
         {
-          teamMembers.map((member, index) => (
-            <article
-              class:list={[
-                "flex flex-col gap-4 sm:flex-row sm:items-start",
-                index === 2 &&
-                  "lg:col-span-2 lg:max-w-[52rem] lg:justify-self-center",
-              ]}
-            >
-              <img
-                src={member.avatar}
-                alt={`Mock portrait for ${member.title}`}
-                class="h-20 w-20 shrink-0 rounded-full object-cover"
+          teamMembers.map((member) => (
+            <article class="flex flex-col">
+              <Image
+                src={member.photo}
+                alt={member.name}
+                class="aspect-square w-full max-w-[12rem] rounded-full object-cover"
               />
-              <div>
-                <p class="font-inter text-xs font-bold uppercase tracking-[0.28em] text-accent">
-                  {member.role}
-                </p>
-                <h2 class="mt-3 font-old_standard text-[2rem] leading-[1.05] text-base-content lg:text-xl">
-                  {member.title}
-                </h2>
-              </div>
+              <p class="mt-6 font-inter text-xs font-bold uppercase tracking-[0.28em] text-accent">
+                {member.role}
+              </p>
+              <h3 class="mt-3 font-old_standard text-[2rem] leading-[1.05] text-base-content lg:text-2xl">
+                {member.name}
+              </h3>
             </article>
           ))
         }
-      </div>
-    </section>
-
-    <section class="border-t border-base-content/15 py-2">
-      <div class="mb-8">
-        <span
-          class="font-old_standard text-sm uppercase tracking-[0.42em] text-base-content/70"
-        >
-          Контакты
-        </span>
-      </div>
-
-      <div
-        class="grid gap-x-8 gap-y-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:items-start lg:gap-x-8 lg:gap-y-5"
-      >
-        <div
-          class="max-w-[56rem] font-old_standard text-[1.9rem] leading-[1.32] text-base-content lg:text-4xl"
-        >
-          Если вы хотите присоединиться к нашей команде, поддержать проект,
-          стать партнёром или рекламодателем -{" "}
-          <a
-            href="mailto:editors@maag-france.com"
-            class="underline decoration-base-content/35 underline-offset-8 transition-colors hover:text-accent hover:decoration-accent"
-          >
-            пишите сюда
-          </a>
-          .
-        </div>
-
-        <div
-          class="space-y-3 border border-base-content/10 bg-white p-6 font-inter text-sm uppercase tracking-[0.22em] text-base-content/65"
-        >
-          <p>Редакция</p>
-          <a
-            href="mailto:editors@maag-france.com"
-            class="block text-base font-semibold normal-case tracking-normal text-base-content hover:text-accent"
-          >
-            editors@maag-france.com
-          </a>
-          <p
-            class="pt-4 text-[0.72rem] leading-[1.7] normal-case tracking-normal text-base-content/55"
-          >
-            Ответим по вопросам редакции, партнёрств, рекламы и сотрудничества.
-          </p>
-        </div>
       </div>
     </section>
   </div>
