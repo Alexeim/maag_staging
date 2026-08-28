@@ -123,6 +123,15 @@ const allStructuredData = [
       gtag("config", "G-7EDWP4DX2J");
     </script>
     <!-- Google tag (gtag.js) -->
+    <!-- Twitter/X tweet embeds. Kept off Partytown on purpose: widgets.js
+         has a long-standing unresolved rendering bug under Partytown's DOM
+         proxy (github.com/BuilderIO/partytown/issues/305) — even Partytown's
+         own test suite keeps this scenario disabled. -->
+    <script
+      is:inline
+      async
+      src="https://platform.twitter.com/widgets.js"
+      charset="utf-8"></script>
     {useClientRouter && <ClientRouter />}
     <title>{title}</title>
   </head>

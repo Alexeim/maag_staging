@@ -123,6 +123,14 @@ const wideBreakoutRailClass = "w-full lg:max-w-[1356px] my-12 px-4 lg:px-0";
             <span class="font-medium" x-text="block.text || block.url"></span>
             <span class="ml-2 break-all text-base-content/60" x-text="block.url"></span>
           </a>
+          <a
+            x-show="block.type === 'tweet' && block.url"
+            :href="block.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block rounded-lg border border-base-300 bg-base-200/40 p-4 text-sm text-primary hover:underline break-all"
+            x-text="block.url"
+          ></a>
           </article>
         </div>
       </template>

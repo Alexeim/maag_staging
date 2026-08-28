@@ -9,6 +9,7 @@ export const BLOCK_TYPE_LABELS: Record<string, string> = {
   quote: "Цитата",
   image: "Изображение",
   video: "Видео",
+  tweet: "Твит",
   "one-big-one-small": "Одна большая + одна маленькая",
   collage: "Коллаж",
   "two-columns": "Две колонки",
@@ -148,6 +149,8 @@ export const getBlockSummary = (
         "Видео не добавлено";
       return `${sourceLabel} · ${details}`;
     }
+    case "tweet":
+      return truncatePreviewText(block.url, 80) || "Ссылка на твит не добавлена";
     case "one-big-one-small": {
       const portraitStatus =
         typeof block.portraitImageUrl === "string" && block.portraitImageUrl.trim()

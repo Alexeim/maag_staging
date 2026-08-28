@@ -7,6 +7,7 @@ import ArticleColumnContent from "./ArticleColumnContent.astro";
 import OneBigOneSmall from "./OneBigOneSmall.astro";
 import Collage from "./Collage.astro";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
+import { getTweetId } from "@/lib/utils/tweet";
 import {
   getLinkedContentKey,
   type LinkedContentLookup,
@@ -265,6 +266,19 @@ if (currentProseGroup.length > 0) {
                         )}
                       </div>
                     );
+                  case "tweet": {
+                    const tweetId = getTweetId(block.url);
+                    if (!tweetId) {
+                      return null;
+                    }
+                    return (
+                      <div class="not-prose w-full flex justify-center">
+                        <blockquote class="twitter-tweet" data-dnt="true">
+                          <a href={block.url}>Загрузка твита…</a>
+                        </blockquote>
+                      </div>
+                    );
+                  }
                   case "image":
                     return (
                       <figure class="not-prose flex flex-col items-center">

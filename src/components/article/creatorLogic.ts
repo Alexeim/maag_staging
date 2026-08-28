@@ -25,6 +25,7 @@ import {
   getVideoRenderMode as resolveVideoRenderMode,
   normalizeVideoBlock,
 } from "@/lib/utils/video";
+import { getTweetId as resolveTweetId, normalizeTweetBlock } from "@/lib/utils/tweet";
 import { normalizeTagList } from "@/content/tags/tags";
 import {
   getBlockSummary as buildBlockSummary,
@@ -466,6 +467,9 @@ export default function articleCreatorLogic(initialState = {}) {
     getVideoRenderMode(url: string, sourceType = "embed") {
       return resolveVideoRenderMode(url, sourceType);
     },
+    getTweetId(url: string) {
+      return resolveTweetId(url);
+    },
     normalizeEditableVideoBlock(block) {
       return normalizeVideoBlock(block);
     },
@@ -491,6 +495,22 @@ export default function articleCreatorLogic(initialState = {}) {
         if (showToast) {
           window.Alpine?.store("ui")?.showToast?.(
             "Нужна прямая ссылка на видеофайл или готовая ссылка для встраивания, а не обычная страница с видео.",
+            "error",
+          );
+        }
+        return false;
+      }
+      return true;
+    },
+    validateTweetBlock(block, showToast = true) {
+      if (!block || block.type !== "tweet") {
+        return true;
+      }
+      const normalized = normalizeTweetBlock(block);
+      if (!normalized.url || !resolveTweetId(normalized.url)) {
+        if (showToast) {
+          window.Alpine?.store("ui")?.showToast?.(
+            "Нужна ссылка на конкретный твит вида twitter.com/user/status/123.",
             "error",
           );
         }
@@ -1297,6 +1317,9 @@ export default function articleCreatorLogic(initialState = {}) {
         case "image":
           newBlockData = { url: "", caption: "" };
           break;
+        case "tweet":
+          newBlockData = { url: "" };
+          break;
         case "video":
           newBlockData = {
             sourceType: "embed",
@@ -1386,13 +1409,26 @@ export default function articleCreatorLogic(initialState = {}) {
     // Saves the changes to the block
     updateBlock() {
       if (this.editingIndex !== null) {
-        if (this.editingBlock?.type === "video") {
-          this.editingBlock = normalizeVideoBlock(this.editingBlock);
-          if (!this.validateVideoBlock(this.editingBlock)) {
+        // Normalize into a local variable instead of reassigning
+        // this.editingBlock: the edit panel's templates read
+        // editingBlock.type/.url reactively, and reassigning it here (a
+        // valid object) immediately before cancelEdit() nulls it (right
+        // after) fires those reads twice in a row while the panel is
+        // still mounted, right as it's being torn down.
+        let blockToSave = this.editingBlock;
+        if (blockToSave?.type === "video") {
+          blockToSave = normalizeVideoBlock(blockToSave);
+          if (!this.validateVideoBlock(blockToSave)) {
             return;
           }
         }
-        this.article.contentBlocks[this.editingIndex] = this.editingBlock;
+        if (blockToSave?.type === "tweet") {
+          blockToSave = normalizeTweetBlock(blockToSave);
+          if (!this.validateTweetBlock(blockToSave)) {
+            return;
+          }
+        }
+        this.article.contentBlocks[this.editingIndex] = blockToSave;
         this.syncContentBlockOrder();
         this.cancelEdit();
       }
