@@ -1602,6 +1602,14 @@ export default function articleCreatorLogic(initialState = {}) {
         return;
       }
 
+      const hasInvalidTweetBlock = this.article.contentBlocks.some(
+        (block) => !this.validateTweetBlock(block),
+      );
+      if (hasInvalidTweetBlock) {
+        this.isSaving = false;
+        return;
+      }
+
       if (!this.article.category && !this.article.isHotContent) {
         window.Alpine.store("ui").showToast(
           "Выбери категорию перед сохранением — это обязательное поле.",
