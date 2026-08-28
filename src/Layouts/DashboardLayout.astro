@@ -177,7 +177,10 @@ const { title = "MAAG Dashboard", active = "articles-overview" } =
               <a
                 href={item.href}
                 class:list={[
-                  "block px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                  "block px-4 py-2 rounded-md font-medium transition-colors",
+                  item.id === "articles-overview"
+                    ? "text-base font-semibold"
+                    : "text-sm",
                   active === item.id
                     ? "bg-primary text-primary-content"
                     : "text-base-content/80 hover:bg-base-200",
