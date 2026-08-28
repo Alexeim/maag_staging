@@ -35,6 +35,7 @@ const components: Record<string, () => Promise<any>> = {
   profile: () => import('@/components/profile/profileLogic'),
   calendar: () => import('@/components/calendar/logic'),
   articleCreator: () => import('@/components/article/creatorLogic'),
+  dashboardOverview: () => import('@/components/dashboard/dashboardOverviewLogic'),
   flipperCreator: () => import('@/components/dashboard/flipperCreatorLogic'),
   eventCreator: () => import('@/components/article/eventCreatorLogic'),
   eventList: () => import('@/components/dashboard/eventListLogic'),
@@ -163,6 +164,13 @@ export default function(Alpine: Alpine) {
       rangeFlexibleEvents: [],
       smallEvents: [],
       availableEventsCount: 0,
+      // --- Dashboard Overview properties ---
+      materials: [],
+      counts: {
+        total: 0,
+        byBucket: { culture: 0, paris: 0, events: 0, none: 0 },
+        byStatus: { published: 0, draft: 0 },
+      },
       // --- Article Creator properties ---
       article: {
         title: '',

@@ -30,7 +30,7 @@ const storyCreatorState = JSON.stringify({
 });
 ---
 
-<DashboardLayout title="Редактировать визуальную историю" active="visual-stories">
+<DashboardLayout title="Редактировать «Крупным планом»" active="visual-stories">
   {loadFailed ? (
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <h2 class="text-xl font-semibold mb-2">Не удалось загрузить данные для редактирования</h2>
@@ -39,7 +39,7 @@ const storyCreatorState = JSON.stringify({
     </div>
   ) : story ? (
     <VisualStoryComposer
-      heading="Редактировать визуальную историю"
+      heading="Редактировать «Крупным планом»"
       submitLabel="Обновить историю"
       storyCreatorState={storyCreatorState}
       cancelHref="/dashboard/visual-stories"
@@ -48,7 +48,7 @@ const storyCreatorState = JSON.stringify({
     />
   ) : (
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
-      <h2 class="text-xl font-semibold mb-2">Визуальная история не найдена</h2>
+      <h2 class="text-xl font-semibold mb-2">«Крупным планом» не найдено</h2>
       <p class="text-base-content/70">Возможно, материал был удалён или указан неверный идентификатор.</p>
       <a href="/dashboard/visual-stories" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 mt-4 inline-block">
         Вернуться к визуальным историям

@@ -71,7 +71,7 @@ const MAIN_HERO_TYPE_LABELS: Record<LandingMainHeroType, string> = {
   guide: "Путеводитель",
   interview: "Интервью",
   flipper: "Листалка",
-  "visual-story": "Визуальная история",
+  "visual-story": "Крупным планом",
 };
 
 const loadMainHeroTitle = async (target: LandingMainHeroTarget): Promise<string | null> => {

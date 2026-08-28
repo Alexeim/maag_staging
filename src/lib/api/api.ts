@@ -1387,3 +1387,48 @@ export const publicInterviewsListingApi = {
     });
   },
 };
+
+export type DashboardMaterialType =
+  | "article"
+  | "tips"
+  | "le_saviez_vous"
+  | "guide"
+  | "visual-story"
+  | "flipper"
+  | "news"
+  | "interview"
+  | "photo-of-the-day"
+  | "event";
+
+export type DashboardBucket = "culture" | "paris" | "events" | "none";
+
+export interface DashboardMaterialRow {
+  id: string;
+  type: DashboardMaterialType;
+  title: string;
+  category: "culture" | "paris" | null;
+  bucket: DashboardBucket;
+  published: boolean;
+  isHotContent: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
+  startDate: string | null;
+  tags: string[];
+}
+
+export interface DashboardOverviewResponse {
+  counts: {
+    total: number;
+    byBucket: Record<DashboardBucket, number>;
+    byStatus: { published: number; draft: number };
+  };
+  materials: DashboardMaterialRow[];
+}
+
+export const dashboardApi = {
+  overview(token?: string) {
+    return request<DashboardOverviewResponse>("/api/dashboard/overview", {
+      token,
+    });
+  },
+};

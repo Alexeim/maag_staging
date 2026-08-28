@@ -60,17 +60,14 @@ const stories = storiesRaw.map((story) => {
 });
 ---
 
-<DashboardLayout
-  title="Управление визуальными историями"
-  active="visual-stories"
->
+<DashboardLayout title="Крупным планом" active="visual-stories">
   <div
     class="bg-base-100 border border-base-300 rounded-xl p-6"
     x-data={`$lazy('visualStoryList', { apiBaseUrl: '${PUBLIC_API_BASE_URL}' })`}
   >
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h2 class="text-xl font-semibold">Визуальные истории</h2>
+        <h2 class="text-xl font-semibold">Крупным планом</h2>
         <p class="text-sm text-base-content/70 mt-1">
           Управляй опубликованными и черновыми визуальными историями.
         </p>

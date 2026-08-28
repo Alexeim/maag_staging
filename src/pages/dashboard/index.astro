@@ -1,46 +1,8 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
-
-const articleSections = [
-  {
-    href: "/dashboard/articles/culture",
-    title: "Статьи Культура",
-    description: "Отдельный список всех материалов категории «Культура».",
-  },
-  {
-    href: "/dashboard/articles/paris",
-    title: "Статьи Париж",
-    description: "Отдельный список всех материалов категории «Париж».",
-  },
-  {
-    href: "/dashboard/le-saviez-vous",
-    title: "Le saviez-vous",
-    description: "Отдельный список материалов для одноимённых карточек.",
-  },
-];
+import DashboardOverview from "@/components/dashboard/DashboardOverview.astro";
 ---
 
-<DashboardLayout title="Управление статьями" active="articles-overview">
-  <div class="grid gap-6 md:grid-cols-2">
-    {articleSections.map((section) => (
-      <a
-        href={section.href}
-        class="group bg-base-100 border border-base-300 rounded-xl p-6 hover:border-primary hover:shadow-md transition"
-      >
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <h2 class="text-xl font-semibold group-hover:text-primary transition-colors">
-              {section.title}
-            </h2>
-            <p class="text-sm text-base-content/70 mt-2">
-              {section.description}
-            </p>
-          </div>
-          <span class="text-primary text-sm font-medium whitespace-nowrap">
-            Открыть →
-          </span>
-        </div>
-      </a>
-    ))}
-  </div>
+<DashboardLayout title="Обзор" active="articles-overview">
+  <DashboardOverview />
 </DashboardLayout>

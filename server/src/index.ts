@@ -16,6 +16,7 @@ import contentCollectionsRoutes from './routes/contentCollectionsRoutes';
 import photoOfTheDayRoutes from './routes/photoOfTheDayRoutes';
 import publicRoutes from './routes/publicRoutes';
 import authRoutes from './routes/authRoutes';
+import dashboardRoutes from './routes/dashboardRoutes';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -78,6 +79,9 @@ app.use('/api/public', publicRoutes);
 
 // Session-cookie auth bridge, used by the Astro server to gate pages
 app.use('/api/auth', authRoutes);
+
+// Aggregated read model for the dashboard home
+app.use('/api/dashboard', dashboardRoutes);
 
 // Test route to verify Firebase connection
 app.get('/api/test-firebase', async (req, res) => {

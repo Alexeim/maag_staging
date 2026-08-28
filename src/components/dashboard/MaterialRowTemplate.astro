@@ -1,0 +1,61 @@
+---
+// A single overview row, authored as an Alpine template: every value is read
+// from `row` (a DashboardMaterialRow) at runtime, so this markup renders once
+// and is reused inside every <template x-for="row in ..."> on the overview.
+// Requires the dashboardOverview island scope (typeMeta, formatRowDate,
+// handleDeleteClick).
+---
+
+<li
+  class="group flex items-center gap-3 px-3 py-2.5 sm:px-4 hover:bg-base-200/40"
+>
+  <span
+    class="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none"
+    :class="typeMeta(row.type).badgeClass"
+    x-text="typeMeta(row.type).badge"
+  ></span>
+
+  <div class="min-w-0 flex-1">
+    <a
+      :href="typeMeta(row.type).editHref(row.id)"
+      class="block truncate text-sm font-medium hover:text-primary"
+      x-text="row.title || '(без заголовка)'"
+    ></a>
+    <div
+      class="truncate text-xs text-base-content/45"
+      x-text="row.tags.length ? row.tags.join(' · ') : ('ID: ' + row.id)"
+    ></div>
+  </div>
+
+  <span
+    class="hidden shrink-0 whitespace-nowrap text-xs text-base-content/55 md:block"
+    x-text="formatRowDate(row)"
+  ></span>
+
+  <span
+    class="shrink-0 h-2.5 w-2.5 rounded-full border"
+    :class="row.published ? 'border-success bg-success' : 'border-base-content/30 bg-transparent'"
+    :title="row.published ? 'Опубликовано' : 'Черновик'"
+  ></span>
+
+  <div
+    class="shrink-0 flex items-center gap-2.5 text-xs opacity-70 transition-opacity group-hover:opacity-100"
+  >
+    <a
+      :href="typeMeta(row.type).viewHref(row.id)"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hidden text-blue-600 hover:underline sm:inline dark:text-blue-500"
+      >Просмотр</a
+    >
+    <a
+      :href="typeMeta(row.type).editHref(row.id)"
+      class="font-medium text-primary hover:underline">Ред.</a
+    >
+    <button
+      type="button"
+      class="font-medium text-error hover:underline"
+      @click="handleDeleteClick(row.id, row.title, row.type)">Удал.</button
+    >
+  </div>
+</li>

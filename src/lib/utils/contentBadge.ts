@@ -35,7 +35,7 @@ export const TAG_LABEL_ALIASES: Record<string, string> = {
   news: "Новости",
   guide: "Гид",
   flipper: "Листалка",
-  "visual-story": "Visual Story",
+  "visual-story": "Крупным планом",
   event: "Событие",
   ...Object.fromEntries(
     Array.from({ length: 20 }, (_, i) => [
@@ -52,7 +52,7 @@ const CONTENT_TYPE_FALLBACK_LABELS: Record<string, string> = {
   guide: "Путеводитель",
   flipper: "Листалка",
   event: "Событие",
-  "visual-story": "Visual Story",
+  "visual-story": "Крупным планом",
   photoOfTheDay: "Фото дня",
 };
 

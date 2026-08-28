@@ -16,7 +16,7 @@ const BOOKMARK_TYPE_LABELS: Record<string, string> = {
   interview: "Интервью",
   flipper: "Листалки",
   photoOfTheDay: "Фото дня",
-  visualStory: "Визуальные истории",
+  visualStory: "Крупным планом",
 };
 
 const BOOKMARK_TYPE_ORDER = [

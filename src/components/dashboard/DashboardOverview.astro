@@ -1,0 +1,252 @@
+---
+import { dashboardApi } from "@/lib/api/api";
+import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+import {
+  BUCKETS,
+  BUCKET_ORDER,
+  MATERIAL_TYPES,
+  MATERIAL_TYPE_ORDER,
+} from "@/lib/utils/dashboardMaterials";
+import MaterialRowTemplate from "@/components/dashboard/MaterialRowTemplate.astro";
+
+let counts = {
+  total: 0,
+  byBucket: { culture: 0, paris: 0, events: 0, none: 0 },
+  byStatus: { published: 0, draft: 0 },
+};
+let materials: Awaited<ReturnType<typeof dashboardApi.overview>>["materials"] = [];
+let loadError = false;
+
+try {
+  const overview = await dashboardApi.overview();
+  counts = overview.counts;
+  materials = overview.materials;
+} catch (error) {
+  console.error("Failed to load dashboard overview", error);
+  loadError = true;
+}
+
+const overviewState = JSON.stringify({
+  apiBaseUrl: PUBLIC_API_BASE_URL,
+  materials,
+  counts,
+});
+
+const categorySegments: Array<{ key: string; label: string }> = [
+  { key: "all", label: "Все" },
+  { key: "culture", label: BUCKETS.culture.label },
+  { key: "paris", label: BUCKETS.paris.label },
+  { key: "events", label: BUCKETS.events.label },
+  { key: "none", label: BUCKETS.none.label },
+];
+
+const statCards: Array<{ label: string; value: number; click: string }> = [
+  { label: "Всего", value: counts.total, click: "setCategory('all')" },
+  { label: BUCKETS.culture.label, value: counts.byBucket.culture, click: "setCategory('culture')" },
+  { label: BUCKETS.paris.label, value: counts.byBucket.paris, click: "setCategory('paris')" },
+  { label: BUCKETS.events.label, value: counts.byBucket.events, click: "setCategory('events')" },
+  { label: BUCKETS.none.label, value: counts.byBucket.none, click: "setCategory('none')" },
+  { label: "Черновики", value: counts.byStatus.draft, click: "setDraftOnly()" },
+];
+---
+
+<div x-data={`$lazy('dashboardOverview', ${overviewState})`}>
+  {
+    loadError && (
+      <div class="mb-6 rounded-xl border border-error/40 bg-error/5 p-4 text-sm text-error">
+        Не удалось загрузить материалы. Обнови страницу или проверь бэкенд.
+      </div>
+    )
+  }
+
+  <template x-if="isLazyLoading">
+    <div class="py-20 text-center text-sm text-base-content/50">
+      Загрузка обзора…
+    </div>
+  </template>
+
+  <template x-if="!isLazyLoading">
+    <div>
+      {/* --- stat cards --- */}
+      <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {
+          statCards.map((card) => (
+            <button
+              type="button"
+              @click={card.click}
+              class="rounded-xl border border-base-300 bg-base-100 p-3 text-left transition hover:border-primary hover:shadow-sm"
+            >
+              <div class="text-2xl font-semibold leading-none">{card.value}</div>
+              <div class="mt-1.5 text-xs text-base-content/60">{card.label}</div>
+            </button>
+          ))
+        }
+      </div>
+
+      {/* --- filter bar --- */}
+      <div class="mb-6 space-y-3 rounded-xl border border-base-300 bg-base-100 p-4">
+        <div class="flex flex-wrap gap-1">
+          {
+            categorySegments.map((seg) => (
+              <button
+                type="button"
+                @click={`setCategory('${seg.key}')`}
+                class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+                x-bind:class={`category === '${seg.key}' ? 'bg-primary text-primary-content' : 'text-base-content/70 hover:bg-base-200'`}
+              >
+                {seg.label}
+              </button>
+            ))
+          }
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <select
+            x-model="status"
+            @change="syncFilters()"
+            class="select select-bordered select-sm bg-base-100"
+          >
+            <option value="all">Все статусы</option>
+            <option value="published">Опубликовано</option>
+            <option value="draft">Черновик</option>
+          </select>
+          <select
+            x-model="sort"
+            @change="syncFilters()"
+            class="select select-bordered select-sm bg-base-100"
+          >
+            <option value="updated">Сначала обновлённые</option>
+            <option value="created">Сначала новые</option>
+            <option value="title">По алфавиту</option>
+          </select>
+          <label class="flex items-center gap-1.5 text-sm text-base-content/70">
+            <input
+              type="checkbox"
+              x-model="hotOnly"
+              @change="syncFilters()"
+              class="checkbox checkbox-sm"
+            />
+            Самое читаемое
+          </label>
+          <input
+            type="search"
+            x-model="query"
+            @input.debounce.400ms="syncFilters()"
+            placeholder="Поиск по заголовку…"
+            class="input input-bordered input-sm w-full bg-base-100 sm:w-64"
+          />
+          <button
+            type="button"
+            x-show="hasSecondaryFilters()"
+            @click="clearFilters()"
+            class="text-xs text-base-content/50 hover:text-error"
+          >
+            сбросить
+          </button>
+        </div>
+
+        <div class="flex flex-wrap gap-1.5">
+          {
+            MATERIAL_TYPE_ORDER.map((type) => (
+              <button
+                type="button"
+                @click={`toggleType('${type}')`}
+                class="rounded-full border px-2.5 py-1 text-xs font-medium transition-colors"
+                x-bind:class={`isTypeActive('${type}') ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 text-base-content/60 hover:border-base-content/40'`}
+              >
+                {MATERIAL_TYPES[type].label}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      {/* --- list area --- */}
+
+      {/* digest mode */}
+      <template x-if="isDigest()">
+        <div class="space-y-6">
+          <p
+            x-show="totalVisible() === 0"
+            class="py-16 text-center text-sm text-base-content/50"
+          >
+            Ничего не найдено — измени фильтры.
+          </p>
+
+          {
+            BUCKET_ORDER.map((bucket) => {
+              const meta = BUCKETS[bucket];
+              const sec = `digestSection('${bucket}')`;
+              return (
+                <section x-show={`${sec}.total > 0`}>
+                  <div class="mb-2 flex items-end justify-between">
+                    <h3 class="text-sm font-semibold uppercase tracking-wide text-base-content/70">
+                      {meta.label}
+                      <span
+                        class="font-normal text-base-content/40"
+                        x-text={`' (' + ${sec}.total + ')'`}
+                      />
+                    </h3>
+                    <button
+                      type="button"
+                      @click={`setCategory('${bucket}')`}
+                      class="text-xs text-primary hover:underline"
+                    >
+                      показать всё →
+                    </button>
+                  </div>
+                  <ul class="divide-y divide-base-300 rounded-xl border border-base-300 bg-base-100">
+                    <template x-for={`row in ${sec}.rows`} x-bind:key="row.id">
+                      <MaterialRowTemplate />
+                    </template>
+                  </ul>
+                  <div
+                    class="mt-1.5 text-right"
+                    x-show={`${sec}.total > ${sec}.rows.length`}
+                  >
+                    <button
+                      type="button"
+                      @click={`setCategory('${bucket}')`}
+                      class="text-xs text-base-content/50 hover:text-primary"
+                    >
+                      ещё <span x-text={`${sec}.total - ${sec}.rows.length`} /> →
+                    </button>
+                  </div>
+                </section>
+              );
+            })
+          }
+        </div>
+      </template>
+
+      {/* flat mode — a specific category tab is selected */}
+      <template x-if="!isDigest()">
+        <div>
+          <p class="mb-3 text-sm text-base-content/60">
+            Найдено:
+            <span
+              class="font-semibold text-base-content"
+              x-text="filteredRows().length"></span>
+          </p>
+          <ul class="divide-y divide-base-300 rounded-xl border border-base-300 bg-base-100">
+            <template x-for="row in flatRows()" x-bind:key="row.id">
+              <MaterialRowTemplate />
+            </template>
+            <template x-if="filteredRows().length === 0">
+              <li class="px-4 py-12 text-center text-sm text-base-content/50">
+                Ничего не найдено по фильтрам.
+              </li>
+            </template>
+          </ul>
+          <p
+            class="mt-3 text-center text-sm text-base-content/50"
+            x-show="flatOverflow() > 0"
+          >
+            Показаны первые 100 из <span x-text="filteredRows().length"></span>.
+            Уточни фильтры.
+          </p>
+        </div>
+      </template>
+    </div>
+  </template>
+</div>

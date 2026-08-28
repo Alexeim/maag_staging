@@ -29,7 +29,7 @@ const TYPE_LABELS: Record<MaterialContentType, string> = {
   event: 'События',
   flipper: 'Листалки',
   interview: 'Интервью',
-  'visual-story': 'Visual Story',
+  'visual-story': 'Крупным планом',
 };
 
 // Order in which sections appear on the /tag/[tag] page. Events lead the

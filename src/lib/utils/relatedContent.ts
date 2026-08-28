@@ -61,7 +61,7 @@ export const RELATED_CONTENT_TYPE_OPTIONS: Array<{
   { value: "guide", label: "Гид" },
   { value: "news", label: "Новость" },
   { value: "flipper", label: "Флиппер" },
-  { value: "visualStory", label: "Visual Story" },
+  { value: "visualStory", label: "Крупным планом" },
 ];
 
 export const MATERIAL_LINK_TYPE_OPTIONS: Array<{
@@ -74,7 +74,7 @@ export const MATERIAL_LINK_TYPE_OPTIONS: Array<{
   { value: "guide", label: "Гид" },
   { value: "news", label: "Новость" },
   { value: "flipper", label: "Флиппер" },
-  { value: "visualStory", label: "Visual Story" },
+  { value: "visualStory", label: "Крупным планом" },
   { value: "photoOfTheDay", label: "Фото дня" },
 ];
 

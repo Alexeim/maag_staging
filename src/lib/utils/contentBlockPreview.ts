@@ -27,8 +27,8 @@ export const LINKED_CONTENT_TYPE_LABELS: Record<string, string> = {
   interview: "Интервью",
   guide: "Гид",
   flipper: "Флиппер",
-  visualStory: "Visual Story",
-  "visual-story": "Visual Story",
+  visualStory: "Крупным планом",
+  "visual-story": "Крупным планом",
   photoOfTheDay: "Фото дня",
 };
 
