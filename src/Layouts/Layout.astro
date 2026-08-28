@@ -133,6 +133,29 @@ const allStructuredData = [
       async
       src="https://platform.twitter.com/widgets.js"
       charset="utf-8"></script>
+    <!-- Re-initialise embeds after a client-side navigation. With <ClientRouter />
+         the document is not reloaded, so these one-shot browser/3rd-party
+         mechanisms never re-run for the swapped <body>. -->
+    <script is:inline>
+      // Tweets: widgets.js only auto-scans the DOM on its own first run.
+      // Runs on first load too (harmless: guarded, and load() is idempotent).
+      document.addEventListener("astro:page-load", function () {
+        if (window.twttr && window.twttr.widgets) {
+          window.twttr.widgets.load();
+        }
+      });
+      // Video: a lazy <iframe> inserted during the swap is dropped by the
+      // browser's lazy-load observer and stays blank. Re-inserting a clone
+      // makes the browser re-evaluate lazy loading against the current
+      // viewport, so off-screen embeds stay lazy.
+      document.addEventListener("astro:after-swap", function () {
+        document
+          .querySelectorAll('iframe[loading="lazy"]')
+          .forEach(function (frame) {
+            frame.replaceWith(frame.cloneNode(true));
+          });
+      });
+    </script>
     {useClientRouter && <ClientRouter />}
     <title>{title}</title>
   </head>
