@@ -1,17 +1,25 @@
 ---
 import Layout from "@/Layouts/Layout.astro";
 import MaterialResultRow from "@/components/common/MaterialResultRow.astro";
-import { getTagLabel } from "@/lib/utils/contentBadge";
+import NetlenkaCardOne from "@/components/common/NetlenkaCardOne.astro";
+import {
+  getTagLabel,
+  getPrimaryBadgeHref,
+  getPrimaryBadgeLabel,
+} from "@/lib/utils/contentBadge";
+import { getTransitionName } from "@/lib/utils/transitions";
 import {
   publicMaterialsByTagApi,
   type PublicMaterialGroup,
+  type PublicMaterialItem,
 } from "@/lib/api/api";
 
+// No eventPage here: events never appear in `groups` on this page — only
+// the single featured one, in the aside — so nothing paginates it.
 const PAGE_PARAMS = [
   "articlePage",
   "newsPage",
   "guidePage",
-  "eventPage",
   "flipperPage",
   "interviewPage",
   "visualStoryPage",
@@ -32,17 +40,23 @@ PAGE_PARAMS.forEach((param) => {
 let groups: PublicMaterialGroup[] = [];
 let totalCount = 0;
 let loadError = false;
+let featuredEvent: PublicMaterialItem | null = null;
+let sidebarCards: PublicMaterialItem[] = [];
 
 if (tag) {
   try {
     const response = await publicMaterialsByTagApi.get(tag, pageByType);
     groups = response.groups;
     totalCount = response.totalCount;
+    featuredEvent = response.featuredEvent;
+    sidebarCards = response.sidebarCards;
   } catch (error) {
     console.error("Failed to load materials by tag:", error);
     loadError = true;
   }
 }
+
+const hasAsideContent = Boolean(featuredEvent) || sidebarCards.length > 0;
 
 // Russian plural forms: 1 результат / 2 результата / 5 результатов
 const resultsWord = (count: number) => {
@@ -59,6 +73,40 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
   url.searchParams.set(group.pageParam, String(page));
   return `${url.pathname}${url.search}`;
 };
+
+// Kept minimal on purpose: the event card only shows the start date (no "до
+// <end date>" range indicator), matching the landing page's own calendar
+// aside card (src/components/common/MainLandingBlock.astro), the closest
+// existing precedent for "a single event card in a narrow aside column".
+const toDate = (value: unknown): Date | null => {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value === "string" || typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === "object") {
+    const seconds =
+      (value as { seconds?: number; _seconds?: number }).seconds ??
+      (value as { seconds?: number; _seconds?: number })._seconds;
+    if (typeof seconds === "number") return new Date(seconds * 1000);
+  }
+  return null;
+};
+
+const formatEventDate = (value: unknown) => {
+  const date = toDate(value);
+  if (!date) return null;
+  return {
+    day: date.getUTCDate().toString().padStart(2, "0"),
+    month: date.toLocaleDateString("ru-RU", { month: "long", timeZone: "UTC" }),
+    weekday: date.toLocaleDateString("ru-RU", { weekday: "long", timeZone: "UTC" }),
+  };
+};
+
+const featuredEventDate = featuredEvent
+  ? formatEventDate(featuredEvent.startDate)
+  : null;
 ---
 
 <Layout
@@ -91,57 +139,142 @@ const buildPageHref = (group: PublicMaterialGroup, page: number) => {
       }
 
       {
-        !loadError && groups.length === 0 && (
+        !loadError && groups.length === 0 && !hasAsideContent && (
           <p class="font-inter text-base-content/70">
             По этому тегу пока ничего нет.
           </p>
         )
       }
 
-      <div class="space-y-16">
-        {
-          groups.map((group) => (
-            <section class="space-y-8">
-              <div class="flex items-center gap-4">
-                <h2 class="m-0 font-old_standard text-[1.05rem] font-semibold uppercase tracking-[0.5em] text-black !leading-8 !lg:leading-none">
-                  {group.label}
-                </h2>
-                <div class="h-px flex-1 bg-neutral-200" />
-                <span class="font-inter text-xs text-base-content/50">
-                  {group.count}
-                </span>
-              </div>
+      {
+        !loadError && (groups.length > 0 || hasAsideContent) && (
+          <div class:list={["gap-7", hasAsideContent && "grid lg:grid-cols-12 lg:gap-4 lg:items-start"]}>
+            <div class:list={["space-y-16", hasAsideContent && "min-w-0 lg:col-span-9"]}>
+              {groups.map((group) => (
+                <section class="space-y-8">
+                  <div class="flex items-center gap-4">
+                    <h2 class="m-0 font-old_standard text-[1.05rem] font-semibold uppercase tracking-[0.5em] text-black !leading-8 !lg:leading-none">
+                      {group.label}
+                    </h2>
+                    <div class="h-px flex-1 bg-neutral-200" />
+                    <span class="font-inter text-xs text-base-content/50">
+                      {group.count}
+                    </span>
+                  </div>
 
-              <div class="space-y-4 sm:space-y-6">
-                {group.items.map((item) => (
-                  <MaterialResultRow item={item} />
-                ))}
-              </div>
+                  <div class="space-y-4 sm:space-y-6">
+                    {group.items.map((item) => (
+                      <MaterialResultRow item={item} />
+                    ))}
+                  </div>
 
-              {group.totalPages > 1 && (
-                <nav class="flex items-center justify-center gap-2 pt-4">
-                  {Array.from(
-                    { length: group.totalPages },
-                    (_, index) => index + 1,
-                  ).map((pageNum) => (
-                    <a
-                      href={buildPageHref(group, pageNum)}
-                      class:list={[
-                        "flex h-9 w-9 items-center justify-center font-inter text-sm transition",
-                        pageNum === group.page
-                          ? "bg-accent text-white"
-                          : "text-base-content/60 hover:text-base-content",
-                      ]}
-                    >
-                      {pageNum}
-                    </a>
-                  ))}
-                </nav>
-              )}
-            </section>
-          ))
-        }
-      </div>
+                  {group.totalPages > 1 && (
+                    <nav class="flex items-center justify-center gap-2 pt-4">
+                      {Array.from(
+                        { length: group.totalPages },
+                        (_, index) => index + 1,
+                      ).map((pageNum) => (
+                        <a
+                          href={buildPageHref(group, pageNum)}
+                          class:list={[
+                            "flex h-9 w-9 items-center justify-center font-inter text-sm transition",
+                            pageNum === group.page
+                              ? "bg-accent text-white"
+                              : "text-base-content/60 hover:text-base-content",
+                          ]}
+                        >
+                          {pageNum}
+                        </a>
+                      ))}
+                    </nav>
+                  )}
+                </section>
+              ))}
+            </div>
+
+            {
+              hasAsideContent && (
+                <aside class="min-w-0 lg:col-span-3">
+                  <div class="grid gap-4 border-t border-base-content/15 pt-8 lg:border-t-0 lg:border-l lg:border-base-content/15 lg:pt-0 lg:pl-[1.1rem]">
+                    {featuredEvent && (
+                      <div class="linked-image-hover relative bg-white">
+                        <div class="px-4 py-2 flex items-center gap-3">
+                          <div class="w-fill flex flex-row gap-2 items-center justify-center mt-2 mb-1">
+                            <div class="flex items-center justify-center h-full">
+                              <p class="text-6xl font-old_standard !leading-none uppercase font-bold mt-2.5">
+                                {featuredEventDate?.day}
+                              </p>
+                            </div>
+                            <div class="h-full flex flex-col items-start justify-center">
+                              <p class="font-semibold font-inter text-black/70">
+                                {(featuredEventDate?.month ?? "").toUpperCase()}
+                              </p>
+                              <div class="w-full border-t border-black/50" />
+                              <p>
+                                {featuredEventDate?.weekday && (
+                                  <span class="font-normal normal-case tracking-normal italic font-old_standard opacity-60">
+                                    {featuredEventDate.weekday}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {featuredEvent.imageUrl && (
+                          <img
+                            src={featuredEvent.imageUrl}
+                            alt={featuredEvent.title}
+                            class="linked-image-hover__media w-full h-[240px] object-cover"
+                            loading="lazy"
+                            transition:name={getTransitionName(featuredEvent)}
+                          />
+                        )}
+
+                        <div class="px-4 py-4">
+                          {getPrimaryBadgeHref(featuredEvent) ? (
+                            <a
+                              href={getPrimaryBadgeHref(featuredEvent)}
+                              class="relative z-[2] text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                            >
+                              {getPrimaryBadgeLabel(featuredEvent)}
+                            </a>
+                          ) : (
+                            <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                              {getPrimaryBadgeLabel(featuredEvent)}
+                            </p>
+                          )}
+                          <h2 class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mt-2">
+                            {featuredEvent.title}
+                          </h2>
+                        </div>
+
+                        <a
+                          href={featuredEvent.href}
+                          class="absolute inset-0 z-[1]"
+                          aria-label={featuredEvent.title}
+                        />
+                      </div>
+                    )}
+
+                    {sidebarCards.map((item) => (
+                      <NetlenkaCardOne
+                        title={item.title}
+                        category={getPrimaryBadgeLabel(item)}
+                        categoryHref={getPrimaryBadgeHref(item)}
+                        imageUrl={item.imageUrl ?? undefined}
+                        href={item.href}
+                        transitionName={getTransitionName(item)}
+                        hideDate={true}
+                      />
+                    ))}
+                  </div>
+                </aside>
+              )
+            }
+          </div>
+        )
+      }
     </div>
   </main>
 </Layout>

@@ -1309,6 +1309,13 @@ export interface PublicMaterialItem {
   authorName: string;
   publishedAt: ApiTimestamp;
   tags: string[];
+  isHotContent: boolean;
+  isNotebookContent: boolean;
+  isMaagChoice: boolean;
+  // Only set for contentType 'event'.
+  startDate?: ApiTimestamp | null;
+  endDate?: ApiTimestamp | null;
+  dateType?: "single" | "duration";
 }
 
 export interface PublicMaterialGroup {
@@ -1325,6 +1332,12 @@ export interface PublicMaterialsByTagResponse {
   tag: string;
   totalCount: number;
   groups: PublicMaterialGroup[];
+  // The single soonest-upcoming tagged event, shown as a card in the aside
+  // instead of in `groups` — events never appear in the main list here.
+  featuredEvent: PublicMaterialItem | null;
+  // Tagged items flagged isHotContent / isNotebookContent / isMaagChoice —
+  // pulled out of `groups` and shown as cards below the event card.
+  sidebarCards: PublicMaterialItem[];
 }
 
 export const publicMaterialsByTagApi = {

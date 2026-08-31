@@ -112,6 +112,17 @@ const parsePage = (value: unknown): number => {
   return Number.isFinite(parsed) && parsed >= 1 ? Math.floor(parsed) : 1;
 };
 
+// Content types that can carry the "самое читаемое" / "записная книжка" /
+// "Нетленка" editorial flags — mirrors EDITORIAL_FLAG_CONTENT_TYPE_SET in
+// publicLandingController.ts so a flag means the same thing everywhere.
+const EDITORIAL_FLAG_TYPES = new Set<MaterialContentType>([
+  'article',
+  'guide',
+  'flipper',
+  'interview',
+  'visual-story',
+]);
+
 interface MaterialItem {
   id: string;
   contentType: MaterialContentType;
@@ -122,6 +133,14 @@ interface MaterialItem {
   authorName: string;
   publishedAt: unknown;
   tags: string[];
+  isHotContent: boolean;
+  isNotebookContent: boolean;
+  isMaagChoice: boolean;
+  // Only populated for contentType 'event' — needed to pick and render the
+  // single featured event card on /tag/[tag].
+  startDate?: unknown;
+  endDate?: unknown;
+  dateType?: 'single' | 'duration';
 }
 
 const toMaterialItem = (
@@ -139,6 +158,16 @@ const toMaterialItem = (
     authorName: '',
     publishedAt: data.publishedAt ?? null,
     tags: Array.isArray(data.tags) ? data.tags.filter((tag: unknown) => typeof tag === 'string') : [],
+    isHotContent: type !== 'news' && (Boolean(data.isHotContent) || data.category === 'hotContent'),
+    isNotebookContent: EDITORIAL_FLAG_TYPES.has(type) && Boolean(data.isNotebookContent),
+    isMaagChoice: EDITORIAL_FLAG_TYPES.has(type) && Boolean(data.isMaagChoice),
+    ...(type === 'event'
+      ? {
+          startDate: data.startDate ?? null,
+          endDate: data.endDate ?? null,
+          dateType: (data.dateType === 'duration' ? 'duration' : 'single') as 'single' | 'duration',
+        }
+      : {}),
   };
 };
 
@@ -168,6 +197,40 @@ const attachAuthorNames = async (items: MaterialItem[]): Promise<MaterialItem[]>
 
 const sortByPublishedAtDesc = (left: MaterialItem, right: MaterialItem) =>
   getTime(right.publishedAt) - getTime(left.publishedAt);
+
+const startOfUtcDay = (date: Date): Date => {
+  const normalized = new Date(date);
+  normalized.setUTCHours(0, 0, 0, 0);
+  return normalized;
+};
+
+// /tag/[tag] has no per-tag editorial curation (unlike the landing page's
+// "auto-nearest" event slot), so the single featured event is always picked
+// automatically: the soonest event that hasn't ended yet. Falls back to null
+// (aside just omits the event card) when every tagged event is in the past.
+const pickFeaturedEvent = (events: MaterialItem[]): MaterialItem | null => {
+  const today = startOfUtcDay(new Date());
+
+  const upcoming = events
+    .map((event) => {
+      const start = toDate(event.startDate);
+      if (!start) return null;
+      const end = toDate(event.endDate) ?? start;
+      return { event, startDay: startOfUtcDay(start), endDay: startOfUtcDay(end) };
+    })
+    .filter((entry): entry is { event: MaterialItem; startDay: Date; endDay: Date } => entry !== null)
+    .filter((entry) => entry.endDay.getTime() >= today.getTime())
+    .sort((left, right) => left.startDay.getTime() - right.startDay.getTime());
+
+  return upcoming[0]?.event ?? null;
+};
+
+// isHotContent / isNotebookContent / isMaagChoice are the same 3 flags that
+// drive the "самое читаемое" (culture), "записная книжка" (paris) and
+// "Нетленка" (landing) rails — on the tag page they all feed the same aside,
+// so a match on any one of them pulls the item out of the main list.
+const isSidebarCard = (item: MaterialItem): boolean =>
+  item.isHotContent || item.isNotebookContent || item.isMaagChoice;
 
 const fetchTaggedItems = async (
   type: MaterialContentType,
@@ -212,14 +275,27 @@ export const getMaterialsByTag = async (req: Request, res: Response) => {
     );
     const allItems = await attachAuthorNames(itemsByTypeArrays.flat());
 
+    // Events never appear in the main list — only the single featured one,
+    // in the aside — so they're excluded from group-building entirely.
+    const featuredEvent = pickFeaturedEvent(allItems.filter((item) => item.contentType === 'event'));
+
+    // Anything flagged for one of the 3 editorial rails also moves out of
+    // the main list and into the aside, as a card, instead of a row.
+    const sidebarCards = allItems.filter((item) => item.contentType !== 'event' && isSidebarCard(item));
+    const sidebarCardKeys = new Set(sidebarCards.map((item) => `${item.contentType}:${item.id}`));
+
+    const listableItems = allItems.filter(
+      (item) => item.contentType !== 'event' && !sidebarCardKeys.has(`${item.contentType}:${item.id}`),
+    );
+
     const itemsByType = new Map<MaterialContentType, MaterialItem[]>();
-    allItems.forEach((item) => {
+    listableItems.forEach((item) => {
       const list = itemsByType.get(item.contentType) ?? [];
       list.push(item);
       itemsByType.set(item.contentType, list);
     });
 
-    const groups = TYPE_ORDER.map((type) => {
+    const groups = TYPE_ORDER.filter((type) => type !== 'event').map((type) => {
       const items = (itemsByType.get(type) ?? []).sort(sortByPublishedAtDesc);
       if (items.length === 0) return null;
 
@@ -243,6 +319,8 @@ export const getMaterialsByTag = async (req: Request, res: Response) => {
       tag,
       totalCount: allItems.length,
       groups,
+      featuredEvent,
+      sidebarCards,
     });
   } catch (error) {
     console.error('Error getting materials by tag:', error);
