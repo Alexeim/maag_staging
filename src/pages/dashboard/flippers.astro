@@ -78,10 +78,10 @@ const flippers = flippersRaw.map((flipper) => {
               const isLast = index === flippers.length - 1;
               return (
                 <tr
-                  class:list=[
+                  class:list={[
                     "bg-base-100 hover:bg-base-200/50",
                     !isLast && "border-b border-base-300",
-                  ]
+                  ]}
                 >
                   <th scope="row" class="px-6 py-4 font-medium text-base-content whitespace-nowrap">
                     <div class="font-semibold truncate max-w-xs" title={flipper.title}>{flipper.title}</div>
