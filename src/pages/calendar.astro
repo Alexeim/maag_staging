@@ -200,9 +200,11 @@ const topCards = topSourceCards.map((event, index) =>
   buildCardPayload(event, index + 1),
 );
 
-const lastChanceCards = lastChanceSourceCards.map((event, index) =>
-  buildCardPayload(event, index + 2),
-);
+const lastChanceCards = lastChanceSourceCards
+  .map((event, index) => buildCardPayload(event, index + 2))
+  // "Last chance" only makes sense for multi-day events — a single-day
+  // event doesn't have a "last day to catch it" framing.
+  .filter((event) => event.isDateRange);
 
 // Shared shape for every mobile/desktop carousel card driven by Alpine
 // (Главные события, Обязательная программа, Последний шанс).
