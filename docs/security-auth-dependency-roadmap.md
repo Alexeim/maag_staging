@@ -2,6 +2,51 @@
 
 Последний review: 2026-09-01
 
+## Прогресс (обновлено 2026-09-01)
+
+Сделано и задеплоено на прод (BE + FE green):
+
+- **`requireAdmin` middleware** в `server/src/middleware/auth.ts` — проверяет Firebase ID
+  token через `verifyIdToken` + роль `admin` из Firestore `users/{uid}`. Без токена → 401,
+  не-админ → 403.
+- **Все editorial write-роуты закрыты** `requireAdmin` на `POST` / `PUT` / `PATCH` / `DELETE`:
+  articles, news, events, flippers, interviews, authors, addresses, guides, visual-stories,
+  content-collections, photos-of-the-day, editorial-placements. `GET` везде оставлен
+  публичным — публичные страницы не задеты.
+- **Фронт шлёт токен автоматически.** У `request()` в `src/lib/api/api.ts` появился
+  `setAuthTokenProvider`; браузерный entrypoint регистрирует `getIdToken`, поэтому все
+  `*Api` write-вызовы несут токен без правок в каждом creator-логе. Списки, которые удаляют
+  через голый `fetch`, дописаны вручную (заголовок `Authorization`).
+- **`GET /api/test-firebase` удалён** вместе со скриптом `server/src/test-firebase-direct.ts`
+  и npm-скриптом `test:firebase`. Это был неаутентифицированный дамп первых 5 юзеров с email
+  (Firebase Admin SDK connection check из сентября 2025, забытый в проде).
+
+Проверено `curl` на проде: все write без токена → 401, все `GET` → 200, `/api/test-firebase` → 404.
+
+Коммиты: `de7f18fc`, `d43f729b`, `16546574`, `6a402f4a`.
+
+### Ещё НЕ сделано из Phase 1
+
+- **Astro dashboard guard** (`src/middleware.ts`) всё ещё закомментирован. Защита теперь на
+  уровне API, но сами страницы `/dashboard/**` на уровне SSR не закрыты.
+- **Cookie `session` → `__session`** не переименована. Нюанс Firebase Hosting rewrite всё ещё открыт.
+
+### Новые находки этой сессии
+
+- **Firebase Storage.** Правил нет в репозитории. Проверка анонимным `curl` на проде:
+  запись → `403 Permission denied` (заблокировано), но `LIST /o` и чтение файлов —
+  **полностью открыты** (виден весь инвентарь бакета). Правило записи, вероятно,
+  `allow write: if request.auth != null`, то есть писать может любой залогиненный
+  пользователь, не только admin — надо проверить. Загрузка картинок идёт с клиента напрямую
+  в Storage, мимо Express, поэтому `requireAdmin` её не трогает — единственная граница там
+  это Storage Rules.
+- **Stripe `POST /stripe/create-portal-session`** берёт `customerId` из тела запроса без
+  auth → IDOR: можно открыть биллинг-портал чужого клиента. `create-checkout-session`
+  так же берёт `userId` из тела.
+- **`GET /api/dashboard/overview`** не закрыт (это чтение — счётчики и черновики дашборда).
+- **`articlesApi.del`** в `src/components/article/creatorLogic.ts:1730` — такого метода нет
+  (есть `delete`), удаление из редактора обычных статей сломано независимо от auth.
+
 ## Контекст проекта
 
 MAAG сейчас состоит из двух Node-сервисов:
@@ -71,9 +116,10 @@ Firebase всё ещё используется для:
 
 - `server/src/controllers/authController.ts` создаёт Firebase Admin session cookie из Firebase ID token.
 - `verifySession` проверяет session cookie через `getAuth().verifySessionCookie(sessionCookie, true)` и возвращает роль из Firestore `users/{uid}`.
-- `server/src/middleware/auth.ts` сейчас проверяет Firebase ID token из `Authorization: Bearer ...`.
-- Этот middleware используется на `userRoutes`.
-- Большинство editorial CRUD routes сейчас не закрыты backend auth middleware.
+- `server/src/middleware/auth.ts` проверяет Firebase ID token из `Authorization: Bearer ...`.
+- ~~Большинство editorial CRUD routes сейчас не закрыты backend auth middleware.~~
+  **Обновление 2026-09-01:** добавлен `requireAdmin` (Bearer token + роль `admin` из Firestore),
+  повешен на `POST/PUT/PATCH/DELETE` всех editorial route-групп. `requireAuth` по-прежнему на `userRoutes`.
 
 ## Review деплоя
 
@@ -215,22 +261,12 @@ Alpine иногда может быть капризнее из-за musl libc �
 
 Если появятся странные runtime/build проблемы после dependency upgrades, первый кандидат для проверки — переход на `node:24-slim`.
 
-### Public debug endpoint
+### Public debug endpoint — ✅ сделано (2026-09-01)
 
-В `server/src/index.ts` есть endpoint:
-
-```text
-GET /api/test-firebase
-```
-
-Он вызывает `auth.listUsers(5)`.
-
-Это нельзя оставлять публичным в production hardening.
-
-Варианты:
-
-- удалить endpoint;
-- или закрыть `requireAdmin`.
+Был `GET /api/test-firebase` в `server/src/index.ts`, вызывал `auth.listUsers(5)` и отдавал
+email'ы юзеров без auth. Удалён вместе со скриптом `server/src/test-firebase-direct.ts`,
+npm-скриптом `test:firebase` и ставшим лишним импортом `getAuth` в `index.ts`.
+Проверено на проде: `GET /api/test-firebase` → 404.
 
 ## Dependency audit summary
 
@@ -418,7 +454,11 @@ Priority: highest.
 - invalid/expired cookie удаляется;
 - unauthenticated dashboard request уходит на `/` или login route.
 
-#### 1.2 Добавить backend session-cookie middleware
+#### 1.2 Добавить backend auth middleware — ✅ сделано (2026-09-01)
+
+Сделано в варианте Bearer ID token, а не session-cookie: `requireAdmin` в
+`server/src/middleware/auth.ts` (`verifyIdToken` → роль из `users/{uid}` → `admin`?).
+`requireSession` / `requireRole` не добавлялись — пока не нужны.
 
 Файлы:
 
@@ -434,9 +474,13 @@ Priority: highest.
 - кладёт user object в request;
 - даёт middleware `requireSession`, `requireAdmin`, возможно `requireRole`.
 
-#### 1.3 Закрыть editorial CRUD routes
+#### 1.3 Закрыть editorial CRUD routes — ✅ сделано (2026-09-01)
 
-Закрыть:
+`requireAdmin` повешен на `POST/PUT/PATCH/DELETE` всех групп ниже. `GET` оставлен публичным
+(short-term вариант из рекомендации ниже). Фронт: `setAuthTokenProvider` в `src/lib/api/api.ts`
++ ручной заголовок в списках с `fetch`-удалением.
+
+Закрыто:
 
 - `/api/articles`
 - `/api/news`
@@ -661,26 +705,37 @@ Dependencies:
 
 ## Рекомендуемый порядок работ
 
-1. Включить Astro dashboard guard.
-2. Добавить backend session-cookie auth middleware.
-3. Закрыть editorial CRUD routes.
-4. Ограничить CORS.
-5. Удалить или закрыть `/api/test-firebase`.
-6. Прогнать auth/deploy smoke tests.
-7. Обновить backend `sharp`.
-8. Отдельно проверить `firebase-admin@14.x`.
-9. Перенести frontend build/deploy-only tooling из production dependencies.
-10. Проверить Quill/rich-text sanitization.
-11. Настроить npm install scripts allow policy.
-12. Перейти на immutable image tags.
-13. Рассмотреть `min instances = 1` для frontend Cloud Run, если landing иногда открывается слишком медленно.
-14. Профилировать landing SSR/public API/cache headers.
-15. Повторить audit и обновить этот документ.
+1. ⬜ Включить Astro dashboard guard (`src/middleware.ts`).
+2. ✅ Backend auth middleware — сделано через Bearer ID token (`requireAdmin`), а не session-cookie.
+3. ✅ Закрыть editorial CRUD routes — сделано для всех групп (write methods).
+4. ⬜ Ограничить CORS.
+5. ✅ Удалить `/api/test-firebase` — удалён вместе со скриптом.
+6. ✅ Прогнать auth smoke tests — curl на локали и на проде, зелёные.
+7. ⬜ Закрыть Stripe `create-portal-session` / `create-checkout-session` (IDOR по `customerId` / `userId` из тела).
+8. ⬜ Закрыть `GET /api/dashboard/overview` (`requireAdmin`).
+9. ⬜ Вытащить Firestore/Storage rules в репо; проверить, что запись в Storage не `auth != null`, а admin-only; решить по открытому листингу.
+10. ⬜ Переименовать cookie `session` → `__session` (`src/pages/api/session.ts`, `src/middleware.ts`).
+11. ⬜ Починить `articlesApi.del` → `delete` в `src/components/article/creatorLogic.ts`.
+12. ⬜ Обновить backend `sharp`.
+13. ⬜ Отдельно проверить `firebase-admin@14.x`.
+14. ⬜ Перенести frontend build/deploy-only tooling из production dependencies.
+15. ⬜ Проверить Quill/rich-text sanitization.
+16. ⬜ Настроить npm install scripts allow policy.
+17. ⬜ Перейти на immutable image tags.
+18. ⬜ Рассмотреть `min instances = 1` для frontend Cloud Run.
+19. ⬜ Профилировать landing SSR/public API/cache headers.
+20. ⬜ Повторить audit и обновить этот документ.
 
 ## Итоговая оценка
 
-Это не stop-the-line incident.
+Обновление 2026-09-01: **backend auth boundary закрыт и задеплоен.** Все editorial write-роуты
+требуют `requireAdmin`, публичный дамп юзеров (`/api/test-firebase`) удалён. Фронт шлёт токен.
+Основной риск (аноним пишет/удаляет контент через публичный Cloud Run API, аноним читает
+список юзеров) — снят.
 
-С учётом текущей формы проекта реальная срочность ниже, чем выглядят raw `critical/high` цифры из `npm audit`. Но backend auth boundary нужно закрыть первым делом, потому что Cloud Run API публично достижим, а editorial routes сейчас не должны полагаться на frontend UI как на защиту.
+Осталось: Astro dashboard guard, CORS allowlist, Stripe IDOR, `GET /api/dashboard/overview`,
+Storage rules в репо + проверка их строгости, `__session`, и dependency-гигиена. Ничего из
+этого не stop-the-line; это нормальная последовательная работа по списку выше.
 
-После server-side auth dependency audit превращается из тревожного шума в нормальную maintenance-задачу.
+После закрытия auth boundary dependency audit превращается из тревожного шума в обычную
+maintenance-задачу.
