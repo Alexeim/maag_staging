@@ -215,7 +215,7 @@ const splitTitle = (t: string) => {
                       href={cultureHero.href}
                       class="text-current no-underline hover:underline"
                     >
-                      <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
+                      <h3 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
                         {cultureHero.paid ? (
                           <>
                             {splitTitle(cultureHero.title).start && (
@@ -229,7 +229,7 @@ const splitTitle = (t: string) => {
                         ) : (
                           cultureHero.title
                         )}
-                      </h4>
+                      </h3>
                     </a>
                     {getCardLead(cultureHero) && (
                       <p class="text-base lg:text-sm text-base-content font-inter font-light">
@@ -252,9 +252,9 @@ const splitTitle = (t: string) => {
                     <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">
                       Балет
                     </p>
-                    <h4 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
+                    <h3 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
                       Нет статей в категории
-                    </h4>
+                    </h3>
                   </div>
                 </>
               )
@@ -436,7 +436,7 @@ const splitTitle = (t: string) => {
                       href={parisHero.href}
                       class="text-current no-underline hover:underline"
                     >
-                      <h4 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
+                      <h3 class="text-3xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2">
                         {parisHero.paid ? (
                           <>
                             {splitTitle(parisHero.title).start && (
@@ -450,7 +450,7 @@ const splitTitle = (t: string) => {
                         ) : (
                           parisHero.title
                         )}
-                      </h4>
+                      </h3>
                     </a>
                     {getCardLead(parisHero) && (
                       <p class="text-base lg:text-sm text-base-content font-inter font-light">
@@ -477,9 +477,9 @@ const splitTitle = (t: string) => {
                     <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">
                       {PARIS_CATEGORY_LABEL}
                     </p>
-                    <h4 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
+                    <h3 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
                       Нет статей в категории
-                    </h4>
+                    </h3>
                   </div>
                   <div class="aspect-[3/2] overflow-hidden lg:order-2">
                     <Image

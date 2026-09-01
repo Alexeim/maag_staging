@@ -37,7 +37,9 @@ const publicLanding = await publicLandingApi.get().catch((error) => {
   description="Авторитетный русскоязычный источник информации о французской культуре и актуальных событиях во Франции. Интервью, рецензии, обзоры выставок, путеводители, афиша и авторские материалы о городе — всё необходимое, чтобы понимать Париж, открывать его новые стороны и чувствовать себя частью его культурной жизни."
   useClientRouter={true}
 >
-  <Hero />
-  <MainLandingBlock data={publicLanding.mainBlock} />
-  <LandingBody data={publicLanding.body} />
+  <main>
+    <Hero />
+    <MainLandingBlock data={publicLanding.mainBlock} />
+    <LandingBody data={publicLanding.body} />
+  </main>
 </Layout>
