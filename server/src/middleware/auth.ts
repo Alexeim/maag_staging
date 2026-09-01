@@ -18,16 +18,23 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 };
 
 // Like requireAuth, but also loads the caller's role from Firestore and
-// rejects anyone who is not an admin. Used to gate editorial writes.
+// rejects anyone who is not an admin. Accepts either a Bearer ID token
+// (browser calls) or an X-Session-Cookie header carrying the Firebase
+// session cookie (Astro SSR calls, which have no ID token). Used to gate
+// editorial writes and admin-only reads.
 export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization?.split('Bearer ')[1];
+  const bearer = req.headers.authorization?.split('Bearer ')[1];
+  const sessionCookie = req.header('x-session-cookie');
 
-  if (!token) {
+  if (!bearer && !sessionCookie) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
-    const decoded = await getAuth().verifyIdToken(token);
+    const decoded = bearer
+      ? await getAuth().verifyIdToken(bearer)
+      : await getAuth().verifySessionCookie(sessionCookie as string, true);
+
     const snap = await getDb().collection('users').doc(decoded.uid).get();
     const role = snap.exists ? snap.data()?.role : null;
 

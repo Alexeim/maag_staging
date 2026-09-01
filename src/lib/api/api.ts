@@ -8,6 +8,9 @@ export interface ApiRequestOptions {
   headers?: Record<string, string>;
   body?: unknown;
   token?: string;
+  // Firebase session-cookie value, forwarded as X-Session-Cookie. For SSR calls
+  // where there is no Bearer ID token but there is a __session cookie.
+  sessionCookie?: string;
   baseUrl?: string;
   query?: Record<string, ApiQueryValue>;
   signal?: AbortSignal;
@@ -50,6 +53,7 @@ export async function request<T>(
     headers = {},
     body,
     token,
+    sessionCookie,
     baseUrl,
     query,
     signal,
@@ -86,6 +90,10 @@ export async function request<T>(
 
   if (!isPublic && authToken) {
     finalHeaders["Authorization"] = `Bearer ${authToken}`;
+  }
+
+  if (!isPublic && sessionCookie) {
+    finalHeaders["X-Session-Cookie"] = sessionCookie;
   }
 
   const payload =
@@ -1456,9 +1464,10 @@ export interface DashboardOverviewResponse {
 }
 
 export const dashboardApi = {
-  overview(token?: string) {
+  overview(auth: { token?: string; sessionCookie?: string } = {}) {
     return request<DashboardOverviewResponse>("/api/dashboard/overview", {
-      token,
+      token: auth.token,
+      sessionCookie: auth.sessionCookie,
     });
   },
 };

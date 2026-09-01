@@ -19,7 +19,10 @@ let materials: Awaited<ReturnType<typeof dashboardApi.overview>>["materials"] =
 let loadError = false;
 
 try {
-  const overview = await dashboardApi.overview();
+  // SSR call: no Bearer token here, so forward the __session cookie for requireAdmin.
+  const overview = await dashboardApi.overview({
+    sessionCookie: Astro.cookies.get("__session")?.value,
+  });
   counts = overview.counts;
   materials = overview.materials;
 } catch (error) {
