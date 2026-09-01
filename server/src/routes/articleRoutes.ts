@@ -6,13 +6,14 @@ import {
   updateArticle,
   deleteArticle,
 } from '../controllers/articleController';
+import { requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
 router.get('/', getArticles);
-router.post('/', createArticle);
+router.post('/', requireAdmin, createArticle);
 router.get('/:id', getArticleById);
-router.put('/:id', updateArticle);
-router.delete('/:id', deleteArticle);
+router.put('/:id', requireAdmin, updateArticle);
+router.delete('/:id', requireAdmin, deleteArticle);
 
 export default router;

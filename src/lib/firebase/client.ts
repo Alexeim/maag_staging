@@ -21,3 +21,8 @@ if (!getApps().length) {
 
 export const auth = getAuth(app);
 export { app };
+
+// Firebase ID token of the signed-in user, or undefined when signed out.
+// Pass it to write calls in api.ts so the backend can verify the caller.
+export const getIdToken = async (): Promise<string | undefined> =>
+  (await auth.currentUser?.getIdToken()) ?? undefined;

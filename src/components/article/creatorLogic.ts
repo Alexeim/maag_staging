@@ -1,5 +1,5 @@
 import { articlesApi, authorsApi, contentCollectionsApi } from "@/lib/api/api";
-import { app } from "../../lib/firebase/client";
+import { app, getIdToken } from "../../lib/firebase/client";
 import {
   getInitialRichTextHtml,
   normalizeStoredRichTextHtml,
@@ -1693,14 +1693,14 @@ export default function articleCreatorLogic(initialState = {}) {
         };
 
         if (this.isEditMode && this.articleId) {
-          await articlesApi.update(this.articleId, payload);
+          await articlesApi.update(this.articleId, payload, await getIdToken());
           localStorage.removeItem("articlePreview");
           window.Alpine.store("ui").showToast("Статья успешно обновлена!");
           setTimeout(() => {
             globalThis.location.href = listUrl;
           }, 1500);
         } else {
-          await articlesApi.create(payload);
+          await articlesApi.create(payload, await getIdToken());
           localStorage.removeItem("articlePreview");
           window.Alpine.store("ui").showToast(
             "Статья успешно создана! Молодец!",

@@ -1,5 +1,5 @@
 import { articlesApi, authorsApi } from "@/lib/api/api";
-import { app } from "../../lib/firebase/client";
+import { app, getIdToken } from "../../lib/firebase/client";
 import {
   RELATED_CONTENT_TYPE_OPTIONS,
   createEmptyRelatedContent,
@@ -783,7 +783,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
       const performDelete = async () => {
         try {
-          await articlesApi.delete(this.articleId!);
+          await articlesApi.delete(this.articleId!, await getIdToken());
           ui()?.showToast?.("Статья удалена");
           setTimeout(() => {
             globalThis.location.href = redirectUrl || "/dashboard/tips";
@@ -886,14 +886,14 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         };
 
         if (this.isEditMode && this.articleId) {
-          await articlesApi.update(this.articleId, payload);
+          await articlesApi.update(this.articleId, payload, await getIdToken());
           globalThis.localStorage.removeItem("tipsPreview");
           ui()?.showToast?.("Статья обновлена!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard/tips";
           }, 1500);
         } else {
-          await articlesApi.create(payload);
+          await articlesApi.create(payload, await getIdToken());
           globalThis.localStorage.removeItem("tipsPreview");
           ui()?.showToast?.("Статья создана!");
           setTimeout(() => {
