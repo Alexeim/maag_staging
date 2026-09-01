@@ -20,16 +20,33 @@
 - **`GET /api/test-firebase` удалён** вместе со скриптом `server/src/test-firebase-direct.ts`
   и npm-скриптом `test:firebase`. Это был неаутентифицированный дамп первых 5 юзеров с email
   (Firebase Admin SDK connection check из сентября 2025, забытый в проде).
+- **Astro dashboard guard включён** в `src/middleware.ts`: любой запрос к `/dashboard/**` без
+  admin-сессии → `redirect("/")`. Ловит и аноним, и залогиненного не-админа.
+- **Cookie `session` → `__session`** переименована в `src/middleware.ts` и
+  `src/pages/api/session.ts` — единственное имя, которое Firebase Hosting пропускает через
+  rewrite на Cloud Run. Старые сессии перевыпускаются сами через `onAuthStateChanged`.
+- **CORS сужен до allowlist** в `server/src/index.ts`: `maagfrance.fr`, Firebase Hosting
+  домены, Cloud Run frontend URL, `FRONTEND_URL`, локалка. Запросы без `Origin` (SSR, curl,
+  Stripe webhook) проходят; неизвестные браузерные origin не получают CORS-заголовков.
+  Без `credentials` — API вызывается Bearer-токеном, не кукой.
+- **`GET /api/dashboard/overview` закрыт** `requireAdmin`. Эндпоинт отдавал id / title /
+  тип / `published` всех материалов, включая черновики, кому угодно. `requireAdmin` теперь
+  принимает либо Bearer ID token (браузер), либо заголовок `X-Session-Cookie` с Firebase
+  session cookie — потому что dashboard home тянет overview на SSR, где ID token'а нет.
+  `DashboardOverview.astro` прокидывает `Astro.cookies` `__session`.
 
-Проверено `curl` на проде: все write без токена → 401, все `GET` → 200, `/api/test-firebase` → 404.
+Проверено `curl`: write без токена → 401, публичный `GET` → 200, `/api/test-firebase` → 404,
+`/dashboard` без куки → 302 на `/`, `/api/dashboard/overview` без auth → 401,
+CORS отдаёт ACAO только своим origin.
 
-Коммиты: `de7f18fc`, `d43f729b`, `16546574`, `6a402f4a`.
+Коммиты: `de7f18fc`, `d43f729b`, `16546574`, `6a402f4a`, `e751adb5`, `307e9bac`, `17f55466`.
 
-### Ещё НЕ сделано из Phase 1
+> `e751adb5`, `307e9bac`, `17f55466` — закоммичены, ждут деплоя FE + BE.
 
-- **Astro dashboard guard** (`src/middleware.ts`) всё ещё закомментирован. Защита теперь на
-  уровне API, но сами страницы `/dashboard/**` на уровне SSR не закрыты.
-- **Cookie `session` → `__session`** не переименована. Нюанс Firebase Hosting rewrite всё ещё открыт.
+### Phase 1 — закрыто
+
+Server-side auth boundary стоит на трёх слоях: `requireAdmin` на данных (API), middleware
+guard на страницах (`/dashboard`), `__session` cookie как транспорт личности на SSR.
 
 ### Новые находки этой сессии
 
@@ -43,7 +60,7 @@
 - **Stripe `POST /stripe/create-portal-session`** берёт `customerId` из тела запроса без
   auth → IDOR: можно открыть биллинг-портал чужого клиента. `create-checkout-session`
   так же берёт `userId` из тела.
-- **`GET /api/dashboard/overview`** не закрыт (это чтение — счётчики и черновики дашборда).
+- ~~**`GET /api/dashboard/overview`** не закрыт~~ → ✅ закрыт `requireAdmin` (`17f55466`).
 - **`articlesApi.del`** в `src/components/article/creatorLogic.ts:1730` — такого метода нет
   (есть `delete`), удаление из редактора обычных статей сломано независимо от auth.
 
@@ -180,25 +197,17 @@ Firebase всё ещё используется для:
 - Закрыть editorial CRUD routes backend middleware.
 - Позже можно рассмотреть private backend + service-to-service auth от frontend server, но это уже более сложная архитектура.
 
-### CORS
+### CORS — ✅ сделано (2026-09-01, `307e9bac`)
 
-Сейчас в `server/src/index.ts` стоит:
+`app.use(cors())` заменён на allowlist в `server/src/index.ts`: `maagfrance.fr`,
+`www.maagfrance.fr`, `maag-60419.web.app`, `maag-60419.firebaseapp.com`, Cloud Run frontend
+URL, `process.env.FRONTEND_URL`, `localhost:4321/4322/8080/3000`. Запросы без `Origin`
+(Astro SSR, curl, Stripe webhook) проходят; неизвестный браузерный origin не получает
+CORS-заголовков (callback `(null, false)`). `credentials` не включён — API вызывается
+Bearer-токеном, куки на домен `maag-api` не уходят.
 
-```ts
-app.use(cors());
-```
-
-Это слишком открыто для production.
-
-Целевое состояние:
-
-- allowlist origin:
-  - `https://maagfrance.fr`
-  - Firebase Hosting домен, если он нужен;
-  - Cloud Run frontend URL, если он остаётся user-facing;
-  - локальные dev origins.
-- Если backend будет принимать cookies cross-origin, включить `credentials: true`.
-- Не использовать wildcard origin вместе с credentials.
+Открытый вопрос на потом: если появится same-origin proxy через Astro и куки начнут ходить
+cross-origin — тогда `credentials: true` + точечный origin (без wildcard).
 
 ### Image tags
 
@@ -438,21 +447,12 @@ Priority: highest.
 
 Цель: dashboard и editorial writes должны быть защищены server-side, а не только UI/Alpine state.
 
-#### 1.1 Включить Astro dashboard guard
+#### 1.1 Включить Astro dashboard guard — ✅ сделано (2026-09-01, `e751adb5`)
 
-Файл: `src/middleware.ts`
-
-Сейчас:
-
-- cookie проверяется;
-- `locals.user` заполняется;
-- dashboard redirect logic закомментирован.
-
-Нужно:
-
-- `/dashboard/**` требует `locals.user.role === "admin"` или явно разрешённую роль;
-- invalid/expired cookie удаляется;
-- unauthenticated dashboard request уходит на `/` или login route.
+`src/middleware.ts`: `/dashboard/**` при `locals.user?.role !== "admin"` → `context.redirect("/")`
+(ловит и аноним, и не-админа). Невалидная/протухшая cookie удаляется в `catch` при verify.
+Cookie переименована `session` → `__session` здесь и в `src/pages/api/session.ts`.
+`/calendar`, `/paris` gating — отложено, решаем отдельно.
 
 #### 1.2 Добавить backend auth middleware — ✅ сделано (2026-09-01)
 
@@ -705,17 +705,18 @@ Dependencies:
 
 ## Рекомендуемый порядок работ
 
-1. ⬜ Включить Astro dashboard guard (`src/middleware.ts`).
+1. ✅ Включить Astro dashboard guard (`src/middleware.ts`) — `e751adb5`.
 2. ✅ Backend auth middleware — сделано через Bearer ID token (`requireAdmin`), а не session-cookie.
 3. ✅ Закрыть editorial CRUD routes — сделано для всех групп (write methods).
-4. ⬜ Ограничить CORS.
+4. ✅ Ограничить CORS — allowlist в `server/src/index.ts`, `307e9bac`.
 5. ✅ Удалить `/api/test-firebase` — удалён вместе со скриптом.
 6. ✅ Прогнать auth smoke tests — curl на локали и на проде, зелёные.
-7. ⬜ Закрыть Stripe `create-portal-session` / `create-checkout-session` (IDOR по `customerId` / `userId` из тела).
-8. ⬜ Закрыть `GET /api/dashboard/overview` (`requireAdmin`).
-9. ⬜ Вытащить Firestore/Storage rules в репо; проверить, что запись в Storage не `auth != null`, а admin-only; решить по открытому листингу.
-10. ⬜ Переименовать cookie `session` → `__session` (`src/pages/api/session.ts`, `src/middleware.ts`).
-11. ⬜ Починить `articlesApi.del` → `delete` в `src/components/article/creatorLogic.ts`.
+7. ✅ Переименовать cookie `session` → `__session` — `e751adb5`.
+8. ⬜ Закрыть Stripe `create-portal-session` / `create-checkout-session` (IDOR по `customerId` / `userId` из тела).
+9. ✅ Закрыть `GET /api/dashboard/overview` (`requireAdmin`, Bearer или `X-Session-Cookie`) — `17f55466`.
+10. ⬜ Вытащить Firestore/Storage rules в репо; проверить, что запись в Storage не `auth != null`, а admin-only; решить по открытому листингу.
+11. ⬜ Решить `/calendar`, `/paris` — закрытые членам или публичные.
+12. ⬜ Починить `articlesApi.del` → `delete` в `src/components/article/creatorLogic.ts`.
 12. ⬜ Обновить backend `sharp`.
 13. ⬜ Отдельно проверить `firebase-admin@14.x`.
 14. ⬜ Перенести frontend build/deploy-only tooling из production dependencies.
@@ -733,9 +734,13 @@ Dependencies:
 Основной риск (аноним пишет/удаляет контент через публичный Cloud Run API, аноним читает
 список юзеров) — снят.
 
-Осталось: Astro dashboard guard, CORS allowlist, Stripe IDOR, `GET /api/dashboard/overview`,
-Storage rules в репо + проверка их строгости, `__session`, и dependency-гигиена. Ничего из
-этого не stop-the-line; это нормальная последовательная работа по списку выше.
+Обновление позже 2026-09-01: добавлены Astro `/dashboard` guard, cookie `__session`, CORS
+allowlist (коммиты `e751adb5`, `307e9bac`). Server-side auth boundary закрыт целиком: данные
+(API), страницы (`/dashboard`), транспорт личности (`__session`).
+
+Осталось: Stripe IDOR, Storage rules в репо + проверка их строгости, решение по
+`/calendar` / `/paris`, dependency-гигиена. Ничего из этого не stop-the-line; это
+нормальная последовательная работа по списку выше.
 
 После закрытия auth boundary dependency audit превращается из тревожного шума в обычную
 maintenance-задачу.
