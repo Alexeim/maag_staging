@@ -1,7 +1,9 @@
 import type { APIRoute } from "astro";
 import { authSessionApi, ApiError } from "@/lib/api/api";
 
-const SESSION_COOKIE_NAME = "session";
+// Must be exactly "__session": Firebase Hosting strips every other cookie on
+// its rewrite to Cloud Run, so this is the only name that survives to Astro SSR.
+const SESSION_COOKIE_NAME = "__session";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   const { idToken } = (await request.json().catch(() => ({}))) as {

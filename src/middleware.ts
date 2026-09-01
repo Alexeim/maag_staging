@@ -1,7 +1,9 @@
 import { defineMiddleware } from "astro:middleware";
 import { authSessionApi } from "@/lib/api/api";
 
-const SESSION_COOKIE_NAME = "session";
+// Must match src/pages/api/session.ts. "__session" is the only cookie name
+// Firebase Hosting forwards through its rewrite to Cloud Run.
+const SESSION_COOKIE_NAME = "__session";
 
 // Whoever made the request — stored here so any page can read it.
 interface SessionUser {
@@ -26,17 +28,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
   }
 
-  // const isDashboardRoute = context.url.pathname.startsWith("/dashboard");
+  // Dashboard is admin-only. Covers both "not logged in" (user is null) and
+  // "logged in but not admin". Redirect target is outside /dashboard, so no loop.
+  const isDashboardRoute = context.url.pathname.startsWith("/dashboard");
 
-  // if (isDashboardRoute && locals.user?.role !== "admin") {
-  //   return context.redirect("/");
-  // }
+  if (isDashboardRoute && locals.user?.role !== "admin") {
+    return context.redirect("/");
+  }
 
-  // const isParisRoute = context.url.pathname.startsWith("/paris");
-
-  // if (isParisRoute && locals.user?.role !== "admin") {
-  //   return context.redirect("/");
-  // }
+  // /calendar, /paris gating — decide later.
 
   return next();
 });
