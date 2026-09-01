@@ -20,6 +20,8 @@
     "repair:landing-main-hero:apply": "node scripts/fixLandingMainHeroSchema.js --apply",
     "migrate:published:dry": "node scripts/backfillPublishedFields.js",
     "migrate:published:apply": "node scripts/backfillPublishedFields.js --apply",
+    "purge:events:dry": "ts-node src/scripts/purgeOldEvents.ts",
+    "purge:events:apply": "ts-node src/scripts/purgeOldEvents.ts --apply",
     "deploy:prod": "bash deploy.sh",
     "images:compress:dry": "node scripts/compressStorageImages.js --dry-run",
     "images:compress:live": "node scripts/compressStorageImages.js"

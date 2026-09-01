@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { getDb, deleteFileFromStorage } from '../services/firebase';
+import { getDb } from '../services/firebase';
+import { purgeEventById } from '../services/eventPurge';
 import { normalizeRelatedContent, type RelatedContent } from '../utils/relatedContent';
 import {
   normalizeContentCollectionId,
@@ -406,55 +407,13 @@ export const updateEvent = async (req: Request, res: Response) => {
 export const deleteEvent = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const eventDoc = await eventsCollection.doc(id).get();
+    // Storage images, relatedContent backrefs and content-collection membership
+    // are all cleaned up inside purgeEventById — the same path the purge job uses.
+    const result = await purgeEventById(id);
 
-    if (!eventDoc.exists) {
+    if (result.status === 'not-found') {
       return res.status(404).json({ message: 'Event not found' });
     }
-
-    const eventData = eventDoc.data() as EventItem;
-    const imageUrlsToDelete: string[] = [];
-    const previousContentCollectionId = normalizeContentCollectionId(
-      eventData.contentCollectionId,
-    );
-
-    if (eventData.imageUrl) {
-      imageUrlsToDelete.push(eventData.imageUrl);
-    }
-
-    if (Array.isArray(eventData.content)) {
-      for (const block of eventData.content) {
-        if (block.type === 'image' && block.url) {
-          imageUrlsToDelete.push(block.url);
-        }
-        if (block.type === 'one-big-one-small') {
-          if (block.portraitImageUrl) {
-            imageUrlsToDelete.push(block.portraitImageUrl);
-          }
-          if (block.landscapeImageUrl) {
-            imageUrlsToDelete.push(block.landscapeImageUrl);
-          }
-        }
-      }
-    }
-
-    if (imageUrlsToDelete.length > 0) {
-      console.log(`[Event Delete] Deleting ${imageUrlsToDelete.length} associated images.`);
-      await Promise.all(imageUrlsToDelete.map(url => deleteFileFromStorage(url)));
-    }
-
-    await db.runTransaction(async (transaction) => {
-      await syncSingleContentCollectionMembershipInTransaction({
-        transaction,
-        collectionsCollection: contentCollectionsCollection,
-        previousCollectionId: previousContentCollectionId,
-        nextCollectionId: null,
-        contentType: 'event',
-        materialId: id,
-        now: new Date(),
-      });
-      transaction.delete(eventsCollection.doc(id));
-    });
 
     res.status(204).send();
   } catch (error) {
