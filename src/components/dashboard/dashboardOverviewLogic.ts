@@ -5,6 +5,7 @@ import {
   type DashboardMaterialRow,
   type DashboardMaterialType,
 } from "@/lib/utils/dashboardMaterials";
+import { getIdToken } from "@/lib/firebase/client";
 
 declare const Alpine: any;
 
@@ -283,8 +284,10 @@ export default (initialState: InitialState) => ({
     const meta = MATERIAL_TYPES[type];
     if (!meta) return;
     try {
+      const token = await getIdToken();
       const response = await fetch(this.buildApiUrl(meta.deletePath(id)), {
         method: "DELETE",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!response.ok && response.status !== 204) {
         throw new Error(`Deletion failed with status: ${response.status}`);
