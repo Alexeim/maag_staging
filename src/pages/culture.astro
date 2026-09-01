@@ -153,7 +153,7 @@ const splitTitle = (t: string) => {
 };
 
 const primaryCultureTrunc = primaryCultureArticle
-  ? truncateText(primaryCultureArticle.title, 96)
+  ? truncateText(primaryCultureArticle.title, 220)
   : "";
 const primaryCultureSplit = splitTitle(primaryCultureTrunc);
 ---
@@ -232,7 +232,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
 
                   {getCardLead(primaryCultureArticle) && (
                     <p class="text-base lg:text-sm text-base-content font-inter font-light">
-                      {truncateText(getCardLead(primaryCultureArticle), 280)}
+                      {getCardLead(primaryCultureArticle)}
                     </p>
                   )}
 
