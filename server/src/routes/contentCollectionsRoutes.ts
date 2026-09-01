@@ -5,12 +5,13 @@ import {
   getContentCollections,
   updateContentCollection,
 } from '../controllers/contentCollectionsController';
+import { requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
 router.get('/', getContentCollections);
-router.post('/', createContentCollection);
+router.post('/', requireAdmin, createContentCollection);
 router.get('/:id', getContentCollectionById);
-router.put('/:id', updateContentCollection);
+router.put('/:id', requireAdmin, updateContentCollection);
 
 export default router;

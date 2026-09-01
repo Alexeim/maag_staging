@@ -6,13 +6,14 @@ import {
   updateNews,
   deleteNews,
 } from '../controllers/newsController';
+import { requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
 router.get('/', getNews);
-router.post('/', createNews);
+router.post('/', requireAdmin, createNews);
 router.get('/:id', getNewsById);
-router.put('/:id', updateNews);
-router.delete('/:id', deleteNews);
+router.put('/:id', requireAdmin, updateNews);
+router.delete('/:id', requireAdmin, deleteNews);
 
 export default router;

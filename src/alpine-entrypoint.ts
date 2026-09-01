@@ -4,9 +4,12 @@ import { authStore } from '@/stores/authStore';
 import { createUiStore } from '@/stores/uiStore';
 import lazyLoadPlugin from '@/lib/alpine/plugins/lazyLoadPlugin';
 import blockRichTextEditor from '@/lib/alpine/blockRichTextEditor';
-import { auth } from '@/lib/firebase/client';
+import { auth, getIdToken } from '@/lib/firebase/client';
 import { onAuthStateChanged } from 'firebase/auth';
-import { usersApi } from "@/lib/api/api";
+import { setAuthTokenProvider, usersApi } from "@/lib/api/api";
+
+// Let every api.ts write call pick up the signed-in user's token automatically.
+setAuthTokenProvider(getIdToken);
 
 export default (Alpine: Alpine) => {
   console.log('Alpine entrypoint loaded!');

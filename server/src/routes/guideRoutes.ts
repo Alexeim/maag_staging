@@ -6,13 +6,14 @@ import {
   updateGuide,
   deleteGuide,
 } from '../controllers/guideController';
+import { requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
 router.get('/', getGuides);
-router.post('/', createGuide);
+router.post('/', requireAdmin, createGuide);
 router.get('/:id', getGuideById);
-router.put('/:id', updateGuide);
-router.delete('/:id', deleteGuide);
+router.put('/:id', requireAdmin, updateGuide);
+router.delete('/:id', requireAdmin, deleteGuide);
 
 export default router;

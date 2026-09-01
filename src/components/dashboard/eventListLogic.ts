@@ -1,4 +1,5 @@
 import type { UiStore } from "@/stores/uiStore";
+import { getIdToken } from "@/lib/firebase/client";
 
 declare const Alpine: any;
 
@@ -30,8 +31,10 @@ export default (initialState: { apiBaseUrl: string }) => ({
 
   async confirmAndDelete(id: string) {
     try {
+      const token = await getIdToken();
       const response = await fetch(this.buildApiUrl(`/api/events/${id}`), {
         method: "DELETE",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!response.ok && response.status !== 204) {
         throw new Error(`Deletion failed with status: ${response.status}`);

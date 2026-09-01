@@ -6,13 +6,14 @@ import {
   updatePhotoOfTheDay,
   deletePhotoOfTheDay,
 } from '../controllers/photoOfTheDayController';
+import { requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
 router.get('/', getPhotosOfTheDay);
-router.post('/', createPhotoOfTheDay);
+router.post('/', requireAdmin, createPhotoOfTheDay);
 router.get('/:id', getPhotoOfTheDayById);
-router.put('/:id', updatePhotoOfTheDay);
-router.delete('/:id', deletePhotoOfTheDay);
+router.put('/:id', requireAdmin, updatePhotoOfTheDay);
+router.delete('/:id', requireAdmin, deletePhotoOfTheDay);
 
 export default router;

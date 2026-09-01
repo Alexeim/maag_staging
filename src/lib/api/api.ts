@@ -31,6 +31,16 @@ export type ApiTimestamp = string | Date | { _seconds: number } | null;
 const isJsonLike = (value: unknown): boolean =>
   typeof value === "object" && value !== null && !(value instanceof FormData);
 
+// Client-only auth hook. The browser entrypoint registers a provider that
+// returns the current Firebase ID token; SSR leaves it as the no-op default.
+// Write requests without an explicit token fall back to this.
+type AuthTokenProvider = () => Promise<string | undefined> | string | undefined;
+let authTokenProvider: AuthTokenProvider = () => undefined;
+
+export const setAuthTokenProvider = (provider: AuthTokenProvider): void => {
+  authTokenProvider = provider;
+};
+
 export async function request<T>(
   endpoint: string,
   options: ApiRequestOptions = {}
@@ -67,8 +77,15 @@ export async function request<T>(
     finalHeaders["Content-Type"] = "application/json";
   }
 
-  if (!isPublic && token) {
-    finalHeaders["Authorization"] = `Bearer ${token}`;
+  // Explicit token wins; otherwise, for writes, fall back to the registered
+  // provider so dashboard mutations carry the caller's identity automatically.
+  let authToken = token;
+  if (!isPublic && !authToken && method !== "GET") {
+    authToken = (await authTokenProvider()) ?? undefined;
+  }
+
+  if (!isPublic && authToken) {
+    finalHeaders["Authorization"] = `Bearer ${authToken}`;
   }
 
   const payload =

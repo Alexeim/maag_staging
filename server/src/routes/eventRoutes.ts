@@ -6,13 +6,14 @@ import {
   getEvents,
   updateEvent,
 } from '../controllers/eventController';
+import { requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
 router.get('/', getEvents);
-router.post('/', createEvent);
+router.post('/', requireAdmin, createEvent);
 router.get('/:id', getEventById);
-router.put('/:id', updateEvent);
-router.delete('/:id', deleteEvent);
+router.put('/:id', requireAdmin, updateEvent);
+router.delete('/:id', requireAdmin, deleteEvent);
 
 export default router;

@@ -6,13 +6,14 @@ import {
   updateAuthor,
   deleteAuthor,
 } from '../controllers/authorController';
+import { requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
 router.get('/', getAuthors);
-router.post('/', createAuthor);
+router.post('/', requireAdmin, createAuthor);
 router.get('/:id', getAuthorById);
-router.put('/:id', updateAuthor);
-router.delete('/:id', deleteAuthor);
+router.put('/:id', requireAdmin, updateAuthor);
+router.delete('/:id', requireAdmin, deleteAuthor);
 
 export default router;

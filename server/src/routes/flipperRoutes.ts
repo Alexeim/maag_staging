@@ -6,13 +6,14 @@ import {
   updateFlipper,
   deleteFlipper,
 } from '../controllers/flipperController';
+import { requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
 router.get('/', getFlippers);
-router.post('/', createFlipper);
+router.post('/', requireAdmin, createFlipper);
 router.get('/:id', getFlipperById);
-router.put('/:id', updateFlipper);
-router.delete('/:id', deleteFlipper);
+router.put('/:id', requireAdmin, updateFlipper);
+router.delete('/:id', requireAdmin, deleteFlipper);
 
 export default router;
