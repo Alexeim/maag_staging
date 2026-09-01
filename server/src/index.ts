@@ -20,7 +20,34 @@ import dashboardRoutes from './routes/dashboardRoutes';
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors()); // In a real app, configure this with your frontend's origin
+// Browser origins allowed to call this API. Non-browser callers (Astro SSR,
+// curl, Stripe webhooks) send no Origin header and are always allowed.
+const allowedOrigins = new Set(
+  [
+    'https://maagfrance.fr',
+    'https://www.maagfrance.fr',
+    'https://maag-60419.web.app',
+    'https://maag-60419.firebaseapp.com',
+    'https://maag-frontend-953634001415.europe-west9.run.app',
+    process.env.FRONTEND_URL,
+    'http://localhost:4321',
+    'http://localhost:4322',
+    'http://localhost:8080',
+    'http://localhost:3000',
+  ].filter((o): o is string => Boolean(o)),
+);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+      // Unknown browser origin: no CORS headers, browser blocks the response.
+      return callback(null, false);
+    },
+  }),
+);
 // Middleware для Stripe webhook, чтобы получить raw body
 app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
 
