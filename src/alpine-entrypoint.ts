@@ -11,6 +11,30 @@ import { setAuthTokenProvider, usersApi } from "@/lib/api/api";
 // Let every api.ts write call pick up the signed-in user's token automatically.
 setAuthTokenProvider(getIdToken);
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+let isAuthProfileCreateInProgress = false;
+const authProfileCreateWaiters: Array<() => void> = [];
+
+document.addEventListener("auth-profile-create-start", () => {
+  isAuthProfileCreateInProgress = true;
+});
+
+document.addEventListener("auth-profile-create-end", () => {
+  isAuthProfileCreateInProgress = false;
+  authProfileCreateWaiters.splice(0).forEach((resolve) => resolve());
+});
+
+const waitForAuthProfileCreate = async () => {
+  if (!isAuthProfileCreateInProgress) {
+    return;
+  }
+
+  await Promise.race([
+    new Promise<void>((resolve) => authProfileCreateWaiters.push(resolve)),
+    wait(3000),
+  ]);
+};
+
 export default (Alpine: Alpine) => {
   console.log('Alpine entrypoint loaded!');
   
@@ -31,9 +55,16 @@ onAuthStateChanged(auth, async (user) => {
 
   if (user) {
     try {
-      const token = await user.getIdToken();
-      const profileData = await usersApi.get(user.uid, token);
-      getStore()?.setUser(user, profileData);
+      await waitForAuthProfileCreate();
+
+      const store = getStore();
+      if (store?.profile?.uid === user.uid) {
+        store.setUser(user, store.profile);
+      } else {
+        const token = await user.getIdToken();
+        const profileData = await usersApi.get(user.uid, token);
+        store?.setUser(user, profileData);
+      }
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
       getStore()?.setUser(user);

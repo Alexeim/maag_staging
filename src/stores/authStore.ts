@@ -71,6 +71,11 @@ export const authStore: AuthStore = {
       };
       this.isProfileLoaded = true; // Backend profile is now loaded
     } else if (user) {
+      if (this.profile?.uid === user.uid) {
+        this.isProfileLoaded = true;
+        return;
+      }
+
       // User is logged in, but we don't have profile data yet.
       // This can happen on initial page load.
       this.isProfileLoaded = false;
