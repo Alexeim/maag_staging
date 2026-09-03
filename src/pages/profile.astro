@@ -42,9 +42,14 @@ import { Bookmark, Trash2 } from "@lucide/astro";
 
       <!-- Main Content -->
       <div class="space-y-20 mb-16" x-show="activeTab === 'account'">
-        <!-- Subscription Section -->
+        <!--
+          TODO(subscription): Subscription Section — hidden for now, payed-features
+          policy is still being decided. Not deleted on purpose: uncomment once the
+          policy is set. The `subscriptionManager` Alpine module
+          ($lazy('subscriptionManager')) and its backing logic in
+          subscriptionLogic.ts are untouched.
+
         <div class="space-y-8" x-data="$lazy('subscriptionManager')">
-          <!-- Section Header -->
           <div class="space-y-6">
             <div class="w-full h-px bg-neutral-200"></div>
             <h2
@@ -54,7 +59,6 @@ import { Bookmark, Trash2 } from "@lucide/astro";
             </h2>
           </div>
 
-          <!-- Subscription Content -->
           <div class="space-y-8 w-full max-w-2xl">
             <template x-if="!$store.auth.isProfileLoaded">
               <p>Загрузка данных о подписке...</p>
@@ -62,7 +66,6 @@ import { Bookmark, Trash2 } from "@lucide/astro";
 
             <template x-if="$store.auth.isProfileLoaded">
               <div>
-                <!-- Если подписка активна -->
                 <template x-if="isSubscribed">
                   <div class="space-y-4">
                     <p>
@@ -87,7 +90,6 @@ import { Bookmark, Trash2 } from "@lucide/astro";
                   </div>
                 </template>
 
-                <!-- Если подписки нет -->
                 <template x-if="!isSubscribed">
                   <div class="space-y-4">
                     <p>У вас нет активной подписки.</p>
@@ -109,6 +111,7 @@ import { Bookmark, Trash2 } from "@lucide/astro";
             </template>
           </div>
         </div>
+        -->
 
         <!-- Account Data Section -->
         <div class="space-y-8">

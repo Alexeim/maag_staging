@@ -1,10 +1,11 @@
 ---
 import { Image } from "astro:assets";
 
-import maagArtwork from "../../aboutUs/about.png";
-import mariaSidelnikovaImage from "../../assets/team/MS.png";
-import alexeyMakarovImage from "../../assets/team/AM.jpeg";
-import dmitryMakarovImage from "../../assets/team/dm.jpg";
+import maagArtwork from "@/assets/aboutUs/aboutTwo.jpeg";
+import mariaSidelnikovaImage from "@/assets/team/MS.png";
+import alexeyMakarovImage from "@/assets/team/AM.jpeg";
+import dmitryMakarovImage from "@/assets/team/dm.jpg";
+import denisLandinImage from "@/assets/team/DL.png";
 
 const teamMembers = [
   {
@@ -18,6 +19,11 @@ const teamMembers = [
     photo: alexeyMakarovImage,
   },
   {
+    role: "Дизайн",
+    name: "Денис Ландин",
+    photo: denisLandinImage,
+  },
+  {
     role: "CTO",
     name: "Дмитрий Макаров",
     photo: dmitryMakarovImage,
@@ -29,9 +35,7 @@ const sectionLabel =
 ---
 
 <main class="min-h-screen bg-base-200 text-base-content">
-  <div
-    class="mx-auto max-w-[1440px] px-4 pb-20 sm:px-6 lg:px-8 lg:pb-[6.5rem]"
-  >
+  <div class="mx-auto max-w-[1440px] px-4 pb-20 sm:px-6 lg:px-8 lg:pb-[6.5rem]">
     <div class="pt-8 lg:pt-10">
       <h1
         class="m-0 text-3xl lg:text-[28px] font-old_standard font-base uppercase tracking-[0.46em] text-base-content"
@@ -56,38 +60,63 @@ const sectionLabel =
           />
         </div>
 
-        <p
-          class="font-old_standard text-[2rem] leading-[1.15] text-base-content lg:text-[2.4rem]"
-        >
-          Maag France — независимое русскоязычное медиа о современной культуре и
-          Париже.
-        </p>
+        <div class="flex flex-col justify-evenly self-stretch">
+          <h2
+            class="font-old_standard text-[2rem] leading-[1.15] text-base-content lg:text-[2.4rem]"
+          >
+            Maag France — независимое русскоязычное медиа о современной культуре
+            и Париже.
+          </h2>
+
+          <div class="space-y-5">
+            <p>
+              В Maag France о Париже говорят те, кто в нем живет и те, кто его
+              любит. Лучшие из лучших, знатоки и профессионалы. У каждого — своя
+              экспертиза, свой взгляд и свой Париж.
+            </p>
+
+            <p>
+              В Maag France французская культура звучит на русском языке.
+              Новости художественной жизни Парижа, репортажи, рецензии на
+              театральные, балетные и оперные премьеры, интервью с художниками,
+              артистами, режиссёрами, хореографами. Самое интересное в его
+              истории и самое важное в сегодняшней моде и дизайне, ведь
+              парижские магазины — те же музеи и галереи.
+            </p>
+          </div>
+        </div>
 
         <div
           class="space-y-5 font-inter text-base-content/80 lg:text-[0.95rem]"
         >
+          <p>В Maag France — есть ответы на любые вопросы о Париже.</p>
           <p>
-            Что делать в Париже прямо сейчас? А через месяц? Чем живёт
-            культурная столица? Какую выставку стоит обязательно увидеть, а
-            какую можно пропустить — и почему? На какой спектакль нужно попасть
-            любой ценой, кого стоит увидеть на сцене и где поймать билеты даже в
-            последний момент? Чем занять детей? И как составить маршрут так,
-            чтобы не упустить ничего интересного — неважно, есть ли у вас на
-            Париж всего два дня или целая жизнь.
+            Что смотреть прямо сейчас? На какую выставку идти, а какую можно
+            смело пропустить — и почему? На какой спектакль нужно попасть любой
+            ценой, кого увидеть на сцене и где поймать билет даже в последний
+            момент? Что с наслаждением съесть и где с радостью купить. Как не
+            потеряться с детьми и каксоставить маршрут так, чтобы не упустить
+            ничего интересного — вне зависимости от того, есть ли у вас на Париж
+            два дня или целая жизнь.
           </p>
           <p>
-            Но MAAG France — не только о том, чем заняться в Париже. Нам важно,
-            чтобы французская культура звучала на русском языке — во всём её
-            многообразии, сложности и современности. На страницах MAAG France вы
-            найдёте новости художественной жизни Парижа, репортажи с
-            арт-ярмарок, рецензии на театральные, балетные и оперные премьеры,
-            интервью с художниками, артистами, режиссёрами и хореографами.
+            Всё главное, что происходит в парижской культуре, коротко или
+            подробно, но так, чтобы у вас всегда был выбор. Всё самое важное и
+            интересное. И всё из первых рук.
+          </p>
+          <p>
+            Maag France — независимое издание, поэтому часть материалов доступна
+            только подписчикам. Уверены, что вы войдете в их число
           </p>
         </div>
       </div>
     </section>
 
-    <section class="mt-12 lg:mt-16">
+    {
+      /** ========================= HIDDEN FOR NOW ============================== */
+    }
+    {/** TODO remove the hidden 'word of the editor' */}
+    <section class="mt-12 lg:mt-16 hidden">
       <div class="mb-8">
         <span class={sectionLabel}>Слово редактора</span>
       </div>
@@ -154,13 +183,16 @@ const sectionLabel =
         </div>
       </div>
     </section>
+    {
+      /** ========================= HIDDEN FOR NOW ============================== */
+    }
 
     <section class="mt-12 py-2 lg:mt-16">
       <div class="mb-12">
         <span class={sectionLabel}>Команда</span>
       </div>
 
-      <div class="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
         {
           teamMembers.map((member) => (
             <article class="flex flex-col">
