@@ -2,6 +2,8 @@
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import CustomSelect from "@/components/dashboard/CustomSelect.astro";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
+// Shared type-badge metadata (label + colour classes), same source the /dashboard page uses.
+import { MATERIAL_TYPES } from "@/lib/utils/dashboardMaterials";
 import {
   articlesApi,
   editorialPlacementsApi,
@@ -499,207 +501,285 @@ const getBadgeClass = (modeLabel: string): string => {
   return "inline-flex items-center rounded-full border border-base-300 px-2.5 py-0.5 text-xs font-medium text-base-content/60";
 };
 
+// A type badge for a picked material: the short label plus its Tailwind colour classes,
+// taken from the shared MATERIAL_TYPES table so it matches the /dashboard page.
+type TypeBadge = { text: string; class: string };
+
+// Resolve a landing material type ("article", "guide", "interview", ...) to its badge,
+// or undefined if that type has no entry.
+const typeBadge = (type: string): TypeBadge | undefined => {
+  const meta = MATERIAL_TYPES[type as keyof typeof MATERIAL_TYPES];
+  return meta ? { text: meta.badge, class: meta.badgeClass } : undefined;
+};
+
+// One picked material: an optional type badge and its real title, kept as SEPARATE
+// fields so the markup can render the badge as a pill and style the title on its own.
+// `badge` is omitted for slots that do not show a type (section heroes, event, interview, news).
+type SlotPick = { badge?: TypeBadge; title: string };
+
+// The summary shown on a slot card, structured at the source instead of pre-glued into a string:
+//   { kind: "note",  text }   -> a plain description (auto / empty states) — no material title in it
+//   { kind: "picks", picks }  -> one or more picked materials
+type SlotSummary =
+  | { kind: "note"; text: string }
+  | { kind: "picks"; picks: SlotPick[] };
+
+// Build a plain-description summary.
+const note = (text: string): SlotSummary => ({ kind: "note", text });
+
+// Build a summary with exactly one picked material.
+const pick = (title: string, badge?: TypeBadge): SlotSummary => ({
+  kind: "picks",
+  picks: [{ badge, title }],
+});
+
+// Build a summary from a list of picks; fall back to a plain description when the list is empty.
+const picks = (list: SlotPick[], emptyText: string): SlotSummary =>
+  list.length > 0 ? { kind: "picks", picks: list } : note(emptyText);
+
 const mainHeroSummary = (() => {
+  // nothing chosen -> plain description
   if (!landingPlacements.mainHero) {
     return {
       modeLabel: "Пусто",
-      details: "Главный hero-slot сейчас пуст.",
+      details: note("Главный hero-slot сейчас пуст."),
     };
   }
 
+  // resolve the chosen material's type + real title
   const { type, id } = landingPlacements.mainHero;
   const title = contentTitleMaps.mainHero.get(`${type}:${id}`) || "Материал не найден";
 
+  // one pick: type badge and title stay in separate fields
   return {
     modeLabel: "Manual",
-    details: `${MAIN_HERO_TYPE_LABELS[type]}: ${title}`,
+    details: pick(title, typeBadge(type)),
   };
 })();
 
 const newsRailSummary = (() => {
+  // block turned off -> plain description
   if (!landingPlacements.newsRail) {
     return {
       modeLabel: "Пусто",
-      details: "Блок новостей сейчас пуст.",
+      details: note("Блок новостей сейчас пуст."),
     };
   }
 
+  // auto mode -> plain description, no titles
   if (landingPlacements.newsRail.mode === "auto-latest") {
     return {
       modeLabel: "Auto latest",
-      details: `Последние ${landingPlacements.newsRail.limit} новости.`,
+      details: note(`Последние ${landingPlacements.newsRail.limit} новости.`),
     };
   }
 
-  const items = landingPlacements.newsRail.ids.map(
-    (id) => contentTitleMaps.news.get(id) || `Новость ${id}`,
-  );
+  // manual mode -> list of picked news; each is a bare title (news has no type label)
+  const list = landingPlacements.newsRail.ids.map((newsId) => ({
+    title: contentTitleMaps.news.get(newsId) || `Новость ${newsId}`,
+  }));
 
   return {
     modeLabel: "Manual",
-    details: items.length > 0 ? items.join(" | ") : "Список новостей пуст.",
+    details: picks(list, "Список новостей пуст."),
   };
 })();
 
 const netlenkaRailSummary = (() => {
+  // block turned off -> plain description
   if (!landingPlacements.netlenkaRail) {
     return {
       modeLabel: "Пусто",
-      details: "Блок «Выбор MAAG» сейчас пуст.",
+      details: note("Блок «Выбор MAAG» сейчас пуст."),
     };
   }
 
+  // auto mode -> plain description, no titles
   if (landingPlacements.netlenkaRail.mode === "auto-latest") {
     return {
       modeLabel: "Auto latest",
-      details: `Последние ${landingPlacements.netlenkaRail.limit} материала(ов) из «Выбор MAAG».`,
+      details: note(
+        `Последние ${landingPlacements.netlenkaRail.limit} материала(ов) из «Выбор MAAG».`,
+      ),
     };
   }
 
-  const items = landingPlacements.netlenkaRail.items.map(({ type, id }) => {
-    const key = `${type}:${id}`;
-    const title = contentTitleMaps.netlenka.get(key) || `${NETLENKA_TYPE_LABELS[type]} ${id}`;
-    return `[${NETLENKA_TYPE_LABELS[type]}] ${title}`;
-  });
+  // manual mode -> list of picks; type badge and title kept apart
+  const list = landingPlacements.netlenkaRail.items.map(({ type, id }) => ({
+    badge: typeBadge(type),
+    title:
+      contentTitleMaps.netlenka.get(`${type}:${id}`) ||
+      `${NETLENKA_TYPE_LABELS[type]} ${id}`,
+  }));
 
   return {
     modeLabel: "Manual",
-    details: items.length > 0 ? items.join(" | ") : "Список материалов пуст.",
+    details: picks(list, "Список материалов пуст."),
   };
 })();
 
 const cultureHeroSummary = (() => {
+  // nothing chosen -> plain description
   if (!landingPlacements.cultureHero) {
     return {
       modeLabel: "Пусто",
-      details: "Culture hero slot пуст.",
+      details: note("Culture hero slot пуст."),
     };
   }
 
+  // one pick with the badge of its actual type (can be article / guide / flipper / visual-story)
   const key = `${landingPlacements.cultureHero.type}:${landingPlacements.cultureHero.id}`;
   return {
     modeLabel: "Manual",
-    details:
+    details: pick(
       contentTitleMaps.mainHero.get(key) ||
-      `${CATEGORY_CARDS_TYPE_LABELS[landingPlacements.cultureHero.type]} ${landingPlacements.cultureHero.id}`,
+        `${CATEGORY_CARDS_TYPE_LABELS[landingPlacements.cultureHero.type]} ${landingPlacements.cultureHero.id}`,
+      typeBadge(landingPlacements.cultureHero.type),
+    ),
   };
 })();
 
 const cultureCardsSummary = (() => {
+  // block turned off -> plain description
   if (!landingPlacements.cultureCards) {
     return {
       modeLabel: "Пусто",
-      details: "Карточки culture section на landing сейчас пусты.",
+      details: note("Карточки culture section на landing сейчас пусты."),
     };
   }
 
+  // auto mode -> plain description, no titles
   if (landingPlacements.cultureCards.mode === "auto-latest") {
     return {
       modeLabel: "Auto latest",
-      details: `Последние ${landingPlacements.cultureCards.limit} карточки в culture section, с исключением global main hero и hero рубрики.`,
+      details: note(
+        `Последние ${landingPlacements.cultureCards.limit} карточки в culture section, с исключением global main hero и hero рубрики.`,
+      ),
     };
   }
 
-  const items = landingPlacements.cultureCards.items.map(({ type, id }) => {
-    const key = `${type}:${id}`;
-    const title = contentTitleMaps.mainHero.get(key) || `${CATEGORY_CARDS_TYPE_LABELS[type]} ${id}`;
-    return `[${CATEGORY_CARDS_TYPE_LABELS[type]}] ${title}`;
-  });
+  // manual mode -> list of picks; type badge and title kept apart
+  const list = landingPlacements.cultureCards.items.map(({ type, id }) => ({
+    badge: typeBadge(type),
+    title:
+      contentTitleMaps.mainHero.get(`${type}:${id}`) ||
+      `${CATEGORY_CARDS_TYPE_LABELS[type]} ${id}`,
+  }));
 
   return {
     modeLabel: "Manual",
-    details: items.length > 0 ? items.join(" | ") : "Список материалов пуст.",
+    details: picks(list, "Список материалов пуст."),
   };
 })();
 
 const parisHeroSummary = (() => {
+  // nothing chosen -> plain description
   if (!landingPlacements.parisHero) {
     return {
       modeLabel: "Пусто",
-      details: "Paris hero slot пуст.",
+      details: note("Paris hero slot пуст."),
     };
   }
 
+  // one pick with the badge of its actual type (can be article / guide / flipper / visual-story)
   const key = `${landingPlacements.parisHero.type}:${landingPlacements.parisHero.id}`;
   return {
     modeLabel: "Manual",
-    details:
+    details: pick(
       contentTitleMaps.mainHero.get(key) ||
-      `${CATEGORY_CARDS_TYPE_LABELS[landingPlacements.parisHero.type]} ${landingPlacements.parisHero.id}`,
+        `${CATEGORY_CARDS_TYPE_LABELS[landingPlacements.parisHero.type]} ${landingPlacements.parisHero.id}`,
+      typeBadge(landingPlacements.parisHero.type),
+    ),
   };
 })();
 
 const parisCardsSummary = (() => {
+  // block turned off -> plain description
   if (!landingPlacements.parisCards) {
     return {
       modeLabel: "Пусто",
-      details: "Карточки paris section на landing сейчас пусты.",
+      details: note("Карточки paris section на landing сейчас пусты."),
     };
   }
 
+  // auto mode -> plain description, no titles
   if (landingPlacements.parisCards.mode === "auto-latest") {
     return {
       modeLabel: "Auto latest",
-      details: `Последние ${landingPlacements.parisCards.limit} карточки в paris section, с исключением global main hero и hero рубрики.`,
+      details: note(
+        `Последние ${landingPlacements.parisCards.limit} карточки в paris section, с исключением global main hero и hero рубрики.`,
+      ),
     };
   }
 
-  const items = landingPlacements.parisCards.items.map(({ type, id }) => {
-    const key = `${type}:${id}`;
-    const title = contentTitleMaps.mainHero.get(key) || `${CATEGORY_CARDS_TYPE_LABELS[type]} ${id}`;
-    return `[${CATEGORY_CARDS_TYPE_LABELS[type]}] ${title}`;
-  });
+  // manual mode -> list of picks; type badge and title kept apart
+  const list = landingPlacements.parisCards.items.map(({ type, id }) => ({
+    badge: typeBadge(type),
+    title:
+      contentTitleMaps.mainHero.get(`${type}:${id}`) ||
+      `${CATEGORY_CARDS_TYPE_LABELS[type]} ${id}`,
+  }));
 
   return {
     modeLabel: "Manual",
-    details: items.length > 0 ? items.join(" | ") : "Список материалов пуст.",
+    details: picks(list, "Список материалов пуст."),
   };
 })();
 
 const eventCardSummary = (() => {
+  // nothing chosen -> plain description
   if (!landingPlacements.eventCard) {
     return {
       modeLabel: "Пусто",
-      details: "Event card сейчас пустая.",
+      details: note("Event card сейчас пустая."),
     };
   }
 
+  // auto mode -> plain description, no title
   if (landingPlacements.eventCard.mode === "auto-nearest") {
     return {
       modeLabel: "Auto nearest",
-      details:
+      details: note(
         "Сначала single-day событие на сегодня по latest created, если его нет — последний созданный active range event, затем ближайшее upcoming событие.",
+      ),
     };
   }
 
+  // one pick, bare title (event card does not display a type label)
   return {
     modeLabel: "Manual",
-    details:
+    details: pick(
       contentTitleMaps.events.get(landingPlacements.eventCard.id) ||
-      `Событие ${landingPlacements.eventCard.id}`,
+        `Событие ${landingPlacements.eventCard.id}`,
+    ),
   };
 })();
 
 const cultureInterviewSummary = (() => {
+  // nothing chosen -> plain description
   if (!landingPlacements.cultureInterviewBlock) {
     return {
       modeLabel: "Пусто",
-      details: "Interview block в culture section landing сейчас пуст.",
+      details: note("Interview block в culture section landing сейчас пуст."),
     };
   }
 
+  // auto mode -> plain description, no title
   if (landingPlacements.cultureInterviewBlock.mode === "auto-latest") {
     return {
       modeLabel: "Auto latest",
-      details: "Автоматически показывается последнее интервью.",
+      details: note("Автоматически показывается последнее интервью."),
     };
   }
 
+  // one pick with the fixed "Интервью" badge (this slot only ever holds an interview)
   return {
     modeLabel: "Manual",
-    details:
+    details: pick(
       contentTitleMaps.interviews.get(landingPlacements.cultureInterviewBlock.id) ||
-      `Интервью ${landingPlacements.cultureInterviewBlock.id}`,
+        `Интервью ${landingPlacements.cultureInterviewBlock.id}`,
+      typeBadge("interview"),
+    ),
   };
 })();
 
@@ -769,11 +849,15 @@ const slotCards = [
       return "Manual";
     })(),
     details: (() => {
-      if (!landingPlacements.photoOfTheDayFeature) return "Фото дня slot пуст.";
-      if (landingPlacements.photoOfTheDayFeature.mode === "auto-latest") return "Автоматически показывается последнее фото дня.";
+      // block turned off -> plain description
+      if (!landingPlacements.photoOfTheDayFeature) return note("Фото дня slot пуст.");
+      // auto mode -> plain description, no title
+      if (landingPlacements.photoOfTheDayFeature.mode === "auto-latest")
+        return note("Автоматически показывается последнее фото дня.");
+      // manual mode -> one pick, bare title
       const id = landingPlacements.photoOfTheDayFeature.id;
       const found = photoOfTheDayItems.find((i) => i.id === id);
-      return found ? found.title : `Фото ${id}`;
+      return pick(found ? found.title : `Фото ${id}`);
     })(),
   },
   {
@@ -787,11 +871,15 @@ const slotCards = [
       return "Manual";
     })(),
     details: (() => {
-      if (!landingPlacements.leSaviezVousFeature) return "Le saviez-vous slot пуст.";
-      if (landingPlacements.leSaviezVousFeature.mode === "auto-latest") return "Автоматически показывается последний le saviez-vous материал.";
+      // block turned off -> plain description
+      if (!landingPlacements.leSaviezVousFeature) return note("Le saviez-vous slot пуст.");
+      // auto mode -> plain description, no title
+      if (landingPlacements.leSaviezVousFeature.mode === "auto-latest")
+        return note("Автоматически показывается последний le saviez-vous материал.");
+      // manual mode -> one pick, bare title
       const id = landingPlacements.leSaviezVousFeature.id;
       const found = leSaviezVousItems.find((i) => i.id === id);
-      return found ? found.title : `Материал ${id}`;
+      return pick(found ? found.title : `Материал ${id}`);
     })(),
   },
 ];
@@ -1165,7 +1253,31 @@ const initialMainHeroState = (() => {
               </div>
               <span class={getBadgeClass(card.modeLabel)}>{card.modeLabel}</span>
             </div>
-            <p class="mt-4 text-sm leading-6 text-base-content/80">{card.details}</p>
+            <div class="mt-4 space-y-1 text-sm leading-6 text-base-content/80">
+              {
+                // plain description -> a single line in the default font
+                card.details.kind === "note" ? (
+                  <p>{card.details.text}</p>
+                ) : (
+                  // one or more picks -> one row per entry: coloured type badge + title
+                  card.details.picks.map((slotPick) => (
+                    <div class="flex items-baseline gap-1.5">
+                      {slotPick.badge && (
+                        <span
+                          class:list={[
+                            "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none",
+                            slotPick.badge.class,
+                          ]}
+                        >
+                          {slotPick.badge.text}
+                        </span>
+                      )}
+                      <span class="font-old_standard text-base font-semibold">{slotPick.title}</span>
+                    </div>
+                  ))
+                )
+              }
+            </div>
           </article>
         ))
       }
@@ -1177,6 +1289,32 @@ const initialMainHeroState = (() => {
         <p class="text-sm text-base-content/70">
           Главный материал в блоке «Главное» на лендинге.
         </p>
+      </div>
+
+      {/* what is live in this slot right now (updates after save + reload) */}
+      <div class="mt-3 flex items-baseline gap-1.5 text-sm text-base-content/80">
+        <span class="text-base-content/60">Сейчас:</span>
+        {
+          mainHeroSummary.details.kind === "note" ? (
+            <span>{mainHeroSummary.details.text}</span>
+          ) : (
+            <Fragment>
+              {mainHeroSummary.details.picks[0].badge && (
+                <span
+                  class:list={[
+                    "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none",
+                    mainHeroSummary.details.picks[0].badge.class,
+                  ]}
+                >
+                  {mainHeroSummary.details.picks[0].badge.text}
+                </span>
+              )}
+              <span class="font-old_standard text-base font-semibold">
+                {mainHeroSummary.details.picks[0].title}
+              </span>
+            </Fragment>
+          )
+        }
       </div>
 
       <div class="mt-5 grid gap-5">
@@ -1482,21 +1620,33 @@ const initialMainHeroState = (() => {
           {netlenkaOptions.length > 0 ? (
             <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
               {
-                netlenkaOptions.map((item) => (
-                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      :checked={`isManualNetlenkaSelected(${JSON.stringify(item.id)})`}
-                      @change={`toggleNetlenkaItem(${JSON.stringify(item.id)})`}
-                    />
-                    <span class="flex flex-col gap-1 text-sm leading-6">
-                      <span class="font-medium">{item.title}</span>
-                      <span class="text-xs uppercase tracking-[0.22em] text-base-content/55">
-                        {item.typeLabel}
+                netlenkaOptions.map((item) => {
+                  // coloured type badge from the shared MATERIAL_TYPES table
+                  const badge = typeBadge(item.type);
+                  return (
+                    <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        class="mt-1"
+                        :checked={`isManualNetlenkaSelected(${JSON.stringify(item.id)})`}
+                        @change={`toggleNetlenkaItem(${JSON.stringify(item.id)})`}
+                      />
+                      <span class="flex flex-col items-start gap-1.5 leading-6">
+                        {badge && (
+                          <span
+                            class:list={[
+                              "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none",
+                              badge.class,
+                            ]}
+                          >
+                            {badge.text}
+                          </span>
+                        )}
+                        <span class="font-old_standard text-base font-semibold">{item.title}</span>
                       </span>
-                    </span>
-                  </label>
-                ))
+                    </label>
+                  );
+                })
               }
             </div>
           ) : (
@@ -1622,21 +1772,33 @@ const initialMainHeroState = (() => {
           {cultureCardsOptions.length > 0 ? (
             <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
               {
-                cultureCardsOptions.map((item) => (
-                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      :checked={`isManualCultureCardSelected(${JSON.stringify(item.id)})`}
-                      @change={`toggleCultureCardItem(${JSON.stringify(item.id)})`}
-                    />
-                    <span class="flex flex-col gap-1 text-sm leading-6">
-                      <span class="font-medium">{item.title}</span>
-                      <span class="text-xs uppercase tracking-[0.22em] text-base-content/55">
-                        {item.typeLabel}
+                cultureCardsOptions.map((item) => {
+                  // coloured type badge from the shared MATERIAL_TYPES table
+                  const badge = typeBadge(item.type);
+                  return (
+                    <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        class="mt-1"
+                        :checked={`isManualCultureCardSelected(${JSON.stringify(item.id)})`}
+                        @change={`toggleCultureCardItem(${JSON.stringify(item.id)})`}
+                      />
+                      <span class="flex flex-col items-start gap-1.5 leading-6">
+                        {badge && (
+                          <span
+                            class:list={[
+                              "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none",
+                              badge.class,
+                            ]}
+                          >
+                            {badge.text}
+                          </span>
+                        )}
+                        <span class="font-old_standard text-base font-semibold">{item.title}</span>
                       </span>
-                    </span>
-                  </label>
-                ))
+                    </label>
+                  );
+                })
               }
             </div>
           ) : (
@@ -1814,21 +1976,33 @@ const initialMainHeroState = (() => {
           {parisCardsOptions.length > 0 ? (
             <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
               {
-                parisCardsOptions.map((item) => (
-                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      :checked={`isManualParisCardSelected(${JSON.stringify(item.id)})`}
-                      @change={`toggleParisCardItem(${JSON.stringify(item.id)})`}
-                    />
-                    <span class="flex flex-col gap-1 text-sm leading-6">
-                      <span class="font-medium">{item.title}</span>
-                      <span class="text-xs uppercase tracking-[0.22em] text-base-content/55">
-                        {item.typeLabel}
+                parisCardsOptions.map((item) => {
+                  // coloured type badge from the shared MATERIAL_TYPES table
+                  const badge = typeBadge(item.type);
+                  return (
+                    <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        class="mt-1"
+                        :checked={`isManualParisCardSelected(${JSON.stringify(item.id)})`}
+                        @change={`toggleParisCardItem(${JSON.stringify(item.id)})`}
+                      />
+                      <span class="flex flex-col items-start gap-1.5 leading-6">
+                        {badge && (
+                          <span
+                            class:list={[
+                              "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none",
+                              badge.class,
+                            ]}
+                          >
+                            {badge.text}
+                          </span>
+                        )}
+                        <span class="font-old_standard text-base font-semibold">{item.title}</span>
                       </span>
-                    </span>
-                  </label>
-                ))
+                    </label>
+                  );
+                })
               }
             </div>
           ) : (
