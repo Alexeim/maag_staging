@@ -705,62 +705,64 @@ const cultureInterviewSummary = (() => {
 
 const slotCards = [
   {
-    title: "Main Hero",
-    description: "Большой блок «Главное» на landing.",
+    title: "Главный материал",
+    description: "Большой блок «Главное» на лендинге.",
     modeLabel: mainHeroSummary.modeLabel,
     details: mainHeroSummary.details,
   },
   {
-    title: "News Rail",
-    description: "Блок новостей в main landing block.",
+    title: "Лента новостей",
+    description: "Блок новостей в главном блоке лендинга.",
     modeLabel: newsRailSummary.modeLabel,
     details: newsRailSummary.details,
   },
   {
-    title: "MAAG Choice Rail",
-    description: "Блок «Выбор MAAG» в landing body.",
-    modeLabel: netlenkaRailSummary.modeLabel,
-    details: netlenkaRailSummary.details,
-  },
-  {
-    title: "Culture Hero",
-    description: "Главный материал culture section на landing.",
-    modeLabel: cultureHeroSummary.modeLabel,
-    details: cultureHeroSummary.details,
-  },
-  {
-    title: "Culture Cards",
-    description: "Три карточки под hero в culture section на landing.",
-    modeLabel: cultureCardsSummary.modeLabel,
-    details: cultureCardsSummary.details,
-  },
-  {
-    title: "Paris Hero",
-    description: "Главный материал paris section на landing.",
-    modeLabel: parisHeroSummary.modeLabel,
-    details: parisHeroSummary.details,
-  },
-  {
-    title: "Paris Cards",
-    description: "Три карточки под hero в paris section на landing.",
-    modeLabel: parisCardsSummary.modeLabel,
-    details: parisCardsSummary.details,
-  },
-  {
-    title: "Event Card",
-    description: "Карточка события в main landing block.",
+    title: "Карточка события",
+    description: "Карточка события в главном блоке лендинга.",
     modeLabel: eventCardSummary.modeLabel,
     details: eventCardSummary.details,
   },
   {
-    title: "Culture Interview Block",
-    description: "Interview block в culture section именно на landing.",
+    title: "Выбор MAAG",
+    description: "Блок «Выбор MAAG» в теле лендинга.",
+    modeLabel: netlenkaRailSummary.modeLabel,
+    details: netlenkaRailSummary.details,
+  },
+  {
+    title: "Главный материал секции «Культура»",
+    description: "Главный материал секции «Культура» на лендинге.",
+    modeLabel: cultureHeroSummary.modeLabel,
+    details: cultureHeroSummary.details,
+  },
+  {
+    title: "Карточки секции «Культура»",
+    description: "Карточки под главным материалом секции «Культура» на лендинге.",
+    modeLabel: cultureCardsSummary.modeLabel,
+    details: cultureCardsSummary.details,
+  },
+  {
+    title: "Интервью в секции «Культура»",
+    description: "Блок интервью в секции «Культура» на лендинге.",
     modeLabel: cultureInterviewSummary.modeLabel,
     details: cultureInterviewSummary.details,
   },
   {
+    title: "Главный материал секции «Париж»",
+    description: "Главный материал секции «Париж» на лендинге.",
+    modeLabel: parisHeroSummary.modeLabel,
+    details: parisHeroSummary.details,
+  },
+  {
+    title: "Карточки секции «Париж»",
+    description: "Карточки под главным материалом секции «Париж» на лендинге.",
+    modeLabel: parisCardsSummary.modeLabel,
+    details: parisCardsSummary.details,
+  },
+  {
+    // Temporarily hidden: block is not used on the landing right now.
+    hidden: true,
     title: "Фото дня",
-    description: "Блок «Фото дня» в sidebar на landing.",
+    description: "Блок «Фото дня» в боковой колонке лендинга.",
     modeLabel: (() => {
       if (!landingPlacements.photoOfTheDayFeature) return "Пусто";
       if (landingPlacements.photoOfTheDayFeature.mode === "auto-latest") return "Auto latest";
@@ -775,8 +777,10 @@ const slotCards = [
     })(),
   },
   {
-    title: "Le Saviez-Vous",
-    description: "Блок «Le saviez-vous?» в paris section на landing.",
+    // Temporarily hidden: block is not used on the landing right now.
+    hidden: true,
+    title: "А вы знали?",
+    description: "Блок «А вы знали?» в секции «Париж» на лендинге.",
     modeLabel: (() => {
       if (!landingPlacements.leSaviezVousFeature) return "Пусто";
       if (landingPlacements.leSaviezVousFeature.mode === "auto-latest") return "Auto latest";
@@ -1152,7 +1156,7 @@ const initialMainHeroState = (() => {
 
     <div class="grid gap-4 lg:grid-cols-2">
       {
-        slotCards.map((card) => (
+        slotCards.filter((card) => !("hidden" in card && card.hidden)).map((card) => (
           <article class="bg-base-100 border border-base-300 rounded-xl p-6">
             <div class="flex items-start justify-between gap-4">
               <div>
@@ -1169,9 +1173,9 @@ const initialMainHeroState = (() => {
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Main Hero Controls</h3>
+        <h3 class="text-lg font-semibold">Главный материал</h3>
         <p class="text-sm text-base-content/70">
-          Главный материал в блоке «Главное» на landing.
+          Главный материал в блоке «Главное» на лендинге.
         </p>
       </div>
 
@@ -1265,7 +1269,7 @@ const initialMainHeroState = (() => {
             @click="saveMainHero()"
             :disabled="mainHeroSaving"
           >
-            Сохранить main hero
+            Сохранить
           </button>
           <span x-show="mainHeroSaving" class="text-sm text-base-content/70">
             Сохраняем...
@@ -1276,9 +1280,9 @@ const initialMainHeroState = (() => {
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">News Rail Controls</h3>
+        <h3 class="text-lg font-semibold">Лента новостей</h3>
         <p class="text-sm text-base-content/70">
-          Первый editable slot: блок новостей на landing.
+          Блок новостей на лендинге.
         </p>
       </div>
 
@@ -1350,7 +1354,7 @@ const initialMainHeroState = (() => {
             @click="saveNewsRail()"
             :disabled="newsSaving"
           >
-            Сохранить news rail
+            Сохранить
           </button>
           <span x-show="newsSaving" class="text-sm text-base-content/70">
             Сохраняем...
@@ -1361,111 +1365,61 @@ const initialMainHeroState = (() => {
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Culture Hero Controls</h3>
+        <h3 class="text-lg font-semibold">Карточка события</h3>
         <p class="text-sm text-base-content/70">
-          Главный материал culture section на landing.
+          Карточка события на лендинге.
         </p>
       </div>
 
       <div class="mt-5 grid gap-5">
-        <div class="grid gap-3 sm:grid-cols-2">
+        <div class="grid gap-3 sm:grid-cols-3">
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-            <input type="radio" name="culture-hero-mode" value="empty" x-model="cultureHeroMode" />
+            <input type="radio" name="event-card-mode" value="empty" x-model="eventCardMode" />
             <span class="text-sm">Empty</span>
           </label>
 
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-            <input type="radio" name="culture-hero-mode" value="manual" x-model="cultureHeroMode" />
+            <input type="radio" name="event-card-mode" value="auto-nearest" x-model="eventCardMode" />
+            <span class="text-sm">Auto nearest</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="event-card-mode" value="manual" x-model="eventCardMode" />
             <span class="text-sm">Manual</span>
           </label>
         </div>
 
-        <div x-show="cultureHeroMode === 'manual'" class="grid gap-2 max-w-xl">
-          <label for="culture-hero-select" class="text-sm font-medium">
-            Выбери материал для culture hero
-          </label>
+        <div x-show="eventCardMode === 'manual'" class="grid gap-2 max-w-sm">
+          <label for="event-select" class="text-sm font-medium">Выбери событие</label>
           <CustomSelect
-            id="culture-hero-select"
-            model="selectedCultureHeroKey"
-            itemsExpr={JSON.stringify(cultureHeroOptions)}
-            placeholder="— выбери материал —"
+            id="event-select"
+            model="selectedEventId"
+            itemsExpr={JSON.stringify(eventOptions)}
+            placeholder="— выбери событие —"
           />
         </div>
 
-        <p x-show="cultureHeroError" class="text-sm text-error" x-text="cultureHeroError"></p>
+        <p x-show="eventError" class="text-sm text-error" x-text="eventError"></p>
 
         <div class="flex items-center gap-3">
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveCultureHero()"
-            :disabled="cultureHeroSaving"
+            @click="saveEventCard()"
+            :disabled="eventSaving"
           >
-            Сохранить culture hero
+            Сохранить
           </button>
-          <span x-show="cultureHeroSaving" class="text-sm text-base-content/70">
-            Сохраняем...
-          </span>
+          <span x-show="eventSaving" class="text-sm text-base-content/70">Сохраняем...</span>
         </div>
       </div>
     </div>
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Paris Hero Controls</h3>
+        <h3 class="text-lg font-semibold">Выбор MAAG</h3>
         <p class="text-sm text-base-content/70">
-          Главный материал paris section на landing.
-        </p>
-      </div>
-
-      <div class="mt-5 grid gap-5">
-        <div class="grid gap-3 sm:grid-cols-2">
-          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-            <input type="radio" name="paris-hero-mode" value="empty" x-model="parisHeroMode" />
-            <span class="text-sm">Empty</span>
-          </label>
-
-          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-            <input type="radio" name="paris-hero-mode" value="manual" x-model="parisHeroMode" />
-            <span class="text-sm">Manual</span>
-          </label>
-        </div>
-
-        <div x-show="parisHeroMode === 'manual'" class="grid gap-2 max-w-xl">
-          <label for="paris-hero-select" class="text-sm font-medium">
-            Выбери материал для paris hero
-          </label>
-          <CustomSelect
-            id="paris-hero-select"
-            model="selectedParisHeroKey"
-            itemsExpr={JSON.stringify(parisHeroOptions)}
-            placeholder="— выбери материал —"
-          />
-        </div>
-
-        <p x-show="parisHeroError" class="text-sm text-error" x-text="parisHeroError"></p>
-
-        <div class="flex items-center gap-3">
-          <button
-            type="button"
-            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveParisHero()"
-            :disabled="parisHeroSaving"
-          >
-            Сохранить paris hero
-          </button>
-          <span x-show="parisHeroSaving" class="text-sm text-base-content/70">
-            Сохраняем...
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
-      <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">MAAG Choice Rail Controls</h3>
-        <p class="text-sm text-base-content/70">
-          Блок «Выбор MAAG» в правой колонке landing.
+          Блок «Выбор MAAG» в правой колонке лендинга.
         </p>
       </div>
 
@@ -1561,7 +1515,7 @@ const initialMainHeroState = (() => {
             @click="saveNetlenkaRail()"
             :disabled="netlenkaSaving"
           >
-            Сохранить MAAG choice rail
+            Сохранить
           </button>
           <span x-show="netlenkaSaving" class="text-sm text-base-content/70">
             Сохраняем...
@@ -1572,62 +1526,61 @@ const initialMainHeroState = (() => {
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Event Card Controls</h3>
+        <h3 class="text-lg font-semibold">Главный материал секции «Культура»</h3>
         <p class="text-sm text-base-content/70">
-          Карточка события на landing.
+          Главный материал секции «Культура» на лендинге.
         </p>
       </div>
 
       <div class="mt-5 grid gap-5">
-        <div class="grid gap-3 sm:grid-cols-3">
+        <div class="grid gap-3 sm:grid-cols-2">
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-            <input type="radio" name="event-card-mode" value="empty" x-model="eventCardMode" />
+            <input type="radio" name="culture-hero-mode" value="empty" x-model="cultureHeroMode" />
             <span class="text-sm">Empty</span>
           </label>
 
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-            <input type="radio" name="event-card-mode" value="auto-nearest" x-model="eventCardMode" />
-            <span class="text-sm">Auto nearest</span>
-          </label>
-
-          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-            <input type="radio" name="event-card-mode" value="manual" x-model="eventCardMode" />
+            <input type="radio" name="culture-hero-mode" value="manual" x-model="cultureHeroMode" />
             <span class="text-sm">Manual</span>
           </label>
         </div>
 
-        <div x-show="eventCardMode === 'manual'" class="grid gap-2 max-w-sm">
-          <label for="event-select" class="text-sm font-medium">Выбери событие</label>
+        <div x-show="cultureHeroMode === 'manual'" class="grid gap-2 max-w-xl">
+          <label for="culture-hero-select" class="text-sm font-medium">
+            Выбери материал для culture hero
+          </label>
           <CustomSelect
-            id="event-select"
-            model="selectedEventId"
-            itemsExpr={JSON.stringify(eventOptions)}
-            placeholder="— выбери событие —"
+            id="culture-hero-select"
+            model="selectedCultureHeroKey"
+            itemsExpr={JSON.stringify(cultureHeroOptions)}
+            placeholder="— выбери материал —"
           />
         </div>
 
-        <p x-show="eventError" class="text-sm text-error" x-text="eventError"></p>
+        <p x-show="cultureHeroError" class="text-sm text-error" x-text="cultureHeroError"></p>
 
         <div class="flex items-center gap-3">
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveEventCard()"
-            :disabled="eventSaving"
+            @click="saveCultureHero()"
+            :disabled="cultureHeroSaving"
           >
-            Сохранить event card
+            Сохранить
           </button>
-          <span x-show="eventSaving" class="text-sm text-base-content/70">Сохраняем...</span>
+          <span x-show="cultureHeroSaving" class="text-sm text-base-content/70">
+            Сохраняем...
+          </span>
         </div>
       </div>
     </div>
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Culture Cards Controls</h3>
+        <h3 class="text-lg font-semibold">Карточки секции «Культура»</h3>
         <p class="text-sm text-base-content/70">
-          До 2 карточек под главным материалом в culture section на landing.
-          Блок автоматически исключает global main hero и текущий hero рубрики.
+          До 2 карточек под главным материалом секции «Культура» на лендинге.
+          Блок автоматически исключает главный материал лендинга и текущий главный материал секции.
         </p>
       </div>
 
@@ -1702,7 +1655,7 @@ const initialMainHeroState = (() => {
             @click="saveCultureCards()"
             :disabled="cultureCardsSaving"
           >
-            Сохранить culture cards
+            Сохранить
           </button>
           <span x-show="cultureCardsSaving" class="text-sm text-base-content/70">
             Сохраняем...
@@ -1713,10 +1666,113 @@ const initialMainHeroState = (() => {
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Paris Cards Controls</h3>
+        <h3 class="text-lg font-semibold">Интервью в секции «Культура»</h3>
         <p class="text-sm text-base-content/70">
-          До 2 карточек под главным материалом в paris section на landing.
-          Блок автоматически исключает global main hero и текущий hero рубрики.
+          Блок интервью в секции «Культура» на лендинге.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-interview-mode" value="empty" x-model="cultureInterviewMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-interview-mode" value="auto-latest" x-model="cultureInterviewMode" />
+            <span class="text-sm">Auto latest</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-interview-mode" value="manual" x-model="cultureInterviewMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="cultureInterviewMode === 'manual'" class="grid gap-2 max-w-sm">
+          <label for="interview-select" class="text-sm font-medium">Выбери интервью</label>
+          <CustomSelect
+            id="interview-select"
+            model="selectedInterviewId"
+            itemsExpr={JSON.stringify(interviewOptions)}
+            placeholder="— выбери интервью —"
+          />
+        </div>
+
+        <p x-show="cultureInterviewError" class="text-sm text-error" x-text="cultureInterviewError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveCultureInterview()"
+            :disabled="cultureInterviewSaving"
+          >
+            Сохранить
+          </button>
+          <span x-show="cultureInterviewSaving" class="text-sm text-base-content/70">Сохраняем...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Главный материал секции «Париж»</h3>
+        <p class="text-sm text-base-content/70">
+          Главный материал секции «Париж» на лендинге.
+        </p>
+      </div>
+
+      <div class="mt-5 grid gap-5">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="paris-hero-mode" value="empty" x-model="parisHeroMode" />
+            <span class="text-sm">Empty</span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="paris-hero-mode" value="manual" x-model="parisHeroMode" />
+            <span class="text-sm">Manual</span>
+          </label>
+        </div>
+
+        <div x-show="parisHeroMode === 'manual'" class="grid gap-2 max-w-xl">
+          <label for="paris-hero-select" class="text-sm font-medium">
+            Выбери материал для paris hero
+          </label>
+          <CustomSelect
+            id="paris-hero-select"
+            model="selectedParisHeroKey"
+            itemsExpr={JSON.stringify(parisHeroOptions)}
+            placeholder="— выбери материал —"
+          />
+        </div>
+
+        <p x-show="parisHeroError" class="text-sm text-error" x-text="parisHeroError"></p>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="saveParisHero()"
+            :disabled="parisHeroSaving"
+          >
+            Сохранить
+          </button>
+          <span x-show="parisHeroSaving" class="text-sm text-base-content/70">
+            Сохраняем...
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-lg font-semibold">Карточки секции «Париж»</h3>
+        <p class="text-sm text-base-content/70">
+          До 2 карточек под главным материалом секции «Париж» на лендинге.
+          Блок автоматически исключает главный материал лендинга и текущий главный материал секции.
         </p>
       </div>
 
@@ -1791,7 +1847,7 @@ const initialMainHeroState = (() => {
             @click="saveParisCards()"
             :disabled="parisCardsSaving"
           >
-            Сохранить paris cards
+            Сохранить
           </button>
           <span x-show="parisCardsSaving" class="text-sm text-base-content/70">
             Сохраняем...
@@ -1799,63 +1855,12 @@ const initialMainHeroState = (() => {
         </div>
       </div>
     </div>
-
-    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+    <!-- Temporarily hidden: block is not used on the landing right now. -->
+    <div class="hidden bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Culture Interview Block Controls</h3>
+        <h3 class="text-lg font-semibold">А вы знали?</h3>
         <p class="text-sm text-base-content/70">
-          Interview block в culture section на landing.
-        </p>
-      </div>
-
-      <div class="mt-5 grid gap-5">
-        <div class="grid gap-3 sm:grid-cols-3">
-          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-            <input type="radio" name="culture-interview-mode" value="empty" x-model="cultureInterviewMode" />
-            <span class="text-sm">Empty</span>
-          </label>
-
-          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-            <input type="radio" name="culture-interview-mode" value="auto-latest" x-model="cultureInterviewMode" />
-            <span class="text-sm">Auto latest</span>
-          </label>
-
-          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-            <input type="radio" name="culture-interview-mode" value="manual" x-model="cultureInterviewMode" />
-            <span class="text-sm">Manual</span>
-          </label>
-        </div>
-
-        <div x-show="cultureInterviewMode === 'manual'" class="grid gap-2 max-w-sm">
-          <label for="interview-select" class="text-sm font-medium">Выбери интервью</label>
-          <CustomSelect
-            id="interview-select"
-            model="selectedInterviewId"
-            itemsExpr={JSON.stringify(interviewOptions)}
-            placeholder="— выбери интервью —"
-          />
-        </div>
-
-        <p x-show="cultureInterviewError" class="text-sm text-error" x-text="cultureInterviewError"></p>
-
-        <div class="flex items-center gap-3">
-          <button
-            type="button"
-            class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveCultureInterview()"
-            :disabled="cultureInterviewSaving"
-          >
-            Сохранить culture interview
-          </button>
-          <span x-show="cultureInterviewSaving" class="text-sm text-base-content/70">Сохраняем...</span>
-        </div>
-      </div>
-    </div>
-    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
-      <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Le Saviez-Vous Controls</h3>
-        <p class="text-sm text-base-content/70">
-          Блок «Le saviez-vous?» в paris section на landing.
+          Блок «А вы знали?» в секции «Париж» на лендинге.
         </p>
       </div>
 
@@ -1894,18 +1899,19 @@ const initialMainHeroState = (() => {
             @click="saveLeSaviezVous()"
             :disabled="leSaviezVousSaving"
           >
-            Сохранить le saviez-vous
+            Сохранить
           </button>
           <span x-show="leSaviezVousSaving" class="text-sm text-base-content/70">Сохраняем...</span>
         </div>
       </div>
     </div>
 
-    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+    <!-- Temporarily hidden: block is not used on the landing right now. -->
+    <div class="hidden bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Фото дня Controls</h3>
+        <h3 class="text-lg font-semibold">Фото дня</h3>
         <p class="text-sm text-base-content/70">
-          Блок «Фото дня» в sidebar на landing.
+          Блок «Фото дня» в боковой колонке лендинга.
         </p>
       </div>
 
@@ -1944,7 +1950,7 @@ const initialMainHeroState = (() => {
             @click="savePhotoOfTheDay()"
             :disabled="photoOfTheDaySaving"
           >
-            Сохранить фото дня
+            Сохранить
           </button>
           <span x-show="photoOfTheDaySaving" class="text-sm text-base-content/70">Сохраняем...</span>
         </div>
