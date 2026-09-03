@@ -18,6 +18,17 @@ import {
   type LandingPlacementsResponse,
 } from "@/lib/api/api";
 
+// Culture/Paris sections always render 1 hero + exactly 2 cards below it
+// (LandingBody.astro hard-caps with `.slice(0, 2)`), so the cards limit is 1–2.
+const CATEGORY_CARDS_MAX_LIMIT = 2;
+const clampCategoryCardsLimit = (value: unknown) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return CATEGORY_CARDS_MAX_LIMIT;
+  }
+  return Math.min(CATEGORY_CARDS_MAX_LIMIT, Math.max(1, Math.round(parsed)));
+};
+
 const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   schemaVersion: 4,
   mainHero: null,
@@ -32,12 +43,12 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   cultureHero: null,
   cultureCards: {
     mode: "auto-latest",
-    limit: 3,
+    limit: CATEGORY_CARDS_MAX_LIMIT,
   },
   parisHero: null,
   parisCards: {
     mode: "auto-latest",
-    limit: 3,
+    limit: CATEGORY_CARDS_MAX_LIMIT,
   },
   eventCard: {
     mode: "auto-nearest",
@@ -853,7 +864,7 @@ const initialCultureCardsState = (() => {
   if (!landingPlacements.cultureCards) {
     return {
       mode: "empty" as const,
-      limit: 3,
+      limit: CATEGORY_CARDS_MAX_LIMIT,
       keys: [],
     };
   }
@@ -861,7 +872,7 @@ const initialCultureCardsState = (() => {
   if (landingPlacements.cultureCards.mode === "auto-latest") {
     return {
       mode: "auto-latest" as const,
-      limit: landingPlacements.cultureCards.limit,
+      limit: clampCategoryCardsLimit(landingPlacements.cultureCards.limit),
       keys: [],
     };
   }
@@ -870,7 +881,7 @@ const initialCultureCardsState = (() => {
 
   return {
     mode: "manual" as const,
-    limit: 3,
+    limit: CATEGORY_CARDS_MAX_LIMIT,
     keys: landingPlacements.cultureCards.items
       .map((item) => `${item.type}:${item.id}`)
       .filter((key) => availableCultureCardKeys.has(key)),
@@ -892,7 +903,7 @@ const initialParisCardsState = (() => {
   if (!landingPlacements.parisCards) {
     return {
       mode: "empty" as const,
-      limit: 3,
+      limit: CATEGORY_CARDS_MAX_LIMIT,
       keys: [],
     };
   }
@@ -900,7 +911,7 @@ const initialParisCardsState = (() => {
   if (landingPlacements.parisCards.mode === "auto-latest") {
     return {
       mode: "auto-latest" as const,
-      limit: landingPlacements.parisCards.limit,
+      limit: clampCategoryCardsLimit(landingPlacements.parisCards.limit),
       keys: [],
     };
   }
@@ -909,7 +920,7 @@ const initialParisCardsState = (() => {
 
   return {
     mode: "manual" as const,
-    limit: 3,
+    limit: CATEGORY_CARDS_MAX_LIMIT,
     keys: landingPlacements.parisCards.items
       .map((item) => `${item.type}:${item.id}`)
       .filter((key) => availableParisCardKeys.has(key)),

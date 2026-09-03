@@ -42,12 +42,13 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   cultureHero: null,
   cultureCards: {
     mode: "auto-latest",
-    limit: 3,
+    // Culture/Paris sections render 1 hero + exactly 2 cards (LandingBody `.slice(0, 2)`).
+    limit: 2,
   },
   parisHero: null,
   parisCards: {
     mode: "auto-latest",
-    limit: 3,
+    limit: 2,
   },
   eventCard: {
     mode: "auto-nearest",

@@ -18,6 +18,17 @@ declare const Alpine: any;
 
 const ARTICLE_BUCKET_ORDER = ["culture", "paris", "tips"];
 
+// Culture/Paris sections always render 1 hero + exactly 2 cards below it
+// (LandingBody hard-caps with `.slice(0, 2)`), so the cards limit is 1–2.
+const CATEGORY_CARDS_MAX_LIMIT = 2;
+const clampCategoryCardsLimit = (value: unknown) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return CATEGORY_CARDS_MAX_LIMIT;
+  }
+  return Math.min(CATEGORY_CARDS_MAX_LIMIT, Math.max(1, Math.round(parsed)));
+};
+
 interface ContentOption {
   id: string;
   title: string;
@@ -176,14 +187,14 @@ export default (initialState: LandingEditorInitialState) => ({
 
   cultureCardsOptions: initialState.cultureCardsOptions ?? [],
   cultureCardsMode: initialState.initialCultureCards?.mode ?? "auto-latest",
-  cultureCardsLimit: initialState.initialCultureCards?.limit ?? 3,
+  cultureCardsLimit: initialState.initialCultureCards?.limit ?? 2,
   selectedCultureCardKeys: [...(initialState.initialCultureCards?.keys ?? [])],
   cultureCardsSaving: false,
   cultureCardsError: "",
 
   parisCardsOptions: initialState.parisCardsOptions ?? [],
   parisCardsMode: initialState.initialParisCards?.mode ?? "auto-latest",
-  parisCardsLimit: initialState.initialParisCards?.limit ?? 3,
+  parisCardsLimit: initialState.initialParisCards?.limit ?? 2,
   selectedParisCardKeys: [...(initialState.initialParisCards?.keys ?? [])],
   parisCardsSaving: false,
   parisCardsError: "",
@@ -606,7 +617,7 @@ export default (initialState: LandingEditorInitialState) => ({
       if (this.cultureCardsMode === "auto-latest") {
         cultureCards = {
           mode: "auto-latest",
-          limit: Number(this.cultureCardsLimit) || 3,
+          limit: clampCategoryCardsLimit(this.cultureCardsLimit),
         };
       }
 
@@ -656,7 +667,7 @@ export default (initialState: LandingEditorInitialState) => ({
       if (this.parisCardsMode === "auto-latest") {
         parisCards = {
           mode: "auto-latest",
-          limit: Number(this.parisCardsLimit) || 3,
+          limit: clampCategoryCardsLimit(this.parisCardsLimit),
         };
       }
 
