@@ -107,14 +107,14 @@ const wideBreakoutRailClass = "w-full lg:max-w-[1356px] my-12 px-4 lg:px-0";
             ></p>
           </div>
           <p
-            x-show="block.type === 'url-link' && !(block.url || '').match(/^(https?:\\/\\/|\\/)/)"
+            x-show="block.type === 'url-link' && !(block.url || '').match(/^(https?:\/\/|\/)/)"
             class="rounded-lg border border-base-300 bg-base-200/40 p-4 text-sm text-base-content/70"
           >
             <span class="font-medium text-base-content" x-text="block.text || '(без текста)'"></span>
             <span class="ml-2 break-all" x-text="block.url"></span>
           </p>
           <a
-            x-show="block.type === 'url-link' && (block.url || '').match(/^(https?:\\/\\/|\\/)/)"
+            x-show="block.type === 'url-link' && (block.url || '').match(/^(https?:\/\/|\/)/)"
             :href="block.url"
             target="_blank"
             rel="noopener noreferrer"
