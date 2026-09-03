@@ -9,6 +9,8 @@ import {
   getTagLabel,
 } from "@/lib/utils/contentBadge";
 import { flippersApi } from "../../lib/api/api";
+import { canPreviewUnpublished } from "@/lib/utils/preview";
+import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { ChevronLeft, ChevronRight } from "@lucide/astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import picture1 from "@/assets/images/culture.jpg";
@@ -28,7 +30,12 @@ if (!flipper) {
   return Astro.redirect("/404");
 }
 
-if ((flipper as any).published !== true) {
+// Admins may preview an unpublished flipper on its real page; everyone else
+// gets redirected to /404.
+const isDraftPreview =
+  (flipper as any).published !== true && canPreviewUnpublished(Astro.locals);
+
+if ((flipper as any).published !== true && !isDraftPreview) {
   return Astro.redirect("/404");
 }
 
@@ -119,6 +126,9 @@ try {
   includePreFooterCTA={false}
   useClientRouter={true}
 >
+  {isDraftPreview && (
+    <DraftPreviewBanner editHref={`/dashboard/flippers/edit/${id}`} />
+  )}
   <main class="bg-base-200 min-h-screen">
     <div class="max-w-[1512px] mx-auto" x-data={flipperState}>
       <div

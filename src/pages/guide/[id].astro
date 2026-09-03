@@ -11,6 +11,8 @@ import {
   getTagLabel,
 } from "@/lib/utils/contentBadge";
 import { ApiError, guidesApi } from "@/lib/api/api";
+import { canPreviewUnpublished } from "@/lib/utils/preview";
+import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import {
   buildContentCollectionItems,
   buildLinkedContentLookup,
@@ -52,7 +54,13 @@ try {
   }
 }
 
-if (!error && guideData?.published !== true) {
+// Admins may preview an unpublished guide on its real page; everyone else
+// gets the usual "not found".
+const isDraftPreview =
+  !error && Boolean(guideData) && guideData?.published !== true &&
+  canPreviewUnpublished(Astro.locals);
+
+if (!error && guideData?.published !== true && !isDraftPreview) {
   error = "Путеводитель не найден.";
   guideData = null;
 }
@@ -152,6 +160,9 @@ if (!error && guideData) {
   structuredData={articleStructuredData}
   useClientRouter={true}
 >
+  {isDraftPreview && (
+    <DraftPreviewBanner editHref={`/dashboard/guide/${id}/edit`} />
+  )}
   <main class="bg-base-200 min-h-screen">
     <div class="max-w-[1512px] mx-auto">
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}

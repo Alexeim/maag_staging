@@ -15,6 +15,8 @@ import {
   getTagLabel,
 } from "@/lib/utils/contentBadge";
 import { ApiError, newsApi } from "@/lib/api/api";
+import { canPreviewUnpublished } from "@/lib/utils/preview";
+import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
 import {
   buildLinkedContentLookup,
@@ -51,7 +53,13 @@ try {
   }
 }
 
-if (!error && articleData?.published !== true) {
+// Admins may preview an unpublished news item on its real page; everyone else
+// gets the usual "not found".
+const isDraftPreview =
+  !error && Boolean(articleData) && articleData?.published !== true &&
+  canPreviewUnpublished(Astro.locals);
+
+if (!error && articleData?.published !== true && !isDraftPreview) {
   error = "Новость не найдена.";
   articleData = null;
 }
@@ -201,6 +209,9 @@ if (!error && articleData) {
   includePreFooterCTA={false}
   useClientRouter={true}
 >
+  {isDraftPreview && (
+    <DraftPreviewBanner editHref={`/dashboard/news/${id}/edit`} />
+  )}
   <main class="bg-base-200 min-h-screen">
     <div class="max-w-[1512px] mx-auto">
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}

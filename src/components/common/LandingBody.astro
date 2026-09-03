@@ -107,7 +107,12 @@ const cultureHero = publicLandingData?.cultureHero ?? null;
 const cultureCardItems = publicLandingData?.cultureCardItems ?? [];
 const parisHero = publicLandingData?.parisHero ?? null;
 const parisCardItems = publicLandingData?.parisCardItems ?? [];
-const carouselItems = publicLandingData?.carouselItems ?? [];
+// Safety net: never let an unpublished material into the public rail. The
+// backend's /api/public/landing is expected to filter these out already, but
+// a draft explicitly placed into a landing slot can still leak through.
+const carouselItems = (publicLandingData?.carouselItems ?? []).filter(
+  (item: any) => item?.published !== false,
+);
 
 const extractQuoteOrAnswer = (interview: any) => {
   if (!interview || !Array.isArray(interview.content)) {

@@ -10,6 +10,8 @@ import {
   getTagLabel,
 } from "@/lib/utils/contentBadge";
 import { ApiError, visualStoriesApi } from "@/lib/api/api";
+import { canPreviewUnpublished } from "@/lib/utils/preview";
+import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import { getTransitionName } from "@/lib/utils/transitions";
@@ -38,7 +40,13 @@ if (!id) {
   }
 }
 
-if (!error && storyData?.published !== true) {
+// Admins may preview an unpublished visual story on its real page; everyone
+// else gets the usual "not found".
+const isDraftPreview =
+  !error && Boolean(storyData) && storyData?.published !== true &&
+  canPreviewUnpublished(Astro.locals);
+
+if (!error && storyData?.published !== true && !isDraftPreview) {
   error = "Визуальная история не найдена.";
   storyData = null;
 }
@@ -595,6 +603,9 @@ const articleStructuredData = storyData
       }
     }
   </style>
+  {isDraftPreview && (
+    <DraftPreviewBanner editHref={`/dashboard/visual-story/${id}/edit`} />
+  )}
   {
     error ? (
       <div class="error-state">

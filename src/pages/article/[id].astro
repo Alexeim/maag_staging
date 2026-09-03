@@ -15,6 +15,8 @@ import {
   ApiError,
   articlesApi,
 } from "@/lib/api/api";
+import { canPreviewUnpublished } from "@/lib/utils/preview";
+import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import {
   buildContentCollectionItems,
   buildLinkedContentLookup,
@@ -69,7 +71,13 @@ try {
   }
 }
 
-if (!error && articleData?.published !== true) {
+// Admins may preview an unpublished article on its real page; everyone else
+// gets the usual "not found".
+const isDraftPreview =
+  !error && Boolean(articleData) && articleData?.published !== true &&
+  canPreviewUnpublished(Astro.locals);
+
+if (!error && articleData?.published !== true && !isDraftPreview) {
   error = "Article not found.";
   articleData = null;
 }
@@ -209,6 +217,9 @@ const isAKid = displayArticle.authorName === "Саша Макарова";
   structuredData={articleStructuredData}
   useClientRouter={true}
 >
+  {isDraftPreview && (
+    <DraftPreviewBanner editHref={`/dashboard/article/${id}/edit`} />
+  )}
   <main class="bg-base-200 min-h-screen">
     <div class="max-w-[1512px] mx-auto">
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}

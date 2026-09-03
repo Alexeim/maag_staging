@@ -1,6 +1,8 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
 import { interviewsApi } from "../../lib/api/api";
+import { canPreviewUnpublished } from "@/lib/utils/preview";
+import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import InterviewHero from "@/components/interview/InterviewHero.astro";
@@ -32,7 +34,12 @@ if (!interview) {
   return Astro.redirect("/404");
 }
 
-if ((interview as any).published !== true) {
+// Admins may preview an unpublished interview on its real page; everyone else
+// gets redirected to /404.
+const isDraftPreview =
+  (interview as any).published !== true && canPreviewUnpublished(Astro.locals);
+
+if ((interview as any).published !== true && !isDraftPreview) {
   return Astro.redirect("/404");
 }
 
@@ -122,6 +129,9 @@ try {
   structuredData={articleStructuredData}
   useClientRouter={true}
 >
+  {isDraftPreview && (
+    <DraftPreviewBanner editHref={`/dashboard/interview/${id}/edit`} />
+  )}
   <main class="bg-base-200 min-h-screen">
     <div class="max-w-[1512px] mx-auto">
       <InterviewHero

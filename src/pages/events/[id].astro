@@ -7,6 +7,8 @@ import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarque
 import picture1 from "../../assets/images/culture.jpg";
 import { CalendarPlus } from "@lucide/astro";
 import { ApiError, eventsApi } from "@/lib/api/api";
+import { canPreviewUnpublished } from "@/lib/utils/preview";
+import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import {
   buildContentCollectionItems,
   buildLinkedContentLookup,
@@ -427,7 +429,13 @@ try {
   }
 }
 
-if (!error && eventData?.published !== true) {
+// Admins may preview an unpublished event on its real page; everyone else
+// gets the usual "not found".
+const isDraftPreview =
+  !error && Boolean(eventData) && eventData?.published !== true &&
+  canPreviewUnpublished(Astro.locals);
+
+if (!error && eventData?.published !== true && !isDraftPreview) {
   error = "Событие не найдено.";
   eventData = null;
 }
@@ -598,6 +606,9 @@ const eventStructuredData = eventData
   structuredData={eventStructuredData}
   useClientRouter={true}
 >
+  {isDraftPreview && (
+    <DraftPreviewBanner editHref={`/dashboard/event/${id}/edit`} />
+  )}
   <main class="min-h-screen bg-base-200 text-black">
     <div
       class="mx-auto max-w-[1512px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
