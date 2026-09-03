@@ -195,7 +195,9 @@ const fetchLatest = async (type: LandingContentType, limit: number) => {
 
   return snapshot.docs
     .map((doc) => toLandingItem(doc, type))
-    .filter(Boolean)
+    // A draft can still carry a publishedAt (published once, then unpublished),
+    // so ordering by it is not enough — keep only what is actually published.
+    .filter((item) => Boolean(item) && isPublished(item))
     .slice(0, limit);
 };
 
