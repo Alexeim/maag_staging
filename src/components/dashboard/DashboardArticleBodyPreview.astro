@@ -22,7 +22,7 @@ const wideBreakoutRailClass = "w-full lg:max-w-[1356px] my-12 px-4 lg:px-0";
 <div class="flex flex-col items-center">
   <template x-for={`(block, index) in ${contentExpression}`} :key="block.id || `${block.type}-${index}`">
     <div class="w-full">
-      <template x-if="['first-paragraph', 'paragraph', 'h1', 'h2', 'h3', 'quote', 'image', 'qa', 'link', 'url-link'].includes(block.type)">
+      <template x-if="['first-paragraph', 'paragraph', 'h1', 'h2', 'h3', 'quote', 'image', 'qa', 'link', 'url-link', 'tweet'].includes(block.type)">
         <div class={proseRailClass}>
           <article class="max-w-full space-y-12">
           <div
@@ -76,61 +76,99 @@ const wideBreakoutRailClass = "w-full lg:max-w-[1356px] my-12 px-4 lg:px-0";
               class="text-center font-inter text-xs text-gray-500 mt-2"
             ></figcaption>
           </figure>
-          <div x-show="block.type === 'qa'" class="space-y-4">
+          <div x-show="block.type === 'qa'">
             <p
-              x-show="block.question"
-              x-text="block.question"
-              class="text-xl font-article-body font-bold! italic"
+              class="mb-2 text-[0.7rem] uppercase tracking-[0.2em] text-base-content/40"
+              x-text="getBlockTypeLabel(block.type)"
             ></p>
-            <p
-              x-show="block.answer"
-              x-text="block.answer"
-              class="text-lg font-article-body text-justify"
-            ></p>
+            <div class="space-y-4">
+              <p
+                x-show="block.question"
+                x-text="block.question"
+                class="text-xl font-article-body font-bold! italic"
+              ></p>
+              <p
+                x-show="block.answer"
+                x-text="block.answer"
+                class="text-lg font-article-body text-justify"
+              ></p>
+            </div>
           </div>
           <div
             x-show="block.type === 'link'"
-            class="rounded-lg border border-base-300 bg-base-200/40 p-4 space-y-2"
+            class="border-l-2 border-base-300 pl-4 space-y-1"
           >
             <p
-              class="text-xs uppercase tracking-[0.2em] text-base-content/60"
+              class="text-[0.7rem] uppercase tracking-[0.2em] text-base-content/40"
+              x-text="getBlockTypeLabel(block.type)"
+            ></p>
+            <p
+              class="text-xs uppercase tracking-[0.2em] text-base-content/55"
               x-text="getLinkedContentTypeLabel(block.linkedContentType)"
             ></p>
             <p
-              class="text-sm font-medium text-base-content"
+              class="font-article-body text-lg text-base-content"
               x-text="getLinkedBlockTitle(block) || block.linkedContentTitle || 'Контент не выбран'"
             ></p>
             <p
               x-show="block.linkedContentId"
-              class="text-xs text-base-content/60 break-all"
+              class="text-xs text-base-content/45 break-all"
               x-text="block.linkedContentId"
             ></p>
           </div>
-          <p
+          <div
             x-show="block.type === 'url-link' && !(block.url || '').match(/^(https?:\/\/|\/)/)"
-            class="rounded-lg border border-base-300 bg-base-200/40 p-4 text-sm text-base-content/70"
+            class="border-l-2 border-base-300 pl-4 space-y-1"
           >
-            <span class="font-medium text-base-content" x-text="block.text || '(без текста)'"></span>
-            <span class="ml-2 break-all" x-text="block.url"></span>
-          </p>
-          <a
+            <p
+              class="text-[0.7rem] uppercase tracking-[0.2em] text-base-content/40"
+              x-text="getBlockTypeLabel(block.type)"
+            ></p>
+            <p
+              class="font-article-body text-lg text-base-content/70"
+              x-text="block.text || '(без текста)'"
+            ></p>
+            <p
+              class="text-sm text-base-content/45 break-all"
+              x-text="block.url || '(ссылка не указана)'"
+            ></p>
+          </div>
+          <div
             x-show="block.type === 'url-link' && (block.url || '').match(/^(https?:\/\/|\/)/)"
-            :href="block.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="block rounded-lg border border-base-300 bg-base-200/40 p-4 text-sm text-primary hover:underline"
+            class="border-l-2 border-base-300 pl-4 space-y-1"
           >
-            <span class="font-medium" x-text="block.text || block.url"></span>
-            <span class="ml-2 break-all text-base-content/60" x-text="block.url"></span>
-          </a>
-          <a
+            <p
+              class="text-[0.7rem] uppercase tracking-[0.2em] text-base-content/40"
+              x-text="getBlockTypeLabel(block.type)"
+            ></p>
+            <a
+              :href="block.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-article-body text-lg text-base-content underline decoration-maag-green underline-offset-2 hover:opacity-80"
+              x-text="block.text || block.url"
+            ></a>
+            <p
+              class="text-sm text-base-content/45 break-all"
+              x-text="block.url"
+            ></p>
+          </div>
+          <div
             x-show="block.type === 'tweet' && block.url"
-            :href="block.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="block rounded-lg border border-base-300 bg-base-200/40 p-4 text-sm text-primary hover:underline break-all"
-            x-text="block.url"
-          ></a>
+            class="border-l-2 border-base-300 pl-4 space-y-1"
+          >
+            <p
+              class="text-[0.7rem] uppercase tracking-[0.2em] text-base-content/40"
+              x-text="getBlockTypeLabel(block.type)"
+            ></p>
+            <a
+              :href="block.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-article-body text-lg text-base-content underline decoration-maag-green underline-offset-2 hover:opacity-80 break-all"
+              x-text="block.text || block.url"
+            ></a>
+          </div>
           </article>
         </div>
       </template>
