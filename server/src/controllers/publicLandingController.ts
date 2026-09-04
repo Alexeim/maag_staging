@@ -232,14 +232,14 @@ const selectCategoryItems = async (
   if (!selection) return [];
   if (selection.mode === 'manual') {
     return (await fetchByTargets(Array.isArray(selection.items) ? selection.items : []))
-      .filter((item: any) => !item.isHotContent && !item.isMaagChoice);
+      .filter((item: any) => !item.isMaagChoice);
   }
 
   const limit = selection.limit ?? 3;
   const candidates = await fetchLatestFromTypes(CATEGORY_CONTENT_TYPES, 24);
   return candidates
     .filter((item: any) => normalizeCategory(item?.category) === category)
-    .filter((item: any) => !item.isHotContent && !item.isMaagChoice && !isLeSaviezVousItem(item) && !excludedIds.has(item.id))
+    .filter((item: any) => !item.isMaagChoice && !isLeSaviezVousItem(item) && !excludedIds.has(item.id))
     .slice(0, limit);
 };
 
@@ -328,8 +328,10 @@ const selectEventCard = async (selection: any) => {
   return selectAutoLandingEvent();
 };
 
-const isLandingPrimaryExcluded = (item: any) =>
-  Boolean(item?.isHotContent) || Boolean(item?.isMaagChoice);
+// On the landing, the only disqualifying editorial flag is "Выбор Maag".
+// "Самое читаемое" / "Записная книжка" scope to the culture / paris pages
+// respectively and must not suppress a material anywhere on the landing.
+const isLandingPrimaryExcluded = (item: any) => Boolean(item?.isMaagChoice);
 
 const fetchLandingPrimaryTarget = async (target: LandingTarget | null) => {
   const item = await fetchByTarget(target);
@@ -630,20 +632,20 @@ const buildParisPagePayload = async () => {
   const primaryParisArticle = await fetchSectionHero(
     parisPagePlacements.hero,
     candidates,
-    ['isHotContent', 'isNotebookContent'],
+    ['isNotebookContent'],
   );
 
   const twoImageArticle = await fetchSectionHero(
     parisPagePlacements.twoImageArticle,
     candidates.filter((item: any) => item.id !== primaryParisArticle?.id),
-    ['isHotContent', 'isNotebookContent'],
+    ['isNotebookContent'],
   );
 
   const secondaryStories = await selectSectionSecondaryStories(
     parisPagePlacements.secondaryStories,
     candidates.filter((item: any) => item.id !== twoImageArticle?.id),
     primaryParisArticle,
-    ['isHotContent', 'isNotebookContent'],
+    ['isNotebookContent'],
   );
 
   const topIds = new Set(
@@ -658,7 +660,7 @@ const buildParisPagePayload = async () => {
     parisPagePlacements.interviewFeature,
     interviewCandidates,
     topIds,
-    ['isHotContent', 'isNotebookContent'],
+    ['isNotebookContent'],
   );
 
   const excludedIds = new Set([...topIds, interviewFeature?.id].filter(Boolean));
@@ -673,7 +675,6 @@ const buildParisPagePayload = async () => {
     (item: any) =>
       !excludedIds.has(item.id) &&
       !sidebarIds.has(item.id) &&
-      !item.isHotContent &&
       !item.isNotebookContent,
   );
   const photoOfTheDay = await selectPhotoOfTheDay(parisPagePlacements.photoOfTheDayFeature);
@@ -961,7 +962,6 @@ export const getPublicLanding = async (_req: Request, res: Response) => {
     const carouselItems = (await fetchLatestFromTypes(CATEGORY_CONTENT_TYPES, 24))
       .filter(
         (item: any) =>
-          !item.isHotContent &&
           !item.isMaagChoice &&
           !item.isNews &&
           !isLeSaviezVousItem(item) &&
