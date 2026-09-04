@@ -1,3 +1,5 @@
+import logoFull from "@/assets/logo/logoFull.svg";
+
 export type JsonLdObject = Record<string, unknown>;
 
 interface TimestampLike {
@@ -220,7 +222,8 @@ export const buildGlobalStructuredData = (
       "@id": organizationId,
       name: "MAAG France",
       url: siteOrigin,
-      logo: toAbsoluteUrl("/favicon.svg"),
+      logo: toAbsoluteUrl(logoFull.src),
+      sameAs: ["https://www.instagram.com/stories/maag_france/"],
       inLanguage: "ru",
     },
     {
