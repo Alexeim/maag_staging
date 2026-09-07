@@ -6,8 +6,6 @@ import compressor from "astro-compressor";
 
 import node from "@astrojs/node";
 
-import partytown from "@astrojs/partytown";
-
 import sitemap from "@astrojs/sitemap";
 
 const sitemapExcludedPaths = new Set([
@@ -49,7 +47,6 @@ export default defineConfig({
   integrations: [
     alpinejs({ entrypoint: "/src/alpine-entrypoint.ts" }),
     compressor({ gzip: true, brotli: true }),
-    partytown(),
     sitemap({
       filter: shouldIncludeInSitemap,
     }),

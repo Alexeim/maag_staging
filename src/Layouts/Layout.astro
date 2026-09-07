@@ -124,10 +124,8 @@ const allStructuredData = [
       gtag("config", "G-7EDWP4DX2J");
     </script>
     <!-- Google tag (gtag.js) -->
-    <!-- Twitter/X tweet embeds. Kept off Partytown on purpose: widgets.js
-         has a long-standing unresolved rendering bug under Partytown's DOM
-         proxy (github.com/BuilderIO/partytown/issues/305) — even Partytown's
-         own test suite keeps this scenario disabled. -->
+    <!-- Twitter/X tweet embeds. widgets.js manipulates the DOM directly, so it
+         runs on the main thread as a plain async script (no worker offloading). -->
     <script
       is:inline
       async
