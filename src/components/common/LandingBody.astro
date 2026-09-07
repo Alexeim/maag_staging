@@ -163,7 +163,7 @@ const splitTitle = (t: string) => {
     <hr class="h-px border-1" />
   </div>
   <div
-    class="grid grid-cols-1 lg:grid-cols-12 min-h-[200px] gap-6 lg:gap-4 mb-0 lg:mb-6"
+    class="grid grid-cols-1 lg:grid-cols-12 min-h-[200px] gap-12 lg:gap-4 mb-0 lg:mb-6"
   >
     <div class="order-2 lg:order-none lg:col-span-9 flex flex-col">
       <div class="pl-0 pr-0">
@@ -202,7 +202,7 @@ const splitTitle = (t: string) => {
                       />
                     </div>
                   )}
-                  <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                  <div class="grid content-start gap-[0.55rem] bg-white pt-[1.2rem] px-[1.2rem] pb-8 lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                     <p class="m-0">
                       {getPrimaryTagHref(cultureHero) ? (
                         <a
@@ -275,7 +275,7 @@ const splitTitle = (t: string) => {
 
           <div
             id="culture-articles-box"
-            class="grid gap-4 sm:grid-cols-2 sm:items-stretch py-8 border-b border-base-content/15"
+            class="grid gap-12 lg:gap-4 sm:grid-cols-2 sm:items-stretch py-8 border-b border-base-content/15 mb-4 lg:mb-0"
           >
             {
               cultureCardItems.length > 0 ? (
@@ -429,7 +429,7 @@ const splitTitle = (t: string) => {
             {
               parisHero ? (
                 <>
-                  <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:order-1 lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
+                  <div class="grid content-start gap-[0.55rem] bg-white pt-[1.2rem] px-[1.2rem] pb-8 lg:order-1 lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                     <p class="m-0">
                       {getPrimaryTagHref(parisHero) ? (
                         <a
@@ -516,7 +516,7 @@ const splitTitle = (t: string) => {
             parisCardItems.length > 0 ? (
               <div
                 id="paris-articles-box-1"
-                class="grid gap-4 sm:grid-cols-2 sm:items-stretch py-8"
+                class="grid gap-12 lg:gap-4 sm:grid-cols-2 sm:items-stretch py-8"
               >
                 {parisCardItems.slice(0, 2).map((item) => (
                   <ArticleCard

@@ -197,10 +197,8 @@ const interviewName =
   useClientRouter={true}
 >
   <main class="min-h-screen bg-base-200 text-black">
-    <div
-      class="mx-auto max-w-[1440px] px-4 pb-20 sm:px-6 lg:px-8 lg:pb-[6.5rem]"
-    >
-      <div class="pt-8 lg:pt-10">
+    <div class="mx-auto max-w-[1440px] pb-20 lg:px-8 lg:pb-[6.5rem]">
+      <div class="px-4 pt-8 sm:px-6 lg:px-0 lg:pt-10">
         <h1
           class="m-0 text-3xl lg:text-[28px] font-old_standard font-base uppercase tracking-[0.46em] text-base-content"
         >
@@ -263,8 +261,8 @@ const interviewName =
         {
           primaryParisArticle ? (
             <article class="lg:flex lg:h-full lg:flex-col">
-              <div class="mb-6 flex flex-col items-center gap-3 lg:mb-8 lg:flex-shrink-0 lg:text-center">
-                <p class="m-0">
+              <div class="mb-0 flex flex-col items-center gap-3 lg:mb-8 lg:shrink-0 lg:text-center">
+                <p class="m-0 px-4 sm:px-6 lg:px-0">
                   {getPrimaryTagHref(primaryParisArticle) ? (
                     <a
                       href={getPrimaryTagHref(primaryParisArticle)}
@@ -279,12 +277,12 @@ const interviewName =
                   )}
                 </p>
 
-                <div class="mx-auto flex w-full max-w-[850px] flex-col items-center gap-3">
+                <div class="mx-auto flex w-full max-w-[850px] flex-col items-center gap-3 px-4 sm:px-6 lg:px-0">
                   <a
                     href={primaryParisArticle.href}
                     class="text-current no-underline hover:underline text-center"
                   >
-                    <h2 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
+                    <h2 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2 lg:mb-0">
                       {primaryParisArticle.paid ? (
                         <>
                           {primaryParisSplit.start && (
@@ -309,7 +307,7 @@ const interviewName =
                 </div>
                 <a
                   href={primaryParisArticle.href}
-                  class="linked-image-hover block! lg:hidden! aspect-[4/5] overflow-hidden lg:aspect-auto lg:h-full lg:min-h-0 w-screen"
+                  class="linked-image-hover block! lg:hidden! aspect-[4/5] overflow-hidden lg:aspect-auto lg:h-full lg:min-h-0 w-full"
                   aria-label={primaryParisArticle.title}
                 >
                   <img
@@ -321,8 +319,8 @@ const interviewName =
                 </a>
               </div>
 
-              <div class="grid lg:min-h-0 lg:flex-1 lg:grid-cols-2 lg:grid-rows-1 lg:items-stretch">
-                <div class="grid content-center gap-10 lg:h-full lg:min-h-0 bg-base-100">
+              <div class="grid lg:min-h-0 lg:flex-1 lg:grid-cols-2 lg:grid-rows-1 lg:items-stretch bg-base-100 w-full">
+                <div class="grid content-center gap-10 lg:h-full lg:min-h-0 bg-base-100 py-6 lg:py-0 px-2 lg:px-0">
                   {getCardLead(primaryParisArticle) && (
                     <p class="text-[22px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light text-center px-1 lg:px-16">
                       {truncateText(getCardLead(primaryParisArticle), 280)}
@@ -361,586 +359,590 @@ const interviewName =
               </div>
             </article>
           ) : (
-            <article class="border border-base-content/15 bg-white p-5 text-[1.05rem] font-light leading-[1.5]">
+            <article class="mx-4 border border-base-content/15 bg-white p-5 text-[1.05rem] font-light leading-[1.5] sm:mx-6 lg:mx-0">
               Пока нет материалов категории «Париж».
             </article>
           )
         }
       </div>
 
-      <div class="w-full my-8 lg:my-10">
-        <hr class="h-px border-1" />
-      </div>
+      <div class="px-4 sm:px-6 lg:contents">
+        <div class="w-full my-8 lg:my-10">
+          <hr class="h-px border-1" />
+        </div>
 
-      {
-        editorialSidebarItems.length > 0 && (
-          <section class="mb-10 lg:mb-14">
-            <p class="m-0 mb-[35px] text-lg font-normal uppercase tracking-[0.3em] font-old_standard">
-              записная книжка
-            </p>
+        {
+          editorialSidebarItems.length > 0 && (
+            <section class="mb-10 lg:mb-14">
+              <p class="m-0 mb-[35px] text-lg font-normal uppercase tracking-[0.3em] font-old_standard">
+                записная книжка
+              </p>
 
-            <div class="hidden gap-4 lg:flex lg:flex-wrap lg:gap-6">
-              {editorialSidebarItems.map((item) => (
-                <div class="w-[320px]">
-                  <ZapisnayaKnijkaCard
-                    title={getCardTitle(item)}
-                    category={getPrimaryTag(item)}
-                    categoryHref={getPrimaryTagHref(item)}
-                    imageUrl={item.imageUrl}
-                    href={item.href}
-                    transitionName={getTransitionName(item)}
-                    hideDate={true}
-                    lead={getCardLead(item)}
-                  />
-                </div>
-              ))}
-            </div>
-
-            <div
-              class="zapisnaya-carousel min-w-0 w-full max-w-full lg:hidden [touch-action:pan-y]"
-              data-zapisnaya-carousel-root
-              data-zapisnaya-carousel-swipe="true"
-              data-page-count={editorialSidebarItems.length}
-            >
-              <div class="min-w-0 w-full max-w-full overflow-hidden">
-                <div
-                  class="zapisnaya-carousel__track flex w-full transition-transform duration-700 ease-out"
-                  data-zapisnaya-carousel-track
-                >
-                  {editorialSidebarItems.map((item, index) => (
-                    <div
-                      class="zapisnaya-carousel__page min-w-full w-full max-w-full flex-shrink-0"
-                      data-zapisnaya-carousel-page
-                      aria-hidden={index === 0 ? "false" : "true"}
-                    >
-                      <div class="w-full">
-                        <ZapisnayaKnijkaCard
-                          title={getCardTitle(item)}
-                          category={getPrimaryTag(item)}
-                          categoryHref={getPrimaryTagHref(item)}
-                          imageUrl={item.imageUrl}
-                          href={item.href}
-                          transitionName={getTransitionName(item)}
-                          hideDate={true}
-                          lead={getCardLead(item)}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div class="hidden gap-4 lg:flex lg:flex-wrap lg:gap-6">
+                {editorialSidebarItems.map((item) => (
+                  <div class="w-[320px]">
+                    <ZapisnayaKnijkaCard
+                      title={getCardTitle(item)}
+                      category={getPrimaryTag(item)}
+                      categoryHref={getPrimaryTagHref(item)}
+                      imageUrl={item.imageUrl}
+                      href={item.href}
+                      transitionName={getTransitionName(item)}
+                      hideDate={true}
+                      lead={getCardLead(item)}
+                    />
+                  </div>
+                ))}
               </div>
 
-              {editorialSidebarItems.length > 1 && (
-                <div class="flex items-center justify-center gap-2 pt-4">
-                  {editorialSidebarItems.map((_, index) => (
-                    <button
-                      type="button"
-                      class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
-                      data-zapisnaya-carousel-dot
-                      data-page-index={index}
-                      aria-label={`Показать карточку ${index + 1}`}
-                      aria-pressed={index === 0 ? "true" : "false"}
-                    />
-                  ))}
+              <div
+                class="zapisnaya-carousel min-w-0 w-full max-w-full lg:hidden [touch-action:pan-y]"
+                data-zapisnaya-carousel-root
+                data-zapisnaya-carousel-swipe="true"
+                data-page-count={editorialSidebarItems.length}
+              >
+                <div class="min-w-0 w-full max-w-full overflow-hidden">
+                  <div
+                    class="zapisnaya-carousel__track flex w-full transition-transform duration-700 ease-out"
+                    data-zapisnaya-carousel-track
+                  >
+                    {editorialSidebarItems.map((item, index) => (
+                      <div
+                        class="zapisnaya-carousel__page min-w-full w-full max-w-full flex-shrink-0"
+                        data-zapisnaya-carousel-page
+                        aria-hidden={index === 0 ? "false" : "true"}
+                      >
+                        <div class="w-full">
+                          <ZapisnayaKnijkaCard
+                            title={getCardTitle(item)}
+                            category={getPrimaryTag(item)}
+                            categoryHref={getPrimaryTagHref(item)}
+                            imageUrl={item.imageUrl}
+                            href={item.href}
+                            transitionName={getTransitionName(item)}
+                            hideDate={true}
+                            lead={getCardLead(item)}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-          </section>
-        )
-      }
 
-      <script is:inline>
-        const initZapisnayaCarousels = () => {
-          const roots = document.querySelectorAll(
-            "[data-zapisnaya-carousel-root]",
-          );
+                {editorialSidebarItems.length > 1 && (
+                  <div class="flex items-center justify-center gap-2 pt-4">
+                    {editorialSidebarItems.map((_, index) => (
+                      <button
+                        type="button"
+                        class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
+                        data-zapisnaya-carousel-dot
+                        data-page-index={index}
+                        aria-label={`Показать карточку ${index + 1}`}
+                        aria-pressed={index === 0 ? "true" : "false"}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+          )
+        }
 
-          roots.forEach((root) => {
-            if (
-              !(root instanceof HTMLElement) ||
-              root.dataset.initialized === "true"
-            ) {
-              return;
-            }
-
-            const track = root.querySelector("[data-zapisnaya-carousel-track]");
-            const pages = Array.from(
-              root.querySelectorAll("[data-zapisnaya-carousel-page]"),
+        <script is:inline>
+          const initZapisnayaCarousels = () => {
+            const roots = document.querySelectorAll(
+              "[data-zapisnaya-carousel-root]",
             );
-            const dots = Array.from(
-              root.querySelectorAll("[data-zapisnaya-carousel-dot]"),
-            );
-            const pageCount = Number(
-              root.dataset.pageCount || pages.length || 0,
-            );
-            const isSwipeEnabled =
-              root.dataset.zapisnayaCarouselSwipe === "true";
 
-            if (!(track instanceof HTMLElement) || pageCount <= 1) {
-              root.dataset.initialized = "true";
-              return;
-            }
+            roots.forEach((root) => {
+              if (
+                !(root instanceof HTMLElement) ||
+                root.dataset.initialized === "true"
+              ) {
+                return;
+              }
 
-            let currentPage = 0;
-            let touchStartX = 0;
-            let touchStartY = 0;
+              const track = root.querySelector(
+                "[data-zapisnaya-carousel-track]",
+              );
+              const pages = Array.from(
+                root.querySelectorAll("[data-zapisnaya-carousel-page]"),
+              );
+              const dots = Array.from(
+                root.querySelectorAll("[data-zapisnaya-carousel-dot]"),
+              );
+              const pageCount = Number(
+                root.dataset.pageCount || pages.length || 0,
+              );
+              const isSwipeEnabled =
+                root.dataset.zapisnayaCarouselSwipe === "true";
 
-            const syncUi = () => {
-              track.style.transform = `translateX(-${currentPage * 100}%)`;
+              if (!(track instanceof HTMLElement) || pageCount <= 1) {
+                root.dataset.initialized = "true";
+                return;
+              }
 
-              pages.forEach((page, index) => {
-                page.setAttribute(
-                  "aria-hidden",
-                  index === currentPage ? "false" : "true",
-                );
-              });
+              let currentPage = 0;
+              let touchStartX = 0;
+              let touchStartY = 0;
 
-              dots.forEach((dot, index) => {
+              const syncUi = () => {
+                track.style.transform = `translateX(-${currentPage * 100}%)`;
+
+                pages.forEach((page, index) => {
+                  page.setAttribute(
+                    "aria-hidden",
+                    index === currentPage ? "false" : "true",
+                  );
+                });
+
+                dots.forEach((dot, index) => {
+                  if (!(dot instanceof HTMLButtonElement)) {
+                    return;
+                  }
+
+                  dot.setAttribute(
+                    "aria-pressed",
+                    index === currentPage ? "true" : "false",
+                  );
+                });
+              };
+
+              const goToPage = (pageIndex) => {
+                currentPage = ((pageIndex % pageCount) + pageCount) % pageCount;
+                syncUi();
+              };
+
+              dots.forEach((dot) => {
                 if (!(dot instanceof HTMLButtonElement)) {
                   return;
                 }
 
-                dot.setAttribute(
-                  "aria-pressed",
-                  index === currentPage ? "true" : "false",
-                );
+                dot.addEventListener("click", () => {
+                  const pageIndex = Number(dot.dataset.pageIndex || 0);
+                  goToPage(pageIndex);
+                });
               });
-            };
 
-            const goToPage = (pageIndex) => {
-              currentPage = ((pageIndex % pageCount) + pageCount) % pageCount;
-              syncUi();
-            };
+              if (isSwipeEnabled) {
+                root.addEventListener(
+                  "touchstart",
+                  (event) => {
+                    const touch = event.touches[0];
+                    if (!touch) {
+                      return;
+                    }
 
-            dots.forEach((dot) => {
-              if (!(dot instanceof HTMLButtonElement)) {
-                return;
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+                  },
+                  { passive: true },
+                );
+
+                root.addEventListener(
+                  "touchend",
+                  (event) => {
+                    const touch = event.changedTouches[0];
+                    if (!touch) {
+                      return;
+                    }
+
+                    const deltaX = touch.clientX - touchStartX;
+                    const deltaY = touch.clientY - touchStartY;
+
+                    if (
+                      Math.abs(deltaX) > 40 &&
+                      Math.abs(deltaX) > Math.abs(deltaY)
+                    ) {
+                      goToPage(currentPage + (deltaX < 0 ? 1 : -1));
+                    }
+                  },
+                  { passive: true },
+                );
               }
 
-              dot.addEventListener("click", () => {
-                const pageIndex = Number(dot.dataset.pageIndex || 0);
-                goToPage(pageIndex);
-              });
+              syncUi();
+              root.dataset.initialized = "true";
             });
+          };
 
-            if (isSwipeEnabled) {
-              root.addEventListener(
-                "touchstart",
-                (event) => {
-                  const touch = event.touches[0];
-                  if (!touch) {
-                    return;
-                  }
+          if (document.readyState === "loading") {
+            document.addEventListener(
+              "DOMContentLoaded",
+              initZapisnayaCarousels,
+              {
+                once: true,
+              },
+            );
+          } else {
+            initZapisnayaCarousels();
+          }
 
-                  touchStartX = touch.clientX;
-                  touchStartY = touch.clientY;
-                },
-                { passive: true },
-              );
-
-              root.addEventListener(
-                "touchend",
-                (event) => {
-                  const touch = event.changedTouches[0];
-                  if (!touch) {
-                    return;
-                  }
-
-                  const deltaX = touch.clientX - touchStartX;
-                  const deltaY = touch.clientY - touchStartY;
-
-                  if (
-                    Math.abs(deltaX) > 40 &&
-                    Math.abs(deltaX) > Math.abs(deltaY)
-                  ) {
-                    goToPage(currentPage + (deltaX < 0 ? 1 : -1));
-                  }
-                },
-                { passive: true },
-              );
-            }
-
-            syncUi();
-            root.dataset.initialized = "true";
-          });
-        };
-
-        if (document.readyState === "loading") {
-          document.addEventListener(
-            "DOMContentLoaded",
-            initZapisnayaCarousels,
-            {
-              once: true,
-            },
-          );
-        } else {
-          initZapisnayaCarousels();
-        }
-
-        document.addEventListener("astro:page-load", initZapisnayaCarousels);
-      </script>
-      <div class="w-full mt-8 mb-8 lg:mb-14">
-        <hr class="h-px border-1" />
-      </div>
-      <div class="grid gap-2">
-        {
-          twoImageArticle && (
-            <article class="grid gap-6 pb-8 lg:pb-0">
-              <div class="w-full flex flex-col lg:flex-row">
-                <div class="w-full lg:w-1/2 -mb-12 lg:mb-0">
-                  <div class="h-[420px] lg:h-[700px] relative">
-                    <a
-                      href={twoImageArticle.href}
-                      class="linked-image-hover aspect-[2/3] h-[260px] lg:h-[437px] overflow-hidden absolute left-1/2 translate-x-[calc(-50%-50px)] lg:translate-x-[calc(-50%-100px)] -rotate-6 border-[10px] border-white"
-                      aria-label={twoImageArticle.title}
-                    >
-                      <img
-                        src={twoImageArticle.secondImageUrl || picture1.src}
-                        alt={twoImageArticle.title}
-                        class="linked-image-hover__media block h-full w-full object-cover"
-                        loading="lazy"
-                      />
-                    </a>
-                    <a
-                      href={twoImageArticle.href}
-                      class="aspect-[2/3] h-[260px] lg:h-[437px] overflow-hidden linked-image-hover absolute bottom-20 left-1/2 translate-x-[calc(-50%+50px)] lg:translate-x-[calc(-50%+100px)] rotate-12 border-[10px] border-white"
-                      aria-label={twoImageArticle.title}
-                    >
-                      <img
-                        src={twoImageArticle.imageUrl || picture1.src}
-                        alt=""
-                        class="linked-image-hover__media block h-full w-full object-cover"
-                        loading="lazy"
-                      />
-                    </a>
-                  </div>
-                </div>
-                <div class="w-full lg:w-1/2 flex flex-col justify-center items-center gap-4">
-                  <div class="inline-flex w-fit flex-col items-start gap-3">
-                    <p class="m-0">
-                      {getPrimaryTagHref(twoImageArticle) ? (
-                        <a
-                          href={getPrimaryTagHref(twoImageArticle)}
-                          class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
-                        >
-                          {getPrimaryTag(twoImageArticle)}
-                        </a>
-                      ) : (
-                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryTag(twoImageArticle)}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <div class="grid gap-10">
-                    <a
-                      href={twoImageArticle.href}
-                      class="text-center text-current no-underline hover:underline"
-                    >
-                      <h3 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                        {twoImageArticle.paid ? (
-                          <>
-                            {twoImageArticleSplit.start && (
-                              <>{twoImageArticleSplit.start} </>
-                            )}
-                            <span class="whitespace-nowrap">
-                              {twoImageArticleSplit.last}{" "}
-                              <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
-                            </span>
-                          </>
-                        ) : (
-                          twoImageArticleTrunc
-                        )}
-                      </h3>
-                    </a>
-                    {getCardLead(twoImageArticle) && (
-                      <p class="text-[22px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light text-center px-1 lg:px-16">
-                        {truncateText(getCardLead(twoImageArticle), 380)}
-                      </p>
-                    )}
-                    <div class="w-full flex flex-row justify-center">
+          document.addEventListener("astro:page-load", initZapisnayaCarousels);
+        </script>
+        <div class="w-full mt-8 mb-8 lg:mb-14">
+          <hr class="h-px border-1" />
+        </div>
+        <div class="grid gap-2">
+          {
+            twoImageArticle && (
+              <article class="grid gap-6 pb-8 lg:pb-0">
+                <div class="w-full flex flex-col lg:flex-row">
+                  <div class="w-full lg:w-1/2 -mb-12 lg:mb-0">
+                    <div class="h-[420px] lg:h-[700px] relative">
                       <a
                         href={twoImageArticle.href}
-                        class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
-                      >
-                        Читать дальше
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </article>
-          )
-        }
-
-        {
-          interviewFeature && (
-            <LatestInterview
-              tag="Интервью"
-              interviewee={interviewName}
-              quote={
-                interviewQuote ? truncateText(interviewQuote, 130) : undefined
-              }
-              imageUrl={interviewFeature.imageUrl || picture1.src}
-              href={`/interviews/${interviewFeature.id}`}
-              transitionName={getTransitionName({
-                id: interviewFeature.id,
-                href: `/interviews/${interviewFeature.id}`,
-              })}
-              inversed
-            />
-          )
-        }
-
-        {
-          secondaryStories.length > 0 && (
-            <div class="grid gap-x-4 gap-y-8 sm:grid-cols-3 sm:items-stretch mt-8 mb-12">
-              {secondaryStories.map((item) => (
-                <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
-                  <a
-                    href={item.href}
-                    class="linked-image-hover aspect-[3/2]"
-                    aria-label={getCardTitle(item)}
-                  >
-                    <img
-                      src={item.imageUrl || picture1.src}
-                      alt={getCardTitle(item)}
-                      class="linked-image-hover__media block h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </a>
-
-                  <div class="grid h-full content-start gap-[0.55rem]">
-                    <p class="m-0">
-                      {getPrimaryTagHref(item) ? (
-                        <a
-                          href={getPrimaryTagHref(item)}
-                          class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
-                        >
-                          {getPrimaryTag(item)}
-                        </a>
-                      ) : (
-                        <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                          {getPrimaryTag(item)}
-                        </span>
-                      )}
-                    </p>
-
-                    <a
-                      href={item.href}
-                      class="block text-current no-underline hover:underline"
-                    >
-                      <h3 class="m-0 line-clamp-3 text-[1.4rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.12]">
-                        {(() => {
-                          const t = truncateText(getCardTitle(item), 88);
-                          const { start, last } = splitTitle(t);
-                          return item.paid ? (
-                            <>
-                              {start && <>{start} </>}
-                              <span class="whitespace-nowrap">
-                                {last}{" "}
-                                <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
-                              </span>
-                            </>
-                          ) : (
-                            t
-                          );
-                        })()}
-                      </h3>
-                    </a>
-
-                    <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                      {formatDate(item.publishedAt)}
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )
-        }
-
-        {
-          photoOfTheDay && (
-            <article class="grid overflow-hidden bg-white lg:grid-cols-[12rem_minmax(0,1fr)] mb-6">
-              <div class="grid content-center gap-3 p-6">
-                <p class="m-0 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                  Фото дня
-                </p>
-                <a
-                  href={`/photo-of-the-day/${photoOfTheDay.id}`}
-                  class="text-current no-underline hover:underline"
-                >
-                  <h3 class="m-0 text-2xl font-normal font-old_standard tracking-[-0.02em] leading-[1.2]">
-                    {photoOfTheDay.title}
-                  </h3>
-                </a>
-                <CardByline
-                  variant="photo"
-                  authorName={photoOfTheDay.authorName}
-                  authorId={photoOfTheDay.authorId}
-                  date={photoOfTheDay.publishedAt}
-                />
-              </div>
-
-              <a
-                href={`/photo-of-the-day/${photoOfTheDay.id}`}
-                class="linked-image-hover block aspect-[3/2] overflow-hidden"
-                aria-label={photoOfTheDay.title}
-              >
-                <img
-                  src={photoOfTheDay.imageUrl}
-                  alt={photoOfTheDay.title}
-                  class="linked-image-hover__media block h-full w-full object-cover"
-                  loading="lazy"
-                />
-              </a>
-            </article>
-          )
-        }
-      </div>
-      <div class="w-full my-8">
-        <hr class="h-px border-1" />
-      </div>
-      <section class="mt-[2.2rem] pt-[1.6rem]">
-        <div>
-          {
-            editorialGridItems.length > 0 ? (
-              <>
-                <div class="grid grid-cols-2 gap-x-4 gap-y-[1.4rem] lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
-                  {editorialGridItems.map((item) => (
-                    <article class="grid h-full min-w-0 grid-rows-[auto_1fr] gap-[0.8rem]">
-                      <a
-                        href={item.href}
-                        class="linked-image-hover bg-white aspect-[1.02/1]"
-                        aria-label={getCardTitle(item)}
+                        class="linked-image-hover aspect-[2/3] h-[260px] lg:h-[437px] overflow-hidden absolute left-1/2 translate-x-[calc(-50%-50px)] lg:translate-x-[calc(-50%-100px)] -rotate-6 border-[10px] border-white"
+                        aria-label={twoImageArticle.title}
                       >
                         <img
-                          src={item.imageUrl || picture1.src}
-                          alt={getCardTitle(item)}
+                          src={twoImageArticle.secondImageUrl || picture1.src}
+                          alt={twoImageArticle.title}
                           class="linked-image-hover__media block h-full w-full object-cover"
                           loading="lazy"
                         />
                       </a>
-
-                      <div class="grid h-full content-start gap-[0.55rem]">
-                        <p class="m-0">
-                          {getPrimaryTagHref(item) ? (
-                            <a
-                              href={getPrimaryTagHref(item)}
-                              class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
-                            >
-                              {getPrimaryTag(item)}
-                            </a>
-                          ) : (
-                            <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                              {getPrimaryTag(item)}
-                            </span>
-                          )}
-                        </p>
-
-                        <a
-                          href={item.href}
-                          class="block text-current no-underline hover:underline"
-                        >
-                          <h3 class="line-clamp-2 text-xl lg:text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                            {(() => {
-                              const t = truncateText(getCardTitle(item), 72);
-                              const { start, last } = splitTitle(t);
-                              return item.paid ? (
-                                <>
-                                  {start && <>{start} </>}
-                                  <span class="inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap align-bottom">
-                                    {last}{" "}
-                                    <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
-                                  </span>
-                                </>
-                              ) : (
-                                t
-                              );
-                            })()}
-                          </h3>
-                        </a>
-
-                        <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                          {formatDate(item.publishedAt)}
-                        </p>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-
-                {editorialCarouselItems.length > 0 && (
-                  <div class="mt-[2rem] overflow-hidden">
-                    <div
-                      class="rubric-marquee-track flex items-start gap-6 py-2"
-                      style="width: max-content;"
-                    >
-                      {[
-                        ...editorialCarouselItems,
-                        ...editorialCarouselItems,
-                      ].map((item, i) => (
-                        <div class="w-[240px] sm:w-[260px] lg:w-[280px] flex-shrink-0">
-                          <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
-                            <a
-                              href={item.href}
-                              class="linked-image-hover bg-white aspect-[1.02/1]"
-                              aria-label={getCardTitle(item)}
-                            >
-                              <img
-                                src={item.imageUrl || picture1.src}
-                                alt={getCardTitle(item)}
-                                class="linked-image-hover__media block h-full w-full object-cover"
-                                loading="lazy"
-                              />
-                            </a>
-
-                            <div class="grid h-full content-start gap-[0.55rem]">
-                              <p class="m-0">
-                                {getPrimaryTagHref(item) ? (
-                                  <a
-                                    href={getPrimaryTagHref(item)}
-                                    class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
-                                  >
-                                    {getPrimaryTag(item)}
-                                  </a>
-                                ) : (
-                                  <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                                    {getPrimaryTag(item)}
-                                  </span>
-                                )}
-                              </p>
-
-                              <a
-                                href={item.href}
-                                class="block text-current no-underline hover:underline"
-                              >
-                                <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
-                                  {truncateText(getCardTitle(item), 72)}{" "}
-                                  {item.paid && (
-                                    <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
-                                  )}
-                                </h3>
-                              </a>
-
-                              <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
-                                {formatDate(item.publishedAt)}
-                              </p>
-                            </div>
-                          </article>
-                        </div>
-                      ))}
+                      <a
+                        href={twoImageArticle.href}
+                        class="aspect-[2/3] h-[260px] lg:h-[437px] overflow-hidden linked-image-hover absolute bottom-20 left-1/2 translate-x-[calc(-50%+50px)] lg:translate-x-[calc(-50%+100px)] rotate-12 border-[10px] border-white"
+                        aria-label={twoImageArticle.title}
+                      >
+                        <img
+                          src={twoImageArticle.imageUrl || picture1.src}
+                          alt=""
+                          class="linked-image-hover__media block h-full w-full object-cover"
+                          loading="lazy"
+                        />
+                      </a>
                     </div>
                   </div>
-                )}
-              </>
-            ) : (
-              <article class="bg-white p-5 text-[1.05rem] font-light leading-[1.5]">
-                Больше материалов пока нет.
+                  <div class="w-full lg:w-1/2 flex flex-col justify-center items-center gap-4">
+                    <div class="inline-flex w-fit flex-col items-start gap-3">
+                      <p class="m-0">
+                        {getPrimaryTagHref(twoImageArticle) ? (
+                          <a
+                            href={getPrimaryTagHref(twoImageArticle)}
+                            class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                          >
+                            {getPrimaryTag(twoImageArticle)}
+                          </a>
+                        ) : (
+                          <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                            {getPrimaryTag(twoImageArticle)}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <div class="grid gap-10">
+                      <a
+                        href={twoImageArticle.href}
+                        class="text-center text-current no-underline hover:underline"
+                      >
+                        <h3 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
+                          {twoImageArticle.paid ? (
+                            <>
+                              {twoImageArticleSplit.start && (
+                                <>{twoImageArticleSplit.start} </>
+                              )}
+                              <span class="whitespace-nowrap">
+                                {twoImageArticleSplit.last}{" "}
+                                <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                              </span>
+                            </>
+                          ) : (
+                            twoImageArticleTrunc
+                          )}
+                        </h3>
+                      </a>
+                      {getCardLead(twoImageArticle) && (
+                        <p class="text-[22px] text-base-content/70 font-old_standard font_2_percent_negative_spacing font-light text-center px-1 lg:px-16">
+                          {truncateText(getCardLead(twoImageArticle), 380)}
+                        </p>
+                      )}
+                      <div class="w-full flex flex-row justify-center">
+                        <a
+                          href={twoImageArticle.href}
+                          class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
+                        >
+                          Читать дальше
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            )
+          }
+
+          {
+            interviewFeature && (
+              <LatestInterview
+                tag="Интервью"
+                interviewee={interviewName}
+                quote={
+                  interviewQuote ? truncateText(interviewQuote, 130) : undefined
+                }
+                imageUrl={interviewFeature.imageUrl || picture1.src}
+                href={`/interviews/${interviewFeature.id}`}
+                transitionName={getTransitionName({
+                  id: interviewFeature.id,
+                  href: `/interviews/${interviewFeature.id}`,
+                })}
+                inversed
+              />
+            )
+          }
+
+          {
+            secondaryStories.length > 0 && (
+              <div class="grid gap-x-4 gap-y-12 lg:gap-y-8 sm:grid-cols-3 sm:items-stretch mt-8 mb-12">
+                {secondaryStories.map((item) => (
+                  <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
+                    <a
+                      href={item.href}
+                      class="linked-image-hover aspect-[3/2]"
+                      aria-label={getCardTitle(item)}
+                    >
+                      <img
+                        src={item.imageUrl || picture1.src}
+                        alt={getCardTitle(item)}
+                        class="linked-image-hover__media block h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    </a>
+
+                    <div class="grid h-full content-start gap-[0.55rem]">
+                      <p class="m-0">
+                        {getPrimaryTagHref(item) ? (
+                          <a
+                            href={getPrimaryTagHref(item)}
+                            class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                          >
+                            {getPrimaryTag(item)}
+                          </a>
+                        ) : (
+                          <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                            {getPrimaryTag(item)}
+                          </span>
+                        )}
+                      </p>
+
+                      <a
+                        href={item.href}
+                        class="block text-current no-underline hover:underline"
+                      >
+                        <h3 class="m-0 line-clamp-3 text-[1.4rem] font-normal font-old_standard tracking-[-0.02em] leading-[1.12]">
+                          {(() => {
+                            const t = truncateText(getCardTitle(item), 88);
+                            const { start, last } = splitTitle(t);
+                            return item.paid ? (
+                              <>
+                                {start && <>{start} </>}
+                                <span class="whitespace-nowrap">
+                                  {last}{" "}
+                                  <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                                </span>
+                              </>
+                            ) : (
+                              t
+                            );
+                          })()}
+                        </h3>
+                      </a>
+
+                      <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                        {formatDate(item.publishedAt)}
+                      </p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )
+          }
+
+          {
+            photoOfTheDay && (
+              <article class="grid overflow-hidden bg-white lg:grid-cols-[12rem_minmax(0,1fr)] mb-6">
+                <div class="grid content-center gap-3 p-6">
+                  <p class="m-0 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                    Фото дня
+                  </p>
+                  <a
+                    href={`/photo-of-the-day/${photoOfTheDay.id}`}
+                    class="text-current no-underline hover:underline"
+                  >
+                    <h3 class="m-0 text-2xl font-normal font-old_standard tracking-[-0.02em] leading-[1.2]">
+                      {photoOfTheDay.title}
+                    </h3>
+                  </a>
+                  <CardByline
+                    variant="photo"
+                    authorName={photoOfTheDay.authorName}
+                    authorId={photoOfTheDay.authorId}
+                    date={photoOfTheDay.publishedAt}
+                  />
+                </div>
+
+                <a
+                  href={`/photo-of-the-day/${photoOfTheDay.id}`}
+                  class="linked-image-hover block aspect-[3/2] overflow-hidden"
+                  aria-label={photoOfTheDay.title}
+                >
+                  <img
+                    src={photoOfTheDay.imageUrl}
+                    alt={photoOfTheDay.title}
+                    class="linked-image-hover__media block h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </a>
               </article>
             )
           }
         </div>
-      </section>
+        <div class="w-full my-8">
+          <hr class="h-px border-1" />
+        </div>
+        <section class="mt-[2.2rem] pt-[1.6rem]">
+          <div>
+            {
+              editorialGridItems.length > 0 ? (
+                <>
+                  <div class="grid grid-cols-2 gap-x-4 gap-y-[1.4rem] lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
+                    {editorialGridItems.map((item) => (
+                      <article class="grid h-full min-w-0 grid-rows-[auto_1fr] gap-[0.8rem]">
+                        <a
+                          href={item.href}
+                          class="linked-image-hover bg-white aspect-[1.02/1]"
+                          aria-label={getCardTitle(item)}
+                        >
+                          <img
+                            src={item.imageUrl || picture1.src}
+                            alt={getCardTitle(item)}
+                            class="linked-image-hover__media block h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        </a>
+
+                        <div class="grid h-full content-start gap-[0.55rem]">
+                          <p class="m-0">
+                            {getPrimaryTagHref(item) ? (
+                              <a
+                                href={getPrimaryTagHref(item)}
+                                class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                              >
+                                {getPrimaryTag(item)}
+                              </a>
+                            ) : (
+                              <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                {getPrimaryTag(item)}
+                              </span>
+                            )}
+                          </p>
+
+                          <a
+                            href={item.href}
+                            class="block text-current no-underline hover:underline"
+                          >
+                            <h3 class="line-clamp-2 text-xl lg:text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
+                              {(() => {
+                                const t = truncateText(getCardTitle(item), 72);
+                                const { start, last } = splitTitle(t);
+                                return item.paid ? (
+                                  <>
+                                    {start && <>{start} </>}
+                                    <span class="inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap align-bottom">
+                                      {last}{" "}
+                                      <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                                    </span>
+                                  </>
+                                ) : (
+                                  t
+                                );
+                              })()}
+                            </h3>
+                          </a>
+
+                          <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                            {formatDate(item.publishedAt)}
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+
+                  {editorialCarouselItems.length > 0 && (
+                    <div class="mt-[2rem] overflow-hidden">
+                      <div
+                        class="rubric-marquee-track flex items-start gap-6 py-2"
+                        style="width: max-content;"
+                      >
+                        {[
+                          ...editorialCarouselItems,
+                          ...editorialCarouselItems,
+                        ].map((item, i) => (
+                          <div class="w-[240px] sm:w-[260px] lg:w-[280px] flex-shrink-0">
+                            <article class="grid h-full grid-rows-[auto_1fr] gap-[0.8rem]">
+                              <a
+                                href={item.href}
+                                class="linked-image-hover bg-white aspect-[1.02/1]"
+                                aria-label={getCardTitle(item)}
+                              >
+                                <img
+                                  src={item.imageUrl || picture1.src}
+                                  alt={getCardTitle(item)}
+                                  class="linked-image-hover__media block h-full w-full object-cover"
+                                  loading="lazy"
+                                />
+                              </a>
+
+                              <div class="grid h-full content-start gap-[0.55rem]">
+                                <p class="m-0">
+                                  {getPrimaryTagHref(item) ? (
+                                    <a
+                                      href={getPrimaryTagHref(item)}
+                                      class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
+                                    >
+                                      {getPrimaryTag(item)}
+                                    </a>
+                                  ) : (
+                                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
+                                      {getPrimaryTag(item)}
+                                    </span>
+                                  )}
+                                </p>
+
+                                <a
+                                  href={item.href}
+                                  class="block text-current no-underline hover:underline"
+                                >
+                                  <h3 class="text-2xl font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90">
+                                    {truncateText(getCardTitle(item), 72)}{" "}
+                                    {item.paid && (
+                                      <MaagLogoPaid class="w-4 h-4 inline-block align-baseline" />
+                                    )}
+                                  </h3>
+                                </a>
+
+                                <p class="hidden m-0 text-xs font-inter uppercase tracking-[0.22em] text-base-content/55">
+                                  {formatDate(item.publishedAt)}
+                                </p>
+                              </div>
+                            </article>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <article class="bg-white p-5 text-[1.05rem] font-light leading-[1.5]">
+                  Больше материалов пока нет.
+                </article>
+              )
+            }
+          </div>
+        </section>
+      </div>
     </div>
   </main>
 </Layout>
