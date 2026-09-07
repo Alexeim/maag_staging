@@ -1,32 +1,30 @@
 ---
-// Google Tag Manager container (GTM-5HL5M45V).
-// GA4 and every other tag are configured inside the GTM web UI, not in code —
-// this component only bootstraps the container. The GA4 measurement ID
-// (G-7EDWP4DX2J) lives in a "Google tag" tag inside the container.
-interface Props {
-  /**
-   * Render the <noscript> fallback (place it right after <body>).
-   * Default renders the <head> loader script.
-   */
-  noscript?: boolean;
-}
-
-const { noscript = false } = Astro.props;
+// Google Tag Manager container (GTM-5HL5M45V), gated on cookie consent.
+//
+// GA4 (G-7EDWP4DX2J) and every other tag are configured inside the GTM web UI,
+// not in code — this component only bootstraps the container, and only once the
+// visitor has granted the "analytics" category in the consent banner
+// (see CookieConsent.astro). Until then nothing from googletagmanager.com loads.
+//
+// Wiring is event-based on purpose: vanilla-cookieconsent dispatches
+// `cc:onConsent` (on every load when a decision is already stored, and right
+// after the first choice) and `cc:onChange` (later changes) on `window`. This
+// inline <head> script only attaches listeners, so the load order between this
+// component and CookieConsent.astro does not matter.
+//
+// There is deliberately no <noscript> fallback: without JS the consent banner
+// cannot run, so consent can never be given, so no tracking may fire.
 ---
 
-{
-  noscript ? (
-    <noscript>
-      <iframe
-        src="https://www.googletagmanager.com/ns.html?id=GTM-5HL5M45V"
-        height="0"
-        width="0"
-        style="display:none;visibility:hidden"
-        title="Google Tag Manager"
-      />
-    </noscript>
-  ) : (
-    <script is:inline>
+<script is:inline>
+  (function () {
+    var GTM_ID = "GTM-5HL5M45V";
+    var CONSENT_CATEGORY = "analytics";
+    var loaded = false;
+
+    function loadGtm() {
+      if (loaded) return;
+      loaded = true;
       (function (w, d, s, l, i) {
         w[l] = w[l] || [];
         w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
@@ -36,7 +34,31 @@ const { noscript = false } = Astro.props;
         j.async = true;
         j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
         f.parentNode.insertBefore(j, f);
-      })(window, document, "script", "dataLayer", "GTM-5HL5M45V");
-    </script>
-  )
-}
+      })(window, document, "script", "dataLayer", GTM_ID);
+    }
+
+    function accepted(event) {
+      var cookie = event && event.detail && event.detail.cookie;
+      var categories = cookie && cookie.categories;
+      return (
+        Array.isArray(categories) &&
+        categories.indexOf(CONSENT_CATEGORY) !== -1
+      );
+    }
+
+    window.addEventListener("cc:onConsent", function (event) {
+      if (accepted(event)) loadGtm();
+    });
+
+    window.addEventListener("cc:onChange", function (event) {
+      if (accepted(event)) {
+        loadGtm();
+      } else if (loaded) {
+        // Consent withdrawn mid-session. GTM cannot be torn down; the only
+        // clean state is a fresh page load (GA cookies are wiped by the
+        // banner's autoClear config).
+        window.location.reload();
+      }
+    });
+  })();
+</script>

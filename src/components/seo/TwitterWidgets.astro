@@ -1,0 +1,54 @@
+---
+// Twitter/X embed runtime (platform.twitter.com/widgets.js), gated on consent.
+//
+// widgets.js manipulates the DOM directly and sets its own cookies
+// (guest_id, personalization_id on twitter.com), so it loads only once the
+// visitor grants the "social" consent category in the banner
+// (see CookieConsent.astro). Until then a `<blockquote class="twitter-tweet">`
+// stays as its plain-text fallback (quote + link).
+//
+// Same event-based wiring as GoogleTagManager.astro: this inline <head> script
+// only attaches listeners for `cc:onConsent` / `cc:onChange`, so load order
+// versus CookieConsent.astro does not matter.
+---
+
+<script is:inline>
+  (function () {
+    var CONSENT_CATEGORY = "social";
+    var loaded = false;
+
+    function loadWidgets() {
+      if (loaded) return;
+      loaded = true;
+      var script = document.createElement("script");
+      script.src = "https://platform.twitter.com/widgets.js";
+      script.async = true;
+      script.charset = "utf-8";
+      document.head.appendChild(script);
+    }
+
+    function accepted(event) {
+      var cookie = event && event.detail && event.detail.cookie;
+      var categories = cookie && cookie.categories;
+      return (
+        Array.isArray(categories) &&
+        categories.indexOf(CONSENT_CATEGORY) !== -1
+      );
+    }
+
+    window.addEventListener("cc:onConsent", function (event) {
+      if (accepted(event)) loadWidgets();
+    });
+
+    window.addEventListener("cc:onChange", function (event) {
+      if (accepted(event)) {
+        loadWidgets();
+      } else if (loaded) {
+        // Consent withdrawn mid-session. widgets.js cannot be unloaded and its
+        // cookies live on twitter.com (out of our reach), so a fresh page load
+        // is the only clean state.
+        window.location.reload();
+      }
+    });
+  })();
+</script>

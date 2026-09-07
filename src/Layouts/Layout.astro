@@ -11,6 +11,8 @@ import Toast from "../components/common/Toast.astro";
 import ConfirmationModal from "../components/common/ConfirmationModal.astro";
 import StructuredData from "../components/seo/StructuredData.astro";
 import GoogleTagManager from "../components/seo/GoogleTagManager.astro";
+import TwitterWidgets from "../components/seo/TwitterWidgets.astro";
+import CookieConsent from "../components/seo/CookieConsent.astro";
 import { navbarContent } from "../content/navbar/RU/Navbar.json";
 import {
   buildGlobalStructuredData,
@@ -111,13 +113,7 @@ const allStructuredData = [
       />
     </noscript>
     <GoogleTagManager />
-    <!-- Twitter/X tweet embeds. widgets.js manipulates the DOM directly, so it
-         runs on the main thread as a plain async script (no worker offloading). -->
-    <script
-      is:inline
-      async
-      src="https://platform.twitter.com/widgets.js"
-      charset="utf-8"></script>
+    <TwitterWidgets />
     <!-- Re-initialise embeds after a client-side navigation. With <ClientRouter />
          the document is not reloaded, so these one-shot browser/3rd-party
          mechanisms never re-run for the swapped <body>. -->
@@ -145,7 +141,6 @@ const allStructuredData = [
     <title>{title}</title>
   </head>
   <body class="bg-base-200">
-    <GoogleTagManager noscript />
     <Header
       variant={navbarVariant}
       cultureText={navbarContent.items[0].label}
@@ -267,5 +262,6 @@ const allStructuredData = [
     <AuthModal />
     <Toast />
     <ConfirmationModal />
+    <CookieConsent />
   </body>
 </html>

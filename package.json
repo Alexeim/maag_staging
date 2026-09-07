@@ -33,7 +33,8 @@
     "heic2any": "^0.0.4",
     "quill": "^2.0.3",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vanilla-cookieconsent": "^3.1.0"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

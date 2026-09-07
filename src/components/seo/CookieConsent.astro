@@ -1,0 +1,144 @@
+---
+// CNIL-compliant cookie consent banner (vanilla-cookieconsent v3).
+//
+// - Equally-weighted "accept all" / "reject all", granular preferences modal.
+// - Decision persisted in the `cc_cookie` cookie (default 182 days =
+//   CNIL's 6-month re-prompt).
+// - GTM and third-party embeds are gated on the stored consent by
+//   GoogleTagManager.astro / TwitterWidgets.astro, which listen for the
+//   `cc:onConsent` / `cc:onChange` events this component dispatches.
+//
+// Astro view transitions (useClientRouter) swap <body>, which destroys the
+// #cc-main container and every listener the library attached to `data-cc`
+// triggers (e.g. the footer "cookie settings" button). So the instance is
+// torn down before each swap and rebuilt against the fresh DOM afterwards.
+import "vanilla-cookieconsent/dist/cookieconsent.css";
+---
+
+<script>
+  import * as CookieConsent from "vanilla-cookieconsent";
+
+  // `revision` lets us force a fresh prompt if the category list changes.
+  const CONSENT_REVISION = 1;
+
+  const config: CookieConsent.CookieConsentConfig = {
+    revision: CONSENT_REVISION,
+
+    guiOptions: {
+      consentModal: {
+        layout: "box",
+        position: "bottom left",
+        // CNIL: "accept" and "reject" must be equally prominent.
+        equalWeightButtons: true,
+        flipButtons: false,
+      },
+      preferencesModal: {
+        layout: "box",
+        position: "right",
+        equalWeightButtons: true,
+        flipButtons: false,
+      },
+    },
+
+    categories: {
+      // Strictly necessary — always on, cannot be toggled off.
+      necessary: {
+        enabled: true,
+        readOnly: true,
+      },
+      // Google Analytics 4 (loaded via GTM). Off until the visitor opts in.
+      // On withdrawal the GA cookies are erased automatically.
+      analytics: {
+        autoClear: {
+          cookies: [
+            { name: /^_ga/ },
+            { name: "_gid" },
+            { name: "_gat" },
+          ],
+        },
+      },
+      // Social-media embeds (X/Twitter widgets.js, see TwitterWidgets.astro).
+      // Their cookies live on the provider's domain, so there is nothing for
+      // autoClear to erase from here — the gate simply stops loading the script.
+      social: {},
+    },
+
+    language: {
+      default: "ru",
+      translations: {
+        ru: {
+          consentModal: {
+            title: "Мы используем файлы cookie",
+            description:
+              "Обязательные cookie нужны для работы сайта. Аналитические cookie (Google Analytics) помогают нам понять, как читатели пользуются изданием — они подключаются только с вашего согласия.",
+            acceptAllBtn: "Принять все",
+            acceptNecessaryBtn: "Отклонить все",
+            showPreferencesBtn: "Настроить",
+            footer:
+              '<a href="/privacy">Политика конфиденциальности</a>\n<a href="/cookies">Использование файлов cookie</a>',
+          },
+          preferencesModal: {
+            title: "Настройки cookie",
+            acceptAllBtn: "Принять все",
+            acceptNecessaryBtn: "Отклонить все",
+            savePreferencesBtn: "Сохранить выбор",
+            closeIconLabel: "Закрыть",
+            sections: [
+              {
+                title: "Использование файлов cookie",
+                description:
+                  "Здесь вы можете выбрать, какие категории cookie разрешить. Обязательные cookie отключить нельзя — без них сайт не работает.",
+              },
+              {
+                title: "Обязательные cookie",
+                description:
+                  "Нужны для базовой работы сайта: сессия, авторизация, хранение самого факта вашего выбора по cookie.",
+                linkedCategory: "necessary",
+              },
+              {
+                title: "Аналитические cookie",
+                description:
+                  "Google Analytics 4: обезличенная статистика посещаемости и поведения на сайте. Помогает нам решать, о чём писать.",
+                linkedCategory: "analytics",
+              },
+              {
+                title: "Cookie социальных сетей",
+                description:
+                  "Встроенные публикации из соцсетей (X/Twitter). Их провайдеры ставят свои cookie, когда пост подгружается. Без согласия вместо встроенного поста показывается цитата со ссылкой.",
+                linkedCategory: "social",
+              },
+              {
+                title: "Ещё вопросы?",
+                description:
+                  'Подробнее — в <a href="/cookies">описании использования cookie</a> и <a href="/privacy">политике конфиденциальности</a>.',
+              },
+            ],
+          },
+        },
+      },
+    },
+  };
+
+  let mounted = false;
+
+  function mount() {
+    if (mounted) return;
+    CookieConsent.run(config);
+    mounted = true;
+  }
+
+  function unmount() {
+    if (!mounted) return;
+    // reset() without `true` keeps the consent cookie — only the DOM and
+    // listeners are torn down.
+    CookieConsent.reset(false);
+    mounted = false;
+  }
+
+  mount();
+
+  // This module runs once; the listeners below persist on `document` across
+  // view transitions and drive the teardown / rebuild cycle.
+  document.addEventListener("astro:before-swap", unmount);
+  document.addEventListener("astro:page-load", mount);
+</script>
