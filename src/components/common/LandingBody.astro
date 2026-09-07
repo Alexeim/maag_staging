@@ -9,6 +9,7 @@ import {
 
 import NetlenkaCardOne from "./NetlenkaCardOne.astro";
 import ArticleCard from "./ArticleCard.astro";
+import CardByline from "./CardByline.astro";
 import LazyImage from "./LazyImage.astro";
 import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import MaagLogoMobile from "../../assets/logo/logo-mobile.svg";
@@ -241,6 +242,12 @@ const splitTitle = (t: string) => {
                         {getCardLead(cultureHero)}
                       </p>
                     )}
+                    <CardByline
+                      class="mt-[0.4rem]"
+                      authorName={cultureHero.authorName}
+                      authorId={cultureHero.authorId}
+                      date={cultureHero.publishedAt}
+                    />
                   </div>
                 </>
               ) : (
@@ -462,6 +469,12 @@ const splitTitle = (t: string) => {
                         {getCardLead(parisHero)}
                       </p>
                     )}
+                    <CardByline
+                      class="mt-[0.4rem]"
+                      authorName={parisHero.authorName}
+                      authorId={parisHero.authorId}
+                      date={parisHero.publishedAt}
+                    />
                   </div>
                   <a
                     href={parisHero.href}

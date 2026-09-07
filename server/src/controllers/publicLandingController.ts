@@ -154,6 +154,9 @@ const toLandingItem = (
     updatedAt: data.updatedAt ?? null,
     published: Boolean(data.published),
     publishedAt: data.publishedAt ?? null,
+    authorId: typeof data.authorId === 'string' ? data.authorId : null,
+    // Resolved to "First Last" by attachAuthorNames() once the payload is assembled.
+    authorName: '',
     isHotContent:
       type !== 'news' &&
       (Boolean(data.isHotContent) || data.category === 'hotContent'),
@@ -173,6 +176,43 @@ const toLandingItem = (
     dateType: data.dateType ?? null,
     caption: data.caption ?? '',
   };
+};
+
+// Walks an assembled payload, finds every card object carrying an `authorId`,
+// and fills its `authorName` with "First Last" in a single batch of author
+// reads (one round trip per unique author). Mutates the payload in place.
+const attachAuthorNames = async (payload: unknown): Promise<void> => {
+  const cards: Array<{ authorId?: unknown; authorName?: unknown }> = [];
+  const visit = (node: any) => {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
+    }
+    if (typeof node.authorId === 'string') cards.push(node);
+    Object.values(node).forEach(visit);
+  };
+  visit(payload);
+
+  const authorIds = Array.from(
+    new Set(cards.map((card) => card.authorId).filter((id): id is string => Boolean(id))),
+  );
+  if (authorIds.length === 0) return;
+
+  const authorDocs = await Promise.all(
+    authorIds.map((authorId) => db.collection('authors').doc(authorId).get()),
+  );
+  const nameById = new Map<string, string>();
+  authorDocs.forEach((doc) => {
+    if (!doc.exists) return;
+    const data = doc.data() as { firstName?: string; lastName?: string } | undefined;
+    const name = [data?.firstName, data?.lastName].filter(Boolean).join(' ').trim();
+    if (name) nameById.set(doc.id, name);
+  });
+
+  cards.forEach((card) => {
+    card.authorName = card.authorId ? (nameById.get(card.authorId as string) ?? '') : '';
+  });
 };
 
 const fetchByTarget = async (target: LandingTarget | null) => {
@@ -969,7 +1009,7 @@ export const getPublicLanding = async (_req: Request, res: Response) => {
       )
       .slice(0, 20);
 
-    res.status(200).json({
+    const payload = {
       landingPlacements,
       mainBlock: {
         mainArticle,
@@ -988,7 +1028,9 @@ export const getPublicLanding = async (_req: Request, res: Response) => {
         leSaviezVousArticle,
         photoOfTheDay,
       },
-    });
+    };
+    await attachAuthorNames(payload);
+    res.status(200).json(payload);
   } catch (error) {
     console.error('Error getting public landing:', error);
     res.status(500).json({ message: 'Server error while getting public landing' });
@@ -997,7 +1039,9 @@ export const getPublicLanding = async (_req: Request, res: Response) => {
 
 export const getPublicCulture = async (_req: Request, res: Response) => {
   try {
-    res.status(200).json(await buildCulturePagePayload());
+    const payload = await buildCulturePagePayload();
+    await attachAuthorNames(payload);
+    res.status(200).json(payload);
   } catch (error) {
     console.error('Error getting public culture page:', error);
     res.status(500).json({ message: 'Server error while getting public culture page' });
@@ -1006,7 +1050,9 @@ export const getPublicCulture = async (_req: Request, res: Response) => {
 
 export const getPublicParis = async (_req: Request, res: Response) => {
   try {
-    res.status(200).json(await buildParisPagePayload());
+    const payload = await buildParisPagePayload();
+    await attachAuthorNames(payload);
+    res.status(200).json(payload);
   } catch (error) {
     console.error('Error getting public paris page:', error);
     res.status(500).json({ message: 'Server error while getting public paris page' });

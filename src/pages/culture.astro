@@ -3,6 +3,7 @@ import Layout from "../Layouts/Layout.astro";
 import { getTransitionName } from "../lib/utils/transitions";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import NetlenkaCardOne from "@/components/common/NetlenkaCardOne.astro";
+import CardByline from "@/components/common/CardByline.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import {
   getPrimaryBadgeHref,
@@ -236,9 +237,12 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                     </p>
                   )}
 
-                  <p class="hidden mt-[0.4rem] font-inter text-[0.68rem] uppercase tracking-[0.18em] text-[#30282185]">
-                    {formatDate(primaryCultureArticle.publishedAt)}
-                  </p>
+                  <CardByline
+                    class="mt-[0.4rem]"
+                    authorName={primaryCultureArticle.authorName}
+                    authorId={primaryCultureArticle.authorId}
+                    date={primaryCultureArticle.publishedAt}
+                  />
                 </div>
               </article>
             ) : (

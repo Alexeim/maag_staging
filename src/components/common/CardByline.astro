@@ -1,0 +1,98 @@
+---
+// Compact "author · date" byline for the large horizontal cards on the
+// landing culture/paris blocks and the culture/paris page main articles.
+// `variant="photo"` swaps the pen icon for a camera (photo-of-the-day card).
+import { Camera } from "@lucide/astro";
+import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
+
+type Timestamp =
+  | string
+  | Date
+  | { toDate: () => Date }
+  | { _seconds: number }
+  | null
+  | undefined;
+
+interface Props {
+  authorName?: string | null;
+  authorId?: string | null;
+  date?: Timestamp;
+  variant?: "article" | "photo";
+  class?: string;
+}
+
+const {
+  authorName,
+  authorId,
+  date,
+  variant = "article",
+  class: className,
+} = Astro.props as Props;
+
+const toDate = (value: Timestamp): Date | null => {
+  if (!value) return null;
+  if (typeof value === "object") {
+    if ("toDate" in value && typeof value.toDate === "function") {
+      return value.toDate();
+    }
+    if ("_seconds" in value && typeof value._seconds === "number") {
+      return new Date(value._seconds * 1000);
+    }
+  }
+  const parsed = new Date(value as string | Date);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const parsedDate = toDate(date);
+const formattedDate = parsedDate
+  ? parsedDate
+      .toLocaleDateString("ru-RU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+      .replace(" г.", "")
+  : "";
+
+const name = typeof authorName === "string" ? authorName.trim() : "";
+const authorHref = authorId ? `/author/${authorId}` : undefined;
+const AuthorWrapper = authorHref ? "a" : "span";
+---
+
+{
+  (name || formattedDate) && (
+    <div
+      class:list={[
+        "flex flex-wrap items-center gap-x-2 gap-y-1 font-inter text-xs lg:text-sm text-base-content/55",
+        className,
+      ]}
+    >
+      {name && (
+        <AuthorWrapper
+          href={authorHref}
+          class:list={[
+            "flex items-center gap-1.5",
+            authorHref && "hover:underline",
+          ]}
+        >
+          {variant === "photo" ? (
+            <Camera class="h-3.5 w-3.5 flex-shrink-0" />
+          ) : (
+            <AuthorIcon class="h-3.5 w-3.5 flex-shrink-0" />
+          )}
+          <span class="font-old_standard italic text-sm lg:text-[0.95rem] text-base-content/70">
+            {name}
+          </span>
+        </AuthorWrapper>
+      )}
+
+      {name && formattedDate && (
+        <span class="text-base-content/40" aria-hidden="true">
+          |
+        </span>
+      )}
+
+      {formattedDate && <span>{formattedDate}</span>}
+    </div>
+  )
+}

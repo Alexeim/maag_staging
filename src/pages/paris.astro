@@ -4,6 +4,7 @@ import { getTransitionName } from "../lib/utils/transitions";
 import NetlenkaCardOne from "@/components/common/NetlenkaCardOne.astro";
 import LatestInterview from "@/components/HomePage/LatestInterview.astro";
 import ZapisnayaKnijkaCard from "@/components/common/ZapisnayaKnijkaCard.astro";
+import CardByline from "@/components/common/CardByline.astro";
 import MaagLogoPaid from "../assets/logo/maaglogo.svg";
 import { isLegacyParisTag } from "@/content/tags/tags";
 import {
@@ -337,9 +338,12 @@ const interviewName =
                     </a>
                   </div>
 
-                  <p class="hidden font-inter text-[0.68rem] uppercase tracking-[0.18em] text-base-content/40">
-                    {formatDate(primaryParisArticle.publishedAt)}
-                  </p>
+                  <CardByline
+                    class="justify-center"
+                    authorName={primaryParisArticle.authorName}
+                    authorId={primaryParisArticle.authorId}
+                    date={primaryParisArticle.publishedAt}
+                  />
                 </div>
 
                 <a
@@ -770,6 +774,12 @@ const interviewName =
                     {photoOfTheDay.title}
                   </h3>
                 </a>
+                <CardByline
+                  variant="photo"
+                  authorName={photoOfTheDay.authorName}
+                  authorId={photoOfTheDay.authorId}
+                  date={photoOfTheDay.publishedAt}
+                />
               </div>
 
               <a
