@@ -6,6 +6,7 @@ import AuthModal from "../components/auth/AuthModal.astro";
 import Toast from "../components/common/Toast.astro";
 import ConfirmationModal from "../components/common/ConfirmationModal.astro";
 import StructuredData from "../components/seo/StructuredData.astro";
+import GoogleTagManager from "../components/seo/GoogleTagManager.astro";
 import { navbarContent } from "../content/navbar/RU/Navbar.json";
 import {
   buildGlobalStructuredData,
@@ -96,24 +97,11 @@ const allStructuredData = [
         rel="stylesheet"
       />
     </noscript>
-    <!-- Google tag (gtag.js) -->
-    <script
-      is:inline
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-7EDWP4DX2J"></script>
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-
-      gtag("config", "G-7EDWP4DX2J");
-    </script>
-    <!-- Google tag (gtag.js) -->
+    <GoogleTagManager />
     <title>{title}</title>
   </head>
   <body class="bg-base-100 text-base-content">
+    <GoogleTagManager noscript />
     <Header
       variant="default"
       hoverReveal
