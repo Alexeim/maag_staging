@@ -130,12 +130,19 @@ const currentPath = Astro.url.pathname;
             >
               <a href="/calendar">Календарь</a>
             </li>
-            <!-- <div class="w-[1px] h-[12px] bg-neutral-300 mx-6"></div>
+            <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
             <li
-              class="nav-item font-oswald uppercase tracking-[.46em] text-base font-normal hover:border-b hover:border-base-content pb-0.5"
+              class:list={[
+                "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
+                "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
+                "hover:after:scale-x-100",
+                currentPath.startsWith("/about")
+                  ? "after:scale-x-100"
+                  : "after:scale-x-0",
+              ]}
             >
-              <a href="/about" class="">О проекте</a>
-            </li> -->
+              <a href="/about">О проекте</a>
+            </li>
           </ul>
         </div>
       </div>

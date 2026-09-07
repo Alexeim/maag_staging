@@ -13,6 +13,7 @@
   --color-primary-content: oklch(0 0 0);
 
   --color-maag-beige: oklch(0.8971 0.0248 83.42);
+  --color-maag-gray: oklch(0.235 0 0); /* #1e1e1e */
 
   --color-accent: oklch(0.55 0.2 25); /* #D92F1C - Красный акцентный */
   --color-accent-content: oklch(1 0 0);
