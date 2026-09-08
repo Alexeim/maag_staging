@@ -51,11 +51,15 @@ export default () => ({
     // This solves the race condition where the component initializes
     // before the user's profile data has been fetched from the server.
     Alpine.effect(() => {
-      const authStore = Alpine.store('auth') as AuthStore;
+      const authStore = Alpine.store("auth") as AuthStore;
       if (authStore.profile) {
-        console.log('Alpine.effect triggered, profile data is now available:', authStore.profile);
-        this.form.firstName = authStore.profile.firstName || '';
-        this.form.lastName = authStore.profile.lastName || '';
+        // TODO investigate why this log appears multiple times
+        // console.log(
+        //   "Alpine.effect triggered, profile data is now available:",
+        //   authStore.profile,
+        // );
+        this.form.firstName = authStore.profile.firstName || "";
+        this.form.lastName = authStore.profile.lastName || "";
         this.bookmarks = authStore.profile.bookmarks ?? [];
         this.syncBookmarkGroups();
         this.refreshBookmarks();
@@ -68,14 +72,17 @@ export default () => ({
   },
 
   async refreshBookmarks() {
-    const authStore = Alpine.store('auth') as AuthStore;
+    const authStore = Alpine.store("auth") as AuthStore;
     const currentUser = auth.currentUser;
 
     if (!authStore.isLoggedIn || !currentUser) {
       return;
     }
 
-    if (this.bookmarksLoading || this.loadedBookmarksForUid === currentUser.uid) {
+    if (
+      this.bookmarksLoading ||
+      this.loadedBookmarksForUid === currentUser.uid
+    ) {
       return;
     }
 
@@ -108,8 +115,10 @@ export default () => ({
       .sort(([leftType], [rightType]) => {
         const leftIndex = BOOKMARK_TYPE_ORDER.indexOf(leftType);
         const rightIndex = BOOKMARK_TYPE_ORDER.indexOf(rightType);
-        const normalizedLeftIndex = leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex;
-        const normalizedRightIndex = rightIndex === -1 ? Number.MAX_SAFE_INTEGER : rightIndex;
+        const normalizedLeftIndex =
+          leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex;
+        const normalizedRightIndex =
+          rightIndex === -1 ? Number.MAX_SAFE_INTEGER : rightIndex;
 
         if (normalizedLeftIndex !== normalizedRightIndex) {
           return normalizedLeftIndex - normalizedRightIndex;
@@ -125,9 +134,9 @@ export default () => ({
   },
 
   async saveChanges() {
-    const authStore = Alpine.store('auth') as AuthStore;
-    const uiStore = Alpine.store('ui') as UiStore;
-    
+    const authStore = Alpine.store("auth") as AuthStore;
+    const uiStore = Alpine.store("ui") as UiStore;
+
     const currentUser = auth.currentUser;
 
     if (!currentUser) {
@@ -148,7 +157,6 @@ export default () => ({
       authStore.setUser(authStore.user, updatedProfile);
 
       uiStore?.showToast?.("Изменения успешно сохранены!");
-
     } catch (error) {
       console.error("Failed to save profile:", error);
       uiStore?.showToast?.("Не удалось сохранить изменения.", "error");
@@ -156,7 +164,7 @@ export default () => ({
   },
 
   async changePassword() {
-    const uiStore = Alpine.store('ui') as UiStore;
+    const uiStore = Alpine.store("ui") as UiStore;
     const email = auth.currentUser?.email;
 
     if (!email) {
@@ -174,8 +182,8 @@ export default () => ({
   },
 
   async removeBookmark(bookmark: UserBookmark) {
-    const authStore = Alpine.store('auth') as AuthStore;
-    const uiStore = Alpine.store('ui') as UiStore;
+    const authStore = Alpine.store("auth") as AuthStore;
+    const uiStore = Alpine.store("ui") as UiStore;
     const currentUser = auth.currentUser;
 
     if (!currentUser) {
@@ -203,16 +211,17 @@ export default () => ({
   },
 
   deleteAccount() {
-    const uiStore = Alpine.store('ui') as UiStore;
-    
+    const uiStore = Alpine.store("ui") as UiStore;
+
     const performDelete = () => {
       console.log("Deleting account");
       // Add actual deletion logic here, e.g., call an API endpoint
       uiStore?.showToast?.("Аккаунт удалён (демо)");
     };
 
-    const message = "Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.";
-    
+    const message =
+      "Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.";
+
     if (uiStore?.showConfirmation) {
       uiStore.showConfirmation(message, performDelete);
     } else {
