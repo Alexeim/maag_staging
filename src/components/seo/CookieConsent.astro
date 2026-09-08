@@ -4,8 +4,8 @@
 // - Equally-weighted "accept all" / "reject all", granular preferences modal.
 // - Decision persisted in the `cc_cookie` cookie (default 182 days =
 //   CNIL's 6-month re-prompt).
-// - GTM and third-party embeds are gated on the stored consent by
-//   GoogleTagManager.astro / TwitterWidgets.astro, which listen for the
+// - GTM, Yandex Metrika and third-party embeds are gated on consent by
+//   GoogleTagManager.astro / YandexMetrika.astro / TwitterWidgets.astro, listening for
 //   `cc:onConsent` / `cc:onChange` events this component dispatches.
 //
 // Astro view transitions (useClientRouter) swap <body>, which destroys the
@@ -18,8 +18,8 @@ import "vanilla-cookieconsent/dist/cookieconsent.css";
 <script>
   import * as CookieConsent from "vanilla-cookieconsent";
 
-  // `revision` lets us force a fresh prompt if the category list changes.
-  const CONSENT_REVISION = 1;
+  // Ask again when analytics providers or their disclosed features change.
+  const CONSENT_REVISION = 2;
 
   const config: CookieConsent.CookieConsentConfig = {
     revision: CONSENT_REVISION,
@@ -46,14 +46,15 @@ import "vanilla-cookieconsent/dist/cookieconsent.css";
         enabled: true,
         readOnly: true,
       },
-      // Google Analytics 4 (loaded via GTM). Off until the visitor opts in.
-      // On withdrawal the GA cookies are erased automatically.
+      // Google Analytics and Yandex Metrika stay off until the visitor opts in.
+      // Clear their first-party cookies when consent is withdrawn.
       analytics: {
         autoClear: {
           cookies: [
             { name: /^_ga/ },
             { name: "_gid" },
             { name: "_gat" },
+            { name: /^_ym_/ },
           ],
         },
       },
@@ -70,7 +71,7 @@ import "vanilla-cookieconsent/dist/cookieconsent.css";
           consentModal: {
             title: "Мы используем файлы cookie",
             description:
-              "Обязательные cookie нужны для работы сайта. Аналитические cookie (Google Analytics) помогают нам понять, как читатели пользуются изданием — они подключаются только с вашего согласия.",
+              "Обязательные cookie нужны для работы сайта. Google Analytics и Яндекс Метрика (включая Вебвизор — запись взаимодействий с сайтом) помогают понять, как читатели пользуются изданием, и подключаются только с вашего согласия.",
             acceptAllBtn: "Принять все",
             acceptNecessaryBtn: "Отклонить все",
             showPreferencesBtn: "Настроить",
@@ -98,7 +99,7 @@ import "vanilla-cookieconsent/dist/cookieconsent.css";
               {
                 title: "Аналитические cookie",
                 description:
-                  "Google Analytics 4: обезличенная статистика посещаемости и поведения на сайте. Помогает нам решать, о чём писать.",
+                  "Google Analytics 4 и Яндекс Метрика: статистика посещаемости и поведения на сайте. В Метрике включены карта кликов и Вебвизор — запись взаимодействий с сайтом. Эти инструменты подключаются только с вашего согласия.",
                 linkedCategory: "analytics",
               },
               {

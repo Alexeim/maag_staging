@@ -7,6 +7,7 @@ import Toast from "../components/common/Toast.astro";
 import ConfirmationModal from "../components/common/ConfirmationModal.astro";
 import StructuredData from "../components/seo/StructuredData.astro";
 import GoogleTagManager from "../components/seo/GoogleTagManager.astro";
+import YandexMetrika from "../components/seo/YandexMetrika.astro";
 import CookieConsent from "../components/seo/CookieConsent.astro";
 import { navbarContent } from "../content/navbar/RU/Navbar.json";
 import {
@@ -99,6 +100,7 @@ const allStructuredData = [
       />
     </noscript>
     <GoogleTagManager />
+    <YandexMetrika />
     <title>{title}</title>
   </head>
   <body class="bg-base-100 text-base-content">

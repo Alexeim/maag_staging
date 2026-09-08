@@ -11,6 +11,7 @@ import Toast from "../components/common/Toast.astro";
 import ConfirmationModal from "../components/common/ConfirmationModal.astro";
 import StructuredData from "../components/seo/StructuredData.astro";
 import GoogleTagManager from "../components/seo/GoogleTagManager.astro";
+import YandexMetrika from "../components/seo/YandexMetrika.astro";
 import TwitterWidgets from "../components/seo/TwitterWidgets.astro";
 import CookieConsent from "../components/seo/CookieConsent.astro";
 import { navbarContent } from "../content/navbar/RU/Navbar.json";
@@ -113,6 +114,7 @@ const allStructuredData = [
       />
     </noscript>
     <GoogleTagManager />
+    <YandexMetrika />
     <TwitterWidgets />
     <!-- Re-initialise embeds after a client-side navigation. With <ClientRouter />
          the document is not reloaded, so these one-shot browser/3rd-party

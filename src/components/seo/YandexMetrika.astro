@@ -1,0 +1,70 @@
+---
+// Consent-gated counter shared by public layouts. No unconditional noscript pixel.
+---
+
+<script is:inline>
+  (function () {
+    if (window.__maagMetrikaInstalled) return;
+    window.__maagMetrikaInstalled = true;
+
+    var counterId = 112396271;
+    var started = false;
+    var lastUrl = null;
+
+    function trackPage() {
+      if (!started || lastUrl === location.href) return;
+      window.ym(counterId, "hit", location.href, {
+        title: document.title,
+        referer: lastUrl || document.referrer,
+      });
+      lastUrl = location.href;
+    }
+
+    function start() {
+      if (started) return;
+      started = true;
+      window.ym = window.ym || function () {
+        (window.ym.a = window.ym.a || []).push(arguments);
+      };
+      window.ym.l = window.ym.l || Date.now();
+      var src = "https://mc.yandex.ru/metrika/tag.js?id=" + counterId;
+      if (!Array.from(document.scripts).some(function (script) {
+        return script.src === src;
+      })) {
+        var script = document.createElement("script");
+        script.async = true;
+        script.src = src;
+        document.head.appendChild(script);
+      }
+      window.ym(counterId, "init", {
+        ssr: true,
+        defer: true,
+        webvisor: true,
+        clickmap: true,
+        ecommerce: "dataLayer",
+        referrer: document.referrer,
+        url: location.href,
+        accurateTrackBounce: true,
+        trackLinks: true,
+      });
+      trackPage();
+    }
+
+    function syncConsent(event) {
+      var cookie = event.detail && event.detail.cookie;
+      var categories = cookie && cookie.categories;
+      if (Array.isArray(categories) && categories.includes("analytics")) {
+        start();
+      } else if (started) {
+        started = false;
+        window.ym(counterId, "destruct");
+        // Match the existing analytics teardown and clear the loaded runtime.
+        window.location.reload();
+      }
+    }
+
+    window.addEventListener("cc:onConsent", syncConsent);
+    window.addEventListener("cc:onChange", syncConsent);
+    document.addEventListener("astro:page-load", trackPage);
+  })();
+</script>
