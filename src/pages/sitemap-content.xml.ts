@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import {
   articlesApi,
+  authorsApi,
   eventsApi,
   flippersApi,
   guidesApi,
@@ -53,7 +54,8 @@ const toDate = (value: unknown): Date | null => {
     const seconds = timestamp._seconds ?? timestamp.seconds;
 
     if (typeof seconds === "number") {
-      return new Date(seconds * 1000);
+      const date = new Date(seconds * 1000);
+      return Number.isNaN(date.getTime()) ? null : date;
     }
   }
 
@@ -76,33 +78,35 @@ const renderUrl = ({ loc, lastmod }: SitemapEntry) => {
 const renderXml = (entries: SitemapEntry[]) =>
   `${XML_DECLARATION}${URLSET_OPEN}${entries.map(renderUrl).join("")}${URLSET_CLOSE}`;
 
-const fetchEntries = async <T extends { id: string; updatedAt?: unknown; createdAt?: unknown }>(
-  label: string,
+interface SitemapMaterial {
+  id: string;
+  published?: boolean;
+  updatedAt?: unknown;
+  createdAt?: unknown;
+  authorId?: string;
+  tags?: unknown;
+}
+
+const fetchEntries = async <T extends SitemapMaterial>(
   list: () => Promise<T[]>,
-  toPath: (item: T) => string | null,
+  toPath: (item: T) => string,
   site: URL,
+  authorIds: Set<string>,
+  tags: Set<string>,
+  includeCollections = true,
 ) => {
-  try {
-    const items = await list();
-
-    return items
-      .map((item) => {
-        const path = toPath(item);
-
-        if (!path) {
-          return null;
-        }
-
-        return {
-          loc: absoluteUrl(site, path),
-          lastmod: toLastmod(item),
-        };
-      })
-      .filter((entry): entry is SitemapEntry => Boolean(entry));
-  } catch (error) {
-    console.error(`Failed to build sitemap entries for ${label}:`, error);
-    return [];
-  }
+  const items = await list();
+  return items.filter((item) => item.published === true).map((item) => {
+    if (includeCollections) {
+      if (item.authorId) authorIds.add(item.authorId);
+      if (Array.isArray(item.tags)) {
+        item.tags.forEach((tag) => {
+          if (typeof tag === "string" && tag.trim()) tags.add(tag.trim());
+        });
+      }
+    }
+    return { loc: absoluteUrl(site, toPath(item)), lastmod: toLastmod(item) };
+  });
 };
 
 const getArticlePath = (article: ArticleResponse) => {
@@ -118,28 +122,50 @@ export const GET: APIRoute = async ({ site }) => {
     throw new Error("Missing Astro `site` config required to generate sitemap-content.xml");
   }
 
-  const entryGroups = await Promise.all([
-    fetchEntries("articles", () => articlesApi.list(), getArticlePath, site),
-    fetchEntries("news", () => newsApi.list(), (item) => `/news/${item.id}`, site),
-    fetchEntries("interviews", () => interviewsApi.list(), (item) => `/interviews/${item.id}`, site),
-    fetchEntries("guides", () => guidesApi.list(), (item) => `/guide/${item.id}`, site),
-    fetchEntries("events", () => eventsApi.list(), (item) => `/events/${item.id}`, site),
-    fetchEntries("visual stories", () => visualStoriesApi.list(), (item) => `/visual-story/${item.id}`, site),
-    fetchEntries("flippers", () => flippersApi.list(), (item) => `/flippers/${item.id}`, site),
-    fetchEntries(
-      "photos of the day",
-      () => photosOfTheDayApi.list(),
-      (item) => `/photo-of-the-day/${item.id}`,
-      site,
-    ),
-  ]);
+  try {
+    const authorIds = new Set<string>();
+    const tags = new Set<string>();
+    const entriesFor = <T extends SitemapMaterial>(
+      list: () => Promise<T[]>,
+      toPath: (item: T) => string,
+      includeCollections = true,
+    ) => fetchEntries(list, toPath, site, authorIds, tags, includeCollections);
 
-  const entries = entryGroups.flat();
+    // Fail the entire request if any source is unavailable; never cache a partial map.
+    const [authors, ...entryGroups] = await Promise.all([
+      authorsApi.list(),
+      entriesFor(() => articlesApi.list(), getArticlePath),
+      entriesFor(() => newsApi.list(), (item) => `/news/${item.id}`),
+      entriesFor(() => interviewsApi.list(), (item) => `/interviews/${item.id}`),
+      entriesFor(() => guidesApi.list(), (item) => `/guide/${item.id}`),
+      entriesFor(() => eventsApi.list(), (item) => `/events/${item.id}`),
+      entriesFor(() => visualStoriesApi.list(), (item) => `/visual-story/${item.id}`),
+      entriesFor(() => flippersApi.list(), (item) => `/flippers/${item.id}`),
+      entriesFor(() => photosOfTheDayApi.list(), (item) => `/photo-of-the-day/${item.id}`, false),
+    ]);
 
-  return new Response(renderXml(entries), {
-    headers: {
-      "Cache-Control": "public, max-age=3600",
-      "Content-Type": "application/xml; charset=utf-8",
-    },
-  });
+    const entries: SitemapEntry[] = entryGroups.flat();
+    // Only list existing authors with published materials supported by their page.
+    authors.filter((author) => authorIds.has(author.id)).forEach((author) => {
+      entries.push({ loc: absoluteUrl(site, `/author/${encodeURIComponent(author.id)}`) });
+    });
+    tags.forEach((tag) => {
+      entries.push({ loc: absoluteUrl(site, `/tag/${encodeURIComponent(tag)}`) });
+    });
+    const uniqueEntries = [...new Map(entries.map((entry) => [entry.loc, entry])).values()]
+      .sort((left, right) => left.loc.localeCompare(right.loc));
+
+    return new Response(renderXml(uniqueEntries), {
+      headers: {
+        "Cache-Control": "public, max-age=3600",
+        "Content-Type": "application/xml; charset=utf-8",
+      },
+    });
+  } catch (error) {
+    console.error("Failed to build complete content sitemap:", error);
+    return new Response("Sitemap temporarily unavailable", {
+      status: 503,
+      headers: { "Cache-Control": "no-store", "Retry-After": "300" },
+    });
+  }
 };

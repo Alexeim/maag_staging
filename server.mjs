@@ -20,6 +20,12 @@ app.use(
       index: false,
       maxAge: "1y",
       immutable: true,
+      setHeaders(res, filePath) {
+        // Sitemap filenames are stable across deployments, unlike hashed assets.
+        if (/sitemap[^/]*\.xml(?:\.(?:gz|br))?$/.test(filePath)) {
+          res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+        }
+      },
     },
   }),
 );

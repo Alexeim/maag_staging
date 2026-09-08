@@ -14,6 +14,7 @@ let error: string | null = null;
 try {
   photo = await photosOfTheDayApi.getById(id!);
 } catch (e: any) {
+  Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
   if (e instanceof ApiError) {
     error =
       e.status === 404 ? "Фото не найдено." : `Ошибка загрузки: ${e.message}`;
@@ -23,6 +24,7 @@ try {
 }
 
 if (!error && photo?.published !== true) {
+  Astro.response.status = 404;
   error = "Фото не найдено.";
   photo = null;
 }

@@ -19,6 +19,7 @@ const sitemapExcludedPaths = new Set([
 
 const sitemapExcludedPathPrefixes = ["/dashboard/"];
 
+/** @param {string} page */
 const shouldIncludeInSitemap = (page) => {
   const { pathname } = new URL(page);
 
@@ -49,6 +50,7 @@ export default defineConfig({
     compressor({ gzip: true, brotli: true }),
     sitemap({
       filter: shouldIncludeInSitemap,
+      customSitemaps: ["https://maagfrance.fr/sitemap-content.xml"],
     }),
   ],
   compressHTML: true,

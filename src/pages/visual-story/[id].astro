@@ -24,11 +24,13 @@ let storyData: any;
 let error: string | null = null;
 
 if (!id) {
+  Astro.response.status = 404;
   error = "Не указан идентификатор визуальной истории.";
 } else {
   try {
     storyData = await visualStoriesApi.getById(id);
   } catch (e: any) {
+    Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
     if (e instanceof ApiError) {
       error =
         e.status === 404
@@ -47,6 +49,7 @@ const isDraftPreview =
   canPreviewUnpublished(Astro.locals);
 
 if (!error && storyData?.published !== true && !isDraftPreview) {
+  Astro.response.status = 404;
   error = "Визуальная история не найдена.";
   storyData = null;
 }

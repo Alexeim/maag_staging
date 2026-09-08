@@ -418,6 +418,7 @@ let error: string | null = null;
 try {
   eventData = await eventsApi.getById(id!);
 } catch (e: any) {
+  Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
   console.error(e);
   if (e instanceof ApiError) {
     error =
@@ -436,6 +437,7 @@ const isDraftPreview =
   canPreviewUnpublished(Astro.locals);
 
 if (!error && eventData?.published !== true && !isDraftPreview) {
+  Astro.response.status = 404;
   error = "Событие не найдено.";
   eventData = null;
 }

@@ -43,6 +43,7 @@ let sameCategoryItems: any[] = [];
 try {
   guideData = await guidesApi.getById(id);
 } catch (e: any) {
+  Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
   console.error(e);
   if (e instanceof ApiError) {
     error =
@@ -61,6 +62,7 @@ const isDraftPreview =
   canPreviewUnpublished(Astro.locals);
 
 if (!error && guideData?.published !== true && !isDraftPreview) {
+  Astro.response.status = 404;
   error = "Путеводитель не найден.";
   guideData = null;
 }
