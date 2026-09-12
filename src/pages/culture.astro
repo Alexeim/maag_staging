@@ -322,27 +322,78 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
 
         <aside class="min-w-0 lg:col-span-3">
           <div
-            class="grid gap-4 border-t border-base-content/15 pt-8 lg:border-t-0 lg:border-l lg:border-base-content/15 lg:pt-0 lg:pl-[1.1rem]"
+            class="border-t border-base-content/15 pt-8 lg:border-t-0 lg:border-l lg:border-base-content/15 lg:pt-0 lg:pl-[1.1rem]"
           >
             <p
-              class="m-0 text-lg font-semibold uppercase tracking-[0.3em] font-old_standard"
+              class="m-0 mb-6 text-lg font-semibold uppercase tracking-[0.3em] font-old_standard"
             >
               самое читаемое
             </p>
 
             {
               editorialSidebarItems.length > 0 ? (
-                editorialSidebarItems.map((item) => (
-                  <NetlenkaCardOne
-                    title={getCardTitle(item)}
-                    category={getPrimaryBadgeLabel(item)}
-                    categoryHref={getPrimaryBadgeHref(item)}
-                    imageUrl={item.imageUrl}
-                    href={item.href}
-                    transitionName={getTransitionName(item)}
-                    hideDate={true}
-                  />
-                ))
+                <>
+                  <div class="hidden gap-4 lg:flex lg:flex-col">
+                    {editorialSidebarItems.map((item) => (
+                      <NetlenkaCardOne
+                        title={getCardTitle(item)}
+                        category={getPrimaryBadgeLabel(item)}
+                        categoryHref={getPrimaryBadgeHref(item)}
+                        imageUrl={item.imageUrl}
+                        href={item.href}
+                        transitionName={getTransitionName(item)}
+                        hideDate={true}
+                      />
+                    ))}
+                  </div>
+
+                  <div
+                    class="hot-content-carousel min-w-0 w-full max-w-full lg:hidden [touch-action:pan-y]"
+                    data-hot-content-carousel-root
+                    data-hot-content-carousel-swipe="true"
+                    data-page-count={editorialSidebarItems.length}
+                  >
+                    <div class="min-w-0 w-full max-w-full overflow-hidden">
+                      <div
+                        class="hot-content-carousel__track flex w-full transition-transform duration-700 ease-out"
+                        data-hot-content-carousel-track
+                      >
+                        {editorialSidebarItems.map((item, index) => (
+                          <div
+                            class="hot-content-carousel__page min-w-full w-full max-w-full flex-shrink-0"
+                            data-hot-content-carousel-page
+                            aria-hidden={index === 0 ? "false" : "true"}
+                          >
+                            <NetlenkaCardOne
+                              title={getCardTitle(item)}
+                              category={getPrimaryBadgeLabel(item)}
+                              categoryHref={getPrimaryBadgeHref(item)}
+                              imageUrl={item.imageUrl}
+                              href={item.href}
+                              transitionName={getTransitionName(item)}
+                              hideDate={true}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {editorialSidebarItems.length > 1 && (
+                      <div class="flex items-center justify-center gap-2 pt-4">
+                        {editorialSidebarItems.map((_, index) => (
+                          <button
+                            type="button"
+                            class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
+                            data-hot-content-carousel-dot
+                            data-page-index={index}
+                            aria-label={`Показать карточку ${index + 1}`}
+                            aria-pressed={index === 0 ? "true" : "false"}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
               ) : (
                 <p class="m-0 font-inter text-[0.88rem] leading-[1.5] text-[#3028219e]">
                   Пока нет материалов для боковой колонки.
@@ -352,6 +403,142 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
           </div>
         </aside>
       </section>
+
+      <script is:inline>
+        const initHotContentCarousels = () => {
+          const roots = document.querySelectorAll(
+            "[data-hot-content-carousel-root]",
+          );
+
+          roots.forEach((root) => {
+            if (
+              !(root instanceof HTMLElement) ||
+              root.dataset.initialized === "true"
+            ) {
+              return;
+            }
+
+            const track = root.querySelector(
+              "[data-hot-content-carousel-track]",
+            );
+            const pages = Array.from(
+              root.querySelectorAll("[data-hot-content-carousel-page]"),
+            );
+            const dots = Array.from(
+              root.querySelectorAll("[data-hot-content-carousel-dot]"),
+            );
+            const pageCount = Number(
+              root.dataset.pageCount || pages.length || 0,
+            );
+            const isSwipeEnabled =
+              root.dataset.hotContentCarouselSwipe === "true";
+
+            if (!(track instanceof HTMLElement) || pageCount <= 1) {
+              root.dataset.initialized = "true";
+              return;
+            }
+
+            let currentPage = 0;
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            const syncUi = () => {
+              track.style.transform = `translateX(-${currentPage * 100}%)`;
+
+              pages.forEach((page, index) => {
+                page.setAttribute(
+                  "aria-hidden",
+                  index === currentPage ? "false" : "true",
+                );
+              });
+
+              dots.forEach((dot) => {
+                if (!(dot instanceof HTMLButtonElement)) {
+                  return;
+                }
+
+                dot.setAttribute(
+                  "aria-pressed",
+                  Number(dot.dataset.pageIndex) === currentPage
+                    ? "true"
+                    : "false",
+                );
+              });
+            };
+
+            const goToPage = (pageIndex) => {
+              currentPage = ((pageIndex % pageCount) + pageCount) % pageCount;
+              syncUi();
+            };
+
+            dots.forEach((dot) => {
+              if (!(dot instanceof HTMLButtonElement)) {
+                return;
+              }
+
+              dot.addEventListener("click", () => {
+                const pageIndex = Number(dot.dataset.pageIndex || 0);
+                goToPage(pageIndex);
+              });
+            });
+
+            if (isSwipeEnabled) {
+              root.addEventListener(
+                "touchstart",
+                (event) => {
+                  const touch = event.touches[0];
+                  if (!touch) {
+                    return;
+                  }
+
+                  touchStartX = touch.clientX;
+                  touchStartY = touch.clientY;
+                },
+                { passive: true },
+              );
+
+              root.addEventListener(
+                "touchend",
+                (event) => {
+                  const touch = event.changedTouches[0];
+                  if (!touch) {
+                    return;
+                  }
+
+                  const deltaX = touch.clientX - touchStartX;
+                  const deltaY = touch.clientY - touchStartY;
+
+                  if (
+                    Math.abs(deltaX) > 40 &&
+                    Math.abs(deltaX) > Math.abs(deltaY)
+                  ) {
+                    goToPage(currentPage + (deltaX < 0 ? 1 : -1));
+                  }
+                },
+                { passive: true },
+              );
+            }
+
+            syncUi();
+            root.dataset.initialized = "true";
+          });
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener(
+            "DOMContentLoaded",
+            initHotContentCarousels,
+            { once: true },
+          );
+        } else {
+          initHotContentCarousels();
+        }
+
+        document.addEventListener(
+          "astro:page-load",
+          initHotContentCarousels,
+        );
+      </script>
 
       {
         featuredInterview && (
