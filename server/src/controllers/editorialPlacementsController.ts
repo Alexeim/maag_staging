@@ -146,7 +146,10 @@ export interface CalendarPagePlacementsDocument {
   updatedBy: string | null;
 }
 
-export type SectionPageHeroType = LandingMainHeroType;
+// Section pages (culture/paris) also allow picking a news item, unlike the
+// landing's own main hero / Netlenka rail — kept as its own union instead of
+// widening LandingMainHeroType so those stay unaffected.
+export type SectionPageHeroType = LandingMainHeroType | 'news';
 
 export interface SectionPageHeroManualSelection {
   mode: 'manual';
@@ -287,6 +290,7 @@ const MAX_SECTION_PAGE_SIDEBAR_LIMIT = 8;
 
 const SECTION_PAGE_HERO_COLLECTIONS: Record<SectionPageHeroType, string> = {
   ...MAIN_HERO_COLLECTIONS,
+  news: 'news',
 };
 
 const createDefaultLandingPlacements = (): LandingPlacementsDocument => ({

@@ -470,7 +470,10 @@ export interface UpdateCalendarPagePlacementsPayload {
   secondaryCards?: CalendarPageSecondaryCardsSelection | null;
 }
 
-export type SectionPageHeroType = LandingMainHeroType;
+// Section pages (culture/paris) also allow picking a news item, unlike the
+// landing's own main hero / Netlenka rail — kept as its own union instead of
+// widening LandingMainHeroType so those stay unaffected.
+export type SectionPageHeroType = LandingMainHeroType | "news";
 
 export interface SectionPageHeroManualSelection {
   mode: "manual";
