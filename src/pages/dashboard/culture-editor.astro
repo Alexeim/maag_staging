@@ -7,6 +7,7 @@ import {
   flippersApi,
   guidesApi,
   interviewsApi,
+  newsApi,
   visualStoriesApi,
   type CulturePagePlacementsResponse,
   type SectionPageHeroType,
@@ -18,6 +19,7 @@ const CONTENT_TYPE_LABELS: Record<SectionPageHeroType, string> = {
   interview: "Интервью",
   flipper: "Листалка",
   "visual-story": "Крупным планом",
+  news: "Новость",
 };
 
 const DEFAULT_PLACEMENTS: CulturePagePlacementsResponse = {
@@ -77,9 +79,10 @@ const toMs = (value: unknown) => toDate(value)?.getTime() ?? null;
 const heroOptions: MaterialOption[] = [];
 const interviewOptions: Array<{ id: string; title: string; createdAtMs: number | null; publishedAtMs: number | null }> = [];
 const sidebarOptions: MaterialOption[] = [];
+let secondaryOptions: MaterialOption[] = [];
 
 try {
-  const [culturePagePlacements, articles, guides, flippers, visualStories, interviews] =
+  const [culturePagePlacements, articles, guides, flippers, visualStories, interviews, news] =
     await Promise.all([
       editorialPlacementsApi.getCulturePage().catch(() => DEFAULT_PLACEMENTS),
       articlesApi.list(),
@@ -87,6 +90,7 @@ try {
       flippersApi.list(),
       visualStoriesApi.list(),
       interviewsApi.list(),
+      newsApi.list(),
     ]);
 
   placements = culturePagePlacements;
@@ -156,8 +160,21 @@ try {
     }
   });
 
+  // News never carries isHotContent (the backend strips it on write, see
+  // newsController.ts), so a news item can only end up in the hero/secondary
+  // pool — never in the "Самое читаемое" sidebar rail.
+  news
+    .filter((n) => normalizeCategoryKey(n.category) === "culture")
+    .forEach((n) => {
+      heroOptions.push({ id: `news:${n.id}`, title: n.title, type: "news", typeLabel: CONTENT_TYPE_LABELS.news, createdAtMs: toMs(n.createdAt), publishedAtMs: toMs(n.publishedAt) });
+    });
+
   heroOptions.sort((a, b) => a.typeLabel.localeCompare(b.typeLabel, "ru-RU") || a.title.localeCompare(b.title, "ru-RU"));
   sidebarOptions.sort((a, b) => a.typeLabel.localeCompare(b.typeLabel, "ru-RU") || a.title.localeCompare(b.title, "ru-RU"));
+
+  // Same pool as hero, minus interviews — mirrors selectSectionSecondaryStories()
+  // on the public side, which always excludes contentType === 'interview'.
+  secondaryOptions = heroOptions.filter((item) => item.type !== "interview");
 } catch (error) {
   loadError = error instanceof Error ? error.message : "Не удалось загрузить данные.";
 }
@@ -175,13 +192,21 @@ const initialFeaturedInterview = (() => {
 
 const initialSecondaryStoriesMode = (() => {
   if (!placements.secondaryStories) return "empty" as const;
-  return placements.secondaryStories.mode as "auto-latest";
+  return placements.secondaryStories.mode;
 })();
 
 const initialSecondaryStoriesLimit =
   placements.secondaryStories?.mode === "auto-latest"
     ? placements.secondaryStories.limit
     : 3;
+
+const availableSecondaryKeys = new Set(secondaryOptions.map((item) => item.id));
+const initialSecondaryKeys =
+  placements.secondaryStories?.mode === "manual"
+    ? placements.secondaryStories.items
+        .map((item) => `${item.type}:${item.id}`)
+        .filter((key) => availableSecondaryKeys.has(key))
+    : [];
 
 const initialSidebarMode = (() => {
   if (!placements.sidebarRail) return "empty" as const;
@@ -210,6 +235,8 @@ const initialSidebarKeys =
       initialFeaturedInterview,
       initialSecondaryStoriesMode,
       initialSecondaryStoriesLimit,
+      secondaryOptions,
+      initialSecondaryKeys,
       initialSidebarMode,
       initialSidebarLimit,
       sidebarOptions,
@@ -219,7 +246,7 @@ const initialSidebarKeys =
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold">Редактор страницы «Культура»</h2>
-        <p class="text-sm text-base-content/70">Управление editorial slots на странице /culture.</p>
+        <p class="text-sm text-base-content/70">Управление контентными блоками страницы «Культура».</p>
       </div>
       <div class="mt-4 text-sm">
         <span class="font-semibold">Последнее изменение:</span>
@@ -230,8 +257,8 @@ const initialSidebarKeys =
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Hero Controls</h3>
-        <p class="text-sm text-base-content/70">Главный материал в верхней части страницы /culture.</p>
+        <h3 class="text-lg font-semibold">Главный материал</h3>
+        <p class="text-sm text-base-content/70">Главный материал в верхней части страницы «Культура».</p>
       </div>
 
       <div class="mt-5 grid gap-5">
@@ -265,7 +292,7 @@ const initialSidebarKeys =
             @click="saveHero()"
             :disabled="heroSaving"
           >
-            Сохранить hero
+            Сохранить
           </button>
           <span x-show="heroSaving" class="text-sm text-base-content/70">Сохраняем...</span>
         </div>
@@ -274,8 +301,8 @@ const initialSidebarKeys =
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Featured Interview Controls</h3>
-        <p class="text-sm text-base-content/70">Блок интервью на странице /culture.</p>
+        <h3 class="text-lg font-semibold">Интервью</h3>
+        <p class="text-sm text-base-content/70">Блок интервью на странице «Культура».</p>
       </div>
 
       <div class="mt-5 grid gap-5">
@@ -313,7 +340,7 @@ const initialSidebarKeys =
             @click="saveFeaturedInterview()"
             :disabled="featuredInterviewSaving"
           >
-            Сохранить featured interview
+            Сохранить
           </button>
           <span x-show="featuredInterviewSaving" class="text-sm text-base-content/70">Сохраняем...</span>
         </div>
@@ -322,12 +349,12 @@ const initialSidebarKeys =
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Secondary Stories Controls</h3>
-        <p class="text-sm text-base-content/70">Карточки под hero на странице /culture.</p>
+        <h3 class="text-lg font-semibold">Карточки под главным материалом</h3>
+        <p class="text-sm text-base-content/70">Карточки под главным материалом на странице «Культура».</p>
       </div>
 
       <div class="mt-5 grid gap-5">
-        <div class="grid gap-3 sm:grid-cols-2">
+        <div class="grid gap-3 sm:grid-cols-3">
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
             <input type="radio" name="culture-secondary-mode" value="empty" x-model="secondaryStoriesMode" />
             <span class="text-sm">Empty</span>
@@ -335,6 +362,10 @@ const initialSidebarKeys =
           <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
             <input type="radio" name="culture-secondary-mode" value="auto-latest" x-model="secondaryStoriesMode" />
             <span class="text-sm">Auto latest</span>
+          </label>
+          <label class="flex items-center gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+            <input type="radio" name="culture-secondary-mode" value="manual" x-model="secondaryStoriesMode" />
+            <span class="text-sm">Manual</span>
           </label>
         </div>
 
@@ -354,6 +385,35 @@ const initialSidebarKeys =
           </select>
         </div>
 
+        <div x-show="secondaryStoriesMode === 'manual'" class="grid gap-3">
+          <p class="text-sm font-medium">
+            Выбери материалы для карточек. Порядок выбора сохранится на странице.
+          </p>
+          {
+            secondaryOptions.length > 0 ? (
+              <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
+                {secondaryOptions.map((item) => (
+                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      :checked={`isManualSecondarySelected(${JSON.stringify(item.id)})`}
+                      @change={`toggleSecondaryItem(${JSON.stringify(item.id)})`}
+                    />
+                    <span class="flex flex-col gap-1 text-sm leading-6">
+                      <span class="font-medium">{item.title}</span>
+                      <span class="text-xs uppercase tracking-[0.22em] text-base-content/55">
+                        {item.typeLabel}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p class="text-sm text-base-content/60">Нет доступных материалов.</p>
+            )
+          }
+        </div>
+
         <p x-show="secondaryStoriesError" class="text-sm text-error" x-text="secondaryStoriesError"></p>
 
         <div class="flex items-center gap-3">
@@ -363,7 +423,7 @@ const initialSidebarKeys =
             @click="saveSecondaryStories()"
             :disabled="secondaryStoriesSaving"
           >
-            Сохранить secondary stories
+            Сохранить
           </button>
           <span x-show="secondaryStoriesSaving" class="text-sm text-base-content/70">Сохраняем...</span>
         </div>
@@ -372,8 +432,8 @@ const initialSidebarKeys =
 
     <div class="bg-base-100 border border-base-300 rounded-xl p-6">
       <div class="flex flex-col gap-2">
-        <h3 class="text-lg font-semibold">Sidebar Rail Controls</h3>
-        <p class="text-sm text-base-content/70">Блок «Самое читаемое» в правой колонке /culture.</p>
+        <h3 class="text-lg font-semibold">Самое читаемое</h3>
+        <p class="text-sm text-base-content/70">Блок «Самое читаемое» в правой колонке страницы «Культура».</p>
       </div>
 
       <div class="mt-5 grid gap-5">
@@ -411,7 +471,7 @@ const initialSidebarKeys =
 
         <div x-show="sidebarMode === 'manual'" class="grid gap-3">
           <p class="text-sm font-medium">
-            Выбери материалы с флагом «Самое читаемое». Порядок выбора сохранится в rail.
+            Выбери материалы с флагом «Самое читаемое». Порядок выбора сохранится в блоке.
           </p>
           {
             sidebarOptions.length > 0 ? (
@@ -449,7 +509,7 @@ const initialSidebarKeys =
             @click="saveSidebarRail()"
             :disabled="sidebarSaving"
           >
-            Сохранить sidebar rail
+            Сохранить
           </button>
           <span x-show="sidebarSaving" class="text-sm text-base-content/70">Сохраняем...</span>
         </div>

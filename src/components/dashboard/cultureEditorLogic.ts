@@ -31,8 +31,10 @@ interface CultureEditorInitialState {
   initialHero: { mode: "empty" | "manual"; key: string };
   interviewOptions: InterviewOption[];
   initialFeaturedInterview: { mode: "empty" | "auto-latest" | "manual"; id: string };
-  initialSecondaryStoriesMode: "empty" | "auto-latest";
+  initialSecondaryStoriesMode: "empty" | "auto-latest" | "manual";
   initialSecondaryStoriesLimit: number;
+  secondaryOptions: ContentOption[];
+  initialSecondaryKeys: string[];
   initialSidebarMode: "empty" | "auto-hot" | "manual";
   initialSidebarLimit: number;
   sidebarOptions: ContentOption[];
@@ -63,6 +65,8 @@ export default (initialState: CultureEditorInitialState) => ({
 
   secondaryStoriesMode: initialState.initialSecondaryStoriesMode ?? "auto-latest",
   secondaryStoriesLimit: initialState.initialSecondaryStoriesLimit ?? 3,
+  secondaryOptions: initialState.secondaryOptions ?? [],
+  selectedSecondaryKeys: [...(initialState.initialSecondaryKeys ?? [])],
   secondaryStoriesSaving: false,
   secondaryStoriesError: "",
 
@@ -84,6 +88,20 @@ export default (initialState: CultureEditorInitialState) => ({
     } else {
       window.alert(message);
     }
+  },
+
+  isManualSecondarySelected(key: string) {
+    return this.selectedSecondaryKeys.includes(key);
+  },
+
+  toggleSecondaryItem(key: string) {
+    if (this.selectedSecondaryKeys.includes(key)) {
+      this.selectedSecondaryKeys = this.selectedSecondaryKeys.filter(
+        (selectedKey: string) => selectedKey !== key,
+      );
+      return;
+    }
+    this.selectedSecondaryKeys = [key, ...this.selectedSecondaryKeys];
   },
 
   isManualSidebarSelected(key: string) {
@@ -171,6 +189,23 @@ export default (initialState: CultureEditorInitialState) => ({
         secondaryStories = {
           mode: "auto-latest",
           limit: Number(this.secondaryStoriesLimit) || 3,
+        };
+      } else if (this.secondaryStoriesMode === "manual") {
+        if (this.selectedSecondaryKeys.length === 0) {
+          throw new Error("Для ручного режима выбери хотя бы один материал.");
+        }
+        secondaryStories = {
+          mode: "manual",
+          items: this.selectedSecondaryKeys.map((key: string) => {
+            const parsed = parseContentKey(key);
+            if (!parsed) {
+              throw new Error("Не удалось распознать выбранный материал.");
+            }
+            return {
+              type: parsed.type as SectionPageHeroType,
+              id: parsed.id,
+            };
+          }),
         };
       }
 
