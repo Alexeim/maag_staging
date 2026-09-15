@@ -7,26 +7,18 @@ const currentYear = new Date().getFullYear();
 ---
 
 <footer class="bg-maag-gray text-white lg:h-85.75 lg:overflow-hidden" x-data>
-  <div
-    class="mx-auto flex h-full flex-col px-4 py-12 lg:px-12 lg:py-9"
-  >
+  <div class="mx-auto flex h-full flex-col px-4 py-12 lg:px-12 lg:py-9">
     {/* Main Footer Content */}
     <div
       class="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr_1fr] gap-10 lg:gap-8 mb-10 lg:mb-0 text-center sm:text-left"
     >
       {/* Brand block */}
-      <div
-        class="flex flex-col items-center sm:items-start gap-5 lg:gap-3"
-      >
-        <img
-          src={logoFull.src}
-          alt="MAAG France"
-          class="w-40 lg:w-36 h-auto"
-        />
+      <div class="flex flex-col items-center sm:items-start gap-5 lg:gap-3">
+        <img src={logoFull.src} alt="MAAG France" class="w-40 lg:w-36 h-auto" />
         <p
           class="font-old_standard text-lg lg:text-[0.95rem] leading-snug text-white"
         >
-          Независимое издание<br />о культурной жизни Парижа
+          Независимое издание<br />о культуре и Париже
         </p>
 
         {/* Login / account button */}
@@ -124,13 +116,15 @@ const currentYear = new Date().getFullYear();
             >
           </li>
           {/* Hidden for now — no dedicated "editor's word" page yet */}
-          {/* <li>
+          {
+            /* <li>
             <a
               href="/about"
               class="font-old_standard text-sm uppercase tracking-[0.12em] text-white transition-opacity hover:opacity-70"
               >Слово редактора</a
             >
-          </li> */}
+          </li> */
+          }
         </ul>
       </div>
     </div>
