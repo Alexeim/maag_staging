@@ -193,14 +193,22 @@ export default function articleCreatorLogic(initialState = {}) {
 
   const normalizeContentBlocks = (blocks?: unknown) => {
     const orderedBlocks = syncContentBlockOrder(blocks);
-    return orderedBlocks.map((block) =>
-      (block as { type?: string }).type === "video"
-        ? withBlockMeta(
-            normalizeVideoBlock(block as any) as Record<string, unknown>,
-            Number(block.position) || 0,
-          )
-        : block,
-    );
+    return orderedBlocks.map((block) => {
+      const type = (block as { type?: string }).type;
+      if (type === "video") {
+        return withBlockMeta(
+          normalizeVideoBlock(block as any) as Record<string, unknown>,
+          Number(block.position) || 0,
+        );
+      }
+      if (type === "tips") {
+        return {
+          ...block,
+          tips: normalizeTips((block as { tips?: unknown }).tips),
+        };
+      }
+      return block;
+    });
   };
 
   const normalizeLoadedArticle = (data: any) => {
@@ -235,7 +243,6 @@ export default function articleCreatorLogic(initialState = {}) {
     copy.paid = Boolean(copy.paid);
     copy.published = Boolean(copy.published);
     copy.publishedAt = copy.publishedAt ?? null;
-    copy.tips = normalizeTips(copy.tips);
     copy.imageCaption = copy.imageCaption ?? "";
     copy.secondImageUrl = copy.secondImageUrl ?? "";
     copy.secondImageCaption = copy.secondImageCaption ?? "";
@@ -308,7 +315,6 @@ export default function articleCreatorLogic(initialState = {}) {
       parisSubCategories: [],
       parisDistrict: "",
       binaryForGuide: false,
-      tips: [] as TipItem[],
       category: "", // <-- Added category
       isHotContent: false,
       isNotebookContent: false,
@@ -588,42 +594,57 @@ export default function articleCreatorLogic(initialState = {}) {
         this.article.parisDistrict,
       );
     },
+    // Tip helpers below operate on the "tips" content block currently open
+    // in the editor (editingBlock.tips), not on the article itself: a "tips"
+    // block is now a regular, repeatable content block like any other.
     isTipSelected(type: TipType) {
-      return this.article.tips.some((tip: TipItem) => tip.type === type);
+      return (this.editingBlock?.tips || []).some(
+        (tip: TipItem) => tip.type === type,
+      );
     },
     toggleTip(type: TipType) {
-      const idx = this.article.tips.findIndex(
+      if (!this.editingBlock) return;
+      if (!Array.isArray(this.editingBlock.tips)) {
+        this.editingBlock.tips = [];
+      }
+      const idx = this.editingBlock.tips.findIndex(
         (tip: TipItem) => tip.type === type,
       );
       if (idx >= 0) {
-        this.article.tips.splice(idx, 1);
+        this.editingBlock.tips.splice(idx, 1);
       } else {
-        this.article.tips.push(
+        this.editingBlock.tips.push(
           type === "link" ? { type, text: "", url: "" } : { type, text: "" },
         );
       }
     },
     getTipText(type: TipType) {
-      const tip = this.article.tips.find((item: TipItem) => item.type === type);
+      const tip = (this.editingBlock?.tips || []).find(
+        (item: TipItem) => item.type === type,
+      );
       return tip?.text ?? "";
     },
     setTipText(type: TipType, value: string) {
-      const idx = this.article.tips.findIndex(
+      if (!this.editingBlock) return;
+      const idx = (this.editingBlock.tips || []).findIndex(
         (tip: TipItem) => tip.type === type,
       );
       if (idx < 0) return;
-      this.article.tips[idx].text = value;
+      this.editingBlock.tips[idx].text = value;
     },
     getTipUrl(type: TipType) {
-      const tip = this.article.tips.find((item: TipItem) => item.type === type);
+      const tip = (this.editingBlock?.tips || []).find(
+        (item: TipItem) => item.type === type,
+      );
       return (tip as any)?.url ?? "";
     },
     setTipUrl(type: TipType, value: string) {
-      const idx = this.article.tips.findIndex(
+      if (!this.editingBlock) return;
+      const idx = (this.editingBlock.tips || []).findIndex(
         (tip: TipItem) => tip.type === type,
       );
       if (idx < 0) return;
-      (this.article.tips[idx] as any).url = value;
+      (this.editingBlock.tips[idx] as any).url = value;
     },
     getAuthorLabel(author: any) {
       const firstName =
@@ -1076,7 +1097,6 @@ export default function articleCreatorLogic(initialState = {}) {
         this.article.parisDistrict,
       );
       this.article.binaryForGuide = Boolean(this.article.binaryForGuide);
-      this.article.tips = normalizeTips(this.article.tips);
       this.article.lead = this.article.lead ?? "";
       this.article.leadHtml = normalizeStoredRichTextHtml(this.article.leadHtml);
       this.article.subtitle = this.article.subtitle ?? "";
@@ -1383,6 +1403,9 @@ export default function articleCreatorLogic(initialState = {}) {
             rightPortraitImageCaption: "",
           };
           break;
+        case "tips":
+          newBlockData = { tips: [] as TipItem[] };
+          break;
         default:
           break;
       }
@@ -1433,6 +1456,9 @@ export default function articleCreatorLogic(initialState = {}) {
           if (!this.validateTweetBlock(blockToSave)) {
             return;
           }
+        }
+        if (blockToSave?.type === "tips") {
+          blockToSave = { ...blockToSave, tips: normalizeTips(blockToSave.tips) };
         }
         this.article.contentBlocks[this.editingIndex] = blockToSave;
         this.syncContentBlockOrder();
@@ -1598,7 +1624,6 @@ export default function articleCreatorLogic(initialState = {}) {
       this.article.parisDistrict = normalizeParisDistrict(
         this.article.parisDistrict,
       );
-      this.article.tips = normalizeTips(this.article.tips);
 
       const hasInvalidVideoBlock = this.article.contentBlocks.some(
         (block) => !this.validateVideoBlock(block),
@@ -1675,7 +1700,6 @@ export default function articleCreatorLogic(initialState = {}) {
             ? this.article.parisDistrict || null
             : null,
           binaryForGuide: false,
-          tips: this.article.tips,
           isHotContent: this.article.isHotContent,
           isNotebookContent: Boolean(this.article.isNotebookContent),
           isMaagChoice: Boolean(this.article.isMaagChoice),

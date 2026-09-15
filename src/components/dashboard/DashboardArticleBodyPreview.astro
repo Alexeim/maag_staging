@@ -1,6 +1,7 @@
 ---
 import QuoteIcon from "@/assets/icons/quote.svg";
 import { ChevronLeft, ChevronRight } from "@lucide/astro";
+import TipIcon from "@/components/article/TipIcon.astro";
 
 interface Props {
   contentExpression?: string;
@@ -352,6 +353,41 @@ const wideBreakoutRailClass = "w-full lg:max-w-[1356px] my-12 px-4 lg:px-0";
               <figcaption x-show="block.rightPortraitImageCaption" x-text="block.rightPortraitImageCaption" class="mt-2 text-center font-inter text-xs text-gray-500"></figcaption>
             </figure>
           </section>
+        </div>
+      </template>
+
+      <template x-if="block.type === 'tips' && (block.tips || []).length > 0">
+        <div class="max-w-[826px] mx-auto mt-12">
+          <div class="border border-base-300 bg-white">
+            <template x-for="(tip, tipIdx) in (block.tips || [])" :key="tipIdx">
+              <div class="flex flex-row items-start justify-start gap-4 px-4 py-2 border-b border-base-300 last:border-b-0">
+                <div class="pt-1">
+                  <TipIcon type="location" class="mt-0.5 h-5 w-5 shrink-0 text-accent" x-show="tip.type === 'location'" />
+                  <TipIcon type="time" class="mt-0.5 h-5 w-5 shrink-0 text-accent" x-show="tip.type === 'time'" />
+                  <TipIcon type="money" class="mt-0.5 h-5 w-5 shrink-0 text-accent" x-show="tip.type === 'money'" />
+                  <TipIcon type="idea" class="mt-0.5 h-5 w-5 shrink-0 text-accent" x-show="tip.type === 'idea'" />
+                  <TipIcon type="like" class="mt-0.5 h-5 w-5 shrink-0 text-accent" x-show="tip.type === 'like'" />
+                  <TipIcon type="dislike" class="mt-0.5 h-5 w-5 shrink-0 text-accent" x-show="tip.type === 'dislike'" />
+                  <TipIcon type="link" class="mt-0.5 h-5 w-5 shrink-0 text-accent" x-show="tip.type === 'link'" />
+                </div>
+                <div>
+                  <a
+                    x-show="tip.type === 'link' && tip.url"
+                    :href="tip.url"
+                    target="_blank"
+                    rel="noreferrer"
+                    class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90 hover:underline"
+                    x-text="tip.text"
+                  ></a>
+                  <p
+                    x-show="!(tip.type === 'link' && tip.url)"
+                    class="font-oswald text-lg font-light tracking-[0.012em] text-base-content/90"
+                    x-text="tip.text"
+                  ></p>
+                </div>
+              </div>
+            </template>
+          </div>
         </div>
       </template>
     </div>

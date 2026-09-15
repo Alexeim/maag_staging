@@ -25,8 +25,7 @@ export interface Article {
   cardTitle?: string;
   authorId: string;
   articleType?: 'standard' | 'tips' | 'le_saviez_vous'; // Type of article layout
-  content: any[]; // Array of content blocks (e.g., { type: 'paragraph', text: '...' })
-  tips?: Array<{ type: string; text: string; url?: string }>;
+  content: any[]; // Array of content blocks (e.g., { type: 'paragraph', text: '...' }, { type: 'tips', tips: [...] })
   imageUrl?: string;
   imageCaption?: string;
   secondImageUrl?: string;
@@ -64,34 +63,6 @@ const normalizeArticleType = (
   return 'standard';
 };
 
-const normalizeTips = (tips: unknown): Array<{ type: string; text: string; url?: string }> => {
-  if (!Array.isArray(tips)) {
-    return [];
-  }
-
-  const deduped = new Set<string>();
-  const normalized: Array<{ type: string; text: string; url?: string }> = [];
-
-  tips.forEach((rawTip) => {
-    if (!rawTip || typeof rawTip !== 'object') {
-      return;
-    }
-    const type = String((rawTip as { type?: unknown }).type ?? '').trim().toLowerCase();
-    const text = String((rawTip as { text?: unknown }).text ?? '').trim();
-    if (!type || !text || deduped.has(type)) {
-      return;
-    }
-    const url =
-      type === 'link' && typeof (rawTip as { url?: unknown }).url === 'string'
-        ? String((rawTip as { url?: string }).url).trim()
-        : undefined;
-    deduped.add(type);
-    normalized.push({ type, text, ...(url ? { url } : {}) });
-  });
-
-  return normalized;
-};
-
 /**
  * @description Create a new article
  * @route POST /api/articles
@@ -110,7 +81,6 @@ export const createArticle = async (req: Request, res: Response) => {
       cardLead,
       cardTitle,
       content,
-      tips = [],
       imageUrl,
       imageCaption,
       secondImageUrl,
@@ -137,7 +107,6 @@ export const createArticle = async (req: Request, res: Response) => {
     const normalizedTags = Array.isArray(tags)
       ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
-    const normalizedTips = normalizeTips(tips);
     const legacyHotContent =
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
@@ -159,7 +128,6 @@ export const createArticle = async (req: Request, res: Response) => {
       authorId,
       articleType: normalizeArticleType(articleType),
       content,
-      tips: normalizedTips,
       imageUrl,
       imageCaption,
       secondImageUrl: secondImageUrl || '',
@@ -286,7 +254,6 @@ export const updateArticle = async (req: Request, res: Response) => {
       cardLead,
       cardTitle,
       content,
-      tips = [],
       imageUrl,
       imageCaption,
       secondImageUrl,
@@ -313,7 +280,6 @@ export const updateArticle = async (req: Request, res: Response) => {
     const normalizedTags = Array.isArray(tags)
       ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
       : [];
-    const normalizedTips = normalizeTips(tips);
     const legacyHotContent =
       typeof category === 'string' && category.trim() === 'hotContent';
     const persistedCategory = legacyHotContent ? '' : category;
@@ -337,7 +303,6 @@ export const updateArticle = async (req: Request, res: Response) => {
       authorId,
       articleType: normalizeArticleType(articleType),
       content,
-      tips: normalizedTips,
       imageUrl,
       imageCaption,
       secondImageUrl: secondImageUrl || '',

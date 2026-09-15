@@ -6,6 +6,7 @@ import LinkToContent from "./LinkToContent.astro";
 import ArticleColumnContent from "./ArticleColumnContent.astro";
 import OneBigOneSmall from "./OneBigOneSmall.astro";
 import Collage from "./Collage.astro";
+import ArticleTips from "./ArticleTips.astro";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import { getTweetId } from "@/lib/utils/tweet";
 import {
@@ -35,6 +36,7 @@ interface Block {
     | "photoOfTheDay";
   linkedContentId?: string;
   linkedContentTitle?: string;
+  tips?: Array<{ type: string; text: string; url?: string }>;
 }
 
 interface ColumnData {
@@ -95,7 +97,8 @@ interface RenderableBlock {
     | "flipper"
     | "video"
     | "one-big-one-small"
-    | "collage";
+    | "collage"
+    | "tips";
   content?: Block[]; // for prose-group
   block?: TwoColumnBlock; // for two-columns
   threeColumnBlock?: ThreeColumnBlock; // for three-columns
@@ -103,6 +106,7 @@ interface RenderableBlock {
   video?: Block;
   oneBigOneSmall?: OneBigOneSmallBlock;
   collage?: CollageBlock;
+  tips?: Block; // for tips
 }
 
 interface Props {
@@ -201,6 +205,18 @@ for (const block of contentBlocks) {
     renderableGroups.push({
       type: "collage",
       collage: block as CollageBlock,
+    });
+  } else if (block.type === "tips") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "tips",
+      tips: block,
     });
   } else {
     currentProseGroup.push(block);
@@ -510,6 +526,8 @@ if (currentProseGroup.length > 0) {
             />
           </div>
         );
+      } else if (group.type === "tips" && group.tips) {
+        return <ArticleTips tips={group.tips.tips} />;
       }
       return null;
     })

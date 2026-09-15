@@ -18,6 +18,17 @@ export const BLOCK_TYPE_LABELS: Record<string, string> = {
   "url-link": "Ссылка на URL",
   flipper: "Листалка",
   qa: "Вопрос / Ответ",
+  tips: "Блок tips",
+};
+
+export const TIP_TYPE_LABELS: Record<string, string> = {
+  location: "Локация",
+  time: "Время",
+  money: "Стоимость",
+  idea: "Идея",
+  like: "Плюсы",
+  dislike: "Минусы",
+  link: "Ссылка",
 };
 
 export const LINKED_CONTENT_TYPE_LABELS: Record<string, string> = {
@@ -206,6 +217,16 @@ export const getBlockSummary = (
       const question = truncatePreviewText(block.question, 70) || "Вопрос не заполнен";
       const answer = truncatePreviewText(block.answer, 70) || "Ответ не заполнен";
       return `В: ${question} · О: ${answer}`;
+    }
+    case "tips": {
+      const items = Array.isArray(block.tips) ? block.tips : [];
+      if (items.length === 0) {
+        return "Советы не добавлены";
+      }
+      const labels = items
+        .map((tip: GenericRecord) => TIP_TYPE_LABELS[tip?.type] || tip?.type)
+        .filter(Boolean);
+      return `${items.length} шт. · ${labels.join(", ")}`;
     }
     default:
       return "";

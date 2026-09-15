@@ -187,7 +187,6 @@ export default function(Alpine: Alpine) {
         parisSubCategories: [],
         parisDistrict: '',
         binaryForGuide: false,
-        tips: [],
         category: '',
         isHotContent: false,
         isNotebookContent: false,

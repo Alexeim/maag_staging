@@ -329,84 +329,6 @@ const {
 
     <hr class="my-6" />
 
-    <div class="mt-6">
-      <label class="block text-sm font-medium text-base-content mb-3"
-        >Tips</label
-      >
-      <div class="space-y-3 border border-base-300 bg-base-100/70 p-4">
-        <template x-for="tip in tipOptions" :key="tip.type">
-          <div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_auto_1fr] gap-3 items-center border-b border-base-300 pb-3 last:border-b-0 last:pb-0">
-            <label class="inline-flex items-center">
-              <input
-                type="checkbox"
-                class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
-                :checked="isTipSelected(tip.type)"
-                @change="toggleTip(tip.type)"
-              />
-            </label>
-            <span class="inline-flex items-center gap-2 text-sm font-inter text-base-content/80">
-              <TipIcon
-                type="location"
-                class="h-5 w-5 shrink-0 text-accent"
-                x-show="tip.type === 'location'"
-              />
-              <TipIcon
-                type="time"
-                class="h-5 w-5 shrink-0 text-accent"
-                x-show="tip.type === 'time'"
-              />
-              <TipIcon
-                type="money"
-                class="h-5 w-5 shrink-0 text-accent"
-                x-show="tip.type === 'money'"
-              />
-              <TipIcon
-                type="idea"
-                class="h-5 w-5 shrink-0 text-accent"
-                x-show="tip.type === 'idea'"
-              />
-              <TipIcon
-                type="like"
-                class="h-5 w-5 shrink-0 text-accent"
-                x-show="tip.type === 'like'"
-              />
-              <TipIcon
-                type="dislike"
-                class="h-5 w-5 shrink-0 text-accent"
-                x-show="tip.type === 'dislike'"
-              />
-              <TipIcon
-                type="link"
-                class="h-5 w-5 shrink-0 text-accent"
-                x-show="tip.type === 'link'"
-              />
-              <span x-text="tip.label"></span>
-            </span>
-            <input
-              type="text"
-              class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
-              :disabled="!isTipSelected(tip.type)"
-              :value="getTipText(tip.type)"
-              @input="setTipText(tip.type, $event.target.value)"
-              placeholder="Текст подсказки..."
-            />
-            <template x-if="tip.type === 'link'">
-              <input
-                type="url"
-                class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 col-start-3"
-                :disabled="!isTipSelected(tip.type)"
-                :value="getTipUrl(tip.type)"
-                @input="setTipUrl(tip.type, $event.target.value)"
-                placeholder="https://..."
-              />
-            </template>
-          </div>
-        </template>
-      </div>
-    </div>
-
-    <hr class="my-6" />
-
     <label class="block text-sm font-medium text-base-content mb-2"
       >Обложка статьи</label
     >
@@ -1531,6 +1453,79 @@ const {
                 </div>
               </template>
 
+              <template x-if="editingBlock.type === 'tips'">
+                <div class="space-y-3 border border-base-300 bg-base-100/70 p-4">
+                  <template x-for="tip in tipOptions" :key="tip.type">
+                    <div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_auto_1fr] gap-3 items-center border-b border-base-300 pb-3 last:border-b-0 last:pb-0">
+                      <label class="inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+                          :checked="isTipSelected(tip.type)"
+                          @change="toggleTip(tip.type)"
+                        />
+                      </label>
+                      <span class="inline-flex items-center gap-2 text-sm font-inter text-base-content/80">
+                        <TipIcon
+                          type="location"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'location'"
+                        />
+                        <TipIcon
+                          type="time"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'time'"
+                        />
+                        <TipIcon
+                          type="money"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'money'"
+                        />
+                        <TipIcon
+                          type="idea"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'idea'"
+                        />
+                        <TipIcon
+                          type="like"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'like'"
+                        />
+                        <TipIcon
+                          type="dislike"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'dislike'"
+                        />
+                        <TipIcon
+                          type="link"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'link'"
+                        />
+                        <span x-text="tip.label"></span>
+                      </span>
+                      <input
+                        type="text"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+                        :disabled="!isTipSelected(tip.type)"
+                        :value="getTipText(tip.type)"
+                        @input="setTipText(tip.type, $event.target.value)"
+                        placeholder="Текст подсказки..."
+                      />
+                      <template x-if="tip.type === 'link'">
+                        <input
+                          type="url"
+                          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 col-start-3"
+                          :disabled="!isTipSelected(tip.type)"
+                          :value="getTipUrl(tip.type)"
+                          @input="setTipUrl(tip.type, $event.target.value)"
+                          placeholder="https://..."
+                        />
+                      </template>
+                    </div>
+                  </template>
+                </div>
+              </template>
+
                             <div class="flex justify-end gap-3">
                               <Button variant="secondary" @click="cancelEdit()">Отмена</Button>
                 <Button variant="primary" @click="updateBlock()"
@@ -1931,6 +1926,10 @@ const {
                 </div>
               </template>
 
+              <template x-if="block.type === 'tips'">
+                <p class="rounded-lg border border-base-300 bg-base-200/40 p-4 text-sm text-base-content/70" x-text="getBlockSummary(block)"></p>
+              </template>
+
               <div
                 class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2"
               >
@@ -2026,6 +2025,11 @@ const {
             @click="addBlock('flipper')"
             class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
             >Листалка</button
+          >
+          <button
+            @click="addBlock('tips')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Блок tips</button
           >
         </div>
       </template>

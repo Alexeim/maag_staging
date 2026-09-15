@@ -2,7 +2,6 @@
 import Layout from "../../Layouts/Layout.astro";
 import ArticleHero from "../../components/article/ArticleHero.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
-import ArticleTips from "../../components/article/ArticleTips.astro";
 import EventDetails from "../../components/article/EventDetails.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import picture1 from "@/assets/images/culture.jpg";
@@ -107,7 +106,6 @@ const displayArticle = {
   imageCaption: articleData?.imageCaption || '', // <-- Get the caption
   imageAlt: articleData?.mainImage?.alt || 'Article image',
   contentBlocks: articleData?.content || [],
-  tips: Array.isArray(articleData?.tips) ? articleData.tips : [],
 };
 
 const bookmarkCategory =
@@ -258,7 +256,6 @@ const isAKid = displayArticle.authorName === "Саша Макарова";
               contentBlocks={displayArticle.contentBlocks}
               linkedContentLookup={linkedContentLookup}
             />
-            <ArticleTips tips={displayArticle.tips} />
 
             {(articleData?.eventDetails) && (
               <EventDetails
