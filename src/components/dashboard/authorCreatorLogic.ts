@@ -10,6 +10,25 @@ import { compressImage } from "@/lib/images/compressImage";
 
 const storage = getStorage(app);
 
+const NO_BG_AVATAR_WIDTH = 239;
+const NO_BG_AVATAR_HEIGHT = 278;
+
+function readImageSize(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Не удалось прочитать изображение."));
+    };
+    img.src = url;
+  });
+}
+
 interface AuthorCreatorInitialState {
   initialAuthor?: AuthorResponse | null;
   authorId?: string | null;
@@ -21,6 +40,7 @@ export default (initialState: AuthorCreatorInitialState) => ({
     firstName: initialState.initialAuthor?.firstName ?? "",
     lastName: initialState.initialAuthor?.lastName ?? "",
     avatar: initialState.initialAuthor?.avatar ?? "",
+    noBgAvatar: initialState.initialAuthor?.noBgAvatar ?? "",
     bio: initialState.initialAuthor?.bio ?? "",
     socialLinks: {
       instagram: initialState.initialAuthor?.socialLinks?.instagram ?? "",
@@ -35,6 +55,8 @@ export default (initialState: AuthorCreatorInitialState) => ({
   isEditMode: Boolean(initialState.isEditMode),
   uploading: false,
   uploadProgress: 0,
+  uploadingNoBgAvatar: false,
+  noBgAvatarUploadProgress: 0,
   isSaving: false,
 
   async handleAvatarUpload(event: Event) {
@@ -77,6 +99,67 @@ export default (initialState: AuthorCreatorInitialState) => ({
     );
   },
 
+  async handleNoBgAvatarUpload(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "image/png") {
+      (window as any).Alpine.store("ui").showToast(
+        "Нужен файл в формате PNG (с прозрачным фоном).",
+        "error",
+      );
+      input.value = "";
+      return;
+    }
+
+    const { width, height } = await readImageSize(file);
+    if (width !== NO_BG_AVATAR_WIDTH || height !== NO_BG_AVATAR_HEIGHT) {
+      (window as any).Alpine.store("ui").showToast(
+        `Нужен PNG ровно ${NO_BG_AVATAR_WIDTH}×${NO_BG_AVATAR_HEIGHT}px, а этот — ${width}×${height}px.`,
+        "error",
+      );
+      input.value = "";
+      return;
+    }
+
+    this.uploadingNoBgAvatar = true;
+    this.noBgAvatarUploadProgress = 0;
+
+    // Uploaded as-is (no compressImage): that pipeline re-encodes to lossy
+    // WebP, which smears the cutout's alpha edges and drops the .png name.
+    const storageRef = ref(
+      storage,
+      `authorsAvatars/noBackground/${Date.now()}-${file.name}`,
+    );
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        this.noBgAvatarUploadProgress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      },
+      (error) => {
+        console.error("Upload failed:", error);
+        (window as any).Alpine.store("ui").showToast(
+          `Проблема загрузки портрета: ${error.message}`,
+          "error",
+        );
+        this.uploadingNoBgAvatar = false;
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          this.author.noBgAvatar = downloadURL;
+          this.uploadingNoBgAvatar = false;
+          (window as any).Alpine.store("ui").showToast(
+            "Портрет для «от первого лица» загружен!",
+          );
+        });
+      },
+    );
+  },
+
   async saveAuthor() {
     const firstName = this.author.firstName.trim();
     const lastName = this.author.lastName.trim();
@@ -95,6 +178,7 @@ export default (initialState: AuthorCreatorInitialState) => ({
       firstName,
       lastName,
       avatar: this.author.avatar,
+      noBgAvatar: this.author.noBgAvatar,
       bio: this.author.bio.trim(),
       socialLinks: this.author.socialLinks,
     };

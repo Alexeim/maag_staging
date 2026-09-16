@@ -5,6 +5,7 @@ import eventRoutes from './routes/eventRoutes'; // Import event routes
 import userRoutes from './routes/userRoutes'; // Import user routes
 import flipperRoutes from './routes/flipperRoutes'; // Import flipper routes
 import interviewRoutes from './routes/interviewRoutes'; // Import interview routes
+import firstPersonRoutes from './routes/firstPersonRoutes'; // Import "от первого лица" routes
 import authorRoutes from './routes/authorRoutes';
 import addressRoutes from './routes/addressRoutes';
 import guideRoutes from './routes/guideRoutes';
@@ -78,6 +79,9 @@ app.use('/api/flippers', flipperRoutes);
 
 // Use the interview routes
 app.use('/api/interviews', interviewRoutes);
+
+// Use the "от первого лица" routes
+app.use('/api/first-person', firstPersonRoutes);
 
 // Use the authors routes
 app.use('/api/authors', authorRoutes);

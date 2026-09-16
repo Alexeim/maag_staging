@@ -1,0 +1,1773 @@
+---
+import Button from "@/components/common/Button.astro";
+import TipIcon from "@/components/article/TipIcon.astro";
+import { CloudUpload } from "@lucide/astro";
+import QuoteIcon from "@/assets/icons/quote.svg";
+import PublicationStatusBanner from "@/components/dashboard/PublicationStatusBanner.astro";
+import DashboardMaterialActionFooter from "@/components/dashboard/DashboardMaterialActionFooter.astro";
+
+interface Props {
+  heading: string;
+  submitLabel: string;
+  firstPersonCreatorState: string;
+  cancelHref?: string;
+  deleteFirstPersonId?: string | null;
+  deleteRedirect?: string;
+}
+
+const {
+  heading,
+  submitLabel,
+  firstPersonCreatorState,
+  cancelHref,
+  deleteFirstPersonId = null,
+  deleteRedirect = "/dashboard",
+} = Astro.props as Props;
+---
+
+<div
+  class="max-w-4xl mx-auto"
+  x-data={`$lazy('firstPersonCreator', ${firstPersonCreatorState})`}
+>
+  <h1 class="text-3xl font-bold mb-6">{heading}</h1>
+  <PublicationStatusBanner model="article" />
+
+  <section
+    class="mb-6 p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm"
+  >
+    <h2 class="text-xl font-semibold mb-4">Основная информация</h2>
+
+    <label class="block text-sm font-medium text-base-content mb-2"
+      >Заголовок материала</label
+    >
+    <template x-if="isEditingTitle">
+      <div>
+        <input
+          type="text"
+          x-model="editingTitleText"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+        />
+        <div class="flex justify-end gap-3 mt-3">
+          <Button variant="secondary" size="sm" @click="cancelEditTitle()"
+            >Отмена</Button
+          >
+          <Button variant="primary" size="sm" @click="saveTitle()"
+            >Сохранить</Button
+          >
+        </div>
+      </div>
+    </template>
+    <template x-if="!isEditingTitle">
+      <div
+        class="flex justify-between items-center border border-base-300 rounded-lg px-4 py-3"
+      >
+        <h3
+          class="text-lg font-semibold"
+          x-text="article.title || 'Введите заголовок...'"
+        >
+        </h3>
+        <Button variant="outline" size="sm" @click="editTitle()"
+          >Редактировать</Button
+        >
+      </div>
+    </template>
+
+    <div class="mt-6 space-y-3">
+      <label class="block text-sm font-medium text-base-content">Автор</label>
+
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          @click="useNewAuthor = false"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          :class="!useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          Выбрать из списка
+        </button>
+        <button
+          type="button"
+          @click="useNewAuthor = true"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          :class="useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          Новый автор
+        </button>
+      </div>
+
+      <div x-show="!useNewAuthor">
+        <select
+          x-model="selectedAuthorId"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+        >
+          <option value="">Выберите автора...</option>
+          <template x-for="author in authors" :key="author.id">
+            <option :value="author.id" x-text="getAuthorLabel(author)"></option>
+          </template>
+        </select>
+        <p x-show="authorsLoading" class="text-xs text-base-content/60 mt-1">Загружаем авторов...</p>
+        <p
+          x-show="selectedAuthorId && !getSelectedAuthorNoBgAvatar()"
+          class="text-xs text-warning mt-1"
+        >
+          У этого автора нет портрета без фона — добавь его в карточке автора, иначе карточка «от первого лица» будет без фото.
+        </p>
+      </div>
+
+      <div x-show="useNewAuthor" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input
+          type="text"
+          x-model="newAuthorFirstName"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+          placeholder="Имя автора"
+        />
+        <input
+          type="text"
+          x-model="newAuthorLastName"
+          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+          placeholder="Фамилия автора"
+        />
+        <p class="sm:col-span-2 text-xs text-base-content/60">
+          У нового автора ещё не будет портрета без фона — добавь его потом в карточке автора, иначе карточка «от первого лица» будет без фото.
+        </p>
+      </div>
+    </div>
+
+    <hr class="my-6" />
+
+    <label
+      for="category-select"
+      class="block text-sm font-medium text-base-content mb-2">Категория</label
+    >
+    <select
+      id="category-select"
+      x-model="article.category"
+      @change="handleCategoryChange($event.target.value)"
+      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+    >
+      <option value="" disabled>Выберите категорию...</option>
+      <option value="culture">Культура</option>
+      <option value="paris">Париж</option>
+    </select>
+
+    <div class="mt-4 flex items-center gap-3">
+      <input
+        id="maag-choice-flag"
+        type="checkbox"
+        x-model="article.isMaagChoice"
+        class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+      />
+      <label for="maag-choice-flag" class="text-sm font-medium text-base-content cursor-pointer">
+        Добавить в «Выбор MAAG»
+      </label>
+    </div>
+    <p class="mt-1 text-xs text-base-content/60">
+      Сейчас это единственное место на сайте, где появляются материалы «от первого лица» — без этой галочки материал останется недоступен читателям.
+    </p>
+
+    <div class="mt-6">
+      <label
+        class="block text-sm font-medium text-base-content mb-3"
+        x-text="article.category === 'paris' ? 'Подкатегории Парижа' : 'Теги'"
+      ></label>
+
+      <template x-if="getAvailableTags().length > 0">
+        <div class="flex flex-wrap gap-2">
+          <template x-for="tag in getAvailableTags()" :key="tag">
+            <button
+              type="button"
+              class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
+              :class="isTagSelected(tag) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+              @click="toggleTag(tag)"
+            >
+              <span x-text="tag"></span>
+            </button>
+          </template>
+        </div>
+      </template>
+
+      <div class="mt-3 flex flex-col gap-3">
+        <template x-if="getSelectedCategoryTags().length > 0">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">
+              <span x-text="article.category === 'paris' ? 'Подкатегории Парижа' : 'Категорийные теги'"></span>
+            </p>
+            <div class="flex flex-wrap gap-2 mt-1">
+              <template x-for="tag in getSelectedCategoryTags()" :key="tag">
+                <span
+                  class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm"
+                >
+                  <span x-text="tag"></span>
+                  <button
+                    type="button"
+                    class="text-base-content/60 hover:text-base-content cursor-pointer"
+                    @click="removeTag(tag)"
+                  >
+                    ×
+                  </button>
+                </span>
+              </template>
+            </div>
+          </div>
+        </template>
+
+      </div>
+    </div>
+
+    <template x-if="article.category === 'paris'">
+      <div class="mt-6">
+        <label class="block text-sm font-medium text-base-content mb-2">
+          Округ Парижа
+        </label>
+        <select
+          x-model="article.parisDistrict"
+          class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
+        >
+          <option value="">Не указывать округ</option>
+          <template x-for="district in parisDistrictOptions" :key="district.value">
+            <option :value="district.value" x-text="district.title"></option>
+          </template>
+        </select>
+        <p class="text-xs text-base-content/60 mt-2">
+          Если округ выбран, в документе появится поле <code>parisDistrict</code>.
+        </p>
+      </div>
+    </template>
+  </section>
+
+  <section class="p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
+    <h2 class="text-xl font-semibold mb-4">Содержание материала</h2>
+    <div class="space-y-4">
+      <template x-for="(block, index) in article.contentBlocks" :key="block.id || index">
+        <div
+          class="p-4 border border-base-300 rounded-lg bg-base-100 relative group transition-colors"
+          :class="{
+            'cursor-grab': editingIndex === null,
+            'cursor-default': editingIndex !== null,
+            'opacity-60': draggedBlockId === block.id,
+            'border-primary ring-2 ring-primary/20': dragOverBlockId === block.id && draggedBlockId !== block.id
+          }"
+          :draggable="editingIndex === null"
+          @dragstart="startBlockDrag(index)"
+          @dragenter.prevent="setBlockDropTarget(index)"
+          @dragover.prevent="setBlockDropTarget(index)"
+          @drop.prevent="dropBlock(index)"
+          @dragend="resetBlockDrag()"
+        >
+          <template x-if="editingIndex === index">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-xs uppercase tracking-[0.2em] text-base-content/50" x-text="'Позиция: ' + ((block.position ?? index) + 1)"></p>
+                <p class="text-xs text-base-content/50">Во время редактирования перетаскивание выключено</p>
+              </div>
+              <h3
+                class="text-lg font-semibold capitalize"
+                x-text="getBlockTypeLabel(editingBlock.type)"
+              >
+              </h3>
+
+              <template
+                x-if="['paragraph', 'first-paragraph'].includes(editingBlock.type)"
+              >
+                <div
+                  class="rich-text-editor"
+                  :class="{ 'rich-text-editor--dropcap': editingBlock.type === 'first-paragraph' }"
+                  x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml(editingBlock), placeholder: 'Введите текст абзаца...' })"
+                  @rich-text-change="editingBlock.html = $event.detail.html; editingBlock.text = $event.detail.text"
+                >
+                  <div x-ref="editor"></div>
+                </div>
+              </template>
+
+              <template
+                x-if="['h1', 'h2', 'h3', 'quote'].includes(editingBlock.type)"
+              >
+                <textarea
+                  x-model="editingBlock.text"
+                  class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                  rows="5"></textarea>
+              </template>
+
+              <template x-if="editingBlock.type === 'quote'">
+                <div class="mt-3">
+                  <label class="block text-sm font-medium mb-1">Автор цитаты</label>
+                  <input
+                    type="text"
+                    x-model="editingBlock.quoteAuthor"
+                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    placeholder="Имя автора (необязательно)"
+                  />
+                </div>
+              </template>
+
+              <template x-if="editingBlock.type === 'tweet'">
+                <div class="space-y-3">
+                  <label class="block text-sm font-medium">Ссылка на твит</label>
+                  <input
+                    type="url"
+                    x-model="editingBlock.url"
+                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    placeholder="https://x.com/user/status/1234567890123456789"
+                  />
+                  <p
+                    x-show="editingBlock.url && !getTweetId(editingBlock.url)"
+                    class="text-sm text-error"
+                  >
+                    Это не похоже на ссылку на конкретный твит. Нужен вид twitter.com/user/status/123 или x.com/user/status/123.
+                  </p>
+                  <p
+                    x-show="editingBlock.url && getTweetId(editingBlock.url)"
+                    class="text-sm text-success"
+                  >
+                    Ссылка распознана, твит подставится на странице материала.
+                  </p>
+                </div>
+              </template>
+
+              <template x-if="editingBlock.type === 'image'">
+                <div x-data="{ blockFileName: '' }" class="space-y-3">
+                  <label class="block text-sm font-medium">Изображение</label>
+                  <div class="flex items-center gap-3">
+                    <label
+                      :for="'block-image-upload-' + index"
+                      class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                    >
+                      <CloudUpload />
+                      Загрузить файл
+                    </label>
+                    <input
+                      :id="'block-image-upload-' + index"
+                      type="file"
+                      class="hidden"
+                      @change="handleImageUpload($event, false, index); blockFileName = $event.target.files[0]?.name || ''"
+                      accept="image/png, image/jpeg, image/webp"
+                    />
+                    <span
+                      x-text="blockFileName || (editingBlock.url ? 'Изображение загружено' : 'Файл не выбран')"
+                      class="text-sm text-base-content/70"></span>
+                  </div>
+                  <div x-show="uploading && editingIndex === index">
+                    <p>
+                      Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"
+                      ></span>
+                    </p>
+                    <div class="w-full bg-base-200 rounded-full h-2">
+                      <div
+                        class="bg-primary h-2 rounded-full"
+                        :style="{ width: uploadProgress + '%' }"
+                      >
+                      </div>
+                    </div>
+                  </div>
+                  <img
+                    x-show="editingBlock.url && !uploading"
+                    :src="editingBlock.url"
+                    alt="Предпросмотр блока"
+                    class="rounded-md max-h-48"
+                  />
+                  <label class="block text-sm font-medium mt-2"
+                    >Подпись к изображению</label
+                  >
+                  <input
+                    type="text"
+                    x-model="editingBlock.caption"
+                    class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    placeholder="Введите подпись..."
+                  />
+                </div>
+              </template>
+
+              <template x-if="editingBlock.type === 'one-big-one-small'">
+                <div class="space-y-6">
+                  <p class="text-sm text-base-content/70">
+                    Загрузи одну вертикальную картинку для малого блока и одну горизонтальную для большого.
+                  </p>
+
+                  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <div x-data="{ portraitFileName: '' }" class="space-y-3 rounded-lg border border-base-300 p-4">
+                      <label class="block text-sm font-medium">Маленькое портретное изображение</label>
+                      <div class="flex items-center gap-3">
+                        <label
+                          :for="'one-big-one-small-portrait-upload-' + index"
+                          class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                        >
+                          <CloudUpload />
+                          Загрузить файл
+                        </label>
+                        <input
+                          :id="'one-big-one-small-portrait-upload-' + index"
+                          type="file"
+                          class="hidden"
+                          @change="handleImageUpload($event, false, index, null, 'portraitImageUrl'); portraitFileName = $event.target.files[0]?.name || ''"
+                          accept="image/png, image/jpeg, image/webp"
+                        />
+                        <span
+                          x-text="portraitFileName || (editingBlock.portraitImageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+                          class="text-sm text-base-content/70"
+                        ></span>
+                      </div>
+                      <div x-show="uploading && editingIndex === index">
+                        <p>
+                          Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span>
+                        </p>
+                        <div class="w-full bg-base-200 rounded-full h-2">
+                          <div
+                            class="bg-primary h-2 rounded-full"
+                            :style="{ width: uploadProgress + '%' }"
+                          ></div>
+                        </div>
+                      </div>
+                      <img
+                        x-show="editingBlock.portraitImageUrl && !uploading"
+                        :src="editingBlock.portraitImageUrl"
+                        alt="Предпросмотр портретного изображения"
+                        class="rounded-md aspect-[2/3] w-full object-cover"
+                      />
+                      <label class="block text-sm font-medium mt-2">Подпись к портретному изображению</label>
+                      <input
+                        type="text"
+                        x-model="editingBlock.portraitImageCaption"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                        placeholder="Введите подпись..."
+                      />
+                    </div>
+
+                    <div x-data="{ landscapeFileName: '' }" class="space-y-3 rounded-lg border border-base-300 p-4">
+                      <label class="block text-sm font-medium">Большое горизонтальное изображение</label>
+                      <div class="flex items-center gap-3">
+                        <label
+                          :for="'one-big-one-small-landscape-upload-' + index"
+                          class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                        >
+                          <CloudUpload />
+                          Загрузить файл
+                        </label>
+                        <input
+                          :id="'one-big-one-small-landscape-upload-' + index"
+                          type="file"
+                          class="hidden"
+                          @change="handleImageUpload($event, false, index, null, 'landscapeImageUrl'); landscapeFileName = $event.target.files[0]?.name || ''"
+                          accept="image/png, image/jpeg, image/webp"
+                        />
+                        <span
+                          x-text="landscapeFileName || (editingBlock.landscapeImageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+                          class="text-sm text-base-content/70"
+                        ></span>
+                      </div>
+                      <div x-show="uploading && editingIndex === index">
+                        <p>
+                          Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span>
+                        </p>
+                        <div class="w-full bg-base-200 rounded-full h-2">
+                          <div
+                            class="bg-primary h-2 rounded-full"
+                            :style="{ width: uploadProgress + '%' }"
+                          ></div>
+                        </div>
+                      </div>
+                      <img
+                        x-show="editingBlock.landscapeImageUrl && !uploading"
+                        :src="editingBlock.landscapeImageUrl"
+                        alt="Предпросмотр горизонтального изображения"
+                        class="rounded-md aspect-[16/9] w-full object-cover"
+                      />
+                      <label class="block text-sm font-medium mt-2">Подпись к горизонтальному изображению</label>
+                      <input
+                        type="text"
+                        x-model="editingBlock.landscapeImageCaption"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                        placeholder="Введите подпись..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="editingBlock.type === 'collage'">
+                <div class="space-y-6">
+                  <p class="text-sm text-base-content/70">
+                    Загрузи две портретные и две горизонтальные картинки для редакционного коллажа.
+                  </p>
+
+                  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <div x-data="{ leftPortraitFileName: '' }" class="space-y-3 rounded-lg border border-base-300 p-4">
+                      <label class="block text-sm font-medium">Левое портретное изображение</label>
+                      <div class="flex items-center gap-3">
+                        <label
+                          :for="'collage-left-portrait-upload-' + index"
+                          class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                        >
+                          <CloudUpload />
+                          Загрузить файл
+                        </label>
+                        <input
+                          :id="'collage-left-portrait-upload-' + index"
+                          type="file"
+                          class="hidden"
+                          @change="handleImageUpload($event, false, index, null, 'leftPortraitImageUrl'); leftPortraitFileName = $event.target.files[0]?.name || ''"
+                          accept="image/png, image/jpeg, image/webp"
+                        />
+                        <span
+                          x-text="leftPortraitFileName || (editingBlock.leftPortraitImageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+                          class="text-sm text-base-content/70"
+                        ></span>
+                      </div>
+                      <div x-show="uploading && editingIndex === index">
+                        <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
+                        <div class="w-full bg-base-200 rounded-full h-2">
+                          <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                        </div>
+                      </div>
+                      <img
+                        x-show="editingBlock.leftPortraitImageUrl && !uploading"
+                        :src="editingBlock.leftPortraitImageUrl"
+                        alt="Предпросмотр левого портретного изображения"
+                        class="rounded-md aspect-[3/4] w-full object-cover"
+                      />
+                      <label class="block text-sm font-medium mt-2">Подпись к левому портретному изображению</label>
+                      <input
+                        type="text"
+                        x-model="editingBlock.leftPortraitImageCaption"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                        placeholder="Введите подпись..."
+                      />
+                    </div>
+
+                    <div x-data="{ topLandscapeFileName: '' }" class="space-y-3 rounded-lg border border-base-300 p-4">
+                      <label class="block text-sm font-medium">Верхнее горизонтальное изображение</label>
+                      <div class="flex items-center gap-3">
+                        <label
+                          :for="'collage-top-landscape-upload-' + index"
+                          class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                        >
+                          <CloudUpload />
+                          Загрузить файл
+                        </label>
+                        <input
+                          :id="'collage-top-landscape-upload-' + index"
+                          type="file"
+                          class="hidden"
+                          @change="handleImageUpload($event, false, index, null, 'topLandscapeImageUrl'); topLandscapeFileName = $event.target.files[0]?.name || ''"
+                          accept="image/png, image/jpeg, image/webp"
+                        />
+                        <span
+                          x-text="topLandscapeFileName || (editingBlock.topLandscapeImageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+                          class="text-sm text-base-content/70"
+                        ></span>
+                      </div>
+                      <div x-show="uploading && editingIndex === index">
+                        <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
+                        <div class="w-full bg-base-200 rounded-full h-2">
+                          <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                        </div>
+                      </div>
+                      <img
+                        x-show="editingBlock.topLandscapeImageUrl && !uploading"
+                        :src="editingBlock.topLandscapeImageUrl"
+                        alt="Предпросмотр верхнего горизонтального изображения"
+                        class="rounded-md aspect-[5/3] w-full object-cover"
+                      />
+                      <label class="block text-sm font-medium mt-2">Подпись к верхнему горизонтальному изображению</label>
+                      <input
+                        type="text"
+                        x-model="editingBlock.topLandscapeImageCaption"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                        placeholder="Введите подпись..."
+                      />
+                    </div>
+
+                    <div x-data="{ mainLandscapeFileName: '' }" class="space-y-3 rounded-lg border border-base-300 p-4">
+                      <label class="block text-sm font-medium">Основное горизонтальное изображение</label>
+                      <div class="flex items-center gap-3">
+                        <label
+                          :for="'collage-main-landscape-upload-' + index"
+                          class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                        >
+                          <CloudUpload />
+                          Загрузить файл
+                        </label>
+                        <input
+                          :id="'collage-main-landscape-upload-' + index"
+                          type="file"
+                          class="hidden"
+                          @change="handleImageUpload($event, false, index, null, 'mainLandscapeImageUrl'); mainLandscapeFileName = $event.target.files[0]?.name || ''"
+                          accept="image/png, image/jpeg, image/webp"
+                        />
+                        <span
+                          x-text="mainLandscapeFileName || (editingBlock.mainLandscapeImageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+                          class="text-sm text-base-content/70"
+                        ></span>
+                      </div>
+                      <div x-show="uploading && editingIndex === index">
+                        <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
+                        <div class="w-full bg-base-200 rounded-full h-2">
+                          <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                        </div>
+                      </div>
+                      <img
+                        x-show="editingBlock.mainLandscapeImageUrl && !uploading"
+                        :src="editingBlock.mainLandscapeImageUrl"
+                        alt="Предпросмотр основного горизонтального изображения"
+                        class="rounded-md aspect-[16/9] w-full object-cover"
+                      />
+                      <label class="block text-sm font-medium mt-2">Подпись к основному горизонтальному изображению</label>
+                      <input
+                        type="text"
+                        x-model="editingBlock.mainLandscapeImageCaption"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                        placeholder="Введите подпись..."
+                      />
+                    </div>
+
+                    <div x-data="{ rightPortraitFileName: '' }" class="space-y-3 rounded-lg border border-base-300 p-4">
+                      <label class="block text-sm font-medium">Правое портретное изображение</label>
+                      <div class="flex items-center gap-3">
+                        <label
+                          :for="'collage-right-portrait-upload-' + index"
+                          class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                        >
+                          <CloudUpload />
+                          Загрузить файл
+                        </label>
+                        <input
+                          :id="'collage-right-portrait-upload-' + index"
+                          type="file"
+                          class="hidden"
+                          @change="handleImageUpload($event, false, index, null, 'rightPortraitImageUrl'); rightPortraitFileName = $event.target.files[0]?.name || ''"
+                          accept="image/png, image/jpeg, image/webp"
+                        />
+                        <span
+                          x-text="rightPortraitFileName || (editingBlock.rightPortraitImageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+                          class="text-sm text-base-content/70"
+                        ></span>
+                      </div>
+                      <div x-show="uploading && editingIndex === index">
+                        <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
+                        <div class="w-full bg-base-200 rounded-full h-2">
+                          <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                        </div>
+                      </div>
+                      <img
+                        x-show="editingBlock.rightPortraitImageUrl && !uploading"
+                        :src="editingBlock.rightPortraitImageUrl"
+                        alt="Предпросмотр правого портретного изображения"
+                        class="rounded-md aspect-[3/4] w-full object-cover"
+                      />
+                      <label class="block text-sm font-medium mt-2">Подпись к правому портретному изображению</label>
+                      <input
+                        type="text"
+                        x-model="editingBlock.rightPortraitImageCaption"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                        placeholder="Введите подпись..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="editingBlock.type === 'video'">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-2">Источник видео</label>
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        class="px-3 py-2 border text-sm cursor-pointer"
+                        :class="editingBlock.sourceType === 'upload' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+                        @click="editingBlock.sourceType = 'upload'; editingBlock.provider = 'upload'"
+                      >
+                        Загрузить файл
+                      </button>
+                      <button
+                        type="button"
+                        class="px-3 py-2 border text-sm cursor-pointer"
+                        :class="editingBlock.sourceType === 'embed' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+                        @click="editingBlock.sourceType = 'embed'; editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
+                      >
+                        Ссылка / Embed
+                      </button>
+                    </div>
+                  </div>
+
+                  <div x-show="editingBlock.sourceType === 'upload'" x-data="{ videoFileName: '' }" class="space-y-3">
+                    <label class="block text-sm font-medium">Видео файл</label>
+                    <div class="flex items-center gap-3">
+                      <label
+                        :for="'block-video-upload-' + index"
+                        class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                      >
+                        <CloudUpload />
+                        Загрузить видео
+                      </label>
+                      <input
+                        :id="'block-video-upload-' + index"
+                        type="file"
+                        class="hidden"
+                        @change="handleVideoUpload($event, index); videoFileName = $event.target.files[0]?.name || ''"
+                        accept="video/mp4,video/webm,video/quicktime"
+                      />
+                      <span
+                        x-text="videoFileName || (editingBlock.url ? 'Видео загружено' : 'Файл не выбран')"
+                        class="text-sm text-base-content/70"
+                      ></span>
+                    </div>
+                    <div x-show="uploading && editingIndex === index">
+                      <p>
+                        Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span>
+                      </p>
+                      <div class="w-full bg-base-200 rounded-full h-2">
+                        <div
+                          class="bg-primary h-2 rounded-full"
+                          :style="{ width: uploadProgress + '%' }"
+                        ></div>
+                      </div>
+                    </div>
+                    <video
+                      x-show="editingBlock.url && !uploading"
+                      :src="editingBlock.url"
+                      controls
+                      playsinline
+                      class="rounded-md max-h-48 w-full bg-black"
+                    ></video>
+                  </div>
+
+                  <div x-show="editingBlock.sourceType === 'embed'" class="space-y-3">
+                    <label class="block text-sm font-medium">Ссылка на видео или embed URL</label>
+                    <input
+                      type="url"
+                      x-model="editingBlock.url"
+                      @input="editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="https://player.example.com/embed/123 или https://cdn.example.com/video.mp4"
+                    />
+                    <p class="text-xs text-base-content/60">
+                      Поддерживаются YouTube/Vimeo, готовые embed-ссылки и прямые ссылки на видеофайлы.
+                    </p>
+                    <p class="text-xs text-base-content/50">
+                      Обычная страница с видео не подойдёт: нужна либо прямая ссылка на файл, либо готовая ссылка для встраивания.
+                    </p>
+                    <video
+                      x-show="getVideoDirectUrl(editingBlock.url)"
+                      :src="getVideoDirectUrl(editingBlock.url)"
+                      controls
+                      playsinline
+                      class="rounded-md max-h-48 w-full bg-black"
+                    ></video>
+                    <div
+                      x-show="getVideoEmbedUrl(editingBlock.url)"
+                      class="w-full aspect-video rounded-md overflow-hidden bg-black"
+                    >
+                      <iframe
+                        :src="getVideoEmbedUrl(editingBlock.url)"
+                        class="w-full h-full border-0"
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                      ></iframe>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium mt-2">Подпись к видео</label>
+                    <input
+                      type="text"
+                      x-model="editingBlock.caption"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="Введите подпись..."
+                    />
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="['two-columns', 'three-columns'].includes(editingBlock.type)">
+                <div class="space-y-4">
+                  <div class="flex flex-col lg:flex-row gap-4">
+                    <!-- Left Column Editor -->
+                    <div
+                      class="w-full space-y-3 p-3 border border-base-300 rounded-lg"
+                      :class="editingBlock.type === 'three-columns' ? 'lg:w-1/3' : 'lg:w-1/2'"
+                    >
+                      <h4 class="text-md font-semibold">Левая колонка</h4>
+                      <label class="block text-sm font-medium"
+                        >Тип контента</label
+                      >
+                      <select
+                        x-model="editingBlock.left.type"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      >
+                        <option value="text">Текст</option>
+                        <option value="image">Изображение</option>
+                        <option value="quote">Цитата</option>
+                      </select>
+
+                      <template x-if="editingBlock.left.type === 'text'">
+                        <div>
+                          <label class="block text-sm font-medium">Текст</label>
+                          <div
+                            class="rich-text-editor"
+                            x-data="blockRichTextEditor({ initialHtml: getColumnRichTextInitialHtml(editingBlock.left), placeholder: 'Введите текст колонки...' })"
+                            @rich-text-change="editingBlock.left.html = $event.detail.html; editingBlock.left.content = $event.detail.text"
+                          >
+                            <div x-ref="editor"></div>
+                          </div>
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.left.type === 'quote'">
+                        <div class="space-y-3">
+                          <label class="block text-sm font-medium">Цитата</label>
+                          <textarea
+                            x-model="editingBlock.left.content"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            rows="5"></textarea>
+                          <p class="mt-2 text-xs text-base-content/60">
+                            Цитата отрендерится с красной кавычкой, курсивом и размером как у aside-текста.
+                          </p>
+                          <label class="block text-sm font-medium">Автор цитаты</label>
+                          <input
+                            type="text"
+                            x-model="editingBlock.left.quoteAuthor"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Имя автора (необязательно)"
+                          />
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.left.type === 'image'">
+                        <div
+                          x-data="{ leftBlockFileName: '' }"
+                          class="space-y-3"
+                        >
+                          <label class="block text-sm font-medium"
+                            >Изображение</label
+                          >
+                          <div class="flex items-center gap-3">
+                            <label
+                              :for="'left-block-image-upload-' + index"
+                              class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                            >
+                              <CloudUpload />
+                              Загрузить файл
+                            </label>
+                            <input
+                              :id="'left-block-image-upload-' + index"
+                              type="file"
+                              class="hidden"
+                              @change="handleImageUpload($event, false, index, 'left'); leftBlockFileName = $event.target.files[0]?.name || ''"
+                              accept="image/png, image/jpeg, image/webp"
+                            />
+                            <span
+                              x-text="leftBlockFileName || (editingBlock.left.content ? 'Изображение загружено' : 'Файл не выбран')"
+                              class="text-sm text-base-content/70"></span>
+                          </div>
+                          <img
+                            x-show="editingBlock.left.content"
+                            :src="editingBlock.left.content"
+                            alt="Предпросмотр левой колонки"
+                            class="rounded-md max-h-48"
+                          />
+                          <label class="block text-sm font-medium mt-2"
+                            >Подпись к изображению</label
+                          >
+                          <input
+                            type="text"
+                            x-model="editingBlock.left.caption"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Введите подпись..."
+                          />
+                        </div>
+                      </template>
+                    </div>
+
+                    <!-- Center Column Editor -->
+                    <div
+                      x-show="editingBlock.type === 'three-columns'"
+                      class="w-full lg:w-1/3 space-y-3 p-3 border border-base-300 rounded-lg"
+                    >
+                      <h4 class="text-md font-semibold">Центральная колонка</h4>
+                      <label class="block text-sm font-medium"
+                        >Тип контента</label
+                      >
+                      <select
+                        x-model="editingBlock.center.type"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      >
+                        <option value="text">Текст</option>
+                        <option value="image">Изображение</option>
+                        <option value="quote">Цитата</option>
+                      </select>
+
+                      <template x-if="editingBlock.center.type === 'text'">
+                        <div>
+                          <label class="block text-sm font-medium">Текст</label>
+                          <div
+                            class="rich-text-editor"
+                            x-data="blockRichTextEditor({ initialHtml: getColumnRichTextInitialHtml(editingBlock.center), placeholder: 'Введите текст колонки...' })"
+                            @rich-text-change="editingBlock.center.html = $event.detail.html; editingBlock.center.content = $event.detail.text"
+                          >
+                            <div x-ref="editor"></div>
+                          </div>
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.center.type === 'quote'">
+                        <div class="space-y-3">
+                          <label class="block text-sm font-medium">Цитата</label>
+                          <textarea
+                            x-model="editingBlock.center.content"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            rows="5"></textarea>
+                          <p class="mt-2 text-xs text-base-content/60">
+                            Цитата отрендерится с красной кавычкой, курсивом и размером как у aside-текста.
+                          </p>
+                          <label class="block text-sm font-medium">Автор цитаты</label>
+                          <input
+                            type="text"
+                            x-model="editingBlock.center.quoteAuthor"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Имя автора (необязательно)"
+                          />
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.center.type === 'image'">
+                        <div
+                          x-data="{ centerBlockFileName: '' }"
+                          class="space-y-3"
+                        >
+                          <label class="block text-sm font-medium"
+                            >Изображение</label
+                          >
+                          <div class="flex items-center gap-3">
+                            <label
+                              :for="'center-block-image-upload-' + index"
+                              class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                            >
+                              <CloudUpload />
+                              Загрузить файл
+                            </label>
+                            <input
+                              :id="'center-block-image-upload-' + index"
+                              type="file"
+                              class="hidden"
+                              @change="handleImageUpload($event, false, index, 'center'); centerBlockFileName = $event.target.files[0]?.name || ''"
+                              accept="image/png, image/jpeg, image/webp"
+                            />
+                            <span
+                              x-text="centerBlockFileName || (editingBlock.center.content ? 'Изображение загружено' : 'Файл не выбран')"
+                              class="text-sm text-base-content/70"></span>
+                          </div>
+                          <img
+                            x-show="editingBlock.center.content"
+                            :src="editingBlock.center.content"
+                            alt="Предпросмотр центральной колонки"
+                            class="rounded-md max-h-48"
+                          />
+                          <label class="block text-sm font-medium mt-2"
+                            >Подпись к изображению</label
+                          >
+                          <input
+                            type="text"
+                            x-model="editingBlock.center.caption"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Введите подпись..."
+                          />
+                        </div>
+                      </template>
+                    </div>
+
+                    <!-- Right Column Editor -->
+                    <div
+                      class="w-full space-y-3 p-3 border border-base-300 rounded-lg"
+                      :class="editingBlock.type === 'three-columns' ? 'lg:w-1/3' : 'lg:w-1/2'"
+                    >
+                      <h4 class="text-md font-semibold">Правая колонка</h4>
+                      <label class="block text-sm font-medium"
+                        >Тип контента</label
+                      >
+                      <select
+                        x-model="editingBlock.right.type"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      >
+                        <option value="text">Текст</option>
+                        <option value="image">Изображение</option>
+                        <option value="quote">Цитата</option>
+                      </select>
+
+                      <template x-if="editingBlock.right.type === 'text'">
+                        <div>
+                          <label class="block text-sm font-medium">Текст</label>
+                          <div
+                            class="rich-text-editor"
+                            x-data="blockRichTextEditor({ initialHtml: getColumnRichTextInitialHtml(editingBlock.right), placeholder: 'Введите текст колонки...' })"
+                            @rich-text-change="editingBlock.right.html = $event.detail.html; editingBlock.right.content = $event.detail.text"
+                          >
+                            <div x-ref="editor"></div>
+                          </div>
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.right.type === 'quote'">
+                        <div class="space-y-3">
+                          <label class="block text-sm font-medium">Цитата</label>
+                          <textarea
+                            x-model="editingBlock.right.content"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            rows="5"></textarea>
+                          <p class="mt-2 text-xs text-base-content/60">
+                            Цитата отрендерится с красной кавычкой, курсивом и размером как у aside-текста.
+                          </p>
+                          <label class="block text-sm font-medium">Автор цитаты</label>
+                          <input
+                            type="text"
+                            x-model="editingBlock.right.quoteAuthor"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Имя автора (необязательно)"
+                          />
+                        </div>
+                      </template>
+
+                      <template x-if="editingBlock.right.type === 'image'">
+                        <div
+                          x-data="{ rightBlockFileName: '' }"
+                          class="space-y-3"
+                        >
+                          <label class="block text-sm font-medium"
+                            >Изображение</label
+                          >
+                          <div class="flex items-center gap-3">
+                            <label
+                              :for="'right-block-image-upload-' + index"
+                              class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+                            >
+                              <CloudUpload />
+                              Загрузить файл
+                            </label>
+                            <input
+                              :id="'right-block-image-upload-' + index"
+                              type="file"
+                              class="hidden"
+                              @change="handleImageUpload($event, false, index, 'right'); rightBlockFileName = $event.target.files[0]?.name || ''"
+                              accept="image/png, image/jpeg, image/webp"
+                            />
+                            <span
+                              x-text="rightBlockFileName || (editingBlock.right.content ? 'Изображение загружено' : 'Файл не выбран')"
+                              class="text-sm text-base-content/70"></span>
+                          </div>
+                          <img
+                            x-show="editingBlock.right.content"
+                            :src="editingBlock.right.content"
+                            alt="Предпросмотр правой колонки"
+                            class="rounded-md max-h-48"
+                          />
+                          <label class="block text-sm font-medium mt-2"
+                            >Подпись к изображению</label
+                          >
+                          <input
+                            type="text"
+                            x-model="editingBlock.right.caption"
+                            class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="Введите подпись..."
+                          />
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="editingBlock.type === 'link'">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium">Тип контента</label>
+                    <select
+                      x-model="editingBlock.linkedContentType"
+                      @change="editingBlock.linkedContentId = ''"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    >
+                      <template x-for="type in materialLinkTypeOptions" :key="type.value">
+                        <option :value="type.value" x-text="type.label"></option>
+                      </template>
+                    </select>
+                  </div>
+                  <div x-show="editingBlock.linkedContentType">
+                    <label class="block text-sm font-medium">Выберите контент</label>
+                    <select
+                      x-model="editingBlock.linkedContentId"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                    >
+                      <option value="" disabled>Выберите...</option>
+                      <template x-for="item in getFilteredContentList(editingBlock.linkedContentType)" :key="item.id">
+                        <option :value="item.id" x-text="item.title"></option>
+                      </template>
+                    </select>
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="editingBlock.type === 'url-link'">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium">Текст ссылки</label>
+                    <input
+                      type="text"
+                      x-model="editingBlock.text"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="Например: Купить билеты..."
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium">URL</label>
+                    <input
+                      type="url"
+                      x-model="editingBlock.url"
+                      class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="editingBlock.type === 'flipper'">
+                <div class="space-y-4">
+                  <template x-for="(slide, slideIdx) in editingBlock.slides" :key="slideIdx">
+                    <div class="p-3 border border-base-300 rounded-lg space-y-3 relative">
+                      <h4 class="font-semibold text-sm" x-text="'Слайд ' + (slideIdx + 1)"></h4>
+                      <div x-data="{ flipperFileName: '' }" class="flex items-center gap-3">
+                        <label :for="'flipper-slide-upload-' + slideIdx" class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4">
+                          <CloudUpload />
+                          Загрузить
+                        </label>
+                        <input
+                          :id="'flipper-slide-upload-' + slideIdx"
+                          type="file"
+                          class="hidden"
+                          @change="handleFlipperSlideUpload($event, slideIdx); flipperFileName = $event.target.files[0]?.name || ''"
+                          accept="image/png, image/jpeg, image/webp"
+                        />
+                        <span x-text="flipperFileName || (slide.imageUrl ? 'Изображение загружено' : 'Файл не выбран')" class="text-sm text-base-content/70"></span>
+                      </div>
+                      <div x-show="uploading" class="mt-2">
+                        <div class="w-full bg-base-200 rounded-full h-2">
+                          <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                        </div>
+                      </div>
+                      <img x-show="slide.imageUrl && !uploading" :src="slide.imageUrl" alt="Слайд" class="rounded-md max-h-40 w-full object-cover" />
+                      <label class="block text-sm font-medium">Подпись к слайду</label>
+                      <input
+                        type="text"
+                        x-model="slide.caption"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                        placeholder="Подпись к слайду..."
+                      />
+                      <div class="absolute top-2 right-2">
+                        <Button variant="error" size="sm" type="button" @click="editingBlock.slides.splice(slideIdx, 1)">Удалить</Button>
+                      </div>
+                    </div>
+                  </template>
+                  <div class="text-center mt-2">
+                    <Button variant="primary" type="button" @click="editingBlock.slides.push({ imageUrl: '', caption: '' })">+ Добавить слайд</Button>
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="editingBlock.type === 'tips'">
+                <div class="space-y-3 border border-base-300 bg-base-100/70 p-4">
+                  <template x-for="tip in tipOptions" :key="tip.type">
+                    <div class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_auto_1fr] gap-3 items-center border-b border-base-300 pb-3 last:border-b-0 last:pb-0">
+                      <label class="inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
+                          :checked="isTipSelected(tip.type)"
+                          @change="toggleTip(tip.type)"
+                        />
+                      </label>
+                      <span class="inline-flex items-center gap-2 text-sm font-inter text-base-content/80">
+                        <TipIcon
+                          type="location"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'location'"
+                        />
+                        <TipIcon
+                          type="time"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'time'"
+                        />
+                        <TipIcon
+                          type="money"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'money'"
+                        />
+                        <TipIcon
+                          type="idea"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'idea'"
+                        />
+                        <TipIcon
+                          type="like"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'like'"
+                        />
+                        <TipIcon
+                          type="dislike"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'dislike'"
+                        />
+                        <TipIcon
+                          type="link"
+                          class="h-5 w-5 shrink-0 text-accent"
+                          x-show="tip.type === 'link'"
+                        />
+                        <span x-text="tip.label"></span>
+                      </span>
+                      <input
+                        type="text"
+                        class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
+                        :disabled="!isTipSelected(tip.type)"
+                        :value="getTipText(tip.type)"
+                        @input="setTipText(tip.type, $event.target.value)"
+                        placeholder="Текст подсказки..."
+                      />
+                      <template x-if="tip.type === 'link'">
+                        <input
+                          type="url"
+                          class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 col-start-3"
+                          :disabled="!isTipSelected(tip.type)"
+                          :value="getTipUrl(tip.type)"
+                          @input="setTipUrl(tip.type, $event.target.value)"
+                          placeholder="https://..."
+                        />
+                      </template>
+                    </div>
+                  </template>
+                </div>
+              </template>
+
+              <div class="flex justify-end gap-3">
+                <Button variant="secondary" @click="cancelEdit()">Отмена</Button>
+                <Button variant="primary" @click="updateBlock()"
+                  >Сохранить блок</Button
+                >
+              </div>
+            </div>
+          </template>
+
+          <template x-if="editingIndex !== index">
+            <div class="space-y-4">
+              <div class="flex items-start gap-3 pr-40">
+                <span class="text-base-content/40 select-none shrink-0" aria-hidden="true">⋮⋮</span>
+                <div class="min-w-0 flex-1 space-y-2">
+                  <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-base-content/60">
+                    <span x-text="'Позиция: ' + ((block.position ?? index) + 1)"></span>
+                    <span>Перетащи, чтобы изменить порядок</span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span
+                      class="inline-flex items-center rounded-full border border-primary bg-primary px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-content shadow-sm"
+                      x-text="getBlockTypeLabel(block.type)"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+
+              <template x-if="['paragraph', 'first-paragraph'].includes(block.type)">
+                <div
+                  :class="{
+                    'text-base': block.type === 'paragraph',
+                    'text-lg first-letter:text-4xl first-letter:font-bold': block.type === 'first-paragraph'
+                  }"
+                  x-html="getRichTextInitialHtml(block)"
+                ></div>
+              </template>
+
+              <template x-if="['h1', 'h2', 'h3', 'quote'].includes(block.type)">
+                <p
+                  :class="{
+                    'text-3xl font-bold': block.type === 'h1',
+                    'text-2xl font-semibold': block.type === 'h2',
+                    'text-xl font-semibold': block.type === 'h3',
+                    'text-lg italic border-l-4 pl-4 my-4 border-base-300': block.type === 'quote'
+                  }"
+                  x-text="block.text"
+                >
+                </p>
+              </template>
+
+              <p x-show="block.type === 'quote' && block.quoteAuthor" x-text="block.quoteAuthor" class="w-full mt-2 font-['Inter'] text-[0.8rem] font-bold uppercase tracking-[0.22em] text-base-content/50 text-right"></p>
+
+              <template x-if="block.type === 'image'">
+                <figure class="space-y-2">
+                  <img
+                    x-show="block.url"
+                    :src="block.url"
+                    alt="Содержимое материала"
+                    class="rounded-md w-full object-cover"
+                  />
+                  <div
+                    x-show="!block.url"
+                    class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-4 py-8 text-center text-sm text-base-content/60"
+                  >
+                    Изображение ещё не загружено
+                  </div>
+                  <figcaption
+                    x-show="block.caption"
+                    class="text-center text-sm text-base-content/60 mt-2"
+                    x-text="block.caption"
+                  >
+                  </figcaption>
+                </figure>
+              </template>
+
+              <template x-if="block.type === 'tweet'">
+                <div>
+                  <div
+                    x-show="block.url"
+                    class="rounded-md border border-base-300 bg-base-200/40 px-4 py-3 text-sm break-all"
+                  >
+                    <span class="text-base-content/60">Твит: </span>
+                    <a
+                      :href="block.url"
+                      x-text="block.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-primary underline"
+                    ></a>
+                  </div>
+                  <div
+                    x-show="!block.url"
+                    class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-4 py-8 text-center text-sm text-base-content/60"
+                  >
+                    Ссылка на твит ещё не добавлена
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="block.type === 'one-big-one-small'">
+                <div class="space-y-3">
+                  <div class="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
+                    <figure class="space-y-2">
+                      <img
+                        x-show="block.portraitImageUrl"
+                        :src="block.portraitImageUrl"
+                        :alt="block.portraitImageCaption || 'Портретное изображение'"
+                        class="rounded-md aspect-[2/3] w-full object-cover"
+                      />
+                      <div
+                        x-show="!block.portraitImageUrl"
+                        class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-4 py-8 text-center text-sm text-base-content/60"
+                      >
+                        Портретное изображение ещё не загружено
+                      </div>
+                      <figcaption
+                        x-show="block.portraitImageCaption"
+                        class="text-center text-sm text-base-content/60"
+                        x-text="block.portraitImageCaption"
+                      ></figcaption>
+                    </figure>
+                    <figure class="space-y-2">
+                      <img
+                        x-show="block.landscapeImageUrl"
+                        :src="block.landscapeImageUrl"
+                        :alt="block.landscapeImageCaption || 'Горизонтальное изображение'"
+                        class="rounded-md aspect-[16/9] w-full object-cover"
+                      />
+                      <div
+                        x-show="!block.landscapeImageUrl"
+                        class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-4 py-8 text-center text-sm text-base-content/60"
+                      >
+                        Горизонтальное изображение ещё не загружено
+                      </div>
+                      <figcaption
+                        x-show="block.landscapeImageCaption"
+                        class="text-center text-sm text-base-content/60"
+                        x-text="block.landscapeImageCaption"
+                      ></figcaption>
+                    </figure>
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="block.type === 'collage'">
+                <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                  <figure class="space-y-2">
+                    <img
+                      x-show="block.leftPortraitImageUrl"
+                      :src="block.leftPortraitImageUrl"
+                      :alt="block.leftPortraitImageCaption || 'Левое портретное изображение'"
+                      class="rounded-md aspect-[3/4] w-full object-cover"
+                    />
+                    <div
+                      x-show="!block.leftPortraitImageUrl"
+                      class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-3 py-8 text-center text-xs text-base-content/60"
+                    >
+                      Левый портрет не загружен
+                    </div>
+                    <figcaption
+                      x-show="block.leftPortraitImageCaption"
+                      class="text-center text-sm text-base-content/60"
+                      x-text="block.leftPortraitImageCaption"
+                    ></figcaption>
+                  </figure>
+                  <figure class="space-y-2">
+                    <img
+                      x-show="block.topLandscapeImageUrl"
+                      :src="block.topLandscapeImageUrl"
+                      :alt="block.topLandscapeImageCaption || 'Верхнее горизонтальное изображение'"
+                      class="rounded-md aspect-[5/3] w-full object-cover"
+                    />
+                    <div
+                      x-show="!block.topLandscapeImageUrl"
+                      class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-3 py-8 text-center text-xs text-base-content/60"
+                    >
+                      Верхнее горизонтальное не загружено
+                    </div>
+                    <figcaption
+                      x-show="block.topLandscapeImageCaption"
+                      class="text-center text-sm text-base-content/60"
+                      x-text="block.topLandscapeImageCaption"
+                    ></figcaption>
+                  </figure>
+                  <figure class="space-y-2">
+                    <img
+                      x-show="block.mainLandscapeImageUrl"
+                      :src="block.mainLandscapeImageUrl"
+                      :alt="block.mainLandscapeImageCaption || 'Основное горизонтальное изображение'"
+                      class="rounded-md aspect-[16/9] w-full object-cover"
+                    />
+                    <div
+                      x-show="!block.mainLandscapeImageUrl"
+                      class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-3 py-8 text-center text-xs text-base-content/60"
+                    >
+                      Основное горизонтальное не загружено
+                    </div>
+                    <figcaption
+                      x-show="block.mainLandscapeImageCaption"
+                      class="text-center text-sm text-base-content/60"
+                      x-text="block.mainLandscapeImageCaption"
+                    ></figcaption>
+                  </figure>
+                  <figure class="space-y-2">
+                    <img
+                      x-show="block.rightPortraitImageUrl"
+                      :src="block.rightPortraitImageUrl"
+                      :alt="block.rightPortraitImageCaption || 'Правое портретное изображение'"
+                      class="rounded-md aspect-[3/4] w-full object-cover"
+                    />
+                    <div
+                      x-show="!block.rightPortraitImageUrl"
+                      class="rounded-md border border-dashed border-base-300 bg-base-200/60 px-3 py-8 text-center text-xs text-base-content/60"
+                    >
+                      Правый портрет не загружен
+                    </div>
+                    <figcaption
+                      x-show="block.rightPortraitImageCaption"
+                      class="text-center text-sm text-base-content/60"
+                      x-text="block.rightPortraitImageCaption"
+                    ></figcaption>
+                  </figure>
+                </div>
+              </template>
+
+              <template x-if="block.type === 'video'">
+                <figure class="space-y-2">
+                  <video
+                    x-show="block.sourceType === 'upload' && block.url"
+                    :src="block.url"
+                    controls
+                    playsinline
+                    class="rounded-md w-full max-h-64 bg-black"
+                  ></video>
+                  <video
+                    x-show="block.sourceType === 'embed' && getVideoDirectUrl(block.url)"
+                    :src="getVideoDirectUrl(block.url)"
+                    controls
+                    playsinline
+                    class="rounded-md w-full max-h-64 bg-black"
+                  ></video>
+                  <div
+                    x-show="block.sourceType === 'embed' && getVideoEmbedUrl(block.url)"
+                    class="w-full aspect-video rounded-md overflow-hidden bg-black"
+                  >
+                    <iframe
+                      :src="getVideoEmbedUrl(block.url)"
+                      class="w-full h-full border-0"
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowfullscreen
+                    ></iframe>
+                  </div>
+                  <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">
+                    <span
+                      x-text="block.sourceType === 'upload'
+                        ? 'Загруженное видео'
+                        : (getVideoDirectUrl(block.url) ? 'Видео по прямой ссылке' : 'Встроенное видео')"
+                    ></span>
+                  </p>
+                  <figcaption
+                    x-show="block.caption"
+                    class="text-center text-sm text-base-content/60 mt-2"
+                    x-text="block.caption"
+                  ></figcaption>
+                </figure>
+              </template>
+
+              <div x-show="['two-columns', 'three-columns'].includes(block.type)" class="space-y-3">
+                <div class="flex flex-wrap gap-2">
+                  <span
+                    class="inline-flex items-center rounded-full bg-base-200 px-3 py-1 text-xs text-base-content/70"
+                    x-text="'Левая колонка: ' + getColumnTypeLabel(block.left?.type)"
+                  ></span>
+                  <span
+                    x-show="block.type === 'three-columns'"
+                    class="inline-flex items-center rounded-full bg-base-200 px-3 py-1 text-xs text-base-content/70"
+                    x-text="'Центральная колонка: ' + getColumnTypeLabel(block.center?.type)"
+                  ></span>
+                  <span
+                    class="inline-flex items-center rounded-full bg-base-200 px-3 py-1 text-xs text-base-content/70"
+                    x-text="'Правая колонка: ' + getColumnTypeLabel(block.right?.type)"
+                  ></span>
+                </div>
+                <div class="flex flex-col lg:flex-row gap-4 w-full">
+                <div class="w-full flex flex-col items-center rounded-lg border border-base-300 bg-base-200/30 p-3" :class="block.type === 'three-columns' ? 'lg:w-1/3' : 'lg:w-1/2'">
+                  <p class="text-xs uppercase tracking-[0.2em] text-base-content/60 mb-2">Левая колонка</p>
+                  <img
+                    x-show="block.left?.type === 'image'"
+                    :src="block.left?.content"
+                    :alt="block.left?.caption || 'Левая колонка'"
+                    class="rounded-md max-h-32 object-cover"
+                  />
+                  <div
+                    x-show="block.left?.type === 'text'"
+                    x-html="getColumnRichTextInitialHtml(block.left)"
+                    class="article-rich-text text-sm text-base-content/80"
+                  ></div>
+                  <div x-show="block.left?.type === 'quote'" class="w-full max-w-[420px]">
+                    <QuoteIcon class="w-8 h-8" />
+                    <blockquote
+                      x-text="block.left?.content"
+                      class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"
+                    ></blockquote>
+                    <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                    <p x-show="block.left?.quoteAuthor" x-text="block.left?.quoteAuthor" class="w-full mt-4 font-['Inter'] text-[0.8rem] font-bold uppercase tracking-[0.22em] text-base-content/50 text-right"></p>
+                  </div>
+                  <span x-show="block.left?.type === 'image' && block.left?.caption" x-text="block.left?.caption" class="text-xs text-base-content/60 mt-1"></span>
+                </div>
+                <div x-show="block.type === 'three-columns'" class="w-full lg:w-1/3 flex flex-col items-center rounded-lg border border-base-300 bg-base-200/30 p-3">
+                  <p class="text-xs uppercase tracking-[0.2em] text-base-content/60 mb-2">Центральная колонка</p>
+                  <img
+                    x-show="block.center?.type === 'image'"
+                    :src="block.center?.content"
+                    :alt="block.center?.caption || 'Центральная колонка'"
+                    class="rounded-md max-h-32 object-cover"
+                  />
+                  <div
+                    x-show="block.center?.type === 'text'"
+                    x-html="getColumnRichTextInitialHtml(block.center)"
+                    class="article-rich-text text-sm text-base-content/80"
+                  ></div>
+                  <div x-show="block.center?.type === 'quote'" class="w-full max-w-[420px]">
+                    <QuoteIcon class="w-8 h-8" />
+                    <blockquote
+                      x-text="block.center?.content"
+                      class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"
+                    ></blockquote>
+                    <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                    <p x-show="block.center?.quoteAuthor" x-text="block.center?.quoteAuthor" class="w-full mt-4 font-['Inter'] text-[0.8rem] font-bold uppercase tracking-[0.22em] text-base-content/50 text-right"></p>
+                  </div>
+                  <span x-show="block.center?.type === 'image' && block.center?.caption" x-text="block.center?.caption" class="text-xs text-base-content/60 mt-1"></span>
+                </div>
+                <div class="w-full flex flex-col items-center rounded-lg border border-base-300 bg-base-200/30 p-3" :class="block.type === 'three-columns' ? 'lg:w-1/3' : 'lg:w-1/2'">
+                  <p class="text-xs uppercase tracking-[0.2em] text-base-content/60 mb-2">Правая колонка</p>
+                  <img
+                    x-show="block.right?.type === 'image'"
+                    :src="block.right?.content"
+                    :alt="block.right?.caption || 'Правая колонка'"
+                    class="rounded-md max-h-32 object-cover"
+                  />
+                  <div
+                    x-show="block.right?.type === 'text'"
+                    x-html="getColumnRichTextInitialHtml(block.right)"
+                    class="article-rich-text text-sm text-base-content/80"
+                  ></div>
+                  <div x-show="block.right?.type === 'quote'" class="w-full max-w-[420px]">
+                    <QuoteIcon class="w-8 h-8" />
+                    <blockquote
+                      x-text="block.right?.content"
+                      class="mt-4 text-base lg:text-lg leading-relaxed text-base-content/80 font-serif italic whitespace-pre-line"
+                    ></blockquote>
+                    <QuoteIcon class="w-8 h-8 rotate-180 mt-4" />
+                    <p x-show="block.right?.quoteAuthor" x-text="block.right?.quoteAuthor" class="w-full mt-4 font-['Inter'] text-[0.8rem] font-bold uppercase tracking-[0.22em] text-base-content/50 text-right"></p>
+                  </div>
+                  <span x-show="block.right?.type === 'image' && block.right?.caption" x-text="block.right?.caption" class="text-xs text-base-content/60 mt-1"></span>
+                </div>
+                </div>
+              </div>
+
+              <template x-if="block.type === 'link'">
+                <div class="rounded-lg border border-base-300 bg-base-200/40 p-4 space-y-2">
+                  <p
+                    class="text-xs uppercase tracking-[0.2em] text-base-content/60"
+                    x-text="getLinkedContentTypeLabel(block.linkedContentType)"
+                  ></p>
+                  <p
+                    class="text-sm font-medium text-base-content"
+                    x-text="getLinkedBlockTitle(block) || 'Контент не выбран'"
+                  ></p>
+                  <p
+                    x-show="block.linkedContentId"
+                    class="text-xs text-base-content/60 break-all"
+                    x-text="block.linkedContentId"
+                  ></p>
+                </div>
+              </template>
+
+              <template x-if="block.type === 'url-link'">
+                <p class="rounded-lg border border-base-300 bg-base-200/40 p-4 text-sm text-base-content/70">
+                  <span class="font-medium text-base-content" x-text="block.text || '(без текста)'"></span>
+                  <span class="ml-2" x-text="block.url"></span>
+                </p>
+              </template>
+
+              <template x-if="block.type === 'flipper'">
+                <div class="space-y-2">
+                  <p class="text-xs uppercase tracking-[0.2em] text-base-content/60">Листалка</p>
+                  <div class="flex gap-2 overflow-x-auto pb-1">
+                    <template x-for="(slide, si) in block.slides" :key="si">
+                      <div class="flex-none">
+                        <img x-show="slide.imageUrl" :src="slide.imageUrl" alt="Слайд" class="rounded max-h-24 object-cover" />
+                        <div x-show="!slide.imageUrl" class="w-24 h-24 bg-base-200 rounded flex items-center justify-center text-xs text-base-content/50">Нет фото</div>
+                      </div>
+                    </template>
+                  </div>
+                  <p class="text-xs text-base-content/60" x-text="(block.slides?.length || 0) + ' слайд(ов)'"></p>
+                </div>
+              </template>
+
+              <template x-if="block.type === 'tips'">
+                <p class="rounded-lg border border-base-300 bg-base-200/40 p-4 text-sm text-base-content/70" x-text="getBlockSummary(block)"></p>
+              </template>
+
+              <div
+                class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2"
+              >
+                <Button variant="outline" size="sm" @click="editBlock(index)"
+                  >Редактировать</Button
+                >
+                <Button variant="error" size="sm" @click="deleteBlock(index)"
+                  >Удалить</Button
+                >
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <div class="mt-6">
+      <template x-if="showBlockOptions">
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 border border-base-300 rounded-lg bg-base-100"
+        >
+          <button
+            @click="addBlock('paragraph')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Обычный абзац</button
+          >
+          <button
+            @click="addBlock('first-paragraph')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Абзац с буквицей</button
+          >
+          <button
+            @click="addBlock('h2')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Подзаголовок H2</button
+          >
+          <button
+            @click="addBlock('h3')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Подзаголовок H3</button
+          >
+          <button
+            @click="addBlock('quote')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Цитата</button
+          >
+          <button
+            @click="addBlock('image')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Картинка</button
+          >
+          <button
+            @click="addBlock('tweet')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Твит</button
+          >
+          <button
+            @click="addBlock('one-big-one-small')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Одна большая + одна маленькая</button
+          >
+          <button
+            @click="addBlock('collage')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Коллаж</button
+          >
+          <button
+            @click="addBlock('two-columns')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Две колонки</button
+          >
+          <button
+            @click="addBlock('three-columns')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Три колонки</button
+          >
+          <button
+            @click="addBlock('link')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Блок-ссылка</button
+          >
+          <button
+            @click="addBlock('url-link')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Ссылка на URL</button
+          >
+          <button
+            @click="addBlock('video')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Видео</button
+          >
+          <button
+            @click="addBlock('flipper')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Листалка</button
+          >
+          <button
+            @click="addBlock('tips')"
+            class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100"
+            >Блок tips</button
+          >
+        </div>
+      </template>
+
+      <div x-show="!showBlockOptions" class="text-center">
+        <Button variant="primary" @click="openBlockSelector()"
+          >+ Добавить блок</Button
+        >
+      </div>
+    </div>
+  </section>
+
+  <DashboardMaterialActionFooter
+    cancelHref={cancelHref}
+    deleteAction="deleteFirstPerson(deleteRedirect)"
+    deleteLabel="Удалить материал"
+    previewAction="previewFirstPerson()"
+    publishedModel="article"
+    saveAction="saveFirstPerson()"
+    saveDisabled="isSaving"
+    saveLabel={submitLabel}
+    showDelete={Boolean(deleteFirstPersonId)}
+  />
+</div>

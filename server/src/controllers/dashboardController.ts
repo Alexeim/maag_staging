@@ -29,7 +29,8 @@ export type DashboardMaterialType =
   | 'news'
   | 'interview'
   | 'photo-of-the-day'
-  | 'event';
+  | 'event'
+  | 'first-person';
 
 export type DashboardBucket = 'culture' | 'paris' | 'events' | 'none';
 
@@ -87,6 +88,7 @@ const SOURCES: SourceConfig[] = [
     forcedCategory: 'culture',
     resolveType: () => 'interview',
   },
+  { collection: 'firstPerson', categoryApplies: true, resolveType: () => 'first-person' },
   {
     collection: 'events',
     categoryApplies: false,

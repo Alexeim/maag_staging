@@ -15,6 +15,9 @@ interface Author {
   lastName: string;
   role: 'author' | 'reader' | 'admin' | string;
   avatar: string;
+  // Cutout PNG portrait (transparent background), fixed 239x278 — used by
+  // the "от первого лица" card/page, distinct from the regular `avatar`.
+  noBgAvatar?: string;
   bio?: string;
   socialLinks?: AuthorSocialLinks;
   createdAt: Date;
@@ -82,6 +85,7 @@ export const createAuthor = async (req: Request, res: Response) => {
       lastName,
       role: 'author',
       avatar: normalizeText(req.body?.avatar),
+      noBgAvatar: normalizeText(req.body?.noBgAvatar),
       bio: normalizeText(req.body?.bio),
       socialLinks: normalizeSocialLinks(req.body?.socialLinks),
       createdAt: new Date(),
@@ -130,6 +134,7 @@ export const updateAuthor = async (req: Request, res: Response) => {
       firstName,
       lastName,
       avatar: normalizeText(req.body?.avatar),
+      noBgAvatar: normalizeText(req.body?.noBgAvatar),
       bio: normalizeText(req.body?.bio),
       socialLinks: normalizeSocialLinks(req.body?.socialLinks),
     };

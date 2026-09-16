@@ -1,0 +1,56 @@
+---
+import DashboardLayout from "@/Layouts/DashboardLayout.astro";
+import FirstPersonComposer from "@/components/dashboard/FirstPersonComposer.astro";
+import { categoryTags, parisDistrictTags } from "@/content/tags/tags";
+import { firstPersonApi, authorsApi } from "@/lib/api/api";
+
+const { id } = Astro.params;
+
+let material = null;
+let authors: any[] = [];
+let loadFailed = false;
+
+try {
+  [material, authors] = await Promise.all([
+    firstPersonApi.getById(id),
+    authorsApi.list(),
+  ]);
+} catch (error) {
+  console.error("Failed to fetch first-person material or authors", error);
+  loadFailed = true;
+}
+
+const firstPersonCreatorState = JSON.stringify({
+  categoryTags,
+  parisDistrictOptions: parisDistrictTags,
+  initialArticle: material,
+  initialAuthors: authors,
+  articleId: id,
+  isEditMode: true,
+});
+---
+
+<DashboardLayout title="Редактировать материал «от первого лица»" active="articles-overview">
+  {loadFailed ? (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Не удалось загрузить данные для редактирования</h2>
+      <p class="text-base-content/70">Обнови страницу — похоже, произошёл временный сбой сети.</p>
+      <a href="/dashboard" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Вернуться в дашборд</a>
+    </div>
+  ) : material ? (
+    <FirstPersonComposer
+      heading="Редактировать материал «от первого лица»"
+      submitLabel="Обновить материал"
+      firstPersonCreatorState={firstPersonCreatorState}
+      cancelHref="/dashboard"
+      deleteFirstPersonId={id}
+      deleteRedirect="/dashboard"
+    />
+  ) : (
+    <div class="bg-base-100 border border-base-300 rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">Материал не найден</h2>
+      <p class="text-base-content/70">Возможно, материал был удалён или указан неверный идентификатор.</p>
+      <a href="/dashboard" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Вернуться в дашборд</a>
+    </div>
+  )}
+</DashboardLayout>

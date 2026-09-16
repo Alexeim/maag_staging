@@ -114,6 +114,15 @@ export const MATERIAL_TYPES: Record<DashboardMaterialType, MaterialTypeMeta> = {
     viewHref: (id) => `/events/${id}`,
     deletePath: (id) => `/api/events/${id}`,
   },
+  "first-person": {
+    label: "От первого лица",
+    badge: "От первого лица",
+    icon: "UserRound",
+    badgeClass: "bg-cyan-100 text-cyan-700",
+    editHref: (id) => `/dashboard/first-person/${id}/edit`,
+    viewHref: (id) => `/first-person/${id}`,
+    deletePath: (id) => `/api/first-person/${id}`,
+  },
 };
 
 // Order for the type filter dropdown.
@@ -128,6 +137,7 @@ export const MATERIAL_TYPE_ORDER: DashboardMaterialType[] = [
   "interview",
   "photo-of-the-day",
   "event",
+  "first-person",
 ];
 
 export interface BucketMeta {

@@ -61,6 +61,7 @@ const components: Record<string, () => Promise<any>> = {
   photoOfTheDayList: () => import('@/components/dashboard/photoOfTheDayListLogic'),
   authorCreator: () => import('@/components/dashboard/authorCreatorLogic'),
   authorList: () => import('@/components/dashboard/authorListLogic'),
+  firstPersonCreator: () => import('@/components/dashboard/firstPersonCreatorLogic'),
 };
 
 export default function(Alpine: Alpine) {
@@ -403,6 +404,10 @@ export default function(Alpine: Alpine) {
       saveCaption() {},
       cancelEditCaption() {},
       previewArticle() {},
+      previewFirstPerson() {},
+      saveFirstPerson() {},
+      deleteFirstPerson() {},
+      getSelectedAuthorNoBgAvatar() { return ''; },
       previewInterview() {},
       previewFlipper() {},
       previewEvent() {},
@@ -719,12 +724,16 @@ export default function(Alpine: Alpine) {
         firstName: '',
         lastName: '',
         avatar: '',
+        noBgAvatar: '',
         bio: '',
         socialLinks: { instagram: '', linkedin: '', facebook: '', telegram: '', site: '' },
       },
       authorId: null,
       authorRole: '',
+      uploadingNoBgAvatar: false,
+      noBgAvatarUploadProgress: 0,
       handleAvatarUpload() {},
+      handleNoBgAvatarUpload() {},
       saveAuthor() {},
       deleteAuthor() {},
     };

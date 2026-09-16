@@ -627,6 +627,9 @@ export interface AuthorPayload {
   firstName: string;
   lastName: string;
   avatar?: string;
+  // Cutout PNG portrait (transparent background), fixed 239x278 — used by
+  // the "от первого лица" card/page, distinct from the regular `avatar`.
+  noBgAvatar?: string;
   bio?: string;
   socialLinks?: AuthorSocialLinks;
 }
@@ -702,6 +705,26 @@ export interface InterviewPayload {
 }
 
 export interface InterviewResponse extends InterviewPayload {
+  id: string;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
+  author?: unknown;
+}
+
+export interface FirstPersonPayload {
+  title: string;
+  authorId: string;
+  content: unknown[];
+  category?: string;
+  tags?: string[];
+  parisSubCategories?: string[];
+  parisDistrict?: string | null;
+  isMaagChoice?: boolean;
+  published?: boolean;
+  publishedAt?: ApiTimestamp;
+}
+
+export interface FirstPersonResponse extends FirstPersonPayload {
   id: string;
   createdAt: string | Date;
   updatedAt?: string | Date;
@@ -883,6 +906,35 @@ export const interviewsApi = {
   },
   delete(id: string, token?: string) {
     return request<void>(`/api/interviews/${id}`, {
+      method: "DELETE",
+      token,
+    });
+  },
+};
+
+export const firstPersonApi = {
+  list(token?: string) {
+    return request<FirstPersonResponse[]>("/api/first-person", { token });
+  },
+  create(payload: FirstPersonPayload, token?: string) {
+    return request<FirstPersonResponse>("/api/first-person", {
+      method: "POST",
+      body: payload,
+      token,
+    });
+  },
+  getById(id: string, token?: string) {
+    return request<FirstPersonResponse>(`/api/first-person/${id}`, { token });
+  },
+  update(id: string, payload: FirstPersonPayload, token?: string) {
+    return request<FirstPersonResponse>(`/api/first-person/${id}`, {
+      method: "PUT",
+      body: payload,
+      token,
+    });
+  },
+  delete(id: string, token?: string) {
+    return request<void>(`/api/first-person/${id}`, {
       method: "DELETE",
       token,
     });
@@ -1325,7 +1377,8 @@ export type MaterialContentType =
   | "event"
   | "flipper"
   | "interview"
-  | "visual-story";
+  | "visual-story"
+  | "first-person";
 
 export interface PublicMaterialItem {
   id: string;
@@ -1439,7 +1492,8 @@ export type DashboardMaterialType =
   | "news"
   | "interview"
   | "photo-of-the-day"
-  | "event";
+  | "event"
+  | "first-person";
 
 export type DashboardBucket = "culture" | "paris" | "events" | "none";
 
