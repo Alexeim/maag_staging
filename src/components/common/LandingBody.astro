@@ -8,6 +8,7 @@ import {
 } from "@/lib/utils/contentBadge";
 
 import NetlenkaCardOne from "./NetlenkaCardOne.astro";
+import FirstPersonCard from "./FirstPersonCard.astro";
 import ArticleCard from "./ArticleCard.astro";
 import CardByline from "./CardByline.astro";
 import LazyImage from "./LazyImage.astro";
@@ -335,19 +336,29 @@ const splitTitle = (t: string) => {
           maagChoiceItems.length > 0 ? (
             <>
               <div class="hidden gap-6 lg:flex lg:flex-col">
-                {maagChoiceItems.map((item) => (
-                  <NetlenkaCardOne
-                    key={item.id}
-                    title={getCardTitle(item)}
-                    category={getPrimaryTag(item)}
-                    categoryHref={getPrimaryTagHref(item)}
-                    date={formatArticleDate(item.createdAt)}
-                    hideDate={true}
-                    transitionName={getTransitionName(item)}
-                    imageUrl={item.imageUrl}
-                    href={item.href}
-                  />
-                ))}
+                {maagChoiceItems.map((item) =>
+                  item.contentType === "first-person" ? (
+                    <FirstPersonCard
+                      key={item.id}
+                      title={getCardTitle(item)}
+                      imageUrl={item.imageUrl}
+                      transitionName={getTransitionName(item)}
+                      href={item.href}
+                    />
+                  ) : (
+                    <NetlenkaCardOne
+                      key={item.id}
+                      title={getCardTitle(item)}
+                      category={getPrimaryTag(item)}
+                      categoryHref={getPrimaryTagHref(item)}
+                      date={formatArticleDate(item.createdAt)}
+                      hideDate={true}
+                      transitionName={getTransitionName(item)}
+                      imageUrl={item.imageUrl}
+                      href={item.href}
+                    />
+                  ),
+                )}
               </div>
 
               <div
@@ -367,17 +378,27 @@ const splitTitle = (t: string) => {
                         data-netlenka-carousel-page
                         aria-hidden={index === 0 ? "false" : "true"}
                       >
-                        <NetlenkaCardOne
-                          key={item.id}
-                          title={getCardTitle(item)}
-                          category={getPrimaryTag(item)}
-                          categoryHref={getPrimaryTagHref(item)}
-                          date={formatArticleDate(item.createdAt)}
-                          hideDate={true}
-                          transitionName={getTransitionName(item)}
-                          imageUrl={item.imageUrl}
-                          href={item.href}
-                        />
+                        {item.contentType === "first-person" ? (
+                          <FirstPersonCard
+                            key={item.id}
+                            title={getCardTitle(item)}
+                            imageUrl={item.imageUrl}
+                            transitionName={getTransitionName(item)}
+                            href={item.href}
+                          />
+                        ) : (
+                          <NetlenkaCardOne
+                            key={item.id}
+                            title={getCardTitle(item)}
+                            category={getPrimaryTag(item)}
+                            categoryHref={getPrimaryTagHref(item)}
+                            date={formatArticleDate(item.createdAt)}
+                            hideDate={true}
+                            transitionName={getTransitionName(item)}
+                            imageUrl={item.imageUrl}
+                            href={item.href}
+                          />
+                        )}
                       </div>
                     ))}
                   </div>

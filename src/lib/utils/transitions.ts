@@ -18,7 +18,8 @@ export function getTransitionName(item: ContentItem): string | undefined {
     href.startsWith("/interviews/") ||
     href.startsWith("/guide/") ||
     href.startsWith("/visual-story/") ||
-    href.startsWith("/flippers/")
+    href.startsWith("/flippers/") ||
+    href.startsWith("/first-person/")
   ) {
     return `main-article-image-${item.id}`;
   }

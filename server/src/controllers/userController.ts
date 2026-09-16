@@ -5,6 +5,7 @@ import admin from "firebase-admin";
 const BOOKMARK_CONTENT_TYPES = new Set([
   "article",
   "event",
+  "firstPerson",
   "flipper",
   "guide",
   "interview",

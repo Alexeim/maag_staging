@@ -1,0 +1,145 @@
+---
+import Layout from "../../Layouts/Layout.astro";
+import ArticleBody from "../../components/article/ArticleBody.astro";
+import ContentActions from "@/components/common/ContentActions.astro";
+import {
+  ApiError,
+  firstPersonApi,
+} from "@/lib/api/api";
+import { canPreviewUnpublished } from "@/lib/utils/preview";
+import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
+
+const { id } = Astro.params;
+
+let materialData: any;
+let error: string | null = null;
+
+try {
+  materialData = await firstPersonApi.getById(id);
+} catch (e: any) {
+  Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
+  console.error(e);
+  if (e instanceof ApiError) {
+    error =
+      e.status === 404
+        ? "Material not found."
+        : `Error fetching material: ${e.message}`;
+  } else {
+    error = `Error fetching material: ${e.message}`;
+  }
+}
+
+// Admins may preview an unpublished material on its real page; everyone else
+// gets the usual "not found".
+const isDraftPreview =
+  !error && Boolean(materialData) && materialData?.published !== true &&
+  canPreviewUnpublished(Astro.locals);
+
+if (!error && materialData?.published !== true && !isDraftPreview) {
+  Astro.response.status = 404;
+  error = "Material not found.";
+  materialData = null;
+}
+
+const author = materialData?.author ?? null;
+const authorName = author ? `${author.firstName} ${author.lastName}`.trim() : "";
+const authorPortrait = author?.noBgAvatar || "";
+const authorHref = materialData?.authorId ? `/author/${materialData.authorId}` : undefined;
+
+const displayMaterial = {
+  title: materialData?.title || "Материал",
+  contentBlocks: materialData?.content || [],
+};
+
+const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
+const canonicalUrl = new URL(`/first-person/${id}`, siteOrigin).toString();
+const organizationId = new URL("/#organization", siteOrigin).toString();
+const toIsoDate = (value: unknown) => {
+  if (!value) return undefined;
+  const date = new Date(value as string);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+};
+const materialStructuredData = materialData
+  ? {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: displayMaterial.title,
+      datePublished: toIsoDate(materialData.createdAt),
+      dateModified: toIsoDate(materialData.updatedAt ?? materialData.createdAt),
+      author: authorName ? { "@type": "Person", name: authorName } : { "@id": organizationId },
+      publisher: { "@id": organizationId },
+      mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
+      inLanguage: "ru",
+    }
+  : [];
+---
+
+<Layout
+  navbarVariant="default"
+  includePreFooterCTA={false}
+  title={`${displayMaterial.title} - Maag`}
+  description="От первого лица"
+  canonicalPath={`/first-person/${id}`}
+  type="article"
+  structuredData={materialStructuredData}
+  useClientRouter={true}
+>
+  {isDraftPreview && (
+    <DraftPreviewBanner editHref={`/dashboard/first-person/${id}/edit`} />
+  )}
+  <main class="bg-base-200 min-h-screen">
+    <div class="max-w-[1512px] mx-auto">
+      {error && <div class="text-red-500 text-center pt-40">{error}</div>}
+      {!error && materialData && (
+        <>
+          <section class="w-full px-4 pt-16 pb-[100px] sm:px-6 lg:px-14">
+            <div class="mx-auto flex w-full max-w-[1400px] flex-col gap-8 lg:flex-row lg:gap-16">
+              <!-- Left column (1/3): portrait + about the author -->
+              <div class="flex flex-col gap-4 lg:w-1/3">
+                <div class="w-[159px] max-w-70 sm:w-49.75 lg:w-full">
+                  {authorPortrait ? (
+                    <a href={authorHref} class:list={[authorHref && "hover:opacity-90"]}>
+                      <img
+                        src={authorPortrait}
+                        alt={authorName}
+                        class="aspect-239/278 w-full object-contain"
+                        transition:name={`main-article-image-${id}`}
+                      />
+                    </a>
+                  ) : (
+                    <div class="aspect-239/278 w-full bg-base-300" />
+                  )}
+                </div>
+                {author?.bio && (
+                  <p class="max-w-70 font-inter text-sm text-base-content/70">
+                    {author.bio}
+                  </p>
+                )}
+              </div>
+
+              <!-- Right column (2/3): label, title, actions, body content -->
+              <div class="flex flex-col gap-8 lg:w-2/3">
+                <div class="flex flex-col gap-4">
+                  <p class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
+                    От первого лица
+                  </p>
+                  <h1 class="font-old_standard text-3xl leading-tight text-base-content lg:text-[44px]">
+                    {displayMaterial.title}
+                  </h1>
+                  <ContentActions
+                    contentType="firstPerson"
+                    contentId={id!}
+                    title={displayMaterial.title}
+                    href={`/first-person/${id}`}
+                    align="left"
+                  />
+                </div>
+                <ArticleBody contentBlocks={displayMaterial.contentBlocks} />
+              </div>
+            </div>
+          </section>
+        </>
+      )}
+    </div>
+  </main>
+</Layout>

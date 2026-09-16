@@ -28,7 +28,7 @@ export type LandingNewsRailSelection =
   | LandingNewsRailAutoSelection
   | LandingNewsRailManualSelection;
 
-export type LandingNetlenkaItemType = LandingMainHeroType;
+export type LandingNetlenkaItemType = LandingMainHeroType | 'first-person';
 
 export interface LandingNetlenkaItemTarget {
   type: LandingNetlenkaItemType;
@@ -268,6 +268,7 @@ const MAIN_HERO_COLLECTIONS: Record<LandingMainHeroType, string> = {
 
 const NETLENKA_COLLECTIONS: Record<LandingNetlenkaItemType, string> = {
   ...MAIN_HERO_COLLECTIONS,
+  'first-person': 'firstPerson',
 };
 
 const CATEGORY_CARDS_COLLECTIONS: Record<LandingCategoryCardsItemType, string> = {
@@ -407,7 +408,8 @@ const isAllowedMainHeroType = (value: unknown): value is LandingMainHeroType =>
 
 const isAllowedNetlenkaItemType = (
   value: unknown,
-): value is LandingNetlenkaItemType => isAllowedMainHeroType(value);
+): value is LandingNetlenkaItemType =>
+  isAllowedMainHeroType(value) || value === 'first-person';
 
 const isAllowedCategoryCardsItemType = (
   value: unknown,

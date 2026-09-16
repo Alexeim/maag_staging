@@ -10,7 +10,8 @@ type LandingContentType =
   | 'visual-story'
   | 'news'
   | 'event'
-  | 'photo-of-the-day';
+  | 'photo-of-the-day'
+  | 'first-person';
 
 interface LandingTarget {
   type: LandingContentType;
@@ -32,14 +33,19 @@ const COLLECTION_BY_TYPE: Record<LandingContentType, string> = {
   news: 'news',
   event: 'events',
   'photo-of-the-day': 'photosOfTheDay',
+  'first-person': 'firstPerson',
 };
 
+// "от первого лица" is landing-only, gated entirely by isMaagChoice — it
+// never appears on the culture/paris category cards or section pages, so it
+// is deliberately absent from CATEGORY_CONTENT_TYPES / SECTION_CONTENT_TYPES.
 const LANDING_CONTENT_TYPES: LandingContentType[] = [
   'article',
   'guide',
   'interview',
   'flipper',
   'visual-story',
+  'first-person',
 ];
 
 const CATEGORY_CONTENT_TYPES: LandingContentType[] = [
@@ -55,6 +61,7 @@ const EDITORIAL_FLAG_CONTENT_TYPES: LandingContentType[] = [
   'flipper',
   'interview',
   'visual-story',
+  'first-person',
 ];
 
 const EDITORIAL_FLAG_CONTENT_TYPE_SET = new Set<LandingContentType>(
@@ -113,12 +120,16 @@ const getHref = (type: LandingContentType, id: string): string => {
   if (type === 'news') return `/news/${id}`;
   if (type === 'event') return `/events/${id}`;
   if (type === 'photo-of-the-day') return `/photo-of-the-day/${id}`;
+  if (type === 'first-person') return `/first-person/${id}`;
   return `/article/${id}`;
 };
 
 const getImageUrl = (type: LandingContentType, data: any): string | null => {
   if (type === 'flipper') return data.carouselContent?.[0]?.imageUrl ?? data.imageUrl ?? null;
   if (type === 'visual-story') return data.imageUrl ?? data.slides?.[0]?.imageUrl ?? null;
+  // "от первого лица" has no imageUrl of its own — the card shows the
+  // linked author's cutout portrait instead, filled in by attachAuthorNames().
+  if (type === 'first-person') return null;
   return data.imageUrl ?? null;
 };
 
@@ -182,7 +193,12 @@ const toLandingItem = (
 // and fills its `authorName` with "First Last" in a single batch of author
 // reads (one round trip per unique author). Mutates the payload in place.
 const attachAuthorNames = async (payload: unknown): Promise<void> => {
-  const cards: Array<{ authorId?: unknown; authorName?: unknown }> = [];
+  const cards: Array<{
+    authorId?: unknown;
+    authorName?: unknown;
+    contentType?: unknown;
+    imageUrl?: unknown;
+  }> = [];
   const visit = (node: any) => {
     if (!node || typeof node !== 'object') return;
     if (Array.isArray(node)) {
@@ -203,15 +219,26 @@ const attachAuthorNames = async (payload: unknown): Promise<void> => {
     authorIds.map((authorId) => db.collection('authors').doc(authorId).get()),
   );
   const nameById = new Map<string, string>();
+  const noBgAvatarById = new Map<string, string>();
   authorDocs.forEach((doc) => {
     if (!doc.exists) return;
-    const data = doc.data() as { firstName?: string; lastName?: string } | undefined;
+    const data = doc.data() as
+      | { firstName?: string; lastName?: string; noBgAvatar?: string }
+      | undefined;
     const name = [data?.firstName, data?.lastName].filter(Boolean).join(' ').trim();
     if (name) nameById.set(doc.id, name);
+    if (data?.noBgAvatar) noBgAvatarById.set(doc.id, data.noBgAvatar);
   });
 
   cards.forEach((card) => {
     card.authorName = card.authorId ? (nameById.get(card.authorId as string) ?? '') : '';
+    // "от первого лица" has no image of its own — the card/page shows the
+    // linked author's cutout portrait instead (getImageUrl() left this null).
+    if (card.contentType === 'first-person') {
+      card.imageUrl = card.authorId
+        ? (noBgAvatarById.get(card.authorId as string) ?? null)
+        : null;
+    }
   });
 };
 
@@ -296,6 +323,11 @@ const selectNetlenkaItems = async (selection: any, excludedKeys: Set<string>) =>
   return candidates
     .filter((item: any) => item.isMaagChoice)
     .filter((item: any) => !excludedKeys.has(`${item.type}:${item.id}`))
+    // "от первого лица" cards lead the rail — everything else keeps its
+    // existing recency order behind them (stable sort).
+    .sort((left: any, right: any) =>
+      Number(right.type === 'first-person') - Number(left.type === 'first-person'),
+    )
     .slice(0, limit);
 };
 

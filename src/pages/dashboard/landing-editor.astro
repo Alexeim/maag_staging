@@ -8,6 +8,7 @@ import {
   articlesApi,
   editorialPlacementsApi,
   eventsApi,
+  firstPersonApi,
   flippersApi,
   guidesApi,
   interviewsApi,
@@ -78,6 +79,7 @@ const MAIN_HERO_TYPE_LABELS: Record<LandingMainHeroType, string> = {
 
 const NETLENKA_TYPE_LABELS: Record<LandingNetlenkaItemType, string> = {
   ...MAIN_HERO_TYPE_LABELS,
+  "first-person": "От первого лица",
 };
 
 const CATEGORY_CARDS_TYPE_LABELS: Record<LandingCategoryCardsItemType, string> = {
@@ -249,6 +251,7 @@ try {
     visualStories,
     newsItems,
     events,
+    firstPersonItems,
   ] = await Promise.all([
     editorialPlacementsApi.getLanding().catch(() => DEFAULT_LANDING_PLACEMENTS),
     articlesApi.list(),
@@ -258,6 +261,7 @@ try {
     visualStoriesApi.list(),
     newsApi.list(),
     eventsApi.list(),
+    firstPersonApi.list(),
   ]);
 
   landingPlacements = placements;
@@ -363,6 +367,23 @@ try {
         createdAtMs: toMs(item.createdAt),
         publishedAtMs: toMs(item.publishedAt),
         createdAt: item.createdAt,
+      });
+    }
+  });
+  firstPersonItems.forEach((item) => {
+    // "от первого лица" is landing-only and never eligible as a main hero —
+    // unlike the other types above, only the netlenka (Выбор MAAG) branch applies.
+    if (isMaagChoiceItem(item)) {
+      const key = `first-person:${item.id}`;
+      contentTitleMaps.netlenka.set(key, item.title);
+      netlenkaOptionItems.push({
+        id: key,
+        title: item.title,
+        type: "first-person",
+        typeLabel: NETLENKA_TYPE_LABELS["first-person"],
+        createdAt: item.createdAt,
+        createdAtMs: toMs(item.createdAt),
+        publishedAtMs: toMs(item.publishedAt),
       });
     }
   });

@@ -314,7 +314,7 @@ export type LandingNewsRailSelection =
   | LandingNewsRailAutoSelection
   | LandingNewsRailManualSelection;
 
-export type LandingNetlenkaItemType = LandingMainHeroType;
+export type LandingNetlenkaItemType = LandingMainHeroType | "first-person";
 
 export interface LandingNetlenkaItemTarget {
   type: LandingNetlenkaItemType;
@@ -596,6 +596,7 @@ export interface UserProfileResponse {
 export type BookmarkContentType =
   | "article"
   | "event"
+  | "firstPerson"
   | "flipper"
   | "guide"
   | "interview"
