@@ -120,6 +120,11 @@ const isHotContentItem = (item: { isHotContent?: boolean }) =>
 const isMaagChoiceItem = (item: { isMaagChoice?: boolean }) =>
   Boolean(item.isMaagChoice);
 
+// Drafts should not be pickable into a live landing rail — an editor
+// selecting one manually would silently publish unfinished content.
+const isPublishedItem = (item: { published?: boolean }) =>
+  Boolean(item.published);
+
 const isLandingPrimaryEligible = (item: {
   isHotContent?: boolean;
   isMaagChoice?: boolean;
@@ -276,7 +281,7 @@ try {
       contentTitleMaps.mainHero.set(key, item.title);
       contentDatesMap.set(key, { createdAtMs: toMs(item.createdAt), publishedAtMs: toMs(item.publishedAt) });
     }
-    if (isMaagChoiceItem(item)) {
+    if (isMaagChoiceItem(item) && isPublishedItem(item)) {
       contentTitleMaps.netlenka.set(key, item.title);
       netlenkaOptionItems.push({
         id: key,
@@ -300,7 +305,7 @@ try {
       contentTitleMaps.mainHero.set(`guide:${item.id}`, item.title);
       contentDatesMap.set(`guide:${item.id}`, { createdAtMs: toMs(item.createdAt), publishedAtMs: toMs(item.publishedAt) });
     }
-    if (isMaagChoiceItem(item)) {
+    if (isMaagChoiceItem(item) && isPublishedItem(item)) {
       contentTitleMaps.netlenka.set(`guide:${item.id}`, item.title);
       netlenkaOptionItems.push({
         id: `guide:${item.id}`,
@@ -318,7 +323,7 @@ try {
       contentTitleMaps.mainHero.set(`interview:${item.id}`, item.title);
       contentDatesMap.set(`interview:${item.id}`, { createdAtMs: toMs(item.createdAt), publishedAtMs: toMs(item.publishedAt) });
     }
-    if (isMaagChoiceItem(item)) {
+    if (isMaagChoiceItem(item) && isPublishedItem(item)) {
       contentTitleMaps.netlenka.set(`interview:${item.id}`, item.title);
       netlenkaOptionItems.push({
         id: `interview:${item.id}`,
@@ -339,7 +344,7 @@ try {
       contentTitleMaps.mainHero.set(`flipper:${item.id}`, item.title);
       contentDatesMap.set(`flipper:${item.id}`, { createdAtMs: toMs(item.createdAt), publishedAtMs: toMs(item.publishedAt) });
     }
-    if (isMaagChoiceItem(item)) {
+    if (isMaagChoiceItem(item) && isPublishedItem(item)) {
       contentTitleMaps.netlenka.set(`flipper:${item.id}`, item.title);
       netlenkaOptionItems.push({
         id: `flipper:${item.id}`,
@@ -357,7 +362,7 @@ try {
       contentTitleMaps.mainHero.set(`visual-story:${item.id}`, item.title);
       contentDatesMap.set(`visual-story:${item.id}`, { createdAtMs: toMs(item.createdAt), publishedAtMs: toMs(item.publishedAt) });
     }
-    if (isMaagChoiceItem(item)) {
+    if (isMaagChoiceItem(item) && isPublishedItem(item)) {
       contentTitleMaps.netlenka.set(`visual-story:${item.id}`, item.title);
       netlenkaOptionItems.push({
         id: `visual-story:${item.id}`,
@@ -373,7 +378,7 @@ try {
   firstPersonItems.forEach((item) => {
     // "от первого лица" is landing-only and never eligible as a main hero —
     // unlike the other types above, only the netlenka (Выбор MAAG) branch applies.
-    if (isMaagChoiceItem(item)) {
+    if (isMaagChoiceItem(item) && isPublishedItem(item)) {
       const key = `first-person:${item.id}`;
       contentTitleMaps.netlenka.set(key, item.title);
       netlenkaOptionItems.push({
