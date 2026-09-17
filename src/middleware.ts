@@ -71,8 +71,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Dashboard is admin-only. Covers both "not logged in" (user is null) and
   // "logged in but not admin". Redirect target is outside /dashboard, so no loop.
   const isDashboardRoute = context.url.pathname.startsWith("/dashboard");
+  const isTestPage = context.url.pathname.includes("testpage");
 
-  if (isDashboardRoute && locals.user?.role !== "admin") {
+  if ((isDashboardRoute || isTestPage) && locals.user?.role !== "admin") {
     return context.redirect("/");
   }
 

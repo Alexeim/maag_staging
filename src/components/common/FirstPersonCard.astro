@@ -20,19 +20,19 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
 
 <div class="linked-image-hover w-full">
   <div
-    class="relative flex aspect-2/3 w-full flex-row overflow-hidden bg-base-100 border-6 border-gray-400"
+    class="relative flex aspect-2/3 w-full flex-row overflow-hidden bg-base-100 border-[10px] border-gray-400"
   >
-    <div class="flex w-1/5 items-start justify-center">
+    <div class="flex w-1/6 items-start justify-center">
       <span
-        class="[writing-mode:vertical-rl] rotate-180 whitespace-nowrap text-xs text-accent font-semibold uppercase tracking-[0.25em] px-2 py-1 font-['Inter']"
+        class="[writing-mode:vertical-rl] rotate-180 whitespace-nowrap text-xs text-accent font-semibold uppercase tracking-[0.25em] px-4 font-['Inter']"
       >
         от первого лица
       </span>
     </div>
-    <div class="w-4/5 grid grid-rows-[5fr_7fr]">
-      <div class="pt-2 pr-2">
+    <div class="w-5/6 grid grid-rows-[5fr_7fr]">
+      <div class="pt-4 pr-2">
         <h2
-          class="font-old_standard leading-[1.15] text-base-content text-[22px] font-semibold line-clamp-4"
+          class="font-old_standard leading-[1.15] text-base-content text-[22px] font-semibold"
         >
           {title}
         </h2>
