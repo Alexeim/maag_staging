@@ -340,6 +340,7 @@ const splitTitle = (t: string) => {
                   item.contentType === "first-person" ? (
                     <FirstPersonCard
                       key={item.id}
+                      authorName={item.authorName}
                       title={getCardTitle(item)}
                       imageUrl={item.imageUrl}
                       transitionName={getTransitionName(item)}
@@ -381,6 +382,7 @@ const splitTitle = (t: string) => {
                         {item.contentType === "first-person" ? (
                           <FirstPersonCard
                             key={item.id}
+                            authorName={item.authorName}
                             title={getCardTitle(item)}
                             imageUrl={item.imageUrl}
                             transitionName={getTransitionName(item)}

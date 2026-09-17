@@ -10,6 +10,9 @@ import {
 // noBgAvatar) and no related-content/content-collection editor yet.
 export interface FirstPerson {
   id?: string;
+  // Only the headline's tail ("о том, как он попал..."). The author's full
+  // name is prepended at render time (composeFirstPersonTitle on the client)
+  // — never stored here, so it stays in sync if the author is renamed.
   title: string;
   authorId: string;
   content: any[];

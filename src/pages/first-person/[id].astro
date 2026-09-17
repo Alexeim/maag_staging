@@ -8,6 +8,7 @@ import {
 } from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
+import { composeFirstPersonTitle } from "@/lib/utils/firstPerson";
 
 const { id } = Astro.params;
 
@@ -46,10 +47,15 @@ const authorName = author ? `${author.firstName} ${author.lastName}`.trim() : ""
 const authorPortrait = author?.noBgAvatar || "";
 const authorHref = materialData?.authorId ? `/author/${materialData.authorId}` : undefined;
 
+// materialData.title only holds the headline's tail ("о том, как...") — the
+// author's full name is composed in front of it for anything rendered as a
+// flat string (tab title, structured data, share text).
 const displayMaterial = {
-  title: materialData?.title || "Материал",
+  title: materialData?.title || "",
   contentBlocks: materialData?.content || [],
 };
+const composedTitle =
+  composeFirstPersonTitle(authorName, displayMaterial.title) || "Материал";
 
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
 const canonicalUrl = new URL(`/first-person/${id}`, siteOrigin).toString();
@@ -63,7 +69,7 @@ const materialStructuredData = materialData
   ? {
       "@context": "https://schema.org",
       "@type": "Article",
-      headline: displayMaterial.title,
+      headline: composedTitle,
       datePublished: toIsoDate(materialData.createdAt),
       dateModified: toIsoDate(materialData.updatedAt ?? materialData.createdAt),
       author: authorName ? { "@type": "Person", name: authorName } : { "@id": organizationId },
@@ -77,7 +83,7 @@ const materialStructuredData = materialData
 <Layout
   navbarVariant="default"
   includePreFooterCTA={false}
-  title={`${displayMaterial.title} - Maag`}
+  title={`${composedTitle} - Maag`}
   description="От первого лица"
   canonicalPath={`/first-person/${id}`}
   type="article"
@@ -124,12 +130,12 @@ const materialStructuredData = materialData
                     От первого лица
                   </p>
                   <h1 class="font-old_standard text-3xl leading-tight text-base-content lg:text-[44px]">
-                    {displayMaterial.title}
+                    {authorName && <span class="font-bold">{authorName}</span>}{authorName && " "}{displayMaterial.title}
                   </h1>
                   <ContentActions
                     contentType="firstPerson"
                     contentId={id!}
-                    title={displayMaterial.title}
+                    title={composedTitle}
                     href={`/first-person/${id}`}
                     align="left"
                   />

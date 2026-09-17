@@ -40,11 +40,16 @@ const {
     <label class="block text-sm font-medium text-base-content mb-2"
       >Заголовок материала</label
     >
+    <p class="text-xs text-base-content/60 mb-2">
+      Заголовок собирается автоматически: полное имя автора + текст ниже, без двоеточия.
+      Здесь нужно ввести только продолжение — например, «о том, как он попал в DAU Ильи Хржановского и сыграл самого себя».
+    </p>
     <template x-if="isEditingTitle">
       <div>
         <input
           type="text"
           x-model="editingTitleText"
+          placeholder="о том, как..."
           class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
         />
         <div class="flex justify-end gap-3 mt-3">
@@ -63,7 +68,7 @@ const {
       >
         <h3
           class="text-lg font-semibold"
-          x-text="article.title || 'Введите заголовок...'"
+          x-text="getComposedTitle() || 'Введите заголовок...'"
         >
         </h3>
         <Button variant="outline" size="sm" @click="editTitle()"

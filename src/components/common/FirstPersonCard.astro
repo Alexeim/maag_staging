@@ -1,7 +1,9 @@
 ---
 import LazyImage from "./LazyImage.astro";
+import { composeFirstPersonTitle } from "@/lib/utils/firstPerson";
 
 interface FirstPersonCardProps {
+  authorName?: string;
   title?: string;
   imageUrl?: string | null;
   transitionName?: string;
@@ -9,13 +11,16 @@ interface FirstPersonCardProps {
 }
 
 const {
-  title = "Без названия",
+  authorName = "",
+  title = "",
   imageUrl,
   transitionName,
   href = "#",
 } = Astro.props as FirstPersonCardProps;
 
 const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
+const composedTitle =
+  composeFirstPersonTitle(authorName, title) || "Без названия";
 ---
 
 <div class="linked-image-hover w-full">
@@ -32,9 +37,11 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
     <div class="w-5/6 grid grid-rows-[5fr_7fr]">
       <div class="pt-4 pr-2">
         <h2
-          class="font-old_standard leading-[1.15] text-base-content text-[22px] font-semibold"
+          class="font-old_standard font-normal leading-[1.15] text-base-content text-[22px]"
         >
-          {title}
+          {authorName && <span class="font-bold">{authorName}</span>}{
+            authorName && " "
+          }<span class="italic">{title}</span>
         </h2>
       </div>
       <div>
@@ -54,6 +61,6 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
       </div>
     </div>
 
-    <a href={href} class="absolute inset-0 z-1" aria-label={title}></a>
+    <a href={href} class="absolute inset-0 z-1" aria-label={composedTitle}></a>
   </div>
 </div>

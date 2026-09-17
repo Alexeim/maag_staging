@@ -49,12 +49,9 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
               </p>
               <h1
                 class="text-3xl lg:text-[44px] leading-tight font-old_standard text-base-content w-full"
-                x-text="article.title">
+              >
+                <span class="font-bold" x-text="getPreviewAuthorName()"></span> <span x-text="article.title"></span>
               </h1>
-              <p
-                class="text-base lg:text-xl font-thin font-old_standard italic text-base-content mt-4"
-                x-text="getPreviewAuthorName()"
-              ></p>
             </div>
           </div>
         </div>
