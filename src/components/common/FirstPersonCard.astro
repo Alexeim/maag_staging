@@ -39,9 +39,14 @@ const composedTitle =
         <h2
           class="font-old_standard font-normal leading-[1.15] text-base-content text-[22px]"
         >
-          {authorName && <span class="font-bold">{authorName}</span>}{
-            authorName && " "
-          }<span class="italic">{title}</span>
+          {
+            authorName && (
+              <span class="font-bold">
+                {authorName}
+                <br />
+              </span>
+            )
+          }{authorName && " "}<span class="italic">{title}</span>
         </h2>
       </div>
       <div>
