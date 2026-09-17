@@ -1,7 +1,6 @@
 import { firstPersonApi } from "@/lib/api/api";
 import articleCreatorLogic from "@/components/article/creatorLogic";
 import { reindexContentBlocks } from "@/lib/utils/contentBlocks";
-import { composeFirstPersonTitle } from "@/lib/utils/firstPerson";
 
 // "От первого лица" reuses the article block editor/category/tags/author
 // machinery wholesale (via articleCreatorLogic), but has no hero image and
@@ -89,16 +88,6 @@ export default function firstPersonCreatorLogic(initialState = {}) {
         (author: any) => author.id === this.selectedAuthorId,
       );
       return selectedAuthor?.noBgAvatar || "";
-    },
-
-    // article.title only holds the tail of the headline ("о том, как...");
-    // the author's full name is prepended here so editors see the real
-    // published headline while they type, not just the fragment.
-    getComposedTitle() {
-      return composeFirstPersonTitle(
-        this.getSelectedAuthorDisplay().name,
-        this.article.title,
-      );
     },
 
     returnToEdit() {
