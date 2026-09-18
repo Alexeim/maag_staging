@@ -16,23 +16,36 @@ Only things that are non-obvious or that I have already got wrong here.
 ## Two read models — this is the important one
 
 - `server/src/routes/publicRoutes.ts` → `publicMaterialsController.ts`,
-  `publicLandingController.ts`. These filter `.where('published','==',true)`.
+  `publicLandingController.ts`, `publicRelatedController.ts`. Published only.
   **Safe for readers.**
 - `server/src/routes/{article,news,guide,interview,flipper,visualStory,event,
   firstPerson}Routes.ts` → `router.get('/')` and `router.get('/:id')`.
   No auth, no `published` filter. **Editorial endpoints, drafts included.**
-
-**Open defect (2026-09-18, not fixed):** `fetchPublicContentPools()` in
-`src/lib/utils/contentCollectionMarquee.ts` calls `articlesApi.list()` etc. —
-the unfiltered routes — and never filters `published`. Drafts therefore reach
-the "Похожие материалы" carousels, the in-news sidebar rail and
-`src/components/article/LinkToContent.astro`.
+  Anyone with the API host can read drafts through them (the host is in the
+  client bundle as `PUBLIC_API_BASE_URL`). **Accepted on 2026-09-18** — the
+  owner decided not to close them. Don't re-raise it as a finding.
 
 Before touching any public card list, check which read model it uses.
 
-Admin draft preview on real pages is intentional and separate:
-`canPreviewUnpublished()` in `src/lib/utils/preview.ts`, gated on
-`role === "admin"`. Do not break it while fixing the above.
+**Cards on material pages** — the "Похожие материалы" carousel, the news-page
+sidebar and in-body `LinkToContent` — come from one call,
+`GET /api/public/related/:type/:id` (`publicRelatedController.ts`). It returns
+card fields only, published only. The per-page autofill rules (same rubric,
+latest flippers, …) live there, not on the pages. Until 2026-09-18 the pages
+downloaded every material of every type (~2.1 MB, drafts included) and picked
+cards themselves; that code was removed.
+
+Material pages still load **the material itself** with the editorial
+`getById` on purpose: they 404 a draft themselves, and admin draft preview —
+`canPreviewUnpublished()` in `src/lib/utils/preview.ts`, `role === "admin"` —
+depends on getting the draft. Don't move that call to a published-only route.
+
+**Dates shown to readers and to Google are `publishedAt`, never `createdAt`**
+(page headers, cards, landing, carousel, `datePublished`, sitemap `lastmod`).
+Unpublishing clears `publishedAt`; republishing sets a new one. A draft has
+none, so `ArticleDate` renders "Черновик" — only an admin ever sees that.
+Component props are still *named* `createdAt=`; the value passed is the
+publication date.
 
 ## Alpine
 
