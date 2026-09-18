@@ -1503,7 +1503,7 @@ export interface PublicRelatedCard {
   lead?: string;
   mainQuote?: string;
   imageUrl: string | null;
-  createdAt?: unknown;
+  publishedAt?: unknown;
   category?: string;
   articleType?: string;
   isNews?: boolean;

@@ -6,7 +6,7 @@ interface ContentCardItem {
   title: string;
   href: string;
   imageUrl?: string | null;
-  createdAt?: unknown;
+  publishedAt?: unknown;
   tags?: string[];
   category?: string;
   contentType: string;
@@ -208,7 +208,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                               </a>
 
                               <p class="hidden m-0 font-inter text-xs uppercase tracking-[0.22em] text-base-content/55">
-                                {formatDate(entry.item.createdAt)}
+                                {formatDate(entry.item.publishedAt)}
                               </p>
                             </div>
                           </article>
@@ -310,7 +310,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                           </a>
 
                           <p class="m-0 font-inter text-[11px] uppercase tracking-[0.22em] text-base-content/55">
-                            {formatDate(item.createdAt)}
+                            {formatDate(item.publishedAt)}
                           </p>
                         </div>
                       </article>

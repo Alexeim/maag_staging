@@ -113,14 +113,18 @@ const normalizeDate = (value: any): Date | null => {
   return null;
 };
 
-const createdAt = normalizeDate(storyData?.createdAt);
-const dateFormatted = createdAt
-  ? createdAt.toLocaleDateString("ru-RU", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  : "";
+// Publication date; a draft has none, and only an admin can see one.
+const publishedAt = normalizeDate(storyData?.publishedAt);
+let dateFormatted = "";
+if (publishedAt) {
+  dateFormatted = publishedAt.toLocaleDateString("ru-RU", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+} else if (isDraftPreview) {
+  dateFormatted = "Черновик";
+}
 
 // Dedicated cover takes priority; fall back to first slide's image
 const heroImageUrl = storyData?.imageUrl || slides[0]?.imageUrl || "";

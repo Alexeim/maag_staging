@@ -112,12 +112,12 @@ try {
 
           <div class="flex flex-col flex-wrap items-start justify-center gap-4">
             {
-              flipper.author && flipper.createdAt && (
+              flipper.author && (
                 <ArticleMetaRow
                   authorName={`${flipper.author.firstName} ${flipper.author.lastName}`}
                   authorAvatar={flipper.author.avatar}
                   authorId={flipper.authorId}
-                  createdAt={flipper.createdAt}
+                  createdAt={flipper.publishedAt}
                   align="start"
                 />
               )

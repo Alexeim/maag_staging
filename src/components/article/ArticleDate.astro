@@ -1,13 +1,25 @@
 ---
 interface Props {
-  createdAt: string | Date | { toDate: () => Date } | { _seconds: number };
+  // Publication date. Empty only for an unpublished material, which only an
+  // admin sees (draft preview) — shown as "Черновик", never as 1 Jan 1970.
+  createdAt:
+    | string
+    | Date
+    | { toDate: () => Date }
+    | { _seconds: number }
+    | null
+    | undefined;
 }
 
 const { createdAt } = Astro.props;
 
-let date: Date;
+const isDraft = createdAt === null || createdAt === undefined;
 
-if (typeof createdAt === "object" && createdAt !== null) {
+let date = new Date(NaN);
+
+if (isDraft) {
+  // Nothing to parse.
+} else if (typeof createdAt === "object") {
   if ("toDate" in createdAt && typeof createdAt.toDate === "function") {
     // Вариант 1: Настоящий объект Firebase Timestamp
     date = createdAt.toDate();
@@ -26,15 +38,19 @@ if (typeof createdAt === "object" && createdAt !== null) {
   date = new Date(createdAt);
 }
 
-const formattedDate = !isNaN(date.getTime())
-  ? date
-      .toLocaleDateString("ru-RU", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-      .replace(" г.", "") // Remove " г."
-  : "Некорректная дата";
+let formattedDate = "Некорректная дата";
+
+if (isDraft) {
+  formattedDate = "Черновик";
+} else if (!isNaN(date.getTime())) {
+  formattedDate = date
+    .toLocaleDateString("ru-RU", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+    .replace(" г.", ""); // Remove " г."
+}
 ---
 
 <div class="text-xs lg:text-sm font-inter text-gray-600 leading-none">

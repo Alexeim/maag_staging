@@ -83,7 +83,6 @@ const CARD_FIELDS = [
   'caption',
   'carouselContent',
   'slides',
-  'createdAt',
   'publishedAt',
   'category',
   'articleType',
@@ -104,7 +103,7 @@ interface Card {
   lead?: string;
   mainQuote?: string;
   imageUrl: string | null;
-  createdAt?: unknown;
+  publishedAt?: unknown;
   category?: string;
   articleType?: string;
   isNews?: boolean;
@@ -163,7 +162,7 @@ const toCard = (type: CardType, doc: Snapshot): Card => {
     lead: data.lead,
     mainQuote: data.mainQuote,
     imageUrl: toImageUrl(type, data),
-    createdAt: data.createdAt,
+    publishedAt: data.publishedAt,
     category: data.category,
     articleType: data.articleType,
     isNews: type === 'news' ? true : data.isNews,

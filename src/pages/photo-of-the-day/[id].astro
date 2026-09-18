@@ -39,7 +39,7 @@ const AuthorWrapper = authorHref ? "a" : "div";
 
 // Same date-normalizing logic as ArticleDate.astro, duplicated here because
 // the hero overlay needs light (white) text and ArticleDate hardcodes gray-600.
-const normalizeCreatedAt = (value: any): Date | null => {
+const normalizeTimestamp = (value: any): Date | null => {
   if (!value) return null;
   if (typeof value === "object") {
     if ("toDate" in value && typeof value.toDate === "function") {
@@ -52,10 +52,10 @@ const normalizeCreatedAt = (value: any): Date | null => {
   }
   return new Date(value);
 };
-const createdAtDate = photo ? normalizeCreatedAt(photo.createdAt) : null;
-const formattedCreatedAt =
-  createdAtDate && !isNaN(createdAtDate.getTime())
-    ? createdAtDate
+const publishedAtDate = photo ? normalizeTimestamp(photo.publishedAt) : null;
+const formattedPublishedAt =
+  publishedAtDate && !isNaN(publishedAtDate.getTime())
+    ? publishedAtDate
         .toLocaleDateString("ru-RU", {
           year: "numeric",
           month: "long",
@@ -145,11 +145,11 @@ const xInit =
                   </span>
                 </AuthorWrapper>
                 <div class="flex items-center gap-3 flex-shrink-0">
-                  {formattedCreatedAt && (
+                  {formattedPublishedAt && (
                     <>
                       <span class="text-white/40 font-inter">|</span>
                       <span class="text-xs lg:text-sm font-inter text-white/70 whitespace-nowrap">
-                        {formattedCreatedAt}
+                        {formattedPublishedAt}
                       </span>
                     </>
                   )}

@@ -17,7 +17,8 @@ interface Props {
   authorAvatar?: string;
   authorId?: string;
   isKid?: boolean;
-  createdAt: string | Date | { toDate: () => Date } | { _seconds: number };
+  // Publication date; empty for a draft (see ArticleDate).
+  createdAt?: string | Date | { toDate: () => Date } | { _seconds: number } | null;
   imageUrl?: string;
   imageAlt?: string;
   imageCaption?: string;
