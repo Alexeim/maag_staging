@@ -107,18 +107,12 @@ const truncateText = (text?: string, maxLength: number = 220) => {
   return `${safeText.trim()}...`;
 };
 
+// `contentQuote` is the first quote / Q&A answer from the interview body,
+// picked on the server (publicLandingController.ts) — the body is not sent.
 const extractInterviewQuote = (interview: any): string | null => {
   if (!interview) return null;
   if (interview.mainQuote) return interview.mainQuote;
-  if (!Array.isArray(interview.content)) return interview.lead ?? null;
-  const quoteBlock = interview.content.find(
-    (block: any) => block.type === "quote" && block.text,
-  );
-  if (quoteBlock) return quoteBlock.text;
-  const qaBlock = interview.content.find(
-    (block: any) => block.type === "qa" && block.answer,
-  );
-  return qaBlock?.answer ?? interview.lead ?? null;
+  return interview.contentQuote ?? interview.lead ?? null;
 };
 
 let primaryCultureArticle: any = null;

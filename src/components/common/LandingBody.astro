@@ -116,24 +116,10 @@ const carouselItems = (publicLandingData?.carouselItems ?? []).filter(
   (item: any) => item?.published !== false,
 );
 
-const extractQuoteOrAnswer = (interview: any) => {
-  if (!interview || !Array.isArray(interview.content)) {
-    return null;
-  }
-  const quoteBlock = interview.content.find(
-    (block) => block.type === "quote" && block.text,
-  );
-  if (quoteBlock) {
-    return quoteBlock.text;
-  }
-  const qaBlock = interview.content.find(
-    (block) => block.type === "qa" && block.answer,
-  );
-  if (qaBlock) {
-    return qaBlock.answer;
-  }
-  return null;
-};
+// First quote / Q&A answer from the interview body, picked on the server
+// (publicLandingController.ts) — the body itself is not sent.
+const extractQuoteOrAnswer = (interview: any): string | null =>
+  interview?.contentQuote ?? null;
 
 const truncateText = (text: string | null, maxLength: number = 100) => {
   if (!text) return null;

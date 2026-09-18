@@ -173,15 +173,7 @@ const twoImageArticleSplit = splitTitle(twoImageArticleTrunc);
 const extractInterviewQuote = (interview: any): string | null => {
   if (!interview) return null;
   if (interview.mainQuote) return interview.mainQuote;
-  if (!Array.isArray(interview.content)) return interview.lead ?? null;
-  const quoteBlock = interview.content.find(
-    (block: any) => block.type === "quote" && block.text,
-  );
-  if (quoteBlock) return quoteBlock.text;
-  const qaBlock = interview.content.find(
-    (block: any) => block.type === "qa" && block.answer,
-  );
-  return qaBlock?.answer ?? interview.lead ?? null;
+  return interview.contentQuote ?? interview.lead ?? null;
 };
 
 const interviewQuote = extractInterviewQuote(interviewFeature);

@@ -137,6 +137,17 @@ const getImageUrl = (type: LandingContentType, data: any): string | null => {
 // currently rendered exclusively in the Paris "2 фото" block.
 const getSecondImageUrl = (data: any): string | null => data.secondImageUrl ?? null;
 
+// Fallback headline quote for an interview without `mainQuote`: the first quote
+// block, else the first Q&A answer. Pages used to receive the whole `content`
+// (tens of KB per interview) only to run this search themselves.
+const extractInterviewContentQuote = (content: unknown): string | null => {
+  if (!Array.isArray(content)) return null;
+  const quoteBlock = content.find((block: any) => block?.type === 'quote' && block.text);
+  if (quoteBlock) return quoteBlock.text;
+  const qaBlock = content.find((block: any) => block?.type === 'qa' && block.answer);
+  return qaBlock ? qaBlock.answer : null;
+};
+
 const toLandingItem = (
   doc: FirebaseFirestore.DocumentSnapshot,
   type: LandingContentType,
@@ -181,7 +192,8 @@ const toLandingItem = (
     paid: Boolean(data.paid),
     mainQuote: data.mainQuote ?? null,
     interviewee: data.interviewee ?? null,
-    content: type === 'interview' ? data.content ?? [] : undefined,
+    contentQuote:
+      type === 'interview' ? extractInterviewContentQuote(data.content) : undefined,
     startDate: data.startDate ?? null,
     endDate: data.endDate ?? null,
     dateType: data.dateType ?? null,
@@ -1039,7 +1051,9 @@ export const getPublicLanding = async (_req: Request, res: Response) => {
           !isLeSaviezVousItem(item) &&
           !displayedIds.has(item.id),
       )
-      .slice(0, 20);
+      .slice(0, 20)
+      // Carousel cards show no lead — don't ship it (it was ~38% of the block).
+      .map((item: any) => ({ ...item, lead: undefined }));
 
     const payload = {
       landingPlacements,
