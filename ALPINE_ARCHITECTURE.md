@@ -1,8 +1,13 @@
-# Mentormatic: Alpine.js Architecture Refactoring Plan
+# Alpine.js Architecture
 
-**Date:** September 3, 2025  
-**Status:** Final Version - Clean  
-**Author:** Refactoring Documentation
+**Originally written:** September 3, 2025, for a different project (Mentormatic).
+**Status:** the architecture described here is the one in use in MAAG — the
+`$lazy` magic and `src/lib/alpine/plugins/lazyLoadPlugin.ts` were built from
+Part 7 and Appendix B below.
+
+**Known drift:** this document registers one lazy component (`calendar`); the
+project now registers 35, and the shared skeleton has grown to ~600 lines that
+load on every page. Not yet addressed.
 
 This document provides a technical analysis of the issues related to Alpine.js interactivity within the Astro View Transitions environment when using the official `@astrojs/alpinejs` integration. It outlines the core technical challenges identified and presents architectural solutions optimized for the `entrypoint.ts` pattern.
 

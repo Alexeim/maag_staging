@@ -70,9 +70,10 @@ Nothing reads these automatically. Status is unverified unless noted.
 **History, closed:**
 - `FRONTEND_DEPLOYMENT_CHAOS.md`, `SECURITY_INCIDENT_2025-01-27.md`
 
-**Misleading title, real content:**
-- `MENTORMATIC_ALPINE_REFACTOR_PLAN.md` — despite the name, this **is** the
-  design document for the Alpine architecture actually in use here. Part 7 and
+**Alpine architecture:**
+- `ALPINE_ARCHITECTURE.md` — the design document for the Alpine architecture
+  actually in use here (renamed from `MENTORMATIC_ALPINE_REFACTOR_PLAN.md`,
+  which is why it still reads as written for another project). Part 7 and
   Appendix B specify the `$lazy` magic and `lazyLoadPlugin.ts` (skeleton
   returned synchronously, real logic merged in on `init()`), and Part 1 explains
   why the skeleton exists at all: under View Transitions, Alpine starts scanning
@@ -84,4 +85,5 @@ Nothing reads these automatically. Status is unverified unless noted.
 - `ALPINE_GUIDELINES.md` — written for Mentormatic. Describes a per-component
   `x-init` dynamic-import pattern this project does not use, and names the wrong
   entrypoint. The Alpine section above is correct; that file is not.
-- `README.md` — untouched Astro starter template.
+  `DASHBOARD_PREVIEW_REFACTOR_ROADMAP.md:114` links to `ALPINE_GUIDELINES.md`;
+  it means `ALPINE_ARCHITECTURE.md`.
