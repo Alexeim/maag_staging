@@ -11,6 +11,7 @@ import {
   getPublicInterviews,
   getPublicNews,
 } from '../controllers/publicMaterialsController';
+import { getPublicRelated } from '../controllers/publicRelatedController';
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.get('/materials-by-tag', getMaterialsByTag);
 router.get('/materials-by-author', getMaterialsByAuthor);
 router.get('/news', getPublicNews);
 router.get('/interviews', getPublicInterviews);
+router.get('/related/:type/:id', getPublicRelated);
 
 export default router;

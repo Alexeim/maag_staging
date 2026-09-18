@@ -12,16 +12,11 @@ import {
 import {
   ApiError,
   articlesApi,
+  publicRelatedApi,
 } from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
-import {
-  buildContentCollectionItems,
-  fetchPublicContentPools,
-  normalizeTags,
-  toDate,
-} from "@/lib/utils/contentCollectionMarquee";
-import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
+import { normalizeTags } from "@/lib/utils/contentCollectionMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params as { id: string };
@@ -108,38 +103,12 @@ let sameCategoryItems: any[] = [];
 
 if (!error && articleData) {
   try {
-    const pools = await fetchPublicContentPools();
-    const allArticles = pools.allArticles;
-    collectionContentItems = await buildContentCollectionItems({
-      contentCollectionId: articleData?.contentCollectionId,
-      currentContentType: "article",
-      currentId: id,
-      pools,
-    });
-
-    relatedContentItems = buildRelatedContentItems({
-      relatedContent: articleData?.relatedContent,
-      currentContentType: "article",
-      currentId: id,
-      pools,
-      excludeKeys: new Set(
-        collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
-      ),
-    });
-
-    const currentCategory = rawCategory?.toLowerCase() ?? null;
-    const relatedArticleIds = new Set(
-      [...collectionContentItems, ...relatedContentItems]
-        .filter((i) => i.contentType === "article")
-        .map((i) => i.id),
-    );
-    sameCategoryItems = allArticles
-      .filter((i) => i.id !== id && !relatedArticleIds.has(i.id))
-      .filter((i) => i?.articleType === "tips")
-      .filter((i) => !currentCategory || i?.category?.toLowerCase() === currentCategory)
-      .sort((a, b) => (toDate(b?.createdAt)?.getTime() ?? 0) - (toDate(a?.createdAt)?.getTime() ?? 0))
-      .slice(0, 12)
-      .map((item) => ({ ...item }));
+    // The server picks the cards (published only, card fields only) — see
+    // server/src/controllers/publicRelatedController.ts.
+    const cards = await publicRelatedApi.get("tips", id);
+    collectionContentItems = cards.collection;
+    relatedContentItems = cards.related;
+    sameCategoryItems = cards.autofill;
   } catch (e) {
     console.error("Failed to fetch collection content for tips page:", e);
   }

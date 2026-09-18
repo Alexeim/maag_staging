@@ -14,14 +14,10 @@ import {
   getPrimaryBadgeLabel,
   getTagLabel,
 } from "@/lib/utils/contentBadge";
-import { ApiError, newsApi } from "@/lib/api/api";
+import { ApiError, newsApi, publicRelatedApi } from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
-import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
 import {
-  buildLinkedContentLookup,
-  buildContentCollectionItems,
-  fetchPublicContentPools,
   normalizeTags,
   toDate,
   type LinkedContentLookup,
@@ -135,45 +131,13 @@ let linkedContentLookup: LinkedContentLookup = {};
 
 if (!error && articleData) {
   try {
-    const pools = await fetchPublicContentPools();
-    linkedContentLookup = buildLinkedContentLookup(pools);
-    const allNews = pools.allNews;
-    collectionContentItems = await buildContentCollectionItems({
-      contentCollectionId: articleData?.contentCollectionId,
-      currentContentType: "news",
-      currentId: id,
-      pools,
-    });
-
-    relatedContentItems = buildRelatedContentItems({
-      relatedContent: articleData?.relatedContent,
-      currentContentType: "news",
-      currentId: id,
-      pools,
-      excludeKeys: new Set(
-        collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
-      ),
-    });
-
-    const currentCategory = articleData?.category?.toLowerCase?.() ?? null;
-    const relatedNewsIds = new Set(
-      [...collectionContentItems, ...relatedContentItems]
-        .filter((i) => i.contentType === "news")
-        .map((i) => i.id),
-    );
-    sameCategoryItems = allNews
-      .filter((i) => i.id !== id && !relatedNewsIds.has(i.id))
-      .filter(
-        (i) =>
-          !currentCategory || i?.category?.toLowerCase() === currentCategory,
-      )
-      .sort(
-        (a, b) =>
-          (toDate(b?.createdAt)?.getTime() ?? 0) -
-          (toDate(a?.createdAt)?.getTime() ?? 0),
-      )
-      .slice(0, 12)
-      .map((item) => ({ ...item }));
+    // The server picks the cards (published only, card fields only) — see
+    // server/src/controllers/publicRelatedController.ts.
+    const cards = await publicRelatedApi.get("news", id!);
+    collectionContentItems = cards.collection;
+    relatedContentItems = cards.related;
+    sameCategoryItems = cards.autofill;
+    linkedContentLookup = cards.linked;
 
     const seenMoreNewsIds = new Set<string>();
     const appendUniqueNewsItems = (items: any[]) => {

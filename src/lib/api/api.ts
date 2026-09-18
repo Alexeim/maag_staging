@@ -1483,6 +1483,50 @@ export const publicInterviewsListingApi = {
   },
 };
 
+export type PublicRelatedPageType =
+  | "article"
+  | "tips"
+  | "news"
+  | "guide"
+  | "flipper"
+  | "interview"
+  | "event";
+
+// Card fields only — never the material's body. Published materials only.
+export interface PublicRelatedCard {
+  id: string;
+  contentType: string;
+  href: string;
+  title: string;
+  cardTitle?: string;
+  cardLead?: string;
+  lead?: string;
+  mainQuote?: string;
+  imageUrl: string | null;
+  createdAt?: unknown;
+  category?: string;
+  articleType?: string;
+  isNews?: boolean;
+  tags: string[];
+}
+
+export interface PublicRelatedResponse {
+  collection: PublicRelatedCard[];
+  related: PublicRelatedCard[];
+  autofill: PublicRelatedCard[];
+  // Keyed "<linkedContentType>:<id>", the way ArticleBody looks link blocks up.
+  linked: Record<string, PublicRelatedCard>;
+}
+
+export const publicRelatedApi = {
+  get(type: PublicRelatedPageType, id: string) {
+    return request<PublicRelatedResponse>(
+      `/api/public/related/${type}/${encodeURIComponent(id)}`,
+      { public: true },
+    );
+  },
+};
+
 export type DashboardMaterialType =
   | "article"
   | "tips"

@@ -6,21 +6,15 @@ import EventMetaIcon from "../../components/common/EventMetaIcon.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import picture1 from "../../assets/images/culture.jpg";
 import { CalendarPlus } from "@lucide/astro";
-import { ApiError, eventsApi } from "@/lib/api/api";
+import { ApiError, eventsApi, publicRelatedApi } from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import {
-  buildContentCollectionItems,
-  buildLinkedContentLookup,
-  fetchPublicContentPools,
   hasLinkedContentBlocks,
   type LinkedContentLookup,
   type PublicContentCardItem,
 } from "@/lib/utils/contentCollectionMarquee";
-import {
-  buildRelatedContentItems,
-  hasRelatedContentEntries,
-} from "@/lib/utils/relatedMaterialsMarquee";
+import { hasRelatedContentEntries } from "@/lib/utils/relatedMaterialsMarquee";
 import { buildEventStructuredData } from "@/lib/seo/structuredData";
 import { getCalendarToday } from "@/lib/utils/calendarDate";
 import { getPrimaryBadgeHref, getTagLabel } from "@/lib/utils/contentBadge";
@@ -502,27 +496,13 @@ if (
     hasRelatedContentEntries(eventData?.relatedContent))
 ) {
   try {
-    const pools = await fetchPublicContentPools();
-    linkedContentLookup = buildLinkedContentLookup(pools);
-
-    if (eventData.contentCollectionId) {
-      collectionContentItems = await buildContentCollectionItems({
-        contentCollectionId: eventData.contentCollectionId,
-        currentContentType: "event",
-        currentId: id!,
-        pools,
-      });
-    }
-
-    relatedContentItems = buildRelatedContentItems({
-      relatedContent: eventData?.relatedContent,
-      currentContentType: "event",
-      currentId: id!,
-      pools,
-      excludeKeys: new Set(
-        collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
-      ),
-    });
+    // The server picks the cards (published only, card fields only) — see
+    // server/src/controllers/publicRelatedController.ts. Events have no
+    // autofill, so `cards.autofill` is always empty here.
+    const cards = await publicRelatedApi.get("event", id!);
+    collectionContentItems = cards.collection;
+    relatedContentItems = cards.related;
+    linkedContentLookup = cards.linked;
   } catch (collectionError) {
     console.error(
       "Failed to fetch collection content for event page:",

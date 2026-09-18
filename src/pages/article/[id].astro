@@ -13,18 +13,15 @@ import {
 import {
   ApiError,
   articlesApi,
+  publicRelatedApi,
 } from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import {
-  buildContentCollectionItems,
-  buildLinkedContentLookup,
-  fetchPublicContentPools,
   normalizeTags,
   type LinkedContentLookup,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
-import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
 
 const { id } = Astro.params;
 
@@ -159,45 +156,13 @@ const articleStructuredData = articleData
 
 if (!error && articleData) {
   try {
-    const pools = await fetchPublicContentPools();
-    linkedContentLookup = buildLinkedContentLookup(pools);
-    const allArticles = pools.allArticles
-      .filter((article) => article.id !== id);
-    collectionContentItems = await buildContentCollectionItems({
-      contentCollectionId: articleData?.contentCollectionId,
-      currentContentType: "article",
-      currentId: id,
-      pools,
-    });
-
-    relatedContentItems = buildRelatedContentItems({
-      relatedContent: articleData?.relatedContent,
-      currentContentType: "article",
-      currentId: id,
-      pools,
-      excludeKeys: new Set(
-        collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
-      ),
-    });
-
-    const currentCategory = normalizeCategory(articleData?.category);
-    const relatedArticleIds = new Set(
-      [...collectionContentItems, ...relatedContentItems]
-        .filter((item) => item.contentType === "article")
-        .map((item) => item.id),
-    );
-
-    sameCategoryItems = allArticles
-      .filter((item) => isStandardCategoryArticle(item))
-      .filter((item) => normalizeCategory(item?.category) === currentCategory)
-      .filter((item) => item.id !== id && !relatedArticleIds.has(item.id))
-      .sort((left, right) => {
-        const leftDate = toDate(left?.createdAt)?.getTime() ?? 0;
-        const rightDate = toDate(right?.createdAt)?.getTime() ?? 0;
-        return rightDate - leftDate;
-      })
-      .slice(0, 12)
-      .map((item) => ({ ...item }));
+    // The server picks the cards (published only, card fields only) — see
+    // server/src/controllers/publicRelatedController.ts.
+    const cards = await publicRelatedApi.get("article", id!);
+    collectionContentItems = cards.collection;
+    relatedContentItems = cards.related;
+    sameCategoryItems = cards.autofill;
+    linkedContentLookup = cards.linked;
   } catch (relatedError) {
     console.error("Failed to fetch collection content for article page:", relatedError);
   }

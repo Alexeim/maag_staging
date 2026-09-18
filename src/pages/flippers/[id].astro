@@ -8,19 +8,13 @@ import {
   getPrimaryBadgeLabel,
   getTagLabel,
 } from "@/lib/utils/contentBadge";
-import { flippersApi } from "../../lib/api/api";
+import { flippersApi, publicRelatedApi } from "../../lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { ChevronLeft, ChevronRight } from "@lucide/astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import picture1 from "@/assets/images/culture.jpg";
-import {
-  buildContentCollectionItems,
-  fetchPublicContentPools,
-  normalizeTags,
-  toDate,
-} from "@/lib/utils/contentCollectionMarquee";
-import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
+import { normalizeTags } from "@/lib/utils/contentCollectionMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
@@ -77,39 +71,12 @@ let relatedContentItems: any[] = [];
 let recentFlipperItems: any[] = [];
 
 try {
-  const pools = await fetchPublicContentPools();
-  const allFlippers = pools.allFlippers;
-  collectionContentItems = await buildContentCollectionItems({
-    contentCollectionId: (flipper as any)?.contentCollectionId,
-    currentContentType: "flipper",
-    currentId: id,
-    pools,
-  });
-
-  relatedContentItems = buildRelatedContentItems({
-    relatedContent: (flipper as any)?.relatedContent,
-    currentContentType: "flipper",
-    currentId: id,
-    pools,
-    excludeKeys: new Set(
-      collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
-    ),
-  });
-
-  const relatedFlipperIds = new Set(
-    [...collectionContentItems, ...relatedContentItems]
-      .filter((i) => i.contentType === "flipper")
-      .map((i) => i.id),
-  );
-  recentFlipperItems = allFlippers
-    .filter((i) => i.id !== id && !relatedFlipperIds.has(i.id))
-    .sort(
-      (a, b) =>
-        (toDate(b?.createdAt)?.getTime() ?? 0) -
-        (toDate(a?.createdAt)?.getTime() ?? 0),
-    )
-    .slice(0, 12)
-    .map((item) => ({ ...item }));
+  // The server picks the cards (published only, card fields only) — see
+  // server/src/controllers/publicRelatedController.ts.
+  const cards = await publicRelatedApi.get("flipper", id!);
+  collectionContentItems = cards.collection;
+  relatedContentItems = cards.related;
+  recentFlipperItems = cards.autofill;
 } catch (e) {
   console.error("Failed to fetch collection content for flipper page:", e);
 }

@@ -10,19 +10,13 @@ import {
   getPrimaryBadgeLabel,
   getTagLabel,
 } from "@/lib/utils/contentBadge";
-import { ApiError, guidesApi } from "@/lib/api/api";
+import { ApiError, guidesApi, publicRelatedApi } from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import {
-  buildContentCollectionItems,
-  buildLinkedContentLookup,
-  fetchPublicContentPools,
-  hasLinkedContentBlocks,
   normalizeTags,
-  toDate,
   type LinkedContentLookup,
 } from "@/lib/utils/contentCollectionMarquee";
-import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
@@ -106,45 +100,13 @@ const articleStructuredData = guideData
 
 if (!error && guideData) {
   try {
-    const pools = await fetchPublicContentPools();
-
-    if (hasLinkedContentBlocks(displayGuide.contentBlocks)) {
-      linkedContentLookup = buildLinkedContentLookup(pools);
-    }
-
-    collectionContentItems = await buildContentCollectionItems({
-      contentCollectionId: guideData?.contentCollectionId,
-      currentContentType: "guide",
-      currentId: id,
-      pools,
-    });
-
-    relatedContentItems = buildRelatedContentItems({
-      relatedContent: guideData?.relatedContent,
-      currentContentType: "guide",
-      currentId: id,
-      pools,
-      excludeKeys: new Set(
-        collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
-      ),
-    });
-
-    const relatedGuideIds = new Set(
-      [...collectionContentItems, ...relatedContentItems]
-        .filter((item) => item.contentType === "guide")
-        .map((item) => item.id),
-    );
-
-    sameCategoryItems = pools.allGuides
-      .filter((item) => item.id !== id && !relatedGuideIds.has(item.id))
-      .filter((item) => !rawCategory || item?.category === rawCategory)
-      .sort(
-        (a, b) =>
-          (toDate(b?.createdAt)?.getTime() ?? 0) -
-          (toDate(a?.createdAt)?.getTime() ?? 0),
-      )
-      .slice(0, 12)
-      .map((item) => ({ ...item }));
+    // The server picks the cards (published only, card fields only) — see
+    // server/src/controllers/publicRelatedController.ts.
+    const cards = await publicRelatedApi.get("guide", id!);
+    collectionContentItems = cards.collection;
+    relatedContentItems = cards.related;
+    sameCategoryItems = cards.autofill;
+    linkedContentLookup = cards.linked;
   } catch (relatedError) {
     console.error("Failed to fetch related content for guide page:", relatedError);
   }

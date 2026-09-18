@@ -1,6 +1,6 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
-import { interviewsApi } from "../../lib/api/api";
+import { interviewsApi, publicRelatedApi } from "../../lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
@@ -9,14 +9,9 @@ import InterviewHero from "@/components/interview/InterviewHero.astro";
 import { getKnownTagLabel } from "@/content/tags/tags";
 import picture1 from "@/assets/images/culture.jpg";
 import {
-  buildContentCollectionItems,
-  buildLinkedContentLookup,
-  fetchPublicContentPools,
   normalizeTags,
   type LinkedContentLookup,
-  toDate,
 } from "@/lib/utils/contentCollectionMarquee";
-import { buildRelatedContentItems } from "@/lib/utils/relatedMaterialsMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
@@ -79,40 +74,13 @@ let recentInterviewItems: any[] = [];
 let linkedContentLookup: LinkedContentLookup = {};
 
 try {
-  const pools = await fetchPublicContentPools();
-  linkedContentLookup = buildLinkedContentLookup(pools);
-  const allInterviews = pools.allInterviews;
-  collectionContentItems = await buildContentCollectionItems({
-    contentCollectionId: (interview as any)?.contentCollectionId,
-    currentContentType: "interview",
-    currentId: id,
-    pools,
-  });
-
-  relatedContentItems = buildRelatedContentItems({
-    relatedContent: (interview as any)?.relatedContent,
-    currentContentType: "interview",
-    currentId: id,
-    pools,
-    excludeKeys: new Set(
-      collectionContentItems.map((item) => `${item.contentType}:${item.id}`),
-    ),
-  });
-
-  const relatedInterviewIds = new Set(
-    [...collectionContentItems, ...relatedContentItems]
-      .filter((i) => i.contentType === "interview")
-      .map((i) => i.id),
-  );
-  recentInterviewItems = allInterviews
-    .filter((i) => i.id !== id && !relatedInterviewIds.has(i.id))
-    .sort(
-      (a, b) =>
-        (toDate(b?.createdAt)?.getTime() ?? 0) -
-        (toDate(a?.createdAt)?.getTime() ?? 0),
-    )
-    .slice(0, 12)
-    .map((item) => ({ ...item }));
+  // The server picks the cards (published only, card fields only) — see
+  // server/src/controllers/publicRelatedController.ts.
+  const cards = await publicRelatedApi.get("interview", id!);
+  collectionContentItems = cards.collection;
+  relatedContentItems = cards.related;
+  recentInterviewItems = cards.autofill;
+  linkedContentLookup = cards.linked;
 } catch (e) {
   console.error("Failed to fetch collection content for interview page:", e);
 }
