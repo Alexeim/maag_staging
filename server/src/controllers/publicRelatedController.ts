@@ -84,6 +84,7 @@ const CARD_FIELDS = [
   'carouselContent',
   'slides',
   'createdAt',
+  'publishedAt',
   'category',
   'articleType',
   'isNews',
@@ -331,8 +332,10 @@ export const getPublicRelated = async (req: Request, res: Response) => {
       return true;
     });
 
-    // 3. Autofill: newest published materials of the page's own type that
-    // match its rule, minus anything already shown above.
+    // 3. Autofill: most recently published materials of the page's own type
+    // that match its rule, minus anything already shown above. "Recent" is
+    // by publication date — a draft that sat for a month and went out
+    // yesterday is new to readers.
     let autofill: Card[] = [];
     const matchesRule = buildAutofillFilter(pageType, current);
     if (matchesRule) {
@@ -343,7 +346,7 @@ export const getPublicRelated = async (req: Request, res: Response) => {
         .get();
       autofill = snapshot.docs
         .filter((doc) => !seenKeys.has(`${page.cardType}:${doc.id}`) && matchesRule(doc.data()))
-        .sort((left, right) => toTime(right.data().createdAt) - toTime(left.data().createdAt))
+        .sort((left, right) => toTime(right.data().publishedAt) - toTime(left.data().publishedAt))
         .slice(0, AUTOFILL_LIMIT)
         .map((doc) => toCard(page.cardType, doc));
     }
