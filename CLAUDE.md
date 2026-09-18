@@ -74,8 +74,15 @@ publication date.
 Nothing reads these automatically. Status is unverified unless noted.
 
 **Live:**
+- `docs/audit-2026-09-18.md` — **read this first.** Whole-project audit of
+  2026-09-18: what was fixed that day (commits), owner decisions (editorial
+  GET routes stay open, publication date only, delete nothing unasked), and
+  the open items with file:line — profile overwrite/read, Stripe trusting
+  body ids, broken `articlesApi.del`, Quill in every reader's bundle, and more.
+  Check an item there before re-reporting it as a new finding.
 - `docs/security-auth-dependency-roadmap.md` — security/auth/hosting, last
-  reviewed 2026-09-01. Contains the open question about editorial GET routes.
+  reviewed 2026-09-01. Line 513 assumes editorial GET routes return no
+  drafts; they do (see the audit).
 - `CALENDAR_PAYWALL_ROADMAP.md`, `DASHBOARD_PREVIEW_REFACTOR_ROADMAP.md`
 
 **Reference (describe how things work, not tasks):**
