@@ -62,8 +62,8 @@ const toDate = (value: unknown): Date | null => {
   return null;
 };
 
-const toLastmod = (item: { updatedAt?: unknown; createdAt?: unknown }) => {
-  const date = toDate(item.updatedAt) ?? toDate(item.createdAt);
+const toLastmod = (item: { updatedAt?: unknown; publishedAt?: unknown }) => {
+  const date = toDate(item.updatedAt) ?? toDate(item.publishedAt);
   return date?.toISOString().slice(0, 10);
 };
 
@@ -82,7 +82,7 @@ interface SitemapMaterial {
   id: string;
   published?: boolean;
   updatedAt?: unknown;
-  createdAt?: unknown;
+  publishedAt?: unknown;
   authorId?: string;
   tags?: unknown;
 }

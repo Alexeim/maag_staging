@@ -91,8 +91,8 @@ const articleStructuredData = articleData
       headline: displayArticle.title,
       description: displayArticle.lead,
       image: displayArticle.imageUrl,
-      datePublished: articleData.createdAt,
-      dateModified: articleData.updatedAt ?? articleData.createdAt,
+      datePublished: articleData.publishedAt,
+      dateModified: articleData.updatedAt ?? articleData.publishedAt,
       authorName: articleData.author ? displayArticle.authorName : undefined,
     })
   : [];

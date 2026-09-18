@@ -61,8 +61,8 @@ const articleStructuredData = buildArticleStructuredData({
   headline: flipper.title,
   description: flipper.lead,
   image: flipper.carouselContent?.[0]?.imageUrl,
-  datePublished: flipper.createdAt,
-  dateModified: flipper.updatedAt ?? flipper.createdAt,
+  datePublished: flipper.publishedAt,
+  dateModified: flipper.updatedAt ?? flipper.publishedAt,
   authorName,
 });
 

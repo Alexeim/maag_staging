@@ -70,8 +70,8 @@ const imageStructuredData = photo
       name: photo.title,
       description: photo.caption || photo.title,
       image: photo.imageUrl,
-      datePublished: photo.createdAt,
-      dateModified: photo.updatedAt ?? photo.createdAt,
+      datePublished: photo.publishedAt,
+      dateModified: photo.updatedAt ?? photo.publishedAt,
       authorName: photo.author ? authorName : undefined,
     })
   : [];

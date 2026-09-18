@@ -63,8 +63,8 @@ const articleStructuredData = buildArticleStructuredData({
   headline: title,
   description: lead,
   image: imageUrl,
-  datePublished: interview.createdAt,
-  dateModified: (interview as any).updatedAt ?? interview.createdAt,
+  datePublished: interview.publishedAt,
+  dateModified: (interview as any).updatedAt ?? interview.publishedAt,
   authorName: author ? authorName : undefined,
 });
 

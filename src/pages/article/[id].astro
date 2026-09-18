@@ -122,8 +122,8 @@ const articleStructuredData = articleData
       image: displayArticle.imageUrl
         ? [toAbsoluteUrl(displayArticle.imageUrl)]
         : undefined,
-      datePublished: toIsoDate(articleData.createdAt),
-      dateModified: toIsoDate(articleData.updatedAt ?? articleData.createdAt),
+      datePublished: toIsoDate(articleData.publishedAt),
+      dateModified: toIsoDate(articleData.updatedAt ?? articleData.publishedAt),
       author: articleAuthor,
       publisher: {
         "@id": organizationId,

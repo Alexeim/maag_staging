@@ -148,8 +148,8 @@ const articleStructuredData = storyData
       headline: title,
       description: lead,
       image: heroImageUrl,
-      datePublished: storyData.createdAt,
-      dateModified: storyData.updatedAt ?? storyData.createdAt,
+      datePublished: storyData.publishedAt,
+      dateModified: storyData.updatedAt ?? storyData.publishedAt,
       authorName,
     })
   : [];
