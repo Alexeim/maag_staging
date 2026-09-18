@@ -70,9 +70,18 @@ Nothing reads these automatically. Status is unverified unless noted.
 **History, closed:**
 - `FRONTEND_DEPLOYMENT_CHAOS.md`, `SECURITY_INCIDENT_2025-01-27.md`
 
+**Misleading title, real content:**
+- `MENTORMATIC_ALPINE_REFACTOR_PLAN.md` — despite the name, this **is** the
+  design document for the Alpine architecture actually in use here. Part 7 and
+  Appendix B specify the `$lazy` magic and `lazyLoadPlugin.ts` (skeleton
+  returned synchronously, real logic merged in on `init()`), and Part 1 explains
+  why the skeleton exists at all: under View Transitions, Alpine starts scanning
+  before a component's logic has loaded, producing `... is not defined`.
+  Note the drift: the document registers **one** lazy component (`calendar`);
+  the project now registers **35**, and the shared skeleton grew to ~600 lines.
+
 **Wrong / foreign — do not trust:**
 - `ALPINE_GUIDELINES.md` — written for Mentormatic. Describes a per-component
   `x-init` dynamic-import pattern this project does not use, and names the wrong
   entrypoint. The Alpine section above is correct; that file is not.
-- `MENTORMATIC_ALPINE_REFACTOR_PLAN.md` — Mentormatic, not this project.
 - `README.md` — untouched Astro starter template.
