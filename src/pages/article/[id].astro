@@ -25,25 +25,12 @@ import {
 
 const { id } = Astro.params;
 
-// Paris/Culture site-section labels, used for related-content grouping and
-// the bookmark section indicator below — unrelated to the material's tag badge.
+// Paris/Culture site-section labels, used for the bookmark section indicator
+// below — unrelated to the material's tag badge.
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
   paris: "Париж",
   hotContent: "Самое Читаемое",
-};
-
-const normalizeCategory = (value?: string | null) => {
-  if (!value) {
-    return null;
-  }
-  const normalizedValue = value.trim().toLowerCase();
-  const entry = Object.entries(CATEGORY_LABELS).find(
-    ([key, label]) =>
-      key.toLowerCase() === normalizedValue ||
-      label.toLowerCase() === normalizedValue,
-  );
-  return entry ? entry[0] : normalizedValue;
 };
 
 let articleData: any;
@@ -111,11 +98,6 @@ const bookmarkCategory =
     : "";
 const firstBookmarkTag = normalizeTags(articleData?.tags)[0] ?? "";
 const bookmarkTag = firstBookmarkTag ? getTagLabel(firstBookmarkTag) : "";
-
-const isStandardCategoryArticle = (item: any) =>
-  !item?.isNews &&
-  item?.articleType !== "tips" &&
-  item?.articleType !== "le_saviez_vous";
 
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
 const canonicalUrl = new URL(`/article/${id}`, siteOrigin).toString();

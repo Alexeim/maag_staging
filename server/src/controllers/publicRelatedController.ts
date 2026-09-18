@@ -5,9 +5,9 @@ const db = getDb();
 
 // Everything a material page shows as cards: the "Похожие материалы" carousel
 // (collection + related + autofill), the news-page sidebar (built from those
-// three lists on the page) and in-body link cards. Replaces the frontend's
-// fetchPublicContentPools, which downloaded every material of every type —
-// drafts and full `content` blocks included — to pick a dozen cards.
+// three lists on the page) and in-body link cards. The pages used to build
+// these themselves by downloading every material of every type — drafts and
+// full `content` blocks included — to pick a dozen cards.
 //
 // Rules are carried over from the material pages unchanged; the only
 // behavioural change is that unpublished materials never become cards.
@@ -60,8 +60,7 @@ const CARD_TYPE_BY_REFERENCE: Record<string, CardType> = {
   photoOfTheDay: 'photoOfTheDay',
 };
 
-// Order in which a content collection's materials are listed — the same order
-// buildContentCollectionItems used on the frontend.
+// Order in which a content collection's materials are listed on the page.
 const COLLECTION_REFERENCE_ORDER = [
   'article',
   'event',
