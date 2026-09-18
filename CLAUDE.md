@@ -48,6 +48,13 @@ Admin draft preview on real pages is intentional and separate:
 - `ClientRouter` is opt-in per page (`useClientRouter` in
   `src/layouts/Layout.astro`, default `false`). Don't assume view transitions
   are active.
+- **Do not add getters or setters to any `*Logic.ts`.** The lazy loader merges
+  the loaded module with a bare `Object.assign`, which copies values but not
+  property descriptors — a computed property would silently hold no value after
+  load, with no error. There are currently zero getters in these files, so the
+  trap is dormant. Mentormatic hit exactly this (`formattedValue` on
+  `rangeSelector`) and fixed it by copying descriptors explicitly; see
+  `wurkspaces-monorepo/apps/mentormatic/src/lib/alpine/plugins/lazyLoaderV2/factory.ts`.
 
 ## Documents in this repo
 
@@ -81,9 +88,11 @@ Nothing reads these automatically. Status is unverified unless noted.
   Note the drift: the document registers **one** lazy component (`calendar`);
   the project now registers **35**, and the shared skeleton grew to ~600 lines.
 
-**Wrong / foreign — do not trust:**
-- `ALPINE_GUIDELINES.md` — written for Mentormatic. Describes a per-component
-  `x-init` dynamic-import pattern this project does not use, and names the wrong
-  entrypoint. The Alpine section above is correct; that file is not.
-  `DASHBOARD_PREVIEW_REFACTOR_ROADMAP.md:114` links to `ALPINE_GUIDELINES.md`;
-  it means `ALPINE_ARCHITECTURE.md`.
+**Deleted:**
+- `ALPINE_GUIDELINES.md` — removed 2026-09-18. It was written for Mentormatic,
+  named the wrong entrypoint and described a per-component `x-init` dynamic-import
+  pattern this project never used; everything correct in it is covered by
+  `ALPINE_ARCHITECTURE.md`. An identical copy still lives at
+  `wurkspaces-monorepo/apps/mentormatic/ALPINE_GUIDELINES.md`.
+  Note: `DASHBOARD_PREVIEW_REFACTOR_ROADMAP.md:114` still links to it — that
+  link now points at nothing and means `ALPINE_ARCHITECTURE.md`.
