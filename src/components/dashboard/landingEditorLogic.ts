@@ -625,6 +625,14 @@ export default (initialState: LandingEditorInitialState) => ({
         if (this.selectedCultureCardKeys.length === 0) {
           throw new Error("Для ручного режима выбери хотя бы один материал.");
         }
+        // The picker caps this at CATEGORY_CARDS_MAX_LIMIT, but a placement
+        // saved before that cap existed can still hold more. Refuse it loudly
+        // instead of letting LandingBody's .slice(0, 2) drop the rest silently.
+        if (this.selectedCultureCardKeys.length > CATEGORY_CARDS_MAX_LIMIT) {
+          throw new Error(
+            `Секция показывает не больше ${CATEGORY_CARDS_MAX_LIMIT} карточек — сними лишние.`,
+          );
+        }
 
         const items = this.selectedCultureCardKeys.map((key: string) => {
           const parsedKey = parseContentKey(key);
@@ -674,6 +682,12 @@ export default (initialState: LandingEditorInitialState) => ({
       if (this.parisCardsMode === "manual") {
         if (this.selectedParisCardKeys.length === 0) {
           throw new Error("Для ручного режима выбери хотя бы один материал.");
+        }
+        // Same guard as the culture cards above.
+        if (this.selectedParisCardKeys.length > CATEGORY_CARDS_MAX_LIMIT) {
+          throw new Error(
+            `Секция показывает не больше ${CATEGORY_CARDS_MAX_LIMIT} карточек — сними лишние.`,
+          );
         }
 
         const items = this.selectedParisCardKeys.map((key: string) => {

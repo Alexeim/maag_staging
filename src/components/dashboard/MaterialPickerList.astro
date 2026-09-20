@@ -38,9 +38,14 @@ interface Props {
   selectionModel: string;
   // Shown instead of the list when there is nothing to pick at all.
   emptyText: string;
+  // Hard cap on how many options may be picked. Omitted means no cap.
+  // Used by the landing category-card slots, which the public page renders as
+  // exactly two cards (LandingBody.astro slices to 2 into an sm:grid-cols-2).
+  // Without it an editor can tick five, save, and silently get two.
+  maxPicks?: number;
 }
 
-const { options, isSelectedFn, toggleFn, selectionModel, emptyText } =
+const { options, isSelectedFn, toggleFn, selectionModel, emptyText, maxPicks } =
   Astro.props as Props;
 
 const typeMeta = (type: string) =>
@@ -137,6 +142,17 @@ const rootData = `{
     keys.splice(to, 0, keys.splice(from, 1)[0]);
     ${selectionModel} = keys;
   },
+
+  maxPicks: ${maxPicks ?? 0},
+  // True once the cap is reached. Rows already picked stay clickable so they can
+  // be unpicked; only the untouched ones go dead.
+  atLimit() {
+    return this.maxPicks > 0 && ${selectionModel}.length >= this.maxPicks;
+  },
+  pickedLabel() {
+    const count = ${selectionModel}.length;
+    return this.maxPicks > 0 ? 'Выбрано ' + count + ' из ' + this.maxPicks : 'Выбрано (' + count + ')';
+  },
 }`;
 ---
 
@@ -149,7 +165,7 @@ const rootData = `{
         style="display: none"
       >
         <p class="text-xs font-semibold uppercase tracking-wide text-base-content/60">
-          Выбрано<span x-text={` ' (' + ${selectionModel}.length + ')' `} /> — в этом порядке
+          <span x-text="pickedLabel()" /> — в этом порядке
         </p>
 
         <ol class="mt-2 grid gap-1.5">
@@ -214,6 +230,17 @@ const rootData = `{
         </button>
       </div>
 
+      {maxPicks && maxPicks > 0 && (
+        <p
+          class="text-xs text-base-content/60"
+          x-show="atLimit()"
+          style="display: none"
+        >
+          Больше {maxPicks} выбрать нельзя — столько карточек помещается на
+          странице. Сними лишнюю, чтобы выбрать другую.
+        </p>
+      )}
+
       {chipTypes.length > 1 && (
         <div class="flex flex-wrap items-center gap-2">
           {chipTypes.map((type) => (
@@ -241,12 +268,14 @@ const rootData = `{
           return (
             <label
               x-show={`matches(${index})`}
-              class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer"
+              class="flex items-start gap-3 rounded-lg border border-base-300 p-3"
+              :class={`!${isSelectedFn}(${JSON.stringify(item.id)}) && atLimit() ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'`}
             >
               <input
                 type="checkbox"
-                class="mt-1"
+                class="mt-1 disabled:cursor-not-allowed"
                 :checked={`${isSelectedFn}(${JSON.stringify(item.id)})`}
+                :disabled={`!${isSelectedFn}(${JSON.stringify(item.id)}) && atLimit()`}
                 @change={`${toggleFn}(${JSON.stringify(item.id)})`}
               />
               <span class="flex flex-col items-start gap-1.5 text-sm leading-6">
