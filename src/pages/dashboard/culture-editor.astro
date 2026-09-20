@@ -62,6 +62,11 @@ const formatUpdatedAt = (value: unknown) => {
 
 const normalizeCategoryKey = (value?: string) => value?.trim().toLowerCase() ?? "";
 
+// The pools below come from the editorial list endpoints, which return drafts
+// too. A draft must never be pickable into a live section slot — an editor
+// selecting one would silently put unfinished content on the public page.
+const isPublishedItem = (item: { published?: boolean }) => Boolean(item.published);
+
 let placements = DEFAULT_PLACEMENTS;
 let loadError = "";
 
@@ -98,6 +103,7 @@ try {
   articles
     .filter(
       (a) =>
+        isPublishedItem(a) &&
         normalizeCategoryKey(a.category) === "culture" &&
         a.articleType !== "le_saviez_vous" &&
         a.articleType !== "tips" &&
@@ -109,6 +115,7 @@ try {
   articles
     .filter(
       (a) =>
+        isPublishedItem(a) &&
         normalizeCategoryKey(a.category) === "culture" &&
         a.articleType !== "le_saviez_vous" &&
         Boolean(a.isHotContent),
@@ -118,39 +125,70 @@ try {
     });
 
   guides
-    .filter((g) => normalizeCategoryKey(g.category) === "culture" && !g.isHotContent)
+    .filter(
+      (g) =>
+        isPublishedItem(g) &&
+        normalizeCategoryKey(g.category) === "culture" &&
+        !g.isHotContent,
+    )
     .forEach((g) => {
       heroOptions.push({ id: `guide:${g.id}`, title: g.title, type: "guide", typeLabel: CONTENT_TYPE_LABELS.guide, createdAtMs: toMs(g.createdAt), publishedAtMs: toMs(g.publishedAt) });
     });
   guides
-    .filter((g) => normalizeCategoryKey(g.category) === "culture" && Boolean(g.isHotContent))
+    .filter(
+      (g) =>
+        isPublishedItem(g) &&
+        normalizeCategoryKey(g.category) === "culture" &&
+        Boolean(g.isHotContent),
+    )
     .forEach((g) => {
       sidebarOptions.push({ id: `guide:${g.id}`, title: g.title, type: "guide", typeLabel: CONTENT_TYPE_LABELS.guide, createdAtMs: toMs(g.createdAt), publishedAtMs: toMs(g.publishedAt) });
     });
 
   flippers
-    .filter((f) => normalizeCategoryKey(f.category) === "culture" && !f.isHotContent)
+    .filter(
+      (f) =>
+        isPublishedItem(f) &&
+        normalizeCategoryKey(f.category) === "culture" &&
+        !f.isHotContent,
+    )
     .forEach((f) => {
       heroOptions.push({ id: `flipper:${f.id}`, title: f.title, type: "flipper", typeLabel: CONTENT_TYPE_LABELS.flipper, createdAtMs: toMs(f.createdAt), publishedAtMs: toMs(f.publishedAt) });
     });
   flippers
-    .filter((f) => normalizeCategoryKey(f.category) === "culture" && Boolean(f.isHotContent))
+    .filter(
+      (f) =>
+        isPublishedItem(f) &&
+        normalizeCategoryKey(f.category) === "culture" &&
+        Boolean(f.isHotContent),
+    )
     .forEach((f) => {
       sidebarOptions.push({ id: `flipper:${f.id}`, title: f.title, type: "flipper", typeLabel: CONTENT_TYPE_LABELS.flipper, createdAtMs: toMs(f.createdAt), publishedAtMs: toMs(f.publishedAt) });
     });
 
   visualStories
-    .filter((s) => normalizeCategoryKey(s.category) === "culture" && !s.isHotContent)
+    .filter(
+      (s) =>
+        isPublishedItem(s) &&
+        normalizeCategoryKey(s.category) === "culture" &&
+        !s.isHotContent,
+    )
     .forEach((s) => {
       heroOptions.push({ id: `visual-story:${s.id}`, title: s.title, type: "visual-story", typeLabel: CONTENT_TYPE_LABELS["visual-story"], createdAtMs: toMs(s.createdAt), publishedAtMs: toMs(s.publishedAt) });
     });
   visualStories
-    .filter((s) => normalizeCategoryKey(s.category) === "culture" && Boolean(s.isHotContent))
+    .filter(
+      (s) =>
+        isPublishedItem(s) &&
+        normalizeCategoryKey(s.category) === "culture" &&
+        Boolean(s.isHotContent),
+    )
     .forEach((s) => {
       sidebarOptions.push({ id: `visual-story:${s.id}`, title: s.title, type: "visual-story", typeLabel: CONTENT_TYPE_LABELS["visual-story"], createdAtMs: toMs(s.createdAt), publishedAtMs: toMs(s.publishedAt) });
     });
 
   interviews.forEach((i) => {
+    if (!isPublishedItem(i)) return;
     if (!i.isHotContent) {
       heroOptions.push({ id: `interview:${i.id}`, title: i.title, type: "interview", typeLabel: CONTENT_TYPE_LABELS.interview, createdAtMs: toMs(i.createdAt), publishedAtMs: toMs(i.publishedAt) });
       interviewOptions.push({ id: i.id, title: i.title, createdAtMs: toMs(i.createdAt), publishedAtMs: toMs(i.publishedAt) });
@@ -164,7 +202,7 @@ try {
   // newsController.ts), so a news item can only end up in the hero/secondary
   // pool — never in the "Самое читаемое" sidebar rail.
   news
-    .filter((n) => normalizeCategoryKey(n.category) === "culture")
+    .filter((n) => isPublishedItem(n) && normalizeCategoryKey(n.category) === "culture")
     .forEach((n) => {
       heroOptions.push({ id: `news:${n.id}`, title: n.title, type: "news", typeLabel: CONTENT_TYPE_LABELS.news, createdAtMs: toMs(n.createdAt), publishedAtMs: toMs(n.publishedAt) });
     });

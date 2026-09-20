@@ -128,7 +128,8 @@ const isPublishedItem = (item: { published?: boolean }) =>
 const isLandingPrimaryEligible = (item: {
   isHotContent?: boolean;
   isMaagChoice?: boolean;
-}) => !isMaagChoiceItem(item);
+  published?: boolean;
+}) => !isMaagChoiceItem(item) && isPublishedItem(item);
 
 const normalizeCategoryKey = (value?: string) => value?.trim().toLowerCase() ?? "";
 
@@ -392,10 +393,10 @@ try {
       });
     }
   });
-  newsItems.forEach((item) => {
+  newsItems.filter(isPublishedItem).forEach((item) => {
     contentTitleMaps.news.set(item.id, item.title);
   });
-  events.forEach((item) => {
+  events.filter(isPublishedItem).forEach((item) => {
     contentTitleMaps.events.set(item.id, item.title);
     eventDatesMap.set(item.id, { createdAtMs: toMs(item.createdAt), publishedAtMs: null });
   });
@@ -410,7 +411,7 @@ try {
 
   const categoryCardsCandidates = [
     ...articles
-      .filter((item) => !isLeSaviezVousArticle(item))
+      .filter((item) => isPublishedItem(item) && !isLeSaviezVousArticle(item))
       .map((item) => ({
         id: `article:${item.id}`,
         title: item.title,
@@ -423,7 +424,7 @@ try {
         isHotContent: isHotContentItem(item),
         isMaagChoice: isMaagChoiceItem(item),
       })),
-    ...guides.map((item) => ({
+    ...guides.filter(isPublishedItem).map((item) => ({
       id: `guide:${item.id}`,
       title: item.title,
       type: "guide" as const,
@@ -435,7 +436,7 @@ try {
       isHotContent: isHotContentItem(item),
       isMaagChoice: isMaagChoiceItem(item),
     })),
-    ...flippers.map((item) => ({
+    ...flippers.filter(isPublishedItem).map((item) => ({
       id: `flipper:${item.id}`,
       title: item.title,
       type: "flipper" as const,
@@ -447,7 +448,7 @@ try {
       isHotContent: isHotContentItem(item),
       isMaagChoice: isMaagChoiceItem(item),
     })),
-    ...visualStories.map((item) => ({
+    ...visualStories.filter(isPublishedItem).map((item) => ({
       id: `visual-story:${item.id}`,
       title: item.title,
       type: "visual-story" as const,
@@ -504,7 +505,7 @@ try {
 
 try {
   const photos = await photosOfTheDayApi.list();
-  photoOfTheDayItems = photos.map((p) => ({
+  photoOfTheDayItems = photos.filter(isPublishedItem).map((p) => ({
     id: p.id,
     title: p.title,
     createdAtMs: toMs(p.createdAt),

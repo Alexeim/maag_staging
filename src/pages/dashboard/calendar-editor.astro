@@ -101,7 +101,13 @@ try {
       : "Не удалось загрузить данные редактора календаря.";
 }
 
+// `eventsApi.list()` is the editorial endpoint and returns drafts too. A draft
+// must never be pickable into a live calendar slot — an editor selecting one
+// would silently put an unfinished event on the public page.
+const isPublishedItem = (item: { published?: boolean }) => Boolean(item.published);
+
 const eventOptions = events
+  .filter(isPublishedItem)
   .map((event) => ({
     id: event.id,
     title: event.title,
