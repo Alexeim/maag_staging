@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import CustomSelect from "@/components/dashboard/CustomSelect.astro";
+import MaterialPickerList from "@/components/dashboard/MaterialPickerList.astro";
 import {
   articlesApi,
   editorialPlacementsApi,
@@ -207,8 +208,15 @@ try {
       heroOptions.push({ id: `news:${n.id}`, title: n.title, type: "news", typeLabel: CONTENT_TYPE_LABELS.news, createdAtMs: toMs(n.createdAt), publishedAtMs: toMs(n.publishedAt) });
     });
 
-  heroOptions.sort((a, b) => a.typeLabel.localeCompare(b.typeLabel, "ru-RU") || a.title.localeCompare(b.title, "ru-RU"));
-  sidebarOptions.sort((a, b) => a.typeLabel.localeCompare(b.typeLabel, "ru-RU") || a.title.localeCompare(b.title, "ru-RU"));
+  // Newest publication first: an editor looks for what was published recently,
+  // not for a letter of the alphabet. The type is carried by the colour badge
+  // now, so grouping the list by type no longer earns its place.
+  const byPublishedAtDesc = (a: MaterialOption, b: MaterialOption) =>
+    (b.publishedAtMs ?? 0) - (a.publishedAtMs ?? 0) ||
+    a.title.localeCompare(b.title, "ru-RU");
+
+  heroOptions.sort(byPublishedAtDesc);
+  sidebarOptions.sort(byPublishedAtDesc);
 
   // Same pool as hero, minus interviews — mirrors selectSectionSecondaryStories()
   // on the public side, which always excludes contentType === 'interview'.
@@ -315,6 +323,7 @@ const initialSidebarKeys =
           <label for="culture-hero-select" class="text-sm font-medium">Выбери материал</label>
           <CustomSelect
             id="culture-hero-select"
+            defaultSort="published"
             model="selectedHeroKey"
             itemsExpr={JSON.stringify(heroOptions)}
             placeholder="— выбери материал —"
@@ -363,6 +372,7 @@ const initialSidebarKeys =
           <label for="culture-interview-select" class="text-sm font-medium">Выбери интервью</label>
           <CustomSelect
             id="culture-interview-select"
+            defaultSort="published"
             model="selectedInterviewId"
             itemsExpr={JSON.stringify(interviewOptions)}
             placeholder="— выбери интервью —"
@@ -427,29 +437,12 @@ const initialSidebarKeys =
           <p class="text-sm font-medium">
             Выбери материалы для карточек. Порядок выбора сохранится на странице.
           </p>
-          {
-            secondaryOptions.length > 0 ? (
-              <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
-                {secondaryOptions.map((item) => (
-                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      :checked={`isManualSecondarySelected(${JSON.stringify(item.id)})`}
-                      @change={`toggleSecondaryItem(${JSON.stringify(item.id)})`}
-                    />
-                    <span class="flex flex-col gap-1 text-sm leading-6">
-                      <span class="font-medium">{item.title}</span>
-                      <span class="text-xs uppercase tracking-[0.22em] text-base-content/55">
-                        {item.typeLabel}
-                      </span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            ) : (
-              <p class="text-sm text-base-content/60">Нет доступных материалов.</p>
-            )
-          }
+          <MaterialPickerList
+            options={secondaryOptions}
+            isSelectedFn="isManualSecondarySelected"
+            toggleFn="toggleSecondaryItem"
+            emptyText="Нет доступных материалов."
+          />
         </div>
 
         <p x-show="secondaryStoriesError" class="text-sm text-error" x-text="secondaryStoriesError"></p>
@@ -511,31 +504,12 @@ const initialSidebarKeys =
           <p class="text-sm font-medium">
             Выбери материалы с флагом «Самое читаемое». Порядок выбора сохранится в блоке.
           </p>
-          {
-            sidebarOptions.length > 0 ? (
-              <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
-                {sidebarOptions.map((item) => (
-                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      :checked={`isManualSidebarSelected(${JSON.stringify(item.id)})`}
-                      @change={`toggleSidebarItem(${JSON.stringify(item.id)})`}
-                    />
-                    <span class="flex flex-col gap-1 text-sm leading-6">
-                      <span class="font-medium">{item.title}</span>
-                      <span class="text-xs uppercase tracking-[0.22em] text-base-content/55">
-                        {item.typeLabel}
-                      </span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            ) : (
-              <p class="text-sm text-base-content/60">
-                Нет материалов с флагом «Самое читаемое».
-              </p>
-            )
-          }
+          <MaterialPickerList
+            options={sidebarOptions}
+            isSelectedFn="isManualSidebarSelected"
+            toggleFn="toggleSidebarItem"
+            emptyText="Нет материалов с флагом «Самое читаемое»."
+          />
         </div>
 
         <p x-show="sidebarError" class="text-sm text-error" x-text="sidebarError"></p>

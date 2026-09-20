@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import CustomSelect from "@/components/dashboard/CustomSelect.astro";
+import MaterialPickerList from "@/components/dashboard/MaterialPickerList.astro";
 import {
   articlesApi,
   editorialPlacementsApi,
@@ -19,6 +20,10 @@ const CONTENT_TYPE_LABELS: Record<SectionPageHeroType, string> = {
   interview: "Интервью",
   flipper: "Листалка",
   "visual-story": "Крупным планом",
+  // Required by SectionPageHeroType. The paris pools never collect news (the
+  // page has no news slot), so this label is unused today — it is here so the
+  // record stays exhaustive and the file type-checks.
+  news: "Новость",
 };
 
 const DEFAULT_PLACEMENTS: ParisPagePlacementsResponse = {
@@ -182,8 +187,15 @@ try {
       interviewOptions.push({ id: i.id, title: i.title, createdAtMs: toMs(i.createdAt), publishedAtMs: toMs(i.publishedAt) });
     });
 
-  heroOptions.sort((a, b) => a.typeLabel.localeCompare(b.typeLabel, "ru-RU") || a.title.localeCompare(b.title, "ru-RU"));
-  sidebarOptions.sort((a, b) => a.typeLabel.localeCompare(b.typeLabel, "ru-RU") || a.title.localeCompare(b.title, "ru-RU"));
+  // Newest publication first: an editor looks for what was published recently,
+  // not for a letter of the alphabet. The type is carried by the colour badge
+  // now, so grouping the list by type no longer earns its place.
+  const byPublishedAtDesc = (a: MaterialOption, b: MaterialOption) =>
+    (b.publishedAtMs ?? 0) - (a.publishedAtMs ?? 0) ||
+    a.title.localeCompare(b.title, "ru-RU");
+
+  heroOptions.sort(byPublishedAtDesc);
+  sidebarOptions.sort(byPublishedAtDesc);
 } catch (error) {
   loadError = error instanceof Error ? error.message : "Не удалось загрузить данные.";
 }
@@ -292,6 +304,7 @@ const initialSidebarKeys =
           <label for="paris-hero-select" class="text-sm font-medium">Выбери материал</label>
           <CustomSelect
             id="paris-hero-select"
+            defaultSort="published"
             model="selectedHeroKey"
             itemsExpr={JSON.stringify(heroOptions)}
             placeholder="— выбери материал —"
@@ -336,6 +349,7 @@ const initialSidebarKeys =
           <label for="paris-two-image-select" class="text-sm font-medium">Выбери материал</label>
           <CustomSelect
             id="paris-two-image-select"
+            defaultSort="published"
             model="selectedTwoImageArticleKey"
             itemsExpr={JSON.stringify(heroOptions)}
             placeholder="— выбери материал —"
@@ -384,6 +398,7 @@ const initialSidebarKeys =
           <label for="paris-interview-select" class="text-sm font-medium">Выбери интервью</label>
           <CustomSelect
             id="paris-interview-select"
+            defaultSort="published"
             model="selectedInterviewFeatureId"
             itemsExpr={JSON.stringify(interviewOptions)}
             placeholder="— выбери интервью —"
@@ -482,6 +497,7 @@ const initialSidebarKeys =
           <label for="paris-photo-of-the-day-select" class="text-sm font-medium">Выбери фото</label>
           <CustomSelect
             id="paris-photo-of-the-day-select"
+            defaultSort="published"
             model="selectedPhotoOfTheDayId"
             itemsExpr={JSON.stringify(photoOfTheDayOptions)}
             placeholder="— выбери фото —"
@@ -547,31 +563,12 @@ const initialSidebarKeys =
           <p class="text-sm font-medium">
             Выбери материалы с флагом «Записная книжка». Порядок выбора сохранится в rail.
           </p>
-          {
-            sidebarOptions.length > 0 ? (
-              <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
-                {sidebarOptions.map((item) => (
-                  <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      :checked={`isManualSidebarSelected(${JSON.stringify(item.id)})`}
-                      @change={`toggleSidebarItem(${JSON.stringify(item.id)})`}
-                    />
-                    <span class="flex flex-col gap-1 text-sm leading-6">
-                      <span class="font-medium">{item.title}</span>
-                      <span class="text-xs uppercase tracking-[0.22em] text-base-content/55">
-                        {item.typeLabel}
-                      </span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            ) : (
-              <p class="text-sm text-base-content/60">
-                Нет материалов с флагом «Записная книжка».
-              </p>
-            )
-          }
+          <MaterialPickerList
+            options={sidebarOptions}
+            isSelectedFn="isManualSidebarSelected"
+            toggleFn="toggleSidebarItem"
+            emptyText="Нет материалов с флагом «Записная книжка»."
+          />
         </div>
 
         <p x-show="sidebarError" class="text-sm text-error" x-text="sidebarError"></p>

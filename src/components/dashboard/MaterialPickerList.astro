@@ -1,0 +1,150 @@
+---
+// Scrollable checkbox list of pickable materials, with a row of type filter chips
+// above it.
+//
+// The filter is VIEW state, not editor state, so it lives in this component's own
+// local x-data — exactly like CustomSelect.astro does. It deliberately does NOT
+// go into cultureEditorLogic / parisEditorLogic, because every property those
+// modules expose has to be mirrored in the shared skeleton inside
+// lazyLoadPlugin.ts, which every reader of the public site downloads.
+//
+// The rows stay server-rendered, so each one carries its own type as a literal
+// and filtering is a plain x-show — no x-for, no client-side copy of the list.
+//
+// Hiding a row does not clear its checkbox: the filter narrows what you look at,
+// never what you picked.
+import { MATERIAL_TYPES, MATERIAL_TYPE_ORDER } from "@/lib/utils/dashboardMaterials";
+
+export interface PickerOption {
+  id: string;
+  title: string;
+  type: string;
+  typeLabel: string;
+  publishedAtMs: number | null;
+}
+
+interface Props {
+  options: PickerOption[];
+  // Name of the Alpine method on the parent component that reports whether an
+  // option is picked, e.g. "isManualSecondarySelected".
+  isSelectedFn: string;
+  // Name of the Alpine method on the parent that toggles an option,
+  // e.g. "toggleSecondaryItem".
+  toggleFn: string;
+  // Shown instead of the list when there is nothing to pick.
+  emptyText: string;
+}
+
+const { options, isSelectedFn, toggleFn, emptyText } = Astro.props as Props;
+
+const typeMeta = (type: string) =>
+  MATERIAL_TYPES[type as keyof typeof MATERIAL_TYPES];
+
+// Every option here is published (the pages filter drafts out when building the
+// pools), so publishedAt is the date to show — never createdAt.
+const formatDate = (ms: number | null) =>
+  ms === null
+    ? ""
+    : new Date(ms).toLocaleDateString("ru-RU", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+
+// One chip per type actually present in this list, carrying how many rows it
+// covers. Ordered by the shared table so the chips read the same everywhere.
+const counts = new Map<string, number>();
+for (const option of options) {
+  counts.set(option.type, (counts.get(option.type) ?? 0) + 1);
+}
+
+const chips = MATERIAL_TYPE_ORDER.filter((type) => counts.has(type)).map((type) => ({
+  type,
+  text: MATERIAL_TYPES[type].badge,
+  class: MATERIAL_TYPES[type].badgeClass,
+  count: counts.get(type) ?? 0,
+}));
+
+// Alpine expression: is this row visible under the current chip selection?
+const visibleExpr = (type: string) =>
+  `activeTypes.length === 0 || activeTypes.includes(${JSON.stringify(type)})`;
+
+// Alpine expression: add or remove a type from the chip selection.
+const toggleChipExpr = (type: string) => {
+  const key = JSON.stringify(type);
+  return `activeTypes = activeTypes.includes(${key}) ? activeTypes.filter((t) => t !== ${key}) : [...activeTypes, ${key}]`;
+};
+---
+
+{
+  options.length > 0 ? (
+    <div x-data="{ activeTypes: [] }" class="grid gap-3">
+      {chips.length > 1 && (
+        <div class="flex flex-wrap items-center gap-2">
+          {chips.map((chip) => (
+            <button
+              type="button"
+              class:list={[
+                "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition cursor-pointer",
+                chip.class,
+              ]}
+              :class={`activeTypes.includes(${JSON.stringify(chip.type)}) ? 'ring-2 ring-neutral-500/60' : 'opacity-55 hover:opacity-100'`}
+              :aria-pressed={`activeTypes.includes(${JSON.stringify(chip.type)})`}
+              @click={toggleChipExpr(chip.type)}
+            >
+              <span>{chip.text}</span>
+              <span class="opacity-70">{chip.count}</span>
+            </button>
+          ))}
+
+          <button
+            type="button"
+            class="rounded-full border border-base-300 px-2.5 py-1 text-[11px] text-base-content/60 transition cursor-pointer hover:bg-base-200"
+            x-show="activeTypes.length > 0"
+            @click="activeTypes = []"
+          >
+            Сбросить
+          </button>
+        </div>
+      )}
+
+      <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
+        {options.map((item) => {
+          const meta = typeMeta(item.type);
+          const dateLabel = formatDate(item.publishedAtMs);
+          return (
+            <label
+              x-show={visibleExpr(item.type)}
+              class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                class="mt-1"
+                :checked={`${isSelectedFn}(${JSON.stringify(item.id)})`}
+                @change={`${toggleFn}(${JSON.stringify(item.id)})`}
+              />
+              <span class="flex flex-col items-start gap-1.5 text-sm leading-6">
+                <span class="flex items-center gap-2">
+                  <span
+                    class:list={[
+                      "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none",
+                      meta ? meta.badgeClass : "bg-base-200 text-base-content/70",
+                    ]}
+                  >
+                    {meta ? meta.badge : item.typeLabel}
+                  </span>
+                  {dateLabel && (
+                    <span class="text-xs text-base-content/55">{dateLabel}</span>
+                  )}
+                </span>
+                <span class="font-medium">{item.title}</span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </div>
+  ) : (
+    <p class="text-sm text-base-content/60">{emptyText}</p>
+  )
+}
