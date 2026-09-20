@@ -561,12 +561,13 @@ const initialSidebarKeys =
 
         <div x-show="sidebarMode === 'manual'" class="grid gap-3">
           <p class="text-sm font-medium">
-            Выбери материалы с флагом «Записная книжка». Порядок выбора сохранится в rail.
+            Выбери материалы с флагом «Записная книжка». Выбранный последним встаёт первым — порядок виден в списке «Выбрано» и меняется стрелками.
           </p>
           <MaterialPickerList
             options={sidebarOptions}
             isSelectedFn="isManualSidebarSelected"
             toggleFn="toggleSidebarItem"
+            selectionModel="selectedSidebarKeys"
             emptyText="Нет материалов с флагом «Записная книжка»."
           />
         </div>

@@ -435,12 +435,13 @@ const initialSidebarKeys =
 
         <div x-show="secondaryStoriesMode === 'manual'" class="grid gap-3">
           <p class="text-sm font-medium">
-            Выбери материалы для карточек. Порядок выбора сохранится на странице.
+            Выбери материалы для карточек. Выбранный последним встаёт первым — порядок виден в списке «Выбрано» и меняется стрелками.
           </p>
           <MaterialPickerList
             options={secondaryOptions}
             isSelectedFn="isManualSecondarySelected"
             toggleFn="toggleSecondaryItem"
+            selectionModel="selectedSecondaryKeys"
             emptyText="Нет доступных материалов."
           />
         </div>
@@ -502,12 +503,13 @@ const initialSidebarKeys =
 
         <div x-show="sidebarMode === 'manual'" class="grid gap-3">
           <p class="text-sm font-medium">
-            Выбери материалы с флагом «Самое читаемое». Порядок выбора сохранится в блоке.
+            Выбери материалы с флагом «Самое читаемое». Выбранный последним встаёт первым — порядок виден в списке «Выбрано» и меняется стрелками.
           </p>
           <MaterialPickerList
             options={sidebarOptions}
             isSelectedFn="isManualSidebarSelected"
             toggleFn="toggleSidebarItem"
+            selectionModel="selectedSidebarKeys"
             emptyText="Нет материалов с флагом «Самое читаемое»."
           />
         </div>

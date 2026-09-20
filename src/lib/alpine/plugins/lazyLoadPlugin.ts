@@ -529,6 +529,13 @@ export default function(Alpine: Alpine) {
       secondaryStoriesLimit: 3,
       secondaryStoriesSaving: false,
       secondaryStoriesError: '',
+      // The culture editor's manual secondary-stories picker binds to these
+      // before its module resolves; without them Alpine logs "not defined" for
+      // every row on first paint. The sidebar twins below were already here.
+      secondaryOptions: [],
+      selectedSecondaryKeys: [],
+      isManualSecondarySelected() { return false; },
+      toggleSecondaryItem() {},
       sidebarMode: 'auto-hot',
       sidebarLimit: 4,
       sidebarOptions: [],

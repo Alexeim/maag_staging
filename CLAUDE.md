@@ -68,6 +68,29 @@ publication date.
   trap is dormant. Mentormatic hit exactly this (`formattedValue` on
   `rangeSelector`) and fixed it by copying descriptors explicitly; see
   `wurkspaces-monorepo/apps/mentormatic/src/lib/alpine/plugins/lazyLoaderV2/factory.ts`.
+- **View state belongs in a local `x-data`, not in a `*Logic.ts`.** Anything a
+  `*Logic.ts` exposes must be mirrored in that skeleton, so a search box or a
+  filter added there costs every reader of the public site. Nest a plain
+  `x-data` inside the `$lazy` component instead: Alpine's scope chain lets it
+  read and write the parent's state, and nothing reaches the skeleton.
+  `CustomSelect.astro` and `MaterialPickerList.astro` both do this.
+
+## Dashboard page editors (landing / culture / paris / calendar)
+
+- Their option pools are built in the `.astro` frontmatter from the **editorial**
+  list endpoints, which include drafts. Every pool is guarded by a local
+  `isPublishedItem`; absent `published` counts as a draft. Keep new pools guarded.
+- Picking a draft was never a leak: `toLandingItem()`
+  (`publicLandingController.ts:157`) drops unpublished documents, so every
+  manual placement is filtered on the way out. What a stale pick causes is a
+  **silently collapsed slot**, not a draft on the page. Don't re-report it as one.
+- **Order: the last item ticked goes first on the public page.** Every
+  `toggle*Item` prepends (`[key, ...keys]`), `save()` maps the array as-is, and
+  `fetchByTargets` preserves it. The "Выбрано" list in `MaterialPickerList`
+  numbers from the top of the page down.
+- The three pick lists are one component, `MaterialPickerList.astro` (badges,
+  date, search, type chips, ordered "Выбрано" block with ↑↓). It takes the
+  parent's method and array *names* as strings, like `CustomSelect` takes `model`.
 
 ## Documents in this repo
 

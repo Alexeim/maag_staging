@@ -1,18 +1,19 @@
 ---
-// Scrollable checkbox list of pickable materials, with a row of type filter chips
-// above it.
+// Scrollable checkbox list of pickable materials, with a search box and a row of
+// type filter chips above it.
 //
-// The filter is VIEW state, not editor state, so it lives in this component's own
-// local x-data — exactly like CustomSelect.astro does. It deliberately does NOT
-// go into cultureEditorLogic / parisEditorLogic, because every property those
-// modules expose has to be mirrored in the shared skeleton inside
-// lazyLoadPlugin.ts, which every reader of the public site downloads.
+// Search and filter are VIEW state, not editor state, so they live in this
+// component's own local x-data — exactly like CustomSelect.astro does. They
+// deliberately do NOT go into cultureEditorLogic / parisEditorLogic, because
+// every property those modules expose has to be mirrored in the shared skeleton
+// inside lazyLoadPlugin.ts, which every reader of the public site downloads.
 //
-// The rows stay server-rendered, so each one carries its own type as a literal
-// and filtering is a plain x-show — no x-for, no client-side copy of the list.
+// The rows stay server-rendered, so filtering is a plain x-show driven by the
+// row's index — no x-for, no client-side rebuild of the list. What Alpine needs
+// is only a compact index of {type, lowercased title}, built below.
 //
-// Hiding a row does not clear its checkbox: the filter narrows what you look at,
-// never what you picked.
+// Hiding a row never clears its checkbox: this narrows what you look at, not
+// what you picked.
 import { MATERIAL_TYPES, MATERIAL_TYPE_ORDER } from "@/lib/utils/dashboardMaterials";
 
 export interface PickerOption {
@@ -31,11 +32,16 @@ interface Props {
   // Name of the Alpine method on the parent that toggles an option,
   // e.g. "toggleSecondaryItem".
   toggleFn: string;
-  // Shown instead of the list when there is nothing to pick.
+  // Name of the parent's ordered array of picked keys, e.g. "selectedSecondaryKeys".
+  // Read and reordered in place from here — the same way CustomSelect writes to
+  // the parent property named by its `model` prop.
+  selectionModel: string;
+  // Shown instead of the list when there is nothing to pick at all.
   emptyText: string;
 }
 
-const { options, isSelectedFn, toggleFn, emptyText } = Astro.props as Props;
+const { options, isSelectedFn, toggleFn, selectionModel, emptyText } =
+  Astro.props as Props;
 
 const typeMeta = (type: string) =>
   MATERIAL_TYPES[type as keyof typeof MATERIAL_TYPES];
@@ -51,70 +57,190 @@ const formatDate = (ms: number | null) =>
         year: "numeric",
       });
 
-// One chip per type actually present in this list, carrying how many rows it
-// covers. Ordered by the shared table so the chips read the same everywhere.
-const counts = new Map<string, number>();
-for (const option of options) {
-  counts.set(option.type, (counts.get(option.type) ?? 0) + 1);
-}
+// One chip per type actually present, ordered by the shared table so the chips
+// read the same in every editor. The count shown is live (it follows the search
+// box), so only the set of chips is decided here.
+const chipTypes = MATERIAL_TYPE_ORDER.filter((type) =>
+  options.some((option) => option.type === type),
+);
 
-const chips = MATERIAL_TYPE_ORDER.filter((type) => counts.has(type)).map((type) => ({
-  type,
-  text: MATERIAL_TYPES[type].badge,
-  class: MATERIAL_TYPES[type].badgeClass,
-  count: counts.get(type) ?? 0,
+// Compact index for the client: type and lowercased title, positionally aligned
+// with the rows below. Titles are lowercased here so the filter does not redo it
+// on every keystroke.
+const rowIndex = options.map((option) => ({
+  t: option.type,
+  n: option.title.toLowerCase(),
 }));
 
-// Alpine expression: is this row visible under the current chip selection?
-const visibleExpr = (type: string) =>
-  `activeTypes.length === 0 || activeTypes.includes(${JSON.stringify(type)})`;
+// Lookup for the "Выбрано" summary, which renders picked keys in the order they
+// were picked and therefore cannot reuse the positional row index above.
+const pickedMeta = Object.fromEntries(
+  options.map((option) => {
+    const meta = typeMeta(option.type);
+    return [
+      option.id,
+      {
+        title: option.title,
+        badge: meta ? meta.badge : option.typeLabel,
+        badgeClass: meta ? meta.badgeClass : "bg-base-200 text-base-content/70",
+      },
+    ];
+  }),
+);
 
-// Alpine expression: add or remove a type from the chip selection.
-const toggleChipExpr = (type: string) => {
-  const key = JSON.stringify(type);
-  return `activeTypes = activeTypes.includes(${key}) ? activeTypes.filter((t) => t !== ${key}) : [...activeTypes, ${key}]`;
-};
+const rootData = `{
+  activeTypes: [],
+  query: '',
+  rows: ${JSON.stringify(rowIndex)},
+  __query() { return this.query.trim().toLowerCase(); },
+  matches(index) {
+    const row = this.rows[index];
+    if (!row) return false;
+    if (this.activeTypes.length > 0 && !this.activeTypes.includes(row.t)) return false;
+    const q = this.__query();
+    return q === '' || row.n.includes(q);
+  },
+  typeCount(type) {
+    const q = this.__query();
+    return this.rows.filter((row) => row.t === type && (q === '' || row.n.includes(q))).length;
+  },
+  visibleCount() {
+    let total = 0;
+    for (let index = 0; index < this.rows.length; index += 1) {
+      if (this.matches(index)) total += 1;
+    }
+    return total;
+  },
+  toggleType(type) {
+    this.activeTypes = this.activeTypes.includes(type)
+      ? this.activeTypes.filter((active) => active !== type)
+      : [...this.activeTypes, type];
+  },
+  isFiltered() { return this.activeTypes.length > 0 || this.__query() !== ''; },
+  reset() { this.activeTypes = []; this.query = ''; },
+
+  picked: ${JSON.stringify(pickedMeta)},
+  // A key saved earlier can point at something no longer in the pool (it was
+  // unpublished, or lost the flag that put it here). Render it as a plain id
+  // rather than crashing, so the editor can still see and remove it.
+  pickedMeta(key) {
+    return this.picked[key] || { title: key, badge: '—', badgeClass: 'bg-base-200 text-base-content/70' };
+  },
+  // Reorder the PARENT's array: Alpine's scope chain resolves ${selectionModel}
+  // on the editor component, and its save() reads that same array. Reassigning
+  // rather than mutating in place keeps the x-for reactive.
+  movePicked(key, delta) {
+    const keys = [...${selectionModel}];
+    const from = keys.indexOf(key);
+    const to = from + delta;
+    if (from === -1 || to < 0 || to >= keys.length) return;
+    keys.splice(to, 0, keys.splice(from, 1)[0]);
+    ${selectionModel} = keys;
+  },
+}`;
 ---
 
 {
   options.length > 0 ? (
-    <div x-data="{ activeTypes: [] }" class="grid gap-3">
-      {chips.length > 1 && (
+    <div x-data={rootData} class="grid gap-3">
+      <div
+        class="rounded-lg border border-base-300 bg-base-200/40 p-3"
+        x-show={`${selectionModel}.length > 0`}
+        style="display: none"
+      >
+        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/60">
+          Выбрано<span x-text={` ' (' + ${selectionModel}.length + ')' `} /> — в этом порядке
+        </p>
+
+        <ol class="mt-2 grid gap-1.5">
+          <template x-for={`(key, position) in ${selectionModel}`} :key="key">
+            <li class="flex items-center gap-2 rounded-md bg-base-100 px-2 py-1.5">
+              <span
+                class="w-4 shrink-0 text-xs tabular-nums text-base-content/50"
+                x-text="position + 1"
+              />
+              <span
+                class="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none"
+                :class="pickedMeta(key).badgeClass"
+                x-text="pickedMeta(key).badge"
+              />
+              <span class="min-w-0 flex-1 truncate text-sm" x-text="pickedMeta(key).title" />
+
+              <button
+                type="button"
+                class="shrink-0 rounded px-1.5 py-0.5 text-sm leading-none text-base-content/60 transition cursor-pointer hover:bg-base-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Выше"
+                :disabled="position === 0"
+                @click="movePicked(key, -1)"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                class="shrink-0 rounded px-1.5 py-0.5 text-sm leading-none text-base-content/60 transition cursor-pointer hover:bg-base-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Ниже"
+                :disabled={`position === ${selectionModel}.length - 1`}
+                @click="movePicked(key, 1)"
+              >
+                ↓
+              </button>
+              <button
+                type="button"
+                class="shrink-0 rounded px-1.5 py-0.5 text-sm leading-none text-base-content/60 transition cursor-pointer hover:bg-base-200"
+                title="Убрать"
+                @click={`${toggleFn}(key)`}
+              >
+                ×
+              </button>
+            </li>
+          </template>
+        </ol>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          x-model="query"
+          placeholder="Поиск по названию"
+          class="min-w-0 flex-1 rounded-lg border border-base-300 bg-base-100 px-3 py-2 text-sm text-base-content focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50"
+        />
+        <button
+          type="button"
+          class="shrink-0 rounded-lg border border-base-300 px-3 py-2 text-xs text-base-content/60 transition cursor-pointer hover:bg-base-200"
+          x-show="isFiltered()"
+          @click="reset()"
+        >
+          Сбросить
+        </button>
+      </div>
+
+      {chipTypes.length > 1 && (
         <div class="flex flex-wrap items-center gap-2">
-          {chips.map((chip) => (
+          {chipTypes.map((type) => (
             <button
               type="button"
               class:list={[
                 "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition cursor-pointer",
-                chip.class,
+                MATERIAL_TYPES[type].badgeClass,
               ]}
-              :class={`activeTypes.includes(${JSON.stringify(chip.type)}) ? 'ring-2 ring-neutral-500/60' : 'opacity-55 hover:opacity-100'`}
-              :aria-pressed={`activeTypes.includes(${JSON.stringify(chip.type)})`}
-              @click={toggleChipExpr(chip.type)}
+              :class={`activeTypes.includes(${JSON.stringify(type)}) ? 'ring-2 ring-neutral-500/60' : 'opacity-55 hover:opacity-100'`}
+              :aria-pressed={`activeTypes.includes(${JSON.stringify(type)})`}
+              @click={`toggleType(${JSON.stringify(type)})`}
             >
-              <span>{chip.text}</span>
-              <span class="opacity-70">{chip.count}</span>
+              <span>{MATERIAL_TYPES[type].badge}</span>
+              <span class="opacity-70" x-text={`typeCount(${JSON.stringify(type)})`} />
             </button>
           ))}
-
-          <button
-            type="button"
-            class="rounded-full border border-base-300 px-2.5 py-1 text-[11px] text-base-content/60 transition cursor-pointer hover:bg-base-200"
-            x-show="activeTypes.length > 0"
-            @click="activeTypes = []"
-          >
-            Сбросить
-          </button>
         </div>
       )}
 
       <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
-        {options.map((item) => {
+        {options.map((item, index) => {
           const meta = typeMeta(item.type);
           const dateLabel = formatDate(item.publishedAtMs);
           return (
             <label
-              x-show={visibleExpr(item.type)}
+              x-show={`matches(${index})`}
               class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer"
             >
               <input
@@ -142,6 +268,14 @@ const toggleChipExpr = (type: string) => {
             </label>
           );
         })}
+
+        <p
+          class="text-sm text-base-content/60"
+          x-show="visibleCount() === 0"
+          style="display: none"
+        >
+          Ничего не найдено. Измени запрос или сбрось фильтры.
+        </p>
       </div>
     </div>
   ) : (

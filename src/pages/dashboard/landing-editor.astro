@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import CustomSelect from "@/components/dashboard/CustomSelect.astro";
+import MaterialPickerList from "@/components/dashboard/MaterialPickerList.astro";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 // Shared type-badge metadata (label + colour classes), same source the /dashboard page uses.
 import { MATERIAL_TYPES } from "@/lib/utils/dashboardMaterials";
@@ -1641,46 +1642,16 @@ const initialMainHeroState = (() => {
 
         <div x-show="netlenkaRailMode === 'manual'" class="grid gap-3">
           <p class="text-sm font-medium">
-            Выбери материалы с флагом «Выбор MAAG». Порядок выбора сохранится в rail.
+            Выбери материалы с флагом «Выбор MAAG». Выбранный последним встаёт первым — порядок виден в списке «Выбрано» и меняется стрелками.
           </p>
 
-          {netlenkaOptions.length > 0 ? (
-            <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
-              {
-                netlenkaOptions.map((item) => {
-                  // coloured type badge from the shared MATERIAL_TYPES table
-                  const badge = typeBadge(item.type);
-                  return (
-                    <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        class="mt-1"
-                        :checked={`isManualNetlenkaSelected(${JSON.stringify(item.id)})`}
-                        @change={`toggleNetlenkaItem(${JSON.stringify(item.id)})`}
-                      />
-                      <span class="flex flex-col items-start gap-1.5 leading-6">
-                        {badge && (
-                          <span
-                            class:list={[
-                              "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none",
-                              badge.class,
-                            ]}
-                          >
-                            {badge.text}
-                          </span>
-                        )}
-                        <span class="font-old_standard text-base font-semibold">{item.title}</span>
-                      </span>
-                    </label>
-                  );
-                })
-              }
-            </div>
-          ) : (
-            <p class="text-sm text-base-content/70">
-              Пока нет материалов для ручного выбора.
-            </p>
-          )}
+          <MaterialPickerList
+            options={netlenkaOptions}
+            isSelectedFn="isManualNetlenkaSelected"
+            toggleFn="toggleNetlenkaItem"
+            selectionModel="selectedNetlenkaKeys"
+            emptyText="Пока нет материалов для ручного выбора."
+          />
         </div>
 
         <p x-show="netlenkaError" class="text-sm text-error" x-text="netlenkaError"></p>
@@ -1793,46 +1764,16 @@ const initialMainHeroState = (() => {
 
         <div x-show="cultureCardsMode === 'manual'" class="grid gap-3">
           <p class="text-sm font-medium">
-            Выбери карточки вручную. Порядок выбора сохранится в block.
+            Выбери карточки вручную. Выбранный последним встаёт первым — порядок виден в списке «Выбрано» и меняется стрелками.
           </p>
 
-          {cultureCardsOptions.length > 0 ? (
-            <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
-              {
-                cultureCardsOptions.map((item) => {
-                  // coloured type badge from the shared MATERIAL_TYPES table
-                  const badge = typeBadge(item.type);
-                  return (
-                    <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        class="mt-1"
-                        :checked={`isManualCultureCardSelected(${JSON.stringify(item.id)})`}
-                        @change={`toggleCultureCardItem(${JSON.stringify(item.id)})`}
-                      />
-                      <span class="flex flex-col items-start gap-1.5 leading-6">
-                        {badge && (
-                          <span
-                            class:list={[
-                              "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none",
-                              badge.class,
-                            ]}
-                          >
-                            {badge.text}
-                          </span>
-                        )}
-                        <span class="font-old_standard text-base font-semibold">{item.title}</span>
-                      </span>
-                    </label>
-                  );
-                })
-              }
-            </div>
-          ) : (
-            <p class="text-sm text-base-content/70">
-              Пока нет материалов для ручного выбора.
-            </p>
-          )}
+          <MaterialPickerList
+            options={cultureCardsOptions}
+            isSelectedFn="isManualCultureCardSelected"
+            toggleFn="toggleCultureCardItem"
+            selectionModel="selectedCultureCardKeys"
+            emptyText="Пока нет материалов для ручного выбора."
+          />
         </div>
 
         <p x-show="cultureCardsError" class="text-sm text-error" x-text="cultureCardsError"></p>
@@ -1997,46 +1938,16 @@ const initialMainHeroState = (() => {
 
         <div x-show="parisCardsMode === 'manual'" class="grid gap-3">
           <p class="text-sm font-medium">
-            Выбери карточки вручную. Порядок выбора сохранится в block.
+            Выбери карточки вручную. Выбранный последним встаёт первым — порядок виден в списке «Выбрано» и меняется стрелками.
           </p>
 
-          {parisCardsOptions.length > 0 ? (
-            <div class="grid gap-2 max-h-80 overflow-y-auto pr-1">
-              {
-                parisCardsOptions.map((item) => {
-                  // coloured type badge from the shared MATERIAL_TYPES table
-                  const badge = typeBadge(item.type);
-                  return (
-                    <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        class="mt-1"
-                        :checked={`isManualParisCardSelected(${JSON.stringify(item.id)})`}
-                        @change={`toggleParisCardItem(${JSON.stringify(item.id)})`}
-                      />
-                      <span class="flex flex-col items-start gap-1.5 leading-6">
-                        {badge && (
-                          <span
-                            class:list={[
-                              "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none",
-                              badge.class,
-                            ]}
-                          >
-                            {badge.text}
-                          </span>
-                        )}
-                        <span class="font-old_standard text-base font-semibold">{item.title}</span>
-                      </span>
-                    </label>
-                  );
-                })
-              }
-            </div>
-          ) : (
-            <p class="text-sm text-base-content/70">
-              Пока нет материалов для ручного выбора.
-            </p>
-          )}
+          <MaterialPickerList
+            options={parisCardsOptions}
+            isSelectedFn="isManualParisCardSelected"
+            toggleFn="toggleParisCardItem"
+            selectionModel="selectedParisCardKeys"
+            emptyText="Пока нет материалов для ручного выбора."
+          />
         </div>
 
         <p x-show="parisCardsError" class="text-sm text-error" x-text="parisCardsError"></p>
