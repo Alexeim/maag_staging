@@ -45,6 +45,13 @@ import {
 } from "firebase/storage";
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 import { compressImage } from "@/lib/images/compressImage";
+import {
+  clearDashboardPreview,
+  openDashboardPreview,
+  readDashboardPreview,
+} from "@/lib/utils/dashboardPreview";
+
+const PREVIEW_KEY = "interviewPreview";
 
 const storage = getStorage(app);
 
@@ -497,20 +504,8 @@ export default function interviewCreatorLogic(initialState = {}) {
         };
       };
 
-      let previewState: PreviewState | null = null;
+      const previewState = readDashboardPreview<PreviewState>(PREVIEW_KEY);
       let restoredPreviewAuthorState = false;
-
-      if (typeof window !== "undefined") {
-        try {
-          const stored = window.localStorage?.getItem("interviewPreview");
-          const parsed = stored ? JSON.parse(stored) : null;
-          if (parsed && typeof parsed === "object") {
-            previewState = parsed as PreviewState;
-          }
-        } catch (error) {
-          console.error("Failed to load interview preview draft:", error);
-        }
-      }
 
       if (initialInterview) {
         const normalizedInitial = normalizeLoadedInterview(initialInterview);
@@ -526,37 +521,19 @@ export default function interviewCreatorLogic(initialState = {}) {
         this.isEditMode = isEditMode;
       }
 
-      const shouldApplyPreview = (() => {
-        if (!previewState?.interview) {
-          return false;
-        }
-        if (isPreview) {
-          return true;
-        }
-        const previewId =
-          typeof previewState.interviewId === "string" && previewState.interviewId
-            ? previewState.interviewId
-            : null;
-        const isPreviewEdit = Boolean(previewState.isEditMode);
-        const isSameEdit =
-          this.isEditMode && previewId !== null && previewId === this.interviewId;
-        const isCreateDraft = !this.isEditMode && !previewId && !isPreviewEdit;
-        return isSameEdit || isCreateDraft;
-      })();
+      // The draft is only for the preview tab. The editor tab never unloads
+      // while previewing, so it must not overlay a stored draft on itself.
+      const shouldApplyPreview = isPreview && Boolean(previewState?.interview);
 
       if (shouldApplyPreview && previewState?.interview) {
         const normalizedPreview = normalizeLoadedInterview(previewState.interview);
         if (normalizedPreview) {
-          if (isPreview) {
-            this.interview = normalizedPreview;
-            this.interviewId =
-              typeof previewState.interviewId === "string"
-                ? previewState.interviewId
-                : null;
-            this.isEditMode = Boolean(previewState.isEditMode);
-          } else {
-            Object.assign(this.interview, normalizedPreview);
-          }
+          this.interview = normalizedPreview;
+          this.interviewId =
+            typeof previewState.interviewId === "string"
+              ? previewState.interviewId
+              : null;
+          this.isEditMode = Boolean(previewState.isEditMode);
         }
         this.selectedAuthorId =
           typeof previewState.selectedAuthorId === "string"
@@ -585,6 +562,9 @@ export default function interviewCreatorLogic(initialState = {}) {
               }
             : { name: "", avatarUrl: "" };
         restoredPreviewAuthorState = true;
+      } else if (previewState) {
+        // Opening the editor drops any leftover snapshot so it can't go stale.
+        clearDashboardPreview(PREVIEW_KEY);
       }
 
       this.interview.tags = this.interview.tags ?? [];
@@ -646,8 +626,9 @@ export default function interviewCreatorLogic(initialState = {}) {
         newAuthorLastName: this.newAuthorLastName,
         authorDisplay,
       };
-      window.localStorage.setItem("interviewPreview", JSON.stringify(previewState));
-      window.location.href = "/dashboard/interview/preview";
+      if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/interview/preview", previewState)) {
+        window.Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
+      }
     },
 
     editTitle() {
@@ -1059,12 +1040,12 @@ export default function interviewCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.interviewId) {
           await interviewsApi.update(this.interviewId, payload);
-          window.localStorage.removeItem("interviewPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           window.Alpine.store("ui").showToast("Интервью успешно обновлено!");
           setTimeout(() => { globalThis.location.href = "/dashboard/interviews"; }, 1500);
         } else {
           await interviewsApi.create(payload);
-          window.localStorage.removeItem("interviewPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           window.Alpine.store("ui").showToast("Интервью успешно создано!");
           setTimeout(() => { globalThis.location.href = `/dashboard/interviews`; }, 1500);
         }
