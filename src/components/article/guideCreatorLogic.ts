@@ -33,6 +33,7 @@ import {
   reindexContentBlocks,
   sortAndNormalizeContentBlocks,
   withBlockMeta,
+  type EditorBlock,
 } from "@/lib/utils/contentBlocks";
 import {
   getStorage,
@@ -249,7 +250,7 @@ export default function guideCreatorLogic(initialState = {}) {
       secondImageUrl: "",
       secondImageCaption: "",
       heroOrientation: "image-right" as "image-left" | "image-right" | "image-bottom",
-      contentBlocks: [],
+      contentBlocks: [] as EditorBlock[],
       tags: [],
       parisSubCategories: [],
       parisDistrict: "",
@@ -305,10 +306,10 @@ export default function guideCreatorLogic(initialState = {}) {
 
     showBlockOptions: false,
 
-    editingIndex: null,
-    editingBlock: null,
-    draggedBlockId: null,
-    dragOverBlockId: null,
+    editingIndex: null as number | null,
+    editingBlock: null as EditorBlock | null,
+    draggedBlockId: null as string | null,
+    dragOverBlockId: null as string | null,
 
     isEditingTitle: false,
     editingTitleText: "",
@@ -1128,7 +1129,7 @@ export default function guideCreatorLogic(initialState = {}) {
     },
 
     updateBlock() {
-      if (this.editingIndex !== null) {
+      if (this.editingIndex !== null && this.editingBlock) {
         // Normalize into a local variable instead of reassigning
         // this.editingBlock: the edit panel's templates read
         // editingBlock.type/.url reactively, and reassigning it here (a
