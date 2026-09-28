@@ -3,6 +3,13 @@ import { app } from "@/lib/firebase/client";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { compressImage } from "@/lib/images/compressImage";
 import type { UiStore } from "@/stores/uiStore";
+import {
+  clearDashboardPreview,
+  openDashboardPreview,
+  readDashboardPreview,
+} from "@/lib/utils/dashboardPreview";
+
+const PREVIEW_KEY = "photoOfTheDayPreview";
 
 declare const Alpine: any;
 
@@ -23,14 +30,11 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
     isPreview?: boolean;
   };
 
-  let previewState: any = null;
-  if (typeof window !== "undefined" && isPreview) {
-    try {
-      const stored = window.localStorage?.getItem("photoOfTheDayPreview");
-      previewState = stored ? JSON.parse(stored) : null;
-    } catch (error) {
-      console.error("Failed to parse photo preview draft:", error);
-    }
+  // Only the preview tab reads the snapshot. Opening the editor drops any
+  // leftover one so it can't go stale.
+  const previewState = isPreview ? readDashboardPreview<any>(PREVIEW_KEY) : null;
+  if (!isPreview) {
+    clearDashboardPreview(PREVIEW_KEY);
   }
 
   const photoDraft = isPreview && previewState?.photo ? previewState.photo : initialPhoto;
@@ -149,8 +153,9 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
         selectedAuthorId: this.selectedAuthorId,
         authorDisplay,
       };
-      localStorage.setItem("photoOfTheDayPreview", JSON.stringify(previewState));
-      window.location.href = "/dashboard/photo-of-the-day/preview";
+      if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/photo-of-the-day/preview", previewState)) {
+        this.notify("Не удалось открыть предпросмотр.", "error");
+      }
     },
 
     async loadAuthors() {
@@ -232,11 +237,11 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
 
         if (this.isEditMode && this.photoId) {
           await photosOfTheDayApi.update(this.photoId, payload);
-          localStorage.removeItem("photoOfTheDayPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           this.notify("Фото дня обновлено");
         } else {
           await photosOfTheDayApi.create(payload);
-          localStorage.removeItem("photoOfTheDayPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           this.notify("Фото дня создано");
         }
 

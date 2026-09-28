@@ -14,12 +14,11 @@ import Button from "@/components/common/Button.astro";
         <div>
           <h1 class="text-2xl font-semibold">Предпросмотр фото дня</h1>
           <p class="text-sm text-base-content/70 mt-1">
-            Черновой просмотр текущей формы без публикации.
+            Редактор остался открыт в соседней вкладке. Сохраняй фото там.
           </p>
         </div>
         <div class="flex gap-2">
-          <Button variant="secondary" @click="returnToEdit()">Вернуться к редактированию</Button>
-          <Button variant="primary" @click="savePhoto()">Сохранить фото</Button>
+          <Button variant="secondary" @click="window.close()">Закрыть превью</Button>
         </div>
       </div>
 
