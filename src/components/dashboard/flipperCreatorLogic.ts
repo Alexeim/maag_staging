@@ -27,6 +27,10 @@ import {
   openDashboardPreview,
   readDashboardPreview,
 } from "@/lib/utils/dashboardPreview";
+import {
+  createUnsavedChangesGuard,
+  type UnsavedChangesGuard,
+} from "@/lib/utils/unsavedChangesGuard";
 
 const PREVIEW_KEY = "flipperPreview";
 
@@ -126,6 +130,8 @@ export default function flipperCreatorLogic(initialState = {}) {
     copy.secondImageCaption = copy.secondImageCaption ?? "";
     return copy;
   };
+
+  let unsavedGuard: UnsavedChangesGuard | null = null;
 
   return {
     flipper: {
@@ -278,6 +284,17 @@ export default function flipperCreatorLogic(initialState = {}) {
       this.syncCurrentContentCollection();
       this.loadContentCollections();
       this.loadLandingPlacements();
+
+      if (!isPreview) {
+        // @ts-ignore Alpine magic $el is available at runtime.
+        unsavedGuard = createUnsavedChangesGuard(this.$el, () => ({
+          flipper: this.flipper,
+          selectedAuthorId: this.selectedAuthorId,
+          useNewAuthor: this.useNewAuthor,
+          newAuthorFirstName: this.newAuthorFirstName,
+          newAuthorLastName: this.newAuthorLastName,
+        }));
+      }
     },
 
     getRichTextInitialHtml(block: { html?: unknown; text?: unknown } | null) {
@@ -721,11 +738,13 @@ export default function flipperCreatorLogic(initialState = {}) {
         if (this.isEditMode && this.flipperId) {
           await flippersApi.update(this.flipperId, payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast("Листалка успешно обновлена!");
           setTimeout(() => { globalThis.location.href = "/dashboard/flippers"; }, 1500);
         } else {
           await flippersApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast("Листалка успешно создана!");
           setTimeout(() => { globalThis.location.href = `/dashboard/flippers`; }, 1500);
         }
@@ -743,6 +762,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       const performDelete = async () => {
         try {
           await flippersApi.delete(this.flipperId);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast("Листалка удалена");
           setTimeout(() => {
             window.location.href = "/dashboard/flippers";
