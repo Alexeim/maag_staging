@@ -1191,6 +1191,7 @@ export interface VisualStoryPayload {
 export interface VisualStoryResponse extends VisualStoryPayload {
   id: string;
   createdAt: string | Date;
+  updatedAt?: string | Date;
   // Only from getById: the raw authors/{authorId} document (no id), or null.
   author?: AuthorPayload | null;
 }
