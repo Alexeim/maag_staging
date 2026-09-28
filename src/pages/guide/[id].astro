@@ -84,7 +84,7 @@ const displayGuide = {
   authorId: guideData?.author ? guideData?.authorId : undefined,
   imageUrl: guideData?.imageUrl,
   imageCaption: guideData?.imageCaption || '',
-  imageAlt: 'Guide image',
+  imageAlt: guideData?.title || 'Guide image',
   // Stored blocks are unvalidated JSON; ArticleBody renders them by `type`.
   contentBlocks: (guideData?.content || []) as ArticleBodyProps["contentBlocks"],
   tips: Array.isArray(guideData?.tips) ? guideData.tips : [],
