@@ -1,6 +1,8 @@
 import {
   editorialPlacementsApi,
+  type CalendarPageMainCardsSelection,
   type CalendarPagePlacementsResponse,
+  type CalendarPageSecondaryCardsSelection,
 } from "@/lib/api/api";
 import type { UiStore } from "@/stores/uiStore";
 
@@ -185,7 +187,7 @@ export default (initialState: CalendarEditorInitialState) => ({
     this.mainCardsError = "";
 
     try {
-      let mainCards: unknown = null;
+      let mainCards: CalendarPageMainCardsSelection | null = null;
 
       if (this.mainCardsMode === "manual") {
         if (this.selectedMainCardIds.length === 0) {
@@ -219,7 +221,7 @@ export default (initialState: CalendarEditorInitialState) => ({
     this.secondaryCardsError = "";
 
     try {
-      let secondaryCards: unknown = null;
+      let secondaryCards: CalendarPageSecondaryCardsSelection | null = null;
 
       if (this.secondaryCardsMode === "manual") {
         if (this.selectedSecondaryCardIds.length === 0) {
