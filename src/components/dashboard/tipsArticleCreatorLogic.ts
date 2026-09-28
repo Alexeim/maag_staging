@@ -22,6 +22,13 @@ import {
   normalizeStoredRichTextHtml,
 } from "@/lib/utils/richText";
 import { normalizeTagList } from "@/content/tags/tags";
+import {
+  clearDashboardPreview,
+  openDashboardPreview,
+  readDashboardPreview,
+} from "@/lib/utils/dashboardPreview";
+
+const PREVIEW_KEY = "tipsPreview";
 
 const storage = getStorage(app);
 
@@ -226,18 +233,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         };
       };
 
-      let previewState: PreviewState | null = null;
+      const previewState = readDashboardPreview<PreviewState>(PREVIEW_KEY);
       let restoredPreviewAuthorState = false;
-
-      try {
-        const stored = globalThis.localStorage?.getItem("tipsPreview");
-        const parsed = stored ? JSON.parse(stored) : null;
-        if (parsed && typeof parsed === "object") {
-          previewState = parsed as PreviewState;
-        }
-      } catch (error) {
-        console.error("Failed to load tips preview draft:", error);
-      }
 
       if (initialArticle) {
         const normalized = normalizeLoadedArticle(initialArticle);
@@ -249,33 +246,19 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       }
       if (typeof isEditMode === "boolean") this.isEditMode = isEditMode;
 
-      const shouldApplyPreview = (() => {
-        if (!previewState?.article) return false;
-        if (isPreview) return true;
-        const previewId =
-          typeof previewState.articleId === "string" && previewState.articleId
-            ? previewState.articleId
-            : null;
-        const isPreviewEdit = Boolean(previewState.isEditMode);
-        const isSameEdit =
-          this.isEditMode && previewId !== null && previewId === this.articleId;
-        const isCreateDraft = !this.isEditMode && !previewId && !isPreviewEdit;
-        return isSameEdit || isCreateDraft;
-      })();
+      // The draft is only for the preview tab. The editor tab never unloads
+      // while previewing, so it must not overlay a stored draft on itself.
+      const shouldApplyPreview = isPreview && Boolean(previewState?.article);
 
       if (shouldApplyPreview && previewState?.article) {
         const normalized = normalizeLoadedArticle(previewState.article);
         if (normalized) {
-          if (isPreview) {
-            this.article = normalized;
-            this.articleId =
-              typeof previewState.articleId === "string"
-                ? previewState.articleId
-                : null;
-            this.isEditMode = Boolean(previewState.isEditMode);
-          } else {
-            Object.assign(this.article, normalized);
-          }
+          this.article = normalized;
+          this.articleId =
+            typeof previewState.articleId === "string"
+              ? previewState.articleId
+              : null;
+          this.isEditMode = Boolean(previewState.isEditMode);
         }
         this.selectedAuthorId =
           typeof previewState.selectedAuthorId === "string"
@@ -304,6 +287,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
               }
             : { name: "", avatarUrl: "" };
         restoredPreviewAuthorState = true;
+      } else if (previewState) {
+        // Opening the editor drops any leftover snapshot so it can't go stale.
+        clearDashboardPreview(PREVIEW_KEY);
       }
 
       this.article.tags = normalizeTagList(this.article.tags);
@@ -362,11 +348,9 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         newAuthorLastName: this.newAuthorLastName,
         authorDisplay,
       };
-      globalThis.localStorage.setItem(
-        "tipsPreview",
-        JSON.stringify(previewState),
-      );
-      globalThis.location.href = "/dashboard/tips/preview";
+      if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/tips/preview", previewState)) {
+        ui()?.showToast?.("Не удалось открыть предпросмотр.", "error");
+      }
     },
 
     // ── Title editing ────────────────────────────────────────────────────────
@@ -887,14 +871,14 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.articleId) {
           await articlesApi.update(this.articleId, payload, await getIdToken());
-          globalThis.localStorage.removeItem("tipsPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           ui()?.showToast?.("Статья обновлена!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard/tips";
           }, 1500);
         } else {
           await articlesApi.create(payload, await getIdToken());
-          globalThis.localStorage.removeItem("tipsPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           ui()?.showToast?.("Статья создана!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard/tips";
