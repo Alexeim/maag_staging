@@ -50,6 +50,10 @@ import {
   openDashboardPreview,
   readDashboardPreview,
 } from "@/lib/utils/dashboardPreview";
+import {
+  createUnsavedChangesGuard,
+  type UnsavedChangesGuard,
+} from "@/lib/utils/unsavedChangesGuard";
 
 const PREVIEW_KEY = "interviewPreview";
 
@@ -143,6 +147,8 @@ export default function interviewCreatorLogic(initialState = {}) {
         : block,
     );
   };
+
+  let unsavedGuard: UnsavedChangesGuard | null = null;
 
   return {
     interview: {
@@ -592,6 +598,17 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.syncCurrentContentCollection();
       this.loadContentCollections();
       this.loadLandingPlacements();
+
+      if (!isPreview) {
+        // @ts-ignore Alpine magic $el is available at runtime.
+        unsavedGuard = createUnsavedChangesGuard(this.$el, () => ({
+          interview: this.interview,
+          selectedAuthorId: this.selectedAuthorId,
+          useNewAuthor: this.useNewAuthor,
+          newAuthorFirstName: this.newAuthorFirstName,
+          newAuthorLastName: this.newAuthorLastName,
+        }));
+      }
     },
 
     previewInterview() {
@@ -1034,11 +1051,13 @@ export default function interviewCreatorLogic(initialState = {}) {
         if (this.isEditMode && this.interviewId) {
           await interviewsApi.update(this.interviewId, payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast("Интервью успешно обновлено!");
           setTimeout(() => { globalThis.location.href = "/dashboard/interviews"; }, 1500);
         } else {
           await interviewsApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast("Интервью успешно создано!");
           setTimeout(() => { globalThis.location.href = `/dashboard/interviews`; }, 1500);
         }
@@ -1058,6 +1077,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       const performDelete = async () => {
         try {
           await interviewsApi.delete(this.interviewId as string);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast("Интервью удалено");
           setTimeout(() => {
             globalThis.location.href = redirectUrl || "/dashboard/interviews";
