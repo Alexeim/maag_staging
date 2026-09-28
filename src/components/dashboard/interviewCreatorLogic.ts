@@ -37,6 +37,7 @@ import {
   withBlockMeta,
   type EditorBlock,
 } from "@/lib/utils/contentBlocks";
+import type { EditorAuthor, LoadedAuthorFields } from "@/lib/utils/editorAuthors";
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 import { app } from "../../lib/firebase/client";
@@ -80,7 +81,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     ...restInitialState
   } = initialState as {
     initialInterview?: Record<string, unknown> | null;
-    initialAuthors?: Array<Record<string, unknown>>;
+    initialAuthors?: EditorAuthor[];
     interviewId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
@@ -439,7 +440,7 @@ export default function interviewCreatorLogic(initialState = {}) {
         };
       }
 
-      const fallbackAuthor = this.interview?.author;
+      const fallbackAuthor = (this.interview as LoadedAuthorFields)?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         return {
           name: this.getAuthorLabel(fallbackAuthor),
@@ -466,7 +467,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       if (exists) {
         return;
       }
-      const fallbackAuthor = this.interview?.author;
+      const fallbackAuthor = (this.interview as LoadedAuthorFields)?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         this.authors.unshift({
           id: this.selectedAuthorId,
@@ -602,10 +603,9 @@ export default function interviewCreatorLogic(initialState = {}) {
         ? normalizeEditableInterviewBlocks(this.interview.contentBlocks)
         : [];
       if (!restoredPreviewAuthorState) {
+        const loadedAuthorId = (this.interview as LoadedAuthorFields).authorId;
         this.selectedAuthorId =
-          typeof this.interview.authorId === "string"
-            ? this.interview.authorId
-            : "";
+          typeof loadedAuthorId === "string" ? loadedAuthorId : "";
       }
       this.ensureSelectedAuthorPresent();
       this.fetchContentLists();
