@@ -1,4 +1,5 @@
 ---
+import type { MarkdownInstance } from "astro";
 import Layout from "../../Layouts/Layout.astro";
 
 interface LegalFrontmatter {
@@ -8,24 +9,15 @@ interface LegalFrontmatter {
   effectiveDate?: string;
 }
 
-interface Heading {
-  depth: number;
-  slug: string;
-  text: string;
-}
-
-interface MarkdownDocument {
-  frontmatter: LegalFrontmatter;
-  Content: any;
-  getHeadings(): Heading[];
-}
-
 interface Props {
-  markdownDocument: MarkdownDocument;
+  markdownDocument: MarkdownInstance<Record<string, any>>;
 }
 
 const { markdownDocument } = Astro.props;
-const { frontmatter, Content } = markdownDocument;
+const { Content } = markdownDocument;
+// Astro types every .md import's frontmatter as Record<string, any>; the files
+// in src/content/legal all carry these fields.
+const frontmatter = markdownDocument.frontmatter as LegalFrontmatter;
 const headings = markdownDocument
   .getHeadings()
   .filter((heading) => heading.depth >= 2 && heading.depth <= 3);
