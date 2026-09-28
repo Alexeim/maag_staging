@@ -31,6 +31,7 @@ import {
   reindexContentBlocks,
   sortAndNormalizeContentBlocks,
   withBlockMeta,
+  type EditorBlock,
 } from "@/lib/utils/contentBlocks";
 import {
   getBlockSummary as buildBlockSummary,
@@ -226,8 +227,10 @@ export default function newsCreatorLogic(
           this.getLinkedBlockTitle(currentBlock),
       });
     },
-    syncContentBlockOrder(blocks = this.article.contentBlocks) {
-      this.article.contentBlocks = reindexContentBlocks(blocks);
+    syncContentBlockOrder(blocks?: EditorBlock[]) {
+      this.article.contentBlocks = reindexContentBlocks(
+        blocks ?? this.article.contentBlocks,
+      );
     },
     getVideoProvider(url: string, sourceType = "embed") {
       return detectVideoProvider(url, sourceType);
@@ -244,7 +247,7 @@ export default function newsCreatorLogic(
     getTweetId(url: string) {
       return resolveTweetId(url);
     },
-    validateVideoBlock(block: Record<string, unknown> | null, showToast = true) {
+    validateVideoBlock(block: EditorBlock, showToast = true) {
       if (!block || block.type !== "video") {
         return true;
       }
@@ -273,7 +276,7 @@ export default function newsCreatorLogic(
       }
       return true;
     },
-    validateTweetBlock(block: Record<string, unknown> | null, showToast = true) {
+    validateTweetBlock(block: EditorBlock, showToast = true) {
       if (!block || block.type !== "tweet") {
         return true;
       }
@@ -909,7 +912,7 @@ export default function newsCreatorLogic(
       this.article.tags = normalizeTags(this.article.tags);
 
       const hasInvalidVideoBlock = this.article.contentBlocks.some(
-        (block: Record<string, unknown>) => !this.validateVideoBlock(block),
+        (block: EditorBlock) => !this.validateVideoBlock(block),
       );
       if (hasInvalidVideoBlock) {
         this.isSaving = false;
@@ -917,7 +920,7 @@ export default function newsCreatorLogic(
       }
 
       const hasInvalidTweetBlock = this.article.contentBlocks.some(
-        (block: Record<string, unknown>) => !this.validateTweetBlock(block),
+        (block: EditorBlock) => !this.validateTweetBlock(block),
       );
       if (hasInvalidTweetBlock) {
         this.isSaving = false;
