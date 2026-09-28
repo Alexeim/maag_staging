@@ -391,10 +391,6 @@ export type LandingCultureInterviewBlockSelection =
   | LandingCultureInterviewAutoSelection
   | LandingCultureInterviewManualSelection;
 
-export interface PhotoOfTheDayFeatureEmptySelection {
-  mode: "empty";
-}
-
 export interface PhotoOfTheDayFeatureAutoSelection {
   mode: "auto-latest";
 }
@@ -404,8 +400,8 @@ export interface PhotoOfTheDayFeatureManualSelection {
   id: string;
 }
 
+// An empty slot is `null`, as on the server; there is no "empty" mode.
 export type PhotoOfTheDayFeatureSelection =
-  | PhotoOfTheDayFeatureEmptySelection
   | PhotoOfTheDayFeatureAutoSelection
   | PhotoOfTheDayFeatureManualSelection;
 

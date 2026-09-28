@@ -59,6 +59,9 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
   leSaviezVousFeature: {
     mode: "auto-latest",
   },
+  photoOfTheDayFeature: {
+    mode: "auto-latest",
+  },
   updatedAt: null,
   updatedBy: null,
 };
