@@ -144,7 +144,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                   aria-hidden={pageIndex === 0 ? "false" : "true"}
                 >
                   <div class="grid grid-cols-4 items-start justify-items-center gap-6">
-                    {page.map((entry, entryIndex) =>
+                    {page.map((entry) =>
                       entry.type === "separator" ? (
                         <div
                           class="flex min-h-[360px] w-full max-w-[280px] items-center justify-center"
@@ -155,7 +155,6 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                       ) : (
                         <div
                           class="min-w-0 w-full max-w-[280px]"
-                          key={`${entry.item.contentType}-${entry.item.id}-${pageIndex}-${entryIndex}`}
                         >
                           <article
                             class:list={[
@@ -256,7 +255,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                   aria-hidden={pageIndex === 0 ? "false" : "true"}
                 >
                   <div class="mx-auto min-w-0 w-full max-w-[360px]">
-                    {page.map((item, entryIndex) => (
+                    {page.map((item) => (
                       <article
                         class:list={[
                           "w-full",
@@ -264,7 +263,6 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                           item.contentType === "interview" &&
                             "content-start",
                         ]}
-                        key={`${item.contentType}-${item.id}-mobile-${pageIndex}-${entryIndex}`}
                       >
                         <a
                           href={item.href}

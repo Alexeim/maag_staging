@@ -221,7 +221,7 @@ const pages = chunkEntries(marqueeEntries, 4);
                 aria-hidden={pageIndex === 0 ? "false" : "true"}
               >
                 <div class="grid grid-cols-4 items-start justify-items-center gap-6">
-                  {page.map((entry, entryIndex) =>
+                  {page.map((entry) =>
                     entry.type === "separator" ? (
                       <div
                         class="flex min-h-[360px] w-full max-w-[280px] items-center justify-center gap-4 border-x border-base-content/10 px-4"
@@ -235,7 +235,6 @@ const pages = chunkEntries(marqueeEntries, 4);
                     ) : (
                       <div
                         class="min-w-0 w-full max-w-[280px]"
-                        key={`${entry.item.contentType}-${entry.item.id}-${pageIndex}-${entryIndex}`}
                       >
                         <article
                           class:list={[
