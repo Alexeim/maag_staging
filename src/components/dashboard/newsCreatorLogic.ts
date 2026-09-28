@@ -34,6 +34,7 @@ import {
   withBlockMeta,
   type EditorBlock,
 } from "@/lib/utils/contentBlocks";
+import type { EditorAuthor, LoadedAuthorFields } from "@/lib/utils/editorAuthors";
 import {
   getBlockSummary as buildBlockSummary,
   getBlockTypeLabel as resolveBlockTypeLabel,
@@ -80,7 +81,7 @@ export default function newsCreatorLogic(
   } = initialState as {
     categoryTags?: Record<string, string[]>;
     initialArticle?: Record<string, unknown> | null;
-    initialAuthors?: Array<Record<string, unknown>>;
+    initialAuthors?: EditorAuthor[];
     articleId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
@@ -415,7 +416,7 @@ export default function newsCreatorLogic(
         };
       }
 
-      const fallbackAuthor = this.article?.author;
+      const fallbackAuthor = (this.article as LoadedAuthorFields)?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         return {
           name: this.getAuthorLabel(fallbackAuthor),
@@ -442,7 +443,7 @@ export default function newsCreatorLogic(
       if (exists) {
         return;
       }
-      const fallbackAuthor = this.article?.author;
+      const fallbackAuthor = (this.article as LoadedAuthorFields)?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         this.authors.unshift({
           id: this.selectedAuthorId,
@@ -575,8 +576,9 @@ export default function newsCreatorLogic(
         ? sortAndNormalizeContentBlocks(this.article.contentBlocks)
         : [];
       if (!restoredPreviewAuthorState) {
+        const loadedAuthorId = (this.article as LoadedAuthorFields).authorId;
         this.selectedAuthorId =
-          typeof this.article.authorId === "string" ? this.article.authorId : "";
+          typeof loadedAuthorId === "string" ? loadedAuthorId : "";
       }
       this.ensureSelectedAuthorPresent();
       this.fetchContentLists();

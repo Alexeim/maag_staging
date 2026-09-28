@@ -1,9 +1,4 @@
-import {
-  articlesApi,
-  authorsApi,
-  contentCollectionsApi,
-  type AuthorResponse,
-} from "@/lib/api/api";
+import { articlesApi, authorsApi, contentCollectionsApi } from "@/lib/api/api";
 import { app, getIdToken } from "../../lib/firebase/client";
 import {
   getInitialRichTextHtml,
@@ -65,6 +60,7 @@ import {
   withBlockMeta,
   type EditorBlock,
 } from "@/lib/utils/contentBlocks";
+import type { EditorAuthor, LoadedAuthorFields } from "@/lib/utils/editorAuthors";
 
 const PREVIEW_KEY = "articlePreview";
 
@@ -88,25 +84,6 @@ const TIP_TYPES = [
 ] as const;
 type TipType = (typeof TIP_TYPES)[number];
 type TipItem = { type: TipType; text: string; url?: string };
-
-// What the author picker reads. The list is authorsApi.list(), plus an entry
-// rebuilt from the loaded article's author when that one is missing from it.
-type EditorAuthor = Pick<
-  AuthorResponse,
-  "id" | "firstName" | "lastName" | "role" | "avatar" | "noBgAvatar"
->;
-
-// Present on an article loaded from the API (normalizeLoadedArticle copies the
-// response as-is) but not on the empty initial state the type is inferred from.
-type LoadedArticleAuthorFields = {
-  author?: {
-    firstName?: string;
-    lastName?: string;
-    role?: string;
-    avatar?: string;
-  } | null;
-  authorId?: unknown;
-};
 
 export default function articleCreatorLogic(initialState = {}) {
   const {
@@ -671,7 +648,7 @@ export default function articleCreatorLogic(initialState = {}) {
         };
       }
 
-      const fallbackAuthor = (this.article as LoadedArticleAuthorFields)
+      const fallbackAuthor = (this.article as LoadedAuthorFields)
         ?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         return {
@@ -699,7 +676,7 @@ export default function articleCreatorLogic(initialState = {}) {
       if (alreadyExists) {
         return;
       }
-      const fallbackAuthor = (this.article as LoadedArticleAuthorFields)
+      const fallbackAuthor = (this.article as LoadedAuthorFields)
         ?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         this.authors.unshift({
@@ -1060,7 +1037,7 @@ export default function articleCreatorLogic(initialState = {}) {
         ? normalizeContentBlocks(this.article.contentBlocks)
         : [];
       if (!restoredPreviewAuthorState) {
-        const loadedAuthorId = (this.article as LoadedArticleAuthorFields)
+        const loadedAuthorId = (this.article as LoadedAuthorFields)
           .authorId;
         this.selectedAuthorId =
           typeof loadedAuthorId === "string" ? loadedAuthorId : "";
