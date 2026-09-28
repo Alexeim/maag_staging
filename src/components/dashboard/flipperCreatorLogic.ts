@@ -11,6 +11,7 @@ import {
   createEmptyRelatedContentLists,
   fetchRelatedContentLists,
   sanitizeRelatedContent,
+  type RelatedContentType,
 } from "@/lib/utils/relatedContent";
 import {
   getStorage,
@@ -166,7 +167,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     contentListsLoading: false,
     relatedContentLists: createEmptyRelatedContentLists(),
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
-    selectedRelatedContentType: "article",
+    selectedRelatedContentType: "article" as RelatedContentType | "",
     selectedRelatedContentId: "",
     ...createContentCollectionEditorState("flipper"),
     flipperId,
@@ -516,10 +517,10 @@ export default function flipperCreatorLogic(initialState = {}) {
       }
       return this.relatedContentLists[this.selectedRelatedContentType] ?? [];
     },
-    getSelectedEntityRelatedContent(type) {
+    getSelectedEntityRelatedContent(type: RelatedContentType) {
       return this.flipper?.relatedContent?.[type] ?? [];
     },
-    getRelatedContentItemLabel(type, id) {
+    getRelatedContentItemLabel(type: RelatedContentType, id: string) {
       const item = (this.relatedContentLists[type] ?? []).find(
         (entry) => entry.id === id,
       );
@@ -552,7 +553,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       this.flipper.relatedContent = normalized;
       this.selectedRelatedContentId = "";
     },
-    removeRelatedContent(type, id) {
+    removeRelatedContent(type: RelatedContentType, id: string) {
       const normalized = sanitizeRelatedContent(this.flipper.relatedContent);
       normalized[type] = normalized[type].filter((itemId) => itemId !== id);
       this.flipper.relatedContent = normalized;
