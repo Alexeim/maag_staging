@@ -11,6 +11,7 @@ import {
   createEmptyRelatedContentLists,
   fetchRelatedContentLists,
   sanitizeRelatedContent,
+  type MaterialLinkContentType,
   type RelatedContentType,
 } from "@/lib/utils/relatedContent";
 import {
@@ -317,15 +318,17 @@ export default function newsCreatorLogic(
     getSelectedEntityRelatedContent(type: RelatedContentType) {
       return this.article?.relatedContent?.[type] ?? [];
     },
+    // Both also serve in-body link blocks, whose type may be photoOfTheDay or
+    // any string read from a stored block; an unknown key falls back to [].
     getRelatedContentItemLabel(type: string, id: string) {
-      const item = (this.relatedContentLists as Record<string, any[]>)[
-        type
-      ]?.find((entry) => entry.id === id);
+      const list: Array<{ id: string; title?: string }> =
+        this.relatedContentLists[type as MaterialLinkContentType] ?? [];
+      const item = list.find((entry) => entry.id === id);
       return item?.title || id;
     },
     getFilteredContentList(contentType: string) {
       return (
-        (this.relatedContentLists as Record<string, any[]>)[contentType] ?? []
+        this.relatedContentLists[contentType as MaterialLinkContentType] ?? []
       );
     },
     addRelatedContent() {
