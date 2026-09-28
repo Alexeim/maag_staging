@@ -1384,12 +1384,36 @@ export interface PublicParisResponse {
   photoOfTheDay: PublicCardItem | null;
 }
 
+// One event exactly as toPublicCalendarEvent() builds it
+// (server/src/controllers/publicLandingController.ts). Published only.
+export interface PublicCalendarEvent {
+  id: string;
+  title: string;
+  imageUrl: string | null;
+  // ISO strings, set to UTC midnight on the server.
+  startDate: string;
+  endDate: string | null;
+  dateType: "single" | "duration";
+  address: string;
+  timeMode: "none" | "start" | "range";
+  startTime: string | null;
+  endTime: string | null;
+  hasManualTimeInfo: boolean;
+  category: string;
+  // The raw primary tag (or "Событие"); the page resolves the label.
+  categoryLabel: string;
+  tagLabel: string;
+  description: string;
+  isMainEvent: boolean;
+  url: string;
+}
+
 export interface PublicCalendarResponse {
   calendarPagePlacements: CalendarPagePlacementsResponse;
-  events: unknown[];
-  featuredEventCards: unknown[];
-  topCards: unknown[];
-  lastChanceCards: unknown[];
+  events: PublicCalendarEvent[];
+  featuredEventCards: PublicCalendarEvent[];
+  topCards: PublicCalendarEvent[];
+  lastChanceCards: PublicCalendarEvent[];
 }
 
 export const publicCultureApi = {
