@@ -114,20 +114,6 @@ const getEventDateParts = (start: Date, end: Date | null) => {
   };
 };
 
-const formatCreatedAt = (value: unknown): string => {
-  const date = toDate(value);
-  if (!date) {
-    return "";
-  }
-  return date
-    .toLocaleDateString("ru-RU", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    })
-    .replace(" г.", "");
-};
-
 const formatTimeLabel = (event: EventResponse | null): string | null => {
   const mode =
     event?.timeMode === "start" || event?.timeMode === "range"
@@ -426,7 +412,6 @@ const address =
     : "Место уточняется";
 const lead = typeof eventData?.lead === "string" ? eventData.lead : "";
 const leadHtml = getInitialRichTextHtml({ html: eventData?.leadHtml, text: lead });
-const createdAtLabel = formatCreatedAt(eventData?.createdAt);
 const mapsUrl = buildMapsUrl(address);
 const mapsEmbedUrl = buildMapsEmbedUrl(address);
 const calendarUrl = buildGoogleCalendarUrl(
@@ -533,22 +518,6 @@ const eventStructuredData = eventData
                         />
                       )}
                     </div>
-
-                    {/* <div class="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-base-content/65 font-inter">
-                    <span class="uppercase tracking-[0.22em] text-accent">
-                      {topMetaTag}
-                    </span>
-                    <span class="h-1 w-1 rounded-full bg-base-content/30"></span>
-                    <span class="italic font-old_standard text-lg text-base-content/80">
-                      {displayEvent.authorName}
-                    </span>
-                    {createdAtLabel && (
-                      <>
-                        <span class="h-1 w-1 rounded-full bg-base-content/30"></span>
-                        <span>{createdAtLabel}</span>
-                      </>
-                    )}
-                  </div> */}
 
                     <ContentActions
                       contentType="event"
