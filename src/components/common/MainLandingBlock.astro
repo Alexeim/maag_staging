@@ -8,19 +8,20 @@ import {
   getPrimaryBadgeLabel,
 } from "@/lib/utils/contentBadge";
 import { getCalendarToday } from "@/lib/utils/calendarDate";
+import type {
+  PublicCardItem,
+  PublicLandingEvent,
+  PublicLandingResponse,
+} from "@/lib/api/api";
 
 interface MainLandingBlockProps {
-  data?: {
-    mainArticle?: any;
-    newsArticles?: any[];
-    landingEvent?: any;
-  };
+  data?: Partial<PublicLandingResponse["mainBlock"]>;
 }
 
 const { data: publicLandingData } = Astro.props as MainLandingBlockProps;
 
-const getPrimaryTag = (article: any) => getPrimaryBadgeLabel(article);
-const getPrimaryTagHref = (article: any) => getPrimaryBadgeHref(article);
+const getPrimaryTag = (article: PublicCardItem) => getPrimaryBadgeLabel(article);
+const getPrimaryTagHref = (article: PublicCardItem) => getPrimaryBadgeHref(article);
 
 const splitTitle = (t: string) => {
   const s = t.trimEnd();
@@ -105,7 +106,7 @@ const formatArticleDate = (value: unknown) => {
     .replace(" г.", "");
 };
 
-function getLandingEventDisplayDate(event: any) {
+function getLandingEventDisplayDate(event: PublicLandingEvent | null) {
   const startDate = toDate(event?.startDate);
   if (!startDate) {
     return null;
@@ -152,18 +153,20 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
           newsArticles.map((newsItem) => (
             <div class="flex-shrink-0 w-[280px] sm:w-1/2 md:w-1/3 lg:w-full lg:py-4 lg:border-b lg:border-base-content/15 last:lg:border-b-0">
               <div class="flex items-start gap-4">
-                <a
-                  href={`/news/${newsItem.id}`}
-                  class="linked-image-hover bg-base-200 z-10"
-                >
-                  <Image
-                    src={newsItem.imageUrl}
-                    alt={`News image for ${newsItem.title}`}
-                    class="linked-image-hover__media w-20 h-20 object-cover flex-shrink-0"
-                    width={80}
-                    height={80}
-                  />
-                </a>
+                {newsItem.imageUrl && (
+                  <a
+                    href={`/news/${newsItem.id}`}
+                    class="linked-image-hover bg-base-200 z-10"
+                  >
+                    <Image
+                      src={newsItem.imageUrl}
+                      alt={`News image for ${newsItem.title}`}
+                      class="linked-image-hover__media w-20 h-20 object-cover flex-shrink-0"
+                      width={80}
+                      height={80}
+                    />
+                  </a>
+                )}
                 <div class="flex-1 max-w-max">
                   <div class="mb-1 flex items-start">
                     {getPrimaryTagHref(newsItem) ? (
