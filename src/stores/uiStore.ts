@@ -10,13 +10,27 @@ interface ConfirmationModal {
   message: string;
   show: boolean;
   onConfirm: () => void;
+  confirmLabel: string;
+  cancelLabel: string;
 }
+
+interface ConfirmationLabels {
+  confirmLabel?: string;
+  cancelLabel?: string;
+}
+
+const DEFAULT_CONFIRM_LABEL = 'Подтвердить';
+const DEFAULT_CANCEL_LABEL = 'Отмена';
 
 export interface UiStore {
   toast: Toast;
   confirmation: ConfirmationModal;
   showToast(message: string, type?: 'success' | 'error'): void;
-  showConfirmation(message: string, onConfirm: () => void): void;
+  showConfirmation(
+    message: string,
+    onConfirm: () => void,
+    labels?: ConfirmationLabels,
+  ): void;
   hideConfirmation(): void;
 }
 
@@ -31,6 +45,8 @@ export function createUiStore(): UiStore {
       message: '',
       show: false,
       onConfirm: () => {},
+      confirmLabel: DEFAULT_CONFIRM_LABEL,
+      cancelLabel: DEFAULT_CANCEL_LABEL,
     },
 
     showToast(message, type = 'success') {
@@ -42,9 +58,11 @@ export function createUiStore(): UiStore {
       }, 3000);
     },
 
-    showConfirmation(message, onConfirm) {
+    showConfirmation(message, onConfirm, labels = {}) {
       this.confirmation.message = message;
       this.confirmation.onConfirm = onConfirm;
+      this.confirmation.confirmLabel = labels.confirmLabel ?? DEFAULT_CONFIRM_LABEL;
+      this.confirmation.cancelLabel = labels.cancelLabel ?? DEFAULT_CANCEL_LABEL;
       this.confirmation.show = true;
     },
 
@@ -52,6 +70,8 @@ export function createUiStore(): UiStore {
       this.confirmation.show = false;
       this.confirmation.message = '';
       this.confirmation.onConfirm = () => {};
+      this.confirmation.confirmLabel = DEFAULT_CONFIRM_LABEL;
+      this.confirmation.cancelLabel = DEFAULT_CANCEL_LABEL;
     },
   };
 }

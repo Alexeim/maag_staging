@@ -16,7 +16,11 @@ const PREVIEW_KEY = "firstPersonPreview";
 export default function firstPersonCreatorLogic(initialState = {}) {
   // First-person reads its own preview snapshot in init(). The article base
   // must not act as an article preview, or it would load the article's snapshot.
-  const baseLogic = articleCreatorLogic({ ...initialState, isPreview: false });
+  const baseLogic = articleCreatorLogic({
+    ...initialState,
+    isPreview: false,
+    watchUnsavedChanges: false,
+  });
 
   const { isPreview = false } = initialState as { isPreview?: boolean };
 

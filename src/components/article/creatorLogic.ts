@@ -48,6 +48,10 @@ import {
   openDashboardPreview,
   readDashboardPreview,
 } from "@/lib/utils/dashboardPreview";
+import {
+  createUnsavedChangesGuard,
+  type UnsavedChangesGuard,
+} from "@/lib/utils/unsavedChangesGuard";
 
 const PREVIEW_KEY = "articlePreview";
 
@@ -139,6 +143,9 @@ export default function articleCreatorLogic(initialState = {}) {
     articleId = null,
     isEditMode = false,
     articleType = "standard",
+    // Editors that build on this logic (event, first-person) have their own
+    // fields and save methods, so they pass false and set up their own guard.
+    watchUnsavedChanges = true,
     ...restInitialState
   } = initialState as {
     categoryTags?: Record<string, string[]>;
@@ -148,7 +155,10 @@ export default function articleCreatorLogic(initialState = {}) {
     articleId?: string | null;
     isEditMode?: boolean;
     articleType?: "standard" | "tips" | "le_saviez_vous";
+    watchUnsavedChanges?: boolean;
   };
+
+  let unsavedGuard: UnsavedChangesGuard | null = null;
 
   // Each articleType flavor has exactly one dashboard list it belongs to.
   const listUrl =
@@ -1074,6 +1084,17 @@ export default function articleCreatorLogic(initialState = {}) {
       this.loadContentCollections();
       this.loadAuthors();
       this.loadLandingPlacements();
+
+      if (!this.isPreview && watchUnsavedChanges) {
+        // @ts-ignore Alpine magic $el is available at runtime.
+        unsavedGuard = createUnsavedChangesGuard(this.$el, () => ({
+          article: this.article,
+          selectedAuthorId: this.selectedAuthorId,
+          useNewAuthor: this.useNewAuthor,
+          newAuthorFirstName: this.newAuthorFirstName,
+          newAuthorLastName: this.newAuthorLastName,
+        }));
+      }
     },
 
     // --- Title editing methods (unchanged) ---
@@ -1651,6 +1672,7 @@ export default function articleCreatorLogic(initialState = {}) {
         if (this.isEditMode && this.articleId) {
           await articlesApi.update(this.articleId, payload, await getIdToken());
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast("Статья успешно обновлена!");
           setTimeout(() => {
             globalThis.location.href = listUrl;
@@ -1658,6 +1680,7 @@ export default function articleCreatorLogic(initialState = {}) {
         } else {
           await articlesApi.create(payload, await getIdToken());
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast(
             "Статья успешно создана! Молодец!",
           );
@@ -1687,6 +1710,7 @@ export default function articleCreatorLogic(initialState = {}) {
           if (response.status !== 200 && response.status !== 204) {
             throw new Error(`Deletion failed with status: ${response.status}`);
           }
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast("Статья удалена");
           setTimeout(() => {
             window.location.href = redirectUrl || "/dashboard";
