@@ -9,7 +9,6 @@ import node from "@astrojs/node";
 import sitemap from "@astrojs/sitemap";
 
 const sitemapExcludedPaths = new Set([
-  "/article-variant/",
   "/cancel/",
   "/dashboard/",
   "/profile/",
