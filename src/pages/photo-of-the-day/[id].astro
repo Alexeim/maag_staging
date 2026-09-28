@@ -1,25 +1,30 @@
 ---
 import Layout from "@/Layouts/Layout.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
-import { ApiError, photosOfTheDayApi } from "@/lib/api/api";
+import {
+  ApiError,
+  photosOfTheDayApi,
+  type PhotoOfTheDayResponse,
+} from "@/lib/api/api";
 import { buildImageStructuredData } from "@/lib/seo/structuredData";
 import { X } from "@lucide/astro";
 import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
 
 const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 
-let photo: any;
+let photo: PhotoOfTheDayResponse | null = null;
 let error: string | null = null;
 
 try {
-  photo = await photosOfTheDayApi.getById(id!);
-} catch (e: any) {
+  photo = await photosOfTheDayApi.getById(id);
+} catch (e) {
   Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
   if (e instanceof ApiError) {
     error =
       e.status === 404 ? "Фото не найдено." : `Ошибка загрузки: ${e.message}`;
   } else {
-    error = `Ошибка загрузки: ${e.message}`;
+    error = `Ошибка загрузки: ${e instanceof Error ? e.message : String(e)}`;
   }
 }
 
@@ -39,7 +44,7 @@ const AuthorWrapper = authorHref ? "a" : "div";
 
 // Same date-normalizing logic as ArticleDate.astro, duplicated here because
 // the hero overlay needs light (white) text and ArticleDate hardcodes gray-600.
-const normalizeTimestamp = (value: any): Date | null => {
+const normalizeTimestamp = (value: unknown): Date | null => {
   if (!value) return null;
   if (typeof value === "object") {
     if ("toDate" in value && typeof value.toDate === "function") {
@@ -48,9 +53,9 @@ const normalizeTimestamp = (value: any): Date | null => {
     if ("_seconds" in value && typeof value._seconds === "number") {
       return new Date(value._seconds * 1000);
     }
-    return new Date(value as any);
+    return new Date(value as Date);
   }
-  return new Date(value);
+  return new Date(value as string | number);
 };
 const publishedAtDate = photo ? normalizeTimestamp(photo.publishedAt) : null;
 const formattedPublishedAt =
@@ -178,7 +183,7 @@ const xInit =
 
               <ContentActions
                 contentType="photoOfTheDay"
-                contentId={id!}
+                contentId={id}
                 title={photo.title}
                 href={`/photo-of-the-day/${id}`}
                 imageUrl={photo.imageUrl}
