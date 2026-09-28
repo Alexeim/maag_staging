@@ -1,4 +1,5 @@
 ---
+import type { ComponentProps } from "astro/types";
 import Layout from "../../Layouts/Layout.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
@@ -6,7 +7,12 @@ import EventMetaIcon from "../../components/common/EventMetaIcon.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import picture1 from "../../assets/images/culture.jpg";
 import { CalendarPlus } from "@lucide/astro";
-import { ApiError, eventsApi, publicRelatedApi } from "@/lib/api/api";
+import {
+  ApiError,
+  eventsApi,
+  publicRelatedApi,
+  type EventResponse,
+} from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import {
@@ -20,7 +26,10 @@ import { getCalendarToday } from "@/lib/utils/calendarDate";
 import { getPrimaryBadgeHref, getTagLabel } from "@/lib/utils/contentBadge";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 
+type ArticleBodyProps = ComponentProps<typeof ArticleBody>;
+
 const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 
 const toDate = (value: unknown): Date | null => {
   if (!value) {
@@ -121,7 +130,7 @@ const formatCreatedAt = (value: unknown): string => {
     .replace(" г.", "");
 };
 
-const formatTimeLabel = (event: any): string | null => {
+const formatTimeLabel = (event: EventResponse | null): string | null => {
   const mode =
     event?.timeMode === "start" || event?.timeMode === "range"
       ? event.timeMode
@@ -151,7 +160,8 @@ const normalizeAdditionalInfo = (value: unknown) => {
   }
 
   return value
-    .map((item: any) => {
+    // Stored JSON, unvalidated: every field is checked below.
+    .map((item: { icon?: unknown; text?: unknown } | null) => {
       const icon = typeof item?.icon === "string" ? item.icon.trim() : "";
       const text = typeof item?.text === "string" ? item.text.trim() : "";
       if (!text || !(icon in EVENT_INFO_LABELS)) {
@@ -163,7 +173,7 @@ const normalizeAdditionalInfo = (value: unknown) => {
         text,
       };
     })
-    .filter(Boolean);
+    .filter((info) => info !== null);
 };
 
 const toDateKey = (date: Date | null): string => {
@@ -201,13 +211,25 @@ const normalizeTags = (value: unknown): string[] => {
 const resolveTagLabel = (rawTag: unknown, fallback: string): string =>
   typeof rawTag === "string" && rawTag.trim() ? getTagLabel(rawTag) : fallback;
 
+// Only the fields extractTextFromContent reads; stored blocks are unvalidated.
+type LooseColumn = { content?: unknown } | null;
+type LooseContentBlock = {
+  type?: unknown;
+  text?: unknown;
+  question?: unknown;
+  answer?: unknown;
+  left?: LooseColumn;
+  center?: LooseColumn;
+  right?: LooseColumn;
+} | null;
+
 const extractTextFromContent = (blocks: unknown): string => {
   if (!Array.isArray(blocks)) {
     return "";
   }
 
   return blocks
-    .flatMap((block: any) => {
+    .flatMap((block: LooseContentBlock) => {
       const pieces: string[] = [];
 
       if (typeof block?.text === "string") {
@@ -315,7 +337,7 @@ const formatCalendarDay = (date: Date): string => {
 };
 
 const buildGoogleCalendarUrl = (
-  event: any,
+  event: EventResponse | null,
   start: Date | null,
   end: Date | null,
   title: string,
@@ -402,16 +424,48 @@ const buildGoogleCalendarUrl = (
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 };
 
-let eventData: any;
-let relatedEvents: any[] = [];
+const toRelatedEventCard = (item: EventResponse) => {
+  const itemStart = toDate(item?.startDate);
+  const itemEnd = toDate(item?.endDate);
+  if (!itemStart) {
+    return null;
+  }
+
+  return {
+    id: item.id,
+    title: item?.title || "Событие",
+    href: `/events/${item.id}`,
+    imageUrl:
+      typeof item?.imageUrl === "string" &&
+      item.imageUrl.trim().length > 0
+        ? item.imageUrl
+        : picture1.src,
+    address:
+      typeof item?.address === "string" && item.address.trim().length > 0
+        ? item.address.trim()
+        : "Место уточняется",
+    categoryLabel: resolveTagLabel(
+      normalizeTags(item?.tags)[0] ?? null,
+      "Событие",
+    ),
+    startDate: itemStart,
+    endDate: itemEnd,
+    ...getEventDateParts(itemStart, itemEnd),
+    sortTime: itemStart.getTime(),
+    endDay: toUtcDayStart(itemEnd ?? itemStart),
+  };
+};
+
+let eventData: EventResponse | null = null;
+let relatedEvents: NonNullable<ReturnType<typeof toRelatedEventCard>>[] = [];
 let collectionContentItems: PublicContentCardItem[] = [];
 let relatedContentItems: PublicContentCardItem[] = [];
 let linkedContentLookup: LinkedContentLookup = {};
 let error: string | null = null;
 
 try {
-  eventData = await eventsApi.getById(id!);
-} catch (e: any) {
+  eventData = await eventsApi.getById(id);
+} catch (e) {
   Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
   console.error(e);
   if (e instanceof ApiError) {
@@ -420,7 +474,7 @@ try {
         ? "Событие не найдено."
         : `Ошибка загрузки события: ${e.message}`;
   } else {
-    error = `Ошибка загрузки события: ${e.message}`;
+    error = `Ошибка загрузки события: ${e instanceof Error ? e.message : String(e)}`;
   }
 }
 
@@ -443,37 +497,7 @@ if (!error && eventData) {
 
     relatedEvents = allEvents
       .filter((item) => item?.published === true)
-      .map((item) => {
-        const itemStart = toDate(item?.startDate);
-        const itemEnd = toDate(item?.endDate);
-        if (!itemStart) {
-          return null;
-        }
-
-        return {
-          id: item.id,
-          title: item?.title || "Событие",
-          href: `/events/${item.id}`,
-          imageUrl:
-            typeof item?.imageUrl === "string" &&
-            item.imageUrl.trim().length > 0
-              ? item.imageUrl
-              : picture1.src,
-          address:
-            typeof item?.address === "string" && item.address.trim().length > 0
-              ? item.address.trim()
-              : "Место уточняется",
-          categoryLabel: resolveTagLabel(
-            normalizeTags(item?.tags)[0] ?? null,
-            "Событие",
-          ),
-          startDate: itemStart,
-          endDate: itemEnd,
-          ...getEventDateParts(itemStart, itemEnd),
-          sortTime: itemStart.getTime(),
-          endDay: toUtcDayStart(itemEnd ?? itemStart),
-        };
-      })
+      .map(toRelatedEventCard)
       .filter((item): item is NonNullable<typeof item> => Boolean(item))
       .filter(
         (item) => item.id !== id && item.endDay.getTime() >= today.getTime(),
@@ -499,7 +523,7 @@ if (
     // The server picks the cards (published only, card fields only) — see
     // server/src/controllers/publicRelatedController.ts. Events have no
     // autofill, so `cards.autofill` is always empty here.
-    const cards = await publicRelatedApi.get("event", id!);
+    const cards = await publicRelatedApi.get("event", id);
     collectionContentItems = cards.collection;
     relatedContentItems = cards.related;
     linkedContentLookup = cards.linked;
@@ -551,7 +575,10 @@ const displayEvent = {
   imageCaption:
     typeof eventData?.imageCaption === "string" ? eventData.imageCaption : "",
   imageAlt: eventData?.title || "Изображение события",
-  contentBlocks: Array.isArray(eventData?.content) ? eventData.content : [],
+  // Stored blocks are unvalidated JSON; ArticleBody renders them by `type`.
+  contentBlocks: (Array.isArray(eventData?.content)
+    ? eventData.content
+    : []) as ArticleBodyProps["contentBlocks"],
   datesLabel: formatDateRange(startDate, endDate),
   timeLabel: formatTimeLabel(eventData),
   additionalInfo: normalizeAdditionalInfo(eventData?.additionalInfo),
@@ -644,7 +671,7 @@ const eventStructuredData = eventData
 
                     <ContentActions
                       contentType="event"
-                      contentId={id!}
+                      contentId={id}
                       title={displayEvent.title}
                       href={`/events/${id}`}
                       tag={bookmarkTag}
@@ -732,7 +759,7 @@ const eventStructuredData = eventData
                     </article>
                   )}
 
-                  {displayEvent.additionalInfo.map((info: any) => (
+                  {displayEvent.additionalInfo.map((info) => (
                     <article class="border border-base-300 bg-white px-5 py-6 text-base-content lg:px-6">
                       <div class="flex items-start gap-4">
                         <EventMetaIcon
