@@ -9,7 +9,8 @@ import type { UiStore } from "@/stores/uiStore";
 //
 // The baseline is taken on the editor's first pointerdown/keydown, not on
 // load: right after load the editor still normalizes its own data (e.g. Quill
-// rewrites leadHtml on mount), which would otherwise look like an edit.
+// rewrites leadHtml on mount), which would otherwise look like an edit. A
+// Quill mount that lands after the baseline is handled below.
 // Capture-phase listeners run before the handler that applies the edit, so the
 // baseline is always the state the user started from.
 
@@ -76,6 +77,29 @@ export const createUnsavedChangesGuard = (
   };
   root.addEventListener("pointerdown", captureBaseline, { capture: true });
   root.addEventListener("keydown", captureBaseline, { capture: true });
+
+  // A rich-text field writes its normalized value once when Quill mounts
+  // (`detail.initial`). Quill is loaded lazily, so that can happen after the
+  // first click already took the baseline. If nothing had changed before it,
+  // move the baseline past it: it is not an edit. The capture listener runs
+  // before the field's `x-on:rich-text-change` writes the value, the bubble
+  // listener after.
+  const isInitialRichTextChange = (event: Event) =>
+    (event as CustomEvent<{ initial?: boolean }>).detail?.initial === true;
+  let cleanBeforeInitialChange = false;
+  root.addEventListener(
+    "rich-text-change",
+    (event) => {
+      if (!isInitialRichTextChange(event)) return;
+      cleanBeforeInitialChange = baseline !== null && serialize() === baseline;
+    },
+    { capture: true },
+  );
+  root.addEventListener("rich-text-change", (event) => {
+    if (!isInitialRichTextChange(event) || !cleanBeforeInitialChange) return;
+    cleanBeforeInitialChange = false;
+    baseline = serialize();
+  });
 
   document.addEventListener("click", (event: MouseEvent) => {
     if (!hasUnsavedChanges()) return;

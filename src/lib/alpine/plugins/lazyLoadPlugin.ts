@@ -27,6 +27,14 @@ const getSkeletonRichTextInitialHtml = (block?: { html?: unknown; text?: unknown
     .join('');
 };
 
+// Editors with rich-text fields mount Quill as soon as their logic has loaded
+// (`x-if="!isLazyLoading"`). Start the Quill download together with the logic
+// instead of after it; the editor's own `import("quill")` then reuses it.
+const withQuill = (load: () => Promise<any>) => () => {
+  void import('quill');
+  return load();
+};
+
 const components: Record<string, () => Promise<any>> = {
   layout: () => import('@/Layouts/layoutLogic'),
   navbar: () => import('@/components/common/navbarLogic'),
@@ -34,34 +42,34 @@ const components: Record<string, () => Promise<any>> = {
   flipperList: () => import('@/components/dashboard/flipperListLogic'),
   profile: () => import('@/components/profile/profileLogic'),
   calendar: () => import('@/components/calendar/logic'),
-  articleCreator: () => import('@/components/article/creatorLogic'),
+  articleCreator: withQuill(() => import('@/components/article/creatorLogic')),
   dashboardOverview: () => import('@/components/dashboard/dashboardOverviewLogic'),
-  flipperCreator: () => import('@/components/dashboard/flipperCreatorLogic'),
-  eventCreator: () => import('@/components/article/eventCreatorLogic'),
+  flipperCreator: withQuill(() => import('@/components/dashboard/flipperCreatorLogic')),
+  eventCreator: withQuill(() => import('@/components/article/eventCreatorLogic')),
   eventList: () => import('@/components/dashboard/eventListLogic'),
   authModal: () => import('@/components/auth/authLogic'),
   contentActions: () => import('@/components/common/contentActionsLogic'),
   interviewList: () => import('@/components/dashboard/interviewListLogic'),
-  interviewCreator: () => import('@/components/dashboard/interviewCreatorLogic'),
-  newsCreator: () => import('@/components/dashboard/newsCreatorLogic'),
+  interviewCreator: withQuill(() => import('@/components/dashboard/interviewCreatorLogic')),
+  newsCreator: withQuill(() => import('@/components/dashboard/newsCreatorLogic')),
   newsList: () => import('@/components/dashboard/newsListLogic'),
   subscriptionManager: () => import('@/components/profile/subscriptionLogic'),
-  tipsArticleCreator: () => import('@/components/dashboard/tipsArticleCreatorLogic'),
+  tipsArticleCreator: withQuill(() => import('@/components/dashboard/tipsArticleCreatorLogic')),
   tipsList: () => import('@/components/dashboard/tipsListLogic'),
   leSaviezVousList: () => import('@/components/dashboard/leSaviezVousListLogic'),
   landingEditor: () => import('@/components/dashboard/landingEditorLogic'),
   calendarEditor: () => import('@/components/dashboard/calendarEditorLogic'),
   cultureEditor: () => import('@/components/dashboard/cultureEditorLogic'),
   parisEditor: () => import('@/components/dashboard/parisEditorLogic'),
-  guideCreator: () => import('@/components/article/guideCreatorLogic'),
+  guideCreator: withQuill(() => import('@/components/article/guideCreatorLogic')),
   guideList: () => import('@/components/dashboard/guideListLogic'),
-  visualStoryCreator: () => import('@/components/article/visualStoryCreatorLogic'),
+  visualStoryCreator: withQuill(() => import('@/components/article/visualStoryCreatorLogic')),
   visualStoryList: () => import('@/components/dashboard/visualStoryListLogic'),
   photoOfTheDayCreator: () => import('@/components/dashboard/photoOfTheDayCreatorLogic'),
   photoOfTheDayList: () => import('@/components/dashboard/photoOfTheDayListLogic'),
   authorCreator: () => import('@/components/dashboard/authorCreatorLogic'),
   authorList: () => import('@/components/dashboard/authorListLogic'),
-  firstPersonCreator: () => import('@/components/dashboard/firstPersonCreatorLogic'),
+  firstPersonCreator: withQuill(() => import('@/components/dashboard/firstPersonCreatorLogic')),
 };
 
 export default function(Alpine: Alpine) {

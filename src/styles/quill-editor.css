@@ -13,6 +13,20 @@
   font-size: 1rem;
 }
 
+/* Quill is loaded on mount, so the editor node stays empty for a moment.
+   Reserve the mounted height (42px toolbar + 1px bottom border + ql-editor
+   min-height) so the form doesn't jump when it appears. */
+.rich-text-editor [x-ref="editor"]:not(.ql-container) {
+  min-height: calc(14rem + 43px);
+  border: 1px solid color-mix(in srgb, var(--color-base-content) 12%, transparent);
+  border-radius: 0.75rem;
+  background: var(--color-base-100);
+}
+
+.rich-text-editor--compact [x-ref="editor"]:not(.ql-container) {
+  min-height: calc(8rem + 43px);
+}
+
 .rich-text-editor .ql-editor {
   min-height: 14rem;
   font-family: inherit;

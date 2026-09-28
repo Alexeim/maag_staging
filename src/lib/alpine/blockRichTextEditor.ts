@@ -1,8 +1,14 @@
-import Quill, { Delta } from "quill";
+import type Quill from "quill";
+import type { Delta } from "quill";
 import {
   normalizeStoredRichTextHtml,
   richTextHtmlToText,
 } from "@/lib/utils/richText";
+
+// This module is registered in the Alpine entrypoint, which every public page
+// loads. Quill is imported on first mount instead, so Vite puts it in its own
+// chunk and only the dashboard editors download it.
+const loadQuill = () => import("quill");
 
 interface RichTextEditorConfig {
   initialHtml?: string;
@@ -20,8 +26,13 @@ const COSMETIC_FORMATS = new Set([
   "align",
 ]);
 
-function stripCosmeticFormats(_node: Node, delta: Delta): Delta {
-  return new Delta(
+// Delta is passed in because Quill (and its Delta) is only loaded on mount.
+function stripCosmeticFormats(
+  DeltaClass: typeof Delta,
+  _node: Node,
+  delta: Delta,
+): Delta {
+  return new DeltaClass(
     delta.ops
       .filter((op) => {
         // Reject embed ops (images, videos) — insert is an object for embeds, string for text
@@ -47,34 +58,46 @@ export default function blockRichTextEditor(
   return {
     quill: null as Quill | null,
 
-    init() {
+    async init() {
       // @ts-ignore Alpine ref is available at runtime.
-      if (this.$refs.editor.quill) {
+      const editor: HTMLElement & { quill?: Quill } = this.$refs.editor;
+      if (editor.quill) {
         return;
       }
 
-      // @ts-ignore Alpine ref is available at runtime.
-      this.quill = new Quill(this.$refs.editor, {
+      const { default: QuillClass, Delta: DeltaClass } = await loadQuill();
+
+      // While the chunk was loading, the block may have been removed (x-if)
+      // or another instance may have mounted on the same node.
+      if (!editor.isConnected || editor.quill) {
+        return;
+      }
+
+      this.quill = new QuillClass(editor, {
         theme: "snow",
         formats: ["bold", "italic", "underline", "link"],
         placeholder: config.placeholder || "Введите текст...",
         modules: {
           clipboard: {
-            matchers: [[Node.ELEMENT_NODE, stripCosmeticFormats]],
+            matchers: [
+              [Node.ELEMENT_NODE, stripCosmeticFormats.bind(null, DeltaClass)],
+            ],
           },
           toolbar: [["bold", "italic", "underline"], ["link"], ["clean"]],
         },
       });
 
-      // @ts-ignore Store editor instance on host node to avoid duplicate mount.
-      this.$refs.editor.quill = this.quill;
+      // Store editor instance on host node to avoid duplicate mount.
+      editor.quill = this.quill;
 
       const initialHtml = normalizeStoredRichTextHtml(config.initialHtml);
       if (this.quill.root.innerHTML !== initialHtml) {
         this.quill.root.innerHTML = initialHtml || "";
       }
 
-      const emitChange = () => {
+      // `initial` marks the mount-time emit: Quill normalizing the stored
+      // value, not a user edit. unsavedChangesGuard relies on it.
+      const emitChange = (initial: boolean) => {
         if (!this.quill) {
           return;
         }
@@ -83,11 +106,12 @@ export default function blockRichTextEditor(
         const text = richTextHtmlToText(html);
 
         // @ts-ignore Alpine dispatch is available at runtime.
-        this.$dispatch("rich-text-change", { html, text });
+        this.$dispatch("rich-text-change", { html, text, initial });
       };
 
-      this.quill.on("text-change", emitChange);
-      emitChange();
+      // Wrapped: Quill calls the handler with (delta, oldDelta, source).
+      this.quill.on("text-change", () => emitChange(false));
+      emitChange(true);
     },
   };
 }
