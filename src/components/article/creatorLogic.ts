@@ -52,72 +52,16 @@ import {
   createUnsavedChangesGuard,
   type UnsavedChangesGuard,
 } from "@/lib/utils/unsavedChangesGuard";
+import {
+  reindexContentBlocks,
+  sortAndNormalizeContentBlocks as syncContentBlockOrder,
+  withBlockMeta,
+  type EditorBlock,
+} from "@/lib/utils/contentBlocks";
 
 const PREVIEW_KEY = "articlePreview";
 
 const storage = getStorage(app);
-
-const generateBlockId = () => {
-  if (typeof globalThis.crypto?.randomUUID === "function") {
-    return globalThis.crypto.randomUUID();
-  }
-  return `block-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
-};
-
-const withBlockMeta = (block: Record<string, unknown>, position: number) => {
-  const existingId =
-    typeof block.id === "string" && block.id.trim() ? block.id.trim() : "";
-  return {
-    ...block,
-    id: existingId || generateBlockId(),
-    position,
-  };
-};
-
-const reindexContentBlocks = (blocks?: unknown) => {
-  if (!Array.isArray(blocks)) {
-    return [];
-  }
-
-  return blocks
-    .filter(
-      (block): block is Record<string, unknown> =>
-        Boolean(block) && typeof block === "object",
-    )
-    .map((block, index) => withBlockMeta(block, index));
-};
-
-const syncContentBlockOrder = (blocks?: unknown) => {
-  if (!Array.isArray(blocks)) {
-    return [];
-  }
-
-  const sortableBlocks = blocks
-    .filter(
-      (block): block is Record<string, unknown> =>
-        Boolean(block) && typeof block === "object",
-    )
-    .map((block, index) => {
-      const rawPosition = block.position;
-      const position =
-        typeof rawPosition === "number" && Number.isFinite(rawPosition)
-          ? rawPosition
-          : index;
-      return {
-        block,
-        position,
-        originalIndex: index,
-      };
-    })
-    .sort((left, right) => {
-      if (left.position === right.position) {
-        return left.originalIndex - right.originalIndex;
-      }
-      return left.position - right.position;
-    });
-
-  return reindexContentBlocks(sortableBlocks.map(({ block }) => block));
-};
 
 // Helper to create a new block object
 const createBlock = (type, data, position = 0) =>
@@ -323,7 +267,7 @@ export default function articleCreatorLogic(initialState = {}) {
       secondImageCaption: "",
       heroOrientation: "image-right" as "image-left" | "image-right" | "image-bottom",
       // --- REFACTORED: from 'paragraphs' to 'contentBlocks' ---
-      contentBlocks: [],
+      contentBlocks: [] as EditorBlock[],
       tags: [],
       parisSubCategories: [],
       parisDistrict: "",
@@ -386,10 +330,10 @@ export default function articleCreatorLogic(initialState = {}) {
     showBlockOptions: false,
 
     // --- State for editing a specific block ---
-    editingIndex: null,
-    editingBlock: null, // Will hold a copy of the block being edited
-    draggedBlockId: null,
-    dragOverBlockId: null,
+    editingIndex: null as number | null,
+    editingBlock: null as EditorBlock | null, // Will hold a copy of the block being edited
+    draggedBlockId: null as string | null,
+    dragOverBlockId: null as string | null,
 
     isEditingTitle: false,
     editingTitleText: "",
@@ -1400,7 +1344,7 @@ export default function articleCreatorLogic(initialState = {}) {
 
     // Saves the changes to the block
     updateBlock() {
-      if (this.editingIndex !== null) {
+      if (this.editingIndex !== null && this.editingBlock) {
         // Normalize into a local variable instead of reassigning
         // this.editingBlock: the edit panel's templates read
         // editingBlock.type/.url reactively, and reassigning it here (a

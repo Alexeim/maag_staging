@@ -1,3 +1,13 @@
+// Loose shape of a content block in the dashboard editors: every block has an
+// id and a type; per-type fields (text, url, quoteAuthor, ...) are not
+// modelled yet, so they stay `any`. Replacing this with a precise union of
+// block types will tighten every editor that uses it.
+export type EditorBlock = {
+  id: string;
+  type: string;
+  [field: string]: any;
+};
+
 export const generateBlockId = () => {
   if (typeof globalThis.crypto?.randomUUID === "function") {
     return globalThis.crypto.randomUUID();
@@ -7,20 +17,22 @@ export const generateBlockId = () => {
 };
 
 export const withBlockMeta = (
-  block: Record<string, unknown>,
+  block: Record<string, any>,
   position: number,
-) => {
+): EditorBlock => {
   const existingId =
     typeof block.id === "string" && block.id.trim() ? block.id.trim() : "";
 
+  // Blocks come from the editor or the API unvalidated; each is assumed to
+  // carry its `type`, which TypeScript cannot see through the spread.
   return {
     ...block,
     id: existingId || generateBlockId(),
     position,
-  };
+  } as unknown as EditorBlock;
 };
 
-export const reindexContentBlocks = (blocks?: unknown) => {
+export const reindexContentBlocks = (blocks?: unknown): EditorBlock[] => {
   if (!Array.isArray(blocks)) {
     return [];
   }
@@ -33,7 +45,9 @@ export const reindexContentBlocks = (blocks?: unknown) => {
     .map((block, index) => withBlockMeta(block, index));
 };
 
-export const sortAndNormalizeContentBlocks = (blocks?: unknown) => {
+export const sortAndNormalizeContentBlocks = (
+  blocks?: unknown,
+): EditorBlock[] => {
   if (!Array.isArray(blocks)) {
     return [];
   }
