@@ -25,9 +25,15 @@
   списки его не отдают.
 - `heroOrientation?: "image-left" | "image-right"` добавлен в
   `InterviewPayload` — бэкенд его хранит.
-- Блоки интервью приводятся на странице к `ComponentProps<typeof ArticleBody>`:
-  бэкенд хранит `content` как `any[]` без валидации. Статья «не ругается»
-  только потому, что там `articleData: any`.
+- Блоки приводятся на странице к `ComponentProps<typeof ArticleBody>`
+  (интервью, статья, гид, «первое лицо»): бэкенд хранит `content` как
+  `any[]` без валидации.
+- Статья, гид, «первое лицо» больше не держат данные в `any`. Это вскрыло
+  `heroOrientation` (статья, гид) и `updatedAt` (гид), которых не было в
+  типах, и мёртвые фоллбеки статьи на поля мок-JSON 2025-09 (`header`,
+  `meta.readTime`, `mainImage`, `eventDetails`) — их никогда не писали ни
+  API, ни скрипты; удалены вместе с `EventDetails.astro`. Такие же остались
+  в `tips/[id].astro` и `mainImage` в `events/[id].astro`.
 
 ## Остальное
 
