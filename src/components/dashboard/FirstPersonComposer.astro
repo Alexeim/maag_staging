@@ -1765,7 +1765,7 @@ const {
 
   <DashboardMaterialActionFooter
     cancelHref={cancelHref}
-    deleteAction="deleteFirstPerson(deleteRedirect)"
+    deleteAction={`deleteFirstPerson('${deleteRedirect}')`}
     deleteLabel="Удалить материал"
     previewAction="previewFirstPerson()"
     publishedModel="article"
