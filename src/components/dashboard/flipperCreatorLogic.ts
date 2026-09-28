@@ -32,6 +32,7 @@ import {
   createUnsavedChangesGuard,
   type UnsavedChangesGuard,
 } from "@/lib/utils/unsavedChangesGuard";
+import type { EditorAuthor, LoadedAuthorFields } from "@/lib/utils/editorAuthors";
 
 const PREVIEW_KEY = "flipperPreview";
 
@@ -62,7 +63,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     parisDistrictOptions = [],
   } = initialState as {
     initialFlipper?: any;
-    initialAuthors?: Array<Record<string, unknown>>;
+    initialAuthors?: EditorAuthor[];
     flipperId?: string | null;
     isEditMode?: boolean;
     isPreview?: boolean;
@@ -276,8 +277,9 @@ export default function flipperCreatorLogic(initialState = {}) {
         this.flipperId,
       );
       if (!restoredPreviewAuthorState) {
+        const loadedAuthorId = (this.flipper as LoadedAuthorFields).authorId;
         this.selectedAuthorId =
-          typeof this.flipper.authorId === "string" ? this.flipper.authorId : "";
+          typeof loadedAuthorId === "string" ? loadedAuthorId : "";
       }
       this.ensureSelectedAuthorPresent();
       this.fetchContentLists();
@@ -427,7 +429,7 @@ export default function flipperCreatorLogic(initialState = {}) {
         };
       }
 
-      const fallbackAuthor = this.flipper?.author;
+      const fallbackAuthor = (this.flipper as LoadedAuthorFields)?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         return {
           name: this.getAuthorLabel(fallbackAuthor),
@@ -454,7 +456,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       if (exists) {
         return;
       }
-      const fallbackAuthor = this.flipper?.author;
+      const fallbackAuthor = (this.flipper as LoadedAuthorFields)?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         this.authors.unshift({
           id: this.selectedAuthorId,
@@ -567,8 +569,8 @@ export default function flipperCreatorLogic(initialState = {}) {
       if (this.uploading) return;
       this.flipper.carouselContent.splice(index, 1);
     },
-    async handleImageUpload(event, itemUid?: string) {
-      const raw = event.target.files[0];
+    async handleImageUpload(event: Event, itemUid?: string) {
+      const raw = (event.target as HTMLInputElement).files?.[0];
       if (!raw) return;
       if (this.uploading) {
         globalThis.Alpine.store("ui").showToast(
@@ -611,8 +613,8 @@ export default function flipperCreatorLogic(initialState = {}) {
       });
     },
 
-    async handleSecondImageUpload(event) {
-      const raw = event.target.files[0];
+    async handleSecondImageUpload(event: Event) {
+      const raw = (event.target as HTMLInputElement).files?.[0];
       if (!raw) return;
       if (this.uploading) {
         globalThis.Alpine.store("ui").showToast(
@@ -762,7 +764,7 @@ export default function flipperCreatorLogic(initialState = {}) {
 
       const performDelete = async () => {
         try {
-          await flippersApi.delete(this.flipperId);
+          await flippersApi.delete(this.flipperId!);
           unsavedGuard?.markSaved();
           globalThis.Alpine.store("ui").showToast("Листалка удалена");
           setTimeout(() => {
