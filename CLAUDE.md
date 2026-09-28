@@ -58,6 +58,14 @@ publication date.
   with every component's state, and the entrypoint loads it on every page —
   readers download dashboard editor state. Known perf debt, not yet fixed.
   Don't grow it.
+- **In `.astro` templates write Alpine directives in the long form:**
+  `x-bind:class`, `x-on:click` — never `:class` or `@click`. All templates were
+  converted on 2026-09-28. Reason: `astro check` turns templates into TSX, and
+  an attribute name starting with `:`/`@` is not valid JSX, so the compiler
+  emits it as a plain JS string (`{...{":class":"..."}}`); a multiline value
+  then becomes "Unterminated string literal" and derails the parser for the
+  rest of the file. That produced 108 false errors in 8 files. Same behaviour
+  in Alpine, modifiers included. https://github.com/alpinejs/alpine/discussions/3835
 - `ClientRouter` is opt-in per page (`useClientRouter` in
   `src/layouts/Layout.astro`, default `false`). Don't assume view transitions
   are active.
