@@ -1,8 +1,8 @@
 ---
+import type { ComponentProps } from "astro/types";
 import Layout from "../../Layouts/Layout.astro";
 import ArticleHero from "../../components/article/ArticleHero.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
-import EventDetails from "../../components/article/EventDetails.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import {
@@ -14,6 +14,8 @@ import {
   ApiError,
   articlesApi,
   publicRelatedApi,
+  type ArticleResponse,
+  type PublicRelatedCard,
 } from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
@@ -22,6 +24,8 @@ import {
   type LinkedContentLookup,
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
+
+type ArticleBodyProps = ComponentProps<typeof ArticleBody>;
 
 const { id } = Astro.params;
 if (!id) return Astro.redirect("/404");
@@ -34,16 +38,16 @@ const CATEGORY_LABELS: Record<string, string> = {
   hotContent: "Самое Читаемое",
 };
 
-let articleData: any;
-let collectionContentItems: any[] = [];
-let relatedContentItems: any[] = [];
-let sameCategoryItems: any[] = [];
+let articleData: ArticleResponse | null = null;
+let collectionContentItems: PublicRelatedCard[] = [];
+let relatedContentItems: PublicRelatedCard[] = [];
+let sameCategoryItems: PublicRelatedCard[] = [];
 let linkedContentLookup: LinkedContentLookup = {};
 let error: string | null = null;
 
 try {
   articleData = await articlesApi.getById(id);
-} catch (e: any) {
+} catch (e) {
   Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
   console.error(e);
   if (e instanceof ApiError) {
@@ -52,7 +56,7 @@ try {
         ? "Article not found."
         : `Error fetching article: ${e.message}`;
   } else {
-    error = `Error fetching article: ${e.message}`;
+    error = `Error fetching article: ${e instanceof Error ? e.message : String(e)}`;
   }
 }
 
@@ -74,11 +78,10 @@ if (articleData?.articleType === 'tips') {
 }
 
 // Normalize data for the template
-const rawCategory =
-  articleData?.category ?? articleData?.header?.category ?? null;
+const rawCategory = articleData?.category ?? null;
 
 const displayArticle = {
-  title: articleData?.header?.title || articleData?.title || 'Article',
+  title: articleData?.title || 'Article',
   lead: articleData?.lead || '',
   leadHtml: articleData?.leadHtml || '',
   category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }),
@@ -86,11 +89,11 @@ const displayArticle = {
   authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : 'Author',
   authorAvatar: articleData?.author?.avatar,
   authorId: articleData?.author ? articleData?.authorId : undefined,
-  readTime: articleData?.meta?.readTime || '5 min read',
   imageUrl: articleData?.imageUrl, // For dynamic articles
   imageCaption: articleData?.imageCaption || '', // <-- Get the caption
-  imageAlt: articleData?.mainImage?.alt || 'Article image',
-  contentBlocks: articleData?.content || [],
+  imageAlt: 'Article image',
+  // Stored blocks are unvalidated JSON; ArticleBody renders them by `type`.
+  contentBlocks: (articleData?.content || []) as ArticleBodyProps["contentBlocks"],
 };
 
 const bookmarkCategory =
@@ -204,13 +207,6 @@ const isAKid = displayArticle.authorName === "Саша Макарова";
               contentBlocks={displayArticle.contentBlocks}
               linkedContentLookup={linkedContentLookup}
             />
-
-            {(articleData?.eventDetails) && (
-              <EventDetails
-                address={articleData.eventDetails.address}
-                dates={articleData.eventDetails.dates}
-              />
-            )}
 
             <RelatedMaterialsMarquee
               collectionItems={collectionContentItems}
