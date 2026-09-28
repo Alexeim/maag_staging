@@ -27,6 +27,13 @@ import {
 } from "@/lib/utils/richText";
 import { compressImage } from "@/lib/images/compressImage";
 import { normalizeTagList } from "@/content/tags/tags";
+import {
+  clearDashboardPreview,
+  openDashboardPreview,
+  readDashboardPreview,
+} from "@/lib/utils/dashboardPreview";
+
+const PREVIEW_KEY = "visualStoryPreview";
 
 const storage = getStorage(app);
 
@@ -534,15 +541,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     },
 
     init() {
-      let previewState: any = null;
-      if (typeof window !== "undefined") {
-        try {
-          const stored = window.localStorage?.getItem("visualStoryPreview");
-          previewState = stored ? JSON.parse(stored) : null;
-        } catch (error) {
-          console.error("Failed to parse visual story preview draft:", error);
-        }
-      }
+      const previewState = readDashboardPreview<any>(PREVIEW_KEY);
 
       const previewStory = previewState?.story && typeof previewState.story === "object"
         ? previewState.story
@@ -578,6 +577,9 @@ export default function visualStoryCreatorLogic(initialState = {}) {
                     : "",
               }
             : { name: "", avatarUrl: "" };
+      } else if (previewState) {
+        // Opening the editor drops any leftover snapshot so it can't go stale.
+        clearDashboardPreview(PREVIEW_KEY);
       }
 
       if (storyDraft) {
@@ -668,8 +670,9 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         newAuthorLastName: this.newAuthorLastName,
         authorDisplay,
       };
-      localStorage.setItem("visualStoryPreview", JSON.stringify(previewState));
-      window.location.href = "/dashboard/visual-story/preview";
+      if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/visual-story/preview", previewState)) {
+        window.Alpine?.store("ui")?.showToast?.("Не удалось открыть предпросмотр.", "error");
+      }
     },
 
     async saveStory() {
@@ -768,12 +771,12 @@ export default function visualStoryCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.storyId) {
           await visualStoriesApi.update(this.storyId, payload);
-          localStorage.removeItem("visualStoryPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           window.Alpine?.store("ui")?.showToast?.("Визуальная история обновлена!");
           setTimeout(() => { globalThis.location.href = "/dashboard/visual-stories"; }, 1500);
         } else {
           await visualStoriesApi.create(payload);
-          localStorage.removeItem("visualStoryPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           window.Alpine?.store("ui")?.showToast?.("Визуальная история создана!");
           setTimeout(() => { globalThis.location.href = "/dashboard/visual-stories"; }, 1500);
         }

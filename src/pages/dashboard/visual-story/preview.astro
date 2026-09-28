@@ -14,12 +14,11 @@ import Button from "@/components/common/Button.astro";
         <div>
           <h1 class="text-2xl font-semibold">Предпросмотр «Крупным планом»</h1>
           <p class="text-sm text-base-content/70 mt-1">
-            Черновой просмотр текущих слайдов без публикации.
+            Редактор остался открыт в соседней вкладке. Сохраняй историю там.
           </p>
         </div>
         <div class="flex gap-2">
-          <Button variant="secondary" @click="returnToEdit()">Вернуться к редактированию</Button>
-          <Button variant="primary" @click="saveStory()">Сохранить историю</Button>
+          <Button variant="secondary" @click="window.close()">Закрыть превью</Button>
         </div>
       </div>
 
