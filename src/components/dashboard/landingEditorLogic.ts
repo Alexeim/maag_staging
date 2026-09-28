@@ -3,6 +3,7 @@ import {
   type LandingCategoryCardsItemTarget,
   type LandingCategoryCardsSelection,
   type LandingCategoryHeroSelection,
+  type LandingCultureHeroSelection,
   type LandingCultureInterviewBlockSelection,
   type LandingEventCardSelection,
   type LandingMainHeroSelection,
@@ -441,7 +442,7 @@ export default (initialState: LandingEditorInitialState) => ({
     this.cultureHeroError = "";
 
     try {
-      let cultureHero: LandingCategoryHeroSelection | null = null;
+      let cultureHero: LandingCultureHeroSelection | null = null;
 
       if (this.cultureHeroMode === "manual") {
         if (!this.selectedCultureHeroKey) {
@@ -455,7 +456,7 @@ export default (initialState: LandingEditorInitialState) => ({
 
         cultureHero = {
           mode: "manual",
-          type: parsedKey.type as LandingCategoryHeroSelection["type"],
+          type: parsedKey.type as LandingCultureHeroSelection["type"],
           id: parsedKey.id,
         };
       }

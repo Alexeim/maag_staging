@@ -356,6 +356,15 @@ export interface LandingCategoryHeroSelection {
   id: string;
 }
 
+// Mirrors the server: only the culture section hero also accepts an interview.
+export type LandingCultureHeroType = LandingCategoryCardsItemType | "interview";
+
+export interface LandingCultureHeroSelection {
+  mode: "manual";
+  type: LandingCultureHeroType;
+  id: string;
+}
+
 export interface LandingCategoryCardsAutoSelection {
   mode: "auto-latest";
   limit: number;
@@ -415,7 +424,7 @@ export interface LandingPlacementsResponse {
   mainHero: LandingMainHeroSelection | null;
   newsRail: LandingNewsRailSelection | null;
   netlenkaRail: LandingNetlenkaRailSelection | null;
-  cultureHero: LandingCategoryHeroSelection | null;
+  cultureHero: LandingCultureHeroSelection | null;
   cultureCards: LandingCategoryCardsSelection | null;
   parisHero: LandingCategoryHeroSelection | null;
   parisCards: LandingCategoryCardsSelection | null;
@@ -431,7 +440,7 @@ export interface UpdateLandingPlacementsPayload {
   mainHero?: LandingMainHeroSelection | null;
   newsRail?: LandingNewsRailSelection | null;
   netlenkaRail?: LandingNetlenkaRailSelection | null;
-  cultureHero?: LandingCategoryHeroSelection | null;
+  cultureHero?: LandingCultureHeroSelection | null;
   cultureCards?: LandingCategoryCardsSelection | null;
   parisHero?: LandingCategoryHeroSelection | null;
   parisCards?: LandingCategoryCardsSelection | null;

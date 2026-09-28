@@ -17,6 +17,7 @@ import {
   visualStoriesApi,
   photosOfTheDayApi,
   type LandingCategoryCardsItemType,
+  type LandingCultureHeroType,
   type LandingMainHeroType,
   type LandingNetlenkaItemType,
   type LandingPlacementsResponse,
@@ -223,7 +224,7 @@ const parisCardsOptionItems: Array<{
 const cultureHeroOptionItems: Array<{
   id: string;
   title: string;
-  type: LandingCategoryCardsItemType;
+  type: LandingCultureHeroType;
   typeLabel: string;
   createdAt: unknown;
   createdAtMs: number | null;
@@ -477,6 +478,24 @@ try {
     (item) => item.category === "culture",
   );
   cultureHeroOptionItems.push(...cultureCandidates);
+  // Interviews have no `category`: the landing treats every interview as
+  // culture (normalizeSectionItem in publicLandingController.ts). They join the
+  // culture hero pool only, never the cards or the Paris hero, under the same
+  // rules as the candidates above: published, not "Выбор MAAG", not the main hero.
+  cultureHeroOptionItems.push(
+    ...interviews
+      .filter((item) => isPublishedItem(item) && !isMaagChoiceItem(item))
+      .map((item) => ({
+        id: `interview:${item.id}`,
+        title: item.title,
+        type: "interview" as const,
+        typeLabel: MAIN_HERO_TYPE_LABELS.interview,
+        createdAt: item.createdAt,
+        createdAtMs: toMs(item.createdAt),
+        publishedAtMs: toMs(item.publishedAt),
+      }))
+      .filter((item) => item.id !== currentMainHeroKey),
+  );
   const cultureHeroKey = landingPlacements.cultureHero
     ? `${landingPlacements.cultureHero.type}:${landingPlacements.cultureHero.id}`
     : null;
@@ -655,13 +674,13 @@ const cultureHeroSummary = (() => {
     };
   }
 
-  // one pick with the badge of its actual type (can be article / guide / flipper / visual-story)
+  // one pick with the badge of its actual type (can be article / guide / flipper / visual-story / interview)
   const key = `${landingPlacements.cultureHero.type}:${landingPlacements.cultureHero.id}`;
   return {
     modeLabel: "Manual",
     details: pick(
       contentTitleMaps.mainHero.get(key) ||
-        `${CATEGORY_CARDS_TYPE_LABELS[landingPlacements.cultureHero.type]} ${landingPlacements.cultureHero.id}`,
+        `${MAIN_HERO_TYPE_LABELS[landingPlacements.cultureHero.type]} ${landingPlacements.cultureHero.id}`,
       typeBadge(landingPlacements.cultureHero.type),
     ),
   };

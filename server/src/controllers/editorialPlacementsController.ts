@@ -65,6 +65,16 @@ export interface LandingCategoryHeroSelection {
   id: string;
 }
 
+// The culture section hero also accepts an interview; the Paris hero and both
+// card blocks do not, so this is a separate type rather than a wider shared one.
+export type LandingCultureHeroType = LandingCategoryCardsItemType | 'interview';
+
+export interface LandingCultureHeroSelection {
+  mode: 'manual';
+  type: LandingCultureHeroType;
+  id: string;
+}
+
 export interface LandingCategoryCardsAutoSelection {
   mode: 'auto-latest';
   limit: number;
@@ -126,7 +136,7 @@ export interface LandingPlacementsDocument {
   mainHero: LandingMainHeroSelection | null;
   newsRail: LandingNewsRailSelection | null;
   netlenkaRail: LandingNetlenkaRailSelection | null;
-  cultureHero: LandingCategoryHeroSelection | null;
+  cultureHero: LandingCultureHeroSelection | null;
   cultureCards: LandingCategoryCardsSelection | null;
   parisHero: LandingCategoryHeroSelection | null;
   parisCards: LandingCategoryCardsSelection | null;
@@ -276,6 +286,11 @@ const CATEGORY_CARDS_COLLECTIONS: Record<LandingCategoryCardsItemType, string> =
   guide: MAIN_HERO_COLLECTIONS.guide,
   flipper: MAIN_HERO_COLLECTIONS.flipper,
   'visual-story': MAIN_HERO_COLLECTIONS['visual-story'],
+};
+
+const CULTURE_HERO_COLLECTIONS: Record<LandingCultureHeroType, string> = {
+  ...CATEGORY_CARDS_COLLECTIONS,
+  interview: MAIN_HERO_COLLECTIONS.interview,
 };
 
 const DEFAULT_NEWS_RAIL_LIMIT = 4;
@@ -596,6 +611,33 @@ const normalizeCategoryHeroSelection = (
   };
 };
 
+const isAllowedCultureHeroType = (value: unknown): value is LandingCultureHeroType =>
+  isAllowedCategoryCardsItemType(value) || value === 'interview';
+
+// Used on both read and write: if the read path kept the category-only check,
+// a saved interview would be dropped to the default on every load, silently.
+const normalizeCultureHeroSelection = (
+  value: unknown,
+): LandingCultureHeroSelection | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const mode = (value as { mode?: unknown }).mode;
+  const type = (value as { type?: unknown }).type;
+  const id = normalizeStringId((value as { id?: unknown }).id);
+
+  if (!isAllowedCultureHeroType(type) || !id || (mode !== undefined && mode !== 'manual')) {
+    return null;
+  }
+
+  return {
+    mode: 'manual',
+    type,
+    id,
+  };
+};
+
 const normalizeCategoryCardsItemTargets = (
   value: unknown,
 ): LandingCategoryCardsItemTarget[] | null => {
@@ -769,6 +811,18 @@ const normalizeCalendarSecondaryCardsSelection = (
   return null;
 };
 
+// One stored placement field. A stored `null` means the block was turned off
+// and stays off; a missing or unreadable value falls back to `fallback`.
+const readPlacementField = <T>(
+  value: FirebaseFirestore.DocumentData,
+  key: string,
+  normalize: (raw: unknown) => T | null,
+  fallback: T | null,
+): T | null => {
+  const raw = key in value ? value[key] : undefined;
+  return raw === null ? null : (normalize(raw) ?? fallback);
+};
+
 const normalizeLandingPlacements = (
   value: FirebaseFirestore.DocumentData | undefined,
 ): LandingPlacementsDocument => {
@@ -777,75 +831,51 @@ const normalizeLandingPlacements = (
     return defaults;
   }
 
-  const mainHero = normalizeMainHeroSelection(value.mainHero);
-
-  const newsRailRaw = 'newsRail' in value ? value.newsRail : undefined;
-  const newsRail = newsRailRaw === null
-    ? null
-    : (normalizeNewsRailSelection(newsRailRaw) ?? defaults.newsRail);
-
-  const netlenkaRailRaw = 'netlenkaRail' in value ? value.netlenkaRail : undefined;
-  const netlenkaRail = netlenkaRailRaw === null
-    ? null
-    : (normalizeNetlenkaRailSelection(netlenkaRailRaw) ?? defaults.netlenkaRail);
-
-  const cultureHeroRaw = 'cultureHero' in value ? value.cultureHero : undefined;
-  const cultureHero = cultureHeroRaw === null
-    ? null
-    : (normalizeCategoryHeroSelection(cultureHeroRaw) ?? defaults.cultureHero);
-
-  const cultureCardsRaw = 'cultureCards' in value ? value.cultureCards : undefined;
-  const cultureCards = cultureCardsRaw === null
-    ? null
-    : (normalizeCategoryCardsSelection(cultureCardsRaw) ?? defaults.cultureCards);
-
-  const parisHeroRaw = 'parisHero' in value ? value.parisHero : undefined;
-  const parisHero = parisHeroRaw === null
-    ? null
-    : (normalizeCategoryHeroSelection(parisHeroRaw) ?? defaults.parisHero);
-
-  const parisCardsRaw = 'parisCards' in value ? value.parisCards : undefined;
-  const parisCards = parisCardsRaw === null
-    ? null
-    : (normalizeCategoryCardsSelection(parisCardsRaw) ?? defaults.parisCards);
-
-  const eventCardRaw = 'eventCard' in value ? value.eventCard : undefined;
-  const eventCard = eventCardRaw === null
-    ? null
-    : (normalizeEventCardSelection(eventCardRaw)
-        ?? normalizeEventCardSelection(value.featuredEventId)
-        ?? defaults.eventCard);
-
-  const cultureInterviewRaw = 'cultureInterviewBlock' in value ? value.cultureInterviewBlock : undefined;
-  const cultureInterviewBlock = cultureInterviewRaw === null
-    ? null
-    : (normalizeCultureInterviewBlockSelection(cultureInterviewRaw)
-        ?? normalizeCultureInterviewBlockSelection(value.featuredInterviewInCultureId)
-        ?? defaults.cultureInterviewBlock);
-
-  const leSaviezVousRaw = 'leSaviezVousFeature' in value ? value.leSaviezVousFeature : undefined;
-  const leSaviezVousFeature = leSaviezVousRaw === null
-    ? null
-    : (normalizeSectionPageLeSaviezVousSelection(leSaviezVousRaw) ?? defaults.leSaviezVousFeature);
-
-  const photoOfTheDayRaw = 'photoOfTheDayFeature' in value ? value.photoOfTheDayFeature : undefined;
-  const photoOfTheDayFeature = photoOfTheDayRaw === null
-    ? null
-    : (normalizePhotoOfTheDayFeatureSelection(photoOfTheDayRaw) ?? defaults.photoOfTheDayFeature);
-
   return {
     schemaVersion: 4,
-    mainHero,
-    newsRail,
-    netlenkaRail,
-    cultureHero,
-    cultureCards,
-    parisHero,
-    parisCards,
-    eventCard,
-    cultureInterviewBlock,
-    leSaviezVousFeature,
-    photoOfTheDayFeature,
+    mainHero: normalizeMainHeroSelection(value.mainHero),
+    newsRail: readPlacementField(value, 'newsRail', normalizeNewsRailSelection, defaults.newsRail),
+    netlenkaRail: readPlacementField(
+      value, 'netlenkaRail', normalizeNetlenkaRailSelection, defaults.netlenkaRail,
+    ),
+    cultureHero: readPlacementField(
+      value, 'cultureHero', normalizeCultureHeroSelection, defaults.cultureHero,
+    ),
+    cultureCards: readPlacementField(
+      value, 'cultureCards', normalizeCategoryCardsSelection, defaults.cultureCards,
+    ),
+    parisHero: readPlacementField(
+      value, 'parisHero', normalizeCategoryHeroSelection, defaults.parisHero,
+    ),
+    parisCards: readPlacementField(
+      value, 'parisCards', normalizeCategoryCardsSelection, defaults.parisCards,
+    ),
+    // Legacy documents stored the event and the interview as bare ids.
+    eventCard: readPlacementField(
+      value,
+      'eventCard',
+      normalizeEventCardSelection,
+      normalizeEventCardSelection(value.featuredEventId) ?? defaults.eventCard,
+    ),
+    cultureInterviewBlock: readPlacementField(
+      value,
+      'cultureInterviewBlock',
+      normalizeCultureInterviewBlockSelection,
+      normalizeCultureInterviewBlockSelection(value.featuredInterviewInCultureId)
+        ?? defaults.cultureInterviewBlock,
+    ),
+    leSaviezVousFeature: readPlacementField(
+      value,
+      'leSaviezVousFeature',
+      normalizeSectionPageLeSaviezVousSelection,
+      defaults.leSaviezVousFeature,
+    ),
+    photoOfTheDayFeature: readPlacementField(
+      value,
+      'photoOfTheDayFeature',
+      normalizePhotoOfTheDayFeatureSelection,
+      defaults.photoOfTheDayFeature,
+    ),
     updatedAt:
       value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
     updatedBy: normalizeStringId(value.updatedBy),
@@ -860,20 +890,14 @@ const normalizeCalendarPagePlacements = (
     return defaults;
   }
 
-  const mainCardsRaw = 'mainCards' in value ? value.mainCards : undefined;
-  const mainCards = mainCardsRaw === null
-    ? null
-    : (normalizeCalendarManualCardsSelection(mainCardsRaw) ?? defaults.mainCards);
-
-  const secondaryCardsRaw = 'secondaryCards' in value ? value.secondaryCards : undefined;
-  const secondaryCards = secondaryCardsRaw === null
-    ? null
-    : (normalizeCalendarSecondaryCardsSelection(secondaryCardsRaw) ?? defaults.secondaryCards);
-
   return {
     schemaVersion: 1,
-    mainCards,
-    secondaryCards,
+    mainCards: readPlacementField(
+      value, 'mainCards', normalizeCalendarManualCardsSelection, defaults.mainCards,
+    ),
+    secondaryCards: readPlacementField(
+      value, 'secondaryCards', normalizeCalendarSecondaryCardsSelection, defaults.secondaryCards,
+    ),
     updatedAt:
       value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
     updatedBy: normalizeStringId(value.updatedBy),
@@ -948,7 +972,7 @@ const getCategoryCardsItemStatuses = async (
 const sanitizeNetlenkaRailSelection = async (
   netlenkaRail: LandingNetlenkaRailSelection | null,
 ): Promise<LandingNetlenkaRailSelection | null> => {
-  if (!netlenkaRail || netlenkaRail.mode !== 'manual') {
+  if (netlenkaRail?.mode !== 'manual') {
     return netlenkaRail;
   }
 
@@ -980,7 +1004,7 @@ const sanitizeNetlenkaRailSelection = async (
 const sanitizeCategoryCardsSelection = async (
   selection: LandingCategoryCardsSelection | null,
 ): Promise<LandingCategoryCardsSelection | null> => {
-  if (!selection || selection.mode !== 'manual') {
+  if (selection?.mode !== 'manual') {
     return selection;
   }
 
@@ -1074,6 +1098,201 @@ export const getCalendarPagePlacements = async (_req: Request, res: Response) =>
   }
 };
 
+// --- Placement updates -------------------------------------------------------
+// Every update handler follows one rule per field: a key missing from the
+// payload keeps the current value, `null` turns the block off, anything else
+// must normalize (400 otherwise) and pass its reference check (usually 404).
+// The per-field part is a rule; the loop is applyPlacementPayload.
+
+// An error response for a placement update: HTTP status plus JSON body.
+interface PlacementError {
+  status: number;
+  body: Record<string, unknown>;
+}
+
+interface PlacementFieldRule<T> {
+  normalize: (raw: unknown) => T | null;
+  // Resolves to an error when the value points at documents that do not exist.
+  checkReferences?: (value: T) => Promise<PlacementError | null>;
+}
+
+type PlacementFieldRules<F> = { [K in keyof F]-?: PlacementFieldRule<NonNullable<F[K]>> };
+
+type PlacementFields<D> = Omit<D, 'schemaVersion' | 'updatedAt' | 'updatedBy'>;
+
+// Applies the payload field by field, in the order of `rules`, and stops at the
+// first failure so nothing is saved.
+const applyPlacementPayload = async <F extends object>(
+  payload: Record<string, unknown>,
+  current: F,
+  rules: PlacementFieldRules<F>,
+): Promise<{ fields: F } | { error: PlacementError }> => {
+  const fields = { ...current };
+  for (const key of Object.keys(rules) as Array<keyof F & string>) {
+    if (!(key in payload)) continue;
+    const raw = payload[key];
+    if (raw === null) {
+      fields[key] = null as F[typeof key];
+      continue;
+    }
+
+    const rule = rules[key];
+    const normalized = rule.normalize(raw);
+    if (!normalized) {
+      return { error: { status: 400, body: { message: `Invalid ${key} payload` } } };
+    }
+
+    const referenceError = rule.checkReferences ? await rule.checkReferences(normalized) : null;
+    if (referenceError) return { error: referenceError };
+    fields[key] = normalized;
+  }
+  return { fields };
+};
+
+const notFound = (message: string, details: Record<string, unknown> = {}): PlacementError => ({
+  status: 404,
+  body: { message, ...details },
+});
+
+const requireDocument = async (
+  collection: string,
+  id: string,
+  message: string,
+): Promise<PlacementError | null> =>
+  (await assertDocumentExists(collection, id)) ? null : notFound(message);
+
+// A selection whose `type` names the collection (the heroes).
+const requireTypedDocument =
+  <K extends string>(collections: Record<K, string>, message: string) =>
+  (value: { type: K; id: string }) =>
+    requireDocument(collections[value.type], value.id, message);
+
+// An `auto-*` | `manual` selection: only a manual pick references a document.
+const requireManualDocument =
+  (collection: string, message: string) =>
+  async (value: { mode: string; id?: string }) =>
+    value.mode === 'manual' && value.id ? requireDocument(collection, value.id, message) : null;
+
+// Same for a manual list of ids in one collection; answers with `missingIds`.
+const requireManualDocumentIds =
+  (collection: string, message: string) =>
+  async (value: { mode: string; ids?: string[] }) => {
+    if (value.mode !== 'manual' || !value.ids) return null;
+    const missingIds = await assertDocumentsExist(collection, value.ids);
+    return missingIds.length > 0 ? notFound(message, { missingIds }) : null;
+  };
+
+const checkNetlenkaRailReferences = async (
+  value: LandingNetlenkaRailSelection,
+): Promise<PlacementError | null> => {
+  if (value.mode !== 'manual') return null;
+  const statuses = await getNetlenkaItemStatuses(value.items);
+
+  const missingItems = statuses
+    .filter((item) => !item.exists)
+    .map(({ type, id }) => ({ type, id }));
+  if (missingItems.length > 0) {
+    return notFound('Referenced netlenka rail documents were not found', { missingItems });
+  }
+
+  const nonMaagChoiceItems = statuses
+    .filter((item) => item.exists && !item.isMaagChoice)
+    .map(({ type, id }) => ({ type, id }));
+  if (nonMaagChoiceItems.length > 0) {
+    return {
+      status: 400,
+      body: {
+        message: 'Referenced netlenka rail documents must have isMaagChoice=true',
+        nonMaagChoiceItems,
+      },
+    };
+  }
+  return null;
+};
+
+const requireCategoryCards =
+  (key: string) =>
+  async (value: LandingCategoryCardsSelection): Promise<PlacementError | null> => {
+    if (value.mode !== 'manual') return null;
+    const statuses = await getCategoryCardsItemStatuses(value.items);
+    const missingItems = statuses
+      .filter((item) => !item.exists)
+      .map(({ type, id }) => ({ type, id }));
+    return missingItems.length > 0
+      ? notFound(`Referenced ${key} documents were not found`, { missingItems })
+      : null;
+  };
+
+// Built per call, not at module load: several normalizers are `const`s declared
+// further down this file and would not be initialized yet.
+const landingPlacementRules = (): PlacementFieldRules<PlacementFields<LandingPlacementsDocument>> => ({
+  mainHero: {
+    normalize: normalizeMainHeroSelection,
+    checkReferences: requireTypedDocument(
+      MAIN_HERO_COLLECTIONS,
+      'Referenced mainHero document was not found',
+    ),
+  },
+  newsRail: {
+    normalize: normalizeNewsRailSelection,
+    checkReferences: requireManualDocumentIds('news', 'Referenced news documents were not found'),
+  },
+  netlenkaRail: {
+    normalize: normalizeNetlenkaRailSelection,
+    checkReferences: checkNetlenkaRailReferences,
+  },
+  cultureHero: {
+    normalize: normalizeCultureHeroSelection,
+    checkReferences: requireTypedDocument(
+      CULTURE_HERO_COLLECTIONS,
+      'Referenced cultureHero document was not found',
+    ),
+  },
+  cultureCards: {
+    normalize: normalizeCategoryCardsSelection,
+    checkReferences: requireCategoryCards('cultureCards'),
+  },
+  parisHero: {
+    normalize: normalizeCategoryHeroSelection,
+    checkReferences: requireTypedDocument(
+      CATEGORY_CARDS_COLLECTIONS,
+      'Referenced parisHero document was not found',
+    ),
+  },
+  parisCards: {
+    normalize: normalizeCategoryCardsSelection,
+    checkReferences: requireCategoryCards('parisCards'),
+  },
+  eventCard: {
+    normalize: normalizeEventCardSelection,
+    checkReferences: requireManualDocument(
+      'events',
+      'Referenced event card document was not found',
+    ),
+  },
+  cultureInterviewBlock: {
+    normalize: normalizeCultureInterviewBlockSelection,
+    checkReferences: requireManualDocument(
+      'interviews',
+      'Referenced culture interview block document was not found',
+    ),
+  },
+  leSaviezVousFeature: {
+    normalize: normalizeSectionPageLeSaviezVousSelection,
+    checkReferences: requireManualDocument(
+      'articles',
+      'Referenced le saviez-vous article was not found',
+    ),
+  },
+  photoOfTheDayFeature: {
+    normalize: normalizePhotoOfTheDayFeatureSelection,
+    checkReferences: requireManualDocument(
+      'photosOfTheDay',
+      'Referenced photo of the day was not found',
+    ),
+  },
+});
+
 export const updateLandingPlacements = async (req: Request, res: Response) => {
   try {
     const currentDoc = await landingPlacementsRef.get();
@@ -1086,306 +1305,20 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
     };
     const payload = req.body && typeof req.body === 'object' ? req.body : {};
 
-    let mainHero = current.mainHero;
-    let newsRail = current.newsRail;
-    let netlenkaRail = current.netlenkaRail;
-    let cultureHero = current.cultureHero;
-    let cultureCards = current.cultureCards;
-    let parisHero = current.parisHero;
-    let parisCards = current.parisCards;
-    let eventCard = current.eventCard;
-    let cultureInterviewBlock = current.cultureInterviewBlock;
-    let leSaviezVousFeature = current.leSaviezVousFeature;
-    let photoOfTheDayFeature = current.photoOfTheDayFeature;
-
-    if ('mainHero' in payload) {
-      if (payload.mainHero === null) {
-        mainHero = null;
-      } else {
-        const normalizedMainHero = normalizeMainHeroSelection(payload.mainHero);
-        if (!normalizedMainHero) {
-          return res.status(400).json({ message: 'Invalid mainHero payload' });
-        }
-
-        const exists = await assertDocumentExists(
-          MAIN_HERO_COLLECTIONS[normalizedMainHero.type],
-          normalizedMainHero.id,
-        );
-
-        if (!exists) {
-          return res
-            .status(404)
-            .json({ message: 'Referenced mainHero document was not found' });
-        }
-
-        mainHero = normalizedMainHero;
-      }
+    const result = await applyPlacementPayload<PlacementFields<LandingPlacementsDocument>>(
+      payload,
+      current,
+      landingPlacementRules(),
+    );
+    if ('error' in result) {
+      return res.status(result.error.status).json(result.error.body);
     }
 
-    if ('newsRail' in payload) {
-      if (payload.newsRail === null) {
-        newsRail = null;
-      } else {
-        const normalizedNewsRail = normalizeNewsRailSelection(payload.newsRail);
-        if (!normalizedNewsRail) {
-          return res.status(400).json({ message: 'Invalid newsRail payload' });
-        }
-
-        if (normalizedNewsRail.mode === 'manual') {
-          const missingIds = await assertDocumentsExist('news', normalizedNewsRail.ids);
-          if (missingIds.length > 0) {
-            return res.status(404).json({
-              message: 'Referenced news documents were not found',
-              missingIds,
-            });
-          }
-        }
-
-        newsRail = normalizedNewsRail;
-      }
-    }
-
-    if ('netlenkaRail' in payload) {
-      if (payload.netlenkaRail === null) {
-        netlenkaRail = null;
-      } else {
-        const normalizedNetlenkaRail = normalizeNetlenkaRailSelection(payload.netlenkaRail);
-        if (!normalizedNetlenkaRail) {
-          return res.status(400).json({ message: 'Invalid netlenkaRail payload' });
-        }
-
-        if (normalizedNetlenkaRail.mode === 'manual') {
-          const statuses = await getNetlenkaItemStatuses(normalizedNetlenkaRail.items);
-          const missingItems = statuses
-            .filter((item) => !item.exists)
-            .map(({ type, id }) => ({ type, id }));
-          if (missingItems.length > 0) {
-            return res.status(404).json({
-              message: 'Referenced netlenka rail documents were not found',
-              missingItems,
-            });
-          }
-
-          const nonMaagChoiceItems = statuses
-            .filter((item) => item.exists && !item.isMaagChoice)
-            .map(({ type, id }) => ({ type, id }));
-          if (nonMaagChoiceItems.length > 0) {
-            return res.status(400).json({
-              message: 'Referenced netlenka rail documents must have isMaagChoice=true',
-              nonMaagChoiceItems,
-            });
-          }
-        }
-
-        netlenkaRail = normalizedNetlenkaRail;
-      }
-    }
-
-    if ('cultureHero' in payload) {
-      if (payload.cultureHero === null) {
-        cultureHero = null;
-      } else {
-        const normalizedCultureHero = normalizeCategoryHeroSelection(payload.cultureHero);
-        if (!normalizedCultureHero) {
-          return res.status(400).json({ message: 'Invalid cultureHero payload' });
-        }
-
-        const exists = await assertDocumentExists(
-          CATEGORY_CARDS_COLLECTIONS[normalizedCultureHero.type],
-          normalizedCultureHero.id,
-        );
-
-        if (!exists) {
-          return res
-            .status(404)
-            .json({ message: 'Referenced cultureHero document was not found' });
-        }
-
-        cultureHero = normalizedCultureHero;
-      }
-    }
-
-    if ('cultureCards' in payload) {
-      if (payload.cultureCards === null) {
-        cultureCards = null;
-      } else {
-        const normalizedCultureCards = normalizeCategoryCardsSelection(payload.cultureCards);
-        if (!normalizedCultureCards) {
-          return res.status(400).json({ message: 'Invalid cultureCards payload' });
-        }
-
-        if (normalizedCultureCards.mode === 'manual') {
-          const statuses = await getCategoryCardsItemStatuses(normalizedCultureCards.items);
-          const missingItems = statuses
-            .filter((item) => !item.exists)
-            .map(({ type, id }) => ({ type, id }));
-          if (missingItems.length > 0) {
-            return res.status(404).json({
-              message: 'Referenced cultureCards documents were not found',
-              missingItems,
-            });
-          }
-        }
-
-        cultureCards = normalizedCultureCards;
-      }
-    }
-
-    if ('parisHero' in payload) {
-      if (payload.parisHero === null) {
-        parisHero = null;
-      } else {
-        const normalizedParisHero = normalizeCategoryHeroSelection(payload.parisHero);
-        if (!normalizedParisHero) {
-          return res.status(400).json({ message: 'Invalid parisHero payload' });
-        }
-
-        const exists = await assertDocumentExists(
-          CATEGORY_CARDS_COLLECTIONS[normalizedParisHero.type],
-          normalizedParisHero.id,
-        );
-
-        if (!exists) {
-          return res
-            .status(404)
-            .json({ message: 'Referenced parisHero document was not found' });
-        }
-
-        parisHero = normalizedParisHero;
-      }
-    }
-
-    if ('parisCards' in payload) {
-      if (payload.parisCards === null) {
-        parisCards = null;
-      } else {
-        const normalizedParisCards = normalizeCategoryCardsSelection(payload.parisCards);
-        if (!normalizedParisCards) {
-          return res.status(400).json({ message: 'Invalid parisCards payload' });
-        }
-
-        if (normalizedParisCards.mode === 'manual') {
-          const statuses = await getCategoryCardsItemStatuses(normalizedParisCards.items);
-          const missingItems = statuses
-            .filter((item) => !item.exists)
-            .map(({ type, id }) => ({ type, id }));
-          if (missingItems.length > 0) {
-            return res.status(404).json({
-              message: 'Referenced parisCards documents were not found',
-              missingItems,
-            });
-          }
-        }
-
-        parisCards = normalizedParisCards;
-      }
-    }
-
-    if ('eventCard' in payload) {
-      if (payload.eventCard === null) {
-        eventCard = null;
-      } else {
-        const normalizedEventCard = normalizeEventCardSelection(payload.eventCard);
-        if (!normalizedEventCard) {
-          return res.status(400).json({ message: 'Invalid eventCard payload' });
-        }
-
-        if (normalizedEventCard.mode === 'manual') {
-          const exists = await assertDocumentExists('events', normalizedEventCard.id);
-          if (!exists) {
-            return res
-              .status(404)
-              .json({ message: 'Referenced event card document was not found' });
-          }
-        }
-
-        eventCard = normalizedEventCard;
-      }
-    }
-
-    if ('cultureInterviewBlock' in payload) {
-      if (payload.cultureInterviewBlock === null) {
-        cultureInterviewBlock = null;
-      } else {
-        const normalizedCultureInterviewBlock = normalizeCultureInterviewBlockSelection(
-          payload.cultureInterviewBlock,
-        );
-        if (!normalizedCultureInterviewBlock) {
-          return res
-            .status(400)
-            .json({ message: 'Invalid cultureInterviewBlock payload' });
-        }
-
-        if (normalizedCultureInterviewBlock.mode === 'manual') {
-          const exists = await assertDocumentExists(
-            'interviews',
-            normalizedCultureInterviewBlock.id,
-          );
-          if (!exists) {
-            return res.status(404).json({
-              message:
-                'Referenced culture interview block document was not found',
-            });
-          }
-        }
-
-        cultureInterviewBlock = normalizedCultureInterviewBlock;
-      }
-    }
-
-    if ('leSaviezVousFeature' in payload) {
-      if (payload.leSaviezVousFeature === null) {
-        leSaviezVousFeature = null;
-      } else {
-        const normalized = normalizeSectionPageLeSaviezVousSelection(payload.leSaviezVousFeature);
-        if (!normalized) {
-          return res.status(400).json({ message: 'Invalid leSaviezVousFeature payload' });
-        }
-
-        if (normalized.mode === 'manual') {
-          const exists = await assertDocumentExists('articles', normalized.id);
-          if (!exists) {
-            return res.status(404).json({ message: 'Referenced le saviez-vous article was not found' });
-          }
-        }
-
-        leSaviezVousFeature = normalized;
-      }
-    }
-
-    if ('photoOfTheDayFeature' in payload) {
-      if (payload.photoOfTheDayFeature === null) {
-        photoOfTheDayFeature = null;
-      } else {
-        const normalized = normalizePhotoOfTheDayFeatureSelection(payload.photoOfTheDayFeature);
-        if (!normalized) {
-          return res.status(400).json({ message: 'Invalid photoOfTheDayFeature payload' });
-        }
-
-        if (normalized.mode === 'manual') {
-          const exists = await assertDocumentExists('photosOfTheDay', normalized.id);
-          if (!exists) {
-            return res.status(404).json({ message: 'Referenced photo of the day was not found' });
-          }
-        }
-
-        photoOfTheDayFeature = normalized;
-      }
-    }
-
+    // `current` starts with schemaVersion and ends with updatedAt/updatedBy, so
+    // overriding them here keeps the key order of the stored document.
     const nextValue: LandingPlacementsDocument = {
+      ...result.fields,
       schemaVersion: 4,
-      mainHero,
-      newsRail,
-      netlenkaRail,
-      cultureHero,
-      cultureCards,
-      parisHero,
-      parisCards,
-      eventCard,
-      cultureInterviewBlock,
-      leSaviezVousFeature,
-      photoOfTheDayFeature,
       updatedAt: new Date(),
       updatedBy: null,
     };
@@ -1400,65 +1333,44 @@ export const updateLandingPlacements = async (req: Request, res: Response) => {
   }
 };
 
+const calendarPagePlacementRules = (): PlacementFieldRules<
+  PlacementFields<CalendarPagePlacementsDocument>
+> => ({
+  // Main cards are always a manual list, so the check always runs.
+  mainCards: {
+    normalize: normalizeCalendarManualCardsSelection,
+    checkReferences: requireManualDocumentIds(
+      'events',
+      'Referenced mainCards event documents were not found',
+    ),
+  },
+  secondaryCards: {
+    normalize: normalizeCalendarSecondaryCardsSelection,
+    checkReferences: requireManualDocumentIds(
+      'events',
+      'Referenced secondaryCards event documents were not found',
+    ),
+  },
+});
+
 export const updateCalendarPagePlacements = async (req: Request, res: Response) => {
   try {
     const currentDoc = await calendarPagePlacementsRef.get();
     const current = normalizeCalendarPagePlacements(currentDoc.data());
     const payload = req.body && typeof req.body === 'object' ? req.body : {};
 
-    let mainCards = current.mainCards;
-    let secondaryCards = current.secondaryCards;
-
-    if ('mainCards' in payload) {
-      if (payload.mainCards === null) {
-        mainCards = null;
-      } else {
-        const normalizedMainCards = normalizeCalendarManualCardsSelection(payload.mainCards);
-        if (!normalizedMainCards) {
-          return res.status(400).json({ message: 'Invalid mainCards payload' });
-        }
-
-        const missingIds = await assertDocumentsExist('events', normalizedMainCards.ids);
-        if (missingIds.length > 0) {
-          return res.status(404).json({
-            message: 'Referenced mainCards event documents were not found',
-            missingIds,
-          });
-        }
-
-        mainCards = normalizedMainCards;
-      }
-    }
-
-    if ('secondaryCards' in payload) {
-      if (payload.secondaryCards === null) {
-        secondaryCards = null;
-      } else {
-        const normalizedSecondaryCards = normalizeCalendarSecondaryCardsSelection(
-          payload.secondaryCards,
-        );
-        if (!normalizedSecondaryCards) {
-          return res.status(400).json({ message: 'Invalid secondaryCards payload' });
-        }
-
-        if (normalizedSecondaryCards.mode === 'manual') {
-          const missingIds = await assertDocumentsExist('events', normalizedSecondaryCards.ids);
-          if (missingIds.length > 0) {
-            return res.status(404).json({
-              message: 'Referenced secondaryCards event documents were not found',
-              missingIds,
-            });
-          }
-        }
-
-        secondaryCards = normalizedSecondaryCards;
-      }
+    const result = await applyPlacementPayload<PlacementFields<CalendarPagePlacementsDocument>>(
+      payload,
+      current,
+      calendarPagePlacementRules(),
+    );
+    if ('error' in result) {
+      return res.status(result.error.status).json(result.error.body);
     }
 
     const nextValue: CalendarPagePlacementsDocument = {
+      ...result.fields,
       schemaVersion: 1,
-      mainCards,
-      secondaryCards,
       updatedAt: new Date(),
       updatedBy: null,
     };
@@ -1505,17 +1417,38 @@ const normalizeSectionPageLimit = (
   return Math.min(Math.round(parsed), max);
 };
 
+// Own keys only: a plain `COLLECTIONS[type]` lookup is also truthy for
+// prototype names such as "constructor" or "toString".
+const isSectionPageHeroType = (value: unknown): value is SectionPageHeroType =>
+  typeof value === 'string' && Object.hasOwn(SECTION_PAGE_HERO_COLLECTIONS, value);
+
 const normalizeSectionPageHeroSelection = (
   value: unknown,
 ): SectionPageHeroManualSelection | null => {
   if (!value || typeof value !== 'object') return null;
   const v = value as Record<string, unknown>;
   if (v.mode !== 'manual') return null;
-  const type = v.type as string;
-  const id = v.id as string;
-  if (!type || !id || !SECTION_PAGE_HERO_COLLECTIONS[type as SectionPageHeroType]) return null;
-  return { mode: 'manual', type: type as SectionPageHeroType, id };
+  const type = v.type;
+  const id = normalizeStringId(v.id);
+  if (!isSectionPageHeroType(type) || !id) return null;
+  return { mode: 'manual', type, id };
 };
+
+// Manual item lists of the secondary stories and the sidebar rail: drops
+// entries without a type/id or with a type that has no collection.
+const normalizeSectionPageItemTargets = (
+  rawItems: unknown,
+): SectionPageSecondaryItemTarget[] =>
+  (Array.isArray(rawItems) ? rawItems : [])
+    .map((item: unknown) => {
+      if (!item || typeof item !== 'object') return null;
+      const i = item as Record<string, unknown>;
+      const type = i.type;
+      const id = normalizeStringId(i.id);
+      if (!isSectionPageHeroType(type) || !id) return null;
+      return { type, id };
+    })
+    .filter((item): item is SectionPageSecondaryItemTarget => item !== null);
 
 const normalizeSectionPageSecondaryStoriesSelection = (
   value: unknown,
@@ -1533,25 +1466,17 @@ const normalizeSectionPageSecondaryStoriesSelection = (
     };
   }
   if (v.mode === 'manual') {
-    const rawItems = Array.isArray(v.items) ? v.items : [];
-    const items = rawItems
-      .map((item: unknown) => {
-        if (!item || typeof item !== 'object') return null;
-        const i = item as Record<string, unknown>;
-        const type = i.type as string;
-        const id = i.id as string;
-        if (!type || !id || !SECTION_PAGE_HERO_COLLECTIONS[type as SectionPageHeroType]) return null;
-        return { type: type as SectionPageHeroType, id };
-      })
-      .filter((item): item is SectionPageSecondaryItemTarget => item !== null);
-    return { mode: 'manual', items };
+    return { mode: 'manual', items: normalizeSectionPageItemTargets(v.items) };
   }
   return null;
 };
 
-const normalizeSectionPageFeaturedInterviewSelection = (
+// Featured interview, "le saviez-vous" and photo of the day share one shape:
+// `{ mode: 'auto-latest' } | { mode: 'manual'; id }`. The named normalizers
+// below delegate here; the result is structurally assignable to each type.
+const normalizeAutoLatestOrManualIdSelection = (
   value: unknown,
-): SectionPageFeaturedInterviewSelection | null => {
+): { mode: 'auto-latest' } | { mode: 'manual'; id: string } | null => {
   if (!value || typeof value !== 'object') return null;
   const v = value as Record<string, unknown>;
   if (v.mode === 'auto-latest') return { mode: 'auto-latest' };
@@ -1560,6 +1485,11 @@ const normalizeSectionPageFeaturedInterviewSelection = (
   }
   return null;
 };
+
+const normalizeSectionPageFeaturedInterviewSelection = (
+  value: unknown,
+): SectionPageFeaturedInterviewSelection | null =>
+  normalizeAutoLatestOrManualIdSelection(value);
 
 const normalizeSectionPageSidebarRailSelection = (
   value: unknown,
@@ -1577,38 +1507,20 @@ const normalizeSectionPageSidebarRailSelection = (
     };
   }
   if (v.mode === 'manual') {
-    const rawItems = Array.isArray(v.items) ? v.items : [];
-    const items = rawItems
-      .map((item: unknown) => {
-        if (!item || typeof item !== 'object') return null;
-        const i = item as Record<string, unknown>;
-        const type = i.type as string;
-        const id = i.id as string;
-        if (!type || !id || !SECTION_PAGE_HERO_COLLECTIONS[type as SectionPageHeroType]) return null;
-        return { type: type as SectionPageHeroType, id };
-      })
-      .filter((item): item is SectionPageSecondaryItemTarget => item !== null);
-    return { mode: 'manual', items };
+    return { mode: 'manual', items: normalizeSectionPageItemTargets(v.items) };
   }
   return null;
 };
 
 const normalizeSectionPageLeSaviezVousSelection = (
   value: unknown,
-): SectionPageLeSaviezVousSelection | null => {
-  if (!value || typeof value !== 'object') return null;
-  const v = value as Record<string, unknown>;
-  if (v.mode === 'auto-latest') return { mode: 'auto-latest' };
-  if (v.mode === 'manual' && typeof v.id === 'string' && v.id) {
-    return { mode: 'manual', id: v.id };
-  }
-  return null;
-};
+): SectionPageLeSaviezVousSelection | null =>
+  normalizeAutoLatestOrManualIdSelection(value);
 
 const normalizePhotoOfTheDayFeatureSelection = (
   value: unknown,
 ): PhotoOfTheDayFeatureSelection | null =>
-  normalizeSectionPageLeSaviezVousSelection(value) as PhotoOfTheDayFeatureSelection | null;
+  normalizeAutoLatestOrManualIdSelection(value);
 
 const normalizeCulturePagePlacements = (
   value: FirebaseFirestore.DocumentData | undefined,
@@ -1616,32 +1528,24 @@ const normalizeCulturePagePlacements = (
   const defaults = createDefaultCulturePagePlacements();
   if (!value || typeof value !== 'object') return defaults;
 
-  const heroRaw = 'hero' in value ? value.hero : undefined;
-  const hero = heroRaw === null
-    ? null
-    : (normalizeSectionPageHeroSelection(heroRaw) ?? defaults.hero);
-
-  const secondaryStoriesRaw = 'secondaryStories' in value ? value.secondaryStories : undefined;
-  const secondaryStories = secondaryStoriesRaw === null
-    ? null
-    : (normalizeSectionPageSecondaryStoriesSelection(secondaryStoriesRaw) ?? defaults.secondaryStories);
-
-  const featuredInterviewRaw = 'featuredInterview' in value ? value.featuredInterview : undefined;
-  const featuredInterview = featuredInterviewRaw === null
-    ? null
-    : (normalizeSectionPageFeaturedInterviewSelection(featuredInterviewRaw) ?? defaults.featuredInterview);
-
-  const sidebarRailRaw = 'sidebarRail' in value ? value.sidebarRail : undefined;
-  const sidebarRail = sidebarRailRaw === null
-    ? null
-    : (normalizeSectionPageSidebarRailSelection(sidebarRailRaw) ?? defaults.sidebarRail);
-
   return {
     schemaVersion: 1,
-    hero,
-    secondaryStories,
-    featuredInterview,
-    sidebarRail,
+    hero: readPlacementField(value, 'hero', normalizeSectionPageHeroSelection, defaults.hero),
+    secondaryStories: readPlacementField(
+      value,
+      'secondaryStories',
+      normalizeSectionPageSecondaryStoriesSelection,
+      defaults.secondaryStories,
+    ),
+    featuredInterview: readPlacementField(
+      value,
+      'featuredInterview',
+      normalizeSectionPageFeaturedInterviewSelection,
+      defaults.featuredInterview,
+    ),
+    sidebarRail: readPlacementField(
+      value, 'sidebarRail', normalizeSectionPageSidebarRailSelection, defaults.sidebarRail,
+    ),
     updatedAt: value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
     updatedBy: normalizeStringId(value.updatedBy),
   };
@@ -1653,44 +1557,33 @@ const normalizeParisPagePlacements = (
   const defaults = createDefaultParisPagePlacements();
   if (!value || typeof value !== 'object') return defaults;
 
-  const heroRaw = 'hero' in value ? value.hero : undefined;
-  const hero = heroRaw === null
-    ? null
-    : (normalizeSectionPageHeroSelection(heroRaw) ?? defaults.hero);
-
-  const twoImageArticleRaw = 'twoImageArticle' in value ? value.twoImageArticle : undefined;
-  const twoImageArticle = twoImageArticleRaw === null
-    ? null
-    : (normalizeSectionPageHeroSelection(twoImageArticleRaw) ?? defaults.twoImageArticle);
-
-  const interviewFeatureRaw = 'interviewFeature' in value ? value.interviewFeature : undefined;
-  const interviewFeature = interviewFeatureRaw === null
-    ? null
-    : (normalizeSectionPageFeaturedInterviewSelection(interviewFeatureRaw) ?? defaults.interviewFeature);
-
-  const secondaryStoriesRaw = 'secondaryStories' in value ? value.secondaryStories : undefined;
-  const secondaryStories = secondaryStoriesRaw === null
-    ? null
-    : (normalizeSectionPageSecondaryStoriesSelection(secondaryStoriesRaw) ?? defaults.secondaryStories);
-
-  const photoOfTheDayRaw = 'photoOfTheDayFeature' in value ? value.photoOfTheDayFeature : undefined;
-  const photoOfTheDayFeature = photoOfTheDayRaw === null
-    ? null
-    : (normalizePhotoOfTheDayFeatureSelection(photoOfTheDayRaw) ?? defaults.photoOfTheDayFeature);
-
-  const sidebarRailRaw = 'sidebarRail' in value ? value.sidebarRail : undefined;
-  const sidebarRail = sidebarRailRaw === null
-    ? null
-    : (normalizeSectionPageSidebarRailSelection(sidebarRailRaw) ?? defaults.sidebarRail);
-
   return {
     schemaVersion: 2,
-    hero,
-    twoImageArticle,
-    interviewFeature,
-    secondaryStories,
-    photoOfTheDayFeature,
-    sidebarRail,
+    hero: readPlacementField(value, 'hero', normalizeSectionPageHeroSelection, defaults.hero),
+    twoImageArticle: readPlacementField(
+      value, 'twoImageArticle', normalizeSectionPageHeroSelection, defaults.twoImageArticle,
+    ),
+    interviewFeature: readPlacementField(
+      value,
+      'interviewFeature',
+      normalizeSectionPageFeaturedInterviewSelection,
+      defaults.interviewFeature,
+    ),
+    secondaryStories: readPlacementField(
+      value,
+      'secondaryStories',
+      normalizeSectionPageSecondaryStoriesSelection,
+      defaults.secondaryStories,
+    ),
+    photoOfTheDayFeature: readPlacementField(
+      value,
+      'photoOfTheDayFeature',
+      normalizePhotoOfTheDayFeatureSelection,
+      defaults.photoOfTheDayFeature,
+    ),
+    sidebarRail: readPlacementField(
+      value, 'sidebarRail', normalizeSectionPageSidebarRailSelection, defaults.sidebarRail,
+    ),
     updatedAt: value.updatedAt instanceof Date ? value.updatedAt : value.updatedAt ?? null,
     updatedBy: normalizeStringId(value.updatedBy),
   };
@@ -1709,82 +1602,68 @@ export const getCulturePagePlacements = async (_req: Request, res: Response) => 
   }
 };
 
+// Secondary stories answer with `missingIds` as "type:id" strings.
+const checkSectionStoriesReferences = async (
+  value: SectionPageSecondaryStoriesSelection,
+): Promise<PlacementError | null> => {
+  if (value.mode !== 'manual') return null;
+  const missingIds = (
+    await Promise.all(
+      value.items.map(async (item) => {
+        const exists = await assertDocumentExists(SECTION_PAGE_HERO_COLLECTIONS[item.type], item.id);
+        return exists ? null : `${item.type}:${item.id}`;
+      }),
+    )
+  ).filter((id): id is string => id !== null);
+  return missingIds.length > 0
+    ? notFound('Referenced secondaryStories documents not found', { missingIds })
+    : null;
+};
+
+const sectionPageHeroRule = (key: string): PlacementFieldRule<SectionPageHeroManualSelection> => ({
+  normalize: normalizeSectionPageHeroSelection,
+  checkReferences: requireTypedDocument(
+    SECTION_PAGE_HERO_COLLECTIONS,
+    `Referenced ${key} document not found`,
+  ),
+});
+
+const sectionPageInterviewRule = (): PlacementFieldRule<SectionPageFeaturedInterviewSelection> => ({
+  normalize: normalizeSectionPageFeaturedInterviewSelection,
+  checkReferences: requireManualDocument('interviews', 'Referenced interview not found'),
+});
+
+const culturePagePlacementRules = (): PlacementFieldRules<
+  PlacementFields<CulturePagePlacementsDocument>
+> => ({
+  hero: sectionPageHeroRule('hero'),
+  secondaryStories: {
+    normalize: normalizeSectionPageSecondaryStoriesSelection,
+    checkReferences: checkSectionStoriesReferences,
+  },
+  featuredInterview: sectionPageInterviewRule(),
+  // The sidebar rail is not checked against the database.
+  sidebarRail: { normalize: normalizeSectionPageSidebarRailSelection },
+});
+
 export const updateCulturePagePlacements = async (req: Request, res: Response) => {
   try {
     const currentDoc = await culturePagePlacementsRef.get();
     const current = normalizeCulturePagePlacements(currentDoc.data());
     const payload = req.body && typeof req.body === 'object' ? req.body : {};
 
-    let { hero, secondaryStories, featuredInterview, sidebarRail } = current;
-
-    if ('hero' in payload) {
-      if (payload.hero === null) {
-        hero = null;
-      } else {
-        const normalized = normalizeSectionPageHeroSelection(payload.hero);
-        if (!normalized) return res.status(400).json({ message: 'Invalid hero payload' });
-        const exists = await assertDocumentExists(
-          SECTION_PAGE_HERO_COLLECTIONS[normalized.type],
-          normalized.id,
-        );
-        if (!exists) return res.status(404).json({ message: 'Referenced hero document not found' });
-        hero = normalized;
-      }
-    }
-
-    if ('secondaryStories' in payload) {
-      if (payload.secondaryStories === null) {
-        secondaryStories = null;
-      } else {
-        const normalized = normalizeSectionPageSecondaryStoriesSelection(payload.secondaryStories);
-        if (!normalized) return res.status(400).json({ message: 'Invalid secondaryStories payload' });
-        if (normalized.mode === 'manual') {
-          const missingIds = (
-            await Promise.all(
-              normalized.items.map(async (item) => {
-                const exists = await assertDocumentExists(SECTION_PAGE_HERO_COLLECTIONS[item.type], item.id);
-                return exists ? null : `${item.type}:${item.id}`;
-              }),
-            )
-          ).filter((id): id is string => id !== null);
-          if (missingIds.length > 0) {
-            return res.status(404).json({ message: 'Referenced secondaryStories documents not found', missingIds });
-          }
-        }
-        secondaryStories = normalized;
-      }
-    }
-
-    if ('featuredInterview' in payload) {
-      if (payload.featuredInterview === null) {
-        featuredInterview = null;
-      } else {
-        const normalized = normalizeSectionPageFeaturedInterviewSelection(payload.featuredInterview);
-        if (!normalized) return res.status(400).json({ message: 'Invalid featuredInterview payload' });
-        if (normalized.mode === 'manual') {
-          const exists = await assertDocumentExists('interviews', normalized.id);
-          if (!exists) return res.status(404).json({ message: 'Referenced interview not found' });
-        }
-        featuredInterview = normalized;
-      }
-    }
-
-    if ('sidebarRail' in payload) {
-      if (payload.sidebarRail === null) {
-        sidebarRail = null;
-      } else {
-        const normalized = normalizeSectionPageSidebarRailSelection(payload.sidebarRail);
-        if (!normalized) return res.status(400).json({ message: 'Invalid sidebarRail payload' });
-        sidebarRail = normalized;
-      }
+    const result = await applyPlacementPayload<PlacementFields<CulturePagePlacementsDocument>>(
+      payload,
+      current,
+      culturePagePlacementRules(),
+    );
+    if ('error' in result) {
+      return res.status(result.error.status).json(result.error.body);
     }
 
     const nextValue: CulturePagePlacementsDocument = {
+      ...result.fields,
       schemaVersion: 1,
-      hero,
-      secondaryStories,
-      featuredInterview,
-      sidebarRail,
       updatedAt: new Date(),
       updatedBy: null,
     };
@@ -1810,113 +1689,45 @@ export const getParisPagePlacements = async (_req: Request, res: Response) => {
   }
 };
 
+const parisPagePlacementRules = (): PlacementFieldRules<
+  PlacementFields<ParisPagePlacementsDocument>
+> => ({
+  hero: sectionPageHeroRule('hero'),
+  twoImageArticle: sectionPageHeroRule('twoImageArticle'),
+  interviewFeature: sectionPageInterviewRule(),
+  secondaryStories: {
+    normalize: normalizeSectionPageSecondaryStoriesSelection,
+    checkReferences: checkSectionStoriesReferences,
+  },
+  photoOfTheDayFeature: {
+    normalize: normalizePhotoOfTheDayFeatureSelection,
+    checkReferences: requireManualDocument(
+      'photosOfTheDay',
+      'Referenced photo of the day was not found',
+    ),
+  },
+  // The sidebar rail is not checked against the database.
+  sidebarRail: { normalize: normalizeSectionPageSidebarRailSelection },
+});
+
 export const updateParisPagePlacements = async (req: Request, res: Response) => {
   try {
     const currentDoc = await parisPagePlacementsRef.get();
     const current = normalizeParisPagePlacements(currentDoc.data());
     const payload = req.body && typeof req.body === 'object' ? req.body : {};
 
-    let { hero, twoImageArticle, interviewFeature, secondaryStories, photoOfTheDayFeature, sidebarRail } = current;
-
-    if ('hero' in payload) {
-      if (payload.hero === null) {
-        hero = null;
-      } else {
-        const normalized = normalizeSectionPageHeroSelection(payload.hero);
-        if (!normalized) return res.status(400).json({ message: 'Invalid hero payload' });
-        const exists = await assertDocumentExists(
-          SECTION_PAGE_HERO_COLLECTIONS[normalized.type],
-          normalized.id,
-        );
-        if (!exists) return res.status(404).json({ message: 'Referenced hero document not found' });
-        hero = normalized;
-      }
-    }
-
-    if ('twoImageArticle' in payload) {
-      if (payload.twoImageArticle === null) {
-        twoImageArticle = null;
-      } else {
-        const normalized = normalizeSectionPageHeroSelection(payload.twoImageArticle);
-        if (!normalized) return res.status(400).json({ message: 'Invalid twoImageArticle payload' });
-        const exists = await assertDocumentExists(
-          SECTION_PAGE_HERO_COLLECTIONS[normalized.type],
-          normalized.id,
-        );
-        if (!exists) return res.status(404).json({ message: 'Referenced twoImageArticle document not found' });
-        twoImageArticle = normalized;
-      }
-    }
-
-    if ('interviewFeature' in payload) {
-      if (payload.interviewFeature === null) {
-        interviewFeature = null;
-      } else {
-        const normalized = normalizeSectionPageFeaturedInterviewSelection(payload.interviewFeature);
-        if (!normalized) return res.status(400).json({ message: 'Invalid interviewFeature payload' });
-        if (normalized.mode === 'manual') {
-          const exists = await assertDocumentExists('interviews', normalized.id);
-          if (!exists) return res.status(404).json({ message: 'Referenced interview not found' });
-        }
-        interviewFeature = normalized;
-      }
-    }
-
-    if ('secondaryStories' in payload) {
-      if (payload.secondaryStories === null) {
-        secondaryStories = null;
-      } else {
-        const normalized = normalizeSectionPageSecondaryStoriesSelection(payload.secondaryStories);
-        if (!normalized) return res.status(400).json({ message: 'Invalid secondaryStories payload' });
-        if (normalized.mode === 'manual') {
-          const missingIds = (
-            await Promise.all(
-              normalized.items.map(async (item) => {
-                const exists = await assertDocumentExists(SECTION_PAGE_HERO_COLLECTIONS[item.type], item.id);
-                return exists ? null : `${item.type}:${item.id}`;
-              }),
-            )
-          ).filter((id): id is string => id !== null);
-          if (missingIds.length > 0) {
-            return res.status(404).json({ message: 'Referenced secondaryStories documents not found', missingIds });
-          }
-        }
-        secondaryStories = normalized;
-      }
-    }
-
-    if ('photoOfTheDayFeature' in payload) {
-      if (payload.photoOfTheDayFeature === null) {
-        photoOfTheDayFeature = null;
-      } else {
-        const normalized = normalizePhotoOfTheDayFeatureSelection(payload.photoOfTheDayFeature);
-        if (!normalized) return res.status(400).json({ message: 'Invalid photoOfTheDayFeature payload' });
-        if (normalized.mode === 'manual') {
-          const exists = await assertDocumentExists('photosOfTheDay', normalized.id);
-          if (!exists) return res.status(404).json({ message: 'Referenced photo of the day was not found' });
-        }
-        photoOfTheDayFeature = normalized;
-      }
-    }
-
-    if ('sidebarRail' in payload) {
-      if (payload.sidebarRail === null) {
-        sidebarRail = null;
-      } else {
-        const normalized = normalizeSectionPageSidebarRailSelection(payload.sidebarRail);
-        if (!normalized) return res.status(400).json({ message: 'Invalid sidebarRail payload' });
-        sidebarRail = normalized;
-      }
+    const result = await applyPlacementPayload<PlacementFields<ParisPagePlacementsDocument>>(
+      payload,
+      current,
+      parisPagePlacementRules(),
+    );
+    if ('error' in result) {
+      return res.status(result.error.status).json(result.error.body);
     }
 
     const nextValue: ParisPagePlacementsDocument = {
+      ...result.fields,
       schemaVersion: 2,
-      hero,
-      twoImageArticle,
-      interviewFeature,
-      secondaryStories,
-      photoOfTheDayFeature,
-      sidebarRail,
       updatedAt: new Date(),
       updatedBy: null,
     };
