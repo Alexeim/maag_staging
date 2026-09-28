@@ -697,6 +697,7 @@ export interface InterviewPayload {
   isHotContent?: boolean;
   isNotebookContent?: boolean;
   isMaagChoice?: boolean;
+  paid?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
   relatedContent?: RelatedContent;
