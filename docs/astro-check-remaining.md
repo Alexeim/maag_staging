@@ -32,8 +32,9 @@
   `heroOrientation` (статья, гид) и `updatedAt` (гид), которых не было в
   типах, и мёртвые фоллбеки статьи на поля мок-JSON 2025-09 (`header`,
   `meta.readTime`, `mainImage`, `eventDetails`) — их никогда не писали ни
-  API, ни скрипты; удалены вместе с `EventDetails.astro`. Такие же остались
-  в `tips/[id].astro` и `mainImage` в `events/[id].astro`.
+  API, ни скрипты; удалены вместе с `EventDetails.astro`, как и такие же в
+  `tips/[id].astro` и `events/[id].astro`. Сам мок `Article.json` жив: его
+  читает демо-страница `/article-variant` (исключена из sitemap).
 
 ## Остальное
 
