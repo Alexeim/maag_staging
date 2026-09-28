@@ -92,7 +92,8 @@ export default function(Alpine: Alpine) {
               newInit.call(this);
             }
 
-            this.$nextTick(() => {
+            // Same function as the $nextTick magic, which the skeleton's type lacks.
+            Alpine.nextTick(() => {
               this.isLazyLoading = false;
             });
           })
