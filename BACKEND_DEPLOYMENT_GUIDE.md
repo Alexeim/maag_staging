@@ -31,18 +31,18 @@ The backend uses an optimized, multi-stage `Dockerfile` to create a minimal and 
 
 ```dockerfile
 # Stage 1: The "builder" stage to compile TypeScript
-FROM node:20 AS builder
+FROM node:24-alpine AS builder
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
-RUN npm prune --production
+RUN npm prune --omit=dev
 
 # ---
 
 # Stage 2: The final "runner" stage
-FROM node:20-slim
+FROM node:24-alpine
 WORKDIR /usr/src/app
 # Copy ONLY the necessary built files from the builder
 COPY package*.json ./
@@ -51,6 +51,10 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 CMD [ "npm", "start" ]
 ```
 This process ensures that no source code (`.ts` files) or development tools are included in the final image, only the compiled JavaScript (`dist`) and production dependencies.
+
+The build context is `server/` only, so the root `node_modules` (frontend) is never
+visible to the backend build. `server/tsconfig.json` mirrors that locally with
+`"types": ["node"]`, and its `"lib": ["es2022"]` relies on the Node 24 runtime above.
 
 ### Part 2: Secure Key Storage (Google Secret Manager)
 
@@ -89,24 +93,20 @@ This script contains the two `gcloud` commands needed to build and deploy the ba
 #!/bin/bash
 set -e # Exit immediately if a command fails
 
-# 1. Build the image using Cloud Build (submitting the server directory)
-```
+# 1. Build the image using Cloud Build (the script runs from server/ itself)
+gcloud builds submit --tag gcr.io/maag-60419/maag-api .
 
-```bash
-gcloud builds submit --tag gcr.io/maag-60419/maag-api ./server
-
-# 2. Deploy the new image to Cloud Run, securely connecting the secret
-```
-
-```bash
+# 2. Deploy the new image to Cloud Run, securely connecting the secrets
 gcloud run deploy maag-api \
   --image gcr.io/maag-60419/maag-api \
   --platform managed \
   --region europe-west9 \
   --allow-unauthenticated \
-  --set-secrets="FIREBASE_CONFIG_JSON=FIREBASE_CONFIG_JSON:latest"
+  --set-env-vars="FRONTEND_URL=https://maag-frontend-953634001415.europe-west9.run.app" \
+  --set-secrets="FIREBASE_CONFIG_JSON=FIREBASE_CONFIG_JSON:latest,STRIPE_SECRET_KEY=STRIPE_SECRET_KEY:latest,STRIPE_WEBHOOK_SECRET=STRIPE_WEBHOOK_SECRET:latest"
 ```
 The `--set-secrets` flag is the magic that connects our running container to Secret Manager.
+Besides the Firebase key, it mounts the two Stripe secrets the payment routes need.
 
 **B. `server/package.json`:**
 A simple `npm` script is added to execute the deploy script.
