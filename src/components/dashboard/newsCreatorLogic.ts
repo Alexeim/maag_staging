@@ -140,7 +140,7 @@ export default function newsCreatorLogic(
       cardTitle: "",
       imageUrl: "",
       imageCaption: "",
-      contentBlocks: [] as any[],
+      contentBlocks: [] as EditorBlock[],
       tags: [] as string[],
       category: "",
       isMainInCategory: false,
@@ -152,7 +152,7 @@ export default function newsCreatorLogic(
 
     showBlockOptions: false,
     editingIndex: null as number | null,
-    editingBlock: null as any,
+    editingBlock: null as EditorBlock | null,
     draggedBlockId: null as string | null,
     dragOverBlockId: null as string | null,
 
@@ -796,7 +796,7 @@ export default function newsCreatorLogic(
     },
 
     updateBlock() {
-      if (this.editingIndex !== null) {
+      if (this.editingIndex !== null && this.editingBlock) {
         // Normalize into a local variable instead of reassigning
         // this.editingBlock: the edit panel's templates read
         // editingBlock.type/.url reactively, and reassigning it here (a
