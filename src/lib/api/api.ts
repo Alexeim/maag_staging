@@ -1311,24 +1311,77 @@ export const publicLandingApi = {
   },
 };
 
+export type PublicCardContentType =
+  | "article"
+  | "guide"
+  | "interview"
+  | "flipper"
+  | "visual-story"
+  | "news"
+  | "event"
+  | "photo-of-the-day"
+  | "first-person";
+
+// One card exactly as toLandingItem() builds it
+// (server/src/controllers/publicLandingController.ts); attachAuthorNames()
+// fills authorName afterwards. Published items only.
+export interface PublicCardItem {
+  id: string;
+  type: PublicCardContentType;
+  contentType: PublicCardContentType;
+  href: string;
+  title: string;
+  lead: string;
+  subtitle: string;
+  subtitleHtml: string;
+  cardLead: string;
+  cardTitle: string;
+  imageUrl: string | null;
+  secondImageUrl: string | null;
+  category: string;
+  // The server checks only that it is an array.
+  tags: unknown[];
+  createdAt: ApiTimestamp;
+  updatedAt: ApiTimestamp;
+  published: boolean;
+  publishedAt: ApiTimestamp;
+  authorId: string | null;
+  authorName: string;
+  isHotContent: boolean;
+  isNotebookContent: boolean;
+  isMaagChoice: boolean;
+  isMainInCategory: boolean;
+  isNews: boolean;
+  articleType: string | null;
+  paid: boolean;
+  mainQuote: string | null;
+  interviewee: string | null;
+  // Interviews only: the first quote or Q&A answer of the body.
+  contentQuote?: string | null;
+  startDate: ApiTimestamp;
+  endDate: ApiTimestamp;
+  dateType: string | null;
+  caption: string;
+}
+
 export interface PublicCultureResponse {
   culturePagePlacements: CulturePagePlacementsResponse;
-  primaryCultureArticle: unknown | null;
-  secondaryStories: unknown[];
-  editorialSidebarItems: unknown[];
-  cultureFeed: unknown[];
-  featuredInterview: unknown | null;
+  primaryCultureArticle: PublicCardItem | null;
+  secondaryStories: PublicCardItem[];
+  editorialSidebarItems: PublicCardItem[];
+  cultureFeed: PublicCardItem[];
+  featuredInterview: PublicCardItem | null;
 }
 
 export interface PublicParisResponse {
   parisPagePlacements: ParisPagePlacementsResponse;
-  primaryParisArticle: unknown | null;
-  twoImageArticle: unknown | null;
-  interviewFeature: unknown | null;
-  secondaryStories: unknown[];
-  editorialSidebarItems: unknown[];
-  parisFeed: unknown[];
-  photoOfTheDay: unknown | null;
+  primaryParisArticle: PublicCardItem | null;
+  twoImageArticle: PublicCardItem | null;
+  interviewFeature: PublicCardItem | null;
+  secondaryStories: PublicCardItem[];
+  editorialSidebarItems: PublicCardItem[];
+  parisFeed: PublicCardItem[];
+  photoOfTheDay: PublicCardItem | null;
 }
 
 export interface PublicCalendarResponse {
