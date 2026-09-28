@@ -61,7 +61,7 @@ const safeParseUrl = (value?: string) => {
   }
 };
 
-const isHttpUrl = (parsed: URL | null) =>
+const isHttpUrl = (parsed: URL | null): parsed is URL =>
   Boolean(parsed && (parsed.protocol === "https:" || parsed.protocol === "http:"));
 
 const getYouTubeVideoId = (value?: string) => {
