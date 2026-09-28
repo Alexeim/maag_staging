@@ -1096,13 +1096,13 @@ export default function articleCreatorLogic(initialState = {}) {
 
     // --- Image Upload Method ---
     async handleImageUpload(
-      event,
-      isCover = true,
-      blockIndex = null,
-      column = null,
-      imageField = null,
+      event: Event,
+      isCover: boolean | "second" = true,
+      blockIndex: number | null = null,
+      column: string | null = null,
+      imageField: string | null = null,
     ) {
-      const raw = event.target.files[0];
+      const raw = (event.target as HTMLInputElement).files?.[0];
       if (!raw) return;
 
       this.uploading = true;
@@ -1159,8 +1159,8 @@ export default function articleCreatorLogic(initialState = {}) {
       );
     },
 
-    handleVideoUpload(event, blockIndex = null) {
-      const file = event.target.files[0];
+    handleVideoUpload(event: Event, blockIndex: number | null = null) {
+      const file = (event.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
       this.uploading = true;
@@ -1203,8 +1203,8 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     // Uploads a slide image for a flipper block being edited
-    async handleFlipperSlideUpload(event, slideIndex: number) {
-      const raw = event.target.files[0];
+    async handleFlipperSlideUpload(event: Event, slideIndex: number) {
+      const raw = (event.target as HTMLInputElement).files?.[0];
       if (!raw) return;
 
       this.uploading = true;
