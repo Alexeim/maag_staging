@@ -174,7 +174,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       imageCaption: "",
       heroOrientation: "image-left" as "image-left" | "image-right",
       contentBlocks: [] as EditorBlock[],
-      tags: [],
+      tags: [] as string[],
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
     },
