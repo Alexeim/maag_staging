@@ -56,7 +56,8 @@ Only things that are non-obvious or that I have already got wrong here.
 Before touching any public card list, check which read model it uses.
 
 **Cards on material pages** — the "Похожие материалы" carousel, the news-page
-sidebar and in-body `LinkToContent` — come from one call,
+sidebar, in-body `LinkToContent` and the event page's upcoming events
+(its `autofill`, since 2026-09-28) — come from one call,
 `GET /api/public/related/:type/:id` (`publicRelatedController.ts`). It returns
 card fields only, published only. The per-page autofill rules (same rubric,
 latest flippers, …) live there, not on the pages. Until 2026-09-18 the pages
