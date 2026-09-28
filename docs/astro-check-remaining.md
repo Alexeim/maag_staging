@@ -1,57 +1,52 @@
 # astro check — что осталось (2026-09-28)
 
-Редакторы статьи, гида, интервью, новостей, события и «первого лица» — 0 ошибок.
-Ниже всё остальное, по группам. Проверка: `npx astro check` (для `server/` —
-`cd server && npx tsc --noEmit`). Причины — по тексту ошибки, если не сказано
-«проверено».
+Было 55 ошибок, осталась 1 — в `dashboard/le-saviez-vous/[id]/edit.astro:15`
+(тот же `Astro.params.id`, см. п. 2; файл не трогаем). Проверка:
+`npx astro check` (для `server/` — `cd server && npx tsc --noEmit`).
 
-## 1. То же, что уже чинили в редакторах (готовый приём)
+Ниже — что и почему сделано, чтобы не расследовать заново.
 
-- **Авторы** — `flipperCreatorLogic.ts:280, 430, 457, 472, 488` (6),
-  `visualStoryCreatorLogic.ts:294` (1). Как в статье: `EditorAuthor` /
-  `LoadedAuthorFields` из `src/lib/utils/editorAuthors.ts`.
-- **`event` в загрузках** — `flipperCreatorLogic.ts:570, 614` (2):
-  `event: Event` + `(event.target as HTMLInputElement).files?.[0]`.
-- **id в async-замыкании удаления** — `flipperCreatorLogic.ts:765` (1): `this.flipperId!`.
+## 1. Редакторы flipper / visual story
 
-## 2. `Astro.params.id` — `string | undefined` (10)
+Как в статье: `EditorAuthor` / `LoadedAuthorFields`, `event: Event` +
+`(event.target as HTMLInputElement).files?.[0]`, `this.flipperId!` в удалении.
 
-`pages/article/[id].astro:44`, `guide/[id].astro:38`, `first-person/[id].astro:19`,
-`flippers/[id].astro:21`, `dashboard/{article,event,first-person,guide,visual-story}/[id]/edit.astro:15`,
-`dashboard/flippers/edit/[id].astro:15`. Нужно решить, что делать без id
-(404 / редирект), — решение, не подпись.
+## 2. `Astro.params.id` — `string | undefined`
 
-## 3. Публичные страницы: `author` приходит как `unknown` (8)
+Не решение, а формальность: для сегмента `[id]` Astro строит `([^/]+?)`
+(`getPattern` в `astro/dist`), то есть id на такой странице всегда непустой.
+Везде `if (!id) return Astro.redirect("/404");` сразу после чтения —
+ветка недостижима, поведение не меняется.
 
-`flippers/[id].astro:56, 117, 118` (5), `interviews/[id].astro:55, 112` (3).
-В `api.ts` `author?: unknown` у ответов. Сначала проверить, что реально
-отдаёт контроллер (`server/src/controllers/*`), потом описать тип.
+## 3–4. Публичные страницы flipper и интервью
 
-## 4. Интервью, публичная страница (2)
+- `author` в `FlipperResponse` / `InterviewResponse` — `AuthorPayload | null`:
+  `getById` кладёт сырой документ `authors/{authorId}` (без id) или `null`;
+  списки его не отдают.
+- `heroOrientation?: "image-left" | "image-right"` добавлен в
+  `InterviewPayload` — бэкенд его хранит.
+- Блоки интервью приводятся на странице к `ComponentProps<typeof ArticleBody>`:
+  бэкенд хранит `content` как `any[]` без валидации. Статья «не ругается»
+  только потому, что там `articleData: any`.
 
-- `interviews/[id].astro:121` — `heroOrientation` нет в `InterviewResponse`.
-  Проверить, хранит ли его бэкенд.
-- `interviews/[id].astro:132` — `content: unknown[]` не подходит под типы блоков.
+## Остальное
 
-## 5. `lib/utils/video.ts:136–159` — `parsed` может быть `null` (5)
-
-## 6. Маркизы: атрибут `key` на элементах (5)
-
-`ContentCollectionMarquee.astro:151, 260`, `RelatedContentMarquee.astro:238`,
-`RelatedMaterialsMarquee.astro:158, 267`. `key` — из React, в Astro его нет.
-
-## 7. Юридические страницы — импорт `.md` (3)
-
-`cookies.astro:6`, `privacy.astro:6`, `terms.astro:6`: тип `MarkdownDocument`.
-
-## 8. Разное (по одной-две)
-
-- `ArticleBody.astro:280, 282` — `quoteAuthor` нет в типе `Block` (2).
-- `ArticleTips.astro:57, 61` — type predicate не совпадает с параметром (2).
-- `LandingBody.astro:299` — `null` там, где ждут `undefined` (1).
-- `calendarEditorLogic.ts:201, 242` — `unknown` вместо типа выбора карточек (2).
-- `landingPlacementManager.ts:31` — нет `photoOfTheDayFeature` в начальном
-  состоянии (1). Это аудит 4.6, последствия не проверены.
-- `landing-editor.astro:886, 1205` — `.id` у объединения, где у пустого
-  варианта его нет (2).
-- `lazyLoadPlugin.ts:95` — `$nextTick` (магия Alpine) не в типе (1).
+- `video.ts` — `isHttpUrl` стал type predicate (`parsed is URL`).
+- Маркизы — атрибут `key` удалён: в Astro это просто HTML-атрибут
+  (`addAttribute(..., "key")`), никто его не читал.
+- Юридические страницы — `LegalPageLayout` принимает `MarkdownInstance` из
+  `astro`, форма frontmatter приводится в одном месте.
+- `ArticleBody` — `quoteAuthor` в типе `Block` (редактор интервью его пишет,
+  бэкенд хранит блоки целиком).
+- `ArticleTips` — предикат с `url: string | undefined`, как в данных.
+- `LandingBody` — `quote={interviewQuote ?? undefined}`: `null` не включал
+  дефолт `LatestInterview`, читатель видел пустые кавычки вместо заглушки.
+  **Меняет вывод на главной** (решение владельца).
+- `calendarEditorLogic` — `unknown` заменён типами выбора из `api.ts`.
+- `landingPlacementManager` — добавлен `photoOfTheDayFeature: auto-latest`
+  (как на сервере). Аудит 4.6: последствий не было — менеджер это поле не
+  читает и не отправляет.
+- `api.ts` — убран вариант `PhotoOfTheDayFeatureEmptySelection`
+  (`mode: "empty"`): сервер его не знает, пустой слот — `null`.
+- `lazyLoadPlugin` — `Alpine.nextTick` вместо `this.$nextTick` (та же
+  функция: `magic('nextTick', () => nextTick)`).
