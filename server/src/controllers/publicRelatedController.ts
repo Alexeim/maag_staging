@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDb } from '../services/firebase';
+import { getCalendarToday } from '../utils/calendarDate';
 
 const db = getDb();
 
@@ -89,9 +90,14 @@ const CARD_FIELDS = [
   'isNews',
   'tags',
   'published',
+  // Events only.
+  'startDate',
+  'endDate',
+  'address',
 ];
 
 const AUTOFILL_LIMIT = 12;
+const EVENT_AUTOFILL_LIMIT = 3;
 
 interface Card {
   id: string;
@@ -108,6 +114,10 @@ interface Card {
   articleType?: string;
   isNews?: boolean;
   tags: string[];
+  // Events only.
+  startDate?: unknown;
+  endDate?: unknown;
+  address?: string;
 }
 
 type Snapshot = FirebaseFirestore.DocumentSnapshot;
@@ -167,6 +177,9 @@ const toCard = (type: CardType, doc: Snapshot): Card => {
     articleType: data.articleType,
     isNews: type === 'news' ? true : data.isNews,
     tags: type === 'photoOfTheDay' ? [] : normalizeTags(data.tags),
+    ...(type === 'event'
+      ? { startDate: data.startDate, endDate: data.endDate, address: data.address }
+      : {}),
   };
 };
 
@@ -242,7 +255,7 @@ const isStandardArticle = (data: any) =>
   !data?.isNews && data?.articleType !== 'tips' && data?.articleType !== 'le_saviez_vous';
 
 // Returns the candidate filter for a page's autofill, or null when the page
-// type has no autofill (events).
+// type has none of this kind (events have their own rule, see below).
 const buildAutofillFilter = (
   pageType: PageType,
   current: any,
@@ -348,6 +361,34 @@ export const getPublicRelated = async (req: Request, res: Response) => {
         .sort((left, right) => toTime(right.data().publishedAt) - toTime(left.data().publishedAt))
         .slice(0, AUTOFILL_LIMIT)
         .map((doc) => toCard(page.cardType, doc));
+    }
+
+    // Events: the next events still running today (Paris calendar day) or
+    // later, soonest first, minus the current one only — the rule the event
+    // page applied itself when it downloaded every event.
+    if (pageType === 'event') {
+      const today = getCalendarToday().getTime();
+      const toUtcDayStart = (time: number) => {
+        const day = new Date(time);
+        day.setUTCHours(0, 0, 0, 0);
+        return day.getTime();
+      };
+      const snapshot = await db
+        .collection('events')
+        .where('published', '==', true)
+        .select(...CARD_FIELDS)
+        .get();
+      autofill = snapshot.docs
+        .filter((doc) => doc.id !== currentDoc.id)
+        .map((doc) => ({
+          doc,
+          start: toTime(doc.data().startDate),
+          end: toTime(doc.data().endDate),
+        }))
+        .filter(({ start, end }) => start > 0 && toUtcDayStart(end || start) >= today)
+        .sort((left, right) => left.start - right.start)
+        .slice(0, EVENT_AUTOFILL_LIMIT)
+        .map(({ doc }) => toCard('event', doc));
     }
 
     // 4. Cards for link blocks inside the material's body, keyed the way

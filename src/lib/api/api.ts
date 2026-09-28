@@ -1599,6 +1599,10 @@ export interface PublicRelatedCard {
   articleType?: string;
   isNews?: boolean;
   tags: string[];
+  // Events only.
+  startDate?: unknown;
+  endDate?: unknown;
+  address?: string;
 }
 
 export interface PublicRelatedResponse {
