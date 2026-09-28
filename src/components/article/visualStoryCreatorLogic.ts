@@ -37,6 +37,7 @@ import {
   createUnsavedChangesGuard,
   type UnsavedChangesGuard,
 } from "@/lib/utils/unsavedChangesGuard";
+import type { LoadedAuthorFields } from "@/lib/utils/editorAuthors";
 
 const PREVIEW_KEY = "visualStoryPreview";
 
@@ -291,7 +292,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         };
       }
 
-      const fallbackAuthor = this.story?.author;
+      const fallbackAuthor = (this.story as LoadedAuthorFields)?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         return {
           name: this.getAuthorLabel(fallbackAuthor),
