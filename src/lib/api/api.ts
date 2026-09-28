@@ -1282,24 +1282,32 @@ export const editorialPlacementsApi = {
   },
 };
 
+// The auto-picked landing event also goes through normalizeEvents(), which
+// turns the dates into Date objects (ISO strings in JSON) and adds these.
+export type PublicLandingEvent = PublicCardItem & {
+  startDay?: string;
+  endDay?: string;
+};
+
 export interface PublicLandingResponse {
   landingPlacements: LandingPlacementsResponse;
   mainBlock: {
-    mainArticle: unknown | null;
-    newsArticles: unknown[];
-    landingEvent: unknown | null;
+    mainArticle: PublicCardItem | null;
+    newsArticles: PublicCardItem[];
+    landingEvent: PublicLandingEvent | null;
   };
   body: {
     landingPlacements: LandingPlacementsResponse;
-    cultureHero: unknown | null;
-    cultureCardItems: unknown[];
-    parisHero: unknown | null;
-    parisCardItems: unknown[];
-    maagChoiceItems: unknown[];
-    latestInterview: unknown | null;
-    carouselItems: unknown[];
-    leSaviezVousArticle: unknown | null;
-    photoOfTheDay: unknown | null;
+    cultureHero: PublicCardItem | null;
+    cultureCardItems: PublicCardItem[];
+    parisHero: PublicCardItem | null;
+    parisCardItems: PublicCardItem[];
+    maagChoiceItems: PublicCardItem[];
+    latestInterview: PublicCardItem | null;
+    // The server drops `lead` from carousel cards.
+    carouselItems: Omit<PublicCardItem, "lead">[];
+    leSaviezVousArticle: PublicCardItem | null;
+    photoOfTheDay: PublicCardItem | null;
   };
 }
 
