@@ -1,4 +1,3 @@
-import type { Alpine } from 'alpinejs';
 
 type ToastType = 'success' | 'error' | 'info';
 

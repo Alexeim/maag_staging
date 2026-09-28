@@ -1,4 +1,3 @@
-declare const Alpine: any;
 
 export default () => ({
   init() {
