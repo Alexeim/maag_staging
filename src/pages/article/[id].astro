@@ -91,7 +91,7 @@ const displayArticle = {
   authorId: articleData?.author ? articleData?.authorId : undefined,
   imageUrl: articleData?.imageUrl, // For dynamic articles
   imageCaption: articleData?.imageCaption || '', // <-- Get the caption
-  imageAlt: 'Article image',
+  imageAlt: articleData?.title || 'Article image',
   // Stored blocks are unvalidated JSON; ArticleBody renders them by `type`.
   contentBlocks: (articleData?.content || []) as ArticleBodyProps["contentBlocks"],
 };

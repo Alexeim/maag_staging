@@ -73,7 +73,7 @@ const displayArticle = {
   authorId: articleData?.author ? articleData?.authorId : undefined,
   imageUrl: articleData?.imageUrl,
   imageCaption: articleData?.imageCaption || "",
-  imageAlt: "Обложка статьи",
+  imageAlt: articleData?.title || "Обложка статьи",
   contentBlocks: articleData?.content || [],
 };
 
