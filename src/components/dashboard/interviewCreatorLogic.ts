@@ -13,6 +13,8 @@ import {
   createEmptyRelatedContentLists,
   fetchRelatedContentLists,
   sanitizeRelatedContent,
+  type MaterialLinkContentType,
+  type RelatedContentType,
 } from "@/lib/utils/relatedContent";
 import {
   detectVideoProvider,
@@ -199,7 +201,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     relatedContentLists: createEmptyRelatedContentLists(),
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
     materialLinkTypeOptions: MATERIAL_LINK_TYPE_OPTIONS,
-    selectedRelatedContentType: "article",
+    selectedRelatedContentType: "article" as RelatedContentType | "",
     selectedRelatedContentId: "",
     ...createContentCollectionEditorState("interview"),
     authorsLoading: false,
@@ -345,8 +347,12 @@ export default function interviewCreatorLogic(initialState = {}) {
       }
     },
 
-    getFilteredContentList(contentType) {
-      return this.relatedContentLists[contentType] ?? [];
+    // Also serves in-body link blocks, whose type may be photoOfTheDay or any
+    // string read from a stored block; an unknown key falls back to [].
+    getFilteredContentList(contentType: string) {
+      return (
+        this.relatedContentLists[contentType as MaterialLinkContentType] ?? []
+      );
     },
     getAvailableRelatedContentItems() {
       if (!this.selectedRelatedContentType) {
@@ -354,13 +360,13 @@ export default function interviewCreatorLogic(initialState = {}) {
       }
       return this.relatedContentLists[this.selectedRelatedContentType] ?? [];
     },
-    getSelectedEntityRelatedContent(type) {
+    getSelectedEntityRelatedContent(type: RelatedContentType) {
       return this.interview?.relatedContent?.[type] ?? [];
     },
-    getRelatedContentItemLabel(type, id) {
-      const item = (this.relatedContentLists[type] ?? []).find(
-        (entry) => entry.id === id,
-      );
+    getRelatedContentItemLabel(type: string, id: string) {
+      const list: Array<{ id: string; title?: string }> =
+        this.relatedContentLists[type as MaterialLinkContentType] ?? [];
+      const item = list.find((entry) => entry.id === id);
       return item?.title || id;
     },
     addRelatedContent() {
@@ -394,7 +400,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.interview.relatedContent = normalized;
       this.selectedRelatedContentId = "";
     },
-    removeRelatedContent(type, id) {
+    removeRelatedContent(type: RelatedContentType, id: string) {
       const normalized = sanitizeRelatedContent(this.interview.relatedContent);
       normalized[type] = normalized[type].filter((itemId) => itemId !== id);
       this.interview.relatedContent = normalized;
