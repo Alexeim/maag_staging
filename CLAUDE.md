@@ -2,6 +2,32 @@
 
 Only things that are non-obvious or that I have already got wrong here.
 
+## This is a TypeScript project
+
+- **All application code is TypeScript**: `src/` (`.ts`, and `.astro`
+  frontmatter/scripts) and `server/src/`. New files are `.ts`, new parameters
+  get types, and no new implicit `any`. Untyped code that exists here is debt,
+  not the house style — don't copy it.
+- **JavaScript only for one-off tech scripts** — migrations, seeds, backfills
+  in `server/scripts/` (all `.js`, run by hand). The only other `.mjs` files
+  are tooling: `astro.config.mjs`, `server.mjs`, `tests/sitemap.test.mjs`.
+- Open `astro check` errors are listed in `docs/astro-check-remaining.md`.
+- Shared editor types: `EditorBlock` (`src/lib/utils/contentBlocks.ts`),
+  `EditorAuthor` / `LoadedAuthorFields` (`src/lib/utils/editorAuthors.ts`).
+  Fields a material has only once loaded from the API (`author`, `authorId`)
+  are read through `LoadedAuthorFields`, not added to the editor state.
+- Traps hit on 2026-09-28:
+  - `this` inside a **parameter default** of an object-literal method is
+    `any` even with the parameter annotated. Move the default into the body:
+    `blocks?: EditorBlock[]` + `blocks ?? this.article.contentBlocks`.
+  - `.filter(Boolean)` does not narrow out `null`; `.filter((x) => x !== null)`
+    does (TS 5.5+, the project is on 5.9).
+  - An empty `[]` in initial state is `never[]` — write `[] as string[]`.
+  - Link-block helpers (`getFilteredContentList`, `getRelatedContentItemLabel`)
+    also get `photoOfTheDay` and raw stored strings: keep the parameter
+    `string`, narrow only the lookup key (`as MaterialLinkContentType`).
+    The "related materials" section itself uses `RelatedContentType`.
+
 ## Backend
 
 - The API backend is **in this repo**, at `server/` (Express + firebase-admin +
@@ -141,6 +167,8 @@ Nothing reads these automatically. Status is unverified unless noted.
 - `docs/security-auth-dependency-roadmap.md` — security/auth/hosting, last
   reviewed 2026-09-01. Line 513 assumes editorial GET routes return no
   drafts; they do (see the audit).
+- `docs/astro-check-remaining.md` — what `astro check` still reports after the
+  editor typing work of 2026-09-28, grouped, with the known fix per group.
 - `CALENDAR_PAYWALL_ROADMAP.md`
 - `DASHBOARD_PREVIEW_REFACTOR_ROADMAP.md` — **superseded** by the section
   "Dashboard editors: preview and unsaved changes" above. Its "return to edit
