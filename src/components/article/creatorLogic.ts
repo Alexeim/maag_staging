@@ -106,6 +106,8 @@ export default function articleCreatorLogic(initialState = {}) {
     isEditMode?: boolean;
     articleType?: "standard" | "tips" | "le_saviez_vous";
     watchUnsavedChanges?: boolean;
+    // Not destructured: it reaches `this.isPreview` via ...restInitialState.
+    isPreview?: boolean;
   };
 
   let unsavedGuard: UnsavedChangesGuard | null = null;
