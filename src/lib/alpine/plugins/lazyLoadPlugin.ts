@@ -413,7 +413,6 @@ export default function(Alpine: Alpine) {
       previewEvent() {},
       previewStory() {},
       previewPhoto() {},
-      returnToEdit() {},
       getMainHeroTypeOptions() { return []; },
       getFilteredMainHeroOptions() { return []; },
       selectMainHeroType() {},

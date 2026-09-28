@@ -139,8 +139,6 @@ export default function articleCreatorLogic(initialState = {}) {
     articleId = null,
     isEditMode = false,
     articleType = "standard",
-    editRouteBase = "/dashboard/article",
-    createRoute = "/dashboard/article/create",
     ...restInitialState
   } = initialState as {
     categoryTags?: Record<string, string[]>;
@@ -150,8 +148,6 @@ export default function articleCreatorLogic(initialState = {}) {
     articleId?: string | null;
     isEditMode?: boolean;
     articleType?: "standard" | "tips" | "le_saviez_vous";
-    editRouteBase?: string;
-    createRoute?: string;
   };
 
   // Each articleType flavor has exactly one dashboard list it belongs to.
@@ -403,8 +399,6 @@ export default function articleCreatorLogic(initialState = {}) {
     categoryTags,
     articleId,
     isEditMode,
-    editRouteBase,
-    createRoute,
     parisDistrictOptions,
 
     categoryLabels,
@@ -959,8 +953,6 @@ export default function articleCreatorLogic(initialState = {}) {
         article?: unknown;
         articleId?: string | null;
         isEditMode?: boolean;
-        editRouteBase?: string;
-        createRoute?: string;
         selectedAuthorId?: string;
         useNewAuthor?: boolean;
         newAuthorFirstName?: string;
@@ -1005,18 +997,6 @@ export default function articleCreatorLogic(initialState = {}) {
           if (typeof previewState.isEditMode === "boolean") {
             this.isEditMode = previewState.isEditMode;
           }
-        }
-        if (
-          typeof previewState.editRouteBase === "string" &&
-          previewState.editRouteBase
-        ) {
-          this.editRouteBase = previewState.editRouteBase;
-        }
-        if (
-          typeof previewState.createRoute === "string" &&
-          previewState.createRoute
-        ) {
-          this.createRoute = previewState.createRoute;
         }
         this.selectedAuthorId =
           typeof previewState.selectedAuthorId === "string"
@@ -1526,15 +1506,6 @@ export default function articleCreatorLogic(initialState = {}) {
       }
     },
 
-    // For Preview Page
-    returnToEdit() {
-      const target =
-        this.isEditMode && this.articleId
-          ? `${this.editRouteBase}/${this.articleId}/edit`
-          : this.createRoute;
-      window.location.href = target;
-    },
-
     // --- Preview and Save methods ---
     previewArticle() {
       if (!this.prepareBlocksForAction()) return;
@@ -1544,8 +1515,6 @@ export default function articleCreatorLogic(initialState = {}) {
         article: this.article,
         articleId: this.articleId,
         isEditMode: this.isEditMode,
-        editRouteBase: this.editRouteBase,
-        createRoute: this.createRoute,
         selectedAuthorId: this.selectedAuthorId,
         useNewAuthor: this.useNewAuthor,
         newAuthorFirstName: this.newAuthorFirstName,

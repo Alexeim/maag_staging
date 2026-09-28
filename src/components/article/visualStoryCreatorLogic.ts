@@ -643,13 +643,6 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       this.loadLandingPlacements();
     },
 
-    returnToEdit() {
-      window.location.href =
-        this.isEditMode && this.storyId
-          ? `/dashboard/visual-story/${this.storyId}/edit`
-          : "/dashboard/visual-story/create";
-    },
-
     previewStory() {
       if (this.uploading) {
         window.Alpine?.store("ui")?.showToast?.(

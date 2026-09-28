@@ -572,13 +572,6 @@ export default function newsCreatorLogic(
       this.loadContentCollections();
     },
 
-    returnToEdit() {
-      window.location.href =
-        this.isEditMode && this.articleId
-          ? `/dashboard/news/${this.articleId}/edit`
-          : "/dashboard/news/create";
-    },
-
     previewArticle() {
       if (this.editingIndex !== null) {
         this.updateBlock();

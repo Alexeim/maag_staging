@@ -594,13 +594,6 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.loadLandingPlacements();
     },
 
-    returnToEdit() {
-      window.location.href =
-        this.isEditMode && this.interviewId
-          ? `/dashboard/interview/${this.interviewId}/edit`
-          : "/dashboard/interview/create";
-    },
-
     previewInterview() {
       if (this.editingIndex !== null) {
         this.updateBlock();

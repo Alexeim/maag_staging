@@ -100,13 +100,6 @@ export default function firstPersonCreatorLogic(initialState = {}) {
       return selectedAuthor?.noBgAvatar || "";
     },
 
-    returnToEdit() {
-      window.location.href =
-        this.isEditMode && this.articleId
-          ? `/dashboard/first-person/${this.articleId}/edit`
-          : "/dashboard/first-person/create";
-    },
-
     previewFirstPerson() {
       if (!this.prepareBlocksForAction()) return;
 

@@ -294,13 +294,6 @@ export default function flipperCreatorLogic(initialState = {}) {
       return categoryLabels[value] || value;
     },
 
-    returnToEdit() {
-      window.location.href =
-        this.isEditMode && this.flipperId
-          ? `/dashboard/flippers/edit/${this.flipperId}`
-          : "/dashboard/flippers/create";
-    },
-
     previewFlipper() {
       if (this.uploading) {
         window.Alpine.store("ui").showToast(

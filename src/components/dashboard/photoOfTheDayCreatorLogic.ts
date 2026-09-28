@@ -132,13 +132,6 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
       await this.loadAuthors();
     },
 
-    returnToEdit() {
-      window.location.href =
-        this.isEditMode && this.photoId
-          ? `/dashboard/photo-of-the-day/${this.photoId}/edit`
-          : "/dashboard/photo-of-the-day/create";
-    },
-
     previewPhoto() {
       if (this.uploading) {
         this.notify("Подожди — загрузка изображения ещё не завершилась.", "error");

@@ -1232,14 +1232,6 @@ export default function guideCreatorLogic(initialState = {}) {
       }
     },
 
-    returnToEdit() {
-      const target =
-        this.isEditMode && this.articleId
-          ? `/dashboard/guide/${this.articleId}/edit`
-          : "/dashboard/guide/create";
-      window.location.href = target;
-    },
-
     previewArticle() {
       if (!this.prepareBlocksForAction()) return;
 

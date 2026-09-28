@@ -389,13 +389,6 @@ export default function eventCreatorLogic(initialState = {}) {
       this.loadAddresses();
     },
 
-    returnToEdit() {
-      window.location.href =
-        this.isEditMode && this.eventId
-          ? `/dashboard/event/${this.eventId}/edit`
-          : "/dashboard/event/create";
-    },
-
     previewEvent() {
       if (this.editingIndex !== null) {
         this.updateBlock();

@@ -327,13 +327,6 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       this.loadLandingPlacements();
     },
 
-    returnToEdit() {
-      globalThis.location.href =
-        this.isEditMode && this.articleId
-          ? `/dashboard/tips/${this.articleId}/edit`
-          : "/dashboard/tips/create";
-    },
-
     previewArticle() {
       if (!this.commitOpenItemBeforeAction()) return;
 
