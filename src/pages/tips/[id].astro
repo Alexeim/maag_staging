@@ -57,11 +57,10 @@ if (!error && articleData?.published !== true && !isDraftPreview) {
   articleData = null;
 }
 
-const rawCategory =
-  articleData?.category ?? articleData?.header?.category ?? null;
+const rawCategory = articleData?.category ?? null;
 
 const displayArticle = {
-  title: articleData?.header?.title || articleData?.title || "Статья",
+  title: articleData?.title || "Статья",
   lead: articleData?.lead || "",
   leadHtml: articleData?.leadHtml || "",
   introHtml: articleData?.introHtml || "",
@@ -74,7 +73,7 @@ const displayArticle = {
   authorId: articleData?.author ? articleData?.authorId : undefined,
   imageUrl: articleData?.imageUrl,
   imageCaption: articleData?.imageCaption || "",
-  imageAlt: articleData?.mainImage?.alt || "Обложка статьи",
+  imageAlt: "Обложка статьи",
   contentBlocks: articleData?.content || [],
 };
 

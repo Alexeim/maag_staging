@@ -550,11 +550,7 @@ const displayEvent = {
       : picture1.src,
   imageCaption:
     typeof eventData?.imageCaption === "string" ? eventData.imageCaption : "",
-  imageAlt:
-    typeof eventData?.mainImage?.alt === "string" &&
-    eventData.mainImage.alt.trim()
-      ? eventData.mainImage.alt
-      : eventData?.title || "Изображение события",
+  imageAlt: eventData?.title || "Изображение события",
   contentBlocks: Array.isArray(eventData?.content) ? eventData.content : [],
   datesLabel: formatDateRange(startDate, endDate),
   timeLabel: formatTimeLabel(eventData),
