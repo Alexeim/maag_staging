@@ -10,7 +10,7 @@ import {
   getPrimaryBadgeLabel,
 } from "@/lib/utils/contentBadge";
 import picture1 from "../assets/images/culture.jpg";
-import { publicCultureApi } from "@/lib/api/api";
+import { publicCultureApi, type PublicCardItem } from "@/lib/api/api";
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -32,27 +32,25 @@ const normalizeCategory = (value?: string) => {
   return entry ? entry[0] : lowerCaseValue;
 };
 
-const isHotContent = (item: any) =>
+const isHotContent = (item: PublicCardItem) =>
   Boolean(item?.isHotContent) ||
   normalizeCategory(item?.category) === HOT_CONTENT_CATEGORY_KEY;
 
-const isMainInCategoryItem = (item: any) =>
-  item?.isMainInCategory === true ||
-  item?.isMainInCategory === "true" ||
-  item?.isMainInCategory === 1 ||
-  item?.isMainInCategory === "1";
+// The server sends isMainInCategory as a boolean (toLandingItem).
+const isMainInCategoryItem = (item: PublicCardItem) =>
+  item.isMainInCategory === true;
 
-const isLeSaviezVousArticle = (item: any) =>
+const isLeSaviezVousArticle = (item: PublicCardItem) =>
   item?.articleType === "le_saviez_vous";
 
-const getDate = (timestamp: any): Date => {
+const getDate = (timestamp: unknown): Date => {
   if (timestamp instanceof Date) {
     return timestamp;
   }
   if (timestamp && typeof timestamp === "object" && "_seconds" in timestamp) {
     return new Date((timestamp as { _seconds: number })._seconds * 1000);
   }
-  return new Date(timestamp);
+  return new Date(timestamp as string | number);
 };
 
 const formatDate = (value: unknown) => {
@@ -69,19 +67,19 @@ const formatDate = (value: unknown) => {
     .replace(" г.", "");
 };
 
-const getCardLead = (item: any): string => {
+const getCardLead = (item: PublicCardItem): string => {
   const cardLead =
     typeof item?.cardLead === "string" ? item.cardLead.trim() : "";
   return cardLead;
 };
 
-const getCardTitle = (item: any): string => {
+const getCardTitle = (item: PublicCardItem): string => {
   const cardTitle =
     typeof item?.cardTitle === "string" ? item.cardTitle.trim() : "";
   return cardTitle || item?.title || "";
 };
 
-const toContentHref = (item: any) => {
+const toContentHref = (item: PublicCardItem) => {
   if (item?.contentType === "interview") {
     return `/interviews/${item.id}`;
   }
@@ -109,24 +107,24 @@ const truncateText = (text?: string, maxLength: number = 220) => {
 
 // `contentQuote` is the first quote / Q&A answer from the interview body,
 // picked on the server (publicLandingController.ts) — the body is not sent.
-const extractInterviewQuote = (interview: any): string | null => {
+const extractInterviewQuote = (interview: PublicCardItem | null): string | null => {
   if (!interview) return null;
   if (interview.mainQuote) return interview.mainQuote;
   return interview.contentQuote ?? interview.lead ?? null;
 };
 
-let primaryCultureArticle: any = null;
-let secondaryStories: any[] = [];
-let editorialSidebarItems: any[] = [];
-let cultureFeed: any[] = [];
-let featuredInterview: any = null;
+let primaryCultureArticle: PublicCardItem | null = null;
+let secondaryStories: PublicCardItem[] = [];
+let editorialSidebarItems: PublicCardItem[] = [];
+let cultureFeed: PublicCardItem[] = [];
+let featuredInterview: PublicCardItem | null = null;
 
 try {
   const culturePage = await publicCultureApi.get();
   primaryCultureArticle = culturePage.primaryCultureArticle;
-  secondaryStories = culturePage.secondaryStories as any[];
-  editorialSidebarItems = culturePage.editorialSidebarItems as any[];
-  cultureFeed = culturePage.cultureFeed as any[];
+  secondaryStories = culturePage.secondaryStories;
+  editorialSidebarItems = culturePage.editorialSidebarItems;
+  cultureFeed = culturePage.cultureFeed;
   featuredInterview = culturePage.featuredInterview;
 } catch (error) {
   console.error("Failed to fetch culture page articles:", error);
