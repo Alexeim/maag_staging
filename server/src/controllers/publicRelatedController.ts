@@ -253,7 +253,7 @@ const buildAutofillFilter = (
       isStandardArticle(data) && normalizeArticleCategory(data.category) === currentCategory;
   }
   if (pageType === 'tips') {
-    const rawCategory = current.category ?? current.header?.category ?? null;
+    const rawCategory = current.category ?? null;
     const currentCategory = rawCategory?.toLowerCase() ?? null;
     return (data) =>
       data.articleType === 'tips' &&
