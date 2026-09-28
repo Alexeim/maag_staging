@@ -17,6 +17,10 @@ import {
   openDashboardPreview,
   readDashboardPreview,
 } from "@/lib/utils/dashboardPreview";
+import {
+  createUnsavedChangesGuard,
+  type UnsavedChangesGuard,
+} from "@/lib/utils/unsavedChangesGuard";
 
 const PREVIEW_KEY = "eventPreview";
 
@@ -236,6 +240,8 @@ export default function eventCreatorLogic(initialState = {}) {
       }
     : baseLogic.article;
 
+  let unsavedGuard: UnsavedChangesGuard | null = null;
+
   return {
     ...baseLogic,
     article: initialArticle,
@@ -393,6 +399,21 @@ export default function eventCreatorLogic(initialState = {}) {
         : [];
 
       this.loadAddresses();
+
+      if (!isPreview) {
+        // @ts-ignore Alpine magic $el is available at runtime.
+        unsavedGuard = createUnsavedChangesGuard(this.$el, () => ({
+          article: this.article,
+          eventForm: this.eventForm,
+          selectedAddressId: this.selectedAddressId,
+          useNewAddress: this.useNewAddress,
+          newAddressTitle: this.newAddressTitle,
+          selectedAuthorId: this.selectedAuthorId,
+          useNewAuthor: this.useNewAuthor,
+          newAuthorFirstName: this.newAuthorFirstName,
+          newAuthorLastName: this.newAuthorLastName,
+        }));
+      }
     },
 
     previewEvent() {
@@ -718,6 +739,7 @@ export default function eventCreatorLogic(initialState = {}) {
         if (this.isEditMode && this.eventId) {
           await eventsApi.update(this.eventId, payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           (globalThis as any).Alpine.store("ui").showToast(
             "Событие обновлено, красота!",
           );
@@ -727,6 +749,7 @@ export default function eventCreatorLogic(initialState = {}) {
         } else {
           const result = await eventsApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           (globalThis as any).Alpine.store("ui").showToast(
             "Событие создано, поехали!",
           );
@@ -753,6 +776,7 @@ export default function eventCreatorLogic(initialState = {}) {
       const performDelete = async () => {
         try {
           await eventsApi.delete(this.eventId as string);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast("Событие удалено");
           setTimeout(() => {
             window.location.href = redirectUrl || "/dashboard/events";
