@@ -167,6 +167,7 @@ export interface ArticlePayload {
   tips?: Array<{ type: string; text: string; url?: string }>;
   imageUrl?: string;
   imageCaption?: string;
+  heroOrientation?: "image-left" | "image-right" | "image-bottom";
   secondImageUrl?: string;
   secondImageCaption?: string;
   lead?: string;
@@ -743,6 +744,7 @@ export interface GuidePayload {
   tips?: Array<{ type: string; text: string; url?: string }>;
   imageUrl?: string;
   imageCaption?: string;
+  heroOrientation?: "image-left" | "image-right" | "image-bottom";
   secondImageUrl?: string;
   secondImageCaption?: string;
   lead?: string;
@@ -769,6 +771,7 @@ export interface GuidePayload {
 export interface GuideResponse extends GuidePayload {
   id: string;
   createdAt: string | Date;
+  updatedAt?: string | Date;
   // Only from getById: the raw authors/{authorId} document (no id), or null.
   author?: AuthorPayload | null;
 }

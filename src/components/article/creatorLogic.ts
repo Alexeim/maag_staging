@@ -1606,7 +1606,7 @@ export default function articleCreatorLogic(initialState = {}) {
           imageCaption: this.article.imageCaption,
           secondImageUrl: this.article.secondImageUrl,
           secondImageCaption: this.article.secondImageCaption,
-          heroOrientation: this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : "image-right",
+          heroOrientation: this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : ("image-right" as const),
           authorId: resolvedAuthorId,
           content: this.article.contentBlocks,
           category: this.article.category,

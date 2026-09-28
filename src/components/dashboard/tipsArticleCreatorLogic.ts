@@ -855,7 +855,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
           imageCaption: this.article.imageCaption,
           secondImageUrl: this.article.secondImageUrl,
           secondImageCaption: this.article.secondImageCaption,
-          heroOrientation: this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : "image-right",
+          heroOrientation: this.article.heroOrientation === "image-left" || this.article.heroOrientation === "image-bottom" ? this.article.heroOrientation : ("image-right" as const),
           category: this.article.category,
           tags: selectedCategoryTags,
           parisSubCategories: isParisCategory
