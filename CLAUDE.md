@@ -179,6 +179,13 @@ publication date.
   `ConfirmationModal` ("Остаться" / "Уйти без сохранения"); closing the tab or
   reloading can only show the browser's own dialog. Call `markSaved()` after a
   successful save or delete, or the redirect that follows triggers it.
+- The guard relies on `rich-text-change` carrying `detail.initial: true` on
+  Quill's mount-time emit (`blockRichTextEditor.ts`): Quill loads lazily, so
+  that emit can land after the baseline, and the guard moves the baseline past
+  it if nothing had changed. Drop the flag and a false "unsaved changes"
+  returns with no error. Keep the `text-change` subscription wrapped
+  (`() => emitChange(false)`) — Quill passes `(delta, …)`, which would read
+  as a truthy `initial`.
 - `showConfirmation(message, onConfirm, { confirmLabel, cancelLabel })` — the
   labels are optional and default to "Подтвердить" / "Отмена".
 
@@ -191,8 +198,10 @@ Nothing reads these automatically. Status is unverified unless noted.
   2026-09-18: what was fixed that day (commits), owner decisions (editorial
   GET routes stay open, publication date only, delete nothing unasked), and
   the open items with file:line — profile overwrite/read, Stripe trusting
-  body ids, Quill in every reader's bundle, and more (the broken
-  `articlesApi.del` was fixed 2026-09-28).
+  body ids, and more (fixed 2026-09-28: the broken `articlesApi.del`, and
+  Quill in every reader's bundle — `blockRichTextEditor.ts` now imports it
+  in `init()`; never import `quill` statically from anything the Alpine
+  entrypoint reaches).
   Check an item there before re-reporting it as a new finding.
 - `docs/security-auth-dependency-roadmap.md` — security/auth/hosting, last
   reviewed 2026-09-01. Line 513 assumes editorial GET routes return no
