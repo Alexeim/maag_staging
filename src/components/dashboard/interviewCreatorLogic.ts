@@ -61,7 +61,11 @@ const PREVIEW_KEY = "interviewPreview";
 const storage = getStorage(app);
 
 // Helper to create a new block object
-const createBlock = (type, data, position = 0) =>
+const createBlock = (
+  type: string,
+  data: Record<string, any>,
+  position = 0,
+) =>
   withBlockMeta({ type, ...data }, position);
 
 export default function interviewCreatorLogic(initialState = {}) {
@@ -796,7 +800,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.showBlockOptions = true;
     },
 
-    addBlock(type) {
+    addBlock(type: string) {
       let newBlockData = {};
       switch (type) {
         case "paragraph":
@@ -874,7 +878,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.editBlock(this.interview.contentBlocks.length - 1);
     },
 
-    editBlock(index) {
+    editBlock(index: number) {
       this.editingIndex = index;
       this.editingBlock = JSON.parse(JSON.stringify(this.interview.contentBlocks[index]));
       if (this.editingBlock?.type === "video") {
@@ -901,7 +905,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.editingBlock = null;
     },
 
-    startBlockDrag(index) {
+    startBlockDrag(index: number) {
       if (this.editingIndex !== null || this.uploading) {
         return;
       }
@@ -913,7 +917,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.dragOverBlockId = block.id;
     },
 
-    setBlockDropTarget(index) {
+    setBlockDropTarget(index: number) {
       if (!this.draggedBlockId) {
         return;
       }
@@ -924,7 +928,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.dragOverBlockId = block.id;
     },
 
-    dropBlock(targetIndex) {
+    dropBlock(targetIndex: number) {
       if (!this.draggedBlockId || this.editingIndex !== null) {
         this.resetBlockDrag();
         return;
@@ -957,7 +961,7 @@ export default function interviewCreatorLogic(initialState = {}) {
       this.dragOverBlockId = null;
     },
 
-    deleteBlock(index) {
+    deleteBlock(index: number) {
       const removeBlock = () => {
         this.interview.contentBlocks.splice(index, 1);
         this.syncContentBlockOrder();
