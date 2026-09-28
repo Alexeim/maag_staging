@@ -1666,10 +1666,8 @@ export default function articleCreatorLogic(initialState = {}) {
 
       const performDelete = async () => {
         try {
-          const response = await articlesApi.del(this.articleId);
-          if (response.status !== 200 && response.status !== 204) {
-            throw new Error(`Deletion failed with status: ${response.status}`);
-          }
+          // request() throws ApiError on a non-2xx response.
+          await articlesApi.delete(this.articleId!);
           unsavedGuard?.markSaved();
           globalThis.Alpine.store("ui").showToast("Статья удалена");
           setTimeout(() => {
