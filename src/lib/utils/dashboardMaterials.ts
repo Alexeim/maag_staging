@@ -218,3 +218,16 @@ export const formatDashboardDate = (value: unknown): string => {
 
 export const materialTypeLabel = (type: DashboardMaterialType): string =>
   MATERIAL_TYPES[type]?.label ?? type;
+
+export interface MaterialTypeBadge {
+  text: string;
+  class: string;
+}
+
+// The colored type badge for a select option (CustomSelect `badge`). Takes a
+// plain string because option types come from keys like "article:<id>";
+// an unknown type gets no badge.
+export const materialTypeBadge = (type: string): MaterialTypeBadge | undefined => {
+  const meta = MATERIAL_TYPES[type as DashboardMaterialType];
+  return meta ? { text: meta.badge, class: meta.badgeClass } : undefined;
+};

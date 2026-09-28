@@ -13,6 +13,7 @@ import {
   type ParisPagePlacementsResponse,
   type SectionPageHeroType,
 } from "@/lib/api/api";
+import { materialTypeBadge } from "@/lib/utils/dashboardMaterials";
 
 const CONTENT_TYPE_LABELS: Record<SectionPageHeroType, string> = {
   article: "Статья",
@@ -249,6 +250,13 @@ const initialSidebarKeys =
         .map((item) => `${item.type}:${item.id}`)
         .filter((key) => availableSidebarKeys.has(key))
     : [];
+
+// The hero and two-image selects show the dashboard's colored type badge; the
+// picker lists draw their own badges from the same table.
+const heroSelectOptions = heroOptions.map((item) => ({
+  ...item,
+  badge: materialTypeBadge(item.type),
+}));
 ---
 
 <DashboardLayout title="Редактор «Париж»" active="paris-editor">
@@ -306,7 +314,7 @@ const initialSidebarKeys =
             id="paris-hero-select"
             defaultSort="published"
             model="selectedHeroKey"
-            itemsExpr={JSON.stringify(heroOptions)}
+            itemsExpr={JSON.stringify(heroSelectOptions)}
             placeholder="— выбери материал —"
           />
         </div>
@@ -351,7 +359,7 @@ const initialSidebarKeys =
             id="paris-two-image-select"
             defaultSort="published"
             model="selectedTwoImageArticleKey"
-            itemsExpr={JSON.stringify(heroOptions)}
+            itemsExpr={JSON.stringify(heroSelectOptions)}
             placeholder="— выбери материал —"
           />
         </div>

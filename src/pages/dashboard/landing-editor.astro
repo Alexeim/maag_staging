@@ -4,7 +4,7 @@ import CustomSelect from "@/components/dashboard/CustomSelect.astro";
 import MaterialPickerList from "@/components/dashboard/MaterialPickerList.astro";
 import { PUBLIC_API_BASE_URL } from "@/lib/utils/constants";
 // Shared type-badge metadata (label + colour classes), same source the /dashboard page uses.
-import { MATERIAL_TYPES } from "@/lib/utils/dashboardMaterials";
+import { materialTypeBadge, type MaterialTypeBadge } from "@/lib/utils/dashboardMaterials";
 import {
   articlesApi,
   editorialPlacementsApi,
@@ -550,14 +550,9 @@ const getBadgeClass = (modeLabel: string): string => {
 
 // A type badge for a picked material: the short label plus its Tailwind colour classes,
 // taken from the shared MATERIAL_TYPES table so it matches the /dashboard page.
-type TypeBadge = { text: string; class: string };
-
-// Resolve a landing material type ("article", "guide", "interview", ...) to its badge,
-// or undefined if that type has no entry.
-const typeBadge = (type: string): TypeBadge | undefined => {
-  const meta = MATERIAL_TYPES[type as keyof typeof MATERIAL_TYPES];
-  return meta ? { text: meta.badge, class: meta.badgeClass } : undefined;
-};
+// Undefined if the type has no entry.
+type TypeBadge = MaterialTypeBadge;
+const typeBadge = materialTypeBadge;
 
 // One picked material: an optional type badge and its real title, kept as SEPARATE
 // fields so the markup can render the badge as a pill and style the title on its own.
@@ -1090,6 +1085,7 @@ const cultureCardsOptions = cultureCardsOptionItems
     return left.title.localeCompare(right.title, "ru-RU");
   });
 
+// The section hero selects show the same colored type badge as the rest of the dashboard.
 const cultureHeroOptions = cultureHeroOptionItems
   .slice()
   .sort((left, right) => {
@@ -1100,7 +1096,8 @@ const cultureHeroOptions = cultureHeroOptionItems
     }
 
     return left.title.localeCompare(right.title, "ru-RU");
-  });
+  })
+  .map((item) => ({ ...item, badge: typeBadge(item.type) }));
 
 const parisCardsOptions = parisCardsOptionItems
   .slice()
@@ -1124,7 +1121,8 @@ const parisHeroOptions = parisHeroOptionItems
     }
 
     return left.title.localeCompare(right.title, "ru-RU");
-  });
+  })
+  .map((item) => ({ ...item, badge: typeBadge(item.type) }));
 
 const mainHeroOptions = Array.from(contentTitleMaps.mainHero.entries())
   .map(([key, title]) => {

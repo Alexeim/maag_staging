@@ -2,6 +2,10 @@
 // Custom Alpine-powered replacement for native <select> material pickers.
 // Groups options by `typeLabel` (when present) and lets the editor sort
 // the list by creation date, publication date, or alphabetically.
+// An item with `badge: { text, class }` gets the dashboard's colored type
+// badge, in the list and on the button; items without one render as before.
+// When every item has a badge the list is not grouped: the badges already
+// name the type, and sorting then applies to the whole list.
 //
 // `model` and `disabledExpr` are read live, directly inside directive
 // expressions, on every evaluation — never cached into local x-data.
@@ -56,8 +60,13 @@ const rootData = `{
     return items;
   },
   __groups() {
+    const sorted = this.__sortedItems();
+    // Badges already name each item's type: one flat list, sorted as a whole.
+    if (sorted.length > 0 && sorted.every((item) => item.badge)) {
+      return [{ label: '', items: sorted }];
+    }
     const groups = new Map();
-    for (const item of this.__sortedItems()) {
+    for (const item of sorted) {
       const key = item.typeLabel || '';
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(item);
@@ -66,11 +75,16 @@ const rootData = `{
   },
   __hasCreated() { return this.__items.some((item) => item.createdAtMs != null); },
   __hasPublished() { return this.__items.some((item) => item.publishedAtMs != null); },
+  __itemFor(id) {
+    return this.__items.find((item) => item.id === id) || null;
+  },
   __titleFor(id) {
-    const found = this.__items.find((item) => item.id === id);
+    const found = this.__itemFor(id);
     return found ? found.title : '';
   },
 }`;
+
+const BADGE_CLASS = "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none";
 ---
 
 <div
@@ -88,7 +102,16 @@ const rootData = `{
     x-bind:aria-expanded="open"
     x-bind:disabled={isDisabledExpr}
   >
-    <span class="truncate" x-text={`__titleFor(${model}) || ${JSON.stringify(placeholder)}`}></span>
+    <span class="flex min-w-0 items-center gap-2">
+      <span
+        class={BADGE_CLASS}
+        x-show={`__itemFor(${model})?.badge`}
+        x-bind:class={`__itemFor(${model})?.badge?.class`}
+        x-text={`__itemFor(${model})?.badge?.text`}
+        style="display: none"
+      ></span>
+      <span class="truncate" x-text={`__titleFor(${model}) || ${JSON.stringify(placeholder)}`}></span>
+    </span>
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="16"
@@ -169,7 +192,15 @@ const rootData = `{
               x-bind:class={`item.id === (${model}) ? 'bg-base-200 font-medium' : ''`}
               x-on:click={`${model} = item.id; open = false`}
             >
-              <span x-text="item.title"></span>
+              <span class="flex items-center gap-2">
+                <span
+                  class={BADGE_CLASS}
+                  x-show="item.badge"
+                  x-bind:class="item.badge?.class"
+                  x-text="item.badge?.text"
+                ></span>
+                <span x-text="item.title"></span>
+              </span>
               <span class="text-xs text-base-content/50" x-show="item.meta" x-text="item.meta"></span>
             </button>
           </template>

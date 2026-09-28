@@ -13,6 +13,7 @@ import {
   type CulturePagePlacementsResponse,
   type SectionPageHeroType,
 } from "@/lib/api/api";
+import { materialTypeBadge } from "@/lib/utils/dashboardMaterials";
 
 const CONTENT_TYPE_LABELS: Record<SectionPageHeroType, string> = {
   article: "Статья",
@@ -269,6 +270,13 @@ const initialSidebarKeys =
         .map((item) => `${item.type}:${item.id}`)
         .filter((key) => availableSidebarKeys.has(key))
     : [];
+
+// The hero select shows the dashboard's colored type badge; the picker lists
+// draw their own badges from the same table.
+const heroSelectOptions = heroOptions.map((item) => ({
+  ...item,
+  badge: materialTypeBadge(item.type),
+}));
 ---
 
 <DashboardLayout title="Редактор «Культура»" active="culture-editor">
@@ -325,7 +333,7 @@ const initialSidebarKeys =
             id="culture-hero-select"
             defaultSort="published"
             model="selectedHeroKey"
-            itemsExpr={JSON.stringify(heroOptions)}
+            itemsExpr={JSON.stringify(heroSelectOptions)}
             placeholder="— выбери материал —"
           />
         </div>
