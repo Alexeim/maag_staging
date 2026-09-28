@@ -221,10 +221,12 @@ export default function interviewCreatorLogic(initialState = {}) {
       },
       supportsCultureInterviewBlock: true,
     }),
-    getRichTextInitialHtml(block) {
+    getRichTextInitialHtml(block: { html?: unknown; text?: unknown } | null) {
       return getInitialRichTextHtml(block);
     },
-    getColumnRichTextInitialHtml(column) {
+    getColumnRichTextInitialHtml(
+      column: { html?: unknown; content?: unknown } | null | undefined,
+    ) {
       return getInitialRichTextHtml({
         html: column?.html,
         text: column?.content,
@@ -242,7 +244,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     getPreviewText(value?: string, maxLength = 120) {
       return truncatePreviewText(value, maxLength);
     },
-    getLinkedBlockTitle(block) {
+    getLinkedBlockTitle(block: Record<string, any>) {
       return resolveLinkedBlockTitle(block, (currentBlock) => {
         const contentType =
           typeof currentBlock.linkedContentType === "string"
@@ -258,7 +260,7 @@ export default function interviewCreatorLogic(initialState = {}) {
         return this.getRelatedContentItemLabel(contentType, contentId);
       });
     },
-    getBlockSummary(block) {
+    getBlockSummary(block: EditorBlock) {
       return buildBlockSummary(block, {
         resolveLinkedTitle: (currentBlock) => this.getLinkedBlockTitle(currentBlock),
       });
@@ -267,8 +269,10 @@ export default function interviewCreatorLogic(initialState = {}) {
     isTagSelected(value: string) {
       return this.interview.tags.includes(value);
     },
-    syncContentBlockOrder(blocks = this.interview.contentBlocks) {
-      this.interview.contentBlocks = reindexContentBlocks(blocks);
+    syncContentBlockOrder(blocks?: EditorBlock[]) {
+      this.interview.contentBlocks = reindexContentBlocks(
+        blocks ?? this.interview.contentBlocks,
+      );
     },
     getVideoProvider(url: string, sourceType = "embed") {
       return detectVideoProvider(url, sourceType);
@@ -282,7 +286,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     getVideoRenderMode(url: string, sourceType = "embed") {
       return resolveVideoRenderMode(url, sourceType);
     },
-    validateVideoBlock(block, showToast = true) {
+    validateVideoBlock(block: EditorBlock, showToast = true) {
       if (!block || block.type !== "video") {
         return true;
       }
