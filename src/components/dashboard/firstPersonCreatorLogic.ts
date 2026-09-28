@@ -14,7 +14,9 @@ const PREVIEW_KEY = "firstPersonPreview";
 // is never eligible to become a landing main/category hero — only the
 // isMaagChoice flag controls where it surfaces (the "Выбор Maag" rail).
 export default function firstPersonCreatorLogic(initialState = {}) {
-  const baseLogic = articleCreatorLogic(initialState);
+  // First-person reads its own preview snapshot in init(). The article base
+  // must not act as an article preview, or it would load the article's snapshot.
+  const baseLogic = articleCreatorLogic({ ...initialState, isPreview: false });
 
   const { isPreview = false } = initialState as { isPreview?: boolean };
 

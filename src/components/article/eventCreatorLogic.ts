@@ -151,7 +151,9 @@ const normalizeAdditionalInfo = (value: unknown) => {
 };
 
 export default function eventCreatorLogic(initialState = {}) {
-  const baseLogic = articleCreatorLogic(initialState);
+  // The event reads its own preview snapshot below. The article base must not
+  // act as an article preview, or it would load the article's snapshot here.
+  const baseLogic = articleCreatorLogic({ ...initialState, isPreview: false });
 
   const {
     eventId = null,
