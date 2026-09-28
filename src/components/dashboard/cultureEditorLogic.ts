@@ -86,7 +86,7 @@ export default (initialState: CultureEditorInitialState) => ({
     if (store?.showToast) {
       store.showToast(message, type);
     } else {
-      window.alert(message);
+      globalThis.alert(message);
     }
   },
 
@@ -138,7 +138,7 @@ export default (initialState: CultureEditorInitialState) => ({
 
       await editorialPlacementsApi.updateCulturePage({ hero });
       this.notify("Hero страницы «Культура» обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       this.heroError =
         error instanceof Error ? error.message : "Не удалось сохранить hero.";
@@ -166,7 +166,7 @@ export default (initialState: CultureEditorInitialState) => ({
 
       await editorialPlacementsApi.updateCulturePage({ featuredInterview });
       this.notify("Featured interview страницы «Культура» обновлено.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       this.featuredInterviewError =
         error instanceof Error
@@ -211,7 +211,7 @@ export default (initialState: CultureEditorInitialState) => ({
 
       await editorialPlacementsApi.updateCulturePage({ secondaryStories });
       this.notify("Secondary stories страницы «Культура» обновлены.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       this.secondaryStoriesError =
         error instanceof Error
@@ -256,7 +256,7 @@ export default (initialState: CultureEditorInitialState) => ({
 
       await editorialPlacementsApi.updateCulturePage({ sidebarRail });
       this.notify("Sidebar rail страницы «Культура» обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       this.sidebarError =
         error instanceof Error

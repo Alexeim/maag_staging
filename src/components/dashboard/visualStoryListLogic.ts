@@ -15,7 +15,7 @@ export default (initialState: { apiBaseUrl: string }) => ({
     if (store?.showToast) {
       store.showToast(message, type);
     } else {
-      window.alert(message);
+      globalThis.alert(message);
     }
   },
 
@@ -41,7 +41,7 @@ export default (initialState: { apiBaseUrl: string }) => ({
       }
       this.notify("Визуальная история удалена");
       setTimeout(() => {
-        window.location.reload();
+        globalThis.location.reload();
       }, 1500);
     } catch (error) {
       console.error(error);

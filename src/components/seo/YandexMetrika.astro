@@ -4,8 +4,8 @@
 
 <script is:inline>
   (function () {
-    if (window.__maagMetrikaInstalled) return;
-    window.__maagMetrikaInstalled = true;
+    if (globalThis.__maagMetrikaInstalled) return;
+    globalThis.__maagMetrikaInstalled = true;
 
     var counterId = 112396271;
     var started = false;
@@ -13,7 +13,7 @@
 
     function trackPage() {
       if (!started || lastUrl === location.href) return;
-      window.ym(counterId, "hit", location.href, {
+      globalThis.ym(counterId, "hit", location.href, {
         title: document.title,
         referer: lastUrl || document.referrer,
       });
@@ -23,10 +23,10 @@
     function start() {
       if (started) return;
       started = true;
-      window.ym = window.ym || function () {
-        (window.ym.a = window.ym.a || []).push(arguments);
+      globalThis.ym = globalThis.ym || function () {
+        (globalThis.ym.a = globalThis.ym.a || []).push(arguments);
       };
-      window.ym.l = window.ym.l || Date.now();
+      globalThis.ym.l = globalThis.ym.l || Date.now();
       var src = "https://mc.yandex.ru/metrika/tag.js?id=" + counterId;
       if (!Array.from(document.scripts).some(function (script) {
         return script.src === src;
@@ -36,7 +36,7 @@
         script.src = src;
         document.head.appendChild(script);
       }
-      window.ym(counterId, "init", {
+      globalThis.ym(counterId, "init", {
         ssr: true,
         defer: true,
         webvisor: true,
@@ -57,14 +57,14 @@
         start();
       } else if (started) {
         started = false;
-        window.ym(counterId, "destruct");
+        globalThis.ym(counterId, "destruct");
         // Match the existing analytics teardown and clear the loaded runtime.
-        window.location.reload();
+        globalThis.location.reload();
       }
     }
 
-    window.addEventListener("cc:onConsent", syncConsent);
-    window.addEventListener("cc:onChange", syncConsent);
+    globalThis.addEventListener("cc:onConsent", syncConsent);
+    globalThis.addEventListener("cc:onChange", syncConsent);
     document.addEventListener("astro:page-load", trackPage);
   })();
 </script>

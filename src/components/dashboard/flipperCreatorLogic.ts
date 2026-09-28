@@ -313,7 +313,7 @@ export default function flipperCreatorLogic(initialState = {}) {
 
     previewFlipper() {
       if (this.uploading) {
-        window.Alpine.store("ui").showToast(
+        globalThis.Alpine.store("ui").showToast(
           "Подожди — загрузка картинки ещё не завершилась.",
           "error",
         );
@@ -332,7 +332,7 @@ export default function flipperCreatorLogic(initialState = {}) {
         authorDisplay,
       };
       if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/flippers/preview", previewState)) {
-        window.Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
+        globalThis.Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
       }
     },
 
@@ -502,7 +502,7 @@ export default function flipperCreatorLogic(initialState = {}) {
         this.relatedContentLists = await fetchRelatedContentLists();
       } catch (error) {
         console.error("Failed to fetch content lists:", error);
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Не удалось загрузить списки контента.",
           "error",
         );
@@ -535,14 +535,14 @@ export default function flipperCreatorLogic(initialState = {}) {
 
       const normalized = sanitizeRelatedContent(this.flipper.relatedContent);
       if (this.flipperId && type === "flipper" && id === this.flipperId) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Нельзя привязать текущий флиппер к самому себе.",
           "error",
         );
         return;
       }
       if (normalized[type].includes(id)) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Этот материал уже добавлен.",
           "info",
         );
@@ -570,7 +570,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       const raw = event.target.files[0];
       if (!raw) return;
       if (this.uploading) {
-        window.Alpine.store("ui").showToast(
+        globalThis.Alpine.store("ui").showToast(
           "Подожди — текущая загрузка ещё не завершилась.",
           "error",
         );
@@ -592,7 +592,7 @@ export default function flipperCreatorLogic(initialState = {}) {
         this.uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
       }, (error) => {
         console.error("Upload failed:", error);
-        window.Alpine.store("ui").showToast("Ошибка загрузки изображения.", "error");
+        globalThis.Alpine.store("ui").showToast("Ошибка загрузки изображения.", "error");
         this.uploading = false;
         this.uploadingIndex = -1;
       }, () => {
@@ -603,7 +603,7 @@ export default function flipperCreatorLogic(initialState = {}) {
           if (target) {
             target.imageUrl = downloadURL;
           }
-          window.Alpine.store("ui").showToast("Изображение успешно загружено!");
+          globalThis.Alpine.store("ui").showToast("Изображение успешно загружено!");
           this.uploading = false;
           this.uploadingIndex = -1;
         });
@@ -614,7 +614,7 @@ export default function flipperCreatorLogic(initialState = {}) {
       const raw = event.target.files[0];
       if (!raw) return;
       if (this.uploading) {
-        window.Alpine.store("ui").showToast(
+        globalThis.Alpine.store("ui").showToast(
           "Подожди — текущая загрузка ещё не завершилась.",
           "error",
         );
@@ -630,12 +630,12 @@ export default function flipperCreatorLogic(initialState = {}) {
         this.uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
       }, (error) => {
         console.error("Upload failed:", error);
-        window.Alpine.store("ui").showToast("Ошибка загрузки изображения.", "error");
+        globalThis.Alpine.store("ui").showToast("Ошибка загрузки изображения.", "error");
         this.uploading = false;
       }, () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           this.flipper.secondImageUrl = downloadURL;
-          window.Alpine.store("ui").showToast("Изображение успешно загружено!");
+          globalThis.Alpine.store("ui").showToast("Изображение успешно загружено!");
           this.uploading = false;
         });
       });
@@ -656,7 +656,7 @@ export default function flipperCreatorLogic(initialState = {}) {
     async saveFlipper() {
       // Block save while a slide image is still uploading
       if (this.uploading) {
-        window.Alpine.store("ui").showToast(
+        globalThis.Alpine.store("ui").showToast(
           "Подожди — загрузка картинки ещё не завершилась.",
           "error",
         );
@@ -686,19 +686,19 @@ export default function flipperCreatorLogic(initialState = {}) {
       this.flipper.parisDistrict = normalizeParisDistrict(this.flipper.parisDistrict);
 
       if (!this.flipper.title) {
-        window.Alpine.store("ui").showToast("Заголовок обязателен.", "error");
+        globalThis.Alpine.store("ui").showToast("Заголовок обязателен.", "error");
         this.isSaving = false;
         return;
       }
       if (this.flipper.carouselContent.some(item => !item.imageUrl)) {
-        window.Alpine.store("ui").showToast("Для каждого слайда нужно загрузить изображение.", "error");
+        globalThis.Alpine.store("ui").showToast("Для каждого слайда нужно загрузить изображение.", "error");
         this.isSaving = false;
         return;
       }
 
       const selectedCategoryTags = this.getSelectedCategoryTags();
       if (!Array.isArray(selectedCategoryTags) || selectedCategoryTags.length === 0) {
-        window.Alpine.store("ui").showToast(
+        globalThis.Alpine.store("ui").showToast(
           "Добавь хотя бы один тег — без него листалка не сохранится.",
           "error",
         );
@@ -739,19 +739,19 @@ export default function flipperCreatorLogic(initialState = {}) {
           await flippersApi.update(this.flipperId, payload);
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
-          window.Alpine.store("ui").showToast("Листалка успешно обновлена!");
+          globalThis.Alpine.store("ui").showToast("Листалка успешно обновлена!");
           setTimeout(() => { globalThis.location.href = "/dashboard/flippers"; }, 1500);
         } else {
           await flippersApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
-          window.Alpine.store("ui").showToast("Листалка успешно создана!");
+          globalThis.Alpine.store("ui").showToast("Листалка успешно создана!");
           setTimeout(() => { globalThis.location.href = `/dashboard/flippers`; }, 1500);
         }
       } catch (error) {
         console.error("Ошибка сохранения листалки:", error);
         const message = error instanceof Error ? error.message : "Произошла неизвестная ошибка.";
-        window.Alpine.store("ui").showToast(message, "error");
+        globalThis.Alpine.store("ui").showToast(message, "error");
         this.isSaving = false;
       }
     },
@@ -763,17 +763,17 @@ export default function flipperCreatorLogic(initialState = {}) {
         try {
           await flippersApi.delete(this.flipperId);
           unsavedGuard?.markSaved();
-          window.Alpine.store("ui").showToast("Листалка удалена");
+          globalThis.Alpine.store("ui").showToast("Листалка удалена");
           setTimeout(() => {
-            window.location.href = "/dashboard/flippers";
+            globalThis.location.href = "/dashboard/flippers";
           }, 1000);
         } catch (error) {
           console.error("Delete flipper failed:", error);
-          window.Alpine.store("ui").showToast("Не удалось удалить листалку.", "error");
+          globalThis.Alpine.store("ui").showToast("Не удалось удалить листалку.", "error");
         }
       };
 
-      const uiStore = window.Alpine?.store?.("ui");
+      const uiStore = globalThis.Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
         uiStore.showConfirmation("Удалить листалку? Это действие необратимо.", performDelete);
       } else {

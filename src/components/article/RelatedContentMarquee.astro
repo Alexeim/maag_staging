@@ -364,8 +364,8 @@ const pages = chunkEntries(marqueeEntries, 4);
       };
 
       const scheduleNext = () => {
-        window.clearTimeout(autoplayId);
-        autoplayId = window.setTimeout(() => {
+        globalThis.clearTimeout(autoplayId);
+        autoplayId = globalThis.setTimeout(() => {
           currentPage = (currentPage + 1) % pageCount;
           syncUi();
           scheduleNext();
@@ -393,7 +393,7 @@ const pages = chunkEntries(marqueeEntries, 4);
       });
 
       root.addEventListener("mouseenter", () => {
-        window.clearTimeout(autoplayId);
+        globalThis.clearTimeout(autoplayId);
       });
 
       root.addEventListener("mouseleave", () => {

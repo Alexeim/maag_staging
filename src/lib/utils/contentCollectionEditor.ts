@@ -54,7 +54,7 @@ export const createContentCollectionEditorState = (entityKey: string) => ({
       this.syncCurrentContentCollection();
     } catch (error) {
       console.error("Failed to fetch content collections:", error);
-      window.Alpine?.store("ui")?.showToast?.(
+      globalThis.Alpine?.store("ui")?.showToast?.(
         "Не удалось загрузить content collections.",
         "error",
       );
@@ -73,7 +73,7 @@ export const createContentCollectionEditorState = (entityKey: string) => ({
     );
 
     if (!collectionId) {
-      window.Alpine?.store("ui")?.showToast?.(
+      globalThis.Alpine?.store("ui")?.showToast?.(
         "Сначала выбери collection из списка.",
         "error",
       );
@@ -85,7 +85,7 @@ export const createContentCollectionEditorState = (entityKey: string) => ({
     );
 
     if (!selectedCollection) {
-      window.Alpine?.store("ui")?.showToast?.(
+      globalThis.Alpine?.store("ui")?.showToast?.(
         "Выбранная collection не найдена.",
         "error",
       );
@@ -107,7 +107,7 @@ export const createContentCollectionEditorState = (entityKey: string) => ({
     const title = this.newContentCollectionTitle.trim();
 
     if (!title) {
-      window.Alpine?.store("ui")?.showToast?.(
+      globalThis.Alpine?.store("ui")?.showToast?.(
         "Введи название новой collection.",
         "error",
       );
@@ -141,7 +141,7 @@ export const createContentCollectionEditorState = (entityKey: string) => ({
       this.useNewContentCollection = false;
       this.newContentCollectionTitle = "";
 
-      window.Alpine?.store("ui")?.showToast?.(
+      globalThis.Alpine?.store("ui")?.showToast?.(
         "Новая collection создана и выбрана.",
       );
     } catch (error) {
@@ -150,7 +150,7 @@ export const createContentCollectionEditorState = (entityKey: string) => ({
         error instanceof Error
           ? error.message
           : "Не удалось создать новую collection.";
-      window.Alpine?.store("ui")?.showToast?.(message, "error");
+      globalThis.Alpine?.store("ui")?.showToast?.(message, "error");
     }
   },
   removeContentCollection() {

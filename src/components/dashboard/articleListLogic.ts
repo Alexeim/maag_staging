@@ -46,7 +46,7 @@ export default (initialState: {
     if (store?.showToast) {
       store.showToast(message, type);
     } else {
-      window.alert(message);
+      globalThis.alert(message);
     }
   },
 
@@ -78,7 +78,7 @@ export default (initialState: {
       this.notify("Статья удалена");
       // Use a slight delay to allow the user to see the toast message
       setTimeout(() => {
-        window.location.reload();
+        globalThis.location.reload();
       }, 1500);
     } catch (error) {
       console.error(error);

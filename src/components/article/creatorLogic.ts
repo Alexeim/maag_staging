@@ -501,7 +501,7 @@ export default function articleCreatorLogic(initialState = {}) {
       const normalized = normalizeVideoBlock(block);
       if (!normalized.url) {
         if (showToast) {
-          window.Alpine?.store("ui")?.showToast?.(
+          globalThis.Alpine?.store("ui")?.showToast?.(
             "Для видео-блока добавь файл или ссылку.",
             "error",
           );
@@ -514,7 +514,7 @@ export default function articleCreatorLogic(initialState = {}) {
           "unknown"
       ) {
         if (showToast) {
-          window.Alpine?.store("ui")?.showToast?.(
+          globalThis.Alpine?.store("ui")?.showToast?.(
             "Нужна прямая ссылка на видеофайл или готовая ссылка для встраивания, а не обычная страница с видео.",
             "error",
           );
@@ -530,7 +530,7 @@ export default function articleCreatorLogic(initialState = {}) {
       const normalized = normalizeTweetBlock(block);
       if (!normalized.url || !resolveTweetId(normalized.url)) {
         if (showToast) {
-          window.Alpine?.store("ui")?.showToast?.(
+          globalThis.Alpine?.store("ui")?.showToast?.(
             "Нужна ссылка на конкретный твит вида twitter.com/user/status/123.",
             "error",
           );
@@ -791,7 +791,7 @@ export default function articleCreatorLogic(initialState = {}) {
         this.syncCurrentContentCollection();
       } catch (error) {
         console.error("Failed to fetch content collections:", error);
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Не удалось загрузить content collections.",
           "error",
         );
@@ -805,7 +805,7 @@ export default function articleCreatorLogic(initialState = {}) {
       );
 
       if (!collectionId) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Сначала выбери collection из списка.",
           "error",
         );
@@ -817,7 +817,7 @@ export default function articleCreatorLogic(initialState = {}) {
       );
 
       if (!selectedCollection) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Выбранная collection не найдена.",
           "error",
         );
@@ -834,7 +834,7 @@ export default function articleCreatorLogic(initialState = {}) {
       const title = this.newContentCollectionTitle.trim();
 
       if (!title) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Введи название новой collection.",
           "error",
         );
@@ -869,7 +869,7 @@ export default function articleCreatorLogic(initialState = {}) {
         this.useNewContentCollection = false;
         this.newContentCollectionTitle = "";
 
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Новая collection создана и выбрана.",
         );
       } catch (error) {
@@ -878,7 +878,7 @@ export default function articleCreatorLogic(initialState = {}) {
           error instanceof Error
             ? error.message
             : "Не удалось создать новую collection.";
-        window.Alpine?.store("ui")?.showToast?.(message, "error");
+        globalThis.Alpine?.store("ui")?.showToast?.(message, "error");
       }
     },
     removeContentCollection() {
@@ -895,7 +895,7 @@ export default function articleCreatorLogic(initialState = {}) {
         this.relatedContentLists = await fetchRelatedContentLists();
       } catch (error) {
         console.error("Failed to fetch content lists:", error);
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Не удалось загрузить списки контента.",
           "error",
         );
@@ -934,7 +934,7 @@ export default function articleCreatorLogic(initialState = {}) {
       const currentIds = normalized[type] ?? [];
 
       if (this.articleId && type === "article" && id === this.articleId) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Нельзя привязать текущий материал к самому себе.",
           "error",
         );
@@ -942,7 +942,7 @@ export default function articleCreatorLogic(initialState = {}) {
       }
 
       if (currentIds.includes(id)) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Этот материал уже добавлен.",
           "info",
         );
@@ -1162,7 +1162,7 @@ export default function articleCreatorLogic(initialState = {}) {
         },
         (error) => {
           console.error("Upload failed:", error);
-          window.Alpine.store("ui").showToast(
+          globalThis.Alpine.store("ui").showToast(
             `Проблема загрузки картинки: ${error.message}`,
             "error",
           );
@@ -1195,7 +1195,7 @@ export default function articleCreatorLogic(initialState = {}) {
               }
             }
             this.uploading = false;
-            window.Alpine.store("ui").showToast("Картинка успешно загружена!");
+            globalThis.Alpine.store("ui").showToast("Картинка успешно загружена!");
           });
         },
       );
@@ -1220,7 +1220,7 @@ export default function articleCreatorLogic(initialState = {}) {
         },
         (error) => {
           console.error("Upload failed:", error);
-          window.Alpine.store("ui").showToast(
+          globalThis.Alpine.store("ui").showToast(
             `Проблема загрузки видео: ${error.message}`,
             "error",
           );
@@ -1238,7 +1238,7 @@ export default function articleCreatorLogic(initialState = {}) {
               this.editingBlock.provider = "upload";
             }
             this.uploading = false;
-            window.Alpine.store("ui").showToast("Видео успешно загружено!");
+            globalThis.Alpine.store("ui").showToast("Видео успешно загружено!");
           });
         },
       );
@@ -1264,7 +1264,7 @@ export default function articleCreatorLogic(initialState = {}) {
         },
         (error) => {
           console.error("Upload failed:", error);
-          window.Alpine.store("ui").showToast(
+          globalThis.Alpine.store("ui").showToast(
             `Проблема загрузки картинки: ${error.message}`,
             "error",
           );
@@ -1276,7 +1276,7 @@ export default function articleCreatorLogic(initialState = {}) {
               this.editingBlock.slides[slideIndex].imageUrl = downloadURL;
             }
             this.uploading = false;
-            window.Alpine.store("ui").showToast("Картинка успешно загружена!");
+            globalThis.Alpine.store("ui").showToast("Картинка успешно загружена!");
           });
         },
       );
@@ -1437,7 +1437,7 @@ export default function articleCreatorLogic(initialState = {}) {
 
     prepareBlocksForAction() {
       if (this.uploading) {
-        window.Alpine.store("ui").showToast(
+        globalThis.Alpine.store("ui").showToast(
           "Подожди — загрузка файла ещё не завершилась.",
           "error",
         );
@@ -1515,7 +1515,7 @@ export default function articleCreatorLogic(initialState = {}) {
         this.syncContentBlockOrder();
       };
 
-      const uiStore = window.Alpine?.store?.("ui");
+      const uiStore = globalThis.Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
         uiStore.showConfirmation(
           "Ты точно хочешь удалить этот блок?",
@@ -1543,7 +1543,7 @@ export default function articleCreatorLogic(initialState = {}) {
         authorDisplay,
       };
       if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/article/preview", previewState)) {
-        window.Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
+        globalThis.Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
       }
     },
 
@@ -1595,7 +1595,7 @@ export default function articleCreatorLogic(initialState = {}) {
       }
 
       if (!this.article.category && !this.article.isHotContent) {
-        window.Alpine.store("ui").showToast(
+        globalThis.Alpine.store("ui").showToast(
           "Выбери категорию перед сохранением — это обязательное поле.",
           "error",
         );
@@ -1608,7 +1608,7 @@ export default function articleCreatorLogic(initialState = {}) {
         !Array.isArray(selectedCategoryTags) ||
         selectedCategoryTags.length === 0
       ) {
-        window.Alpine.store("ui").showToast(
+        globalThis.Alpine.store("ui").showToast(
           "Добавь хотя бы один тег — без него статья не сохранится.",
           "error",
         );
@@ -1617,7 +1617,7 @@ export default function articleCreatorLogic(initialState = {}) {
       }
 
       if (!this.article.imageUrl) {
-        window.Alpine.store("ui").showToast(
+        globalThis.Alpine.store("ui").showToast(
           "Загрузи оболожку статьи - обязательно!!!",
           "error",
         );
@@ -1673,7 +1673,7 @@ export default function articleCreatorLogic(initialState = {}) {
           await articlesApi.update(this.articleId, payload, await getIdToken());
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
-          window.Alpine.store("ui").showToast("Статья успешно обновлена!");
+          globalThis.Alpine.store("ui").showToast("Статья успешно обновлена!");
           setTimeout(() => {
             globalThis.location.href = listUrl;
           }, 1500);
@@ -1681,7 +1681,7 @@ export default function articleCreatorLogic(initialState = {}) {
           await articlesApi.create(payload, await getIdToken());
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
-          window.Alpine.store("ui").showToast(
+          globalThis.Alpine.store("ui").showToast(
             "Статья успешно создана! Молодец!",
           );
           setTimeout(() => {
@@ -1694,7 +1694,7 @@ export default function articleCreatorLogic(initialState = {}) {
           error instanceof Error
             ? error.message
             : "Во время сохранения статьи возникла ошибочка.";
-        window.Alpine.store("ui").showToast(message, "error");
+        globalThis.Alpine.store("ui").showToast(message, "error");
         this.isSaving = false;
       }
     },
@@ -1711,20 +1711,20 @@ export default function articleCreatorLogic(initialState = {}) {
             throw new Error(`Deletion failed with status: ${response.status}`);
           }
           unsavedGuard?.markSaved();
-          window.Alpine.store("ui").showToast("Статья удалена");
+          globalThis.Alpine.store("ui").showToast("Статья удалена");
           setTimeout(() => {
-            window.location.href = redirectUrl || "/dashboard";
+            globalThis.location.href = redirectUrl || "/dashboard";
           }, 1500);
         } catch (error) {
           console.error(error);
-          window.Alpine.store("ui").showToast(
+          globalThis.Alpine.store("ui").showToast(
             "Не удалось удалить статью.",
             "error",
           );
         }
       };
 
-      const uiStore = window.Alpine?.store?.("ui");
+      const uiStore = globalThis.Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
         uiStore.showConfirmation(
           `Удалить статью «${this.article.title}»? Это действие необратимо.`,

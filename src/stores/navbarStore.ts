@@ -7,11 +7,11 @@ export const navbarStore = {
     }
 
     const updateScrollState = () => {
-      this.isScrolled = window.scrollY > 8;
+      this.isScrolled = globalThis.scrollY > 8;
     };
 
     updateScrollState();
-    window.addEventListener("scroll", updateScrollState, { passive: true });
+    globalThis.addEventListener("scroll", updateScrollState, { passive: true });
   },
   open() {
     this.isOpen = true;

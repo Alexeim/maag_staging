@@ -402,8 +402,8 @@ const mobilePages = chunkEntries(mobileEntries, 1);
           return;
         }
 
-        window.clearTimeout(autoplayId);
-        autoplayId = window.setTimeout(() => {
+        globalThis.clearTimeout(autoplayId);
+        autoplayId = globalThis.setTimeout(() => {
           goToPage(currentPage + 1, false);
           scheduleNext();
         }, 4500);
@@ -431,7 +431,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
 
             touchStartX = touch.clientX;
             touchStartY = touch.clientY;
-            window.clearTimeout(autoplayId);
+            globalThis.clearTimeout(autoplayId);
           },
           { passive: true },
         );
@@ -459,7 +459,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
       }
 
       root.addEventListener("mouseenter", () =>
-        window.clearTimeout(autoplayId),
+        globalThis.clearTimeout(autoplayId),
       );
       root.addEventListener("mouseleave", scheduleNext);
 

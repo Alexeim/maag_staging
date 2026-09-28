@@ -791,7 +791,7 @@ const articleStructuredData = storyData
     const nav = document.getElementById("visual-story-nav");
     const slides = Array.from(document.querySelectorAll(".slide"));
     const total = slides.length;
-    const mobileQuery = window.matchMedia("(max-width: 900px)");
+    const mobileQuery = globalThis.matchMedia("(max-width: 900px)");
 
     let index = 0;
 

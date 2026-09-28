@@ -15,7 +15,7 @@ interface ContentActionsState {
   imageUrl?: string;
 }
 
-const toAbsoluteUrl = (href: string) => new URL(href, window.location.origin).toString();
+const toAbsoluteUrl = (href: string) => new URL(href, globalThis.location.origin).toString();
 
 export default (initialState: ContentActionsState) => ({
   contentType: initialState.contentType,

@@ -97,7 +97,7 @@ export default () => ({
       const data = await response.json();
 
       if (data.url) {
-        window.location.href = data.url;
+        globalThis.location.href = data.url;
       } else {
         alert('Ошибка при создании сессии оплаты: ' + (data.error || 'Неизвестная ошибка'));
       }
@@ -128,7 +128,7 @@ export default () => ({
       const data = await response.json();
 
       if (data.url) {
-        window.location.href = data.url;
+        globalThis.location.href = data.url;
       } else {
         alert('Ошибка при создании сессии портала: ' + (data.error || 'Неизвестная ошибка'));
       }

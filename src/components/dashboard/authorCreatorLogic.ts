@@ -81,7 +81,7 @@ export default (initialState: AuthorCreatorInitialState) => ({
       },
       (error) => {
         console.error("Upload failed:", error);
-        (window as any).Alpine.store("ui").showToast(
+        (globalThis as any).Alpine.store("ui").showToast(
           `Проблема загрузки аватара: ${error.message}`,
           "error",
         );
@@ -91,7 +91,7 @@ export default (initialState: AuthorCreatorInitialState) => ({
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           this.author.avatar = downloadURL;
           this.uploading = false;
-          (window as any).Alpine.store("ui").showToast(
+          (globalThis as any).Alpine.store("ui").showToast(
             "Аватар успешно загружен!",
           );
         });
@@ -105,7 +105,7 @@ export default (initialState: AuthorCreatorInitialState) => ({
     if (!file) return;
 
     if (file.type !== "image/png") {
-      (window as any).Alpine.store("ui").showToast(
+      (globalThis as any).Alpine.store("ui").showToast(
         "Нужен файл в формате PNG (с прозрачным фоном).",
         "error",
       );
@@ -115,7 +115,7 @@ export default (initialState: AuthorCreatorInitialState) => ({
 
     const { width, height } = await readImageSize(file);
     if (width !== NO_BG_AVATAR_WIDTH || height !== NO_BG_AVATAR_HEIGHT) {
-      (window as any).Alpine.store("ui").showToast(
+      (globalThis as any).Alpine.store("ui").showToast(
         `Нужен PNG ровно ${NO_BG_AVATAR_WIDTH}×${NO_BG_AVATAR_HEIGHT}px, а этот — ${width}×${height}px.`,
         "error",
       );
@@ -142,7 +142,7 @@ export default (initialState: AuthorCreatorInitialState) => ({
       },
       (error) => {
         console.error("Upload failed:", error);
-        (window as any).Alpine.store("ui").showToast(
+        (globalThis as any).Alpine.store("ui").showToast(
           `Проблема загрузки портрета: ${error.message}`,
           "error",
         );
@@ -152,7 +152,7 @@ export default (initialState: AuthorCreatorInitialState) => ({
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           this.author.noBgAvatar = downloadURL;
           this.uploadingNoBgAvatar = false;
-          (window as any).Alpine.store("ui").showToast(
+          (globalThis as any).Alpine.store("ui").showToast(
             "Портрет для «от первого лица» загружен!",
           );
         });
@@ -165,7 +165,7 @@ export default (initialState: AuthorCreatorInitialState) => ({
     const lastName = this.author.lastName.trim();
 
     if (!firstName || !lastName) {
-      (window as any).Alpine.store("ui").showToast(
+      (globalThis as any).Alpine.store("ui").showToast(
         "Укажи имя и фамилию автора.",
         "error",
       );
@@ -190,13 +190,13 @@ export default (initialState: AuthorCreatorInitialState) => ({
         const created = await authorsApi.create(payload);
         this.authorId = created.id;
       }
-      (window as any).Alpine.store("ui").showToast("Автор сохранён!");
+      (globalThis as any).Alpine.store("ui").showToast("Автор сохранён!");
       setTimeout(() => {
-        window.location.href = "/dashboard/authors";
+        globalThis.location.href = "/dashboard/authors";
       }, 1500);
     } catch (error) {
       console.error("Failed to save author", error);
-      (window as any).Alpine.store("ui").showToast(
+      (globalThis as any).Alpine.store("ui").showToast(
         "Не удалось сохранить автора. Попробуй ещё раз.",
         "error",
       );
@@ -211,13 +211,13 @@ export default (initialState: AuthorCreatorInitialState) => ({
     const performDelete = async () => {
       try {
         await authorsApi.delete(this.authorId!);
-        (window as any).Alpine.store("ui").showToast("Автор удалён");
+        (globalThis as any).Alpine.store("ui").showToast("Автор удалён");
         setTimeout(() => {
-          window.location.href = redirectUrl || "/dashboard/authors";
+          globalThis.location.href = redirectUrl || "/dashboard/authors";
         }, 1500);
       } catch (error) {
         console.error(error);
-        (window as any).Alpine.store("ui").showToast(
+        (globalThis as any).Alpine.store("ui").showToast(
           "Не удалось удалить автора.",
           "error",
         );
@@ -225,7 +225,7 @@ export default (initialState: AuthorCreatorInitialState) => ({
     };
 
     const authorName = `${this.author.firstName} ${this.author.lastName}`.trim();
-    const uiStore = (window as any).Alpine?.store?.("ui");
+    const uiStore = (globalThis as any).Alpine?.store?.("ui");
     if (uiStore?.showConfirmation) {
       uiStore.showConfirmation(
         `Удалить автора «${authorName}»? Это необратимо.`,

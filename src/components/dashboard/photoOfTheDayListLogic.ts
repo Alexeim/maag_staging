@@ -15,7 +15,7 @@ export default (initialState: { apiBaseUrl: string }) => ({
     if (store?.showToast) {
       store.showToast(message, type);
     } else {
-      window.alert(message);
+      globalThis.alert(message);
     }
   },
 
@@ -35,7 +35,7 @@ export default (initialState: { apiBaseUrl: string }) => ({
         throw new Error(`Deletion failed with status: ${response.status}`);
       }
       this.notify("Фото дня удалено");
-      setTimeout(() => window.location.reload(), 1500);
+      setTimeout(() => globalThis.location.reload(), 1500);
     } catch (error) {
       console.error(error);
       this.notify("Не удалось удалить. Попробуй ещё раз.", "error");

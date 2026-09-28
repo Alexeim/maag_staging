@@ -368,7 +368,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     },
 
     removeSlide(index: number) {
-      const uiStore = window.Alpine?.store?.("ui");
+      const uiStore = globalThis.Alpine?.store?.("ui");
       const doRemove = () => this.story.slides.splice(index, 1);
       if (uiStore?.showConfirmation) {
         uiStore.showConfirmation("Удалить этот слайд?", doRemove);
@@ -396,14 +396,14 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         },
         (error) => {
           console.error("Upload failed:", error);
-          window.Alpine?.store("ui")?.showToast?.(`Ошибка загрузки: ${error.message}`, "error");
+          globalThis.Alpine?.store("ui")?.showToast?.(`Ошибка загрузки: ${error.message}`, "error");
           this.uploading = false;
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
             this.story.imageUrl = downloadURL;
             this.uploading = false;
-            window.Alpine?.store("ui")?.showToast?.("Обложка успешно загружена!");
+            globalThis.Alpine?.store("ui")?.showToast?.("Обложка успешно загружена!");
           });
         },
       );
@@ -428,14 +428,14 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         },
         (error) => {
           console.error("Upload failed:", error);
-          window.Alpine?.store("ui")?.showToast?.(`Ошибка загрузки: ${error.message}`, "error");
+          globalThis.Alpine?.store("ui")?.showToast?.(`Ошибка загрузки: ${error.message}`, "error");
           this.uploading = false;
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
             this.story.secondImageUrl = downloadURL;
             this.uploading = false;
-            window.Alpine?.store("ui")?.showToast?.("Второе изображение успешно загружено!");
+            globalThis.Alpine?.store("ui")?.showToast?.("Второе изображение успешно загружено!");
           });
         },
       );
@@ -460,7 +460,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         },
         (error) => {
           console.error("Upload failed:", error);
-          window.Alpine?.store("ui")?.showToast?.(`Ошибка загрузки: ${error.message}`, "error");
+          globalThis.Alpine?.store("ui")?.showToast?.(`Ошибка загрузки: ${error.message}`, "error");
           this.uploading = false;
           this.uploadingSlideIndex = null;
         },
@@ -471,7 +471,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
             }
             this.uploading = false;
             this.uploadingSlideIndex = null;
-            window.Alpine?.store("ui")?.showToast?.("Картинка успешно загружена!");
+            globalThis.Alpine?.store("ui")?.showToast?.("Картинка успешно загружена!");
           });
         },
       );
@@ -494,7 +494,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         this.relatedContentLists = await fetchRelatedContentLists();
       } catch (error) {
         console.error("Failed to fetch content lists:", error);
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Не удалось загрузить списки контента.",
           "error",
         );
@@ -522,14 +522,14 @@ export default function visualStoryCreatorLogic(initialState = {}) {
 
       const normalized = sanitizeRelatedContent(this.story.relatedContent);
       if (this.storyId && type === "visualStory" && id === this.storyId) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Нельзя привязать текущую visual story к самой себе.",
           "error",
         );
         return;
       }
       if (normalized[type].includes(id)) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Этот материал уже добавлен.",
           "info",
         );
@@ -662,7 +662,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
 
     previewStory() {
       if (this.uploading) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Подожди — загрузка ещё не завершилась.",
           "error",
         );
@@ -681,33 +681,33 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         authorDisplay,
       };
       if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/visual-story/preview", previewState)) {
-        window.Alpine?.store("ui")?.showToast?.("Не удалось открыть предпросмотр.", "error");
+        globalThis.Alpine?.store("ui")?.showToast?.("Не удалось открыть предпросмотр.", "error");
       }
     },
 
     async saveStory() {
       if (this.uploading) {
-        window.Alpine?.store("ui")?.showToast?.("Подожди — загрузка ещё не завершилась.", "error");
+        globalThis.Alpine?.store("ui")?.showToast?.("Подожди — загрузка ещё не завершилась.", "error");
         return;
       }
       if (this.isSaving) return;
       this.isSaving = true;
 
       if (!this.story.title.trim()) {
-        window.Alpine?.store("ui")?.showToast?.("Введи заголовок визуальной истории.", "error");
+        globalThis.Alpine?.store("ui")?.showToast?.("Введи заголовок визуальной истории.", "error");
         this.isSaving = false;
         return;
       }
 
       if (this.story.slides.length === 0) {
-        window.Alpine?.store("ui")?.showToast?.("Добавь хотя бы один слайд.", "error");
+        globalThis.Alpine?.store("ui")?.showToast?.("Добавь хотя бы один слайд.", "error");
         this.isSaving = false;
         return;
       }
 
       const emptyImageSlide = this.story.slides.findIndex((s) => !s.imageUrl);
       if (emptyImageSlide !== -1) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           `Слайд ${emptyImageSlide + 1} без изображения — загрузи картинку.`,
           "error",
         );
@@ -722,7 +722,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       );
       if (invalidContentSlide !== -1) {
         const slide = this.story.slides[invalidContentSlide];
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           slide.contentType === "quote"
             ? `Слайд ${invalidContentSlide + 1} без цитаты — добавь текст цитаты.`
             : `Слайд ${invalidContentSlide + 1} без текста — добавь текст справа.`,
@@ -734,7 +734,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
 
       const selectedCategoryTags = this.getSelectedCategoryTags();
       if (!Array.isArray(selectedCategoryTags) || selectedCategoryTags.length === 0) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Добавь хотя бы один тег — без него визуальная история не сохранится.",
           "error",
         );
@@ -783,19 +783,19 @@ export default function visualStoryCreatorLogic(initialState = {}) {
           await visualStoriesApi.update(this.storyId, payload);
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
-          window.Alpine?.store("ui")?.showToast?.("Визуальная история обновлена!");
+          globalThis.Alpine?.store("ui")?.showToast?.("Визуальная история обновлена!");
           setTimeout(() => { globalThis.location.href = "/dashboard/visual-stories"; }, 1500);
         } else {
           await visualStoriesApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
-          window.Alpine?.store("ui")?.showToast?.("Визуальная история создана!");
+          globalThis.Alpine?.store("ui")?.showToast?.("Визуальная история создана!");
           setTimeout(() => { globalThis.location.href = "/dashboard/visual-stories"; }, 1500);
         }
       } catch (error) {
         console.error("Save error:", error);
         const message = error instanceof Error ? error.message : "Ошибка при сохранении.";
-        window.Alpine?.store("ui")?.showToast?.(message, "error");
+        globalThis.Alpine?.store("ui")?.showToast?.(message, "error");
         this.isSaving = false;
       }
     },
@@ -807,17 +807,17 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         try {
           await visualStoriesApi.delete(this.storyId!);
           unsavedGuard?.markSaved();
-          window.Alpine?.store("ui")?.showToast?.("Визуальная история удалена");
+          globalThis.Alpine?.store("ui")?.showToast?.("Визуальная история удалена");
           setTimeout(() => {
-            window.location.href = redirectUrl || "/dashboard/visual-stories";
+            globalThis.location.href = redirectUrl || "/dashboard/visual-stories";
           }, 1500);
         } catch (error) {
           console.error(error);
-          window.Alpine?.store("ui")?.showToast?.("Не удалось удалить.", "error");
+          globalThis.Alpine?.store("ui")?.showToast?.("Не удалось удалить.", "error");
         }
       };
 
-      const uiStore = window.Alpine?.store?.("ui");
+      const uiStore = globalThis.Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
         uiStore.showConfirmation(
           `Удалить «${this.story.title}»? Это действие необратимо.`,

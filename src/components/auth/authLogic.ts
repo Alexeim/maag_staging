@@ -21,7 +21,7 @@ interface AuthInputChange {
   value: string;
 }
 
-const getAlpineStore = (name: string) => (window as any).Alpine.store(name);
+const getAlpineStore = (name: string) => (globalThis as any).Alpine.store(name);
 
 export default function authModalLogic() {
   return {

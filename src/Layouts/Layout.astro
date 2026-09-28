@@ -123,8 +123,8 @@ const allStructuredData = [
       // Tweets: widgets.js only auto-scans the DOM on its own first run.
       // Runs on first load too (harmless: guarded, and load() is idempotent).
       document.addEventListener("astro:page-load", function () {
-        if (window.twttr && window.twttr.widgets) {
-          window.twttr.widgets.load();
+        if (globalThis.twttr && globalThis.twttr.widgets) {
+          globalThis.twttr.widgets.load();
         }
       });
       // Video: a lazy <iframe> inserted during the swap is dropped by the

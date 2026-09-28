@@ -194,14 +194,14 @@ export default (initialState: InitialState) => ({
 
   // --- persistence ---
   restoreFilters() {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(globalThis.location.search);
     let source: Record<string, string> = {};
 
     if ([...params.keys()].some((k) => k.startsWith("cat") || ["type", "status", "q", "sort", "hot"].includes(k))) {
       source = Object.fromEntries(params.entries());
     } else {
       try {
-        source = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "{}");
+        source = JSON.parse(globalThis.localStorage.getItem(STORAGE_KEY) || "{}");
       } catch {
         source = {};
       }
@@ -236,13 +236,13 @@ export default (initialState: InitialState) => ({
     if (this.hotOnly) state.hot = "1";
 
     const qs = new URLSearchParams(state).toString();
-    window.history.replaceState(
+    globalThis.history.replaceState(
       null,
       "",
-      qs ? `${window.location.pathname}?${qs}` : window.location.pathname,
+      qs ? `${globalThis.location.pathname}?${qs}` : globalThis.location.pathname,
     );
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
       /* storage disabled — URL still carries state */
     }
@@ -256,7 +256,7 @@ export default (initialState: InitialState) => ({
   notify(message: string, type: "success" | "error" = "success") {
     const store = this.getUiStore();
     if (store?.showToast) store.showToast(message, type);
-    else window.alert(message);
+    else globalThis.alert(message);
   },
 
   buildApiUrl(path: string) {

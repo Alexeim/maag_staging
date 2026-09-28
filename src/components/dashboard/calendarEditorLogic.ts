@@ -56,7 +56,7 @@ export default (initialState: CalendarEditorInitialState) => ({
       return;
     }
 
-    window.alert(message);
+    globalThis.alert(message);
   },
 
   getEventTitle(id: string) {
@@ -201,7 +201,7 @@ export default (initialState: CalendarEditorInitialState) => ({
       await editorialPlacementsApi.updateCalendarPage({ mainCards });
 
       this.notify("Верхний блок календаря обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save main cards", error);
       this.mainCardsError =
@@ -242,7 +242,7 @@ export default (initialState: CalendarEditorInitialState) => ({
       await editorialPlacementsApi.updateCalendarPage({ secondaryCards });
 
       this.notify("Нижний блок календаря обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save secondary cards", error);
       this.secondaryCardsError =

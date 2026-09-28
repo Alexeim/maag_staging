@@ -6,7 +6,7 @@ export default () => ({
     try {
       await signOut(auth);
       // Redirect to homepage or show a message after sign out
-      window.location.href = '/';
+      globalThis.location.href = '/';
     } catch (error) {
       console.error("Error signing out: ", error);
       // Optionally, show an error message to the user

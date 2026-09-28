@@ -97,7 +97,7 @@ export default (initialState: ParisEditorInitialState) => ({
     if (store?.showToast) {
       store.showToast(message, type);
     } else {
-      window.alert(message);
+      globalThis.alert(message);
     }
   },
 
@@ -135,7 +135,7 @@ export default (initialState: ParisEditorInitialState) => ({
 
       await editorialPlacementsApi.updateParisPage({ hero });
       this.notify("Hero страницы «Париж» обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       this.heroError =
         error instanceof Error ? error.message : "Не удалось сохранить hero.";
@@ -165,7 +165,7 @@ export default (initialState: ParisEditorInitialState) => ({
 
       await editorialPlacementsApi.updateParisPage({ twoImageArticle });
       this.notify("Two-image article страницы «Париж» обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       this.twoImageArticleError =
         error instanceof Error ? error.message : "Не удалось сохранить two-image article.";
@@ -193,7 +193,7 @@ export default (initialState: ParisEditorInitialState) => ({
 
       await editorialPlacementsApi.updateParisPage({ interviewFeature });
       this.notify("Interview страницы «Париж» обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       this.interviewFeatureError =
         error instanceof Error ? error.message : "Не удалось сохранить interview.";
@@ -219,7 +219,7 @@ export default (initialState: ParisEditorInitialState) => ({
 
       await editorialPlacementsApi.updateParisPage({ secondaryStories });
       this.notify("Secondary stories страницы «Париж» обновлены.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       this.secondaryStoriesError =
         error instanceof Error
@@ -249,7 +249,7 @@ export default (initialState: ParisEditorInitialState) => ({
 
       await editorialPlacementsApi.updateParisPage({ photoOfTheDayFeature });
       this.notify("Фото дня страницы «Париж» обновлено.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       this.photoOfTheDayError =
         error instanceof Error ? error.message : "Не удалось сохранить фото дня.";
@@ -292,7 +292,7 @@ export default (initialState: ParisEditorInitialState) => ({
 
       await editorialPlacementsApi.updateParisPage({ sidebarRail });
       this.notify("Sidebar rail страницы «Париж» обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       this.sidebarError =
         error instanceof Error

@@ -231,7 +231,7 @@ export default (initialState: LandingEditorInitialState) => ({
     if (store?.showToast) {
       store.showToast(message, type);
     } else {
-      window.alert(message);
+      globalThis.alert(message);
     }
   },
 
@@ -423,7 +423,7 @@ export default (initialState: LandingEditorInitialState) => ({
       await editorialPlacementsApi.updateLanding({ mainHero });
 
       this.notify("Главный материал landing обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save main hero", error);
       this.mainHeroError =
@@ -463,7 +463,7 @@ export default (initialState: LandingEditorInitialState) => ({
       await editorialPlacementsApi.updateLanding({ cultureHero });
 
       this.notify("Главный материал блока «Культура» на landing обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save culture hero", error);
       this.cultureHeroError =
@@ -503,7 +503,7 @@ export default (initialState: LandingEditorInitialState) => ({
       await editorialPlacementsApi.updateLanding({ parisHero });
 
       this.notify("Главный материал блока «Париж» на landing обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save paris hero", error);
       this.parisHeroError =
@@ -544,7 +544,7 @@ export default (initialState: LandingEditorInitialState) => ({
       await editorialPlacementsApi.updateLanding({ newsRail });
 
       this.notify("Блок новостей landing обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save news rail", error);
       this.newsError =
@@ -594,7 +594,7 @@ export default (initialState: LandingEditorInitialState) => ({
       await editorialPlacementsApi.updateLanding({ netlenkaRail });
 
       this.notify("Блок «Самое Читаемое» обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save netlenka rail", error);
       this.netlenkaError =
@@ -652,7 +652,7 @@ export default (initialState: LandingEditorInitialState) => ({
       await editorialPlacementsApi.updateLanding({ cultureCards });
 
       this.notify("Карточки блока «Культура» на landing обновлены.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save culture cards", error);
       this.cultureCardsError =
@@ -708,7 +708,7 @@ export default (initialState: LandingEditorInitialState) => ({
       await editorialPlacementsApi.updateLanding({ parisCards });
 
       this.notify("Карточки блока «Париж» на landing обновлены.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save paris cards", error);
       this.parisCardsError =
@@ -742,7 +742,7 @@ export default (initialState: LandingEditorInitialState) => ({
       await editorialPlacementsApi.updateLanding({ eventCard });
 
       this.notify("Event card landing обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save event card", error);
       this.eventError =
@@ -776,7 +776,7 @@ export default (initialState: LandingEditorInitialState) => ({
       await editorialPlacementsApi.updateLanding({ cultureInterviewBlock });
 
       this.notify("Culture interview block landing обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save culture interview", error);
       this.cultureInterviewError =
@@ -810,7 +810,7 @@ export default (initialState: LandingEditorInitialState) => ({
       await editorialPlacementsApi.updateLanding({ leSaviezVousFeature });
 
       this.notify("Le saviez-vous на landing обновлён.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save le saviez-vous", error);
       this.leSaviezVousError =
@@ -842,7 +842,7 @@ export default (initialState: LandingEditorInitialState) => ({
       await editorialPlacementsApi.updateLanding({ photoOfTheDayFeature });
 
       this.notify("Фото дня на landing обновлено.");
-      window.location.reload();
+      globalThis.location.reload();
     } catch (error) {
       console.error("Failed to save photo of the day", error);
       this.photoOfTheDayError =

@@ -283,14 +283,14 @@ export default function eventCreatorLogic(initialState = {}) {
 
       const normalized = sanitizeRelatedContent(this.article.relatedContent);
       if (this.eventId && type === "event" && id === this.eventId) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Нельзя привязать текущее событие к самому себе.",
           "error",
         );
         return;
       }
       if (normalized[type].includes(id)) {
-        window.Alpine?.store("ui")?.showToast?.(
+        globalThis.Alpine?.store("ui")?.showToast?.(
           "Этот материал уже добавлен.",
           "info",
         );
@@ -423,7 +423,7 @@ export default function eventCreatorLogic(initialState = {}) {
       }
 
       if (this.uploading) {
-        window.Alpine.store("ui").showToast(
+        globalThis.Alpine.store("ui").showToast(
           "Подожди — загрузка файла ещё не завершилась.",
           "error",
         );
@@ -442,7 +442,7 @@ export default function eventCreatorLogic(initialState = {}) {
         authorDisplay,
       };
       if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/event/preview", previewState)) {
-        window.Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
+        globalThis.Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
       }
     },
 
@@ -595,7 +595,7 @@ export default function eventCreatorLogic(initialState = {}) {
 
       // Block save while a file upload is still in progress
       if (this.uploading) {
-        window.Alpine.store("ui").showToast(
+        globalThis.Alpine.store("ui").showToast(
           "Подожди — загрузка файла ещё не завершилась.",
           "error",
         );
@@ -763,7 +763,7 @@ export default function eventCreatorLogic(initialState = {}) {
           error instanceof Error
             ? error.message
             : "Что-то пошло не так при сохранении события.";
-        window.Alpine.store("ui").showToast(message, "error");
+        globalThis.Alpine.store("ui").showToast(message, "error");
         this.isSaving = false;
       }
     },
@@ -777,26 +777,26 @@ export default function eventCreatorLogic(initialState = {}) {
         try {
           await eventsApi.delete(this.eventId as string);
           unsavedGuard?.markSaved();
-          window.Alpine.store("ui").showToast("Событие удалено");
+          globalThis.Alpine.store("ui").showToast("Событие удалено");
           setTimeout(() => {
-            window.location.href = redirectUrl || "/dashboard/events";
+            globalThis.location.href = redirectUrl || "/dashboard/events";
           }, 1500);
         } catch (error) {
           console.error(error);
-          window.Alpine.store("ui").showToast(
+          globalThis.Alpine.store("ui").showToast(
             "Не получилось удалить событие.",
             "error",
           );
         }
       };
 
-      const uiStore = window.Alpine?.store?.("ui");
+      const uiStore = globalThis.Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
         uiStore.showConfirmation(
           `Удалить событие «${this.article.title || "без названия"}»? Это действие необратимо.`,
           performDelete,
         );
-      } else if (window.confirm("Удалить событие? Это действие необратимо.")) {
+      } else if (globalThis.confirm("Удалить событие? Это действие необратимо.")) {
         performDelete();
       }
     },

@@ -85,7 +85,7 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
       if (store?.showToast) {
         store.showToast(message, type);
       } else {
-        window.alert(message);
+        globalThis.alert(message);
       }
     },
 
@@ -254,7 +254,7 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
         }
 
         setTimeout(() => {
-          window.location.href = "/dashboard/photo-of-the-day";
+          globalThis.location.href = "/dashboard/photo-of-the-day";
         }, 1000);
       } catch (e) {
         console.error("Save failed", e);
@@ -273,7 +273,7 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
           unsavedGuard?.markSaved();
           this.notify("Фото дня удалено");
           setTimeout(() => {
-            window.location.href = "/dashboard/photo-of-the-day";
+            globalThis.location.href = "/dashboard/photo-of-the-day";
           }, 1000);
         } catch (e) {
           console.error("Delete failed", e);

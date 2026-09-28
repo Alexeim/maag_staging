@@ -250,7 +250,7 @@ export default function newsCreatorLogic(
       const normalized = normalizeVideoBlock(block);
       if (!normalized.url) {
         if (showToast) {
-          (window as any).Alpine?.store("ui")?.showToast?.(
+          (globalThis as any).Alpine?.store("ui")?.showToast?.(
             "Для видео-блока добавь файл или ссылку.",
             "error",
           );
@@ -263,7 +263,7 @@ export default function newsCreatorLogic(
           "unknown"
       ) {
         if (showToast) {
-          (window as any).Alpine?.store("ui")?.showToast?.(
+          (globalThis as any).Alpine?.store("ui")?.showToast?.(
             "Нужна прямая ссылка на видеофайл или готовая ссылка для встраивания, а не обычная страница с видео.",
             "error",
           );
@@ -279,7 +279,7 @@ export default function newsCreatorLogic(
       const normalized = normalizeTweetBlock(block);
       if (!normalized.url || !resolveTweetId(normalized.url)) {
         if (showToast) {
-          (window as any).Alpine?.store("ui")?.showToast?.(
+          (globalThis as any).Alpine?.store("ui")?.showToast?.(
             "Нужна ссылка на конкретный твит вида twitter.com/user/status/123.",
             "error",
           );
@@ -298,7 +298,7 @@ export default function newsCreatorLogic(
         this.relatedContentLists = await fetchRelatedContentLists();
       } catch (error) {
         console.error("Failed to fetch content lists:", error);
-        (window as any).Alpine?.store?.("ui")?.showToast?.(
+        (globalThis as any).Alpine?.store?.("ui")?.showToast?.(
           "Не удалось загрузить списки контента.",
           "error",
         );
@@ -331,14 +331,14 @@ export default function newsCreatorLogic(
 
       const normalized = sanitizeRelatedContent(this.article.relatedContent);
       if (this.articleId && type === "news" && id === this.articleId) {
-        (window as any).Alpine?.store?.("ui")?.showToast?.(
+        (globalThis as any).Alpine?.store?.("ui")?.showToast?.(
           "Нельзя привязать текущую новость к самой себе.",
           "error",
         );
         return;
       }
       if (normalized[type].includes(id)) {
-        (window as any).Alpine?.store?.("ui")?.showToast?.(
+        (globalThis as any).Alpine?.store?.("ui")?.showToast?.(
           "Этот материал уже добавлен.",
           "info",
         );
@@ -596,7 +596,7 @@ export default function newsCreatorLogic(
       }
 
       if (this.uploading) {
-        (window as any).Alpine.store("ui").showToast(
+        (globalThis as any).Alpine.store("ui").showToast(
           "Подожди — загрузка файла ещё не завершилась.",
           "error",
         );
@@ -615,7 +615,7 @@ export default function newsCreatorLogic(
         authorDisplay,
       };
       if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/news/preview", previewState)) {
-        (window as any).Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
+        (globalThis as any).Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
       }
     },
 
@@ -666,7 +666,7 @@ export default function newsCreatorLogic(
         },
         (error) => {
           console.error("Upload failed:", error);
-          (window as any).Alpine.store("ui").showToast(
+          (globalThis as any).Alpine.store("ui").showToast(
             `Проблема загрузки картинки: ${error.message}`,
             "error",
           );
@@ -680,7 +680,7 @@ export default function newsCreatorLogic(
               this.editingBlock.url = downloadURL;
             }
             this.uploading = false;
-            (window as any).Alpine.store("ui").showToast(
+            (globalThis as any).Alpine.store("ui").showToast(
               "Картинка успешно загружена!",
             );
           });
@@ -707,7 +707,7 @@ export default function newsCreatorLogic(
         },
         (error) => {
           console.error("Upload failed:", error);
-          (window as any).Alpine.store("ui").showToast(
+          (globalThis as any).Alpine.store("ui").showToast(
             `Проблема загрузки видео: ${error.message}`,
             "error",
           );
@@ -721,7 +721,7 @@ export default function newsCreatorLogic(
               this.editingBlock.provider = "upload";
             }
             this.uploading = false;
-            (window as any).Alpine.store("ui").showToast("Видео успешно загружено!");
+            (globalThis as any).Alpine.store("ui").showToast("Видео успешно загружено!");
           });
         },
       );
@@ -871,7 +871,7 @@ export default function newsCreatorLogic(
         this.article.contentBlocks.splice(index, 1);
         this.syncContentBlockOrder();
       };
-      const uiStore = (window as any).Alpine?.store?.("ui");
+      const uiStore = (globalThis as any).Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
         uiStore.showConfirmation("Удалить этот блок?", removeBlock);
       } else {
@@ -889,7 +889,7 @@ export default function newsCreatorLogic(
 
       // Block save while a file upload is still in progress
       if (this.uploading) {
-        (window as any).Alpine.store("ui").showToast(
+        (globalThis as any).Alpine.store("ui").showToast(
           "Подожди — загрузка файла ещё не завершилась.",
           "error",
         );
@@ -924,7 +924,7 @@ export default function newsCreatorLogic(
       }
 
       if (!this.article.category) {
-        (window as any).Alpine.store("ui").showToast(
+        (globalThis as any).Alpine.store("ui").showToast(
           "Выбери категорию перед сохранением.",
           "error",
         );
@@ -933,7 +933,7 @@ export default function newsCreatorLogic(
       }
 
       if (!Array.isArray(this.article.tags) || this.article.tags.length === 0) {
-        (window as any).Alpine.store("ui").showToast(
+        (globalThis as any).Alpine.store("ui").showToast(
           "Добавь хотя бы один тег — без него новость не сохранится.",
           "error",
         );
@@ -942,7 +942,7 @@ export default function newsCreatorLogic(
       }
 
       if (!this.article.imageUrl) {
-        (window as any).Alpine.store("ui").showToast(
+        (globalThis as any).Alpine.store("ui").showToast(
           "Загрузи обложку новости!",
           "error",
         );
@@ -980,7 +980,7 @@ export default function newsCreatorLogic(
           await newsApi.update(this.articleId, payload);
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
-          (window as any).Alpine.store("ui").showToast("Новость обновлена!");
+          (globalThis as any).Alpine.store("ui").showToast("Новость обновлена!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard/news";
           }, 1500);
@@ -988,7 +988,7 @@ export default function newsCreatorLogic(
           const result = await newsApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
-          (window as any).Alpine.store("ui").showToast("Новость создана!");
+          (globalThis as any).Alpine.store("ui").showToast("Новость создана!");
           setTimeout(() => {
             globalThis.location.href = `/dashboard/news`;
           }, 1500);
@@ -997,7 +997,7 @@ export default function newsCreatorLogic(
         console.error("Save error:", error);
         const message =
           error instanceof Error ? error.message : "Ошибка сохранения новости.";
-        (window as any).Alpine.store("ui").showToast(message, "error");
+        (globalThis as any).Alpine.store("ui").showToast(message, "error");
         this.isSaving = false;
       }
     },
@@ -1009,20 +1009,20 @@ export default function newsCreatorLogic(
         try {
           await newsApi.delete(this.articleId!);
           unsavedGuard?.markSaved();
-          (window as any).Alpine.store("ui").showToast("Новость удалена");
+          (globalThis as any).Alpine.store("ui").showToast("Новость удалена");
           setTimeout(() => {
-            window.location.href = redirectUrl || "/dashboard/news";
+            globalThis.location.href = redirectUrl || "/dashboard/news";
           }, 1500);
         } catch (error) {
           console.error(error);
-          (window as any).Alpine.store("ui").showToast(
+          (globalThis as any).Alpine.store("ui").showToast(
             "Не удалось удалить.",
             "error",
           );
         }
       };
 
-      const uiStore = (window as any).Alpine?.store?.("ui");
+      const uiStore = (globalThis as any).Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
         uiStore.showConfirmation(
           `Удалить новость «${this.article.title}»? Это необратимо.`,

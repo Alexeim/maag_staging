@@ -51,7 +51,7 @@ onAuthStateChanged(auth, async (user) => {
   // but since this is part of the entrypoint bundle, it's generally safe.
   // We need a way to access the store without the local 'Alpine' variable.
   // Fortunately, Alpine is usually global when using the integration.
-  const getStore = () => (window as any).Alpine?.store('auth');
+  const getStore = () => (globalThis as any).Alpine?.store('auth');
 
   if (user) {
     try {

@@ -64,7 +64,7 @@ const DEFAULT_LANDING_PLACEMENTS: LandingPlacementsResponse = {
 };
 
 const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
-  window.Alpine?.store?.("ui")?.showToast?.(message, type);
+  globalThis.Alpine?.store?.("ui")?.showToast?.(message, type);
 };
 
 const MAIN_HERO_TYPE_LABELS: Record<LandingMainHeroType, string> = {

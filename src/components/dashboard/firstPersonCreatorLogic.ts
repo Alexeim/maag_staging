@@ -138,7 +138,7 @@ export default function firstPersonCreatorLogic(initialState = {}) {
         authorDisplay,
       };
       if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/first-person/preview", previewState)) {
-        (window as any).Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
+        (globalThis as any).Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
       }
     },
 
@@ -148,7 +148,7 @@ export default function firstPersonCreatorLogic(initialState = {}) {
       this.isSaving = true;
 
       const toast = (msg: string) =>
-        (window as any).Alpine.store("ui").showToast(msg, "error");
+        (globalThis as any).Alpine.store("ui").showToast(msg, "error");
 
       // baseLogic infers `article.contentBlocks` as `never[]` from its empty
       // literal default (nothing here widens it the way eventCreatorLogic's
@@ -219,7 +219,7 @@ export default function firstPersonCreatorLogic(initialState = {}) {
           await firstPersonApi.update(this.articleId, payload);
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
-          (window as any).Alpine.store("ui").showToast("Материал обновлён!");
+          (globalThis as any).Alpine.store("ui").showToast("Материал обновлён!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard";
           }, 1500);
@@ -228,7 +228,7 @@ export default function firstPersonCreatorLogic(initialState = {}) {
           this.articleId = created.id;
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
-          (window as any).Alpine.store("ui").showToast(
+          (globalThis as any).Alpine.store("ui").showToast(
             "Материал «от первого лица» создан!",
           );
           setTimeout(() => {
@@ -241,7 +241,7 @@ export default function firstPersonCreatorLogic(initialState = {}) {
           error instanceof Error
             ? error.message
             : "Что-то пошло не так при сохранении материала.";
-        (window as any).Alpine.store("ui").showToast(message, "error");
+        (globalThis as any).Alpine.store("ui").showToast(message, "error");
         this.isSaving = false;
       }
     },
@@ -253,26 +253,26 @@ export default function firstPersonCreatorLogic(initialState = {}) {
         try {
           await firstPersonApi.delete(this.articleId as string);
           unsavedGuard?.markSaved();
-          (window as any).Alpine.store("ui").showToast("Материал удалён");
+          (globalThis as any).Alpine.store("ui").showToast("Материал удалён");
           setTimeout(() => {
-            window.location.href = redirectUrl || "/dashboard";
+            globalThis.location.href = redirectUrl || "/dashboard";
           }, 1500);
         } catch (error) {
           console.error(error);
-          (window as any).Alpine.store("ui").showToast(
+          (globalThis as any).Alpine.store("ui").showToast(
             "Не удалось удалить материал.",
             "error",
           );
         }
       };
 
-      const uiStore = (window as any).Alpine?.store?.("ui");
+      const uiStore = (globalThis as any).Alpine?.store?.("ui");
       if (uiStore?.showConfirmation) {
         uiStore.showConfirmation(
           `Удалить материал «${this.article.title || "без названия"}»? Это необратимо.`,
           performDelete,
         );
-      } else if (window.confirm("Удалить материал?")) {
+      } else if (globalThis.confirm("Удалить материал?")) {
         performDelete();
       }
     },
