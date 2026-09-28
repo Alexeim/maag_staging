@@ -749,7 +749,7 @@ export default function eventCreatorLogic(initialState = {}) {
             globalThis.location.href = "/dashboard/events";
           }, 1500);
         } else {
-          const result = await eventsApi.create(payload);
+          await eventsApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
           (globalThis as any).Alpine.store("ui").showToast(

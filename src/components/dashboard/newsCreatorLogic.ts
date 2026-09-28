@@ -994,7 +994,7 @@ export default function newsCreatorLogic(
             globalThis.location.href = "/dashboard/news";
           }, 1500);
         } else {
-          const result = await newsApi.create(payload);
+          await newsApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
           unsavedGuard?.markSaved();
           (globalThis as any).Alpine.store("ui").showToast("Новость создана!");
