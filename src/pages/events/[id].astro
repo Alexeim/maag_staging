@@ -174,17 +174,6 @@ const normalizeAdditionalInfo = (value: unknown) => {
     .filter((info) => info !== null);
 };
 
-const toDateKey = (date: Date | null): string => {
-  if (!date) {
-    return "";
-  }
-  return [
-    date.getUTCFullYear(),
-    String(date.getUTCMonth() + 1).padStart(2, "0"),
-    String(date.getUTCDate()).padStart(2, "0"),
-  ].join("-");
-};
-
 // Paris district codes (e.g. "district-16") live in a separate parisDistrict
 // field for dashboard-created content and should never stand in as a
 // category badge — but records written outside this app's creator forms
@@ -202,74 +191,6 @@ const normalizeTags = (value: unknown): string[] => {
 
 const resolveTagLabel = (rawTag: unknown, fallback: string): string =>
   typeof rawTag === "string" && rawTag.trim() ? getTagLabel(rawTag) : fallback;
-
-// Only the fields extractTextFromContent reads; stored blocks are unvalidated.
-type LooseColumn = { content?: unknown } | null;
-type LooseContentBlock = {
-  type?: unknown;
-  text?: unknown;
-  question?: unknown;
-  answer?: unknown;
-  left?: LooseColumn;
-  center?: LooseColumn;
-  right?: LooseColumn;
-} | null;
-
-const extractTextFromContent = (blocks: unknown): string => {
-  if (!Array.isArray(blocks)) {
-    return "";
-  }
-
-  return blocks
-    .flatMap((block: LooseContentBlock) => {
-      const pieces: string[] = [];
-
-      if (typeof block?.text === "string") {
-        pieces.push(block.text);
-      }
-      if (typeof block?.question === "string") {
-        pieces.push(block.question);
-      }
-      if (typeof block?.answer === "string") {
-        pieces.push(block.answer);
-      }
-      if (block?.type === "two-columns") {
-        if (typeof block?.left?.content === "string") {
-          pieces.push(block.left.content);
-        }
-        if (typeof block?.right?.content === "string") {
-          pieces.push(block.right.content);
-        }
-      }
-      if (block?.type === "three-columns") {
-        if (typeof block?.left?.content === "string") {
-          pieces.push(block.left.content);
-        }
-        if (typeof block?.center?.content === "string") {
-          pieces.push(block.center.content);
-        }
-        if (typeof block?.right?.content === "string") {
-          pieces.push(block.right.content);
-        }
-      }
-
-      return pieces;
-    })
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
-};
-
-const estimateReadTime = (lead: unknown, blocks: unknown): number => {
-  const leadText = typeof lead === "string" ? lead.trim() : "";
-  const contentText = extractTextFromContent(blocks);
-  const fullText = [leadText, contentText].filter(Boolean).join(" ").trim();
-  if (!fullText) {
-    return 1;
-  }
-  const words = fullText.split(/\s+/).length;
-  return Math.max(1, Math.ceil(words / 180));
-};
 
 const buildMapsUrl = (address: string): string | null => {
   const normalized = address.trim();
@@ -505,7 +426,6 @@ const address =
     : "Место уточняется";
 const lead = typeof eventData?.lead === "string" ? eventData.lead : "";
 const leadHtml = getInitialRichTextHtml({ html: eventData?.leadHtml, text: lead });
-const readTime = estimateReadTime(lead, eventData?.content);
 const createdAtLabel = formatCreatedAt(eventData?.createdAt);
 const mapsUrl = buildMapsUrl(address);
 const mapsEmbedUrl = buildMapsEmbedUrl(address);

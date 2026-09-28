@@ -43,20 +43,6 @@ const toDate = (value: unknown): Date | null => {
   return null;
 };
 
-const extractDescription = (blocks: unknown): string => {
-  if (!Array.isArray(blocks)) {
-    return "Подробнее скоро.";
-  }
-  const blockWithText = blocks.find(
-    (block) => typeof block?.text === "string" && block.text.trim().length > 0,
-  );
-  if (!blockWithText) {
-    return "Подробнее скоро.";
-  }
-  const text = blockWithText.text.trim();
-  return text.length > 180 ? `${text.slice(0, 177).trim()}...` : text;
-};
-
 // Calendar payload only carries the event's primary tag (raw value) as
 // tagLabel/categoryLabel, not the full tags array — resolve it through the
 // shared tag dictionary instead of category, which events don't use.
@@ -69,19 +55,6 @@ const normalizeCalendarEventLabels = (event: PublicCalendarEvent) => {
     tagLabel: label,
     categoryLabel: label,
   };
-};
-
-const formatShortDateRange = (
-  startIso: string,
-  endIso: string | null,
-): string => {
-  const fmt = (d: Date) =>
-    `${d.getUTCDate()}/${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
-  const start = toDate(startIso);
-  if (!start) return "";
-  const end = endIso ? toDate(endIso) : null;
-  if (!end || start.getTime() === end.getTime()) return fmt(start);
-  return `${fmt(start)} – ${fmt(end)}`;
 };
 
 const formatCardDateRange = (

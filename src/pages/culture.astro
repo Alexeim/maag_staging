@@ -12,36 +12,7 @@ import {
 import picture1 from "../assets/images/culture.jpg";
 import { publicCultureApi, type PublicCardItem } from "@/lib/api/api";
 
-const CATEGORY_LABELS: Record<string, string> = {
-  culture: "Культура",
-  hotContent: "Самое Читаемое",
-};
-
-const CULTURE_CATEGORY_KEY = "culture";
-const HOT_CONTENT_CATEGORY_KEY = "hotContent";
 const MAX_EDITORIAL_GRID_ITEMS = 12;
-
-const normalizeCategory = (value?: string) => {
-  if (!value) return null;
-  const lowerCaseValue = value.toLowerCase().trim();
-  const entry = Object.entries(CATEGORY_LABELS).find(
-    ([key, label]) =>
-      key.toLowerCase() === lowerCaseValue ||
-      label.toLowerCase() === lowerCaseValue,
-  );
-  return entry ? entry[0] : lowerCaseValue;
-};
-
-const isHotContent = (item: PublicCardItem) =>
-  Boolean(item?.isHotContent) ||
-  normalizeCategory(item?.category) === HOT_CONTENT_CATEGORY_KEY;
-
-// The server sends isMainInCategory as a boolean (toLandingItem).
-const isMainInCategoryItem = (item: PublicCardItem) =>
-  item.isMainInCategory === true;
-
-const isLeSaviezVousArticle = (item: PublicCardItem) =>
-  item?.articleType === "le_saviez_vous";
 
 const getDate = (timestamp: unknown): Date => {
   if (timestamp instanceof Date) {
@@ -77,22 +48,6 @@ const getCardTitle = (item: PublicCardItem): string => {
   const cardTitle =
     typeof item?.cardTitle === "string" ? item.cardTitle.trim() : "";
   return cardTitle || item?.title || "";
-};
-
-const toContentHref = (item: PublicCardItem) => {
-  if (item?.contentType === "interview") {
-    return `/interviews/${item.id}`;
-  }
-  if (item?.contentType === "flipper") {
-    return `/flippers/${item.id}`;
-  }
-  if (item?.contentType === "guide") {
-    return `/guide/${item.id}`;
-  }
-  if (item?.contentType === "visual-story") {
-    return `/visual-story/${item.id}`;
-  }
-  return `/${item?.isNews ? "news" : "article"}/${item.id}`;
 };
 
 const truncateText = (text?: string, maxLength: number = 220) => {
