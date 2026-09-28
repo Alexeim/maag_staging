@@ -8,7 +8,6 @@ interface HeaderProps {
   childrenText?: string;
   calendarText?: string;
   aboutText?: string;
-  languagesText?: string;
   buttonText?: string;
   hoverReveal?: boolean;
 }
@@ -19,19 +18,10 @@ const {
   childrenText,
   calendarText,
   aboutText,
-  languagesText,
   buttonText,
   hoverReveal,
 } = Astro.props as HeaderProps;
 
-console.log("Header render, variant:", variant);
-console.log("Header render, cultureText:", cultureText);
-console.log("Header render, guideText:", guideText);
-console.log("Header render, childrenText:", childrenText);
-console.log("Header render, calendarText:", calendarText);
-console.log("Header render, aboutText:", aboutText);
-console.log("Header render, languagesText:", languagesText);
-console.log("Header render, buttonText:", buttonText);
 ---
 
 <Navbar variant={variant} hoverReveal={hoverReveal}>
