@@ -4,7 +4,6 @@ import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import LazyImage from "./LazyImage.astro";
 
 interface ArticleCardProps {
-  isNetlenka?: boolean;
   title?: string;
   category?: string;
   categoryHref?: string | null;
@@ -18,7 +17,6 @@ interface ArticleCardProps {
 }
 
 const {
-  isNetlenka = true,
   title = "Без названия",
   category = "Культура",
   categoryHref = null,

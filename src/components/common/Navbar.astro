@@ -6,8 +6,6 @@ import burgerIcon from "../../assets/icons/burger-mobile.svg";
 
 interface NavbarProps {
   variant: "default" | "transparent";
-  languages: string;
-  user?: boolean;
   showLogoInNav?: boolean;
   // Desktop-only "peekaboo" mode: header stays hidden above an invisible
   // fixed strip until hovered/focused, then slides down. Opt-in per usage
@@ -17,8 +15,6 @@ interface NavbarProps {
 
 const {
   variant,
-  languages,
-  user = true,
   showLogoInNav = true,
   hoverReveal = false,
 } = Astro.props as NavbarProps;

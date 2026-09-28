@@ -29,7 +29,6 @@ interface LayoutProps {
   structuredData?: JsonLdObject | JsonLdObject[];
   useClientRouter?: boolean;
   navbarVariant?: "default" | "transparent";
-  includePreFooterCTA?: boolean;
 }
 
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
@@ -53,7 +52,6 @@ const {
   structuredData = [],
   useClientRouter = false,
   navbarVariant = "default",
-  includePreFooterCTA = true,
 } = Astro.props as LayoutProps;
 
 const description = rawDescription.trim() || fallbackDescription;

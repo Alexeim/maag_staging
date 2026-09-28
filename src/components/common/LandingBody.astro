@@ -271,7 +271,6 @@ const splitTitle = (t: string) => {
                   .map((item) => (
                     <ArticleCard
                       key={item.id}
-                      isNetlenka={false}
                       title={getCardTitle(item)}
                       category={getPrimaryTag(item)}
                       categoryHref={getPrimaryTagHref(item)}
@@ -285,8 +284,8 @@ const splitTitle = (t: string) => {
                   ))
               ) : (
                 <>
-                  <ArticleCard isNetlenka={false} />
-                  <ArticleCard isNetlenka={false} />
+                  <ArticleCard />
+                  <ArticleCard />
                 </>
               )
             }
@@ -530,7 +529,6 @@ const splitTitle = (t: string) => {
                 {parisCardItems.slice(0, 2).map((item) => (
                   <ArticleCard
                     key={item.id}
-                    isNetlenka={false}
                     title={getCardTitle(item)}
                     category={getPrimaryTag(item)}
                     categoryHref={getPrimaryTagHref(item)}
@@ -693,7 +691,6 @@ const splitTitle = (t: string) => {
           {[...carouselItems, ...carouselItems].map((item, index) => (
             <div class="w-[320px] flex-shrink-0">
               <ArticleCard
-                isNetlenka={false}
                 title={getCardTitle(item)}
                 category={getPrimaryTag(item)}
                 categoryHref={getPrimaryTagHref(item)}
