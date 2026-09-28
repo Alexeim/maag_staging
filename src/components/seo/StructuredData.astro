@@ -18,5 +18,5 @@ const serializedPayload = JSON.stringify(payload).replace(/</g, "\\u003c");
 ---
 
 {entries.length > 0 && (
-  <script type="application/ld+json" set:html={serializedPayload} />
+  <script is:inline type="application/ld+json" set:html={serializedPayload} />
 )}
