@@ -42,6 +42,13 @@ import {
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 import { compressImage } from "@/lib/images/compressImage";
+import {
+  clearDashboardPreview,
+  openDashboardPreview,
+  readDashboardPreview,
+} from "@/lib/utils/dashboardPreview";
+
+const PREVIEW_KEY = "newsPreview";
 import { normalizeTagList } from "@/content/tags/tags";
 
 const storage = getStorage(app);
@@ -481,18 +488,8 @@ export default function newsCreatorLogic(
         };
       };
 
-      let previewState: PreviewState | null = null;
+      const previewState = readDashboardPreview<PreviewState>(PREVIEW_KEY);
       let restoredPreviewAuthorState = false;
-
-      try {
-        const stored = window.localStorage?.getItem("newsPreview");
-        const parsed = stored ? JSON.parse(stored) : null;
-        if (parsed && typeof parsed === "object") {
-          previewState = parsed as PreviewState;
-        }
-      } catch (error) {
-        console.error("Failed to load news preview draft:", error);
-      }
 
       if (initialArticle) {
         const normalized = normalizeLoadedArticle(initialArticle);
@@ -504,33 +501,19 @@ export default function newsCreatorLogic(
       }
       if (typeof isEditMode === "boolean") this.isEditMode = isEditMode;
 
-      const shouldApplyPreview = (() => {
-        if (!previewState?.article) return false;
-        if (isPreview) return true;
-        const previewId =
-          typeof previewState.articleId === "string" && previewState.articleId
-            ? previewState.articleId
-            : null;
-        const isPreviewEdit = Boolean(previewState.isEditMode);
-        const isSameEdit =
-          this.isEditMode && previewId !== null && previewId === this.articleId;
-        const isCreateDraft = !this.isEditMode && !previewId && !isPreviewEdit;
-        return isSameEdit || isCreateDraft;
-      })();
+      // The draft is only for the preview tab. The editor tab never unloads
+      // while previewing, so it must not overlay a stored draft on itself.
+      const shouldApplyPreview = isPreview && Boolean(previewState?.article);
 
       if (shouldApplyPreview && previewState?.article) {
         const normalized = normalizeLoadedArticle(previewState.article);
         if (normalized) {
-          if (isPreview) {
-            this.article = normalized;
-            this.articleId =
-              typeof previewState.articleId === "string"
-                ? previewState.articleId
-                : null;
-            this.isEditMode = Boolean(previewState.isEditMode);
-          } else {
-            Object.assign(this.article, normalized);
-          }
+          this.article = normalized;
+          this.articleId =
+            typeof previewState.articleId === "string"
+              ? previewState.articleId
+              : null;
+          this.isEditMode = Boolean(previewState.isEditMode);
         }
         this.selectedAuthorId =
           typeof previewState.selectedAuthorId === "string"
@@ -559,6 +542,9 @@ export default function newsCreatorLogic(
               }
             : { name: "", avatarUrl: "" };
         restoredPreviewAuthorState = true;
+      } else if (previewState) {
+        // Opening the editor drops any leftover snapshot so it can't go stale.
+        clearDashboardPreview(PREVIEW_KEY);
       }
 
       this.article.tags = this.article.tags ?? [];
@@ -618,8 +604,9 @@ export default function newsCreatorLogic(
         newAuthorLastName: this.newAuthorLastName,
         authorDisplay,
       };
-      window.localStorage.setItem("newsPreview", JSON.stringify(previewState));
-      window.location.href = "/dashboard/news/preview";
+      if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/news/preview", previewState)) {
+        (window as any).Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
+      }
     },
 
     // Title editing
@@ -981,14 +968,14 @@ export default function newsCreatorLogic(
 
         if (this.isEditMode && this.articleId) {
           await newsApi.update(this.articleId, payload);
-          window.localStorage.removeItem("newsPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           (window as any).Alpine.store("ui").showToast("Новость обновлена!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard/news";
           }, 1500);
         } else {
           const result = await newsApi.create(payload);
-          window.localStorage.removeItem("newsPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           (window as any).Alpine.store("ui").showToast("Новость создана!");
           setTimeout(() => {
             globalThis.location.href = `/dashboard/news`;
