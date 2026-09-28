@@ -1,8 +1,10 @@
 import type { Alpine } from 'alpinejs';
 
+type ToastType = 'success' | 'error' | 'info';
+
 interface Toast {
   message: string;
-  type: 'success' | 'error';
+  type: ToastType;
   show: boolean;
 }
 
@@ -25,7 +27,7 @@ const DEFAULT_CANCEL_LABEL = 'Отмена';
 export interface UiStore {
   toast: Toast;
   confirmation: ConfirmationModal;
-  showToast(message: string, type?: 'success' | 'error'): void;
+  showToast(message: string, type?: ToastType): void;
   showConfirmation(
     message: string,
     onConfirm: () => void,
