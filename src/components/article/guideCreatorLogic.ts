@@ -49,6 +49,10 @@ import {
   openDashboardPreview,
   readDashboardPreview,
 } from "@/lib/utils/dashboardPreview";
+import {
+  createUnsavedChangesGuard,
+  type UnsavedChangesGuard,
+} from "@/lib/utils/unsavedChangesGuard";
 
 const PREVIEW_KEY = "guidePreview";
 
@@ -228,6 +232,8 @@ export default function guideCreatorLogic(initialState = {}) {
     }
     return normalized;
   };
+
+  let unsavedGuard: UnsavedChangesGuard | null = null;
 
   return {
     article: {
@@ -842,6 +848,17 @@ export default function guideCreatorLogic(initialState = {}) {
       this.syncCurrentContentCollection();
       this.loadContentCollections();
       this.loadLandingPlacements();
+
+      if (!this.isPreview) {
+        // @ts-ignore Alpine magic $el is available at runtime.
+        unsavedGuard = createUnsavedChangesGuard(this.$el, () => ({
+          article: this.article,
+          selectedAuthorId: this.selectedAuthorId,
+          useNewAuthor: this.useNewAuthor,
+          newAuthorFirstName: this.newAuthorFirstName,
+          newAuthorLastName: this.newAuthorLastName,
+        }));
+      }
     },
 
     editTitle() {
@@ -1373,6 +1390,7 @@ export default function guideCreatorLogic(initialState = {}) {
         if (this.isEditMode && this.articleId) {
           await guidesApi.update(this.articleId, payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast("Путеводитель успешно обновлён!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard/guides";
@@ -1380,6 +1398,7 @@ export default function guideCreatorLogic(initialState = {}) {
         } else {
           await guidesApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast(
             "Путеводитель успешно создан! Молодец!",
           );
@@ -1406,6 +1425,7 @@ export default function guideCreatorLogic(initialState = {}) {
       const performDelete = async () => {
         try {
           await guidesApi.delete(this.articleId);
+          unsavedGuard?.markSaved();
           window.Alpine.store("ui").showToast("Путеводитель удалён");
           setTimeout(() => {
             window.location.href = redirectUrl || "/dashboard/guides";
