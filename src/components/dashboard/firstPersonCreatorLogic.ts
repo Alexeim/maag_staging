@@ -6,6 +6,10 @@ import {
   openDashboardPreview,
   readDashboardPreview,
 } from "@/lib/utils/dashboardPreview";
+import {
+  createUnsavedChangesGuard,
+  type UnsavedChangesGuard,
+} from "@/lib/utils/unsavedChangesGuard";
 
 const PREVIEW_KEY = "firstPersonPreview";
 
@@ -23,6 +27,8 @@ export default function firstPersonCreatorLogic(initialState = {}) {
   });
 
   const { isPreview = false } = initialState as { isPreview?: boolean };
+
+  let unsavedGuard: UnsavedChangesGuard | null = null;
 
   return {
     ...baseLogic,
@@ -45,6 +51,14 @@ export default function firstPersonCreatorLogic(initialState = {}) {
       if (!isPreview) {
         // Opening the editor drops any leftover snapshot so it can't go stale.
         clearDashboardPreview(PREVIEW_KEY);
+        // @ts-ignore Alpine magic $el is available at runtime.
+        unsavedGuard = createUnsavedChangesGuard(this.$el, () => ({
+          article: this.article,
+          selectedAuthorId: this.selectedAuthorId,
+          useNewAuthor: this.useNewAuthor,
+          newAuthorFirstName: this.newAuthorFirstName,
+          newAuthorLastName: this.newAuthorLastName,
+        }));
         return;
       }
 
@@ -204,6 +218,7 @@ export default function firstPersonCreatorLogic(initialState = {}) {
         if (this.isEditMode && this.articleId) {
           await firstPersonApi.update(this.articleId, payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           (window as any).Alpine.store("ui").showToast("Материал обновлён!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard";
@@ -212,6 +227,7 @@ export default function firstPersonCreatorLogic(initialState = {}) {
           const created = await firstPersonApi.create(payload);
           this.articleId = created.id;
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           (window as any).Alpine.store("ui").showToast(
             "Материал «от первого лица» создан!",
           );
@@ -236,6 +252,7 @@ export default function firstPersonCreatorLogic(initialState = {}) {
       const performDelete = async () => {
         try {
           await firstPersonApi.delete(this.articleId as string);
+          unsavedGuard?.markSaved();
           (window as any).Alpine.store("ui").showToast("Материал удалён");
           setTimeout(() => {
             window.location.href = redirectUrl || "/dashboard";
