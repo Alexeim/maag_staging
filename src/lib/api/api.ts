@@ -186,6 +186,7 @@ export interface ArticlePayload {
   isHotContent?: boolean;
   isNotebookContent?: boolean;
   isMaagChoice?: boolean;
+  paid?: boolean;
   isMainInCategory?: boolean;
   isNews?: boolean;
   published?: boolean;
@@ -667,6 +668,7 @@ export interface FlipperPayload {
   isHotContent?: boolean;
   isNotebookContent?: boolean;
   isMaagChoice?: boolean;
+  paid?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
   carouselContent: { imageUrl: string; caption: string }[];
@@ -761,6 +763,7 @@ export interface GuidePayload {
   isHotContent?: boolean;
   isNotebookContent?: boolean;
   isMaagChoice?: boolean;
+  paid?: boolean;
   isMainInCategory?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
@@ -1178,6 +1181,7 @@ export interface VisualStoryPayload {
   isHotContent?: boolean;
   isNotebookContent?: boolean;
   isMaagChoice?: boolean;
+  paid?: boolean;
   published?: boolean;
   publishedAt?: ApiTimestamp;
   relatedContent?: RelatedContent;
