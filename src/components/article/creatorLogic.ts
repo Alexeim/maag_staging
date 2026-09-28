@@ -64,7 +64,11 @@ const PREVIEW_KEY = "articlePreview";
 const storage = getStorage(app);
 
 // Helper to create a new block object
-const createBlock = (type, data, position = 0) =>
+const createBlock = (
+  type: string,
+  data: Record<string, any>,
+  position = 0,
+) =>
   withBlockMeta({ type, ...data }, position);
 const TIP_TYPES = [
   "location",
@@ -1234,7 +1238,7 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     // Adds a new block of a specific type and opens it for editing
-    addBlock(type) {
+    addBlock(type: string) {
       let newBlockData = {};
       // Set default data based on block type
       switch (type) {
@@ -1331,7 +1335,7 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     // Opens a block for editing
-    editBlock(index) {
+    editBlock(index: number) {
       this.editingIndex = index;
       // Create a deep copy to avoid modifying the original until save
       this.editingBlock = JSON.parse(
@@ -1396,7 +1400,7 @@ export default function articleCreatorLogic(initialState = {}) {
       return true;
     },
 
-    startBlockDrag(index) {
+    startBlockDrag(index: number) {
       if (this.editingIndex !== null || this.uploading) {
         return;
       }
@@ -1408,7 +1412,7 @@ export default function articleCreatorLogic(initialState = {}) {
       this.dragOverBlockId = block.id;
     },
 
-    setBlockDropTarget(index) {
+    setBlockDropTarget(index: number) {
       if (!this.draggedBlockId) {
         return;
       }
@@ -1419,7 +1423,7 @@ export default function articleCreatorLogic(initialState = {}) {
       this.dragOverBlockId = block.id;
     },
 
-    dropBlock(targetIndex) {
+    dropBlock(targetIndex: number) {
       if (!this.draggedBlockId || this.editingIndex !== null) {
         this.resetBlockDrag();
         return;
@@ -1453,7 +1457,7 @@ export default function articleCreatorLogic(initialState = {}) {
     },
 
     // Deletes a block
-    deleteBlock(index) {
+    deleteBlock(index: number) {
       const removeBlock = () => {
         this.article.contentBlocks.splice(index, 1);
         this.syncContentBlockOrder();
@@ -1645,7 +1649,7 @@ export default function articleCreatorLogic(initialState = {}) {
 
     ...restInitialState,
 
-    deleteArticle(redirectUrl) {
+    deleteArticle(redirectUrl?: string) {
       if (!this.articleId) return;
 
       const performDelete = async () => {
