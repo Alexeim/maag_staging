@@ -61,8 +61,9 @@ guard на страницах (`/dashboard`), `__session` cookie как тран
   auth → IDOR: можно открыть биллинг-портал чужого клиента. `create-checkout-session`
   так же берёт `userId` из тела.
 - ~~**`GET /api/dashboard/overview`** не закрыт~~ → ✅ закрыт `requireAdmin` (`17f55466`).
-- **`articlesApi.del`** в `src/components/article/creatorLogic.ts:1730` — такого метода нет
-  (есть `delete`), удаление из редактора обычных статей сломано независимо от auth.
+- ~~**`articlesApi.del`** в `src/components/article/creatorLogic.ts` — такого метода нет
+  (есть `delete`), удаление из редактора обычных статей сломано независимо от auth.~~
+  → ✅ исправлено (`620460e4`).
 
 ## Контекст проекта
 
@@ -716,7 +717,7 @@ Dependencies:
 9. ✅ Закрыть `GET /api/dashboard/overview` (`requireAdmin`, Bearer или `X-Session-Cookie`) — `17f55466`.
 10. ⬜ Вытащить Firestore/Storage rules в репо; проверить, что запись в Storage не `auth != null`, а admin-only; решить по открытому листингу.
 11. ⬜ Решить `/calendar`, `/paris` — закрытые членам или публичные.
-12. ⬜ Починить `articlesApi.del` → `delete` в `src/components/article/creatorLogic.ts`.
+12. ✅ Починить `articlesApi.del` → `delete` в `src/components/article/creatorLogic.ts` — `620460e4`.
 12. ⬜ Обновить backend `sharp`.
 13. ⬜ Отдельно проверить `firebase-admin@14.x`.
 14. ⬜ Перенести frontend build/deploy-only tooling из production dependencies.
