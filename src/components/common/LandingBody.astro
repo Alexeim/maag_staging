@@ -296,7 +296,7 @@ const splitTitle = (t: string) => {
             latestInterview && (
               <LatestInterview
                 interviewee={latestInterview.interviewee}
-                quote={interviewQuote}
+                quote={interviewQuote ?? undefined}
                 imageUrl={latestInterview.imageUrl}
                 href={`/interviews/${latestInterview.id}`}
                 transitionName={getTransitionName({
