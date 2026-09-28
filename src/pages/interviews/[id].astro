@@ -1,6 +1,10 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
-import { interviewsApi, publicRelatedApi } from "../../lib/api/api";
+import {
+  interviewsApi,
+  publicRelatedApi,
+  type PublicRelatedCard,
+} from "../../lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import type { ComponentProps } from "astro/types";
@@ -35,9 +39,9 @@ if (!interview) {
 // Admins may preview an unpublished interview on its real page; everyone else
 // gets redirected to /404.
 const isDraftPreview =
-  (interview as any).published !== true && canPreviewUnpublished(Astro.locals);
+  interview.published !== true && canPreviewUnpublished(Astro.locals);
 
-if ((interview as any).published !== true && !isDraftPreview) {
+if (interview.published !== true && !isDraftPreview) {
   return Astro.redirect("/404");
 }
 
@@ -57,7 +61,7 @@ const {
 } = interview;
 const authorName = author ? `${author.firstName} ${author.lastName}` : "MAAG";
 const resolvedAuthorId = author ? authorId : undefined;
-const firstBookmarkTag = normalizeTags((interview as any)?.tags)[0] ?? "";
+const firstBookmarkTag = normalizeTags(interview.tags)[0] ?? "";
 const bookmarkTag = firstBookmarkTag ? getKnownTagLabel(firstBookmarkTag) : "";
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
 const articleStructuredData = buildArticleStructuredData({
@@ -67,13 +71,13 @@ const articleStructuredData = buildArticleStructuredData({
   description: lead,
   image: imageUrl,
   datePublished: interview.publishedAt,
-  dateModified: (interview as any).updatedAt ?? interview.publishedAt,
+  dateModified: interview.updatedAt ?? interview.publishedAt,
   authorName: author ? authorName : undefined,
 });
 
-let collectionContentItems: any[] = [];
-let relatedContentItems: any[] = [];
-let recentInterviewItems: any[] = [];
+let collectionContentItems: PublicRelatedCard[] = [];
+let relatedContentItems: PublicRelatedCard[] = [];
+let recentInterviewItems: PublicRelatedCard[] = [];
 let linkedContentLookup: LinkedContentLookup = {};
 
 try {
