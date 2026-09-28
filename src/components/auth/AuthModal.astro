@@ -6,8 +6,8 @@ import Input from "@/components/common/Input.astro";
 <div
   x-data="$lazy('authModal')"
   x-show="$store.auth.isAuthModalOpen"
-  @keydown.escape.window="$store.auth.closeAuthModal()"
-  @value-changed.window="handleInputChange($event.detail)"
+  x-on:keydown.escape.window="$store.auth.closeAuthModal()"
+  x-on:value-changed.window="handleInputChange($event.detail)"
   x-transition:enter="transition ease-out duration-300"
   x-transition:enter-start="opacity-0"
   x-transition:enter-end="opacity-100"
@@ -18,7 +18,7 @@ import Input from "@/components/common/Input.astro";
   style="display: none;"
 >
   <!-- Overlay -->
-  <div class="fixed inset-0 bg-black/50" @click="$store.auth.closeAuthModal()"></div>
+  <div class="fixed inset-0 bg-black/50" x-on:click="$store.auth.closeAuthModal()"></div>
 
   <!-- Modal Content -->
   <div
@@ -33,46 +33,46 @@ import Input from "@/components/common/Input.astro";
   >
     <!-- Login Form -->
     <template x-if="$store.auth.formType === 'login'">
-      <form @submit.prevent="handleSubmit">
+      <form x-on:submit.prevent="handleSubmit">
         <h2 class="text-2xl font-bold mb-6 text-center">Войти</h2>
         <div class="space-y-4">
-          <Input type="email" name="email" placeholder="Почта" autocomplete="email" :value="formData.email" required />
-          <Input type="password" name="password" placeholder="Пароль" autocomplete="current-password" :value="formData.password" required />
+          <Input type="email" name="email" placeholder="Почта" autocomplete="email" x-bind:value="formData.email" required />
+          <Input type="password" name="password" placeholder="Пароль" autocomplete="current-password" x-bind:value="formData.password" required />
         </div>
         <div class="mt-6">
-          <Button type="submit" class="w-full" :disabled="isLoading">
+          <Button type="submit" class="w-full" x-bind:disabled="isLoading">
             <span x-show="!isLoading">Войти</span>
             <span x-show="isLoading">Загрузка...</span>
           </Button>
         </div>
         <p class="text-sm text-center mt-4">
-          Не зарегистрирован? <button type="button" @click="$store.auth.switchTo('signup')" class="text-primary hover:underline cursor-pointer">Тебе сюда</button>
+          Не зарегистрирован? <button type="button" x-on:click="$store.auth.switchTo('signup')" class="text-primary hover:underline cursor-pointer">Тебе сюда</button>
         </p>
         <p class="text-sm text-center mt-2">
-          <button type="button" @click="forgotPassword()" class="text-base-content/50 hover:text-primary hover:underline cursor-pointer">Забыл пароль?</button>
+          <button type="button" x-on:click="forgotPassword()" class="text-base-content/50 hover:text-primary hover:underline cursor-pointer">Забыл пароль?</button>
         </p>
       </form>
     </template>
 
     <!-- Signup Form -->
     <template x-if="$store.auth.formType === 'signup'">
-      <form @submit.prevent="handleSubmit">
+      <form x-on:submit.prevent="handleSubmit">
         <h2 class="text-2xl font-bold mb-6 text-center">Зарегистрируйся</h2>
         <div class="space-y-4">
-          <Input type="text" name="firstName" placeholder="Имя" autocomplete="given-name" :value="formData.firstName" required />
-          <Input type="text" name="lastName" placeholder="Фамилия" autocomplete="family-name" :value="formData.lastName" required />
-          <Input type="email" name="email" placeholder="Почта" autocomplete="email" :value="formData.email" required />
-          <Input type="password" name="password" placeholder="Пароль" autocomplete="new-password" :value="formData.password" required />
-          <Input type="password" name="confirmPassword" placeholder="Подтвердить пароль" autocomplete="new-password" :value="formData.confirmPassword" required />
+          <Input type="text" name="firstName" placeholder="Имя" autocomplete="given-name" x-bind:value="formData.firstName" required />
+          <Input type="text" name="lastName" placeholder="Фамилия" autocomplete="family-name" x-bind:value="formData.lastName" required />
+          <Input type="email" name="email" placeholder="Почта" autocomplete="email" x-bind:value="formData.email" required />
+          <Input type="password" name="password" placeholder="Пароль" autocomplete="new-password" x-bind:value="formData.password" required />
+          <Input type="password" name="confirmPassword" placeholder="Подтвердить пароль" autocomplete="new-password" x-bind:value="formData.confirmPassword" required />
         </div>
         <div class="mt-6">
-          <Button type="submit" class="w-full" :disabled="isLoading">
+          <Button type="submit" class="w-full" x-bind:disabled="isLoading">
             <span x-show="!isLoading">Регистрация</span>
             <span x-show="isLoading">Загрузка...</span>
           </Button>
         </div>
         <p class="text-sm text-center mt-4">
-          Уже как дома? <button type="button" @click="$store.auth.switchTo('login')" class="text-primary hover:underline cursor-pointer">Заходи</button>
+          Уже как дома? <button type="button" x-on:click="$store.auth.switchTo('login')" class="text-primary hover:underline cursor-pointer">Заходи</button>
         </p>
       </form>
     </template>

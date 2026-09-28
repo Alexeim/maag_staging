@@ -155,7 +155,7 @@ const currentPath = Astro.url.pathname;
         <button
           type="button"
           class="p-2"
-          @click="$store.navbar.toggle()"
+          x-on:click="$store.navbar.toggle()"
           aria-controls="mobile-menu"
           x-bind:aria-expanded="$store.navbar.isOpen"
         >
@@ -185,7 +185,7 @@ const currentPath = Astro.url.pathname;
           <!-- Logged Out State -->
           <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
             <button
-              @click.prevent="$store.auth.openAuthModal()"
+              x-on:click.prevent="$store.auth.openAuthModal()"
               class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
             >
               Войти
@@ -197,7 +197,7 @@ const currentPath = Astro.url.pathname;
               <a
                 href="/profile"
                 class="flex items-center justify-center w-10 h-10 text-primary-content rounded-full font-bold text-lg hover:drop-shadow-lg transition-shadow"
-                :class="$store.auth.profile?.role === 'admin' ? 'bg-error/50' : 'bg-primary'"
+                x-bind:class="$store.auth.profile?.role === 'admin' ? 'bg-error/50' : 'bg-primary'"
               >
                 <div
                   x-text="($store.auth.profile?.firstName?.[0] || '') + ($store.auth.profile?.lastName?.[0] || '')"
@@ -205,7 +205,7 @@ const currentPath = Astro.url.pathname;
                 </div>
               </a>
               <button
-                @click.prevent="handleSignOut()"
+                x-on:click.prevent="handleSignOut()"
                 class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
               >
                 Выйти

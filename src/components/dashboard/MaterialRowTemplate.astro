@@ -11,13 +11,13 @@
 >
   <span
     class="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none"
-    :class="typeMeta(row.type).badgeClass"
+    x-bind:class="typeMeta(row.type).badgeClass"
     x-text="typeMeta(row.type).badge"
   ></span>
 
   <div class="min-w-0 flex-1">
     <a
-      :href="typeMeta(row.type).editHref(row.id)"
+      x-bind:href="typeMeta(row.type).editHref(row.id)"
       class="block truncate text-sm font-medium hover:text-primary"
       x-text="row.title || '(без заголовка)'"
     ></a>
@@ -34,28 +34,28 @@
 
   <span
     class="shrink-0 h-2.5 w-2.5 rounded-full border"
-    :class="row.published ? 'border-success bg-success' : 'border-base-content/30 bg-transparent'"
-    :title="row.published ? 'Опубликовано' : 'Черновик'"
+    x-bind:class="row.published ? 'border-success bg-success' : 'border-base-content/30 bg-transparent'"
+    x-bind:title="row.published ? 'Опубликовано' : 'Черновик'"
   ></span>
 
   <div
     class="shrink-0 flex items-center gap-2.5 text-xs opacity-70 transition-opacity group-hover:opacity-100"
   >
     <a
-      :href="typeMeta(row.type).viewHref(row.id)"
+      x-bind:href="typeMeta(row.type).viewHref(row.id)"
       target="_blank"
       rel="noopener noreferrer"
       class="hidden text-blue-600 hover:underline sm:inline dark:text-blue-500"
       >Просмотр</a
     >
     <a
-      :href="typeMeta(row.type).editHref(row.id)"
+      x-bind:href="typeMeta(row.type).editHref(row.id)"
       class="font-medium text-primary hover:underline">Ред.</a
     >
     <button
       type="button"
       class="font-medium text-error hover:underline"
-      @click="handleDeleteClick(row.id, row.title, row.type)">Удал.</button
+      x-on:click="handleDeleteClick(row.id, row.title, row.type)">Удал.</button
     >
   </div>
 </li>

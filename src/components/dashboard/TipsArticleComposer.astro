@@ -67,15 +67,15 @@ const allParisDistricts = parisDistrictTags;
           placeholder="Например: 10 спектаклей, которые нельзя пропустить"
         />
         <div class="flex justify-end gap-3 mt-3">
-          <Button variant="secondary" size="sm" @click="cancelEditTitle()">Отмена</Button>
-          <Button variant="primary" size="sm" @click="saveTitle()">Сохранить</Button>
+          <Button variant="secondary" size="sm" x-on:click="cancelEditTitle()">Отмена</Button>
+          <Button variant="primary" size="sm" x-on:click="saveTitle()">Сохранить</Button>
         </div>
       </div>
     </template>
     <template x-if="!isEditingTitle">
       <div class="flex justify-between items-center border border-base-300 rounded-lg px-4 py-3">
         <h3 class="text-lg font-semibold" x-text="article.title || 'Введите заголовок...'"></h3>
-        <Button variant="outline" size="sm" @click="editTitle()">Редактировать</Button>
+        <Button variant="outline" size="sm" x-on:click="editTitle()">Редактировать</Button>
       </div>
     </template>
 
@@ -86,7 +86,7 @@ const allParisDistricts = parisDistrictTags;
         <div
           class="rich-text-editor rich-text-editor--compact"
           x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml({ html: article.leadHtml, text: article.lead }), placeholder: 'Краткое описание под заголовком (необязательно)' })"
-          @rich-text-change="article.leadHtml = $event.detail.html; article.lead = $event.detail.text"
+          x-on:rich-text-change="article.leadHtml = $event.detail.html; article.lead = $event.detail.text"
         >
           <div x-ref="editor"></div>
         </div>
@@ -100,7 +100,7 @@ const allParisDistricts = parisDistrictTags;
         <div
           class="rich-text-editor rich-text-editor--compact"
           x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml({ html: article.subtitleHtml, text: article.subtitle }), placeholder: 'Подзаголовок под заголовком...' })"
-          @rich-text-change="article.subtitleHtml = $event.detail.html; article.subtitle = $event.detail.text"
+          x-on:rich-text-change="article.subtitleHtml = $event.detail.html; article.subtitle = $event.detail.text"
         >
           <div x-ref="editor"></div>
         </div>
@@ -136,17 +136,17 @@ const allParisDistricts = parisDistrictTags;
       <div class="flex flex-wrap gap-2">
         <button
           type="button"
-          @click="useNewAuthor = false"
+          x-on:click="useNewAuthor = false"
           class="px-3 py-2 border text-sm cursor-pointer"
-          :class="!useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+          x-bind:class="!useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
         >
           Выбрать из списка
         </button>
         <button
           type="button"
-          @click="useNewAuthor = true"
+          x-on:click="useNewAuthor = true"
           class="px-3 py-2 border text-sm cursor-pointer"
-          :class="useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+          x-bind:class="useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
         >
           Новый автор
         </button>
@@ -158,8 +158,8 @@ const allParisDistricts = parisDistrictTags;
           class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
         >
           <option value="">Выберите автора...</option>
-          <template x-for="author in authors" :key="author.id">
-            <option :value="author.id" x-text="getAuthorLabel(author)"></option>
+          <template x-for="author in authors" x-bind:key="author.id">
+            <option x-bind:value="author.id" x-text="getAuthorLabel(author)"></option>
           </template>
         </select>
         <p x-show="authorsLoading" class="text-xs text-base-content/60 mt-1">Загружаем авторов...</p>
@@ -187,7 +187,7 @@ const allParisDistricts = parisDistrictTags;
     <label class="block text-sm font-medium text-base-content mb-2">Категория</label>
     <select
       x-model="article.category"
-      @change="handleCategoryChange($event.target.value)"
+      x-on:change="handleCategoryChange($event.target.value)"
       class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
     >
       <option value="culture">Культура</option>
@@ -240,24 +240,24 @@ const allParisDistricts = parisDistrictTags;
     ></label>
     <div class="flex flex-wrap gap-2">
       <template x-if="article.category === 'culture'">
-        <template x-for={`tag in ${JSON.stringify(allCultureTags)}`} :key="tag">
+        <template x-for={`tag in ${JSON.stringify(allCultureTags)}`} x-bind:key="tag">
           <button
             type="button"
             class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
-            :class="isTagSelected(tag) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
-            @click="toggleTag(tag)"
+            x-bind:class="isTagSelected(tag) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+            x-on:click="toggleTag(tag)"
           >
             <span x-text="tag"></span>
           </button>
         </template>
       </template>
       <template x-if="article.category === 'paris'">
-        <template x-for={`tag in ${JSON.stringify(allParisTags)}`} :key="tag">
+        <template x-for={`tag in ${JSON.stringify(allParisTags)}`} x-bind:key="tag">
           <button
             type="button"
             class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
-            :class="isTagSelected(tag) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
-            @click="toggleTag(tag)"
+            x-bind:class="isTagSelected(tag) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+            x-on:click="toggleTag(tag)"
           >
             <span x-text="tag"></span>
           </button>
@@ -272,13 +272,13 @@ const allParisDistricts = parisDistrictTags;
             <span x-text="article.category === 'paris' ? 'Подкатегории Парижа' : 'Категорийные теги'"></span>
           </p>
           <div class="mt-1 flex flex-wrap gap-2">
-            <template x-for="tag in getSelectedCategoryTags()" :key="tag">
+            <template x-for="tag in getSelectedCategoryTags()" x-bind:key="tag">
               <span class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm">
                 <span x-text="tag"></span>
                 <button
                   type="button"
                   class="text-base-content/60 hover:text-base-content cursor-pointer"
-                  @click="removeTag(tag)"
+                  x-on:click="removeTag(tag)"
                 >×</button>
               </span>
             </template>
@@ -298,8 +298,8 @@ const allParisDistricts = parisDistrictTags;
           class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
         >
           <option value="">Не указывать округ</option>
-          <template x-for={`district in ${JSON.stringify(allParisDistricts)}`} :key="district.value">
-            <option :value="district.value" x-text="district.title"></option>
+          <template x-for={`district in ${JSON.stringify(allParisDistricts)}`} x-bind:key="district.value">
+            <option x-bind:value="district.value" x-text="district.title"></option>
           </template>
         </select>
       </div>
@@ -321,7 +321,7 @@ const allParisDistricts = parisDistrictTags;
         id="cover-upload"
         type="file"
         class="hidden"
-        @change="handleCoverUpload($event); fileName = $event.target.files[0]?.name || ''"
+        x-on:change="handleCoverUpload($event); fileName = $event.target.files[0]?.name || ''"
         accept="image/png, image/jpeg, image/webp"
       />
       <span
@@ -332,12 +332,12 @@ const allParisDistricts = parisDistrictTags;
     <div x-show="uploading" class="mt-4">
       <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
       <div class="w-full bg-base-200 rounded-full h-2">
-        <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+        <div class="bg-primary h-2 rounded-full" x-bind:style="{ width: uploadProgress + '%' }"></div>
       </div>
     </div>
     <div x-show="article.imageUrl && !uploading" class="mt-4 space-y-4">
       <p class="text-sm text-success">Главное изображение загружено!</p>
-      <img :src="article.imageUrl" alt="Предпросмотр обложки" class="rounded-md max-h-60 w-full object-cover" />
+      <img x-bind:src="article.imageUrl" alt="Предпросмотр обложки" class="rounded-md max-h-60 w-full object-cover" />
       <div>
         <label class="block text-sm font-medium text-base-content mb-2">Подпись к изображению</label>
         <template x-if="isEditingCaption">
@@ -349,15 +349,15 @@ const allParisDistricts = parisDistrictTags;
               placeholder="Введите подпись..."
             />
             <div class="flex justify-end gap-3 mt-3">
-              <Button variant="secondary" size="sm" @click="cancelEditCaption()">Отмена</Button>
-              <Button variant="primary" size="sm" @click="saveCaption()">Сохранить</Button>
+              <Button variant="secondary" size="sm" x-on:click="cancelEditCaption()">Отмена</Button>
+              <Button variant="primary" size="sm" x-on:click="saveCaption()">Сохранить</Button>
             </div>
           </div>
         </template>
         <template x-if="!isEditingCaption">
           <div class="flex justify-between items-center border border-base-300 rounded-lg px-4 py-3">
             <p class="text-base-content" x-text="article.imageCaption || 'Подпись отсутствует...'"></p>
-            <Button variant="outline" size="sm" @click="editCaption()">Редактировать</Button>
+            <Button variant="outline" size="sm" x-on:click="editCaption()">Редактировать</Button>
           </div>
         </template>
       </div>
@@ -366,25 +366,25 @@ const allParisDistricts = parisDistrictTags;
         <div class="flex flex-wrap gap-2">
           <button
             type="button"
-            @click="article.heroOrientation = 'image-right'"
+            x-on:click="article.heroOrientation = 'image-right'"
             class="px-3 py-2 border text-sm cursor-pointer"
-            :class="article.heroOrientation === 'image-right' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+            x-bind:class="article.heroOrientation === 'image-right' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
           >
             Текст | Фото
           </button>
           <button
             type="button"
-            @click="article.heroOrientation = 'image-left'"
+            x-on:click="article.heroOrientation = 'image-left'"
             class="px-3 py-2 border text-sm cursor-pointer"
-            :class="article.heroOrientation === 'image-left' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+            x-bind:class="article.heroOrientation === 'image-left' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
           >
             Фото | Текст
           </button>
           <button
             type="button"
-            @click="article.heroOrientation = 'image-bottom'"
+            x-on:click="article.heroOrientation = 'image-bottom'"
             class="px-3 py-2 border text-sm cursor-pointer"
-            :class="article.heroOrientation === 'image-bottom' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+            x-bind:class="article.heroOrientation === 'image-bottom' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
           >
             Фото снизу
           </button>
@@ -411,7 +411,7 @@ const allParisDistricts = parisDistrictTags;
         id="second-cover-upload"
         type="file"
         class="hidden"
-        @change="handleSecondImageUpload($event); secondFileName = $event.target.files[0]?.name || ''"
+        x-on:change="handleSecondImageUpload($event); secondFileName = $event.target.files[0]?.name || ''"
         accept="image/png, image/jpeg, image/webp"
       />
       <span
@@ -421,7 +421,7 @@ const allParisDistricts = parisDistrictTags;
     </div>
     <div x-show="article.secondImageUrl && !uploading" class="mt-4 space-y-4">
       <p class="text-sm text-success">Второе главное изображение загружено!</p>
-      <img :src="article.secondImageUrl" alt="Предпросмотр второго изображения" class="rounded-md max-h-60 w-full object-cover" />
+      <img x-bind:src="article.secondImageUrl" alt="Предпросмотр второго изображения" class="rounded-md max-h-60 w-full object-cover" />
       <div>
         <label class="block text-sm font-medium text-base-content mb-2">Подпись ко второму изображению</label>
         <template x-if="isEditingSecondCaption">
@@ -433,15 +433,15 @@ const allParisDistricts = parisDistrictTags;
               placeholder="Введите подпись..."
             />
             <div class="flex justify-end gap-3 mt-3">
-              <Button variant="secondary" size="sm" @click="cancelEditSecondCaption()">Отмена</Button>
-              <Button variant="primary" size="sm" @click="saveSecondCaption()">Сохранить</Button>
+              <Button variant="secondary" size="sm" x-on:click="cancelEditSecondCaption()">Отмена</Button>
+              <Button variant="primary" size="sm" x-on:click="saveSecondCaption()">Сохранить</Button>
             </div>
           </div>
         </template>
         <template x-if="!isEditingSecondCaption">
           <div class="flex justify-between items-center border border-base-300 rounded-lg px-4 py-3">
             <p class="text-base-content" x-text="article.secondImageCaption || 'Подпись отсутствует...'"></p>
-            <Button variant="outline" size="sm" @click="editSecondCaption()">Редактировать</Button>
+            <Button variant="outline" size="sm" x-on:click="editSecondCaption()">Редактировать</Button>
           </div>
         </template>
       </div>
@@ -458,7 +458,7 @@ const allParisDistricts = parisDistrictTags;
       <div
         class="rich-text-editor"
         x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml({ html: article.introHtml, text: article.intro }), placeholder: 'Текст вступления перед списком пунктов (необязательно)' })"
-        @rich-text-change="article.introHtml = $event.detail.html; article.intro = $event.detail.text"
+        x-on:rich-text-change="article.introHtml = $event.detail.html; article.intro = $event.detail.text"
       >
         <div x-ref="editor"></div>
       </div>
@@ -473,7 +473,7 @@ const allParisDistricts = parisDistrictTags;
     </p>
 
     <div class="space-y-4">
-      <template x-for="(block, index) in article.contentBlocks" :key="index">
+      <template x-for="(block, index) in article.contentBlocks" x-bind:key="index">
         <div>
 
           <!-- Collapsed preview — card layout matching public page -->
@@ -485,19 +485,19 @@ const allParisDistricts = parisDistrictTags;
                 <template x-if="block.imageUrl">
                   <div class="sm:w-[42%] shrink-0 bg-base-200">
                     <img
-                      :src="block.imageUrl"
-                      :alt="block.heading || 'Фото'"
+                      x-bind:src="block.imageUrl"
+                      x-bind:alt="block.heading || 'Фото'"
                       class="w-full h-full object-cover"
                       style="min-height:160px; max-height:220px;"
                     />
                   </div>
                 </template>
                 <!-- Right: content -->
-                <div class="flex flex-col justify-start gap-2 p-4" :class="block.imageUrl ? 'sm:w-[58%]' : 'w-full'">
+                <div class="flex flex-col justify-start gap-2 p-4" x-bind:class="block.imageUrl ? 'sm:w-[58%]' : 'w-full'">
                   <p class="font-bold font-oswald tracking-wide leading-snug" x-text="block.heading || '(без заголовка)'"></p>
                   <template x-if="block.metaItems && block.metaItems.length > 0">
                     <div class="flex flex-col gap-0.5">
-                      <template x-for="(mi, mii) in block.metaItems" :key="mii">
+                      <template x-for="(mi, mii) in block.metaItems" x-bind:key="mii">
                         <p class="flex items-center gap-1.5 text-xs text-base-content/60 font-oswald">
                           <span class="opacity-40">·</span>
                           <span x-text="mi.text"></span>
@@ -514,20 +514,20 @@ const allParisDistricts = parisDistrictTags;
                 <div class="flex items-center gap-2">
                   <button
                     type="button"
-                    @click="moveBlock(index, 'up')"
-                    :disabled="index === 0"
+                    x-on:click="moveBlock(index, 'up')"
+                    x-bind:disabled="index === 0"
                     class="p-1 rounded hover:bg-base-200 disabled:opacity-30 cursor-pointer"
                     title="Вверх"
                   >↑</button>
                   <button
                     type="button"
-                    @click="moveBlock(index, 'down')"
-                    :disabled="index === article.contentBlocks.length - 1"
+                    x-on:click="moveBlock(index, 'down')"
+                    x-bind:disabled="index === article.contentBlocks.length - 1"
                     class="p-1 rounded hover:bg-base-200 disabled:opacity-30 cursor-pointer"
                     title="Вниз"
                   >↓</button>
-                  <Button variant="outline" size="sm" @click="editBlock(index)">Редактировать</Button>
-                  <Button variant="error" size="sm" @click="deleteBlock(index)">Удалить</Button>
+                  <Button variant="outline" size="sm" x-on:click="editBlock(index)">Редактировать</Button>
+                  <Button variant="error" size="sm" x-on:click="deleteBlock(index)">Удалить</Button>
                 </div>
               </div>
             </div>
@@ -558,17 +558,17 @@ const allParisDistricts = parisDistrictTags;
                 </label>
                 <div class="flex items-center gap-3">
                   <label
-                    :for="'item-img-' + index"
+                    x-bind:for="'item-img-' + index"
                     class="cursor-pointer text-white bg-green-700 hover:bg-green-800 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4 text-sm"
                   >
                     <CloudUpload class="w-4 h-4" />
                     Загрузить
                   </label>
                   <input
-                    :id="'item-img-' + index"
+                    x-bind:id="'item-img-' + index"
                     type="file"
                     class="hidden"
-                    @change="handleItemImageUpload($event); itemFileName = $event.target.files[0]?.name || ''"
+                    x-on:change="handleItemImageUpload($event); itemFileName = $event.target.files[0]?.name || ''"
                     accept="image/png, image/jpeg, image/webp"
                   />
                   <span
@@ -581,11 +581,11 @@ const allParisDistricts = parisDistrictTags;
                     Загружаем фото пункта <span x-text="index + 1"></span>: <span x-text="uploadProgress.toFixed(0) + '%'"></span>
                   </p>
                   <div class="w-full bg-base-200 rounded-full h-2">
-                    <div class="bg-primary h-2 rounded-full" :style="{ width: uploadProgress + '%' }"></div>
+                    <div class="bg-primary h-2 rounded-full" x-bind:style="{ width: uploadProgress + '%' }"></div>
                   </div>
                 </div>
                 <div x-show="editingBlock.imageUrl && !uploading" class="mt-3 space-y-2">
-                  <img :src="editingBlock.imageUrl" alt="Фото пункта" class="rounded-md max-h-48 object-cover" />
+                  <img x-bind:src="editingBlock.imageUrl" alt="Фото пункта" class="rounded-md max-h-48 object-cover" />
                   <input
                     type="text"
                     x-model="editingBlock.imageCaption"
@@ -605,94 +605,94 @@ const allParisDistricts = parisDistrictTags;
                   <button
                     type="button"
                     class="px-3 py-1.5 rounded-lg border border-base-300 bg-base-100 text-xs text-base-content transition hover:bg-base-200 cursor-pointer"
-                    @click="editingBlock.metaItems.push({ icon: 'location', text: '', isLink: false, url: '' })"
+                    x-on:click="editingBlock.metaItems.push({ icon: 'location', text: '', isLink: false, url: '' })"
                   >
                     + Добавить строку
                   </button>
                 </div>
 
-                <template x-for="(metaItem, mi) in editingBlock.metaItems" :key="mi">
+                <template x-for="(metaItem, mi) in editingBlock.metaItems" x-bind:key="mi">
                   <div class="rounded-lg border border-base-300 bg-base-100 p-4 space-y-3">
                     <!-- Icon picker -->
                     <div class="flex flex-wrap gap-2">
                       <button
                         type="button"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
-                        :class="metaItem.icon === 'location' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        x-bind:class="metaItem.icon === 'location' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
                         title="Место"
-                        @click="metaItem.icon = 'location'"
+                        x-on:click="metaItem.icon = 'location'"
                       >
                         <MapPin class="h-4 w-4" />
                       </button>
                       <button
                         type="button"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
-                        :class="metaItem.icon === 'clock' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        x-bind:class="metaItem.icon === 'clock' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
                         title="Время"
-                        @click="metaItem.icon = 'clock'"
+                        x-on:click="metaItem.icon = 'clock'"
                       >
                         <Clock3 class="h-4 w-4" />
                       </button>
                       <button
                         type="button"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
-                        :class="metaItem.icon === 'calendar' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        x-bind:class="metaItem.icon === 'calendar' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
                         title="Дата"
-                        @click="metaItem.icon = 'calendar'"
+                        x-on:click="metaItem.icon = 'calendar'"
                       >
                         <CalendarDays class="h-4 w-4" />
                       </button>
                       <button
                         type="button"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
-                        :class="metaItem.icon === 'bulb' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        x-bind:class="metaItem.icon === 'bulb' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
                         title="Идея"
-                        @click="metaItem.icon = 'bulb'"
+                        x-on:click="metaItem.icon = 'bulb'"
                       >
                         <Lightbulb class="h-4 w-4" />
                       </button>
                       <button
                         type="button"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
-                        :class="metaItem.icon === 'pen' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        x-bind:class="metaItem.icon === 'pen' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
                         title="Примечание"
-                        @click="metaItem.icon = 'pen'"
+                        x-on:click="metaItem.icon = 'pen'"
                       >
                         <NotebookPen class="h-4 w-4" />
                       </button>
                       <button
                         type="button"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
-                        :class="metaItem.icon === 'crown' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        x-bind:class="metaItem.icon === 'crown' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
                         title="Особое"
-                        @click="metaItem.icon = 'crown'"
+                        x-on:click="metaItem.icon = 'crown'"
                       >
                         <Crown class="h-4 w-4" />
                       </button>
                       <button
                         type="button"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
-                        :class="metaItem.icon === 'star' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        x-bind:class="metaItem.icon === 'star' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
                         title="Рекомендовано"
-                        @click="metaItem.icon = 'star'"
+                        x-on:click="metaItem.icon = 'star'"
                       >
                         <Star class="h-4 w-4" />
                       </button>
                       <button
                         type="button"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
-                        :class="metaItem.icon === 'alert' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        x-bind:class="metaItem.icon === 'alert' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
                         title="Внимание"
-                        @click="metaItem.icon = 'alert'"
+                        x-on:click="metaItem.icon = 'alert'"
                       >
                         <CircleAlert class="h-4 w-4" />
                       </button>
                       <button
                         type="button"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border transition cursor-pointer"
-                        :class="metaItem.icon === 'info' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+                        x-bind:class="metaItem.icon === 'info' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
                         title="Инфо"
-                        @click="metaItem.icon = 'info'"
+                        x-on:click="metaItem.icon = 'info'"
                       >
                         <Info class="h-4 w-4" />
                       </button>
@@ -710,19 +710,19 @@ const allParisDistricts = parisDistrictTags;
                     <div class="flex items-center justify-between gap-3">
                       <div class="flex items-center gap-3">
                         <input
-                          :id="'meta-link-' + index + '-' + mi"
+                          x-bind:id="'meta-link-' + index + '-' + mi"
                           type="checkbox"
                           x-model="metaItem.isLink"
                           class="w-4 h-4 text-primary bg-base-200 border-base-300 rounded-sm focus:ring-primary focus:ring-2 cursor-pointer"
                         />
-                        <label :for="'meta-link-' + index + '-' + mi" class="text-sm text-base-content cursor-pointer">
+                        <label x-bind:for="'meta-link-' + index + '-' + mi" class="text-sm text-base-content cursor-pointer">
                           Это ссылка
                         </label>
                       </div>
                       <button
                         type="button"
                         class="text-xs text-error hover:underline cursor-pointer"
-                        @click="editingBlock.metaItems.splice(mi, 1)"
+                        x-on:click="editingBlock.metaItems.splice(mi, 1)"
                       >
                         Удалить
                       </button>
@@ -754,15 +754,15 @@ const allParisDistricts = parisDistrictTags;
                 <div
                   class="rich-text-editor"
                   x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml(editingBlock), placeholder: 'Основной текст пункта...' })"
-                  @rich-text-change="editingBlock.html = $event.detail.html; editingBlock.text = $event.detail.text"
+                  x-on:rich-text-change="editingBlock.html = $event.detail.html; editingBlock.text = $event.detail.text"
                 >
                   <div x-ref="editor"></div>
                 </div>
               </div>
 
               <div class="flex justify-end gap-3">
-                <Button variant="secondary" size="sm" @click="cancelEdit()" :disabled="uploading" :class="{'opacity-50 cursor-not-allowed': uploading}">Отмена</Button>
-                <Button variant="primary" size="sm" @click="updateBlock()" :disabled="uploading" :class="{'opacity-50 cursor-not-allowed': uploading}">Сохранить пункт</Button>
+                <Button variant="secondary" size="sm" x-on:click="cancelEdit()" x-bind:disabled="uploading" x-bind:class="{'opacity-50 cursor-not-allowed': uploading}">Отмена</Button>
+                <Button variant="primary" size="sm" x-on:click="updateBlock()" x-bind:disabled="uploading" x-bind:class="{'opacity-50 cursor-not-allowed': uploading}">Сохранить пункт</Button>
               </div>
             </div>
           </template>
@@ -772,7 +772,7 @@ const allParisDistricts = parisDistrictTags;
     </div>
 
     <div class="mt-6">
-      <Button variant="outline" size="md" @click="addTipsItem()" :disabled="uploading" :class="{'opacity-50 cursor-not-allowed': uploading}">
+      <Button variant="outline" size="md" x-on:click="addTipsItem()" x-bind:disabled="uploading" x-bind:class="{'opacity-50 cursor-not-allowed': uploading}">
         + Добавить пункт
       </Button>
     </div>

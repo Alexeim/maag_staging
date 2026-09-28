@@ -20,7 +20,7 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
           </p>
         </div>
         <div class="flex gap-2">
-          <Button variant="secondary" @click="window.close()">Закрыть превью</Button>
+          <Button variant="secondary" x-on:click="window.close()">Закрыть превью</Button>
         </div>
       </div>
 
@@ -58,8 +58,8 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
           <template x-if="article.imageUrl">
             <figure class="w-full max-w-[1200px] px-6">
               <img
-                :src="article.imageUrl"
-                :alt="article.imageCaption || article.title || 'Event image'"
+                x-bind:src="article.imageUrl"
+                x-bind:alt="article.imageCaption || article.title || 'Event image'"
                 class="w-full h-auto shadow-lg"
               />
               <figcaption

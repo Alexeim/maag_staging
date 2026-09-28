@@ -24,7 +24,7 @@ const { heading = "Подвязка контента", className = "mt-8 mb-8" }
     </div>
 
     <div class="mt-6 grid gap-4">
-      <template x-for="type in relatedContentTypeOptions" :key="type.value">
+      <template x-for="type in relatedContentTypeOptions" x-bind:key="type.value">
         <section
           x-show="getSelectedEntityRelatedContent(type.value).length > 0"
           class="rounded-xl border border-base-300 bg-white p-4"
@@ -44,7 +44,7 @@ const { heading = "Подвязка контента", className = "mt-8 mb-8" }
           <div class="grid gap-2">
             <template
               x-for="contentId in getSelectedEntityRelatedContent(type.value)"
-              :key="`${type.value}-${contentId}`"
+              x-bind:key="`${type.value}-${contentId}`"
             >
               <div
                 class="flex items-center justify-between gap-3 rounded-lg border border-base-300 bg-base-100 px-3 py-2"
@@ -57,7 +57,7 @@ const { heading = "Подвязка контента", className = "mt-8 mb-8" }
                   variant="error"
                   size="sm"
                   type="button"
-                  @click="removeRelatedContent(type.value, contentId)"
+                  x-on:click="removeRelatedContent(type.value, contentId)"
                 >
                   Удалить
                 </Button>
@@ -77,12 +77,12 @@ const { heading = "Подвязка контента", className = "mt-8 mb-8" }
         >
         <select
           x-model="selectedRelatedContentType"
-          @change="selectedRelatedContentId = ''"
+          x-on:change="selectedRelatedContentId = ''"
           class="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-sm text-base-content focus:border-primary focus:ring-primary"
         >
           <option value="" disabled>Выберите тип...</option>
-          <template x-for="type in relatedContentTypeOptions" :key="type.value">
-            <option :value="type.value" x-text="type.label"></option>
+          <template x-for="type in relatedContentTypeOptions" x-bind:key="type.value">
+            <option x-bind:value="type.value" x-text="type.label"></option>
           </template>
         </select>
       </div>
@@ -93,15 +93,15 @@ const { heading = "Подвязка контента", className = "mt-8 mb-8" }
         >
         <select
           x-model="selectedRelatedContentId"
-          :disabled="!selectedRelatedContentType || contentListsLoading"
+          x-bind:disabled="!selectedRelatedContentType || contentListsLoading"
           class="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-sm text-base-content focus:border-primary focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           <option value="" disabled>Выберите материал...</option>
           <template
             x-for="item in getAvailableRelatedContentItems()"
-            :key="item.id"
+            x-bind:key="item.id"
           >
-            <option :value="item.id" x-text="item.title || item.id"></option>
+            <option x-bind:value="item.id" x-text="item.title || item.id"></option>
           </template>
         </select>
         <p
@@ -116,9 +116,9 @@ const { heading = "Подвязка контента", className = "mt-8 mb-8" }
         <Button
           variant="primary"
           type="button"
-          @click="addRelatedContent()"
-          :disabled="!selectedRelatedContentType || !selectedRelatedContentId || contentListsLoading"
-          :class="{ 'opacity-50 cursor-not-allowed': !selectedRelatedContentType || !selectedRelatedContentId || contentListsLoading }"
+          x-on:click="addRelatedContent()"
+          x-bind:disabled="!selectedRelatedContentType || !selectedRelatedContentId || contentListsLoading"
+          x-bind:class="{ 'opacity-50 cursor-not-allowed': !selectedRelatedContentType || !selectedRelatedContentId || contentListsLoading }"
         >
           Добавить
         </Button>

@@ -1362,14 +1362,14 @@ const initialMainHeroState = (() => {
           <div class="grid gap-2">
             <p class="text-sm font-medium">Шаг 1. Выбери тип материала</p>
             <div class="grid gap-3 sm:grid-cols-2">
-              <template x-for="typeOption in getMainHeroTypeOptions()" :key="typeOption.value">
+              <template x-for="typeOption in getMainHeroTypeOptions()" x-bind:key="typeOption.value">
                 <button
                   type="button"
                   class="rounded-lg border px-4 py-3 text-left text-sm transition cursor-pointer"
-                  :class="selectedMainHeroType === typeOption.value
+                  x-bind:class="selectedMainHeroType === typeOption.value
                     ? 'border-primary bg-primary/10 text-base-content'
                     : 'border-base-300 bg-base-100 text-base-content hover:bg-base-200'"
-                  @click="selectMainHeroType(typeOption.value)"
+                  x-on:click="selectMainHeroType(typeOption.value)"
                 >
                   <span class="font-medium" x-text="typeOption.label"></span>
                 </button>
@@ -1383,14 +1383,14 @@ const initialMainHeroState = (() => {
               Статьи разделены отдельно на Culture, Paris и Tips.
             </p>
             <div class="grid gap-3 sm:grid-cols-3">
-              <template x-for="bucketOption in getMainHeroArticleBucketOptions()" :key="bucketOption.value">
+              <template x-for="bucketOption in getMainHeroArticleBucketOptions()" x-bind:key="bucketOption.value">
                 <button
                   type="button"
                   class="rounded-xl border px-4 py-3 text-left transition cursor-pointer"
-                  :class="selectedMainHeroArticleBucket === bucketOption.value
+                  x-bind:class="selectedMainHeroArticleBucket === bucketOption.value
                     ? 'border-primary bg-primary/10 text-base-content'
                     : 'border-base-300 bg-base-100 text-base-content hover:bg-base-200'"
-                  @click="selectMainHeroArticleBucket(bucketOption.value)"
+                  x-on:click="selectMainHeroArticleBucket(bucketOption.value)"
                 >
                   <span class="block text-sm font-semibold" x-text="bucketOption.label"></span>
                   <span
@@ -1432,8 +1432,8 @@ const initialMainHeroState = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveMainHero()"
-            :disabled="mainHeroSaving"
+            x-on:click="saveMainHero()"
+            x-bind:disabled="mainHeroSaving"
           >
             Сохранить
           </button>
@@ -1496,8 +1496,8 @@ const initialMainHeroState = (() => {
                   <label class="flex items-start gap-3 rounded-lg border border-base-300 p-3 cursor-pointer">
                     <input
                       type="checkbox"
-                      :checked={`isManualNewsSelected(${JSON.stringify(item.id)})`}
-                      @change={`toggleNewsItem(${JSON.stringify(item.id)})`}
+                      x-bind:checked={`isManualNewsSelected(${JSON.stringify(item.id)})`}
+                      x-on:change={`toggleNewsItem(${JSON.stringify(item.id)})`}
                     />
                     <span class="text-sm leading-6">{item.title}</span>
                   </label>
@@ -1517,8 +1517,8 @@ const initialMainHeroState = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveNewsRail()"
-            :disabled="newsSaving"
+            x-on:click="saveNewsRail()"
+            x-bind:disabled="newsSaving"
           >
             Сохранить
           </button>
@@ -1571,8 +1571,8 @@ const initialMainHeroState = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveEventCard()"
-            :disabled="eventSaving"
+            x-on:click="saveEventCard()"
+            x-bind:disabled="eventSaving"
           >
             Сохранить
           </button>
@@ -1660,8 +1660,8 @@ const initialMainHeroState = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveNetlenkaRail()"
-            :disabled="netlenkaSaving"
+            x-on:click="saveNetlenkaRail()"
+            x-bind:disabled="netlenkaSaving"
           >
             Сохранить
           </button>
@@ -1711,8 +1711,8 @@ const initialMainHeroState = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveCultureHero()"
-            :disabled="cultureHeroSaving"
+            x-on:click="saveCultureHero()"
+            x-bind:disabled="cultureHeroSaving"
           >
             Сохранить
           </button>
@@ -1783,8 +1783,8 @@ const initialMainHeroState = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveCultureCards()"
-            :disabled="cultureCardsSaving"
+            x-on:click="saveCultureCards()"
+            x-bind:disabled="cultureCardsSaving"
           >
             Сохранить
           </button>
@@ -1837,8 +1837,8 @@ const initialMainHeroState = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveCultureInterview()"
-            :disabled="cultureInterviewSaving"
+            x-on:click="saveCultureInterview()"
+            x-bind:disabled="cultureInterviewSaving"
           >
             Сохранить
           </button>
@@ -1886,8 +1886,8 @@ const initialMainHeroState = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveParisHero()"
-            :disabled="parisHeroSaving"
+            x-on:click="saveParisHero()"
+            x-bind:disabled="parisHeroSaving"
           >
             Сохранить
           </button>
@@ -1958,8 +1958,8 @@ const initialMainHeroState = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveParisCards()"
-            :disabled="parisCardsSaving"
+            x-on:click="saveParisCards()"
+            x-bind:disabled="parisCardsSaving"
           >
             Сохранить
           </button>
@@ -2010,8 +2010,8 @@ const initialMainHeroState = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveLeSaviezVous()"
-            :disabled="leSaviezVousSaving"
+            x-on:click="saveLeSaviezVous()"
+            x-bind:disabled="leSaviezVousSaving"
           >
             Сохранить
           </button>
@@ -2061,8 +2061,8 @@ const initialMainHeroState = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="savePhotoOfTheDay()"
-            :disabled="photoOfTheDaySaving"
+            x-on:click="savePhotoOfTheDay()"
+            x-bind:disabled="photoOfTheDaySaving"
           >
             Сохранить
           </button>

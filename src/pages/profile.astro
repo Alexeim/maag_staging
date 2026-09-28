@@ -24,16 +24,16 @@ import { Bookmark, Trash2 } from "@lucide/astro";
           <button
             type="button"
             class="w-full lg:w-auto text-left lg:text-center text-xs font-['Inter'] uppercase tracking-[0.25em] text-base-content pb-1 transition-colors cursor-pointer"
-            :class="activeTab === 'account' ? 'font-semibold text-accent border-b-2 border-accent' : 'font-normal text-base-content/70 hover:text-base-content'"
-            @click="activeTab = 'account'"
+            x-bind:class="activeTab === 'account' ? 'font-semibold text-accent border-b-2 border-accent' : 'font-normal text-base-content/70 hover:text-base-content'"
+            x-on:click="activeTab = 'account'"
           >
             настройка аккаунта
           </button>
           <button
             type="button"
             class="w-full lg:w-auto text-left lg:text-center text-xs font-['Inter'] uppercase tracking-[0.25em] text-base-content pb-1 transition-colors cursor-pointer"
-            :class="activeTab === 'bookmarks' ? 'font-semibold text-accent border-b-2 border-accent' : 'font-normal text-base-content/70 hover:text-base-content'"
-            @click="activeTab = 'bookmarks'"
+            x-bind:class="activeTab === 'bookmarks' ? 'font-semibold text-accent border-b-2 border-accent' : 'font-normal text-base-content/70 hover:text-base-content'"
+            x-on:click="activeTab = 'bookmarks'"
           >
             закладки
           </button>
@@ -82,7 +82,7 @@ import { Bookmark, Trash2 } from "@lucide/astro";
                         x-text="subscriptionEndDate"></span>
                     </p>
                     <button
-                      @click="manageSubscription()"
+                      x-on:click="manageSubscription()"
                       class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
                     >
                       Управлять подпиской
@@ -94,13 +94,13 @@ import { Bookmark, Trash2 } from "@lucide/astro";
                   <div class="space-y-4">
                     <p>У вас нет активной подписки.</p>
                     <button
-                      @click="createSubscription()"
+                      x-on:click="createSubscription()"
                       class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
                     >
                       Подписаться
                     </button>
                     <button
-                      @click="forceRefresh()"
+                      x-on:click="forceRefresh()"
                       class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
                     >
                       Обновить статус
@@ -182,7 +182,7 @@ import { Bookmark, Trash2 } from "@lucide/astro";
                     </div>
                     <div class="w-full lg:w-auto">
                       <button
-                        @click="changePassword()"
+                        x-on:click="changePassword()"
                         class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
                         >Поменять пароль</button
                       >
@@ -225,13 +225,13 @@ import { Bookmark, Trash2 } from "@lucide/astro";
                 <!-- Action Buttons -->
                 <div class="space-y-4 mt-10">
                   <button
-                    @click="saveChanges()"
+                    x-on:click="saveChanges()"
                     class="w-full h-11 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
                   >
                     Сохранить изменения
                   </button>
                   <button
-                    @click="deleteAccount()"
+                    x-on:click="deleteAccount()"
                     class="w-full h-11 border border-error text-error rounded-lg py-2 px-4 text-sm font-['Inter'] font-normal hover:bg-error/5 transition-colors cursor-pointer"
                   >
                     Удалить аккаунт
@@ -291,7 +291,7 @@ import { Bookmark, Trash2 } from "@lucide/astro";
             class="space-y-12"
             x-show="!$store.auth.isLoading && $store.auth.isLoggedIn && !bookmarksLoading && bookmarks.length > 0"
           >
-            <template x-for="group in bookmarkGroups" :key="group.contentType">
+            <template x-for="group in bookmarkGroups" x-bind:key="group.contentType">
               <section class="space-y-5">
                 <div class="flex items-center gap-4">
                   <h3
@@ -310,16 +310,16 @@ import { Bookmark, Trash2 } from "@lucide/astro";
                 <div class="grid gap-4 md:grid-cols-2">
                   <template
                     x-for="bookmark in group.items"
-                    :key="`${bookmark.contentType}-${bookmark.id}`"
+                    x-bind:key="`${bookmark.contentType}-${bookmark.id}`"
                   >
                     <article
                       class="grid gap-4 border border-base-300 bg-white p-4"
                     >
-                      <a :href="bookmark.href" class="grid gap-4">
+                      <a x-bind:href="bookmark.href" class="grid gap-4">
                         <template x-if="bookmark.imageUrl">
                           <img
-                            :src="bookmark.imageUrl"
-                            :alt="bookmark.title"
+                            x-bind:src="bookmark.imageUrl"
+                            x-bind:alt="bookmark.title"
                             class="h-44 w-full object-cover"
                             loading="lazy"
                           />
@@ -351,7 +351,7 @@ import { Bookmark, Trash2 } from "@lucide/astro";
                       <button
                         type="button"
                         class="inline-flex w-fit items-center gap-2 font-inter text-sm text-base-content/60 transition hover:text-error cursor-pointer"
-                        @click="removeBookmark(bookmark)"
+                        x-on:click="removeBookmark(bookmark)"
                       >
                         <Trash2 class="h-4 w-4" aria-hidden="true" />
                         Удалить из закладок

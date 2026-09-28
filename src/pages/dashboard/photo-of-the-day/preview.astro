@@ -18,7 +18,7 @@ import Button from "@/components/common/Button.astro";
           </p>
         </div>
         <div class="flex gap-2">
-          <Button variant="secondary" @click="window.close()">Закрыть превью</Button>
+          <Button variant="secondary" x-on:click="window.close()">Закрыть превью</Button>
         </div>
       </div>
 
@@ -48,8 +48,8 @@ import Button from "@/components/common/Button.astro";
           <div class="w-full max-w-[1200px] h-[460px] lg:h-[700px] overflow-hidden bg-base-200">
             <template x-if="photo.imageUrl">
               <img
-                :src="photo.imageUrl"
-                :alt="photo.title || 'Фото дня'"
+                x-bind:src="photo.imageUrl"
+                x-bind:alt="photo.title || 'Фото дня'"
                 class="w-full h-full object-cover object-center shadow-lg"
               />
             </template>

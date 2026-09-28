@@ -49,8 +49,8 @@ const alignmentClass =
   <button
     type="button"
     class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
-    @click="shareContent()"
-    :disabled="isSharing"
+    x-on:click="shareContent()"
+    x-bind:disabled="isSharing"
   >
     <Share2 class="h-4 w-4" aria-hidden="true" />
     <span x-text="shareLabel">Поделиться</span>
@@ -59,9 +59,9 @@ const alignmentClass =
   <button
     type="button"
     class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
-    @click="toggleBookmark()"
-    :disabled="isBookmarking || $store.auth.isLoading"
-    :aria-pressed="isBookmarked"
+    x-on:click="toggleBookmark()"
+    x-bind:disabled="isBookmarking || $store.auth.isLoading"
+    x-bind:aria-pressed="isBookmarked"
   >
     <span x-show="!isBookmarked" class="inline-flex">
       <Bookmark class="h-4 w-4" aria-hidden="true" />

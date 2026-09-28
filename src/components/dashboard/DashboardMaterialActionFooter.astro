@@ -42,9 +42,9 @@ const disabledClass = (expression?: string) =>
       showDelete && deleteAction && (
         <Button
           variant="error"
-          @click={deleteAction}
-          :disabled={deleteDisabled}
-          :class={disabledClass(deleteDisabled)}
+          x-on:click={deleteAction}
+          x-bind:disabled={deleteDisabled}
+          x-bind:class={disabledClass(deleteDisabled)}
           x-show={deleteVisible}
         >
           {deleteLabel}
@@ -57,17 +57,17 @@ const disabledClass = (expression?: string) =>
     {cancelHref && <Button href={cancelHref} variant="accent">Отмена</Button>}
     <Button
       variant="secondary"
-      @click={previewAction}
-      :disabled={previewDisabled}
-      :class={disabledClass(previewDisabled)}
+      x-on:click={previewAction}
+      x-bind:disabled={previewDisabled}
+      x-bind:class={disabledClass(previewDisabled)}
     >
       Предпросмотр
     </Button>
     <Button
       variant="primary"
-      @click={saveAction}
-      :disabled={saveDisabled}
-      :class={disabledClass(saveDisabled)}
+      x-on:click={saveAction}
+      x-bind:disabled={saveDisabled}
+      x-bind:class={disabledClass(saveDisabled)}
     >
       {saveLabel}
     </Button>

@@ -18,7 +18,7 @@ import Button from "@/components/common/Button.astro";
           </p>
         </div>
         <div class="flex gap-2">
-          <Button variant="secondary" @click="window.close()">Закрыть превью</Button>
+          <Button variant="secondary" x-on:click="window.close()">Закрыть превью</Button>
         </div>
       </div>
 
@@ -27,8 +27,8 @@ import Button from "@/components/common/Button.astro";
           <section class="relative min-h-[360px] bg-base-200">
             <template x-if="story.imageUrl || (Array.isArray(story.slides) && story.slides[0]?.imageUrl)">
               <img
-                :src="story.imageUrl || story.slides[0]?.imageUrl"
-                :alt="story.imageCaption || story.title || 'Visual story image'"
+                x-bind:src="story.imageUrl || story.slides[0]?.imageUrl"
+                x-bind:alt="story.imageCaption || story.title || 'Visual story image'"
                 class="absolute inset-0 h-full w-full object-cover"
               />
             </template>
@@ -69,13 +69,13 @@ import Button from "@/components/common/Button.astro";
         </div>
 
         <section class="divide-y divide-base-300">
-          <template x-for="(slide, index) in (Array.isArray(story.slides) ? story.slides : [])" :key="index">
+          <template x-for="(slide, index) in (Array.isArray(story.slides) ? story.slides : [])" x-bind:key="index">
             <article class="grid min-h-[560px] grid-cols-1 lg:grid-cols-2">
               <div class="relative min-h-[320px] bg-base-200">
                 <template x-if="slide.imageUrl">
                   <img
-                    :src="slide.imageUrl"
-                    :alt="slide.caption || story.title || 'Visual story slide'"
+                    x-bind:src="slide.imageUrl"
+                    x-bind:alt="slide.caption || story.title || 'Visual story slide'"
                     class="absolute inset-0 h-full w-full object-cover"
                   />
                 </template>

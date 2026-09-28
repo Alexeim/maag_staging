@@ -50,8 +50,8 @@ const {
         class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
       >
         <option value="">Выберите автора...</option>
-        <template x-for="author in authors" :key="author.id">
-          <option :value="author.id" x-text="getAuthorLabel(author)"></option>
+        <template x-for="author in authors" x-bind:key="author.id">
+          <option x-bind:value="author.id" x-text="getAuthorLabel(author)"></option>
         </template>
       </select>
       <p x-show="authorsLoading" class="text-xs text-base-content/60 mt-1">Загружаем авторов...</p>
@@ -74,7 +74,7 @@ const {
         type="file"
         class="hidden"
         accept="image/png, image/jpeg, image/webp"
-        @change="handleImageUpload($event); fileName = $event.target.files[0]?.name || ''"
+        x-on:change="handleImageUpload($event); fileName = $event.target.files[0]?.name || ''"
       />
       <span
         x-text="fileName ? fileName : (photo.imageUrl ? 'Изображение загружено' : 'Файл не выбран')"
@@ -85,13 +85,13 @@ const {
     <div x-show="uploading" class="mt-4">
       <p class="text-sm mb-1">Загрузка: <span x-text="uploadProgress.toFixed(0) + '%'"></span></p>
       <div class="w-full bg-base-200 rounded-full h-2">
-        <div class="bg-primary h-2 rounded-full transition-all" :style="{ width: uploadProgress + '%' }"></div>
+        <div class="bg-primary h-2 rounded-full transition-all" x-bind:style="{ width: uploadProgress + '%' }"></div>
       </div>
     </div>
 
     <div x-show="photo.imageUrl && !uploading" class="mt-4">
       <img
-        :src="photo.imageUrl"
+        x-bind:src="photo.imageUrl"
         alt="Предпросмотр"
         class="w-full max-h-[400px] object-cover rounded-md shadow"
       />

@@ -20,7 +20,7 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
           </p>
         </div>
         <div class="flex gap-2">
-          <Button variant="secondary" @click="window.close()">Закрыть превью</Button>
+          <Button variant="secondary" x-on:click="window.close()">Закрыть превью</Button>
         </div>
       </div>
 
@@ -29,14 +29,14 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
           <div class="overflow-visible lg:h-[calc(100svh-90px)]">
             <div
               class="grid h-auto gap-8 lg:h-full lg:gap-0 lg:items-stretch"
-              :class="interview.imageUrl ? 'lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]' : 'grid-cols-1'"
+              x-bind:class="interview.imageUrl ? 'lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]' : 'grid-cols-1'"
             >
               <template x-if="interview.imageUrl">
                 <div class="order-2 flex flex-col lg:order-1 lg:h-full lg:min-h-0">
                   <div class="flex items-center justify-center overflow-hidden lg:min-h-0 lg:flex-1">
                     <img
-                      :src="interview.imageUrl"
-                      :alt="interview.imageCaption || interview.title || 'Interview image'"
+                      x-bind:src="interview.imageUrl"
+                      x-bind:alt="interview.imageCaption || interview.title || 'Interview image'"
                       class="block h-auto w-full object-cover lg:h-full lg:w-auto lg:max-w-full lg:object-contain"
                     />
                   </div>

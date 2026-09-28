@@ -88,7 +88,7 @@ const {
         id="author-avatar-upload"
         type="file"
         class="hidden"
-        @change="handleAvatarUpload($event); fileName = $event.target.files[0]?.name || ''"
+        x-on:change="handleAvatarUpload($event); fileName = $event.target.files[0]?.name || ''"
         accept="image/png, image/jpeg, image/webp"
       />
       <span
@@ -100,14 +100,14 @@ const {
       <div class="w-full bg-base-200 rounded-full h-2">
         <div
           class="bg-primary h-2 rounded-full"
-          :style="{ width: uploadProgress + '%' }"
+          x-bind:style="{ width: uploadProgress + '%' }"
         >
         </div>
       </div>
     </div>
     <div x-show="author.avatar && !uploading" class="mt-4">
       <img
-        :src="author.avatar"
+        x-bind:src="author.avatar"
         alt="Предпросмотр аватара"
         class="rounded-full h-24 w-24 object-cover"
       />
@@ -135,7 +135,7 @@ const {
         id="author-no-bg-avatar-upload"
         type="file"
         class="hidden"
-        @change="handleNoBgAvatarUpload($event); noBgFileName = $event.target.files[0]?.name || ''"
+        x-on:change="handleNoBgAvatarUpload($event); noBgFileName = $event.target.files[0]?.name || ''"
         accept="image/png"
       />
       <span
@@ -150,14 +150,14 @@ const {
       <div class="w-full bg-base-200 rounded-full h-2">
         <div
           class="bg-primary h-2 rounded-full"
-          :style="{ width: noBgAvatarUploadProgress + '%' }"
+          x-bind:style="{ width: noBgAvatarUploadProgress + '%' }"
         >
         </div>
       </div>
     </div>
     <div x-show="author.noBgAvatar && !uploadingNoBgAvatar" class="mt-4">
       <img
-        :src="author.noBgAvatar"
+        x-bind:src="author.noBgAvatar"
         alt="Предпросмотр портрета без фона"
         class="h-36 aspect-239/278 object-contain bg-base-200 rounded"
       />
@@ -288,7 +288,7 @@ const {
     <div class="flex gap-2">
       {
         deleteAuthorId && (
-          <Button variant="error" @click={`deleteAuthor('${deleteRedirect}')`}>
+          <Button variant="error" x-on:click={`deleteAuthor('${deleteRedirect}')`}>
             Удалить автора
           </Button>
         )
@@ -298,9 +298,9 @@ const {
       {cancelHref && <Button href={cancelHref} variant="accent">Отмена</Button>}
       <Button
         variant="primary"
-        @click="saveAuthor()"
-        :disabled="isSaving"
-        :class="{ 'opacity-50 cursor-not-allowed': isSaving }"
+        x-on:click="saveAuthor()"
+        x-bind:disabled="isSaving"
+        x-bind:class="{ 'opacity-50 cursor-not-allowed': isSaving }"
       >
         {submitLabel}
       </Button>

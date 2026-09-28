@@ -20,7 +20,7 @@ import { ChevronLeft, ChevronRight } from "@lucide/astro";
           </p>
         </div>
         <div class="flex gap-2">
-          <Button variant="secondary" @click="window.close()">Закрыть превью</Button>
+          <Button variant="secondary" x-on:click="window.close()">Закрыть превью</Button>
         </div>
       </div>
 
@@ -54,7 +54,7 @@ import { ChevronLeft, ChevronRight } from "@lucide/astro";
           <div class="mx-auto w-full max-w-[1200px]" x-data="{ activeSlide: 0 }">
             <div class="relative">
               <div class="relative flex h-[360px] w-full items-center justify-center sm:h-[460px] lg:h-[600px]">
-                <template x-for="(item, index) in (flipper.carouselContent || [])" :key="index">
+                <template x-for="(item, index) in (flipper.carouselContent || [])" x-bind:key="index">
                   <div
                     x-show="activeSlide === index"
                     class="absolute inset-0 flex items-center justify-center duration-700 ease-in-out"
@@ -66,16 +66,16 @@ import { ChevronLeft, ChevronRight } from "@lucide/astro";
                     x-transition:leave-end="opacity-0"
                   >
                     <img
-                      :src="item.imageUrl"
+                      x-bind:src="item.imageUrl"
                       class="block h-full w-auto max-w-full object-contain object-center"
-                      :alt="item.caption || 'Carousel image'"
+                      x-bind:alt="item.caption || 'Carousel image'"
                     />
                   </div>
                 </template>
 
                 <button
                   x-show="(flipper.carouselContent || []).length > 1"
-                  @click="activeSlide = (activeSlide - 1 + (flipper.carouselContent || []).length) % (flipper.carouselContent || []).length"
+                  x-on:click="activeSlide = (activeSlide - 1 + (flipper.carouselContent || []).length) % (flipper.carouselContent || []).length"
                   class="absolute top-1/2 left-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-left-12"
                   aria-label="Предыдущий слайд"
                 >
@@ -83,7 +83,7 @@ import { ChevronLeft, ChevronRight } from "@lucide/astro";
                 </button>
                 <button
                   x-show="(flipper.carouselContent || []).length > 1"
-                  @click="activeSlide = (activeSlide + 1) % (flipper.carouselContent || []).length"
+                  x-on:click="activeSlide = (activeSlide + 1) % (flipper.carouselContent || []).length"
                   class="absolute top-1/2 right-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-right-12"
                   aria-label="Следующий слайд"
                 >
@@ -105,12 +105,12 @@ import { ChevronLeft, ChevronRight } from "@lucide/astro";
               x-show="(flipper.carouselContent || []).length > 1"
               class="mb-16 mt-2 flex justify-center gap-2"
             >
-              <template x-for="(slide, index) in (flipper.carouselContent || [])" :key="index">
+              <template x-for="(slide, index) in (flipper.carouselContent || [])" x-bind:key="index">
                 <button
-                  @click="activeSlide = index"
-                  :class="{'bg-base-content': activeSlide === index, 'bg-base-content/20': activeSlide !== index}"
+                  x-on:click="activeSlide = index"
+                  x-bind:class="{'bg-base-content': activeSlide === index, 'bg-base-content/20': activeSlide !== index}"
                   class="h-2.5 w-2.5 rounded-full transition hover:bg-base-content/60 cursor-pointer"
-                  :aria-label="`Перейти к слайду ${index + 1}`"
+                  x-bind:aria-label="`Перейти к слайду ${index + 1}`"
                 ></button>
               </template>
             </div>

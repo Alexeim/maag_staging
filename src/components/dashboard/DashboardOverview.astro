@@ -93,7 +93,7 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
           statCards.map((card) => (
             <button
               type="button"
-              @click={card.click}
+              x-on:click={card.click}
               class="rounded-xl border border-base-300 bg-base-100 p-3 text-left transition hover:border-primary hover:shadow-sm"
             >
               <div class="text-2xl font-semibold leading-none">
@@ -120,7 +120,7 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
               categorySegments.map((seg) => (
                 <button
                   type="button"
-                  @click={`setCategory('${seg.key}')`}
+                  x-on:click={`setCategory('${seg.key}')`}
                   class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer"
                   x-bind:class={`category === '${seg.key}' ? 'bg-primary text-primary-content' : 'text-base-content/70 hover:bg-base-200'`}
                 >
@@ -140,7 +140,7 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
           <div class="flex flex-wrap items-center gap-2">
             <select
               x-model="status"
-              @change="syncFilters()"
+              x-on:change="syncFilters()"
               class="select select-bordered select-sm bg-base-100"
             >
               <option value="all">Все статусы</option>
@@ -149,7 +149,7 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
             </select>
             <select
               x-model="sort"
-              @change="syncFilters()"
+              x-on:change="syncFilters()"
               class="select select-bordered select-sm bg-base-100"
             >
               <option value="updated">Сначала обновлённые</option>
@@ -162,7 +162,7 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
               <input
                 type="checkbox"
                 x-model="hotOnly"
-                @change="syncFilters()"
+                x-on:change="syncFilters()"
                 class="checkbox checkbox-sm"
               />
               Самое читаемое
@@ -170,14 +170,14 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
             <input
               type="search"
               x-model="query"
-              @input.debounce.400ms="syncFilters()"
+              x-on:input.debounce.400ms="syncFilters()"
               placeholder="Поиск по заголовку…"
               class="input h-11 border border-base-content/50 rounded-md p-2 w-full bg-base-100"
             />
             <button
               type="button"
               x-show="hasSecondaryFilters()"
-              @click="clearFilters()"
+              x-on:click="clearFilters()"
               class="mx-auto shrink-0 cursor-pointer rounded-md px-2 py-1 text-xs text-base-content/50 border border-base-content/50 transition-colors hover:bg-base-200 hover:text-error hover:border hover:border-accent"
             >
               Сбросить фильтры
@@ -199,7 +199,7 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
               MATERIAL_TYPE_ORDER.map((type) => (
                 <button
                   type="button"
-                  @click={`toggleType('${type}')`}
+                  x-on:click={`toggleType('${type}')`}
                   class="rounded-full border px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer"
                   x-bind:class={`isTypeActive('${type}') ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 text-base-content/60 hover:border-base-content/40'`}
                 >
@@ -239,7 +239,7 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
                     </h3>
                     <button
                       type="button"
-                      @click={`setCategory('${bucket}')`}
+                      x-on:click={`setCategory('${bucket}')`}
                       class="text-xs text-primary hover:underline"
                     >
                       показать всё →
@@ -256,7 +256,7 @@ const statCards: Array<{ label: string; value: number; click: string }> = [
                   >
                     <button
                       type="button"
-                      @click={`setCategory('${bucket}')`}
+                      x-on:click={`setCategory('${bucket}')`}
                       class="text-xs text-base-content/50 hover:text-primary"
                     >
                       ещё <span x-text={`${sec}.total - ${sec}.rows.length`} />{" "}

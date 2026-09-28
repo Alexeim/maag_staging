@@ -19,7 +19,7 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
           </p>
         </div>
         <div class="flex gap-2">
-          <Button variant="secondary" @click="window.close()">Закрыть превью</Button>
+          <Button variant="secondary" x-on:click="window.close()">Закрыть превью</Button>
         </div>
       </div>
 
@@ -29,7 +29,7 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
             <div class="shrink-0">
               <template x-if="previewAuthorDisplay.noBgAvatarUrl">
                 <img
-                  :src="previewAuthorDisplay.noBgAvatarUrl"
+                  x-bind:src="previewAuthorDisplay.noBgAvatarUrl"
                   alt=""
                   class="w-29.75 h-auto aspect-239/278 object-contain"
                 />

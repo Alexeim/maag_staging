@@ -49,8 +49,8 @@ const isFeaturedEventOnly =
     <button
       type="button"
       class="px-3 py-2 border text-sm cursor-pointer bg-base-100 border-base-300 text-base-content hover:bg-base-200"
-      @click="loadLandingPlacements()"
-      :disabled="placementLoading || placementSaving"
+      x-on:click="loadLandingPlacements()"
+      x-bind:disabled="placementLoading || placementSaving"
     >
       {isFeaturedEventOnly ? "Обновить карточку" : "Обновить статусы"}
     </button>
@@ -127,18 +127,18 @@ const isFeaturedEventOnly =
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="setAsMainHero()"
+            x-on:click="setAsMainHero()"
             x-show="canSetAsMainHero() && !isCurrentMainHero()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Сделать главным материалом landing
           </button>
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="clearMainHero()"
+            x-on:click="clearMainHero()"
             x-show="isCurrentMainHero()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Снять из главного материала
           </button>
@@ -150,18 +150,18 @@ const isFeaturedEventOnly =
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="setAsEventCard()"
+            x-on:click="setAsEventCard()"
             x-show="canSetAsEventCard() && !isCurrentEventCard()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             {isFeaturedEventOnly ? "Поставить в карточку события" : "Поставить в блок события"}
           </button>
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="clearEventCard()"
+            x-on:click="clearEventCard()"
             x-show="isCurrentEventCard()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             {isFeaturedEventOnly ? "Вернуть авто-выбор события" : "Снять из блока события"}
           </button>
@@ -173,18 +173,18 @@ const isFeaturedEventOnly =
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="setAsCultureInterviewBlock()"
+            x-on:click="setAsCultureInterviewBlock()"
             x-show="canSetAsCultureInterviewBlock() && !isCurrentCultureInterviewBlock()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Поставить в блок интервью «Культура»
           </button>
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="clearCultureInterviewBlock()"
+            x-on:click="clearCultureInterviewBlock()"
             x-show="isCurrentCultureInterviewBlock()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Снять из блока интервью
           </button>
@@ -196,36 +196,36 @@ const isFeaturedEventOnly =
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="setCultureLandingHero()"
+            x-on:click="setCultureLandingHero()"
             x-show="canSetAsCultureLandingHero() && !isCurrentCultureLandingHero()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Hero «Культура» на landing
           </button>
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="clearCultureLandingHero()"
+            x-on:click="clearCultureLandingHero()"
             x-show="isCurrentCultureLandingHero()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Снять hero «Культура» landing
           </button>
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="setParisLandingHero()"
+            x-on:click="setParisLandingHero()"
             x-show="canSetAsParisLandingHero() && !isCurrentParisLandingHero()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Hero «Париж» на landing
           </button>
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="clearParisLandingHero()"
+            x-on:click="clearParisLandingHero()"
             x-show="isCurrentParisLandingHero()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Снять hero «Париж» landing
           </button>
@@ -237,36 +237,36 @@ const isFeaturedEventOnly =
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="setCulturePageHero()"
+            x-on:click="setCulturePageHero()"
             x-show="canSetAsCulturePageHero() && !isCurrentCulturePageHero()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Hero страницы /culture
           </button>
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="clearCulturePageHero()"
+            x-on:click="clearCulturePageHero()"
             x-show="isCurrentCulturePageHero()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Снять hero /culture
           </button>
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="setParisPageHero()"
+            x-on:click="setParisPageHero()"
             x-show="canSetAsParisPageHero() && !isCurrentParisPageHero()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Hero страницы /paris
           </button>
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="clearParisPageHero()"
+            x-on:click="clearParisPageHero()"
             x-show="isCurrentParisPageHero()"
-            :disabled="placementSaving"
+            x-bind:disabled="placementSaving"
           >
             Снять hero /paris
           </button>

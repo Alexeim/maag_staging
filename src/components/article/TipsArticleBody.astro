@@ -42,7 +42,7 @@ const items = contentBlocks.filter((b) => b != null && b.type === "tips-item");
         {/* Left: image */}
         {item.imageUrl && (
           <div class="sm:w-[42%] shrink-0 sm:sticky sm:top-[80px] lg:top-[90px]">
-            <div class="group relative" x-data="{ open: false }" @click="open = !open">
+            <div class="group relative" x-data="{ open: false }" x-on:click="open = !open">
               <img
                 src={item.imageUrl}
                 alt={item.imageCaption || item.heading || `Пункт ${i + 1}`}

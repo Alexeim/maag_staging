@@ -169,7 +169,7 @@ const rootData = `{
         </p>
 
         <ol class="mt-2 grid gap-1.5">
-          <template x-for={`(key, position) in ${selectionModel}`} :key="key">
+          <template x-for={`(key, position) in ${selectionModel}`} x-bind:key="key">
             <li class="flex items-center gap-2 rounded-md bg-base-100 px-2 py-1.5">
               <span
                 class="w-4 shrink-0 text-xs tabular-nums text-base-content/50"
@@ -177,7 +177,7 @@ const rootData = `{
               />
               <span
                 class="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none"
-                :class="pickedMeta(key).badgeClass"
+                x-bind:class="pickedMeta(key).badgeClass"
                 x-text="pickedMeta(key).badge"
               />
               <span class="min-w-0 flex-1 truncate text-sm" x-text="pickedMeta(key).title" />
@@ -186,8 +186,8 @@ const rootData = `{
                 type="button"
                 class="shrink-0 rounded px-1.5 py-0.5 text-sm leading-none text-base-content/60 transition cursor-pointer hover:bg-base-200 disabled:opacity-30 disabled:cursor-not-allowed"
                 title="Выше"
-                :disabled="position === 0"
-                @click="movePicked(key, -1)"
+                x-bind:disabled="position === 0"
+                x-on:click="movePicked(key, -1)"
               >
                 ↑
               </button>
@@ -195,8 +195,8 @@ const rootData = `{
                 type="button"
                 class="shrink-0 rounded px-1.5 py-0.5 text-sm leading-none text-base-content/60 transition cursor-pointer hover:bg-base-200 disabled:opacity-30 disabled:cursor-not-allowed"
                 title="Ниже"
-                :disabled={`position === ${selectionModel}.length - 1`}
-                @click="movePicked(key, 1)"
+                x-bind:disabled={`position === ${selectionModel}.length - 1`}
+                x-on:click="movePicked(key, 1)"
               >
                 ↓
               </button>
@@ -204,7 +204,7 @@ const rootData = `{
                 type="button"
                 class="shrink-0 rounded px-1.5 py-0.5 text-sm leading-none text-base-content/60 transition cursor-pointer hover:bg-base-200"
                 title="Убрать"
-                @click={`${toggleFn}(key)`}
+                x-on:click={`${toggleFn}(key)`}
               >
                 ×
               </button>
@@ -224,7 +224,7 @@ const rootData = `{
           type="button"
           class="shrink-0 rounded-lg border border-base-300 px-3 py-2 text-xs text-base-content/60 transition cursor-pointer hover:bg-base-200"
           x-show="isFiltered()"
-          @click="reset()"
+          x-on:click="reset()"
         >
           Сбросить
         </button>
@@ -250,9 +250,9 @@ const rootData = `{
                 "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition cursor-pointer",
                 MATERIAL_TYPES[type].badgeClass,
               ]}
-              :class={`activeTypes.includes(${JSON.stringify(type)}) ? 'ring-2 ring-neutral-500/60' : 'opacity-55 hover:opacity-100'`}
-              :aria-pressed={`activeTypes.includes(${JSON.stringify(type)})`}
-              @click={`toggleType(${JSON.stringify(type)})`}
+              x-bind:class={`activeTypes.includes(${JSON.stringify(type)}) ? 'ring-2 ring-neutral-500/60' : 'opacity-55 hover:opacity-100'`}
+              x-bind:aria-pressed={`activeTypes.includes(${JSON.stringify(type)})`}
+              x-on:click={`toggleType(${JSON.stringify(type)})`}
             >
               <span>{MATERIAL_TYPES[type].badge}</span>
               <span class="opacity-70" x-text={`typeCount(${JSON.stringify(type)})`} />
@@ -269,14 +269,14 @@ const rootData = `{
             <label
               x-show={`matches(${index})`}
               class="flex items-start gap-3 rounded-lg border border-base-300 p-3"
-              :class={`!${isSelectedFn}(${JSON.stringify(item.id)}) && atLimit() ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'`}
+              x-bind:class={`!${isSelectedFn}(${JSON.stringify(item.id)}) && atLimit() ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'`}
             >
               <input
                 type="checkbox"
                 class="mt-1 disabled:cursor-not-allowed"
-                :checked={`${isSelectedFn}(${JSON.stringify(item.id)})`}
-                :disabled={`!${isSelectedFn}(${JSON.stringify(item.id)}) && atLimit()`}
-                @change={`${toggleFn}(${JSON.stringify(item.id)})`}
+                x-bind:checked={`${isSelectedFn}(${JSON.stringify(item.id)})`}
+                x-bind:disabled={`!${isSelectedFn}(${JSON.stringify(item.id)}) && atLimit()`}
+                x-on:change={`${toggleFn}(${JSON.stringify(item.id)})`}
               />
               <span class="flex flex-col items-start gap-1.5 text-sm leading-6">
                 <span class="flex items-center gap-2">

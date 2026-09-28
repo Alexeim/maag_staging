@@ -15,14 +15,14 @@ import { ChevronLeft, ChevronRight } from "@lucide/astro";
 
       <div class="ml-auto flex items-center gap-2">
         <button
-          @click="$dispatch('change-month', -1)"
+          x-on:click="$dispatch('change-month', -1)"
           class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[#30282133] bg-white transition-colors hover:bg-[#f7f2ee]"
           aria-label="Предыдущий месяц"
         >
           <ChevronLeft class="h-4 w-4" />
         </button>
         <button
-          @click="$dispatch('change-month', 1)"
+          x-on:click="$dispatch('change-month', 1)"
           class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[#30282133] bg-white transition-colors hover:bg-[#f7f2ee]"
           aria-label="Следующий месяц"
         >
@@ -44,12 +44,12 @@ import { ChevronLeft, ChevronRight } from "@lucide/astro";
     </div>
 
     <div class="grid grid-cols-7 gap-x-0 gap-y-1.5">
-      <template x-for="cell in calendarDays" :key="cell.date.toISOString()">
+      <template x-for="cell in calendarDays" x-bind:key="cell.date.toISOString()">
         <button
           type="button"
-          @click="$dispatch('date-selected', cell)"
-          @mouseenter="setHoverDate(cell)"
-          @mouseleave="clearHoverDate()"
+          x-on:click="$dispatch('date-selected', cell)"
+          x-on:mouseenter="setHoverDate(cell)"
+          x-on:mouseleave="clearHoverDate()"
           class="group relative flex aspect-square min-h-[42px] cursor-pointer items-center justify-center overflow-hidden font-inter text-[0.96rem] transition-colors sm:min-h-[48px] sm:text-[1.02rem] md:min-h-[52px] md:text-[1.05rem]"
         >
           <div
@@ -61,7 +61,7 @@ import { ChevronLeft, ChevronRight } from "@lucide/astro";
           <!-- Hover preview range bar -->
           <div
             x-show="cell.isCurrentMonth && isInHoverMode() && (isWithinHoverRange(cell) || isHoverRangeStart(cell) || isHoverRangeEnd(cell))"
-            :class="{
+            x-bind:class="{
               'left-1/2 right-0': isHoverRangeStart(cell) && !isHoverRangeEnd(cell),
               'left-0 right-1/2': isHoverRangeEnd(cell) && !isHoverRangeStart(cell),
               'left-0 right-0': isWithinHoverRange(cell)
@@ -73,7 +73,7 @@ import { ChevronLeft, ChevronRight } from "@lucide/astro";
           <!-- Completed range bar -->
           <div
             x-show="cell.isCurrentMonth && hasCompletedRange() && (isWithinSelectedRange(cell) || isRangeStart(cell) || isRangeEnd(cell))"
-            :class="{
+            x-bind:class="{
               'left-1/2 right-0': isRangeStart(cell) && !isRangeEnd(cell),
               'left-0 right-1/2': isRangeEnd(cell) && !isRangeStart(cell),
               'left-0 right-0': isWithinSelectedRange(cell)
@@ -96,7 +96,7 @@ import { ChevronLeft, ChevronRight } from "@lucide/astro";
           </div>
 
           <div
-            :class="{
+            x-bind:class="{
               'bg-error text-error-content': cell.isCurrentMonth && (isSelectedDate(cell) || isRangeBoundary(cell)),
               'bg-error/60 text-error-content': cell.isCurrentMonth && isHoverEnd(cell) && !isRangeBoundary(cell) && !isSelectedDate(cell),
               'text-[#b5aaa2]': !cell.isCurrentMonth,

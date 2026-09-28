@@ -162,7 +162,7 @@ const allStructuredData = [
       x-data="{}"
       x-show="$store.navbar.isOpen"
       x-cloak
-      @click="$store.navbar.close()"
+      x-on:click="$store.navbar.close()"
       class="fixed inset-0 bg-black/30 z-[998] lg:hidden"
       x-transition:enter="transition-opacity ease-linear duration-300"
       x-transition:enter-start="opacity-0"
@@ -190,7 +190,7 @@ const allStructuredData = [
       <!-- Links -->
       <ul
         class="flex flex-col gap-4 text-base-content"
-        @click="$store.navbar.close()"
+        x-on:click="$store.navbar.close()"
       >
         <li
           class="font-navbar uppercase text-[18px] tracking-[4px] font-normal"
@@ -226,7 +226,7 @@ const allStructuredData = [
         <!-- Logged Out State -->
         <template x-if="!$store.auth.isLoading && !$store.auth.isLoggedIn">
           <button
-            @click.prevent="$store.auth.openAuthModal(); $store.navbar.close()"
+            x-on:click.prevent="$store.auth.openAuthModal(); $store.navbar.close()"
             class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-oswald text-[14px] w-full"
             >Войти</button
           >
@@ -241,7 +241,7 @@ const allStructuredData = [
               <div x-text="$store.auth.initials"></div>
             </a>
             <button
-              @click.prevent="handleSignOut(); $store.navbar.close()"
+              x-on:click.prevent="handleSignOut(); $store.navbar.close()"
               class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
               >Выйти</button
             >

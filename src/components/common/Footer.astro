@@ -33,7 +33,7 @@ const currentYear = new Date().getFullYear();
           </template>
           <template x-if="!$store.auth.isLoggedIn">
             <button
-              @click.prevent="$store.auth.openAuthModal()"
+              x-on:click.prevent="$store.auth.openAuthModal()"
               class="inline-flex items-center justify-center rounded-md bg-maag-beige px-5 py-2.5 lg:py-2 font-inter text-sm text-maag-gray transition-colors hover:bg-maag-beige/85 cursor-pointer"
             >
               Войти в личный кабинет

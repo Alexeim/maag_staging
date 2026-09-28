@@ -38,7 +38,7 @@ const {
           variant="error"
           size="sm"
           type="button"
-          @click="removeContentCollection()"
+          x-on:click="removeContentCollection()"
         >
           Снять
         </Button>
@@ -63,17 +63,17 @@ const {
     <div class="mt-5 flex flex-wrap gap-2">
       <button
         type="button"
-        @click="useNewContentCollection = false"
+        x-on:click="useNewContentCollection = false"
         class="px-3 py-2 border text-sm cursor-pointer"
-        :class="!useNewContentCollection ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        x-bind:class="!useNewContentCollection ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
       >
         Выбрать существующую
       </button>
       <button
         type="button"
-        @click="useNewContentCollection = true"
+        x-on:click="useNewContentCollection = true"
         class="px-3 py-2 border text-sm cursor-pointer"
-        :class="useNewContentCollection ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        x-bind:class="useNewContentCollection ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
       >
         Создать новую
       </button>
@@ -86,13 +86,13 @@ const {
         </label>
         <select
           x-model="selectedContentCollectionId"
-          @change="assignSelectedContentCollection()"
-          :disabled="contentCollectionsLoading"
+          x-on:change="assignSelectedContentCollection()"
+          x-bind:disabled="contentCollectionsLoading"
           class="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-sm text-base-content focus:border-primary focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           <option value="">Выберите collection...</option>
-          <template x-for="collection in availableContentCollections" :key="collection.id">
-            <option :value="collection.id" x-text="collection.title"></option>
+          <template x-for="collection in availableContentCollections" x-bind:key="collection.id">
+            <option x-bind:value="collection.id" x-text="collection.title"></option>
           </template>
         </select>
       </div>
@@ -115,9 +115,9 @@ const {
         <Button
           variant="primary"
           type="button"
-          @click="createAndAssignContentCollection()"
-          :disabled="!newContentCollectionTitle.trim()"
-          :class="{ 'opacity-50 cursor-not-allowed': !newContentCollectionTitle.trim() }"
+          x-on:click="createAndAssignContentCollection()"
+          x-bind:disabled="!newContentCollectionTitle.trim()"
+          x-bind:class="{ 'opacity-50 cursor-not-allowed': !newContentCollectionTitle.trim() }"
         >
           Создать и назначить
         </Button>

@@ -287,7 +287,7 @@ const secondaryCardsSummary = (() => {
             <button
               type="button"
               class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200"
-              @click="addMainCard()"
+              x-on:click="addMainCard()"
             >
               Добавить
             </button>
@@ -298,16 +298,16 @@ const secondaryCardsSummary = (() => {
               <p class="text-sm text-base-content/70">Пока не выбрано ни одного события.</p>
             </template>
 
-            <template x-for="(id, index) in selectedMainCardIds" :key="id">
+            <template x-for="(id, index) in selectedMainCardIds" x-bind:key="id">
               <div class="flex flex-col gap-3 rounded-xl border border-base-300 p-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <p class="text-sm font-semibold" x-text="`${index + 1}. ${getEventTitle(id)}`"></p>
                   <p class="text-xs text-base-content/60 mt-1" x-text="getEventDateLabel(id)"></p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" @click="moveMainCard(id, -1)">↑</button>
-                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" @click="moveMainCard(id, 1)">↓</button>
-                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-error border-base-300 hover:bg-red-50" @click="removeMainCard(id)">Удалить</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" x-on:click="moveMainCard(id, -1)">↑</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" x-on:click="moveMainCard(id, 1)">↓</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-error border-base-300 hover:bg-red-50" x-on:click="removeMainCard(id)">Удалить</button>
                 </div>
               </div>
             </template>
@@ -320,8 +320,8 @@ const secondaryCardsSummary = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveMainCards()"
-            :disabled="mainCardsSaving"
+            x-on:click="saveMainCards()"
+            x-bind:disabled="mainCardsSaving"
           >
             Сохранить
           </button>
@@ -386,7 +386,7 @@ const secondaryCardsSummary = (() => {
             <button
               type="button"
               class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-base-100 text-base-content border-base-300 hover:bg-base-200"
-              @click="addSecondaryCard()"
+              x-on:click="addSecondaryCard()"
             >
               Добавить
             </button>
@@ -397,16 +397,16 @@ const secondaryCardsSummary = (() => {
               <p class="text-sm text-base-content/70">Пока не выбрано ни одного события.</p>
             </template>
 
-            <template x-for="(id, index) in selectedSecondaryCardIds" :key="id">
+            <template x-for="(id, index) in selectedSecondaryCardIds" x-bind:key="id">
               <div class="flex flex-col gap-3 rounded-xl border border-base-300 p-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <p class="text-sm font-semibold" x-text="`${index + 1}. ${getEventTitle(id)}`"></p>
                   <p class="text-xs text-base-content/60 mt-1" x-text="getEventDateLabel(id)"></p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" @click="moveSecondaryCard(id, -1)">↑</button>
-                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" @click="moveSecondaryCard(id, 1)">↓</button>
-                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-error border-base-300 hover:bg-red-50" @click="removeSecondaryCard(id)">Удалить</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" x-on:click="moveSecondaryCard(id, -1)">↑</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-base-content border-base-300 hover:bg-base-200" x-on:click="moveSecondaryCard(id, 1)">↓</button>
+                  <button type="button" class="px-2.5 py-1 rounded-lg border text-sm transition cursor-pointer bg-transparent text-error border-base-300 hover:bg-red-50" x-on:click="removeSecondaryCard(id)">Удалить</button>
                 </div>
               </div>
             </template>
@@ -419,8 +419,8 @@ const secondaryCardsSummary = (() => {
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveSecondaryCards()"
-            :disabled="secondaryCardsSaving"
+            x-on:click="saveSecondaryCards()"
+            x-bind:disabled="secondaryCardsSaving"
           >
             Сохранить
           </button>

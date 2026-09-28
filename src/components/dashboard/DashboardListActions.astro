@@ -28,7 +28,7 @@ const { viewHref, editHref, deleteClick } = Astro.props;
     <button
       type="button"
       class="font-medium text-error hover:underline"
-      @click={deleteClick}
+      x-on:click={deleteClick}
     >
       Удалить
     </button>

@@ -430,7 +430,7 @@ if (currentProseGroup.length > 0) {
               <div class="absolute inset-0 overflow-hidden">
                 <div
                   class="flex h-full transition-transform duration-500 ease-in-out"
-                  :style="`transform: translateX(-${current * 100}%)`"
+                  x-bind:style="`transform: translateX(-${current * 100}%)`"
                 >
                   {slides.map((slide) => (
                     <div class="min-w-full h-full flex items-center justify-center">
@@ -449,7 +449,7 @@ if (currentProseGroup.length > 0) {
                   <button
                     type="button"
                     class="absolute top-1/2 left-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-left-12"
-                    @click="current = (current - 1 + total) % total"
+                    x-on:click="current = (current - 1 + total) % total"
                     aria-label="Предыдущий слайд"
                   >
                     <ChevronLeft class="h-6 w-6" />
@@ -457,7 +457,7 @@ if (currentProseGroup.length > 0) {
                   <button
                     type="button"
                     class="absolute top-1/2 right-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-right-12"
-                    @click="current = (current + 1) % total"
+                    x-on:click="current = (current + 1) % total"
                     aria-label="Следующий слайд"
                   >
                     <ChevronRight class="h-6 w-6" />
@@ -477,8 +477,8 @@ if (currentProseGroup.length > 0) {
                   <button
                     type="button"
                     class="w-2 h-2 rounded-full transition cursor-pointer"
-                    :class={`current === ${i} ? 'bg-base-content' : 'bg-base-content/30'`}
-                    @click={`current = ${i}`}
+                    x-bind:class={`current === ${i} ? 'bg-base-content' : 'bg-base-content/30'`}
+                    x-on:click={`current = ${i}`}
                     aria-label={`Слайд ${i + 1}`}
                   />
                 ))}

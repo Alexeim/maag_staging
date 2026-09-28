@@ -106,7 +106,7 @@ const xInit =
             <button
               type="button"
               class="group relative w-full max-w-[1200px] h-[460px] lg:h-[calc(100svh-90px)] overflow-hidden bg-base-200 cursor-zoom-in"
-              @click="lightboxOpen = true"
+              x-on:click="lightboxOpen = true"
               aria-label="Открыть фото на весь экран"
             >
               <img
@@ -197,18 +197,18 @@ const xInit =
               x-transition:leave-end="opacity-0"
               class="fixed inset-0 z-[900] flex items-center justify-center p-4 lg:p-12"
               style="display: none;"
-              @keydown.escape.window="lightboxOpen = false"
+              x-on:keydown.escape.window="lightboxOpen = false"
               x-cloak
             >
               <div
                 class="absolute inset-0 bg-black/90 backdrop-blur-sm"
-                @click="lightboxOpen = false"
+                x-on:click="lightboxOpen = false"
               />
 
               <button
                 type="button"
                 class="absolute top-4 right-4 lg:top-8 lg:right-8 text-white/70 hover:text-white transition-colors z-10"
-                @click="lightboxOpen = false"
+                x-on:click="lightboxOpen = false"
                 aria-label="Закрыть"
               >
                 <X class="w-8 h-8" />

@@ -76,17 +76,17 @@ const rootData = `{
 <div
   x-data={rootData}
   x-effect={`__items = (${itemsExpr}) || []`}
-  @click.outside="open = false"
-  @keydown.escape.window="open = false"
+  x-on:click.outside="open = false"
+  x-on:keydown.escape.window="open = false"
   class:list={["relative", className]}
 >
   <button
     type="button"
     id={id}
     class="w-full flex items-center justify-between gap-2 rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 text-sm text-base-content text-left focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-    @click={`if (!(${isDisabledExpr})) open = !open`}
-    :aria-expanded="open"
-    :disabled={isDisabledExpr}
+    x-on:click={`if (!(${isDisabledExpr})) open = !open`}
+    x-bind:aria-expanded="open"
+    x-bind:disabled={isDisabledExpr}
   >
     <span class="truncate" x-text={`__titleFor(${model}) || ${JSON.stringify(placeholder)}`}></span>
     <svg
@@ -100,7 +100,7 @@ const rootData = `{
       stroke-linecap="round"
       stroke-linejoin="round"
       class="shrink-0 transition-transform duration-150 text-base-content/50"
-      :class="open ? 'rotate-180' : ''"
+      x-bind:class="open ? 'rotate-180' : ''"
     >
       <path d="m6 9 6 6 6-6"></path>
     </svg>
@@ -121,26 +121,26 @@ const rootData = `{
       <button
         type="button"
         class="rounded-md px-2 py-1 text-xs transition cursor-pointer"
-        :class="sortMode === 'created' ? 'bg-base-200 font-medium text-base-content' : 'text-base-content/60 hover:bg-base-200'"
+        x-bind:class="sortMode === 'created' ? 'bg-base-200 font-medium text-base-content' : 'text-base-content/60 hover:bg-base-200'"
         x-show="__hasCreated()"
-        @click="sortMode = 'created'"
+        x-on:click="sortMode = 'created'"
       >
         По созданию
       </button>
       <button
         type="button"
         class="rounded-md px-2 py-1 text-xs transition cursor-pointer"
-        :class="sortMode === 'published' ? 'bg-base-200 font-medium text-base-content' : 'text-base-content/60 hover:bg-base-200'"
+        x-bind:class="sortMode === 'published' ? 'bg-base-200 font-medium text-base-content' : 'text-base-content/60 hover:bg-base-200'"
         x-show="__hasPublished()"
-        @click="sortMode = 'published'"
+        x-on:click="sortMode = 'published'"
       >
         По публикации
       </button>
       <button
         type="button"
         class="rounded-md px-2 py-1 text-xs transition cursor-pointer"
-        :class="sortMode === 'alpha' ? 'bg-base-200 font-medium text-base-content' : 'text-base-content/60 hover:bg-base-200'"
-        @click="sortMode = 'alpha'"
+        x-bind:class="sortMode === 'alpha' ? 'bg-base-200 font-medium text-base-content' : 'text-base-content/60 hover:bg-base-200'"
+        x-on:click="sortMode = 'alpha'"
       >
         А-Я
       </button>
@@ -150,24 +150,24 @@ const rootData = `{
       <button
         type="button"
         class="w-full text-left px-3 py-2 text-sm text-base-content/50 hover:bg-base-200 cursor-pointer"
-        @click={`${model} = ''; open = false`}
+        x-on:click={`${model} = ''; open = false`}
       >
         {placeholder}
       </button>
 
-      <template x-for="group in __groups()" :key="group.label">
+      <template x-for="group in __groups()" x-bind:key="group.label">
         <div>
           <div
             class="px-3 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-base-content/40"
             x-show="group.label"
             x-text="group.label"
           ></div>
-          <template x-for="item in group.items" :key="item.id">
+          <template x-for="item in group.items" x-bind:key="item.id">
             <button
               type="button"
               class="w-full text-left px-3 py-2 text-sm hover:bg-base-200 cursor-pointer flex flex-col gap-0.5"
-              :class={`item.id === (${model}) ? 'bg-base-200 font-medium' : ''`}
-              @click={`${model} = item.id; open = false`}
+              x-bind:class={`item.id === (${model}) ? 'bg-base-200 font-medium' : ''`}
+              x-on:click={`${model} = item.id; open = false`}
             >
               <span x-text="item.title"></span>
               <span class="text-xs text-base-content/50" x-show="item.meta" x-text="item.meta"></span>

@@ -336,8 +336,8 @@ const initialSidebarKeys =
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveHero()"
-            :disabled="heroSaving"
+            x-on:click="saveHero()"
+            x-bind:disabled="heroSaving"
           >
             Сохранить
           </button>
@@ -385,8 +385,8 @@ const initialSidebarKeys =
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveFeaturedInterview()"
-            :disabled="featuredInterviewSaving"
+            x-on:click="saveFeaturedInterview()"
+            x-bind:disabled="featuredInterviewSaving"
           >
             Сохранить
           </button>
@@ -452,8 +452,8 @@ const initialSidebarKeys =
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveSecondaryStories()"
-            :disabled="secondaryStoriesSaving"
+            x-on:click="saveSecondaryStories()"
+            x-bind:disabled="secondaryStoriesSaving"
           >
             Сохранить
           </button>
@@ -520,8 +520,8 @@ const initialSidebarKeys =
           <button
             type="button"
             class="px-4 py-2 rounded-lg border text-sm transition cursor-pointer bg-primary text-primary-content border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="saveSidebarRail()"
-            :disabled="sidebarSaving"
+            x-on:click="saveSidebarRail()"
+            x-bind:disabled="sidebarSaving"
           >
             Сохранить
           </button>

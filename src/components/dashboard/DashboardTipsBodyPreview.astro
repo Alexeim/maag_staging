@@ -22,19 +22,19 @@ const iconStroke = 1.75;
 ---
 
 <div class="max-w-[826px] mx-auto">
-  <template x-for={`(item, index) in (${contentExpression} || []).filter((block) => block?.type === 'tips-item')`} :key="item.id || index">
+  <template x-for={`(item, index) in (${contentExpression} || []).filter((block) => block?.type === 'tips-item')`} x-bind:key="item.id || index">
     <article class="flex flex-col sm:flex-row py-8 gap-6">
       <div x-show="item.imageUrl" class="sm:w-[42%] shrink-0">
         <img
-          :src="item.imageUrl"
-          :alt="item.imageCaption || item.heading || `Пункт ${index + 1}`"
+          x-bind:src="item.imageUrl"
+          x-bind:alt="item.imageCaption || item.heading || `Пункт ${index + 1}`"
           class="w-full h-full object-cover min-h-[200px] max-h-[340px]"
         />
       </div>
 
       <div
         class="flex flex-col justify-start gap-3 px-5"
-        :class="item.imageUrl ? 'sm:w-[58%]' : 'w-full'"
+        x-bind:class="item.imageUrl ? 'sm:w-[58%]' : 'w-full'"
       >
         <h2
           x-show="item.heading"
@@ -45,7 +45,7 @@ const iconStroke = 1.75;
 
         <template x-if="item.metaItems && item.metaItems.length > 0">
           <div class="flex flex-col gap-1.5">
-            <template x-for="(metaItem, mi) in item.metaItems" :key="mi">
+            <template x-for="(metaItem, mi) in item.metaItems" x-bind:key="mi">
               <div>
                 <p class="flex items-start gap-4 text-sm font-oswald tracking-wide text-base-content/70">
                   <!-- All icons pre-rendered at build time; Alpine shows the matching one -->
@@ -79,7 +79,7 @@ const iconStroke = 1.75;
 
                   <a
                     x-show="metaItem.isLink && metaItem.url"
-                    :href="metaItem.url"
+                    x-bind:href="metaItem.url"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="underline hover:text-base-content transition-colors"

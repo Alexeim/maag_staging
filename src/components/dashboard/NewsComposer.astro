@@ -49,10 +49,10 @@ const {
           class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
         />
         <div class="flex justify-end gap-3 mt-3">
-          <Button variant="secondary" size="sm" @click="cancelEditTitle()"
+          <Button variant="secondary" size="sm" x-on:click="cancelEditTitle()"
             >Отмена</Button
           >
-          <Button variant="primary" size="sm" @click="saveTitle()"
+          <Button variant="primary" size="sm" x-on:click="saveTitle()"
             >Сохранить</Button
           >
         </div>
@@ -67,7 +67,7 @@ const {
           x-text="article.title || 'Введите заголовок...'"
         >
         </h3>
-        <Button variant="outline" size="sm" @click="editTitle()"
+        <Button variant="outline" size="sm" x-on:click="editTitle()"
           >Редактировать</Button
         >
       </div>
@@ -81,7 +81,7 @@ const {
         <div
           class="rich-text-editor rich-text-editor--compact"
           x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml({ html: article.leadHtml, text: article.lead }), placeholder: 'Текст, который отображается рядом с картинкой в шапке новости...' })"
-          @rich-text-change="article.leadHtml = $event.detail.html; article.lead = $event.detail.text"
+          x-on:rich-text-change="article.leadHtml = $event.detail.html; article.lead = $event.detail.text"
         >
           <div x-ref="editor"></div>
         </div>
@@ -118,17 +118,17 @@ const {
       <div class="flex flex-wrap gap-2">
         <button
           type="button"
-          @click="useNewAuthor = false"
+          x-on:click="useNewAuthor = false"
           class="px-3 py-2 border text-sm cursor-pointer"
-          :class="!useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+          x-bind:class="!useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
         >
           Выбрать из списка
         </button>
         <button
           type="button"
-          @click="useNewAuthor = true"
+          x-on:click="useNewAuthor = true"
           class="px-3 py-2 border text-sm cursor-pointer"
-          :class="useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+          x-bind:class="useNewAuthor ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
         >
           Новый автор
         </button>
@@ -140,8 +140,8 @@ const {
           class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
         >
           <option value="">Выберите автора...</option>
-          <template x-for="author in authors" :key="author.id">
-            <option :value="author.id" x-text="getAuthorLabel(author)"></option>
+          <template x-for="author in authors" x-bind:key="author.id">
+            <option x-bind:value="author.id" x-text="getAuthorLabel(author)"></option>
           </template>
         </select>
         <p x-show="authorsLoading" class="text-xs text-base-content/60 mt-1">Загружаем авторов...</p>
@@ -172,7 +172,7 @@ const {
     <select
       id="news-category-select"
       x-model="article.category"
-      @change="handleCategoryChange($event.target.value)"
+      x-on:change="handleCategoryChange($event.target.value)"
       class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 cursor-pointer"
     >
       <option value="" disabled>Выберите категорию...</option>
@@ -189,12 +189,12 @@ const {
 
       <template x-if="getAvailableTags().length > 0">
         <div class="flex flex-wrap gap-2">
-          <template x-for="tag in getAvailableTags()" :key="tag">
+          <template x-for="tag in getAvailableTags()" x-bind:key="tag">
             <button
               type="button"
               class="px-4 py-2 rounded-full border text-sm transition cursor-pointer"
-              :class="isTagSelected(tag) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
-              @click="toggleTag(tag)"
+              x-bind:class="isTagSelected(tag) ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 text-base-content border-base-300 hover:bg-base-200'"
+              x-on:click="toggleTag(tag)"
             >
               <span x-text="tag"></span>
             </button>
@@ -209,7 +209,7 @@ const {
               Категорийные теги
             </p>
             <div class="flex flex-wrap gap-2 mt-1">
-              <template x-for="tag in article.tags" :key="tag">
+              <template x-for="tag in article.tags" x-bind:key="tag">
                 <span
                   class="inline-flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full text-sm"
                 >
@@ -217,7 +217,7 @@ const {
                   <button
                     type="button"
                     class="text-base-content/60 hover:text-base-content cursor-pointer"
-                    @click="removeTag(tag)"
+                    x-on:click="removeTag(tag)"
                   >
                     &times;
                   </button>
@@ -248,7 +248,7 @@ const {
         id="news-file-upload"
         type="file"
         class="hidden"
-        @change="handleImageUpload($event); fileName = $event.target.files[0]?.name || ''"
+        x-on:change="handleImageUpload($event); fileName = $event.target.files[0]?.name || ''"
         accept="image/png, image/jpeg, image/webp"
       />
       <span
@@ -260,7 +260,7 @@ const {
       <div class="w-full bg-base-200 rounded-full h-2">
         <div
           class="bg-primary h-2 rounded-full"
-          :style="{ width: uploadProgress + '%' }"
+          x-bind:style="{ width: uploadProgress + '%' }"
         >
         </div>
       </div>
@@ -268,7 +268,7 @@ const {
     <div x-show="article.imageUrl && !uploading" class="mt-4 space-y-4">
       <p class="text-sm text-success">Обложка загружена!</p>
       <img
-        :src="article.imageUrl"
+        x-bind:src="article.imageUrl"
         alt="Предпросмотр обложки"
         class="rounded-md max-h-60 w-full object-cover"
       />
@@ -285,10 +285,10 @@ const {
               placeholder="Введите подпись..."
             />
             <div class="flex justify-end gap-3 mt-3">
-              <Button variant="secondary" size="sm" @click="cancelEditCaption()"
+              <Button variant="secondary" size="sm" x-on:click="cancelEditCaption()"
                 >Отмена</Button
               >
-              <Button variant="primary" size="sm" @click="saveCaption()"
+              <Button variant="primary" size="sm" x-on:click="saveCaption()"
                 >Сохранить</Button
               >
             </div>
@@ -303,7 +303,7 @@ const {
               x-text="article.imageCaption || 'Подпись отсутствует...'"
             >
             </p>
-            <Button variant="outline" size="sm" @click="editCaption()"
+            <Button variant="outline" size="sm" x-on:click="editCaption()"
               >Редактировать</Button
             >
           </div>
@@ -316,21 +316,21 @@ const {
   <section class="p-6 bg-base-100 border border-base-300 rounded-xl shadow-sm">
     <h2 class="text-xl font-semibold mb-4">Содержание новости</h2>
     <div class="space-y-4">
-      <template x-for="(block, index) in article.contentBlocks" :key="block.id || index">
+      <template x-for="(block, index) in article.contentBlocks" x-bind:key="block.id || index">
         <div
           class="p-4 border border-base-300 rounded-lg bg-base-100 relative group transition-colors"
-          :class="{
+          x-bind:class="{
             'cursor-grab': editingIndex === null,
             'cursor-default': editingIndex !== null,
             'opacity-60': draggedBlockId === block.id,
             'border-primary ring-2 ring-primary/20': dragOverBlockId === block.id && draggedBlockId !== block.id
           }"
-          :draggable="editingIndex === null"
-          @dragstart="startBlockDrag(index)"
-          @dragenter.prevent="setBlockDropTarget(index)"
-          @dragover.prevent="setBlockDropTarget(index)"
-          @drop.prevent="dropBlock(index)"
-          @dragend="resetBlockDrag()"
+          x-bind:draggable="editingIndex === null"
+          x-on:dragstart="startBlockDrag(index)"
+          x-on:dragenter.prevent="setBlockDropTarget(index)"
+          x-on:dragover.prevent="setBlockDropTarget(index)"
+          x-on:drop.prevent="dropBlock(index)"
+          x-on:dragend="resetBlockDrag()"
         >
           <template x-if="editingIndex === index">
             <div class="space-y-4">
@@ -344,7 +344,7 @@ const {
                 <div
                   class="rich-text-editor"
                   x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml(editingBlock), placeholder: 'Введите текст абзаца...' })"
-                  @rich-text-change="editingBlock.html = $event.detail.html; editingBlock.text = $event.detail.text"
+                  x-on:rich-text-change="editingBlock.html = $event.detail.html; editingBlock.text = $event.detail.text"
                 >
                   <div x-ref="editor"></div>
                 </div>
@@ -355,17 +355,17 @@ const {
                   <label class="block text-sm font-medium">Изображение</label>
                   <div class="flex items-center gap-3">
                     <label
-                      :for="'block-image-upload-' + index"
+                      x-bind:for="'block-image-upload-' + index"
                       class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
                     >
                       <CloudUpload />
                       Загрузить файл
                     </label>
                     <input
-                      :id="'block-image-upload-' + index"
+                      x-bind:id="'block-image-upload-' + index"
                       type="file"
                       class="hidden"
-                      @change="handleImageUpload($event, false); blockFileName = $event.target.files[0]?.name || ''"
+                      x-on:change="handleImageUpload($event, false); blockFileName = $event.target.files[0]?.name || ''"
                       accept="image/png, image/jpeg, image/webp"
                     />
                     <span
@@ -380,14 +380,14 @@ const {
                     <div class="w-full bg-base-200 rounded-full h-2">
                       <div
                         class="bg-primary h-2 rounded-full"
-                        :style="{ width: uploadProgress + '%' }"
+                        x-bind:style="{ width: uploadProgress + '%' }"
                       >
                       </div>
                     </div>
                   </div>
                   <img
                     x-show="editingBlock.url && !uploading"
-                    :src="editingBlock.url"
+                    x-bind:src="editingBlock.url"
                     alt="Предпросмотр блока"
                     class="rounded-md max-h-48"
                   />
@@ -411,16 +411,16 @@ const {
                       <button
                         type="button"
                         class="px-3 py-2 border text-sm cursor-pointer"
-                        :class="editingBlock.sourceType === 'upload' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
-                        @click="editingBlock.sourceType = 'upload'; editingBlock.provider = 'upload'"
+                        x-bind:class="editingBlock.sourceType === 'upload' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+                        x-on:click="editingBlock.sourceType = 'upload'; editingBlock.provider = 'upload'"
                       >
                         Загрузить файл
                       </button>
                       <button
                         type="button"
                         class="px-3 py-2 border text-sm cursor-pointer"
-                        :class="editingBlock.sourceType === 'embed' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
-                        @click="editingBlock.sourceType = 'embed'; editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
+                        x-bind:class="editingBlock.sourceType === 'embed' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+                        x-on:click="editingBlock.sourceType = 'embed'; editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
                       >
                         Ссылка / Embed
                       </button>
@@ -431,17 +431,17 @@ const {
                     <label class="block text-sm font-medium">Видео файл</label>
                     <div class="flex items-center gap-3">
                       <label
-                        :for="'block-video-upload-' + index"
+                        x-bind:for="'block-video-upload-' + index"
                         class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
                       >
                         <CloudUpload />
                         Загрузить видео
                       </label>
                       <input
-                        :id="'block-video-upload-' + index"
+                        x-bind:id="'block-video-upload-' + index"
                         type="file"
                         class="hidden"
-                        @change="handleVideoUpload($event); videoFileName = $event.target.files[0]?.name || ''"
+                        x-on:change="handleVideoUpload($event); videoFileName = $event.target.files[0]?.name || ''"
                         accept="video/mp4,video/webm,video/quicktime"
                       />
                       <span
@@ -456,13 +456,13 @@ const {
                       <div class="w-full bg-base-200 rounded-full h-2">
                         <div
                           class="bg-primary h-2 rounded-full"
-                          :style="{ width: uploadProgress + '%' }"
+                          x-bind:style="{ width: uploadProgress + '%' }"
                         ></div>
                       </div>
                     </div>
                     <video
                       x-show="editingBlock.url && !uploading"
-                      :src="editingBlock.url"
+                      x-bind:src="editingBlock.url"
                       controls
                       playsinline
                       class="rounded-md max-h-48 w-full bg-black"
@@ -474,7 +474,7 @@ const {
                     <input
                       type="url"
                       x-model="editingBlock.url"
-                      @input="editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
+                      x-on:input="editingBlock.provider = getVideoProvider(editingBlock.url, 'embed')"
                       class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
                       placeholder="https://player.example.com/embed/123 или https://cdn.example.com/video.mp4"
                     />
@@ -486,7 +486,7 @@ const {
                     </p>
                     <video
                       x-show="getVideoDirectUrl(editingBlock.url)"
-                      :src="getVideoDirectUrl(editingBlock.url)"
+                      x-bind:src="getVideoDirectUrl(editingBlock.url)"
                       controls
                       playsinline
                       class="rounded-md max-h-48 w-full bg-black"
@@ -496,7 +496,7 @@ const {
                       class="w-full aspect-video rounded-md overflow-hidden bg-black"
                     >
                       <iframe
-                        :src="getVideoEmbedUrl(editingBlock.url)"
+                        x-bind:src="getVideoEmbedUrl(editingBlock.url)"
                         class="w-full h-full border-0"
                         loading="lazy"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -547,11 +547,11 @@ const {
                     <label class="block text-sm font-medium">Тип контента</label>
                     <select
                       x-model="editingBlock.linkedContentType"
-                      @change="editingBlock.linkedContentId = ''"
+                      x-on:change="editingBlock.linkedContentId = ''"
                       class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
                     >
-                      <template x-for="type in materialLinkTypeOptions" :key="type.value">
-                        <option :value="type.value" x-text="type.label"></option>
+                      <template x-for="type in materialLinkTypeOptions" x-bind:key="type.value">
+                        <option x-bind:value="type.value" x-text="type.label"></option>
                       </template>
                     </select>
                   </div>
@@ -562,8 +562,8 @@ const {
                       class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
                     >
                       <option value="" disabled>Выберите...</option>
-                      <template x-for="item in getFilteredContentList(editingBlock.linkedContentType)" :key="item.id">
-                        <option :value="item.id" x-text="item.title"></option>
+                      <template x-for="item in getFilteredContentList(editingBlock.linkedContentType)" x-bind:key="item.id">
+                        <option x-bind:value="item.id" x-text="item.title"></option>
                       </template>
                     </select>
                   </div>
@@ -594,8 +594,8 @@ const {
               </template>
 
               <div class="flex justify-end gap-3">
-                <Button variant="secondary" @click="cancelEdit()">Отмена</Button>
-                <Button variant="primary" @click="updateBlock()">Сохранить блок</Button>
+                <Button variant="secondary" x-on:click="cancelEdit()">Отмена</Button>
+                <Button variant="primary" x-on:click="updateBlock()">Сохранить блок</Button>
               </div>
             </div>
           </template>
@@ -624,7 +624,7 @@ const {
                 <figure class="space-y-2">
                   <img
                     x-show="block.url"
-                    :src="block.url"
+                    x-bind:src="block.url"
                     alt="Содержимое новости"
                     class="rounded-md w-full object-cover"
                   />
@@ -646,14 +646,14 @@ const {
                 <figure class="space-y-2">
                   <video
                     x-show="block.sourceType === 'upload' && block.url"
-                    :src="block.url"
+                    x-bind:src="block.url"
                     controls
                     playsinline
                     class="rounded-md w-full max-h-64 bg-black"
                   ></video>
                   <video
                     x-show="block.sourceType === 'embed' && getVideoDirectUrl(block.url)"
-                    :src="getVideoDirectUrl(block.url)"
+                    x-bind:src="getVideoDirectUrl(block.url)"
                     controls
                     playsinline
                     class="rounded-md w-full max-h-64 bg-black"
@@ -663,7 +663,7 @@ const {
                     class="w-full aspect-video rounded-md overflow-hidden bg-black"
                   >
                     <iframe
-                      :src="getVideoEmbedUrl(block.url)"
+                      x-bind:src="getVideoEmbedUrl(block.url)"
                       class="w-full h-full border-0"
                       loading="lazy"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -685,7 +685,7 @@ const {
                   >
                     <span class="text-base-content/60">Твит: </span>
                     <a
-                      :href="block.url"
+                      x-bind:href="block.url"
                       x-text="block.url"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -726,8 +726,8 @@ const {
               <div
                 class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2"
               >
-                <Button variant="outline" size="sm" @click="editBlock(index)">Редактировать</Button>
-                <Button variant="error" size="sm" @click="deleteBlock(index)">Удалить</Button>
+                <Button variant="outline" size="sm" x-on:click="editBlock(index)">Редактировать</Button>
+                <Button variant="error" size="sm" x-on:click="deleteBlock(index)">Удалить</Button>
               </div>
             </div>
           </template>
@@ -738,16 +738,16 @@ const {
     <div class="mt-6">
       <template x-if="showBlockOptions">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 border border-base-300 rounded-lg bg-base-100">
-          <button @click="addBlock('paragraph')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Абзац</button>
-          <button @click="addBlock('image')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Картинка</button>
-          <button @click="addBlock('video')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Видео</button>
-          <button @click="addBlock('tweet')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Твит</button>
-          <button @click="addBlock('link')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Блок-ссылка</button>
-          <button @click="addBlock('url-link')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Ссылка на URL</button>
+          <button x-on:click="addBlock('paragraph')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Абзац</button>
+          <button x-on:click="addBlock('image')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Картинка</button>
+          <button x-on:click="addBlock('video')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Видео</button>
+          <button x-on:click="addBlock('tweet')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Твит</button>
+          <button x-on:click="addBlock('link')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Блок-ссылка</button>
+          <button x-on:click="addBlock('url-link')" class="p-2 rounded-lg cursor-pointer text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-100">Ссылка на URL</button>
         </div>
       </template>
       <div x-show="!showBlockOptions" class="text-center">
-        <Button variant="primary" @click="openBlockSelector()">+ Добавить блок</Button>
+        <Button variant="primary" x-on:click="openBlockSelector()">+ Добавить блок</Button>
       </div>
     </div>
   </section>
