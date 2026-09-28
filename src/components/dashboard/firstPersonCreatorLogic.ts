@@ -1,6 +1,13 @@
 import { firstPersonApi } from "@/lib/api/api";
 import articleCreatorLogic from "@/components/article/creatorLogic";
 import { reindexContentBlocks } from "@/lib/utils/contentBlocks";
+import {
+  clearDashboardPreview,
+  openDashboardPreview,
+  readDashboardPreview,
+} from "@/lib/utils/dashboardPreview";
+
+const PREVIEW_KEY = "firstPersonPreview";
 
 // "От первого лица" reuses the article block editor/category/tags/author
 // machinery wholesale (via articleCreatorLogic), but has no hero image and
@@ -29,11 +36,14 @@ export default function firstPersonCreatorLogic(initialState = {}) {
     init() {
       baseLogic.init.call(this);
 
-      if (!isPreview) return;
+      if (!isPreview) {
+        // Opening the editor drops any leftover snapshot so it can't go stale.
+        clearDashboardPreview(PREVIEW_KEY);
+        return;
+      }
 
       try {
-        const stored = window.localStorage?.getItem("firstPersonPreview");
-        const previewState = stored ? JSON.parse(stored) : null;
+        const previewState = readDashboardPreview<any>(PREVIEW_KEY);
         if (!previewState?.article) return;
 
         this.article = { ...this.article, ...previewState.article };
@@ -114,11 +124,9 @@ export default function firstPersonCreatorLogic(initialState = {}) {
         newAuthorLastName: this.newAuthorLastName,
         authorDisplay,
       };
-      window.localStorage.setItem(
-        "firstPersonPreview",
-        JSON.stringify(previewState),
-      );
-      window.location.href = "/dashboard/first-person/preview";
+      if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/first-person/preview", previewState)) {
+        (window as any).Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
+      }
     },
 
     async saveFirstPerson() {
@@ -196,7 +204,7 @@ export default function firstPersonCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.articleId) {
           await firstPersonApi.update(this.articleId, payload);
-          window.localStorage.removeItem("firstPersonPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           (window as any).Alpine.store("ui").showToast("Материал обновлён!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard";
@@ -204,7 +212,7 @@ export default function firstPersonCreatorLogic(initialState = {}) {
         } else {
           const created = await firstPersonApi.create(payload);
           this.articleId = created.id;
-          window.localStorage.removeItem("firstPersonPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           (window as any).Alpine.store("ui").showToast(
             "Материал «от первого лица» создан!",
           );

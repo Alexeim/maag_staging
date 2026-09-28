@@ -15,12 +15,11 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
         <div>
           <h1 class="text-2xl font-semibold">Предпросмотр материала «от первого лица»</h1>
           <p class="text-sm text-base-content/70 mt-1">
-            Используй кнопки внизу, чтобы вернуться к редактированию или сохранить материал.
+            Редактор остался открыт в соседней вкладке. Сохраняй материал там.
           </p>
         </div>
         <div class="flex gap-2">
-          <Button variant="secondary" @click="returnToEdit()">Вернуться к редактированию</Button>
-          <Button variant="primary" @click="saveFirstPerson()">Сохранить материал</Button>
+          <Button variant="secondary" @click="window.close()">Закрыть превью</Button>
         </div>
       </div>
 
