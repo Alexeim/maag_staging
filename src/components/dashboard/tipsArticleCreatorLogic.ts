@@ -27,6 +27,10 @@ import {
   openDashboardPreview,
   readDashboardPreview,
 } from "@/lib/utils/dashboardPreview";
+import {
+  createUnsavedChangesGuard,
+  type UnsavedChangesGuard,
+} from "@/lib/utils/unsavedChangesGuard";
 
 const PREVIEW_KEY = "tipsPreview";
 
@@ -124,6 +128,8 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     const districtMap = buildParisDistrictMap();
     return districtMap[trimmed.toLowerCase()] || trimmed;
   };
+
+  let unsavedGuard: UnsavedChangesGuard | null = null;
 
   return {
     article: {
@@ -325,6 +331,17 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       this.syncCurrentContentCollection();
       this.loadContentCollections();
       this.loadLandingPlacements();
+
+      if (!isPreview) {
+        // @ts-ignore Alpine magic $el is available at runtime.
+        unsavedGuard = createUnsavedChangesGuard(this.$el, () => ({
+          article: this.article,
+          selectedAuthorId: this.selectedAuthorId,
+          useNewAuthor: this.useNewAuthor,
+          newAuthorFirstName: this.newAuthorFirstName,
+          newAuthorLastName: this.newAuthorLastName,
+        }));
+      }
     },
 
     previewArticle() {
@@ -761,6 +778,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       const performDelete = async () => {
         try {
           await articlesApi.delete(this.articleId!, await getIdToken());
+          unsavedGuard?.markSaved();
           ui()?.showToast?.("Статья удалена");
           setTimeout(() => {
             globalThis.location.href = redirectUrl || "/dashboard/tips";
@@ -865,6 +883,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         if (this.isEditMode && this.articleId) {
           await articlesApi.update(this.articleId, payload, await getIdToken());
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           ui()?.showToast?.("Статья обновлена!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard/tips";
@@ -872,6 +891,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
         } else {
           await articlesApi.create(payload, await getIdToken());
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           ui()?.showToast?.("Статья создана!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard/tips";
