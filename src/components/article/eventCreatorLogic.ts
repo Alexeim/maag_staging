@@ -12,6 +12,13 @@ import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 import { normalizeStoredRichTextHtml } from "@/lib/utils/richText";
 import eventTagsData from "@/content/tags/EventTags.json";
 import { normalizeTagList } from "@/content/tags/tags";
+import {
+  clearDashboardPreview,
+  openDashboardPreview,
+  readDashboardPreview,
+} from "@/lib/utils/dashboardPreview";
+
+const PREVIEW_KEY = "eventPreview";
 
 type EventDateType = "single" | "duration";
 type EventTimeMode = "none" | "start" | "range";
@@ -288,11 +295,12 @@ export default function eventCreatorLogic(initialState = {}) {
 
       const previewEvent = (() => {
         if (!isPreview) {
+          // Opening the editor drops any leftover snapshot so it can't go stale.
+          clearDashboardPreview(PREVIEW_KEY);
           return null;
         }
         try {
-          const stored = window.localStorage?.getItem("eventPreview");
-          const previewState = stored ? JSON.parse(stored) : null;
+          const previewState = readDashboardPreview<any>(PREVIEW_KEY);
           const normalized = normalizeIncoming(previewState?.event);
           if (normalized) {
             this.eventId =
@@ -413,8 +421,9 @@ export default function eventCreatorLogic(initialState = {}) {
         selectedAuthorId: this.selectedAuthorId,
         authorDisplay,
       };
-      window.localStorage.setItem("eventPreview", JSON.stringify(previewState));
-      window.location.href = "/dashboard/event/preview";
+      if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/event/preview", previewState)) {
+        window.Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
+      }
     },
 
     getAvailableTags() {
@@ -709,7 +718,7 @@ export default function eventCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.eventId) {
           await eventsApi.update(this.eventId, payload);
-          window.localStorage.removeItem("eventPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           (globalThis as any).Alpine.store("ui").showToast(
             "Событие обновлено, красота!",
           );
@@ -718,7 +727,7 @@ export default function eventCreatorLogic(initialState = {}) {
           }, 1500);
         } else {
           const result = await eventsApi.create(payload);
-          window.localStorage.removeItem("eventPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           (globalThis as any).Alpine.store("ui").showToast(
             "Событие создано, поехали!",
           );

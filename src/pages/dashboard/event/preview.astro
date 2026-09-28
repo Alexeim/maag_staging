@@ -16,12 +16,11 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
         <div>
           <h1 class="text-2xl font-semibold">Предпросмотр события</h1>
           <p class="text-sm text-base-content/70 mt-1">
-            Используй кнопки справа, чтобы вернуться к редактированию или сохранить событие.
+            Редактор остался открыт в соседней вкладке. Сохраняй событие там.
           </p>
         </div>
         <div class="flex gap-2">
-          <Button variant="secondary" @click="returnToEdit()">Вернуться к редактированию</Button>
-          <Button variant="primary" @click="saveEvent()">Сохранить событие</Button>
+          <Button variant="secondary" @click="window.close()">Закрыть превью</Button>
         </div>
       </div>
 
