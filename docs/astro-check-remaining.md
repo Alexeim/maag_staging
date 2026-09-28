@@ -57,3 +57,11 @@
   (`mode: "empty"`): сервер его не знает, пустой слот — `null`.
 - `lazyLoadPlugin` — `Alpine.nextTick` вместо `this.$nextTick` (та же
   функция: `magic('nextTick', () => nextTick)`).
+
+## Публичные страницы без `any` (2026-09-28)
+
+На `src/pages` вне дашборда `any` больше нет. Карточки culture/paris —
+`PublicCardItem`, события календаря — `PublicCalendarEvent` (`api.ts`). Оба
+типа — зеркало серверных `toLandingItem()` и `toPublicCalendarEvent()` в
+`publicLandingController.ts`: меняешь поле там — меняй и тип. Главная
+(`PublicLandingResponse`) всё ещё на `unknown`.
