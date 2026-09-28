@@ -1049,7 +1049,10 @@ export default function interviewCreatorLogic(initialState = {}) {
           published: Boolean(this.interview.published),
           imageUrl: this.interview.imageUrl,
           imageCaption: this.interview.imageCaption,
-          heroOrientation: this.interview.heroOrientation === "image-right" ? "image-right" : "image-left",
+          heroOrientation:
+            this.interview.heroOrientation === "image-right"
+              ? ("image-right" as const)
+              : ("image-left" as const),
           authorId: resolvedAuthorId,
           content: this.interview.contentBlocks,
           tags: this.interview.tags,

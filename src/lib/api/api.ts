@@ -676,7 +676,8 @@ export interface FlipperResponse extends FlipperPayload {
   id: string;
   createdAt: string | Date;
   updatedAt?: string | Date;
-  author?: unknown;
+  // Only from getById: the raw authors/{authorId} document (no id), or null.
+  author?: AuthorPayload | null;
 }
 
 export interface InterviewPayload {
@@ -686,6 +687,7 @@ export interface InterviewPayload {
   content: unknown[];
   imageUrl?: string;
   imageCaption?: string;
+  heroOrientation?: "image-left" | "image-right";
   lead?: string;
   leadHtml?: string;
   cardLead?: string;
@@ -705,7 +707,8 @@ export interface InterviewResponse extends InterviewPayload {
   id: string;
   createdAt: string | Date;
   updatedAt?: string | Date;
-  author?: unknown;
+  // Only from getById: the raw authors/{authorId} document (no id), or null.
+  author?: AuthorPayload | null;
 }
 
 export interface FirstPersonPayload {
