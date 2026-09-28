@@ -22,6 +22,13 @@ import { createLandingPlacementManager } from "@/components/dashboard/landingPla
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
 import { compressImage } from "@/lib/images/compressImage";
+import {
+  clearDashboardPreview,
+  openDashboardPreview,
+  readDashboardPreview,
+} from "@/lib/utils/dashboardPreview";
+
+const PREVIEW_KEY = "flipperPreview";
 
 const storage = getStorage(app);
 
@@ -199,18 +206,8 @@ export default function flipperCreatorLogic(initialState = {}) {
         };
       };
 
-      let previewState: PreviewState | null = null;
+      const previewState = readDashboardPreview<PreviewState>(PREVIEW_KEY);
       let restoredPreviewAuthorState = false;
-
-      try {
-        const stored = window.localStorage?.getItem("flipperPreview");
-        const parsed = stored ? JSON.parse(stored) : null;
-        if (parsed && typeof parsed === "object") {
-          previewState = parsed as PreviewState;
-        }
-      } catch (error) {
-        console.error("Failed to load flipper preview draft:", error);
-      }
 
       if (initialFlipper) {
         const flipperCopy = normalizeLoadedFlipper(initialFlipper);
@@ -220,31 +217,19 @@ export default function flipperCreatorLogic(initialState = {}) {
         }
       }
 
-      const shouldApplyPreview = (() => {
-        if (!previewState?.flipper) return false;
-        if (isPreview) return true;
-        const previewId =
-          typeof previewState.flipperId === "string" && previewState.flipperId
-            ? previewState.flipperId
-            : null;
-        const isPreviewEdit = Boolean(previewState.isEditMode);
-        const isSameEdit =
-          this.isEditMode && previewId !== null && previewId === this.flipperId;
-        const isCreateDraft = !this.isEditMode && !previewId && !isPreviewEdit;
-        return isSameEdit || isCreateDraft;
-      })();
+      // The draft is only for the preview tab. The editor tab never unloads
+      // while previewing, so it must not overlay a stored draft on itself.
+      const shouldApplyPreview = isPreview && Boolean(previewState?.flipper);
 
       if (shouldApplyPreview && previewState?.flipper) {
         const flipperCopy = normalizeLoadedFlipper(previewState.flipper);
         if (flipperCopy) {
           this.flipper = { ...this.flipper, ...flipperCopy };
-          if (isPreview) {
-            this.flipperId =
-              typeof previewState.flipperId === "string"
-                ? previewState.flipperId
-                : null;
-            this.isEditMode = Boolean(previewState.isEditMode);
-          }
+          this.flipperId =
+            typeof previewState.flipperId === "string"
+              ? previewState.flipperId
+              : null;
+          this.isEditMode = Boolean(previewState.isEditMode);
         }
         this.selectedAuthorId =
           typeof previewState.selectedAuthorId === "string"
@@ -273,6 +258,9 @@ export default function flipperCreatorLogic(initialState = {}) {
               }
             : { name: "", avatarUrl: "" };
         restoredPreviewAuthorState = true;
+      } else if (previewState) {
+        // Opening the editor drops any leftover snapshot so it can't go stale.
+        clearDashboardPreview(PREVIEW_KEY);
       }
 
       this.flipper.relatedContent = sanitizeRelatedContent(
@@ -333,8 +321,9 @@ export default function flipperCreatorLogic(initialState = {}) {
         newAuthorLastName: this.newAuthorLastName,
         authorDisplay,
       };
-      window.localStorage.setItem("flipperPreview", JSON.stringify(previewState));
-      window.location.href = "/dashboard/flippers/preview";
+      if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/flippers/preview", previewState)) {
+        window.Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
+      }
     },
 
     getAvailableTags() {
@@ -738,12 +727,12 @@ export default function flipperCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.flipperId) {
           await flippersApi.update(this.flipperId, payload);
-          window.localStorage.removeItem("flipperPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           window.Alpine.store("ui").showToast("Листалка успешно обновлена!");
           setTimeout(() => { globalThis.location.href = "/dashboard/flippers"; }, 1500);
         } else {
           await flippersApi.create(payload);
-          window.localStorage.removeItem("flipperPreview");
+          clearDashboardPreview(PREVIEW_KEY);
           window.Alpine.store("ui").showToast("Листалка успешно создана!");
           setTimeout(() => { globalThis.location.href = `/dashboard/flippers`; }, 1500);
         }
