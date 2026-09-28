@@ -1,6 +1,5 @@
 ---
 import Layout from "../Layouts/Layout.astro";
-import { getTransitionName } from "../lib/utils/transitions";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import NetlenkaCardOne from "@/components/common/NetlenkaCardOne.astro";
 import CardByline from "@/components/common/CardByline.astro";
@@ -287,7 +286,6 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                         categoryHref={getPrimaryBadgeHref(item)}
                         imageUrl={item.imageUrl}
                         href={item.href}
-                        transitionName={getTransitionName(item)}
                         hideDate={true}
                       />
                     ))}
@@ -316,7 +314,6 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                               categoryHref={getPrimaryBadgeHref(item)}
                               imageUrl={item.imageUrl}
                               href={item.href}
-                              transitionName={getTransitionName(item)}
                               hideDate={true}
                             />
                           </div>
@@ -497,10 +494,6 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
               }
               imageUrl={featuredInterview.imageUrl || picture1.src}
               href={`/interviews/${featuredInterview.id}`}
-              transitionName={getTransitionName({
-                id: featuredInterview.id,
-                href: `/interviews/${featuredInterview.id}`,
-              })}
             />
           </section>
         )

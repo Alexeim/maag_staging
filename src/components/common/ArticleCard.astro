@@ -10,7 +10,6 @@ interface ArticleCardProps {
   date?: string;
   hideDate?: boolean;
   lead?: string;
-  transitionName?: string;
   imageUrl?: string;
   href?: string;
   paid?: boolean;
@@ -23,7 +22,6 @@ const {
   date = "",
   hideDate = false,
   lead = "",
-  transitionName,
   imageUrl,
   href = "#",
   paid = false,
@@ -50,7 +48,6 @@ const lastWord =
         alt={imageUrl ? title : "Culture image"}
         class="linked-image-hover__media w-full h-full object-cover object-center"
         loading={imageLoading}
-        transitionName={transitionName}
       />
     </a>
   </div>

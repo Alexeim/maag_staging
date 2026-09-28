@@ -1,6 +1,5 @@
 ---
 import Layout from "../Layouts/Layout.astro";
-import { getTransitionName } from "../lib/utils/transitions";
 import LatestInterview from "@/components/HomePage/LatestInterview.astro";
 import ZapisnayaKnijkaCard from "@/components/common/ZapisnayaKnijkaCard.astro";
 import CardByline from "@/components/common/CardByline.astro";
@@ -377,7 +376,6 @@ const interviewName =
                       categoryHref={getPrimaryTagHref(item)}
                       imageUrl={item.imageUrl}
                       href={item.href}
-                      transitionName={getTransitionName(item)}
                       hideDate={true}
                       lead={getCardLead(item)}
                     />
@@ -409,7 +407,6 @@ const interviewName =
                             categoryHref={getPrimaryTagHref(item)}
                             imageUrl={item.imageUrl}
                             href={item.href}
-                            transitionName={getTransitionName(item)}
                             hideDate={true}
                             lead={getCardLead(item)}
                           />
@@ -674,10 +671,6 @@ const interviewName =
                 }
                 imageUrl={interviewFeature.imageUrl || picture1.src}
                 href={`/interviews/${interviewFeature.id}`}
-                transitionName={getTransitionName({
-                  id: interviewFeature.id,
-                  href: `/interviews/${interviewFeature.id}`,
-                })}
                 inversed
               />
             )

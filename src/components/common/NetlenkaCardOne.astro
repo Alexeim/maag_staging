@@ -10,7 +10,6 @@ interface NetlenkaCardOneProps {
   date?: string;
   hideDate?: boolean;
   lead?: string;
-  transitionName?: string;
   imageUrl?: string;
   href?: string;
 }
@@ -20,7 +19,6 @@ const {
   category = "Самое Читаемое",
   categoryHref = null,
   lead = "",
-  transitionName,
   imageUrl,
   href = "#",
 } = Astro.props as NetlenkaCardOneProps;
@@ -35,7 +33,6 @@ const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
       alt={imageUrl ? title : "Editorial image"}
       class="linked-image-hover__media w-full h-full object-cover object-center"
       loading={imageLoading}
-      transitionName={transitionName}
     />
 
     <div

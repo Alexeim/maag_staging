@@ -6,7 +6,6 @@ interface FirstPersonCardProps {
   authorName?: string;
   title?: string;
   imageUrl?: string | null;
-  transitionName?: string;
   href?: string;
 }
 
@@ -14,7 +13,6 @@ const {
   authorName = "",
   title = "",
   imageUrl,
-  transitionName,
   href = "#",
 } = Astro.props as FirstPersonCardProps;
 
@@ -57,7 +55,6 @@ const composedTitle =
               alt=""
               class="linked-image-hover__media h-full w-full object-contain object-bottom"
               loading={imageLoading}
-              transitionName={transitionName}
             />
           ) : (
             <div class="h-full w-full bg-base-300" />

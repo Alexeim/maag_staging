@@ -7,7 +7,6 @@ interface Props {
   quote?: string;
   imageUrl?: string;
   href?: string;
-  transitionName?: string;
   inversed?: boolean;
 }
 
@@ -17,7 +16,6 @@ const {
   quote = "Скоро здесь будет интересная цитата...",
   imageUrl = picture1,
   href = "#",
-  transitionName,
   inversed = false,
 } = Astro.props;
 ---

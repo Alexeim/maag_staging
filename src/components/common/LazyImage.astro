@@ -9,7 +9,6 @@ interface Props {
   width?: number;
   height?: number;
   loading?: 'eager' | 'lazy';
-  transitionName?: string;
 }
 
 const {
@@ -19,7 +18,6 @@ const {
   width,
   height,
   loading = 'lazy',
-  transitionName,
 } = Astro.props;
 
 const isRemote = typeof src === 'string';

@@ -1,6 +1,5 @@
 ---
 import { Image } from "astro:assets";
-import { getTransitionName } from "../../lib/utils/transitions";
 import { isLegacyParisTag } from "@/content/tags/tags";
 import {
   getPrimaryBadgeHref,
@@ -176,7 +175,6 @@ const splitTitle = (t: string) => {
                         src={cultureHero.imageUrl}
                         alt={cultureHero.title}
                         class="linked-image-hover__media block h-full w-full object-cover"
-                        transitionName={getTransitionName(cultureHero)}
                       />
                     </a>
                   ) : (
@@ -276,7 +274,6 @@ const splitTitle = (t: string) => {
                       categoryHref={getPrimaryTagHref(item)}
                       date={formatArticleDate(item.publishedAt)}
                       hideDate={true}
-                      transitionName={getTransitionName(item)}
                       imageUrl={item.imageUrl}
                       href={item.href}
                       paid={item.paid}
@@ -298,10 +295,6 @@ const splitTitle = (t: string) => {
                 quote={interviewQuote ?? undefined}
                 imageUrl={latestInterview.imageUrl ?? undefined}
                 href={`/interviews/${latestInterview.id}`}
-                transitionName={getTransitionName({
-                  id: latestInterview.id,
-                  href: `/interviews/${latestInterview.id}`,
-                })}
               />
             )
           }
@@ -328,7 +321,6 @@ const splitTitle = (t: string) => {
                       authorName={item.authorName}
                       title={getCardTitle(item)}
                       imageUrl={item.imageUrl}
-                      transitionName={getTransitionName(item)}
                       href={item.href}
                     />
                   ) : (
@@ -339,7 +331,6 @@ const splitTitle = (t: string) => {
                       categoryHref={getPrimaryTagHref(item)}
                       date={formatArticleDate(item.publishedAt)}
                       hideDate={true}
-                      transitionName={getTransitionName(item)}
                       imageUrl={item.imageUrl}
                       href={item.href}
                     />
@@ -370,7 +361,6 @@ const splitTitle = (t: string) => {
                             authorName={item.authorName}
                             title={getCardTitle(item)}
                             imageUrl={item.imageUrl}
-                            transitionName={getTransitionName(item)}
                             href={item.href}
                           />
                         ) : (
@@ -381,7 +371,6 @@ const splitTitle = (t: string) => {
                             categoryHref={getPrimaryTagHref(item)}
                             date={formatArticleDate(item.publishedAt)}
                             hideDate={true}
-                            transitionName={getTransitionName(item)}
                             imageUrl={item.imageUrl}
                             href={item.href}
                           />
@@ -493,7 +482,6 @@ const splitTitle = (t: string) => {
                       src={parisHero.imageUrl ?? picture1}
                       alt={parisHero.title}
                       class="linked-image-hover__media block h-full w-full object-cover"
-                      transitionName={getTransitionName(parisHero)}
                     />
                   </a>
                 </>
@@ -534,7 +522,6 @@ const splitTitle = (t: string) => {
                     categoryHref={getPrimaryTagHref(item)}
                     date={formatArticleDate(item.publishedAt)}
                     hideDate={true}
-                    transitionName={getTransitionName(item)}
                     imageUrl={item.imageUrl}
                     href={item.href}
                     paid={item.paid}
@@ -688,7 +675,7 @@ const splitTitle = (t: string) => {
           class="articles-marquee-track flex gap-8 items-stretch py-8"
           style="width: max-content;"
         >
-          {[...carouselItems, ...carouselItems].map((item, index) => (
+          {[...carouselItems, ...carouselItems].map((item) => (
             <div class="w-[320px] flex-shrink-0">
               <ArticleCard
                 title={getCardTitle(item)}
@@ -696,11 +683,6 @@ const splitTitle = (t: string) => {
                 categoryHref={getPrimaryTagHref(item)}
                 date={formatArticleDate(item.publishedAt)}
                 hideDate={true}
-                transitionName={
-                  index < carouselItems.length
-                    ? getTransitionName(item)
-                    : undefined
-                }
                 imageUrl={item.imageUrl}
                 href={item.href}
                 paid={item.paid}
