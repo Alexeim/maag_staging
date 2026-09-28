@@ -1,24 +1,28 @@
 ---
+import type { ComponentProps } from "astro/types";
 import Layout from "../../Layouts/Layout.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
 import {
   ApiError,
   firstPersonApi,
+  type FirstPersonResponse,
 } from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { composeFirstPersonTitle } from "@/lib/utils/firstPerson";
 
+type ArticleBodyProps = ComponentProps<typeof ArticleBody>;
+
 const { id } = Astro.params;
 if (!id) return Astro.redirect("/404");
 
-let materialData: any;
+let materialData: FirstPersonResponse | null = null;
 let error: string | null = null;
 
 try {
   materialData = await firstPersonApi.getById(id);
-} catch (e: any) {
+} catch (e) {
   Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
   console.error(e);
   if (e instanceof ApiError) {
@@ -27,7 +31,7 @@ try {
         ? "Material not found."
         : `Error fetching material: ${e.message}`;
   } else {
-    error = `Error fetching material: ${e.message}`;
+    error = `Error fetching material: ${e instanceof Error ? e.message : String(e)}`;
   }
 }
 
@@ -53,7 +57,8 @@ const authorHref = materialData?.authorId ? `/author/${materialData.authorId}` :
 // flat string (tab title, structured data, share text).
 const displayMaterial = {
   title: materialData?.title || "",
-  contentBlocks: materialData?.content || [],
+  // Stored blocks are unvalidated JSON; ArticleBody renders them by `type`.
+  contentBlocks: (materialData?.content || []) as ArticleBodyProps["contentBlocks"],
 };
 const composedTitle =
   composeFirstPersonTitle(authorName, displayMaterial.title) || "Материал";
