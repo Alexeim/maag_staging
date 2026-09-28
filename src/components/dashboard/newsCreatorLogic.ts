@@ -47,6 +47,10 @@ import {
   openDashboardPreview,
   readDashboardPreview,
 } from "@/lib/utils/dashboardPreview";
+import {
+  createUnsavedChangesGuard,
+  type UnsavedChangesGuard,
+} from "@/lib/utils/unsavedChangesGuard";
 
 const PREVIEW_KEY = "newsPreview";
 import { normalizeTagList } from "@/content/tags/tags";
@@ -120,6 +124,8 @@ export default function newsCreatorLogic(
     copy.relatedContent = sanitizeRelatedContent(copy.relatedContent);
     return copy;
   };
+
+  let unsavedGuard: UnsavedChangesGuard | null = null;
 
   return {
     article: {
@@ -570,6 +576,17 @@ export default function newsCreatorLogic(
       this.loadAuthors();
       this.syncCurrentContentCollection();
       this.loadContentCollections();
+
+      if (!isPreview) {
+        // @ts-ignore Alpine magic $el is available at runtime.
+        unsavedGuard = createUnsavedChangesGuard(this.$el, () => ({
+          article: this.article,
+          selectedAuthorId: this.selectedAuthorId,
+          useNewAuthor: this.useNewAuthor,
+          newAuthorFirstName: this.newAuthorFirstName,
+          newAuthorLastName: this.newAuthorLastName,
+        }));
+      }
     },
 
     previewArticle() {
@@ -962,6 +979,7 @@ export default function newsCreatorLogic(
         if (this.isEditMode && this.articleId) {
           await newsApi.update(this.articleId, payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           (window as any).Alpine.store("ui").showToast("Новость обновлена!");
           setTimeout(() => {
             globalThis.location.href = "/dashboard/news";
@@ -969,6 +987,7 @@ export default function newsCreatorLogic(
         } else {
           const result = await newsApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           (window as any).Alpine.store("ui").showToast("Новость создана!");
           setTimeout(() => {
             globalThis.location.href = `/dashboard/news`;
@@ -989,6 +1008,7 @@ export default function newsCreatorLogic(
       const performDelete = async () => {
         try {
           await newsApi.delete(this.articleId!);
+          unsavedGuard?.markSaved();
           (window as any).Alpine.store("ui").showToast("Новость удалена");
           setTimeout(() => {
             window.location.href = redirectUrl || "/dashboard/news";
