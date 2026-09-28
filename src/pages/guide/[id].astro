@@ -1,4 +1,5 @@
 ---
+import type { ComponentProps } from "astro/types";
 import Layout from "../../Layouts/Layout.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
 import ArticleTips from "../../components/article/ArticleTips.astro";
@@ -10,7 +11,13 @@ import {
   getPrimaryBadgeLabel,
   getTagLabel,
 } from "@/lib/utils/contentBadge";
-import { ApiError, guidesApi, publicRelatedApi } from "@/lib/api/api";
+import {
+  ApiError,
+  guidesApi,
+  publicRelatedApi,
+  type GuideResponse,
+  type PublicRelatedCard,
+} from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import {
@@ -18,6 +25,8 @@ import {
   type LinkedContentLookup,
 } from "@/lib/utils/contentCollectionMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
+
+type ArticleBodyProps = ComponentProps<typeof ArticleBody>;
 
 const { id } = Astro.params;
 if (!id) return Astro.redirect("/404");
@@ -28,16 +37,16 @@ const CATEGORY_LABELS: Record<string, string> = {
   hotContent: "Самое Читаемое",
 };
 
-let guideData: any;
+let guideData: GuideResponse | null = null;
 let error: string | null = null;
 let linkedContentLookup: LinkedContentLookup = {};
-let collectionContentItems: any[] = [];
-let relatedContentItems: any[] = [];
-let sameCategoryItems: any[] = [];
+let collectionContentItems: PublicRelatedCard[] = [];
+let relatedContentItems: PublicRelatedCard[] = [];
+let sameCategoryItems: PublicRelatedCard[] = [];
 
 try {
   guideData = await guidesApi.getById(id);
-} catch (e: any) {
+} catch (e) {
   Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
   console.error(e);
   if (e instanceof ApiError) {
@@ -46,7 +55,7 @@ try {
         ? "Путеводитель не найден."
         : `Ошибка загрузки путеводителя: ${e.message}`;
   } else {
-    error = `Ошибка загрузки путеводителя: ${e.message}`;
+    error = `Ошибка загрузки путеводителя: ${e instanceof Error ? e.message : String(e)}`;
   }
 }
 
@@ -76,7 +85,8 @@ const displayGuide = {
   imageUrl: guideData?.imageUrl,
   imageCaption: guideData?.imageCaption || '',
   imageAlt: 'Guide image',
-  contentBlocks: guideData?.content || [],
+  // Stored blocks are unvalidated JSON; ArticleBody renders them by `type`.
+  contentBlocks: (guideData?.content || []) as ArticleBodyProps["contentBlocks"],
   tips: Array.isArray(guideData?.tips) ? guideData.tips : [],
 };
 
