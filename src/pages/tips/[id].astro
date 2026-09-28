@@ -1,4 +1,5 @@
 ---
+import type { ComponentProps } from "astro/types";
 import Layout from "../../Layouts/Layout.astro";
 import TipsArticleBody from "../../components/article/TipsArticleBody.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
@@ -13,13 +14,18 @@ import {
   ApiError,
   articlesApi,
   publicRelatedApi,
+  type ArticleResponse,
+  type PublicRelatedCard,
 } from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { normalizeTags } from "@/lib/utils/contentCollectionMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
-const { id } = Astro.params as { id: string };
+type TipsArticleBodyProps = ComponentProps<typeof TipsArticleBody>;
+
+const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",
@@ -27,12 +33,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   hotContent: "Самое Читаемое",
 };
 
-let articleData: any;
+let articleData: ArticleResponse | null = null;
 let error: string | null = null;
 
 try {
   articleData = await articlesApi.getById(id);
-} catch (e: any) {
+} catch (e) {
   Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
   console.error(e);
   if (e instanceof ApiError) {
@@ -41,7 +47,7 @@ try {
         ? "Статья не найдена."
         : `Ошибка загрузки: ${e.message}`;
   } else {
-    error = `Ошибка загрузки: ${e.message}`;
+    error = `Ошибка загрузки: ${e instanceof Error ? e.message : String(e)}`;
   }
 }
 
@@ -74,7 +80,8 @@ const displayArticle = {
   imageUrl: articleData?.imageUrl,
   imageCaption: articleData?.imageCaption || "",
   imageAlt: articleData?.title || "Обложка статьи",
-  contentBlocks: articleData?.content || [],
+  // Stored blocks are unvalidated JSON; TipsArticleBody keeps only tips items.
+  contentBlocks: (articleData?.content || []) as TipsArticleBodyProps["contentBlocks"],
 };
 
 const firstBookmarkTag = getTagLabel(normalizeTags(articleData?.tags)[0] ?? "");
@@ -96,9 +103,9 @@ const articleStructuredData = articleData
     })
   : [];
 
-let collectionContentItems: any[] = [];
-let relatedContentItems: any[] = [];
-let sameCategoryItems: any[] = [];
+let collectionContentItems: PublicRelatedCard[] = [];
+let relatedContentItems: PublicRelatedCard[] = [];
+let sameCategoryItems: PublicRelatedCard[] = [];
 
 if (!error && articleData) {
   try {
