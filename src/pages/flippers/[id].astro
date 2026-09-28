@@ -8,7 +8,11 @@ import {
   getPrimaryBadgeLabel,
   getTagLabel,
 } from "@/lib/utils/contentBadge";
-import { flippersApi, publicRelatedApi } from "../../lib/api/api";
+import {
+  flippersApi,
+  publicRelatedApi,
+  type PublicRelatedCard,
+} from "../../lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { ChevronLeft, ChevronRight } from "@lucide/astro";
@@ -67,9 +71,9 @@ const articleStructuredData = buildArticleStructuredData({
   authorName,
 });
 
-let collectionContentItems: any[] = [];
-let relatedContentItems: any[] = [];
-let recentFlipperItems: any[] = [];
+let collectionContentItems: PublicRelatedCard[] = [];
+let relatedContentItems: PublicRelatedCard[] = [];
+let recentFlipperItems: PublicRelatedCard[] = [];
 
 try {
   // The server picks the cards (published only, card fields only) — see
