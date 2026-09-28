@@ -1,0 +1,13 @@
+{
+  // Type-checks the tests only; the build keeps using tsconfig.json.
+  // Vitest ships ESM types behind package "exports", which the commonjs
+  // resolution of the build config does not read, hence "bundler" here.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    "module": "preserve",
+    "moduleResolution": "bundler"
+  },
+  "include": ["tests", "vitest.config.mts"]
+}

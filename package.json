@@ -9,8 +9,9 @@
     "build": "astro build",
     "check": "npm run check:ts && npm run check:server && npm run check:astro",
     "check:ts": "tsc --noEmit",
-    "check:server": "tsc --noEmit -p server/tsconfig.json",
+    "check:server": "tsc --noEmit -p server/tsconfig.json && tsc -p server/tsconfig.test.json",
     "check:astro": "astro check",
+    "test": "vitest run && npm test --prefix server",
     "preview": "astro preview",
     "astro": "astro",
     "predeploy": "npm run build && touch dist/.nojekyll",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "gh-pages": "^6.3.0"
+    "gh-pages": "^6.3.0",
+    "vitest": "^5.0.2"
   }
 }

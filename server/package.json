@@ -7,7 +7,7 @@
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "migrate:news:dry": "node scripts/migrateArticlesNewsToNewsCollection.js",
     "migrate:news:copy": "node scripts/migrateArticlesNewsToNewsCollection.js --apply-copy",
     "migrate:news:delete": "node scripts/migrateArticlesNewsToNewsCollection.js --apply-delete",
@@ -44,6 +44,7 @@
     "@types/sharp": "^0.31.1",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^5.0.2"
   }
 }
