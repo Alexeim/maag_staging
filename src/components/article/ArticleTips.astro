@@ -35,7 +35,9 @@ const TIP_ORDER: TipType[] = [
   "link",
 ];
 
-const sortTips = (tips: { type: TipType; text: string; url?: string }[]) =>
+type PreparedTip = { type: TipType; text: string; url: string | undefined };
+
+const sortTips = (tips: PreparedTip[]) =>
   [...tips].sort((left, right) => {
     return TIP_ORDER.indexOf(left.type) - TIP_ORDER.indexOf(right.type);
   });
@@ -54,8 +56,7 @@ const preparedTips = tips
     url: typeof tip.url === "string" ? tip.url.trim() : undefined,
   }))
   .filter(
-    (tip): tip is { type: TipType; text: string; url?: string } =>
-      tip.type in ICONS,
+    (tip): tip is PreparedTip => tip.type in ICONS,
   );
 
 const orderedTips = sortTips(preparedTips);
