@@ -40,6 +40,11 @@ Only things that are non-obvious or that I have already got wrong here.
   Check `server/src/controllers/*Controller.ts` before assuming a change is done.
 - Verify backend with `cd server && npx tsc --noEmit`. Not `astro check`, which
   scans `server/*.ts` with the wrong tsconfig and invents errors.
+- `npm run check` runs all three: `check:ts` (plain `tsc` on `src/`, skips
+  `.astro`), `check:server` (the backend `tsc` above), `check:astro`. Don't
+  run `check:astro` while `npm run dev` is up: on 2026-09-28 it rewrote
+  `node_modules/.vite/deps` under the dev server and the browser got
+  `504 Outdated Optimize Dep` until the dev server was restarted.
 
 ## Two read models — this is the important one
 
