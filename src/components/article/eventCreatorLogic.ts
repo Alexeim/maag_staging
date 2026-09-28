@@ -151,7 +151,9 @@ const normalizeAdditionalInfo = (value: unknown) => {
         text,
       };
     })
-    .filter(Boolean);
+    // Unlike filter(Boolean), this arrow is inferred as a type guard, so the
+    // result type has no null in it.
+    .filter((item) => item !== null);
 };
 
 export default function eventCreatorLogic(initialState = {}) {
