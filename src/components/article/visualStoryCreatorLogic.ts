@@ -32,6 +32,10 @@ import {
   openDashboardPreview,
   readDashboardPreview,
 } from "@/lib/utils/dashboardPreview";
+import {
+  createUnsavedChangesGuard,
+  type UnsavedChangesGuard,
+} from "@/lib/utils/unsavedChangesGuard";
 
 const PREVIEW_KEY = "visualStoryPreview";
 
@@ -102,6 +106,8 @@ export default function visualStoryCreatorLogic(initialState = {}) {
     const districtMap = buildParisDistrictMap();
     return districtMap[trimmed.toLowerCase()] || trimmed;
   };
+
+  let unsavedGuard: UnsavedChangesGuard | null = null;
 
   return {
     story: {
@@ -641,6 +647,17 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       this.syncCurrentContentCollection();
       this.loadContentCollections();
       this.loadLandingPlacements();
+
+      if (!this.isPreview) {
+        // @ts-ignore Alpine magic $el is available at runtime.
+        unsavedGuard = createUnsavedChangesGuard(this.$el, () => ({
+          story: this.story,
+          selectedAuthorId: this.selectedAuthorId,
+          useNewAuthor: this.useNewAuthor,
+          newAuthorFirstName: this.newAuthorFirstName,
+          newAuthorLastName: this.newAuthorLastName,
+        }));
+      }
     },
 
     previewStory() {
@@ -765,11 +782,13 @@ export default function visualStoryCreatorLogic(initialState = {}) {
         if (this.isEditMode && this.storyId) {
           await visualStoriesApi.update(this.storyId, payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           window.Alpine?.store("ui")?.showToast?.("Визуальная история обновлена!");
           setTimeout(() => { globalThis.location.href = "/dashboard/visual-stories"; }, 1500);
         } else {
           await visualStoriesApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           window.Alpine?.store("ui")?.showToast?.("Визуальная история создана!");
           setTimeout(() => { globalThis.location.href = "/dashboard/visual-stories"; }, 1500);
         }
@@ -787,6 +806,7 @@ export default function visualStoryCreatorLogic(initialState = {}) {
       const performDelete = async () => {
         try {
           await visualStoriesApi.delete(this.storyId!);
+          unsavedGuard?.markSaved();
           window.Alpine?.store("ui")?.showToast?.("Визуальная история удалена");
           setTimeout(() => {
             window.location.href = redirectUrl || "/dashboard/visual-stories";
