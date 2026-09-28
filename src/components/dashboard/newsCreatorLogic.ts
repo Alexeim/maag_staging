@@ -11,6 +11,7 @@ import {
   createEmptyRelatedContentLists,
   fetchRelatedContentLists,
   sanitizeRelatedContent,
+  type RelatedContentType,
 } from "@/lib/utils/relatedContent";
 import {
   getStorage,
@@ -165,7 +166,7 @@ export default function newsCreatorLogic(
     relatedContentLists: createEmptyRelatedContentLists(),
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
     materialLinkTypeOptions: MATERIAL_LINK_TYPE_OPTIONS,
-    selectedRelatedContentType: "article",
+    selectedRelatedContentType: "article" as RelatedContentType | "",
     selectedRelatedContentId: "",
     ...createContentCollectionEditorState("article"),
 
@@ -310,7 +311,7 @@ export default function newsCreatorLogic(
       if (!this.selectedRelatedContentType) return [];
       return this.relatedContentLists[this.selectedRelatedContentType] ?? [];
     },
-    getSelectedEntityRelatedContent(type: string) {
+    getSelectedEntityRelatedContent(type: RelatedContentType) {
       return this.article?.relatedContent?.[type] ?? [];
     },
     getRelatedContentItemLabel(type: string, id: string) {
@@ -348,7 +349,7 @@ export default function newsCreatorLogic(
       this.article.relatedContent = normalized;
       this.selectedRelatedContentId = "";
     },
-    removeRelatedContent(type: string, id: string) {
+    removeRelatedContent(type: RelatedContentType, id: string) {
       const normalized = sanitizeRelatedContent(this.article.relatedContent);
       normalized[type] = normalized[type].filter((itemId) => itemId !== id);
       this.article.relatedContent = normalized;
