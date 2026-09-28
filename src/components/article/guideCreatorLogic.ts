@@ -95,6 +95,8 @@ export default function guideCreatorLogic(initialState = {}) {
     initialAuthors?: Array<Record<string, unknown>>;
     articleId?: string | null;
     isEditMode?: boolean;
+    // Not destructured: it reaches `this.isPreview` via ...restInitialState.
+    isPreview?: boolean;
   };
 
   const categoryLabels: Record<string, string> = {
