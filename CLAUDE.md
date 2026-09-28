@@ -92,6 +92,32 @@ publication date.
   date, search, type chips, ordered "Выбрано" block with ↑↓). It takes the
   parent's method and array *names* as strings, like `CustomSelect` takes `model`.
 
+## Dashboard editors: preview and unsaved changes (2026-09-28)
+
+- **"Предпросмотр" opens a new tab; the editor never unloads.** All ten
+  material editors go through `src/lib/utils/dashboardPreview.ts`
+  (`openDashboardPreview` / `readDashboardPreview` / `clearDashboardPreview`).
+  The editor writes a snapshot to localStorage, the preview tab reads it, and
+  the preview page only has "Закрыть превью" (`window.close()`) — no save
+  button, it holds a copy that can be older than the editor.
+- **Never go back to "navigate to the preview and restore on return".** That
+  was the old design and it lost edits for months: four editors (event,
+  visual story, photo, first-person) never restored anything, the rest had
+  ten hand-copied restore paths patched one symptom at a time. An editor must
+  never apply a stored snapshot to itself; opening an editor clears any
+  leftover one.
+- Event and first-person build on `articleCreatorLogic`; they pass it
+  `isPreview: false` and `watchUnsavedChanges: false` and handle both
+  themselves. Otherwise the article base loads the article's snapshot or
+  guards only the article's fields.
+- **Unsaved changes:** `src/lib/utils/unsavedChangesGuard.ts`, created at the
+  end of each editor's `init()` (not on preview pages). Links on the page open
+  `ConfirmationModal` ("Остаться" / "Уйти без сохранения"); closing the tab or
+  reloading can only show the browser's own dialog. Call `markSaved()` after a
+  successful save or delete, or the redirect that follows triggers it.
+- `showConfirmation(message, onConfirm, { confirmLabel, cancelLabel })` — the
+  labels are optional and default to "Подтвердить" / "Отмена".
+
 ## Documents in this repo
 
 Nothing reads these automatically. Status is unverified unless noted.
@@ -106,7 +132,10 @@ Nothing reads these automatically. Status is unverified unless noted.
 - `docs/security-auth-dependency-roadmap.md` — security/auth/hosting, last
   reviewed 2026-09-01. Line 513 assumes editorial GET routes return no
   drafts; they do (see the audit).
-- `CALENDAR_PAYWALL_ROADMAP.md`, `DASHBOARD_PREVIEW_REFACTOR_ROADMAP.md`
+- `CALENDAR_PAYWALL_ROADMAP.md`
+- `DASHBOARD_PREVIEW_REFACTOR_ROADMAP.md` — **superseded** by the section
+  "Dashboard editors: preview and unsaved changes" above. Its "return to edit
+  and restore from localStorage" flow is exactly what was removed.
 
 **Reference (describe how things work, not tasks):**
 - `BACKEND_DEPLOYMENT_GUIDE.md`, `FRONTEND_DEPLOYMENT_GUIDE.md`,
