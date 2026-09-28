@@ -9,7 +9,7 @@ import baletImage from "../assets/images/calendar/balet.png";
 import theatreShowImage from "../assets/images/calendar/theatre-show.png";
 import smallEventImage from "../assets/images/calendar/small-event.png";
 import picture1 from "../assets/images/culture.jpg";
-import { publicCalendarApi } from "@/lib/api/api";
+import { publicCalendarApi, type PublicCalendarEvent } from "@/lib/api/api";
 import { getTagLabel } from "@/lib/utils/contentBadge";
 
 const toDate = (value: unknown): Date | null => {
@@ -44,7 +44,7 @@ const toDate = (value: unknown): Date | null => {
   return null;
 };
 
-const extractDescription = (blocks: any): string => {
+const extractDescription = (blocks: unknown): string => {
   if (!Array.isArray(blocks)) {
     return "Подробнее скоро.";
   }
@@ -61,7 +61,7 @@ const extractDescription = (blocks: any): string => {
 // Calendar payload only carries the event's primary tag (raw value) as
 // tagLabel/categoryLabel, not the full tags array — resolve it through the
 // shared tag dictionary instead of category, which events don't use.
-const normalizeCalendarEventLabels = (event: any) => {
+const normalizeCalendarEventLabels = (event: PublicCalendarEvent) => {
   const rawTag = typeof event?.tagLabel === "string" ? event.tagLabel.trim() : "";
   const label = rawTag ? getTagLabel(rawTag) : "Событие";
 
@@ -165,19 +165,21 @@ const formatDateRange = (startIso: string, endIso: string | null): string => {
   return `${format(start, !sameYear)} – ${format(end, true)}`;
 };
 
-let normalizedEvents: any[] = [];
-let featuredEventSourceCards: any[] = [];
-let topSourceCards: any[] = [];
-let lastChanceSourceCards: any[] = [];
+type CalendarEventCard = ReturnType<typeof normalizeCalendarEventLabels>;
+
+let normalizedEvents: CalendarEventCard[] = [];
+let featuredEventSourceCards: CalendarEventCard[] = [];
+let topSourceCards: CalendarEventCard[] = [];
+let lastChanceSourceCards: CalendarEventCard[] = [];
 
 try {
   const calendarPage = await publicCalendarApi.get();
-  normalizedEvents = (calendarPage.events as any[]).map(normalizeCalendarEventLabels);
-  featuredEventSourceCards = (calendarPage.featuredEventCards as any[]).map(
+  normalizedEvents = calendarPage.events.map(normalizeCalendarEventLabels);
+  featuredEventSourceCards = calendarPage.featuredEventCards.map(
     normalizeCalendarEventLabels,
   );
-  topSourceCards = (calendarPage.topCards as any[]).map(normalizeCalendarEventLabels);
-  lastChanceSourceCards = (calendarPage.lastChanceCards as any[]).map(normalizeCalendarEventLabels);
+  topSourceCards = calendarPage.topCards.map(normalizeCalendarEventLabels);
+  lastChanceSourceCards = calendarPage.lastChanceCards.map(normalizeCalendarEventLabels);
 } catch (error) {
   console.error("Failed to fetch events:", error);
 }
