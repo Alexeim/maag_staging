@@ -20,6 +20,7 @@ import {
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 
 const CATEGORY_LABELS: Record<string, string> = {
   culture: "Культура",

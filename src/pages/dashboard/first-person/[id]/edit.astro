@@ -5,6 +5,7 @@ import { categoryTags, parisDistrictTags } from "@/content/tags/tags";
 import { firstPersonApi, authorsApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 
 let material = null;
 let authors: any[] = [];

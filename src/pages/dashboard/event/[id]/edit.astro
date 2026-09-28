@@ -4,6 +4,7 @@ import EventComposer from "@/components/dashboard/EventComposer.astro";
 import { eventsApi, authorsApi, addressesApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 
 let eventData = null;
 let authors: any[] = [];

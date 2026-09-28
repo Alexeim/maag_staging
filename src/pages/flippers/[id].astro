@@ -18,6 +18,7 @@ import { normalizeTags } from "@/lib/utils/contentCollectionMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 const flipper = await flippersApi.getById(id);
 
 if (!flipper) {

@@ -5,6 +5,7 @@ import { flippersApi, authorsApi } from "../../../../lib/api/api";
 import { categoryTags, parisDistrictTags } from "@/content/tags/tags";
 
 const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 
 let flipper = null;
 let authors: any[] = [];

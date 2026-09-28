@@ -24,6 +24,7 @@ import {
 } from "@/lib/utils/contentCollectionMarquee";
 
 const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 
 // Paris/Culture site-section labels, used for the bookmark section indicator
 // below — unrelated to the material's tag badge.

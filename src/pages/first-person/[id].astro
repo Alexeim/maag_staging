@@ -11,6 +11,7 @@ import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { composeFirstPersonTitle } from "@/lib/utils/firstPerson";
 
 const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 
 let materialData: any;
 let error: string | null = null;

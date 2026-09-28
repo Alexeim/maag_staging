@@ -5,6 +5,7 @@ import { categoryTags, parisDistrictTags } from "@/content/tags/tags";
 import { visualStoriesApi, authorsApi } from "@/lib/api/api";
 
 const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 
 let story = null;
 let authors: any[] = [];
