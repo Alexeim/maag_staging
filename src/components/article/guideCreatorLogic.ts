@@ -59,7 +59,11 @@ const PREVIEW_KEY = "guidePreview";
 
 const storage = getStorage(app);
 
-const createBlock = (type, data, position = 0) =>
+const createBlock = (
+  type: string,
+  data: Record<string, any>,
+  position = 0,
+) =>
   withBlockMeta({ type, ...data }, position);
 const TIP_TYPES = [
   "location",
@@ -1044,7 +1048,7 @@ export default function guideCreatorLogic(initialState = {}) {
       this.showBlockOptions = true;
     },
 
-    addBlock(type) {
+    addBlock(type: string) {
       let newBlockData = {};
       switch (type) {
         case "paragraph":
@@ -1118,7 +1122,7 @@ export default function guideCreatorLogic(initialState = {}) {
       this.editBlock(this.article.contentBlocks.length - 1);
     },
 
-    editBlock(index) {
+    editBlock(index: number) {
       this.editingIndex = index;
       this.editingBlock = JSON.parse(
         JSON.stringify(this.article.contentBlocks[index]),
@@ -1177,7 +1181,7 @@ export default function guideCreatorLogic(initialState = {}) {
       return true;
     },
 
-    startBlockDrag(index) {
+    startBlockDrag(index: number) {
       if (this.editingIndex !== null || this.uploading) {
         return;
       }
@@ -1189,7 +1193,7 @@ export default function guideCreatorLogic(initialState = {}) {
       this.dragOverBlockId = block.id;
     },
 
-    setBlockDropTarget(index) {
+    setBlockDropTarget(index: number) {
       if (!this.draggedBlockId) {
         return;
       }
@@ -1200,7 +1204,7 @@ export default function guideCreatorLogic(initialState = {}) {
       this.dragOverBlockId = block.id;
     },
 
-    dropBlock(targetIndex) {
+    dropBlock(targetIndex: number) {
       if (!this.draggedBlockId || this.editingIndex !== null) {
         this.resetBlockDrag();
         return;
@@ -1233,7 +1237,7 @@ export default function guideCreatorLogic(initialState = {}) {
       this.dragOverBlockId = null;
     },
 
-    deleteBlock(index) {
+    deleteBlock(index: number) {
       const removeBlock = () => {
         this.article.contentBlocks.splice(index, 1);
         this.syncContentBlockOrder();
@@ -1420,12 +1424,12 @@ export default function guideCreatorLogic(initialState = {}) {
 
     ...restInitialState,
 
-    deleteArticle(redirectUrl) {
+    deleteArticle(redirectUrl?: string) {
       if (!this.articleId) return;
 
       const performDelete = async () => {
         try {
-          await guidesApi.delete(this.articleId);
+          await guidesApi.delete(this.articleId!);
           unsavedGuard?.markSaved();
           globalThis.Alpine.store("ui").showToast("Путеводитель удалён");
           setTimeout(() => {
