@@ -272,8 +272,8 @@ export default function articleCreatorLogic(initialState = {}) {
       heroOrientation: "image-right" as "image-left" | "image-right" | "image-bottom",
       // --- REFACTORED: from 'paragraphs' to 'contentBlocks' ---
       contentBlocks: [] as EditorBlock[],
-      tags: [],
-      parisSubCategories: [],
+      tags: [] as string[],
+      parisSubCategories: [] as string[],
       parisDistrict: "",
       binaryForGuide: false,
       category: "", // <-- Added category
