@@ -28,9 +28,9 @@ if (!flipper) {
 // Admins may preview an unpublished flipper on its real page; everyone else
 // gets redirected to /404.
 const isDraftPreview =
-  (flipper as any).published !== true && canPreviewUnpublished(Astro.locals);
+  flipper.published !== true && canPreviewUnpublished(Astro.locals);
 
-if ((flipper as any).published !== true && !isDraftPreview) {
+if (flipper.published !== true && !isDraftPreview) {
   return Astro.redirect("/404");
 }
 
