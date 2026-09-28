@@ -113,7 +113,7 @@ if (!error && guideData) {
   try {
     // The server picks the cards (published only, card fields only) — see
     // server/src/controllers/publicRelatedController.ts.
-    const cards = await publicRelatedApi.get("guide", id!);
+    const cards = await publicRelatedApi.get("guide", id);
     collectionContentItems = cards.collection;
     relatedContentItems = cards.related;
     sameCategoryItems = cards.autofill;
@@ -160,7 +160,7 @@ if (!error && guideData) {
             heroOrientation={guideData?.heroOrientation ?? "image-right"}
             actions={{
               contentType: "guide",
-              contentId: id!,
+              contentId: id,
               href: `/guide/${id}`,
               category: bookmarkCategory,
               tag: firstBookmarkTag,

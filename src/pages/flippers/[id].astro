@@ -74,7 +74,7 @@ let recentFlipperItems: any[] = [];
 try {
   // The server picks the cards (published only, card fields only) — see
   // server/src/controllers/publicRelatedController.ts.
-  const cards = await publicRelatedApi.get("flipper", id!);
+  const cards = await publicRelatedApi.get("flipper", id);
   collectionContentItems = cards.collection;
   relatedContentItems = cards.related;
   recentFlipperItems = cards.autofill;
@@ -125,7 +125,7 @@ try {
             }
             <ContentActions
               contentType="flipper"
-              contentId={id!}
+              contentId={id}
               title={flipper.title}
               href={`/flippers/${id}`}
               category={bookmarkCategory}

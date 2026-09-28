@@ -144,7 +144,7 @@ if (!error && articleData) {
   try {
     // The server picks the cards (published only, card fields only) — see
     // server/src/controllers/publicRelatedController.ts.
-    const cards = await publicRelatedApi.get("article", id!);
+    const cards = await publicRelatedApi.get("article", id);
     collectionContentItems = cards.collection;
     relatedContentItems = cards.related;
     sameCategoryItems = cards.autofill;
@@ -194,7 +194,7 @@ const isAKid = displayArticle.authorName === "Саша Макарова";
             heroOrientation={articleData?.heroOrientation ?? "image-right"}
             actions={{
               contentType: "article",
-              contentId: id!,
+              contentId: id,
               href: `/article/${id}`,
               category: bookmarkCategory,
               tag: bookmarkTag,
