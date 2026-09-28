@@ -9,7 +9,9 @@ Only things that are non-obvious or that I have already got wrong here.
   get types, and no new implicit `any`. Untyped code that exists here is debt,
   not the house style — don't copy it.
 - **JavaScript only for one-off tech scripts** — migrations, seeds, backfills
-  in `server/scripts/` (all `.js`, run by hand). The only other `.mjs` files
+  in `server/scripts/` (all `.js`, run by hand). `seedAddresses.json` next to
+  them is data, not code: `seedAddresses.js` used it to seed the addresses
+  into the database. The only other `.mjs` files
   are tooling: `astro.config.mjs`, `server.mjs`, `tests/sitemap.test.mjs`.
 - Open `astro check` errors are listed in `docs/astro-check-remaining.md`.
 - Shared editor types: `EditorBlock` (`src/lib/utils/contentBlocks.ts`),
