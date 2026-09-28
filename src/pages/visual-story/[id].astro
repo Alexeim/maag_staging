@@ -9,7 +9,11 @@ import {
   getPrimaryBadgeLabel,
   getTagLabel,
 } from "@/lib/utils/contentBadge";
-import { ApiError, visualStoriesApi } from "@/lib/api/api";
+import {
+  ApiError,
+  visualStoriesApi,
+  type VisualStoryResponse,
+} from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
@@ -20,7 +24,7 @@ import { Info, MoveRight, MoveLeft } from "@lucide/astro";
 
 const { id } = Astro.params;
 
-let storyData: any;
+let storyData: VisualStoryResponse | null = null;
 let error: string | null = null;
 
 if (!id) {
@@ -29,7 +33,7 @@ if (!id) {
 } else {
   try {
     storyData = await visualStoriesApi.getById(id);
-  } catch (e: any) {
+  } catch (e) {
     Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
     if (e instanceof ApiError) {
       error =
@@ -37,7 +41,7 @@ if (!id) {
           ? "Визуальная история не найдена."
           : `Ошибка загрузки: ${e.message}`;
     } else {
-      error = `Ошибка загрузки: ${e.message}`;
+      error = `Ошибка загрузки: ${e instanceof Error ? e.message : String(e)}`;
     }
   }
 }
@@ -63,7 +67,7 @@ const slides: Array<{
   quote?: string;
   quoteAuthor?: string;
 }> = Array.isArray(storyData?.slides)
-  ? storyData.slides.map((slide: any) => ({
+  ? storyData.slides.map((slide) => ({
       imageUrl: typeof slide?.imageUrl === "string" ? slide.imageUrl : "",
       contentType: slide?.contentType === "quote" ? "quote" : "text",
       text: typeof slide?.text === "string" ? slide.text : "",
@@ -101,13 +105,13 @@ const categoryHref = getPrimaryBadgeHref({
   tags: storyData?.tags,
 });
 
-const normalizeDate = (value: any): Date | null => {
+const normalizeDate = (value: unknown): Date | null => {
   if (!value) return null;
   if (typeof value === "string") {
     const d = new Date(value);
     return isNaN(d.getTime()) ? null : d;
   }
-  if (typeof value === "object" && typeof value._seconds === "number") {
+  if (typeof value === "object" && "_seconds" in value && typeof value._seconds === "number") {
     return new Date(value._seconds * 1000);
   }
   return null;
