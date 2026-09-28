@@ -1,4 +1,9 @@
-import { articlesApi, authorsApi, contentCollectionsApi } from "@/lib/api/api";
+import {
+  articlesApi,
+  authorsApi,
+  contentCollectionsApi,
+  type AuthorResponse,
+} from "@/lib/api/api";
 import { app, getIdToken } from "../../lib/firebase/client";
 import {
   getInitialRichTextHtml,
@@ -84,6 +89,25 @@ const TIP_TYPES = [
 type TipType = (typeof TIP_TYPES)[number];
 type TipItem = { type: TipType; text: string; url?: string };
 
+// What the author picker reads. The list is authorsApi.list(), plus an entry
+// rebuilt from the loaded article's author when that one is missing from it.
+type EditorAuthor = Pick<
+  AuthorResponse,
+  "id" | "firstName" | "lastName" | "role" | "avatar" | "noBgAvatar"
+>;
+
+// Present on an article loaded from the API (normalizeLoadedArticle copies the
+// response as-is) but not on the empty initial state the type is inferred from.
+type LoadedArticleAuthorFields = {
+  author?: {
+    firstName?: string;
+    lastName?: string;
+    role?: string;
+    avatar?: string;
+  } | null;
+  authorId?: unknown;
+};
+
 export default function articleCreatorLogic(initialState = {}) {
   const {
     categoryTags = {},
@@ -101,7 +125,7 @@ export default function articleCreatorLogic(initialState = {}) {
     categoryTags?: Record<string, string[]>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
     initialArticle?: Record<string, unknown> | null;
-    initialAuthors?: Array<Record<string, unknown>>;
+    initialAuthors?: EditorAuthor[];
     articleId?: string | null;
     isEditMode?: boolean;
     articleType?: "standard" | "tips" | "le_saviez_vous";
@@ -647,7 +671,8 @@ export default function articleCreatorLogic(initialState = {}) {
         };
       }
 
-      const fallbackAuthor = this.article?.author;
+      const fallbackAuthor = (this.article as LoadedArticleAuthorFields)
+        ?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         return {
           name: this.getAuthorLabel(fallbackAuthor),
@@ -674,7 +699,8 @@ export default function articleCreatorLogic(initialState = {}) {
       if (alreadyExists) {
         return;
       }
-      const fallbackAuthor = this.article?.author;
+      const fallbackAuthor = (this.article as LoadedArticleAuthorFields)
+        ?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         this.authors.unshift({
           id: this.selectedAuthorId,
@@ -1034,8 +1060,10 @@ export default function articleCreatorLogic(initialState = {}) {
         ? normalizeContentBlocks(this.article.contentBlocks)
         : [];
       if (!restoredPreviewAuthorState) {
+        const loadedAuthorId = (this.article as LoadedArticleAuthorFields)
+          .authorId;
         this.selectedAuthorId =
-          typeof this.article.authorId === "string" ? this.article.authorId : "";
+          typeof loadedAuthorId === "string" ? loadedAuthorId : "";
       }
       this.ensureSelectedAuthorPresent();
       this.syncCurrentContentCollection();
