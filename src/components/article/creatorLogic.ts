@@ -360,10 +360,12 @@ export default function articleCreatorLogic(initialState = {}) {
     parisDistrictOptions,
 
     categoryLabels,
-    getRichTextInitialHtml(block) {
+    getRichTextInitialHtml(block: { html?: unknown; text?: unknown } | null) {
       return getInitialRichTextHtml(block);
     },
-    getColumnRichTextInitialHtml(column) {
+    getColumnRichTextInitialHtml(
+      column: { html?: unknown; content?: unknown } | null | undefined,
+    ) {
       return getInitialRichTextHtml({
         html: column?.html,
         text: column?.content,
@@ -396,7 +398,7 @@ export default function articleCreatorLogic(initialState = {}) {
     getPreviewText(value?: string, maxLength = 120) {
       return truncatePreviewText(value, maxLength);
     },
-    getLinkedBlockTitle(block) {
+    getLinkedBlockTitle(block: Record<string, any>) {
       return resolveLinkedBlockTitle(block, (currentBlock) => {
         const contentType =
           typeof currentBlock.linkedContentType === "string"
@@ -412,17 +414,19 @@ export default function articleCreatorLogic(initialState = {}) {
         return this.getRelatedContentItemLabel(contentType, contentId);
       });
     },
-    getBlockSummary(block) {
+    getBlockSummary(block: EditorBlock) {
       return buildBlockSummary(block, {
         resolveLinkedTitle: (currentBlock) =>
           this.getLinkedBlockTitle(currentBlock),
       });
     },
-    normalizeContentBlocks(blocks) {
+    normalizeContentBlocks(blocks?: unknown) {
       return normalizeContentBlocks(blocks);
     },
-    syncContentBlockOrder(blocks = this.article.contentBlocks) {
-      this.article.contentBlocks = reindexContentBlocks(blocks);
+    syncContentBlockOrder(blocks?: EditorBlock[]) {
+      this.article.contentBlocks = reindexContentBlocks(
+        blocks ?? this.article.contentBlocks,
+      );
     },
     getVideoProvider(url: string, sourceType = "embed") {
       return detectVideoProvider(url, sourceType);
@@ -439,10 +443,10 @@ export default function articleCreatorLogic(initialState = {}) {
     getTweetId(url: string) {
       return resolveTweetId(url);
     },
-    normalizeEditableVideoBlock(block) {
+    normalizeEditableVideoBlock(block: EditorBlock) {
       return normalizeVideoBlock(block);
     },
-    validateVideoBlock(block, showToast = true) {
+    validateVideoBlock(block: EditorBlock, showToast = true) {
       if (!block || block.type !== "video") {
         return true;
       }
@@ -471,7 +475,7 @@ export default function articleCreatorLogic(initialState = {}) {
       }
       return true;
     },
-    validateTweetBlock(block, showToast = true) {
+    validateTweetBlock(block: EditorBlock, showToast = true) {
       if (!block || block.type !== "tweet") {
         return true;
       }
