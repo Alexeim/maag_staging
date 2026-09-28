@@ -83,18 +83,6 @@ const decoratedEvents = events.map((event) => {
     dateRangeLabel: formatRange(startDate, endDate),
     locationLabel: event.address || "Место уточняется",
     timeLabel,
-    categoryLabel: (() => {
-      switch (event.category) {
-        case "exhibition":
-          return "Выставка";
-        case "concert":
-          return "Концерт";
-        case "performance":
-          return "Спектакль";
-        default:
-          return "Событие";
-      }
-    })(),
   };
 });
 ---
@@ -127,7 +115,7 @@ const decoratedEvents = events.map((event) => {
                   Даты
                 </th>
                 <th scope="col" class="px-6 py-3 hidden lg:table-cell">
-                  Категория / теги
+                  Теги
                 </th>
                 <th scope="col" class="px-6 py-3 hidden md:table-cell">
                   Место / время
@@ -183,9 +171,6 @@ const decoratedEvents = events.map((event) => {
                     </td>
                     <td class="px-6 py-4 hidden lg:table-cell">
                       <div class="flex flex-col gap-1">
-                        <span class="font-semibold">
-                          {eventItem.categoryLabel}
-                        </span>
                         <span class="max-w-64 break-words text-xs text-base-content/70">
                           {tagsLabel}
                         </span>
