@@ -43,6 +43,13 @@ import {
 } from "firebase/storage";
 import { createLandingPlacementManager } from "@/components/dashboard/landingPlacementManager";
 import { compressImage } from "@/lib/images/compressImage";
+import {
+  clearDashboardPreview,
+  openDashboardPreview,
+  readDashboardPreview,
+} from "@/lib/utils/dashboardPreview";
+
+const PREVIEW_KEY = "articlePreview";
 
 const storage = getStorage(app);
 
@@ -963,32 +970,8 @@ export default function articleCreatorLogic(initialState = {}) {
           avatarUrl?: string;
         };
       };
-      let previewState: PreviewState | null = null;
+      const previewState = readDashboardPreview<PreviewState>(PREVIEW_KEY);
       let restoredPreviewAuthorState = false;
-
-      if (typeof window !== "undefined") {
-        try {
-          const stored = window.localStorage?.getItem("articlePreview");
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (parsed && typeof parsed === "object") {
-              if (
-                "article" in parsed ||
-                "articleId" in parsed ||
-                "isEditMode" in parsed
-              ) {
-                previewState = parsed as PreviewState;
-              } else {
-                previewState = { article: parsed } as PreviewState;
-              }
-            } else {
-              previewState = { article: parsed } as PreviewState;
-            }
-          }
-        } catch (error) {
-          console.error("Failed to parse preview draft:", error);
-        }
-      }
 
       if (initialArticle) {
         const normalizedInitial = normalizeLoadedArticle(initialArticle);
@@ -1005,40 +988,22 @@ export default function articleCreatorLogic(initialState = {}) {
         this.isEditMode = isEditMode;
       }
 
-      const shouldApplyPreview = (() => {
-        if (!previewState?.article) {
-          return false;
-        }
-        if (this.isPreview) {
-          return true;
-        }
-        const previewId =
-          typeof previewState.articleId === "string" && previewState.articleId
-            ? previewState.articleId
-            : null;
-        const isPreviewEdit = Boolean(previewState?.isEditMode);
-        const isSameEdit =
-          this.isEditMode && previewId !== null && previewId === this.articleId;
-        const isCreateDraft = !this.isEditMode && !previewId && !isPreviewEdit;
-        return isSameEdit || isCreateDraft;
-      })();
+      // The draft is only for the preview tab. The editor tab never unloads
+      // while previewing, so it must not overlay a stored draft on itself.
+      const shouldApplyPreview = this.isPreview && Boolean(previewState?.article);
 
       if (shouldApplyPreview && previewState?.article) {
         const normalizedPreview = normalizeLoadedArticle(previewState.article);
         if (normalizedPreview) {
-          if (this.isPreview) {
-            this.article = normalizedPreview;
-            if (
-              typeof previewState.articleId === "string" &&
-              previewState.articleId
-            ) {
-              this.articleId = previewState.articleId;
-            }
-            if (typeof previewState.isEditMode === "boolean") {
-              this.isEditMode = previewState.isEditMode;
-            }
-          } else {
-            Object.assign(this.article, normalizedPreview);
+          this.article = normalizedPreview;
+          if (
+            typeof previewState.articleId === "string" &&
+            previewState.articleId
+          ) {
+            this.articleId = previewState.articleId;
+          }
+          if (typeof previewState.isEditMode === "boolean") {
+            this.isEditMode = previewState.isEditMode;
           }
         }
         if (
@@ -1081,11 +1046,8 @@ export default function articleCreatorLogic(initialState = {}) {
             : { name: "", avatarUrl: "" };
         restoredPreviewAuthorState = true;
       } else if (previewState) {
-        try {
-          window.localStorage?.removeItem("articlePreview");
-        } catch (error) {
-          console.warn("Failed to cleanup mismatched preview draft:", error);
-        }
+        // Opening the editor drops any leftover snapshot so it can't go stale.
+        clearDashboardPreview(PREVIEW_KEY);
       }
 
       this.article.tags = this.article.tags ?? [];
@@ -1590,8 +1552,9 @@ export default function articleCreatorLogic(initialState = {}) {
         newAuthorLastName: this.newAuthorLastName,
         authorDisplay,
       };
-      localStorage.setItem("articlePreview", JSON.stringify(previewState));
-      window.location.href = "/dashboard/article/preview";
+      if (!openDashboardPreview(PREVIEW_KEY, "/dashboard/article/preview", previewState)) {
+        window.Alpine.store("ui").showToast("Не удалось открыть предпросмотр.", "error");
+      }
     },
 
     async saveArticle() {
@@ -1718,14 +1681,14 @@ export default function articleCreatorLogic(initialState = {}) {
 
         if (this.isEditMode && this.articleId) {
           await articlesApi.update(this.articleId, payload, await getIdToken());
-          localStorage.removeItem("articlePreview");
+          clearDashboardPreview(PREVIEW_KEY);
           window.Alpine.store("ui").showToast("Статья успешно обновлена!");
           setTimeout(() => {
             globalThis.location.href = listUrl;
           }, 1500);
         } else {
           await articlesApi.create(payload, await getIdToken());
-          localStorage.removeItem("articlePreview");
+          clearDashboardPreview(PREVIEW_KEY);
           window.Alpine.store("ui").showToast(
             "Статья успешно создана! Молодец!",
           );
