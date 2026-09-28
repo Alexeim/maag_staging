@@ -12,17 +12,15 @@ import {
   eventsApi,
   publicRelatedApi,
   type EventResponse,
+  type PublicRelatedCard,
 } from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import {
-  hasLinkedContentBlocks,
   type LinkedContentLookup,
   type PublicContentCardItem,
 } from "@/lib/utils/contentCollectionMarquee";
-import { hasRelatedContentEntries } from "@/lib/utils/relatedMaterialsMarquee";
 import { buildEventStructuredData } from "@/lib/seo/structuredData";
-import { getCalendarToday } from "@/lib/utils/calendarDate";
 import { getPrimaryBadgeHref, getTagLabel } from "@/lib/utils/contentBadge";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 
@@ -185,12 +183,6 @@ const toDateKey = (date: Date | null): string => {
     String(date.getUTCMonth() + 1).padStart(2, "0"),
     String(date.getUTCDate()).padStart(2, "0"),
   ].join("-");
-};
-
-const toUtcDayStart = (date: Date): Date => {
-  const normalized = new Date(date);
-  normalized.setUTCHours(0, 0, 0, 0);
-  return normalized;
 };
 
 // Paris district codes (e.g. "district-16") live in a separate parisDistrict
@@ -424,7 +416,7 @@ const buildGoogleCalendarUrl = (
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 };
 
-const toRelatedEventCard = (item: EventResponse) => {
+const toRelatedEventCard = (item: PublicRelatedCard) => {
   const itemStart = toDate(item?.startDate);
   const itemEnd = toDate(item?.endDate);
   if (!itemStart) {
@@ -434,7 +426,7 @@ const toRelatedEventCard = (item: EventResponse) => {
   return {
     id: item.id,
     title: item?.title || "Событие",
-    href: `/events/${item.id}`,
+    href: item.href,
     imageUrl:
       typeof item?.imageUrl === "string" &&
       item.imageUrl.trim().length > 0
@@ -451,8 +443,6 @@ const toRelatedEventCard = (item: EventResponse) => {
     startDate: itemStart,
     endDate: itemEnd,
     ...getEventDateParts(itemStart, itemEnd),
-    sortTime: itemStart.getTime(),
-    endDay: toUtcDayStart(itemEnd ?? itemStart),
   };
 };
 
@@ -492,46 +482,18 @@ if (!error && eventData?.published !== true && !isDraftPreview) {
 
 if (!error && eventData) {
   try {
-    const allEvents = await eventsApi.list();
-    const today = getCalendarToday();
-
-    relatedEvents = allEvents
-      .filter((item) => item?.published === true)
-      .map(toRelatedEventCard)
-      .filter((item): item is NonNullable<typeof item> => Boolean(item))
-      .filter(
-        (item) => item.id !== id && item.endDay.getTime() >= today.getTime(),
-      )
-      .sort((left, right) => left.sortTime - right.sortTime)
-      .slice(0, 3);
-  } catch (relatedError) {
-    console.error(
-      "Failed to fetch related events for event page:",
-      relatedError,
-    );
-  }
-}
-
-if (
-  !error &&
-  eventData &&
-  (eventData.contentCollectionId ||
-    hasLinkedContentBlocks(eventData?.content) ||
-    hasRelatedContentEntries(eventData?.relatedContent))
-) {
-  try {
     // The server picks the cards (published only, card fields only) — see
-    // server/src/controllers/publicRelatedController.ts. Events have no
-    // autofill, so `cards.autofill` is always empty here.
+    // server/src/controllers/publicRelatedController.ts. For events,
+    // `autofill` is the next upcoming events, soonest first.
     const cards = await publicRelatedApi.get("event", id);
     collectionContentItems = cards.collection;
     relatedContentItems = cards.related;
     linkedContentLookup = cards.linked;
-  } catch (collectionError) {
-    console.error(
-      "Failed to fetch collection content for event page:",
-      collectionError,
-    );
+    relatedEvents = cards.autofill
+      .map(toRelatedEventCard)
+      .filter((item) => item !== null);
+  } catch (relatedError) {
+    console.error("Failed to fetch related cards for event page:", relatedError);
   }
 }
 
