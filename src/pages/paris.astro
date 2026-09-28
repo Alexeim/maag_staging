@@ -12,7 +12,7 @@ import {
   getPrimaryBadgeLabel,
 } from "@/lib/utils/contentBadge";
 import picture1 from "../assets/images/culture.jpg";
-import { publicParisApi } from "@/lib/api/api";
+import { publicParisApi, type PublicCardItem } from "@/lib/api/api";
 import parisTagsData from "@/content/tags/ParisTags.json";
 import { Eye, Footprints, Bookmark, BookOpen } from "@lucide/astro";
 
@@ -54,14 +54,14 @@ const PARIS_MOCK_DROPDOWNS = [
   },
 ];
 
-const getDate = (timestamp: any): Date => {
+const getDate = (timestamp: unknown): Date => {
   if (timestamp instanceof Date) {
     return timestamp;
   }
   if (timestamp && typeof timestamp === "object" && "_seconds" in timestamp) {
     return new Date((timestamp as { _seconds: number })._seconds * 1000);
   }
-  return new Date(timestamp);
+  return new Date(timestamp as string | number);
 };
 
 const formatDate = (value: unknown) => {
@@ -89,19 +89,19 @@ const normalizeTags = (value: unknown): string[] => {
 
 // Paris-specific: strips legacy "Le Saviez-Vous" tag values before picking
 // the primary badge, then defers to the shared news/interview/tag rules.
-const getPrimaryTag = (item: any): string =>
+const getPrimaryTag = (item: PublicCardItem): string =>
   getPrimaryBadgeLabel({ ...item, tags: normalizeTags(item?.tags) });
 
-const getPrimaryTagHref = (item: any): string | null =>
+const getPrimaryTagHref = (item: PublicCardItem): string | null =>
   getPrimaryBadgeHref({ ...item, tags: normalizeTags(item?.tags) });
 
-const getCardLead = (item: any): string => {
+const getCardLead = (item: PublicCardItem): string => {
   const cardLead =
     typeof item?.cardLead === "string" ? item.cardLead.trim() : "";
   return cardLead;
 };
 
-const getCardTitle = (item: any): string => {
+const getCardTitle = (item: PublicCardItem): string => {
   const cardTitle =
     typeof item?.cardTitle === "string" ? item.cardTitle.trim() : "";
   return cardTitle || item?.title || "";
@@ -117,22 +117,22 @@ const truncateText = (text?: string, maxLength: number = 220) => {
   return `${safeText.trim()}...`;
 };
 
-let primaryParisArticle: any = null;
-let twoImageArticle: any = null;
-let interviewFeature: any = null;
-let secondaryStories: any[] = [];
-let editorialSidebarItems: any[] = [];
-let parisFeed: any[] = [];
-let photoOfTheDay: any = null;
+let primaryParisArticle: PublicCardItem | null = null;
+let twoImageArticle: PublicCardItem | null = null;
+let interviewFeature: PublicCardItem | null = null;
+let secondaryStories: PublicCardItem[] = [];
+let editorialSidebarItems: PublicCardItem[] = [];
+let parisFeed: PublicCardItem[] = [];
+let photoOfTheDay: PublicCardItem | null = null;
 
 try {
   const parisPage = await publicParisApi.get();
   primaryParisArticle = parisPage.primaryParisArticle;
   twoImageArticle = parisPage.twoImageArticle;
   interviewFeature = parisPage.interviewFeature;
-  secondaryStories = parisPage.secondaryStories as any[];
-  editorialSidebarItems = parisPage.editorialSidebarItems as any[];
-  parisFeed = parisPage.parisFeed as any[];
+  secondaryStories = parisPage.secondaryStories;
+  editorialSidebarItems = parisPage.editorialSidebarItems;
+  parisFeed = parisPage.parisFeed;
   photoOfTheDay = parisPage.photoOfTheDay;
 } catch (error) {
   console.error("Failed to fetch paris page articles:", error);
@@ -170,7 +170,7 @@ const twoImageArticleSplit = splitTitle(twoImageArticleTrunc);
 // Mirrors culture.astro's featuredInterview handling: interviews store their
 // headline quote in mainQuote (falling back to the first quote/qa content
 // block for older records), and the interviewee's name in `interviewee`.
-const extractInterviewQuote = (interview: any): string | null => {
+const extractInterviewQuote = (interview: PublicCardItem | null): string | null => {
   if (!interview) return null;
   if (interview.mainQuote) return interview.mainQuote;
   return interview.contentQuote ?? interview.lead ?? null;
