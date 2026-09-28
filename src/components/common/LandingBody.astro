@@ -6,6 +6,7 @@ import {
   getPrimaryBadgeHref,
   getPrimaryBadgeLabel,
 } from "@/lib/utils/contentBadge";
+import type { PublicCardItem, PublicLandingResponse } from "@/lib/api/api";
 
 import NetlenkaCardOne from "./NetlenkaCardOne.astro";
 import FirstPersonCard from "./FirstPersonCard.astro";
@@ -20,16 +21,11 @@ import LatestInterview from "../HomePage/LatestInterview.astro";
 import picture1 from "../../assets/images/culture.jpg";
 
 interface LandingBodyProps {
-  data?: {
-    cultureHero?: any;
-    cultureCardItems?: any[];
-    parisHero?: any;
-    parisCardItems?: any[];
-    maagChoiceItems?: any[];
-    latestInterview?: any;
-    carouselItems?: any[];
-  };
+  data?: Partial<PublicLandingResponse["body"]>;
 }
+
+// Carousel cards come without `lead`; the helpers below never read it.
+type LandingCard = Omit<PublicCardItem, "lead">;
 
 const { data: publicLandingData } = Astro.props as LandingBodyProps;
 
@@ -39,7 +35,7 @@ const PARIS_CATEGORY_LABEL = "Париж";
 
 // Strips legacy "Le Saviez-Vous" tag values before picking the primary
 // badge, then defers to the shared news/interview/tag rules.
-const getPrimaryTag = (item: any) => {
+const getPrimaryTag = (item: LandingCard) => {
   const rawTags = Array.isArray(item?.tags)
     ? item.tags
     : typeof item?.tags === "string"
@@ -54,7 +50,7 @@ const getPrimaryTag = (item: any) => {
   return getPrimaryBadgeLabel({ ...item, tags });
 };
 
-const getPrimaryTagHref = (item: any) => {
+const getPrimaryTagHref = (item: LandingCard) => {
   const rawTags = Array.isArray(item?.tags)
     ? item.tags
     : typeof item?.tags === "string"
@@ -69,13 +65,13 @@ const getPrimaryTagHref = (item: any) => {
   return getPrimaryBadgeHref({ ...item, tags });
 };
 
-const getCardLead = (item: any) => {
+const getCardLead = (item: LandingCard) => {
   const cardLead =
     typeof item?.cardLead === "string" ? item.cardLead.trim() : "";
   return cardLead;
 };
 
-const getCardTitle = (item: any): string => {
+const getCardTitle = (item: LandingCard): string => {
   const cardTitle =
     typeof item?.cardTitle === "string" ? item.cardTitle.trim() : "";
   return cardTitle || item?.title || "";
@@ -84,11 +80,16 @@ const getCardTitle = (item: any): string => {
 const maagChoiceItems = publicLandingData?.maagChoiceItems ?? [];
 const latestInterview = publicLandingData?.latestInterview ?? null;
 
-const getDate = (timestamp: any): Date => {
-  if (timestamp && typeof timestamp === "object" && timestamp._seconds) {
-    return new Date(timestamp._seconds * 1000);
+const getDate = (timestamp: unknown): Date => {
+  if (
+    timestamp &&
+    typeof timestamp === "object" &&
+    "_seconds" in timestamp &&
+    timestamp._seconds
+  ) {
+    return new Date(Number(timestamp._seconds) * 1000);
   }
-  return new Date(timestamp);
+  return new Date(timestamp as string | number);
 };
 
 const formatArticleDate = (timestamp: unknown) => {
@@ -113,12 +114,12 @@ const parisCardItems = publicLandingData?.parisCardItems ?? [];
 // backend's /api/public/landing is expected to filter these out already, but
 // a draft explicitly placed into a landing slot can still leak through.
 const carouselItems = (publicLandingData?.carouselItems ?? []).filter(
-  (item: any) => item?.published !== false,
+  (item: LandingCard) => item?.published !== false,
 );
 
 // First quote / Q&A answer from the interview body, picked on the server
 // (publicLandingController.ts) — the body itself is not sent.
-const extractQuoteOrAnswer = (interview: any): string | null =>
+const extractQuoteOrAnswer = (interview: PublicCardItem | null): string | null =>
   interview?.contentQuote ?? null;
 
 const truncateText = (text: string | null, maxLength: number = 100) => {
@@ -295,9 +296,9 @@ const splitTitle = (t: string) => {
           {
             latestInterview && (
               <LatestInterview
-                interviewee={latestInterview.interviewee}
+                interviewee={latestInterview.interviewee ?? undefined}
                 quote={interviewQuote ?? undefined}
-                imageUrl={latestInterview.imageUrl}
+                imageUrl={latestInterview.imageUrl ?? undefined}
                 href={`/interviews/${latestInterview.id}`}
                 transitionName={getTransitionName({
                   id: latestInterview.id,
