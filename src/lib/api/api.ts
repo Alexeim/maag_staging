@@ -197,7 +197,8 @@ export interface ArticleResponse extends ArticlePayload {
   id: string;
   createdAt: string | Date;
   updatedAt?: string | Date;
-  author?: unknown;
+  // Only from getById: the raw authors/{authorId} document (no id), or null.
+  author?: AuthorPayload | null;
 }
 
 export interface ContentCollectionContent {
@@ -244,7 +245,8 @@ export interface NewsResponse extends NewsPayload {
   id: string;
   createdAt: string | Date;
   updatedAt?: string | Date;
-  author?: unknown;
+  // The raw authors/{authorId} document (no id), or null; also on list items.
+  author?: AuthorPayload | null;
 }
 
 export interface EventPayload {
@@ -281,7 +283,8 @@ export interface EventResponse extends EventPayload {
   id: string;
   createdAt: string | Date;
   updatedAt?: string | Date;
-  author?: unknown;
+  // Only from getById: the raw authors/{authorId} document (no id), or null.
+  author?: AuthorPayload | null;
 }
 
 export type LandingMainHeroType =
@@ -729,7 +732,8 @@ export interface FirstPersonResponse extends FirstPersonPayload {
   id: string;
   createdAt: string | Date;
   updatedAt?: string | Date;
-  author?: unknown;
+  // Only from getById: the raw authors/{authorId} document (no id), or null.
+  author?: AuthorPayload | null;
 }
 
 export interface GuidePayload {
@@ -765,7 +769,8 @@ export interface GuidePayload {
 export interface GuideResponse extends GuidePayload {
   id: string;
   createdAt: string | Date;
-  author?: unknown;
+  // Only from getById: the raw authors/{authorId} document (no id), or null.
+  author?: AuthorPayload | null;
 }
 
 export const guidesApi = {
@@ -1179,7 +1184,8 @@ export interface VisualStoryPayload {
 export interface VisualStoryResponse extends VisualStoryPayload {
   id: string;
   createdAt: string | Date;
-  author?: unknown;
+  // Only from getById: the raw authors/{authorId} document (no id), or null.
+  author?: AuthorPayload | null;
 }
 
 export const visualStoriesApi = {
