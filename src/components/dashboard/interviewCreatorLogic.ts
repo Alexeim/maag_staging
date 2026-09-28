@@ -33,6 +33,7 @@ import {
   reindexContentBlocks,
   sortAndNormalizeContentBlocks,
   withBlockMeta,
+  type EditorBlock,
 } from "@/lib/utils/contentBlocks";
 import { createContentCollectionEditorState } from "@/lib/utils/contentCollectionEditor";
 import { normalizeContentCollectionId } from "@/lib/utils/contentCollections";
@@ -168,17 +169,17 @@ export default function interviewCreatorLogic(initialState = {}) {
       imageUrl: "",
       imageCaption: "",
       heroOrientation: "image-left" as "image-left" | "image-right",
-      contentBlocks: [],
+      contentBlocks: [] as EditorBlock[],
       tags: [],
       relatedContent: createEmptyRelatedContent(),
       contentCollectionId: null as string | null,
     },
 
     showBlockOptions: false,
-    editingIndex: null,
-    editingBlock: null,
-    draggedBlockId: null,
-    dragOverBlockId: null,
+    editingIndex: null as number | null,
+    editingBlock: null as EditorBlock | null,
+    draggedBlockId: null as string | null,
+    dragOverBlockId: null as string | null,
     isEditingTitle: false,
     editingTitleText: "",
     isEditingCaption: false,
@@ -882,7 +883,7 @@ export default function interviewCreatorLogic(initialState = {}) {
     },
 
     updateBlock() {
-      if (this.editingIndex !== null) {
+      if (this.editingIndex !== null && this.editingBlock) {
         if (this.editingBlock?.type === "video") {
           this.editingBlock = normalizeVideoBlock(this.editingBlock);
           if (!this.validateVideoBlock(this.editingBlock)) {
