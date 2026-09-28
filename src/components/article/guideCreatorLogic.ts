@@ -37,6 +37,7 @@ import {
   withBlockMeta,
   type EditorBlock,
 } from "@/lib/utils/contentBlocks";
+import type { EditorAuthor, LoadedAuthorFields } from "@/lib/utils/editorAuthors";
 import {
   getStorage,
   ref,
@@ -92,7 +93,7 @@ export default function guideCreatorLogic(initialState = {}) {
     categoryTags?: Record<string, string[]>;
     parisDistrictOptions?: Array<{ title: string; value: string }>;
     initialArticle?: Record<string, unknown> | null;
-    initialAuthors?: Array<Record<string, unknown>>;
+    initialAuthors?: EditorAuthor[];
     articleId?: string | null;
     isEditMode?: boolean;
     // Not destructured: it reaches `this.isPreview` via ...restInitialState.
@@ -599,7 +600,7 @@ export default function guideCreatorLogic(initialState = {}) {
         };
       }
 
-      const fallbackAuthor = this.article?.author;
+      const fallbackAuthor = (this.article as LoadedAuthorFields)?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         return {
           name: this.getAuthorLabel(fallbackAuthor),
@@ -626,7 +627,7 @@ export default function guideCreatorLogic(initialState = {}) {
       if (alreadyExists) {
         return;
       }
-      const fallbackAuthor = this.article?.author;
+      const fallbackAuthor = (this.article as LoadedAuthorFields)?.author;
       if (fallbackAuthor?.firstName || fallbackAuthor?.lastName) {
         this.authors.unshift({
           id: this.selectedAuthorId,
@@ -855,8 +856,9 @@ export default function guideCreatorLogic(initialState = {}) {
         ? normalizeContentBlocks(this.article.contentBlocks)
         : [];
       if (!restoredPreviewAuthorState) {
+        const loadedAuthorId = (this.article as LoadedAuthorFields).authorId;
         this.selectedAuthorId =
-          typeof this.article.authorId === "string" ? this.article.authorId : "";
+          typeof loadedAuthorId === "string" ? loadedAuthorId : "";
       }
       this.ensureSelectedAuthorPresent();
 
