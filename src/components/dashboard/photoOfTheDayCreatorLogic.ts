@@ -8,6 +8,10 @@ import {
   openDashboardPreview,
   readDashboardPreview,
 } from "@/lib/utils/dashboardPreview";
+import {
+  createUnsavedChangesGuard,
+  type UnsavedChangesGuard,
+} from "@/lib/utils/unsavedChangesGuard";
 
 const PREVIEW_KEY = "photoOfTheDayPreview";
 
@@ -38,6 +42,8 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
   }
 
   const photoDraft = isPreview && previewState?.photo ? previewState.photo : initialPhoto;
+
+  let unsavedGuard: UnsavedChangesGuard | null = null;
 
   return {
     photo: {
@@ -129,6 +135,13 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
     },
 
     async init() {
+      if (!isPreview) {
+        // @ts-ignore Alpine magic $el is available at runtime.
+        unsavedGuard = createUnsavedChangesGuard(this.$el, () => ({
+          photo: this.photo,
+          selectedAuthorId: this.selectedAuthorId,
+        }));
+      }
       await this.loadAuthors();
     },
 
@@ -231,10 +244,12 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
         if (this.isEditMode && this.photoId) {
           await photosOfTheDayApi.update(this.photoId, payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           this.notify("Фото дня обновлено");
         } else {
           await photosOfTheDayApi.create(payload);
           clearDashboardPreview(PREVIEW_KEY);
+          unsavedGuard?.markSaved();
           this.notify("Фото дня создано");
         }
 
@@ -255,6 +270,7 @@ export default function photoOfTheDayCreatorLogic(initialState: Record<string, u
       const doDelete = async () => {
         try {
           await photosOfTheDayApi.delete(this.photoId!);
+          unsavedGuard?.markSaved();
           this.notify("Фото дня удалено");
           setTimeout(() => {
             window.location.href = "/dashboard/photo-of-the-day";
