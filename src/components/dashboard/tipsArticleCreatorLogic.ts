@@ -6,6 +6,7 @@ import {
   createEmptyRelatedContentLists,
   fetchRelatedContentLists,
   sanitizeRelatedContent,
+  type RelatedContentType,
 } from "@/lib/utils/relatedContent";
 import {
   getStorage,
@@ -183,7 +184,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
     contentListsLoading: false,
     relatedContentLists: createEmptyRelatedContentLists(),
     relatedContentTypeOptions: RELATED_CONTENT_TYPE_OPTIONS,
-    selectedRelatedContentType: "article",
+    selectedRelatedContentType: "article" as RelatedContentType | "",
     selectedRelatedContentId: "",
     ...createContentCollectionEditorState("article"),
 
@@ -576,13 +577,13 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       if (!this.selectedRelatedContentType) return [];
       return this.relatedContentLists[this.selectedRelatedContentType] ?? [];
     },
-    getSelectedEntityRelatedContent(type: string) {
+    getSelectedEntityRelatedContent(type: RelatedContentType) {
       return (this.article as any)?.relatedContent?.[type] ?? [];
     },
-    getRelatedContentItemLabel(type: string, id: string) {
-      const item = (this.relatedContentLists as Record<string, any[]>)[
-        type
-      ]?.find((entry) => entry.id === id);
+    getRelatedContentItemLabel(type: RelatedContentType, id: string) {
+      const item = this.relatedContentLists[type]?.find(
+        (entry) => entry.id === id,
+      );
       return item?.title || id;
     },
     addRelatedContent() {
@@ -609,7 +610,7 @@ export default function tipsArticleCreatorLogic(initialState = {}) {
       (this.article as any).relatedContent = normalized;
       this.selectedRelatedContentId = "";
     },
-    removeRelatedContent(type: string, id: string) {
+    removeRelatedContent(type: RelatedContentType, id: string) {
       const normalized = sanitizeRelatedContent(
         (this.article as any).relatedContent,
       );
