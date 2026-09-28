@@ -1,7 +1,6 @@
 # astro check — что осталось (2026-09-28)
 
-Было 55 ошибок, осталась 1 — в `dashboard/le-saviez-vous/[id]/edit.astro:15`
-(тот же `Astro.params.id`, см. п. 2; файл не трогаем). Проверка:
+Было 55 ошибок, теперь 0. Проверка:
 `npx astro check` (для `server/` — `cd server && npx tsc --noEmit`).
 
 Ниже — что и почему сделано, чтобы не расследовать заново.
