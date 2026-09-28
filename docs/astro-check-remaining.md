@@ -64,4 +64,6 @@
 `PublicCardItem`, события календаря — `PublicCalendarEvent` (`api.ts`). Оба
 типа — зеркало серверных `toLandingItem()` и `toPublicCalendarEvent()` в
 `publicLandingController.ts`: меняешь поле там — меняй и тип. Главная
-(`PublicLandingResponse`) всё ещё на `unknown`.
+(`PublicLandingResponse`, `MainLandingBlock`, `LandingBody`) — тоже
+`PublicCardItem`. Проверка всего сразу: `npm run check` (не при запущенном
+`npm run dev`).
