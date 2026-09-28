@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import type { ComponentProps } from "astro/types";
 import Layout from "@/Layouts/Layout.astro";
 import ArticleHeader from "@/components/article/ArticleHeader.astro";
 import ArticleMetaRow from "@/components/article/ArticleMetaRow.astro";
@@ -14,7 +15,13 @@ import {
   getPrimaryBadgeLabel,
   getTagLabel,
 } from "@/lib/utils/contentBadge";
-import { ApiError, newsApi, publicRelatedApi } from "@/lib/api/api";
+import {
+  ApiError,
+  newsApi,
+  publicRelatedApi,
+  type NewsResponse,
+  type PublicRelatedCard,
+} from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import {
@@ -23,7 +30,10 @@ import {
   type LinkedContentLookup,
 } from "@/lib/utils/contentCollectionMarquee";
 
+type ArticleBodyProps = ComponentProps<typeof ArticleBody>;
+
 const { id } = Astro.params;
+if (!id) return Astro.redirect("/404");
 
 // Paris/Culture site-section labels, used only for the bookmark section
 // indicator below — unrelated to the news item's tag badge.
@@ -32,12 +42,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   paris: "Париж",
 };
 
-let articleData: any;
+let articleData: NewsResponse | null = null;
 let error: string | null = null;
 
 try {
-  articleData = await newsApi.getById(id!);
-} catch (e: any) {
+  articleData = await newsApi.getById(id);
+} catch (e) {
   Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
   console.error(e);
   if (e instanceof ApiError) {
@@ -46,7 +56,7 @@ try {
         ? "Новость не найдена."
         : `Ошибка загрузки: ${e.message}`;
   } else {
-    error = `Ошибка загрузки: ${e.message}`;
+    error = `Ошибка загрузки: ${e instanceof Error ? e.message : String(e)}`;
   }
 }
 
@@ -76,7 +86,8 @@ const displayArticle = {
   imageUrl: articleData?.imageUrl,
   imageCaption: articleData?.imageCaption || "",
   imageAlt: articleData?.title || "News image",
-  contentBlocks: articleData?.content || [],
+  // Stored blocks are unvalidated JSON; ArticleBody renders them by `type`.
+  contentBlocks: (articleData?.content || []) as ArticleBodyProps["contentBlocks"],
 };
 
 const bookmarkCategory =
@@ -123,24 +134,24 @@ const articleStructuredData = articleData
     }
   : [];
 
-let collectionContentItems: any[] = [];
-let relatedContentItems: any[] = [];
-let sameCategoryItems: any[] = [];
-let moreNewsItems: any[] = [];
+let collectionContentItems: PublicRelatedCard[] = [];
+let relatedContentItems: PublicRelatedCard[] = [];
+let sameCategoryItems: PublicRelatedCard[] = [];
+let moreNewsItems: PublicRelatedCard[] = [];
 let linkedContentLookup: LinkedContentLookup = {};
 
 if (!error && articleData) {
   try {
     // The server picks the cards (published only, card fields only) — see
     // server/src/controllers/publicRelatedController.ts.
-    const cards = await publicRelatedApi.get("news", id!);
+    const cards = await publicRelatedApi.get("news", id);
     collectionContentItems = cards.collection;
     relatedContentItems = cards.related;
     sameCategoryItems = cards.autofill;
     linkedContentLookup = cards.linked;
 
     const seenMoreNewsIds = new Set<string>();
-    const appendUniqueNewsItems = (items: any[]) => {
+    const appendUniqueNewsItems = (items: PublicRelatedCard[]) => {
       items.forEach((item) => {
         if (
           item?.contentType !== "news" ||
@@ -207,7 +218,7 @@ if (!error && articleData) {
                         />
                         <ContentActions
                           contentType="news"
-                          contentId={id!}
+                          contentId={id}
                           title={displayArticle.title}
                           href={`/news/${id}`}
                           category={bookmarkCategory}
