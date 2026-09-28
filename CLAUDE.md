@@ -45,6 +45,28 @@ Only things that are non-obvious or that I have already got wrong here.
   run `check:astro` while `npm run dev` is up: on 2026-09-28 it rewrote
   `node_modules/.vite/deps` under the dev server and the browser got
   `504 Outdated Optimize Dep` until the dev server was restarted.
+- **Tests are Vitest** (since 2026-09-28), not Jest and not `node:test`.
+  `npm test` at the root runs both: `tests/*.test.ts` (root
+  `vitest.config.ts`) and `server/tests/*.test.ts` (`server/vitest.config.mts`,
+  `.mts` because `server/` is a CommonJS package). Vitest does not type-check:
+  root tests are covered by `check:ts`; server tests by
+  `server/tsconfig.test.json`, which `check:server` runs. `server/tsconfig.json`
+  has `include: ["src"]` on purpose — without it `tsc` pulls in the tests and
+  the build fails on `rootDir`.
+- `tests/sitemap.test.ts` reads `dist/client/sitemap-*.xml`: it fails until
+  `npm run build` has run.
+- `server/tsconfig.json` has `"types": ["node"]` because otherwise `tsc`
+  picks up the frontend's `@types/*` from the root `node_modules` (DOM,
+  Alpine) — which the Cloud Run build, with `server/` as its context, never
+  sees. `"lib": ["es2022"]` relies on the Node 24 image in `server/Dockerfile`.
+- **Placement updates are rule tables**, not per-field `if` blocks
+  (`editorialPlacementsController.ts`): `applyPlacementPayload` + one
+  `*PlacementRules()` per document. A new slot = one rule entry plus a test in
+  `server/tests/editorialPlacements.test.ts`. The tables are functions, not
+  module constants: several normalizers are `const`s declared lower in the
+  file, and a module-level table would throw at load (TDZ).
+- The culture section hero (`cultureHero`) also accepts an **interview**;
+  the Paris hero and both card blocks do not (`LandingCultureHeroType`).
 
 ## Two read models — this is the important one
 
