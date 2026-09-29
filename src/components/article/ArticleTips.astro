@@ -55,16 +55,14 @@ const preparedTips = tips
     text: tip.text.trim(),
     url: typeof tip.url === "string" ? tip.url.trim() : undefined,
   }))
-  .filter(
-    (tip): tip is PreparedTip => tip.type in ICONS,
-  );
+  .filter((tip): tip is PreparedTip => tip.type in ICONS);
 
 const orderedTips = sortTips(preparedTips);
 ---
 
 {
   orderedTips.length > 0 && (
-    <section class="w-[826px] mx-auto my-12">
+    <section class="w-full lg:w-[826px] mx-auto my-12">
       <div class="border border-base-300 bg-white">
         {orderedTips.map((tip) => {
           const isLink = tip.type === "link" && tip.url;
