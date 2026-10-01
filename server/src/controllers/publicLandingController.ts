@@ -506,9 +506,12 @@ const SECTION_CONTENT_TYPES: LandingContentType[] = [
   'news',
 ];
 
+// EDITORIAL_FLAG_CONTENT_TYPES is merged in for the interviews; "от первого
+// лица" is landing-only, so it is dropped — it carries a `category` and would
+// otherwise fill every auto slot of the paris page.
 const PARIS_PAGE_CONTENT_TYPES = Array.from(
   new Set([...SECTION_CONTENT_TYPES, ...EDITORIAL_FLAG_CONTENT_TYPES]),
-);
+).filter((type) => type !== 'first-person');
 
 const normalizeSectionItem = (item: any, category: 'culture' | 'paris') => {
   if (!item) return null;
