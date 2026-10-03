@@ -168,7 +168,9 @@ const twoImageArticleSplit = splitTitle(twoImageArticleTrunc);
 // Mirrors culture.astro's featuredInterview handling: interviews store their
 // headline quote in mainQuote (falling back to the first quote/qa content
 // block for older records), and the interviewee's name in `interviewee`.
-const extractInterviewQuote = (interview: PublicCardItem | null): string | null => {
+const extractInterviewQuote = (
+  interview: PublicCardItem | null,
+): string | null => {
   if (!interview) return null;
   if (interview.mainQuote) return interview.mainQuote;
   return interview.contentQuote ?? interview.lead ?? null;
@@ -187,7 +189,7 @@ const interviewName =
 >
   <main class="min-h-screen bg-base-200 text-black">
     <div class="mx-auto max-w-[1440px] pb-20 lg:px-8 lg:pb-[6.5rem]">
-      <div class="px-4 pt-8 sm:px-6 lg:px-0 lg:pt-10">
+      <div class="px-4 pt-8 sm:px-6 lg:px-0 lg:pt-10 mb-18">
         <h1
           class="m-0 text-3xl lg:text-[28px] font-old_standard font-base uppercase tracking-[0.46em] text-base-content"
         >
@@ -246,7 +248,7 @@ const interviewName =
         </div> -->
       </div>
 
-      <div class="mt-8 overflow-visible lg:h-[calc(100svh-90px)]">
+      <div class="overflow-visible lg:h-[calc(100svh-90px)]">
         {
           primaryParisArticle ? (
             <article class="lg:flex lg:h-full lg:flex-col">
@@ -271,7 +273,7 @@ const interviewName =
                     href={primaryParisArticle.href}
                     class="text-current no-underline hover:underline text-center"
                   >
-                    <h2 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-2 lg:mb-0">
+                    <h2 class="text-3xl lg:text-[41px] font-normal font-old_standard tracking-[-0.02em] transition-opacity duration-200 hover:opacity-90 mb-6 lg:mb-0">
                       {primaryParisArticle.paid ? (
                         <>
                           {primaryParisSplit.start && (
@@ -328,6 +330,7 @@ const interviewName =
                   <CardByline
                     class="justify-center"
                     authorName={primaryParisArticle.authorName}
+                    isOnParisPage={true}
                     authorId={primaryParisArticle.authorId}
                     date={primaryParisArticle.publishedAt}
                   />

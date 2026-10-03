@@ -19,6 +19,7 @@ interface Props {
   date?: Timestamp;
   variant?: "article" | "photo";
   class?: string;
+  isOnParisPage?: boolean;
 }
 
 const {
@@ -27,6 +28,7 @@ const {
   date,
   variant = "article",
   class: className,
+  isOnParisPage = false,
 } = Astro.props as Props;
 
 const toDate = (value: Timestamp): Date | null => {
@@ -57,6 +59,7 @@ const formattedDate = parsedDate
 const name = typeof authorName === "string" ? authorName.trim() : "";
 const authorHref = authorId ? `/author/${authorId}` : undefined;
 const AuthorWrapper = authorHref ? "a" : "span";
+const authorFontSize = isOnParisPage ? "lg:text-lg" : "lg:text-base";
 ---
 
 {
@@ -80,7 +83,13 @@ const AuthorWrapper = authorHref ? "a" : "span";
           ) : (
             <AuthorIcon class="h-3.5 w-3.5 flex-shrink-0" />
           )}
-          <span class="font-old_standard italic text-sm lg:text-[0.95rem] text-base-content/70">
+          <span
+            class:list={[
+              "font-old_standard italic text-sm",
+              authorFontSize,
+              "text-base-content/70",
+            ]}
+          >
             {name}
           </span>
         </AuthorWrapper>
