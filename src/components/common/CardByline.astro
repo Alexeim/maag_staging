@@ -59,7 +59,7 @@ const formattedDate = parsedDate
 const name = typeof authorName === "string" ? authorName.trim() : "";
 const authorHref = authorId ? `/author/${authorId}` : undefined;
 const AuthorWrapper = authorHref ? "a" : "span";
-const authorFontSize = isOnParisPage ? "lg:text-lg" : "lg:text-base";
+const authorFontSize = isOnParisPage ? "lg:text-xl" : "lg:text-lg";
 ---
 
 {
@@ -85,7 +85,7 @@ const authorFontSize = isOnParisPage ? "lg:text-lg" : "lg:text-base";
           )}
           <span
             class:list={[
-              "font-old_standard italic text-sm",
+              "font-old_standard italic text-lg",
               authorFontSize,
               "text-base-content/70",
             ]}
