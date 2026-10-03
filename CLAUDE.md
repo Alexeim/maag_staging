@@ -189,6 +189,30 @@ publication date.
 - `showConfirmation(message, onConfirm, { confirmLabel, cancelLabel })` — the
   labels are optional and default to "Подтвердить" / "Отмена".
 
+## First-person page (2026-10-03)
+
+- `src/components/article/FirstPersonBody.astro` is a **deliberate copy** of
+  `ArticleBody.astro` — the owner chose a copy over a shared renderer. A fix
+  to how any block renders (paragraph, image, video, collage, …) must be made
+  in **both** files.
+- The copy differs in layout only: quotes are their own group (not inside the
+  prose `<article>`), start at the left edge of the author column at 826px,
+  icons aligned left, and `clear-left` drops them below the portrait when
+  they would run into it. Its root is a plain block on purpose — float and
+  `clear` do not work inside a flex container.
+- The page floats the author column at `calc((100%-2rem)/3)`; the header and
+  every body group take `calc((100%-2rem)*2/3)` with `ml-auto`. These two
+  widths live in `first-person/[id].astro` and `FirstPersonBody.astro` and
+  must change together. They reproduce the 456/912 split the old flex row got
+  from flex-shrink, so positions stayed pixel-identical.
+- Author portraits (`noBgAvatar`) are exactly 239×278 px — the dashboard
+  rejects anything else (`authorCreatorLogic.ts`). On mobile the portrait is
+  shown at 320px, so it is upscaled.
+- **Known gap:** "ссылка на материал" (`link`) blocks never render on this
+  page. The composer offers them, but the page passes no
+  `linkedContentLookup`, and `GET /api/public/related/:type/:id` has no
+  first-person type (`PageType` in `publicRelatedController.ts` → 400).
+
 ## Documents in this repo
 
 Nothing reads these automatically. Status is unverified unless noted.
