@@ -203,8 +203,15 @@ publication date.
 - The page floats the author column at `calc((100%-2rem)/3)`; the header and
   every body group take `calc((100%-2rem)*2/3)` with `ml-auto`. These two
   widths live in `first-person/[id].astro` and `FirstPersonBody.astro` and
-  must change together. They reproduce the 456/912 split the old flex row got
-  from flex-shrink, so positions stayed pixel-identical.
+  must change together. They reproduced the 456/912 split the old flex row got
+  from flex-shrink, so positions stayed pixel-identical. Since 2026-10-04 the
+  page's only width cap is `max-w-[1040px]` on the outer wrapper; minus the
+  section's `lg:px-14` that leaves 928px, i.e. a ~299/597 split. At that
+  width the prose rail's `lg:max-w-[826px]` no longer binds either: text is
+  as wide as the 2/3 column. The body's
+  media rails sit inside the 2/3 column and take its width; unlike
+  `ArticleBody.astro` they have no max-width of their own (removed 2026-10-04,
+  it could never apply).
 - Author portraits (`noBgAvatar`) are exactly 239×278 px — the dashboard
   rejects anything else (`authorCreatorLogic.ts`). On mobile the portrait is
   shown at 320px, so it is upscaled.

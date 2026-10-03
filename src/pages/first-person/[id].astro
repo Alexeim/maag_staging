@@ -99,17 +99,17 @@ const materialStructuredData = materialData
     <DraftPreviewBanner editHref={`/dashboard/first-person/${id}/edit`} />
   )}
   <main class="bg-base-200 min-h-screen">
-    <div class="max-w-[1512px] mx-auto">
+    <div class="max-w-[1040px] mx-auto">
       {error && <div class="text-red-500 text-center pt-40">{error}</div>}
       {!error && materialData && (
         <>
           <section class="w-full px-4 pt-16 pb-[100px] sm:px-6 lg:px-14">
             <!-- flow-root contains the author float, so the section always
                  grows to fit it even when the body is shorter -->
-            <div class="mx-auto w-full max-w-[1400px] flow-root">
+            <div class="w-full flow-root">
               <!-- Left column: portrait + about the author. Floated so that
                    FirstPersonBody can pull quotes out to its left edge. -->
-              <div class="mb-8 flex flex-col gap-4 items-center lg:items-end lg:float-left lg:w-[calc((100%-2rem)/3)]">
+              <div class="mb-8 flex flex-col gap-4 items-center lg:items-start lg:float-left lg:w-[calc((100%-2rem)/3)]">
                 <div class="w-80 max-w-full sm:w-49.75 sm:max-w-70 lg:w-full">
                   {authorPortrait ? (
                     <a href={authorHref} class:list={[authorHref && "hover:opacity-90"]}>
