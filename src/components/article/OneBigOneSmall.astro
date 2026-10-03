@@ -16,10 +16,15 @@ const {
 } = Astro.props as Props;
 ---
 
-<section class="w-full h-auto lg:relative lg:max-w-[1356px] lg:h-[calc(100vh-90px)]">
+<!--
+  Desktop layout depends on width only: the landscape image starts at the
+  portrait's vertical midpoint. Percentage margins on flex items resolve
+  against the container width, so 16.5929% = 22.1239% * (3/2) / 2.
+-->
+<section class="w-full h-auto lg:flex lg:items-start lg:max-w-[1356px]">
   {
     portraitImageUrl && (
-      <figure class="w-full lg:absolute lg:top-0 lg:left-0 lg:w-[22.1239%]">
+      <figure class="w-full lg:shrink-0 lg:w-[22.1239%]">
         <LazyImage
           src={portraitImageUrl}
           alt={portraitImageCaption || "Portrait article image"}
@@ -37,7 +42,7 @@ const {
 
   {
     landscapeImageUrl && (
-      <figure class="mt-4 w-full lg:absolute lg:right-0 lg:bottom-0 lg:mt-0 lg:w-[77.8761%]">
+      <figure class="mt-4 w-full lg:shrink-0 lg:ml-auto lg:mt-[16.5929%] lg:w-[77.8761%]">
         <LazyImage
           src={landscapeImageUrl}
           alt={landscapeImageCaption || "Landscape article image"}

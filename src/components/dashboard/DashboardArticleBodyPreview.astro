@@ -318,12 +318,13 @@ const wideBreakoutRailClass = "w-full lg:max-w-[1356px] my-12 px-4 lg:px-0";
 
       <template x-if="block.type === 'one-big-one-small'">
         <div class={wideBreakoutRailClass}>
-          <section class="w-full h-auto lg:relative lg:max-w-[1356px] lg:h-[calc(100vh-90px)]">
-          <figure class="w-full lg:absolute lg:top-0 lg:left-0 lg:w-[22.1239%]">
+          <!-- Mirrors OneBigOneSmall.astro: width-only layout, see the comment there -->
+          <section class="w-full h-auto lg:flex lg:items-start lg:max-w-[1356px]">
+          <figure class="w-full lg:shrink-0 lg:w-[22.1239%]">
             <img x-show="block.portraitImageUrl" x-bind:src="block.portraitImageUrl" x-bind:alt="block.portraitImageCaption || 'Portrait article image'" class="block w-full aspect-[2/3] object-cover" />
             <figcaption x-show="block.portraitImageCaption" x-text="block.portraitImageCaption" class="mt-2 text-center font-inter text-xs text-gray-500"></figcaption>
           </figure>
-          <figure class="mt-4 w-full lg:absolute lg:right-0 lg:bottom-0 lg:mt-0 lg:w-[77.8761%]">
+          <figure class="mt-4 w-full lg:shrink-0 lg:ml-auto lg:mt-[16.5929%] lg:w-[77.8761%]">
             <img x-show="block.landscapeImageUrl" x-bind:src="block.landscapeImageUrl" x-bind:alt="block.landscapeImageCaption || 'Landscape article image'" class="block w-full aspect-[16/9] object-cover" />
             <figcaption x-show="block.landscapeImageCaption" x-text="block.landscapeImageCaption" class="mt-2 text-center font-inter text-xs text-gray-500"></figcaption>
           </figure>
