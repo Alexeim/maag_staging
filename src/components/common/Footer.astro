@@ -43,13 +43,13 @@ const currentYear = new Date().getFullYear();
       </div>
 
       {/* Rubrics */}
-      <div>
+      <div class="flex flex-col lg:items-start lg:justify-between">
         <h3
-          class="mb-6 lg:mb-4 font-inter text-xs font-medium uppercase tracking-[0.18em] text-white"
+          class="mb-6 lg:mb-4 font-inter text-xs font-medium uppercase tracking-[0.18em] text-white pt-8"
         >
           Рубрики
         </h3>
-        <ul class="space-y-4 lg:space-y-2.5">
+        <ul class="space-y-1 lg:space-y-2.5">
           <li>
             <a
               href="/culture"
@@ -75,13 +75,13 @@ const currentYear = new Date().getFullYear();
       </div>
 
       {/* Contacts */}
-      <div>
+      <div class="flex flex-col lg:items-start lg:justify-between">
         <h3
-          class="mb-6 lg:mb-4 font-inter text-xs font-medium uppercase tracking-[0.18em] text-white"
+          class="mb-6 lg:mb-4 font-inter text-xs font-medium uppercase tracking-[0.18em] text-white pt-8"
         >
           Контакты
         </h3>
-        <div class="flex gap-4 justify-center sm:justify-start mb-6 lg:mb-4">
+        <div class="flex gap-4 justify-center sm:justify-start mb-6 lg:mb-0">
           <a
             href="https://www.instagram.com/stories/maag_france/"
             target="_blank"
@@ -107,25 +107,6 @@ const currentYear = new Date().getFullYear();
             </svg>
           </a>
         </div>
-        <ul class="space-y-4 lg:space-y-2.5">
-          <li>
-            <a
-              href="/about"
-              class="font-old_standard text-sm uppercase tracking-[0.12em] text-white transition-opacity hover:opacity-70"
-              >О проекте</a
-            >
-          </li>
-          {/* Hidden for now — no dedicated "editor's word" page yet */}
-          {
-            /* <li>
-            <a
-              href="/about"
-              class="font-old_standard text-sm uppercase tracking-[0.12em] text-white transition-opacity hover:opacity-70"
-              >Слово редактора</a
-            >
-          </li> */
-          }
-        </ul>
       </div>
     </div>
 
@@ -134,13 +115,18 @@ const currentYear = new Date().getFullYear();
 
     {/* Bottom Footer */}
     <div
-      class="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left"
+      class="flex flex-col items-center gap-4 text-center lg:flex-row lg:justify-between lg:text-left"
     >
-      <div class="text-sm text-white font-inter font-normal">
+      <div class="flex flex-col sm:flex-row items-center gap-3 text-sm text-white font-inter font-normal">
         &copy; {currentYear} MAAG France. Все права защищены.
       </div>
+      <a
+        href="/about"
+        class="text-sm text-white font-inter font-normal transition-opacity hover:opacity-70"
+        >О проекте</a
+      >
       <div
-        class="flex flex-col lg:flex-row gap-4 sm:gap-6 text-sm text-white font-inter font-normal"
+        class="flex flex-col items-center lg:items-end lg:flex-row gap-4 sm:gap-6 text-sm text-white font-inter font-normal"
       >
         <template x-if="$store.auth.profile?.role === 'admin'">
           <a href="/dashboard" class="transition-opacity hover:opacity-70">
