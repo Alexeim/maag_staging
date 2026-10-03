@@ -1,0 +1,605 @@
+---
+// Body of a first-person material. A copy of ArticleBody with its own layout:
+// the page floats the author column left, every group here sits in the right
+// two thirds, and quotes are pulled out of the prose into their own group so
+// they can start at the left edge of the author column (below it, if they
+// would otherwise run into it). Block markup matches ArticleBody.
+import QuoteIcon from "../../assets/icons/quote.svg";
+import { ChevronLeft, ChevronRight, ArrowUpRight } from "@lucide/astro";
+import ArticleVideo from "./ArticleVideo.astro";
+import LinkToContent from "./LinkToContent.astro";
+import ArticleColumnContent from "./ArticleColumnContent.astro";
+import OneBigOneSmall from "./OneBigOneSmall.astro";
+import Collage from "./Collage.astro";
+import ArticleTips from "./ArticleTips.astro";
+import { getInitialRichTextHtml } from "@/lib/utils/richText";
+import { getTweetId } from "@/lib/utils/tweet";
+import {
+  getLinkedContentKey,
+  type LinkedContentLookup,
+} from "@/lib/utils/contentCollectionMarquee";
+
+interface Block {
+  type: string;
+  text?: string;
+  html?: string;
+  url?: string;
+  caption?: string;
+  quoteAuthor?: string;
+  question?: string;
+  answer?: string;
+  sourceType?: string;
+  provider?: string;
+  linkedContentType?:
+    | "article"
+    | "news"
+    | "event"
+    | "interview"
+    | "guide"
+    | "flipper"
+    | "visualStory"
+    | "visual-story"
+    | "photoOfTheDay";
+  linkedContentId?: string;
+  linkedContentTitle?: string;
+  tips?: Array<{ type: string; text: string; url?: string }>;
+}
+
+interface ColumnData {
+  type: "image" | "text" | "quote";
+  content: string; // url for image, text for text
+  html?: string;
+  caption?: string;
+}
+
+interface TwoColumnBlock extends Block {
+  type: "two-columns";
+  left: ColumnData;
+  right: ColumnData;
+}
+
+interface ThreeColumnBlock extends Block {
+  type: "three-columns";
+  left: ColumnData;
+  center: ColumnData;
+  right: ColumnData;
+}
+
+interface FlipperSlide {
+  imageUrl: string;
+  caption?: string;
+}
+
+interface FlipperBlock extends Block {
+  type: "flipper";
+  slides: FlipperSlide[];
+}
+
+interface OneBigOneSmallBlock extends Block {
+  type: "one-big-one-small";
+  portraitImageUrl?: string;
+  portraitImageCaption?: string;
+  landscapeImageUrl?: string;
+  landscapeImageCaption?: string;
+}
+
+interface CollageBlock extends Block {
+  type: "collage";
+  leftPortraitImageUrl?: string;
+  leftPortraitImageCaption?: string;
+  topLandscapeImageUrl?: string;
+  topLandscapeImageCaption?: string;
+  mainLandscapeImageUrl?: string;
+  mainLandscapeImageCaption?: string;
+  rightPortraitImageUrl?: string;
+  rightPortraitImageCaption?: string;
+}
+
+interface RenderableBlock {
+  type:
+    | "prose-group"
+    | "two-columns"
+    | "three-columns"
+    | "flipper"
+    | "video"
+    | "one-big-one-small"
+    | "collage"
+    | "tips"
+    | "quote";
+  content?: Block[]; // for prose-group
+  block?: TwoColumnBlock; // for two-columns
+  threeColumnBlock?: ThreeColumnBlock; // for three-columns
+  flipper?: FlipperBlock; // for flipper
+  video?: Block;
+  oneBigOneSmall?: OneBigOneSmallBlock;
+  collage?: CollageBlock;
+  tips?: Block; // for tips
+  quote?: Block; // for quote
+}
+
+interface Props {
+  contentBlocks: (
+    | Block
+    | TwoColumnBlock
+    | ThreeColumnBlock
+    | OneBigOneSmallBlock
+    | CollageBlock
+  )[];
+  linkedContentLookup?: LinkedContentLookup;
+}
+
+const {
+  contentBlocks,
+  linkedContentLookup = {},
+} = Astro.props;
+
+const proseRailClass = "max-w-full lg:max-w-[826px] mx-0 lg:mx-auto";
+const mediaRailClass = "w-full lg:max-w-[1200px] my-12 px-4 lg:px-0";
+const breakoutRailClass = "w-full lg:max-w-[1278px] my-12 px-2 lg:px-0";
+const wideBreakoutRailClass = "w-full lg:max-w-[1356px] my-12 px-4 lg:px-0";
+
+// The page floats the author column at (100% - 2rem) / 3; this is the rest of
+// the row minus the 2rem gap, so each rail lands exactly where it did when the
+// page was a flex row. Must stay a sibling of the float in plain block flow.
+const rightColumnClass =
+  "flex flex-col items-center lg:ml-auto lg:w-[calc((100%-2rem)*2/3)]";
+// Quotes clear the author float and start at its left edge, at prose width.
+const quoteClass = "w-full lg:clear-left lg:max-w-[826px]";
+
+const renderableGroups: RenderableBlock[] = [];
+let currentProseGroup: Block[] = [];
+
+for (const block of contentBlocks) {
+  if (block.type === "two-columns") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "two-columns",
+      block: block as TwoColumnBlock,
+    });
+  } else if (block.type === "three-columns") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "three-columns",
+      threeColumnBlock: block as ThreeColumnBlock,
+    });
+  } else if (block.type === "flipper") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "flipper",
+      flipper: block as FlipperBlock,
+    });
+  } else if (block.type === "video") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "video",
+      video: block,
+    });
+  } else if (block.type === "one-big-one-small") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "one-big-one-small",
+      oneBigOneSmall: block as OneBigOneSmallBlock,
+    });
+  } else if (block.type === "collage") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "collage",
+      collage: block as CollageBlock,
+    });
+  } else if (block.type === "tips") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "tips",
+      tips: block,
+    });
+  } else if (block.type === "quote") {
+    if (currentProseGroup.length > 0) {
+      renderableGroups.push({
+        type: "prose-group",
+        content: currentProseGroup,
+      });
+      currentProseGroup = [];
+    }
+    renderableGroups.push({
+      type: "quote",
+      quote: block,
+    });
+  } else {
+    currentProseGroup.push(block);
+  }
+}
+
+if (currentProseGroup.length > 0) {
+  renderableGroups.push({ type: "prose-group", content: currentProseGroup });
+}
+---
+
+<div>
+  {
+    renderableGroups.map((group, index) => {
+      if (group.type === "quote" && group.quote) {
+        const block = group.quote;
+        // Inside a prose group a quote got space-y-8 from its neighbours;
+        // keep that gap only where the neighbour is prose (media rails bring
+        // their own my-12).
+        const afterProse = renderableGroups[index - 1]?.type === "prose-group";
+        const beforeProse = renderableGroups[index + 1]?.type === "prose-group";
+        return (
+          <div class:list={[quoteClass, afterProse && "mt-8", beforeProse && "mb-8"]}>
+            <div class="p-2 flex flex-col items-center justify-center gap-2">
+              <QuoteIcon class="w-8 h-8" />
+              <blockquote class="text-2xl lg:text-3xl italic font-old_standard pl-4 my-4">
+                {block.text}
+              </blockquote>
+              <QuoteIcon class="w-8 h-8 rotate-180" />
+              {block.quoteAuthor && (
+                <p class="w-full mt-4 font-inter text-sm font-light capitalize text-base-content/60 text-left">
+                  {block.quoteAuthor}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+      if (group.type === "prose-group" && group.content) {
+        return (
+          <div class={rightColumnClass}>
+            <div class={proseRailClass}>
+              <article class="max-w-full space-y-8">
+                {group.content.map((block) => {
+                  switch (block.type) {
+                    case "first-paragraph": {
+                      const html = getInitialRichTextHtml(block);
+                      if (!html) return null;
+                      return (
+                        <div
+                          class="article-rich-text article-rich-text--dropcap text-base font-article-body text-justify"
+                          set:html={html}
+                        />
+                      );
+                    }
+                    case "paragraph": {
+                      const html = getInitialRichTextHtml(block);
+                      if (!html) return null;
+                      return (
+                        <div
+                          class="article-rich-text text-base font-article-body text-justify"
+                          set:html={html}
+                        />
+                      );
+                    }
+                    case "h2":
+                      return (
+                        <h2 class="text-[26px] font-bold font-old_standard mb-[18px]">
+                          {block.text}
+                        </h2>
+                      );
+                    case "h3":
+                      return (
+                        <h3 class="text-[28px] font-bold font-old_standard mb-[18px]">
+                          {block.text}
+                        </h3>
+                      );
+                    case "tweet": {
+                      const tweetId = getTweetId(block.url);
+                      if (!tweetId) {
+                        return null;
+                      }
+                      return (
+                        <div class="not-prose w-full flex justify-center">
+                          <blockquote class="twitter-tweet" data-dnt="true">
+                            <a href={block.url}>Загрузка твита…</a>
+                          </blockquote>
+                        </div>
+                      );
+                    }
+                    case "image":
+                      return (
+                        <figure class="not-prose flex flex-col items-center">
+                          <img
+                            src={block.url}
+                            alt={block.caption || "Article image"}
+                            class="article-image"
+                          />
+                          {block.caption && (
+                            <figcaption class="text-center font-inter text-xs text-gray-500 mt-2">
+                              {block.caption}
+                            </figcaption>
+                          )}
+                        </figure>
+                      );
+                    case "link": {
+                      const linkedItem =
+                        linkedContentLookup[
+                          getLinkedContentKey(
+                            block.linkedContentType,
+                            block.linkedContentId,
+                          )
+                        ];
+                      return linkedItem ? <LinkToContent item={linkedItem} /> : null;
+                    }
+                    case "url-link":
+                      return block.url ? (
+                        <a
+                          href={block.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="group inline-flex w-fit items-center gap-2 font-old_standard text-2xl text-base-content no-underline decoration-maag-green hover:underline"
+                        >
+                          {block.text || block.url}
+                          <ArrowUpRight
+                            class="h-8 w-8 shrink-0 text-maag-green transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                            stroke-width={2.5}
+                          />
+                        </a>
+                      ) : null;
+                    case "qa":
+                      return (
+                        <div class="space-y-4">
+                          {block.question && (
+                            <p class="text-base font-article-body font-bold! italic">
+                              {block.question}
+                            </p>
+                          )}
+                          {block.answer && (
+                            <p class="text-base font-article-body text-justify">
+                              {block.answer}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    default:
+                      return null;
+                  }
+                })}
+              </article>
+            </div>
+          </div>
+        );
+      } else if (group.type === "video" && group.video) {
+        return (
+          <div class={rightColumnClass}>
+            <div class={mediaRailClass}>
+              <ArticleVideo block={group.video} />
+            </div>
+          </div>
+        );
+      } else if (group.type === "two-columns" && group.block) {
+        const twoColumnBlock = group.block;
+        return (
+          <div class={rightColumnClass}>
+            <div class={breakoutRailClass}>
+              <div class="flex flex-col lg:flex-row gap-8 items-center">
+                <div class="w-full lg:w-1/2 flex justify-center">
+                  <ArticleColumnContent
+                    column={twoColumnBlock.left}
+                    altLabel="Left column image"
+                    desktopTextAlign="justify"
+                    imageLayout="natural"
+                  />
+                </div>
+                <div class="w-full lg:w-1/2 flex justify-center">
+                  <ArticleColumnContent
+                    column={twoColumnBlock.right}
+                    altLabel="Right column image"
+                    desktopTextAlign="justify"
+                    imageLayout="natural"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      } else if (group.type === "three-columns" && group.threeColumnBlock) {
+        const threeColumnBlock = group.threeColumnBlock;
+        return (
+          <div class={rightColumnClass}>
+            <div class={wideBreakoutRailClass}>
+              <div class="flex flex-col lg:flex-row gap-8 items-center">
+                <div class="w-full lg:w-1/3 flex justify-center">
+                  <ArticleColumnContent
+                    column={threeColumnBlock.left}
+                    altLabel="Left column image"
+                    imageLayout="fixed-height"
+                  />
+                </div>
+                <div class="w-full lg:w-1/3 flex justify-center">
+                  <ArticleColumnContent
+                    column={threeColumnBlock.center}
+                    altLabel="Center column image"
+                    imageLayout="fixed-height"
+                  />
+                </div>
+                <div class="w-full lg:w-1/3 flex justify-center">
+                  <ArticleColumnContent
+                    column={threeColumnBlock.right}
+                    altLabel="Right column image"
+                    imageLayout="fixed-height"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      } else if (group.type === "flipper" && group.flipper) {
+        const { slides } = group.flipper;
+        if (!slides || slides.length === 0) return null;
+        return (
+          <div class={rightColumnClass}>
+            <div
+              class={breakoutRailClass}
+              x-data={`{ current: 0, total: ${slides.length}, captions: ${JSON.stringify(slides.map((s) => s.caption || ""))} }`}
+            >
+              <div class="relative h-[360px] w-full sm:h-[460px] lg:h-[600px]">
+                <div class="absolute inset-0 overflow-hidden">
+                  <div
+                    class="flex h-full transition-transform duration-500 ease-in-out"
+                    x-bind:style="`transform: translateX(-${current * 100}%)`"
+                  >
+                    {slides.map((slide) => (
+                      <div class="min-w-full h-full flex items-center justify-center">
+                        <img
+                          src={slide.imageUrl}
+                          alt={slide.caption || "Слайд"}
+                          class="block h-full w-auto max-w-full object-contain object-center"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {slides.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      class="absolute top-1/2 left-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-left-12"
+                      x-on:click="current = (current - 1 + total) % total"
+                      aria-label="Предыдущий слайд"
+                    >
+                      <ChevronLeft class="h-6 w-6" />
+                    </button>
+                    <button
+                      type="button"
+                      class="absolute top-1/2 right-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-right-12"
+                      x-on:click="current = (current + 1) % total"
+                      aria-label="Следующий слайд"
+                    >
+                      <ChevronRight class="h-6 w-6" />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <p
+                x-show="captions[current]"
+                x-text="captions[current]"
+                class="text-center font-inter text-xs text-gray-500 mt-2 px-4 min-h-[1rem]"
+              ></p>
+              {slides.length > 1 && (
+                <div class="flex justify-center gap-2 mt-4">
+                  {slides.map((_, i) => (
+                    <button
+                      type="button"
+                      class="w-2 h-2 rounded-full transition cursor-pointer"
+                      x-bind:class={`current === ${i} ? 'bg-base-content' : 'bg-base-content/30'`}
+                      x-on:click={`current = ${i}`}
+                      aria-label={`Слайд ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      } else if (group.type === "one-big-one-small" && group.oneBigOneSmall) {
+        const block = group.oneBigOneSmall;
+        if (!block.portraitImageUrl && !block.landscapeImageUrl) {
+          return null;
+        }
+        return (
+          <div class={rightColumnClass}>
+            <div class={wideBreakoutRailClass}>
+              <OneBigOneSmall
+                portraitImageUrl={block.portraitImageUrl}
+                portraitImageCaption={block.portraitImageCaption}
+                landscapeImageUrl={block.landscapeImageUrl}
+                landscapeImageCaption={block.landscapeImageCaption}
+              />
+            </div>
+          </div>
+        );
+      } else if (group.type === "collage" && group.collage) {
+        const block = group.collage;
+        const hasImages = Boolean(
+          block.leftPortraitImageUrl ||
+            block.topLandscapeImageUrl ||
+            block.mainLandscapeImageUrl ||
+            block.rightPortraitImageUrl,
+        );
+        if (!hasImages) {
+          return null;
+        }
+        return (
+          <div class={rightColumnClass}>
+            <div class={wideBreakoutRailClass}>
+              <Collage
+                leftPortraitImageUrl={block.leftPortraitImageUrl}
+                leftPortraitImageCaption={block.leftPortraitImageCaption}
+                topLandscapeImageUrl={block.topLandscapeImageUrl}
+                topLandscapeImageCaption={block.topLandscapeImageCaption}
+                mainLandscapeImageUrl={block.mainLandscapeImageUrl}
+                mainLandscapeImageCaption={block.mainLandscapeImageCaption}
+                rightPortraitImageUrl={block.rightPortraitImageUrl}
+                rightPortraitImageCaption={block.rightPortraitImageCaption}
+              />
+            </div>
+          </div>
+        );
+      } else if (group.type === "tips" && group.tips) {
+        return (
+          <div class={rightColumnClass}>
+            <ArticleTips tips={group.tips.tips} />
+          </div>
+        );
+      }
+      return null;
+    })
+  }
+</div>
+
+<style>
+  .article-rich-text :global(p + p) {
+    margin-top: 1rem;
+  }
+
+  .article-rich-text--dropcap :global(p:first-child::first-letter) {
+    float: left;
+    margin-top: -1rem;
+    margin-right: 1.5rem;
+    font-size: 4rem;
+    font-family: 'Great Vibes', cursive;
+    color: var(--color-maag-green);
+  }
+</style>
