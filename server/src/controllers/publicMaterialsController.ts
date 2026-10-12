@@ -70,7 +70,10 @@ const PAGE_PARAM_BY_TYPE: Record<MaterialContentType, string> = {
 
 const PAGE_SIZE = 10;
 
-const getHref = (type: MaterialContentType, id: string): string => {
+const getHref = (type: MaterialContentType, id: string, data: any): string => {
+  // Tips articles live in the articles collection but have their own page;
+  // /article/:id only redirects there.
+  if (type === 'article' && data?.articleType === 'tips') return `/tips/${id}`;
   if (type === 'interview') return `/interviews/${id}`;
   if (type === 'flipper') return `/flippers/${id}`;
   if (type === 'guide') return `/guide/${id}`;
@@ -151,7 +154,7 @@ const toMaterialItem = (
   return {
     id: doc.id,
     contentType: type,
-    href: getHref(type, doc.id),
+    href: getHref(type, doc.id, data),
     title: typeof data.title === 'string' ? data.title : '',
     imageUrl: getImageUrl(type, data),
     authorId: typeof data.authorId === 'string' ? data.authorId : null,

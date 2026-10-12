@@ -112,7 +112,10 @@ const normalizeCategory = (value?: string): string => {
 const isLeSaviezVousItem = (item: any) => item?.articleType === 'le_saviez_vous';
 const isPublished = (data: any) => data?.published === true;
 
-const getHref = (type: LandingContentType, id: string): string => {
+const getHref = (type: LandingContentType, id: string, data: any): string => {
+  // Tips articles live in the articles collection but have their own page;
+  // /article/:id only redirects there.
+  if (type === 'article' && data?.articleType === 'tips') return `/tips/${id}`;
   if (type === 'interview') return `/interviews/${id}`;
   if (type === 'flipper') return `/flippers/${id}`;
   if (type === 'guide') return `/guide/${id}`;
@@ -160,7 +163,7 @@ const toLandingItem = (
     id: doc.id,
     type,
     contentType: type,
-    href: getHref(type, doc.id),
+    href: getHref(type, doc.id, data),
     title: data.title ?? '',
     lead: data.lead ?? '',
     // Rich-text subtitle, rendered only in the Paris page main article.
