@@ -13,7 +13,7 @@ import {
   type ParisPagePlacementsResponse,
   type SectionPageHeroType,
 } from "@/lib/api/api";
-import { materialTypeBadge } from "@/lib/utils/dashboardMaterials";
+import { MATERIAL_TYPES, materialTypeBadge } from "@/lib/utils/dashboardMaterials";
 
 const CONTENT_TYPE_LABELS: Record<SectionPageHeroType, string> = {
   article: "Статья",
@@ -88,6 +88,14 @@ type MaterialOption = {
 
 const toMs = (value: unknown) => toDate(value)?.getTime() ?? null;
 
+// Tips articles live in the articles collection, so their selection key stays
+// `article:<id>` (that is what the backend resolves). Only the displayed type
+// changes, so the lists show the "Tips" badge and chip instead of "Статья".
+const articleDisplayType = (a: { articleType?: string }) =>
+  a.articleType === "tips"
+    ? { type: "tips", typeLabel: MATERIAL_TYPES.tips.label }
+    : { type: "article", typeLabel: CONTENT_TYPE_LABELS.article };
+
 const heroOptions: MaterialOption[] = [];
 const interviewOptions: Array<{ id: string; title: string; createdAtMs: number | null; publishedAtMs: number | null }> = [];
 const photoOfTheDayOptions: Array<{ id: string; title: string; createdAtMs: number | null; publishedAtMs: number | null }> = [];
@@ -120,13 +128,13 @@ try {
         !a.isNotebookContent,
     )
     .forEach((a) => {
-      heroOptions.push({ id: `article:${a.id}`, title: a.title, type: "article", typeLabel: CONTENT_TYPE_LABELS.article, createdAtMs: toMs(a.createdAt), publishedAtMs: toMs(a.publishedAt) });
+      heroOptions.push({ id: `article:${a.id}`, title: a.title, ...articleDisplayType(a), createdAtMs: toMs(a.createdAt), publishedAtMs: toMs(a.publishedAt) });
     });
 
   articles
     .filter((a) => isPublishedItem(a) && Boolean(a.isNotebookContent))
     .forEach((a) => {
-      sidebarOptions.push({ id: `article:${a.id}`, title: a.title, type: "article", typeLabel: CONTENT_TYPE_LABELS.article, createdAtMs: toMs(a.createdAt), publishedAtMs: toMs(a.publishedAt) });
+      sidebarOptions.push({ id: `article:${a.id}`, title: a.title, ...articleDisplayType(a), createdAtMs: toMs(a.createdAt), publishedAtMs: toMs(a.publishedAt) });
     });
 
   guides

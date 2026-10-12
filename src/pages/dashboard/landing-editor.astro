@@ -248,6 +248,15 @@ const mainHeroArticleMeta = new Map<
     articleBucketLabel: string;
   }
 >();
+// Tips articles live in the articles collection, so their option `type` stays
+// "article" (that is what the backend accepts for a slot). These keys only let
+// the lists show the "Tips" badge and chip instead of "Статья".
+const tipsArticleKeys = new Set<string>();
+const displayType = (item: { id: string; type: string }) =>
+  tipsArticleKeys.has(item.id) ? "tips" : item.type;
+// Badge for a saved placement ({ type, id } as stored by the backend).
+const placedBadge = (type: string, id: string) =>
+  materialTypeBadge(displayType({ id: `${type}:${id}`, type }));
 
 try {
   const [
@@ -280,6 +289,7 @@ try {
   articles.forEach((item) => {
     const key = `article:${item.id}`;
     const articleBucket = normalizeArticleBucket(item);
+    if (item.articleType === "tips") tipsArticleKeys.add(key);
     if (isLandingPrimaryEligible(item)) {
       contentTitleMaps.mainHero.set(key, item.title);
       contentDatesMap.set(key, { createdAtMs: toMs(item.createdAt), publishedAtMs: toMs(item.publishedAt) });
@@ -595,7 +605,7 @@ const mainHeroSummary = (() => {
   // one pick: type badge and title stay in separate fields
   return {
     modeLabel: "Manual",
-    details: pick(title, typeBadge(type)),
+    details: pick(title, placedBadge(type, id)),
   };
 })();
 
@@ -648,7 +658,7 @@ const netlenkaRailSummary = (() => {
 
   // manual mode -> list of picks; type badge and title kept apart
   const list = landingPlacements.netlenkaRail.items.map(({ type, id }) => ({
-    badge: typeBadge(type),
+    badge: placedBadge(type, id),
     title:
       contentTitleMaps.netlenka.get(`${type}:${id}`) ||
       `${NETLENKA_TYPE_LABELS[type]} ${id}`,
@@ -676,7 +686,7 @@ const cultureHeroSummary = (() => {
     details: pick(
       contentTitleMaps.mainHero.get(key) ||
         `${MAIN_HERO_TYPE_LABELS[landingPlacements.cultureHero.type]} ${landingPlacements.cultureHero.id}`,
-      typeBadge(landingPlacements.cultureHero.type),
+      placedBadge(landingPlacements.cultureHero.type, landingPlacements.cultureHero.id),
     ),
   };
 })();
@@ -702,7 +712,7 @@ const cultureCardsSummary = (() => {
 
   // manual mode -> list of picks; type badge and title kept apart
   const list = landingPlacements.cultureCards.items.map(({ type, id }) => ({
-    badge: typeBadge(type),
+    badge: placedBadge(type, id),
     title:
       contentTitleMaps.mainHero.get(`${type}:${id}`) ||
       `${CATEGORY_CARDS_TYPE_LABELS[type]} ${id}`,
@@ -730,7 +740,7 @@ const parisHeroSummary = (() => {
     details: pick(
       contentTitleMaps.mainHero.get(key) ||
         `${CATEGORY_CARDS_TYPE_LABELS[landingPlacements.parisHero.type]} ${landingPlacements.parisHero.id}`,
-      typeBadge(landingPlacements.parisHero.type),
+      placedBadge(landingPlacements.parisHero.type, landingPlacements.parisHero.id),
     ),
   };
 })();
@@ -756,7 +766,7 @@ const parisCardsSummary = (() => {
 
   // manual mode -> list of picks; type badge and title kept apart
   const list = landingPlacements.parisCards.items.map(({ type, id }) => ({
-    badge: typeBadge(type),
+    badge: placedBadge(type, id),
     title:
       contentTitleMaps.mainHero.get(`${type}:${id}`) ||
       `${CATEGORY_CARDS_TYPE_LABELS[type]} ${id}`,
@@ -1097,7 +1107,7 @@ const cultureHeroOptions = cultureHeroOptionItems
 
     return left.title.localeCompare(right.title, "ru-RU");
   })
-  .map((item) => ({ ...item, badge: typeBadge(item.type) }));
+  .map((item) => ({ ...item, badge: typeBadge(displayType(item)) }));
 
 const parisCardsOptions = parisCardsOptionItems
   .slice()
@@ -1122,7 +1132,7 @@ const parisHeroOptions = parisHeroOptionItems
 
     return left.title.localeCompare(right.title, "ru-RU");
   })
-  .map((item) => ({ ...item, badge: typeBadge(item.type) }));
+  .map((item) => ({ ...item, badge: typeBadge(displayType(item)) }));
 
 const mainHeroOptions = Array.from(contentTitleMaps.mainHero.entries())
   .map(([key, title]) => {
@@ -1663,7 +1673,7 @@ const initialMainHeroState = (() => {
           </p>
 
           <MaterialPickerList
-            options={netlenkaOptions}
+            options={netlenkaOptions.map((item) => ({ ...item, type: displayType(item) }))}
             isSelectedFn="isManualNetlenkaSelected"
             toggleFn="toggleNetlenkaItem"
             selectionModel="selectedNetlenkaKeys"
@@ -1785,7 +1795,7 @@ const initialMainHeroState = (() => {
           </p>
 
           <MaterialPickerList
-            options={cultureCardsOptions}
+            options={cultureCardsOptions.map((item) => ({ ...item, type: displayType(item) }))}
             isSelectedFn="isManualCultureCardSelected"
             toggleFn="toggleCultureCardItem"
             selectionModel="selectedCultureCardKeys"
@@ -1960,7 +1970,7 @@ const initialMainHeroState = (() => {
           </p>
 
           <MaterialPickerList
-            options={parisCardsOptions}
+            options={parisCardsOptions.map((item) => ({ ...item, type: displayType(item) }))}
             isSelectedFn="isManualParisCardSelected"
             toggleFn="toggleParisCardItem"
             selectionModel="selectedParisCardKeys"
