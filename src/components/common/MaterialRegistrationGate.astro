@@ -1,0 +1,69 @@
+---
+interface Props {
+  paid?: boolean;
+}
+
+const { paid = false } = Astro.props;
+---
+
+{paid ? (
+  <div
+    class="material-registration-gate"
+    x-data="{}"
+    data-locked="true"
+    x-bind:data-locked="!$store.auth.isLoggedIn"
+  >
+    <div
+      class="material-registration-prompt mx-auto mb-10 max-w-[826px] border-t border-black/15 px-4 py-10 text-center sm:px-8"
+      x-cloak
+      x-show="!$store.auth.isLoading && !$store.auth.isLoggedIn"
+    >
+      <section
+        aria-label="Доступ к материалу"
+        class="w-full"
+      >
+        <h2 class="mb-4 font-old_standard text-[1.75rem] font-normal leading-[1.1] text-black">
+          Продолжить чтение
+        </h2>
+        <p class="mb-8 font-inter text-[0.9rem] leading-relaxed text-black/60">
+          Создайте бесплатный аккаунт, чтобы прочитать материал целиком.
+        </p>
+        <button
+          type="button"
+          x-on:click="$store.auth.openAuthModal(); $store.auth.switchTo('signup')"
+          class="w-full max-w-sm cursor-pointer bg-black px-8 py-3 font-inter text-sm font-bold uppercase tracking-[0.15em] text-white transition-opacity hover:opacity-75 sm:w-auto"
+        >
+          Читать дальше
+        </button>
+        <p class="mt-5 font-inter text-sm text-black/60">
+          Уже есть аккаунт? <button
+            type="button"
+            x-on:click="$store.auth.openAuthModal()"
+            class="cursor-pointer text-black underline underline-offset-4 hover:opacity-75"
+          >Войти</button>
+        </p>
+      </section>
+    </div>
+    <div
+      class="material-registration-content"
+      inert
+      x-bind:inert="!$store.auth.isLoggedIn"
+      aria-hidden="true"
+      x-bind:aria-hidden="!$store.auth.isLoggedIn ? 'true' : null"
+    >
+      <slot />
+    </div>
+  </div>
+) : <slot />}
+
+<style>
+  .material-registration-gate[data-locked="true"] > .material-registration-content {
+    filter: blur(6px);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .material-registration-gate[data-locked="false"] > .material-registration-prompt {
+    display: none;
+  }
+</style>

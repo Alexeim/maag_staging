@@ -2,6 +2,7 @@
 import type { ComponentProps } from "astro/types";
 import Layout from "../../Layouts/Layout.astro";
 import TipsArticleBody from "../../components/article/TipsArticleBody.astro";
+import MaterialRegistrationGate from "@/components/common/MaterialRegistrationGate.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import TipsHero from "@/components/tips/TipsHero.astro";
 import picture1 from "@/assets/images/culture.jpg";
@@ -164,10 +165,12 @@ if (!error && articleData) {
 
           <!-- Tips content -->
           <div class="w-full px-4 lg:px-14 pt-10 pb-[100px] lg:pt-16">
-            <TipsArticleBody
-              contentBlocks={displayArticle.contentBlocks}
-              introHtml={displayArticle.introHtml}
-            />
+            <MaterialRegistrationGate paid={articleData.paid}>
+              <TipsArticleBody
+                contentBlocks={displayArticle.contentBlocks}
+                introHtml={displayArticle.introHtml}
+              />
+            </MaterialRegistrationGate>
             <RelatedMaterialsMarquee
               collectionItems={collectionContentItems}
               relatedItems={relatedContentItems}

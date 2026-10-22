@@ -3,6 +3,7 @@ import Layout from "../../Layouts/Layout.astro";
 import ArticleHeader from "../../components/article/ArticleHeader.astro";
 import ArticleMetaRow from "@/components/article/ArticleMetaRow.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
+import MaterialRegistrationGate from "@/components/common/MaterialRegistrationGate.astro";
 import {
   getPrimaryBadgeHref,
   getPrimaryBadgeLabel,
@@ -140,72 +141,74 @@ try {
       </div>
 
       <div class="max-w-[1400px] mx-auto px-4 lg:px-14 pb-[100px]">
-        <div class="mx-auto w-full max-w-[1200px]">
-          <div class="relative">
-            <div
-              class="relative flex h-[360px] w-full items-center justify-center sm:h-[460px] lg:h-[600px]"
-            >
-              <template x-for="(item, index) in slides" x-bind:key="index">
-                <div
-                  x-show="activeSlide === index"
-                  class="absolute inset-0 flex items-center justify-center duration-700 ease-in-out"
-                  x-transition:enter="transition ease-in-out duration-700"
-                  x-transition:enter-start="opacity-0"
-                  x-transition:enter-end="opacity-100"
-                  x-transition:leave="transition ease-in-out duration-700"
-                  x-transition:leave-start="opacity-100"
-                  x-transition:leave-end="opacity-0"
-                >
-                  <img
-                    x-bind:src="item.imageUrl"
-                    class="block h-full w-auto max-w-full object-contain object-center"
-                    x-bind:alt="item.caption || 'Carousel image'"
-                  />
-                </div>
-              </template>
+        <MaterialRegistrationGate paid={flipper.paid}>
+          <div class="mx-auto w-full max-w-[1200px]">
+            <div class="relative">
+              <div
+                class="relative flex h-[360px] w-full items-center justify-center sm:h-[460px] lg:h-[600px]"
+              >
+                <template x-for="(item, index) in slides" x-bind:key="index">
+                  <div
+                    x-show="activeSlide === index"
+                    class="absolute inset-0 flex items-center justify-center duration-700 ease-in-out"
+                    x-transition:enter="transition ease-in-out duration-700"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in-out duration-700"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                  >
+                    <img
+                      x-bind:src="item.imageUrl"
+                      class="block h-full w-auto max-w-full object-contain object-center"
+                      x-bind:alt="item.caption || 'Carousel image'"
+                    />
+                  </div>
+                </template>
 
-              <button
-                x-show="slides.length > 1"
-                x-on:click="activeSlide = (activeSlide - 1 + slides.length) % slides.length"
-                class="absolute top-1/2 left-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-left-12"
-                aria-label="Предыдущий слайд"
+                <button
+                  x-show="slides.length > 1"
+                  x-on:click="activeSlide = (activeSlide - 1 + slides.length) % slides.length"
+                  class="absolute top-1/2 left-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-left-12"
+                  aria-label="Предыдущий слайд"
+                >
+                  <ChevronLeft class="h-6 w-6" />
+                </button>
+                <button
+                  x-show="slides.length > 1"
+                  x-on:click="activeSlide = (activeSlide + 1) % slides.length"
+                  class="absolute top-1/2 right-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-right-12"
+                  aria-label="Следующий слайд"
+                >
+                  <ChevronRight class="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+
+            <div class="mx-auto mt-6 max-w-[825px] min-h-[2.5rem]">
+              <p
+                class="text-center text-sm text-black/60 font-inter font-normal leading-relaxed"
+                x-text="slides[activeSlide]?.caption || ''"
               >
-                <ChevronLeft class="h-6 w-6" />
-              </button>
-              <button
-                x-show="slides.length > 1"
-                x-on:click="activeSlide = (activeSlide + 1) % slides.length"
-                class="absolute top-1/2 right-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-right-12"
-                aria-label="Следующий слайд"
-              >
-                <ChevronRight class="h-6 w-6" />
-              </button>
+              </p>
+            </div>
+
+            <hr class="my-5 border-base-300" />
+
+            <div
+              x-show="slides.length > 1"
+              class="mb-16 mt-2 flex justify-center gap-2"
+            >
+              <template x-for="(slide, index) in slides" x-bind:key="index">
+                <button
+                  x-on:click="activeSlide = index"
+                  x-bind:class="{'bg-base-content': activeSlide === index, 'bg-base-content/20': activeSlide !== index}"
+                  class="h-2.5 w-2.5 rounded-full transition hover:bg-base-content/60 cursor-pointer"
+                  x-bind:aria-label="`Перейти к слайду ${index + 1}`"></button>
+              </template>
             </div>
           </div>
-
-          <div class="mx-auto mt-6 max-w-[825px] min-h-[2.5rem]">
-            <p
-              class="text-center text-sm text-black/60 font-inter font-normal leading-relaxed"
-              x-text="slides[activeSlide]?.caption || ''"
-            >
-            </p>
-          </div>
-
-          <hr class="my-5 border-base-300" />
-
-          <div
-            x-show="slides.length > 1"
-            class="mb-16 mt-2 flex justify-center gap-2"
-          >
-            <template x-for="(slide, index) in slides" x-bind:key="index">
-              <button
-                x-on:click="activeSlide = index"
-                x-bind:class="{'bg-base-content': activeSlide === index, 'bg-base-content/20': activeSlide !== index}"
-                class="h-2.5 w-2.5 rounded-full transition hover:bg-base-content/60 cursor-pointer"
-                x-bind:aria-label="`Перейти к слайду ${index + 1}`"></button>
-            </template>
-          </div>
-        </div>
+        </MaterialRegistrationGate>
         <RelatedMaterialsMarquee
           collectionItems={collectionContentItems}
           relatedItems={relatedContentItems}

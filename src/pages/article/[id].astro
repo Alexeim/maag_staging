@@ -2,7 +2,7 @@
 import type { ComponentProps } from "astro/types";
 import Layout from "../../Layouts/Layout.astro";
 import ArticleHero from "../../components/article/ArticleHero.astro";
-import ArticleBody from "../../components/article/ArticleBody.astro";
+import RegisteredArticleBody from "../../components/article/RegisteredArticleBody.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import picture1 from "@/assets/images/culture.jpg";
 import {
@@ -25,7 +25,7 @@ import {
   toDate,
 } from "@/lib/utils/contentCollectionMarquee";
 
-type ArticleBodyProps = ComponentProps<typeof ArticleBody>;
+type ArticleBodyProps = ComponentProps<typeof RegisteredArticleBody>;
 
 const { id } = Astro.params;
 if (!id) return Astro.redirect("/404");
@@ -202,7 +202,8 @@ const isAKid = displayArticle.authorName === "Саша Макарова";
 
           <!-- Article Content -->
           <div class="w-full px-4 lg:px-14 pt-10 pb-[100px] lg:pt-16">
-            <ArticleBody
+            <RegisteredArticleBody
+              paid={articleData.paid}
               contentBlocks={displayArticle.contentBlocks}
               linkedContentLookup={linkedContentLookup}
             />

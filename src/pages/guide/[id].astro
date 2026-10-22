@@ -1,7 +1,7 @@
 ---
 import type { ComponentProps } from "astro/types";
 import Layout from "../../Layouts/Layout.astro";
-import ArticleBody from "../../components/article/ArticleBody.astro";
+import RegisteredArticleBody from "../../components/article/RegisteredArticleBody.astro";
 import ArticleTips from "../../components/article/ArticleTips.astro";
 import GuideHero from "@/components/guide/GuideHero.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
@@ -26,7 +26,7 @@ import {
 } from "@/lib/utils/contentCollectionMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
-type ArticleBodyProps = ComponentProps<typeof ArticleBody>;
+type ArticleBodyProps = ComponentProps<typeof RegisteredArticleBody>;
 
 const { id } = Astro.params;
 if (!id) return Astro.redirect("/404");
@@ -167,11 +167,13 @@ if (!error && guideData) {
           />
 
           <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-14 pt-10 pb-[100px] lg:pt-16">
-            <ArticleBody
+            <RegisteredArticleBody
+              paid={guideData.paid}
               contentBlocks={displayGuide.contentBlocks}
               linkedContentLookup={linkedContentLookup}
-            />
-            <ArticleTips tips={displayGuide.tips} />
+            >
+              <ArticleTips tips={displayGuide.tips} />
+            </RegisteredArticleBody>
 
             <RelatedMaterialsMarquee
               collectionItems={collectionContentItems}

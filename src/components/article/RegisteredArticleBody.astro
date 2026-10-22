@@ -1,0 +1,29 @@
+---
+import type { ComponentProps } from "astro/types";
+import ArticleBody from "./ArticleBody.astro";
+import MaterialRegistrationGate from "@/components/common/MaterialRegistrationGate.astro";
+
+type Props = ComponentProps<typeof ArticleBody> & { paid?: boolean };
+
+const { contentBlocks, linkedContentLookup, paid = false } = Astro.props;
+// Only the first stored block can be a teaser; never search past media or quotes.
+const teaserLength = paid && ["paragraph", "first-paragraph", "h2", "h3"].includes(
+  contentBlocks[0]?.type ?? "",
+) ? 1 : 0;
+---
+
+{teaserLength > 0 && (
+  <div class="mb-8">
+    <ArticleBody
+      contentBlocks={contentBlocks.slice(0, teaserLength)}
+      linkedContentLookup={linkedContentLookup}
+    />
+  </div>
+)}
+<MaterialRegistrationGate paid={paid}>
+  <ArticleBody
+    contentBlocks={contentBlocks.slice(teaserLength)}
+    linkedContentLookup={linkedContentLookup}
+  />
+  <slot />
+</MaterialRegistrationGate>

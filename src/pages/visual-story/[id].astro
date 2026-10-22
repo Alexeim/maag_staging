@@ -3,6 +3,7 @@ import QuoteIcon from "@/assets/icons/quote.svg";
 import logo from "@/assets/logo/logo.svg";
 import VisualStoryLayout from "@/Layouts/VisualStoryLayout.astro";
 import ContentActions from "@/components/common/ContentActions.astro";
+import MaterialRegistrationGate from "@/components/common/MaterialRegistrationGate.astro";
 import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import {
   getPrimaryBadgeHref,
@@ -222,6 +223,12 @@ const articleStructuredData = storyData
       flex-shrink: 0;
     }
 
+    .slide-image[data-locked="true"] {
+      filter: blur(6px);
+      pointer-events: none;
+      user-select: none;
+    }
+
     .image-caption-hint {
       position: absolute;
       right: 22px;
@@ -285,6 +292,12 @@ const articleStructuredData = storyData
       padding: 56px 64px;
       flex-shrink: 0;
       background: var(--maag-bg);
+    }
+
+    /* Preserve the original flex layout once the registration gate opens. */
+    .slide-content > :global(.material-registration-gate[data-locked="false"]),
+    .slide-content > :global(.material-registration-gate[data-locked="false"] > .material-registration-content) {
+      display: contents;
     }
 
     /* ── hero slide ───────────────────────────────── */
@@ -623,7 +636,7 @@ const articleStructuredData = storyData
         <p class="error-message">{error}</p>
       </div>
     ) : (
-      <main class="story">
+      <main class="story" x-data="{}">
         <div class="slider" id="slider">
           {/* ── Hero slide ──────────────────────────── */}
           <section class="slide">
@@ -701,6 +714,10 @@ const articleStructuredData = storyData
               <div
                 class="slide-image"
                 style={`background-image:url('${slide.imageUrl}')`}
+                data-locked={storyData?.paid ? "true" : "false"}
+                x-bind:data-locked={storyData?.paid ? "!$store.auth.isLoggedIn" : "false"}
+                inert={storyData?.paid === true}
+                x-bind:inert={storyData?.paid ? "!$store.auth.isLoggedIn" : "false"}
               >
                 {slide.caption && (
                   <div class="image-caption-hint">
@@ -716,36 +733,38 @@ const articleStructuredData = storyData
                 )}
               </div>
               <div class="slide-content bg-base-100">
-                <span class="slide-counter text-base-content">
-                  {String(i + 1).padStart(2, "0")} /{" "}
-                  {String(slides.length).padStart(2, "0")}
-                </span>
-                <div
-                  class:list={[
-                    "slide-text-body",
-                    slide.contentType === "quote" && "slide-text-body--quote",
-                  ]}
-                >
-                  {slide.contentType === "quote" ? (
-                    <>
-                      <div class="slide-quote">
-                        <QuoteIcon class="slide-quote-icon" />
-                        <blockquote class="slide-quote-text">
-                          {slide.quote}
-                        </blockquote>
-                        <QuoteIcon class="slide-quote-icon slide-quote-icon--closing" />
-                      </div>
-                      {slide.quoteAuthor && (
-                        <p class="slide-quote-author">{slide.quoteAuthor}</p>
-                      )}
-                    </>
-                  ) : (
-                    <div
-                      class="visual-story-rich-text text-base-content"
-                      set:html={getInitialRichTextHtml(slide)}
-                    />
-                  )}
-                </div>
+                <MaterialRegistrationGate paid={storyData?.paid}>
+                  <span class="slide-counter text-base-content">
+                    {String(i + 1).padStart(2, "0")} /{" "}
+                    {String(slides.length).padStart(2, "0")}
+                  </span>
+                  <div
+                    class:list={[
+                      "slide-text-body",
+                      slide.contentType === "quote" && "slide-text-body--quote",
+                    ]}
+                  >
+                    {slide.contentType === "quote" ? (
+                      <>
+                        <div class="slide-quote">
+                          <QuoteIcon class="slide-quote-icon" />
+                          <blockquote class="slide-quote-text">
+                            {slide.quote}
+                          </blockquote>
+                          <QuoteIcon class="slide-quote-icon slide-quote-icon--closing" />
+                        </div>
+                        {slide.quoteAuthor && (
+                          <p class="slide-quote-author">{slide.quoteAuthor}</p>
+                        )}
+                      </>
+                    ) : (
+                      <div
+                        class="visual-story-rich-text text-base-content"
+                        set:html={getInitialRichTextHtml(slide)}
+                      />
+                    )}
+                  </div>
+                </MaterialRegistrationGate>
               </div>
             </section>
           ))}
@@ -846,6 +865,10 @@ const articleStructuredData = storyData
     });
 
     document.addEventListener("keydown", (e) => {
+      // Arrow keys in the registration form must not navigate the story behind it.
+      if (e.target instanceof HTMLElement && e.target.closest("input, textarea, select, [contenteditable]")) {
+        return;
+      }
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         if (index < total - 1) {
           index++;

@@ -8,7 +8,7 @@ import {
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import type { ComponentProps } from "astro/types";
-import ArticleBody from "../../components/article/ArticleBody.astro";
+import RegisteredArticleBody from "../../components/article/RegisteredArticleBody.astro";
 import RelatedMaterialsMarquee from "@/components/article/RelatedMaterialsMarquee.astro";
 import InterviewHero from "@/components/interview/InterviewHero.astro";
 import { getKnownTagLabel } from "@/content/tags/tags";
@@ -19,7 +19,7 @@ import {
 } from "@/lib/utils/contentCollectionMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
-type ArticleBodyProps = ComponentProps<typeof ArticleBody>;
+type ArticleBodyProps = ComponentProps<typeof RegisteredArticleBody>;
 
 const { id } = Astro.params;
 
@@ -134,7 +134,8 @@ try {
       />
 
       <div class="px-4 pb-[100px] pt-10 sm:px-6 lg:px-14 lg:pt-16">
-        <ArticleBody
+        <RegisteredArticleBody
+          paid={interview.paid}
           contentBlocks={
             // Stored blocks are unvalidated JSON; ArticleBody renders them by `type`.
             (Array.isArray(content) ? content : []) as ArticleBodyProps["contentBlocks"]
