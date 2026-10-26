@@ -27,7 +27,6 @@ import {
 } from "../lib/i18n/locales";
 import { NAVBAR_TEXT } from "../lib/i18n/navbar";
 import { buildLanguageLinks, splitLocalePath } from "../lib/i18n/languageSwitch";
-import { canPreviewUnpublished } from "../lib/utils/preview";
 import LanguageSwitch from "../components/common/LanguageSwitch.astro";
 
 interface LayoutProps {
@@ -77,12 +76,8 @@ const description =
   rawDescription?.trim() || SITE_FALLBACK_DESCRIPTION[locale];
 const navbarText = NAVBAR_TEXT[locale];
 const navHref = (path: string) => localizePath(path, locale);
-// Admins only while the French site is not public: a reader clicking "FR"
-// would get a 404. Safe for the CDN — admin responses are never cached
-// (src/middleware.ts).
-const languageSwitch = canPreviewUnpublished(Astro.locals)
-  ? { locale, links: buildLanguageLinks(Astro.originPathname) }
-  : null;
+// Alpine controls visibility from the current profile, including after login.
+const languageSwitch = { locale, links: buildLanguageLinks(Astro.originPathname) };
 // Russian canonicals stay exactly as before (trailing-slash work is on hold,
 // see docs/trailing-slash-canonical-2026-09-29.md); another language gets the
 // page's path under its own prefix.
@@ -288,11 +283,7 @@ const allStructuredData = [
           </div>
         </template>
 
-        {
-          languageSwitch && (
-            <LanguageSwitch {...languageSwitch} class="justify-center" />
-          )
-        }
+        <LanguageSwitch {...languageSwitch} class="justify-center" />
         <div class="flex items-center justify-center gap-5">
           <a
             href="https://www.instagram.com/stories/maag_france/"
