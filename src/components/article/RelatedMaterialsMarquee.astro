@@ -1,5 +1,11 @@
 ---
 import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { INTL_LOCALE } from "@/lib/i18n/locales";
+import { ARTICLE_TEXT } from "@/lib/i18n/article";
+
+const locale = getRequestLocale(Astro);
+const text = ARTICLE_TEXT[locale];
 
 interface ContentCardItem {
   id: string;
@@ -62,7 +68,7 @@ const formatDate = (value: unknown) => {
     return "";
   }
   return date
-    .toLocaleDateString("ru-RU", {
+    .toLocaleDateString(INTL_LOCALE[locale], {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -124,7 +130,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
     <section class="mt-[90px] overflow-x-hidden border-t border-base-content/10 pt-10">
       <div class="grid min-w-0 gap-5">
         <h2 class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content">
-          Похожие материалы
+          {text.relatedMaterials}
         </h2>
 
         <div
@@ -193,7 +199,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                             >
                               <p class="m-0">
                                 <span class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
-                                  {getPrimaryBadgeLabel(entry.item) || "Материал"}
+                                  {getPrimaryBadgeLabel(entry.item, locale) || text.material}
                                 </span>
                               </p>
 
@@ -228,7 +234,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                   class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
                   data-related-carousel-dot
                   data-page-index={index}
-                  aria-label={`Показать страницу ${index + 1}`}
+                  aria-label={text.showPage(index + 1)}
                   aria-pressed={index === 0 ? "true" : "false"}
                 />
               ))}
@@ -294,7 +300,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                         >
                           <p class="m-0">
                             <span class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
-                              {getPrimaryBadgeLabel(item) || "Материал"}
+                              {getPrimaryBadgeLabel(item, locale) || text.material}
                             </span>
                           </p>
 
@@ -327,7 +333,7 @@ const mobilePages = chunkEntries(mobileEntries, 1);
                   class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
                   data-related-carousel-dot
                   data-page-index={index}
-                  aria-label={`Показать страницу ${index + 1}`}
+                  aria-label={text.showPage(index + 1)}
                   aria-pressed={index === 0 ? "true" : "false"}
                 />
               ))}

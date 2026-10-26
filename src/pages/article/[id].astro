@@ -122,7 +122,7 @@ const displayArticle = {
   title: articleData?.title || 'Article',
   lead: articleData?.lead || '',
   leadHtml: articleData?.leadHtml || '',
-  category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }),
+  category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }, locale),
   categoryHref: getPrimaryBadgeHref({ contentType: "article", tags: articleData?.tags }),
   authorName: articleData?.author ? `${articleData.author.firstName} ${articleData.author.lastName}` : 'Author',
   authorAvatar: articleData?.author?.avatar,

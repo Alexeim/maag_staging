@@ -1,9 +1,13 @@
 ---
+import { getRequestLocale } from "@/lib/i18n/request";
+import { REGISTRATION_GATE_TEXT } from "@/lib/i18n/article";
+
 interface Props {
   paid?: boolean;
 }
 
 const { paid = false } = Astro.props;
+const text = REGISTRATION_GATE_TEXT[getRequestLocale(Astro)];
 ---
 
 {paid ? (
@@ -19,28 +23,28 @@ const { paid = false } = Astro.props;
       x-show="!$store.auth.isLoading && !$store.auth.isLoggedIn"
     >
       <section
-        aria-label="Доступ к материалу"
+        aria-label={text.region}
         class="w-full"
       >
         <h2 class="mb-4 font-old_standard text-[1.75rem] font-normal leading-[1.1] text-black">
-          Продолжить чтение
+          {text.title}
         </h2>
         <p class="mb-8 font-inter text-[0.9rem] leading-relaxed text-black/60">
-          Создайте бесплатный аккаунт, чтобы прочитать материал целиком.
+          {text.text}
         </p>
         <button
           type="button"
           x-on:click="$store.auth.openAuthModal(); $store.auth.switchTo('signup')"
           class="w-full max-w-sm cursor-pointer bg-black px-8 py-3 font-inter text-sm font-bold uppercase tracking-[0.15em] text-white transition-opacity hover:opacity-75 sm:w-auto"
         >
-          Читать дальше
+          {text.cta}
         </button>
         <p class="mt-5 font-inter text-sm text-black/60">
-          Уже есть аккаунт? <button
+          {text.haveAccount} <button
             type="button"
             x-on:click="$store.auth.openAuthModal()"
             class="cursor-pointer text-black underline underline-offset-4 hover:opacity-75"
-          >Войти</button>
+          >{text.signIn}</button>
         </p>
       </section>
     </div>

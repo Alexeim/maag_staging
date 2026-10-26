@@ -2,6 +2,10 @@ import { usersApi, type UserBookmark, type BookmarkContentType } from "@/lib/api
 import { auth } from "@/lib/firebase/client";
 import type { AuthStore } from "@/stores/authStore";
 import type { UiStore } from "@/stores/uiStore";
+import { CONTENT_ACTIONS_TEXT } from "@/lib/i18n/article";
+import { documentLocale } from "@/lib/i18n/document";
+
+const actionsText = () => CONTENT_ACTIONS_TEXT[documentLocale()];
 
 declare const Alpine: any;
 
@@ -28,8 +32,8 @@ export default (initialState: ContentActionsState) => ({
   isSharing: false,
   isBookmarking: false,
   isBookmarked: false,
-  bookmarkLabel: "В закладки",
-  shareLabel: "Поделиться",
+  bookmarkLabel: actionsText().bookmark,
+  shareLabel: actionsText().share,
 
   init() {
     this.syncBookmarkState();
@@ -66,14 +70,15 @@ export default (initialState: ContentActionsState) => ({
   },
 
   syncLabels() {
-    this.shareLabel = this.isSharing ? "Копируем..." : "Поделиться";
+    const text = actionsText();
+    this.shareLabel = this.isSharing ? text.sharing : text.share;
 
     if (this.isBookmarking) {
-      this.bookmarkLabel = "Сохраняем...";
+      this.bookmarkLabel = text.saving;
       return;
     }
 
-    this.bookmarkLabel = this.isBookmarked ? "В закладках" : "В закладки";
+    this.bookmarkLabel = this.isBookmarked ? text.bookmarked : text.bookmark;
   },
 
   async shareContent() {
@@ -93,11 +98,11 @@ export default (initialState: ContentActionsState) => ({
       }
 
       await navigator.clipboard.writeText(url);
-      uiStore?.showToast?.("Ссылка скопирована");
+      uiStore?.showToast?.(actionsText().linkCopied);
     } catch (error) {
       if ((error as DOMException).name !== "AbortError") {
         console.error("Failed to share content:", error);
-        uiStore?.showToast?.("Не удалось поделиться ссылкой", "error");
+        uiStore?.showToast?.(actionsText().shareFailed, "error");
       }
     } finally {
       this.isSharing = false;
@@ -112,7 +117,7 @@ export default (initialState: ContentActionsState) => ({
 
     if (!authStore.isLoggedIn || !currentUser) {
       authStore.openAuthModal();
-      uiStore?.showToast?.("Войдите, чтобы сохранять материалы", "error");
+      uiStore?.showToast?.(actionsText().signInToSave, "error");
       return;
     }
 
@@ -134,11 +139,11 @@ export default (initialState: ContentActionsState) => ({
       authStore.setBookmarks(bookmarks);
       this.syncBookmarkState();
       uiStore?.showToast?.(
-        shouldRemoveBookmark ? "Материал удален из закладок" : "Материал сохранен",
+        shouldRemoveBookmark ? actionsText().bookmarkRemoved : actionsText().bookmarkSaved,
       );
     } catch (error) {
       console.error("Failed to toggle bookmark:", error);
-      uiStore?.showToast?.("Не удалось обновить закладку", "error");
+      uiStore?.showToast?.(actionsText().bookmarkFailed, "error");
     } finally {
       this.isBookmarking = false;
       this.syncBookmarkState();

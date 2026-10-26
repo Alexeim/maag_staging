@@ -1,4 +1,11 @@
 ---
+import { getRequestLocale } from "@/lib/i18n/request";
+import { INTL_LOCALE } from "@/lib/i18n/locales";
+import { ARTICLE_TEXT } from "@/lib/i18n/article";
+
+const locale = getRequestLocale(Astro);
+const text = ARTICLE_TEXT[locale];
+
 interface Props {
   // Publication date. Empty only for an unpublished material, which only an
   // admin sees (draft preview) — shown as "Черновик", never as 1 Jan 1970.
@@ -38,13 +45,13 @@ if (isDraft) {
   date = new Date(createdAt);
 }
 
-let formattedDate = "Некорректная дата";
+let formattedDate = text.invalidDate;
 
 if (isDraft) {
-  formattedDate = "Черновик";
+  formattedDate = text.draft;
 } else if (!isNaN(date.getTime())) {
   formattedDate = date
-    .toLocaleDateString("ru-RU", {
+    .toLocaleDateString(INTL_LOCALE[locale], {
       year: "numeric",
       month: "long",
       day: "numeric",

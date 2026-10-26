@@ -5,6 +5,10 @@ import {
   normalizeVideoBlock,
   type VideoBlockData,
 } from "@/lib/utils/video";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { ARTICLE_TEXT } from "@/lib/i18n/article";
+
+const text = ARTICLE_TEXT[getRequestLocale(Astro)];
 
 interface Props {
   block: VideoBlockData;
@@ -55,7 +59,7 @@ const embedUrl =
         </div>
       ) : (
         <div class="w-full min-h-[220px] flex items-center justify-center text-sm text-base-content/60 px-6 text-center">
-          Видео недоступно или ссылка не поддерживается.
+          {text.videoUnavailable}
         </div>
       )
     }

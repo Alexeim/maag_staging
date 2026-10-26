@@ -1,6 +1,10 @@
 ---
 import LazyImage from "../common/LazyImage.astro";
 import { Info } from "@lucide/astro";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { ARTICLE_TEXT } from "@/lib/i18n/article";
+
+const text = ARTICLE_TEXT[getRequestLocale(Astro)];
 
 interface Props {
   leftPortraitImageUrl?: string;
@@ -45,7 +49,7 @@ const {
             <button
               type="button"
               class="inline-flex h-8 w-8 items-center justify-center text-white transition-transform duration-200 hover:scale-110 focus-visible:outline-none"
-              aria-label="Показать подпись к изображению"
+              aria-label={text.showCaption}
             >
               <Info class="h-4 w-4" />
             </button>
@@ -72,7 +76,7 @@ const {
             <button
               type="button"
               class="inline-flex h-8 w-8 items-center justify-center text-white transition-transform duration-200 hover:scale-110 focus-visible:outline-none"
-              aria-label="Показать подпись к изображению"
+              aria-label={text.showCaption}
             >
               <Info class="h-4 w-4" />
             </button>
@@ -99,7 +103,7 @@ const {
             <button
               type="button"
               class="inline-flex h-8 w-8 items-center justify-center text-white transition-transform duration-200 hover:scale-110 focus-visible:outline-none"
-              aria-label="Показать подпись к изображению"
+              aria-label={text.showCaption}
             >
               <Info class="h-4 w-4" />
             </button>
@@ -126,7 +130,7 @@ const {
             <button
               type="button"
               class="inline-flex h-8 w-8 items-center justify-center text-white transition-transform duration-200 hover:scale-110 focus-visible:outline-none"
-              aria-label="Показать подпись к изображению"
+              aria-label={text.showCaption}
             >
               <Info class="h-4 w-4" />
             </button>

@@ -14,6 +14,8 @@ import Collage from "./Collage.astro";
 import ArticleTips from "./ArticleTips.astro";
 import { getInitialRichTextHtml } from "@/lib/utils/richText";
 import { getTweetId } from "@/lib/utils/tweet";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { ARTICLE_TEXT } from "@/lib/i18n/article";
 import {
   getLinkedContentKey,
   type LinkedContentLookup,
@@ -129,6 +131,8 @@ interface Props {
 }
 
 const { contentBlocks, linkedContentLookup = {} } = Astro.props;
+
+const text = ARTICLE_TEXT[getRequestLocale(Astro)];
 
 const proseRailClass = "max-w-full lg:max-w-[826px] mx-0 lg:mx-auto";
 // Rails always sit inside rightColumnClass, so they take the column's width;
@@ -335,7 +339,7 @@ if (currentProseGroup.length > 0) {
                       return (
                         <div class="not-prose w-full flex justify-center">
                           <blockquote class="twitter-tweet" data-dnt="true">
-                            <a href={block.url}>Загрузка твита…</a>
+                            <a href={block.url}>{text.tweetLoading}</a>
                           </blockquote>
                         </div>
                       );
@@ -489,7 +493,7 @@ if (currentProseGroup.length > 0) {
                       <div class="min-w-full h-full flex items-center justify-center">
                         <img
                           src={slide.imageUrl}
-                          alt={slide.caption || "Слайд"}
+                          alt={slide.caption || text.slide}
                           class="block h-full w-auto max-w-full object-contain object-center"
                         />
                       </div>
@@ -503,7 +507,7 @@ if (currentProseGroup.length > 0) {
                       type="button"
                       class="absolute top-1/2 left-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-left-12"
                       x-on:click="current = (current - 1 + total) % total"
-                      aria-label="Предыдущий слайд"
+                      aria-label={text.previousSlide}
                     >
                       <ChevronLeft class="h-6 w-6" />
                     </button>
@@ -511,7 +515,7 @@ if (currentProseGroup.length > 0) {
                       type="button"
                       class="absolute top-1/2 right-0 -translate-y-1/2 p-2 transition cursor-pointer text-neutral-400 hover:text-neutral-900 lg:-right-12"
                       x-on:click="current = (current + 1) % total"
-                      aria-label="Следующий слайд"
+                      aria-label={text.nextSlide}
                     >
                       <ChevronRight class="h-6 w-6" />
                     </button>
@@ -532,7 +536,7 @@ if (currentProseGroup.length > 0) {
                       class="w-2 h-2 rounded-full transition cursor-pointer"
                       x-bind:class={`current === ${i} ? 'bg-base-content' : 'bg-base-content/30'`}
                       x-on:click={`current = ${i}`}
-                      aria-label={`Слайд ${i + 1}`}
+                      aria-label={text.slideN(i + 1)}
                     />
                   ))}
                 </div>

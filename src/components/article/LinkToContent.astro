@@ -1,6 +1,10 @@
 ---
 import type { PublicContentCardItem } from "@/lib/utils/contentCollectionMarquee";
 import { getPrimaryBadgeLabel } from "@/lib/utils/contentBadge";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { SECTION_TEXT } from "@/lib/i18n/sections";
+
+const locale = getRequestLocale(Astro);
 
 interface Props {
   item: PublicContentCardItem;
@@ -12,7 +16,7 @@ const isInterview = item.contentType === "interview";
 const imageSrc = item.imageUrl || "";
 const lead = item.cardLead || item.lead || item.mainQuote || "";
 const title = item.cardTitle || item.title;
-const label = getPrimaryBadgeLabel(item);
+const label = getPrimaryBadgeLabel(item, locale);
 ---
 
 <article class="border-y border-base-content/30 py-4">
@@ -76,7 +80,7 @@ const label = getPrimaryBadgeLabel(item);
     <div
       class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer absolute right-0 bottom-0"
     >
-      <span>Читать дальше</span>
+      <span>{SECTION_TEXT[locale].readMore}</span>
     </div>
   </a>
 </article>

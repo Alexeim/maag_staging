@@ -1,6 +1,10 @@
 ---
 import { Bookmark, BookmarkCheck, Share2 } from "@lucide/astro";
 import type { BookmarkContentType } from "@/lib/api/api";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { CONTENT_ACTIONS_TEXT } from "@/lib/i18n/article";
+
+const actionsText = CONTENT_ACTIONS_TEXT[getRequestLocale(Astro)];
 
 interface Props {
   contentType: BookmarkContentType;
@@ -53,7 +57,7 @@ const alignmentClass =
     x-bind:disabled="isSharing"
   >
     <Share2 class="h-4 w-4" aria-hidden="true" />
-    <span x-text="shareLabel">Поделиться</span>
+    <span x-text="shareLabel">{actionsText.share}</span>
   </button>
 
   <button
@@ -69,6 +73,6 @@ const alignmentClass =
     <span x-show="isBookmarked" class="inline-flex text-maag-green">
       <BookmarkCheck class="h-4 w-4" aria-hidden="true" />
     </span>
-    <span x-text="bookmarkLabel">В закладки</span>
+    <span x-text="bookmarkLabel">{actionsText.bookmark}</span>
   </button>
 </div>

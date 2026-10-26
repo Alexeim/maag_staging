@@ -1,4 +1,6 @@
 import type { Alpine } from 'alpinejs';
+import { CONTENT_ACTIONS_TEXT } from '@/lib/i18n/article';
+import { documentLocale } from '@/lib/i18n/document';
 
 const escapeHtml = (value: string) =>
   value
@@ -629,8 +631,9 @@ export default function(Alpine: Alpine) {
       isBookmarking: false,
       bookmark: null,
       isBookmarked: false,
-      bookmarkLabel: 'В закладки',
-      shareLabel: 'Поделиться',
+      // Shown until contentActionsLogic loads, so in the page's language too.
+      bookmarkLabel: CONTENT_ACTIONS_TEXT[documentLocale()].bookmark,
+      shareLabel: CONTENT_ACTIONS_TEXT[documentLocale()].share,
       buildBookmark() { return null; },
       syncBookmarkState() {},
       syncLabels() {},
