@@ -1,15 +1,10 @@
 import { getCalendarToday } from "@/lib/utils/calendarDate";
-import { DEFAULT_LOCALE, INTL_LOCALE, isLocale, type Locale } from "@/lib/i18n/locales";
+import { INTL_LOCALE } from "@/lib/i18n/locales";
 import { CALENDAR_TEXT } from "@/lib/i18n/calendar";
+import { documentLocale } from "@/lib/i18n/document";
 
-// Runs in the browser: the page language is <html lang>, which Layout sets
-// from the URL. Read on every call rather than once at module load.
-const pageLocale = (): Locale => {
-  const lang = typeof document === "undefined" ? "" : document.documentElement.lang;
-  return isLocale(lang) ? lang : DEFAULT_LOCALE;
-};
-const calendarText = () => CALENDAR_TEXT[pageLocale()];
-const dateLocale = () => INTL_LOCALE[pageLocale()];
+const calendarText = () => CALENDAR_TEXT[documentLocale()];
+const dateLocale = () => INTL_LOCALE[documentLocale()];
 
 type ImagePaths = {
   theatreShowSrc?: string;

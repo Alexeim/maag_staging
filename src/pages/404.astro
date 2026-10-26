@@ -3,7 +3,12 @@
 import Layout from "../Layouts/Layout.astro";
 
 import { Construction } from '@lucide/astro';
+import { getRequestLocale } from "@/lib/i18n/request";
+import { localizePath } from "@/lib/i18n/locales";
+import { NOT_FOUND_TEXT } from "@/lib/i18n/notFound";
 
+const locale = getRequestLocale(Astro);
+const text = NOT_FOUND_TEXT[locale];
 ---
 
 <Layout
@@ -14,10 +19,10 @@ import { Construction } from '@lucide/astro';
   <main>
     <div class="w-full bg-base-300 py-14 px-8 flex flex-col items-center justify-center h-screen gap-4">
       <p class="text-base-content/50 font-semibold text-404">404</p>
-      <p class="text-base-content text-2xl font-bold">Страница не найдена</p>
+      <p class="text-base-content text-2xl font-bold">{text.notFound}</p>
       <Construction class="w-10 h-10 text-error" />
-      <p class="text-base-content text-2xl font-bold">... этой страницы пока нет, но мы усердно работаем над ней ...</p>
-      <a href="/maag_staging/" class="btn btn-error">На главную</a>
+      <p class="text-base-content text-2xl font-bold">{text.wip}</p>
+      <a href={localizePath("/", locale)} class="btn btn-error">{text.home}</a>
     </div>
   </main>
 </Layout>

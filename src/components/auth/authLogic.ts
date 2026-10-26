@@ -9,6 +9,10 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
+import { AUTH_MESSAGES } from "@/lib/i18n/auth";
+import { documentLocale } from "@/lib/i18n/document";
+
+const messages = () => AUTH_MESSAGES[documentLocale()];
 
 interface AuthFormData {
   email: string;
@@ -59,17 +63,17 @@ export default function authModalLogic() {
 
     async forgotPassword() {
       if (!this.formData.email) {
-        this.error = "Введите email чтобы сбросить пароль.";
+        this.error = messages().enterEmailToReset;
         return;
       }
       try {
         await sendPasswordResetEmail(auth, this.formData.email);
         this.error = "";
         getAlpineStore("ui").showToast(
-          "Письмо отправлено на " + this.formData.email,
+          messages().resetEmailSentTo + this.formData.email,
         );
       } catch {
-        this.error = "Не удалось отправить письмо. Проверьте email.";
+        this.error = messages().resetEmailFailed;
       }
     },
 
@@ -90,7 +94,7 @@ export default function authModalLogic() {
           return;
         }
 
-        this.error = "Не удалось войти через Google. Попробуйте ещё раз.";
+        this.error = messages().googleSignInFailed;
         console.error("Google sign-in failed:", error);
       } finally {
         this.isLoading = false;
@@ -115,16 +119,16 @@ export default function authModalLogic() {
             (err.code === "auth/wrong-password" ||
               err.code === "auth/user-not-found")
           ) {
-            this.error = "Неверный email или пароль.";
+            this.error = messages().wrongCredentials;
           } else {
-            this.error = "Произошла непредвиденная ошибка.";
+            this.error = messages().unexpectedError;
             console.error(err);
           }
         }
       } else {
         // Signup
         if (this.formData.password !== this.formData.confirmPassword) {
-          this.error = "Пароли не совпадают";
+          this.error = messages().passwordsMismatch;
           this.isLoading = false;
           return;
         }
@@ -156,7 +160,7 @@ export default function authModalLogic() {
             token,
           );
 
-          getAlpineStore("ui").showToast("Регистрация прошла успешно!");
+          getAlpineStore("ui").showToast(messages().signupSucceeded);
           getAlpineStore("auth").setUser(user, createdProfile);
           getAlpineStore("auth").closeAuthModal();
         } catch (err) {
@@ -164,14 +168,14 @@ export default function authModalLogic() {
             err instanceof FirebaseError &&
             err.code === "auth/email-already-in-use"
           ) {
-            this.error = "Этот email уже зарегистрирован.";
+            this.error = messages().emailAlreadyUsed;
           } else if (
             err instanceof FirebaseError &&
             err.code === "auth/weak-password"
           ) {
-            this.error = "Пароль должен содержать минимум 6 символов";
+            this.error = messages().weakPassword;
           } else {
-            this.error = "Произошла непредвиденная ошибка при регистрации.";
+            this.error = messages().unexpectedSignupError;
             // TODO remove the console log
             console.error(err);
           }

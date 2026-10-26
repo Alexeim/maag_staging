@@ -1,3 +1,5 @@
+import { CONFIRMATION_TEXT } from '@/lib/i18n/confirmation';
+import { documentLocale } from '@/lib/i18n/document';
 
 type ToastType = 'success' | 'error' | 'info';
 
@@ -20,8 +22,9 @@ interface ConfirmationLabels {
   cancelLabel?: string;
 }
 
-const DEFAULT_CONFIRM_LABEL = 'Подтвердить';
-const DEFAULT_CANCEL_LABEL = 'Отмена';
+// In the page's language, read on every call (the dashboard and profile pages
+// are always Russian).
+const defaultLabels = () => CONFIRMATION_TEXT[documentLocale()];
 
 export interface UiStore {
   toast: Toast;
@@ -46,8 +49,8 @@ export function createUiStore(): UiStore {
       message: '',
       show: false,
       onConfirm: () => {},
-      confirmLabel: DEFAULT_CONFIRM_LABEL,
-      cancelLabel: DEFAULT_CANCEL_LABEL,
+      confirmLabel: defaultLabels().confirm,
+      cancelLabel: defaultLabels().cancel,
     },
 
     showToast(message, type = 'success') {
@@ -62,8 +65,8 @@ export function createUiStore(): UiStore {
     showConfirmation(message, onConfirm, labels = {}) {
       this.confirmation.message = message;
       this.confirmation.onConfirm = onConfirm;
-      this.confirmation.confirmLabel = labels.confirmLabel ?? DEFAULT_CONFIRM_LABEL;
-      this.confirmation.cancelLabel = labels.cancelLabel ?? DEFAULT_CANCEL_LABEL;
+      this.confirmation.confirmLabel = labels.confirmLabel ?? defaultLabels().confirm;
+      this.confirmation.cancelLabel = labels.cancelLabel ?? defaultLabels().cancel;
       this.confirmation.show = true;
     },
 
@@ -71,8 +74,8 @@ export function createUiStore(): UiStore {
       this.confirmation.show = false;
       this.confirmation.message = '';
       this.confirmation.onConfirm = () => {};
-      this.confirmation.confirmLabel = DEFAULT_CONFIRM_LABEL;
-      this.confirmation.cancelLabel = DEFAULT_CANCEL_LABEL;
+      this.confirmation.confirmLabel = defaultLabels().confirm;
+      this.confirmation.cancelLabel = defaultLabels().cancel;
     },
   };
 }

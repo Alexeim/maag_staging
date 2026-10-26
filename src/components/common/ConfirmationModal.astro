@@ -1,5 +1,9 @@
 ---
 import Button from "@/components/common/Button.astro";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { CONFIRMATION_TEXT } from "@/lib/i18n/confirmation";
+
+const text = CONFIRMATION_TEXT[getRequestLocale(Astro)];
 ---
 
 <div
@@ -28,15 +32,15 @@ import Button from "@/components/common/Button.astro";
     x-transition:leave-end="opacity-0 scale-95"
     class="relative bg-base-100 rounded-lg shadow-xl p-8 w-full max-w-md"
   >
-    <h2 class="text-xl font-bold mb-4">Подтверждение</h2>
+    <h2 class="text-xl font-bold mb-4">{text.title}</h2>
     <p class="mb-6" x-text="$store.ui.confirmation.message"></p>
     
     <div class="flex justify-end gap-4">
       <Button variant="secondary" x-on:click="$store.ui.hideConfirmation()">
-        <span x-text="$store.ui.confirmation.cancelLabel">Отмена</span>
+        <span x-text="$store.ui.confirmation.cancelLabel">{text.cancel}</span>
       </Button>
       <Button variant="error" x-on:click="$store.ui.confirmation.onConfirm(); $store.ui.hideConfirmation();">
-        <span x-text="$store.ui.confirmation.confirmLabel">Подтвердить</span>
+        <span x-text="$store.ui.confirmation.confirmLabel">{text.confirm}</span>
       </Button>
     </div>
   </div>
