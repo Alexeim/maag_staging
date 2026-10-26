@@ -11,6 +11,15 @@ import smallEventImage from "../assets/images/calendar/small-event.png";
 import picture1 from "../assets/images/culture.jpg";
 import { publicCalendarApi, type PublicCalendarEvent } from "@/lib/api/api";
 import { getTagLabel } from "@/lib/utils/contentBadge";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { INTL_LOCALE } from "@/lib/i18n/locales";
+import { NAVBAR_TEXT } from "@/lib/i18n/navbar";
+import { CALENDAR_TEXT } from "@/lib/i18n/calendar";
+import { alpineString } from "@/lib/i18n/alpine";
+
+const locale = getRequestLocale(Astro);
+const text = CALENDAR_TEXT[locale];
+const dateLocale = INTL_LOCALE[locale];
 
 const toDate = (value: unknown): Date | null => {
   if (!value) {
@@ -49,7 +58,7 @@ const toDate = (value: unknown): Date | null => {
 // shared tag dictionary instead of category, which events don't use.
 const normalizeCalendarEventLabels = (event: PublicCalendarEvent) => {
   const rawTag = typeof event?.tagLabel === "string" ? event.tagLabel.trim() : "";
-  const label = rawTag ? getTagLabel(rawTag) : "Событие";
+  const label = rawTag ? getTagLabel(rawTag, locale) : text.event;
 
   return {
     ...event,
@@ -72,7 +81,7 @@ const formatCardDateRange = (
 };
 
 const getMonthGenitive = (d: Date): string =>
-  new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", timeZone: "UTC" })
+  new Intl.DateTimeFormat(dateLocale, { day: "numeric", month: "long", timeZone: "UTC" })
     .formatToParts(d)
     .find((p) => p.type === "month")?.value ?? "";
 
@@ -107,13 +116,13 @@ const getDateParts = (
   return {
     dateDay: String(start.getUTCDate()),
     dateMonth: getMonthGenitive(start),
-    dateWeekday: start.toLocaleDateString("ru-RU", { weekday: "long", timeZone: "UTC" }),
+    dateWeekday: start.toLocaleDateString(dateLocale, { weekday: "long", timeZone: "UTC" }),
     dateYear: String(start.getUTCFullYear()),
     dateEndDay: isRange && end ? String(end.getUTCDate()) : null,
     dateEndMonth: isRange && end ? getMonthGenitive(end) : null,
     dateEndWeekday:
       isRange && end
-        ? end.toLocaleDateString("ru-RU", { weekday: "long", timeZone: "UTC" })
+        ? end.toLocaleDateString(dateLocale, { weekday: "long", timeZone: "UTC" })
         : null,
     isDateRange: isRange,
   };
@@ -122,11 +131,11 @@ const getDateParts = (
 const formatDateRange = (startIso: string, endIso: string | null): string => {
   const start = toDate(startIso);
   if (!start) {
-    return "Дата уточняется";
+    return text.dateTbd;
   }
   const end = endIso ? toDate(endIso) : null;
   const format = (date: Date, withYear = false) =>
-    date.toLocaleDateString("ru-RU", {
+    date.toLocaleDateString(dateLocale, {
       day: "numeric",
       month: "long",
       ...(withYear ? { year: "numeric" } : {}),
@@ -187,7 +196,7 @@ const toCarouselPayload = (event: (typeof featuredEventCards)[number]) => ({
   id: event.id,
   title: event.title,
   imageUrl: event.imageUrl ?? event.fallbackImage.src,
-  address: event.address || "Место",
+  address: event.address || text.place,
   categoryLabel: event.categoryLabel,
   dateLabel: formatCardDateRange(event.startDate, event.endDate),
   url: event.url,
@@ -236,10 +245,10 @@ const calendarState = JSON.stringify({
           Maag
         </p>
         <h2 class="mb-4 font-old_standard text-[1.75rem] font-normal leading-[1.1] text-black">
-          Только для авторизованных
+          {text.gateTitle}
         </h2>
         <p class="mb-8 font-inter text-[0.9rem] leading-relaxed text-black/60">
-          Войдите в аккаунт, чтобы получить доступ к афише.
+          {text.gateText}
         </p>
 
         <button
@@ -247,7 +256,7 @@ const calendarState = JSON.stringify({
           x-on:click="$store.auth.openAuthModal()"
           class="w-full cursor-pointer bg-black py-3 font-inter text-sm font-bold uppercase tracking-[0.25em] text-white transition-opacity hover:opacity-75"
         >
-          Войти
+          {NAVBAR_TEXT[locale].signIn}
         </button>
       </div>
     </div>
@@ -259,7 +268,7 @@ const calendarState = JSON.stringify({
       <h1
         class="text-3xl lg:text-[28px] font-old_standard font-base uppercase tracking-[0.46em] text-base-content w-full mb-10"
       >
-        Календарь
+        {NAVBAR_TEXT[locale].calendar}
       </h1>
 
       {
@@ -268,7 +277,7 @@ const calendarState = JSON.stringify({
             <h2
               class="m-0 font-old_standard text-[1.05rem] font-semibold uppercase tracking-[0.5em] text-black !leading-8 !lg:leading-none"
             >
-              Главные события
+              {text.featured}
             </h2>
 
             <div
@@ -280,7 +289,7 @@ const calendarState = JSON.stringify({
             >
               <button
                 type="button"
-                aria-label="Предыдущее"
+                aria-label={text.previous}
                 class="absolute left-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full text-base-content md:flex cursor-pointer"
                 x-show="hasMultipleCarouselItems('featured')"
                 x-on:click.prevent="prevCarouselItem('featured')"
@@ -289,7 +298,7 @@ const calendarState = JSON.stringify({
               </button>
               <button
                 type="button"
-                aria-label="Следующее"
+                aria-label={text.next}
                 class="absolute right-[-1rem] top-1/2 -translate-y-1/2 z-10 hidden h-10 w-10 items-center justify-center rounded-full text-base-content md:flex cursor-pointer"
                 x-show="hasMultipleCarouselItems('featured')"
                 x-on:click.prevent="nextCarouselItem('featured')"
@@ -306,11 +315,11 @@ const calendarState = JSON.stringify({
                   <a
                     x-bind:href="getCarouselItem('featured')?.url || '#'"
                     class="linked-image-hover aspect-[3/2]"
-                    x-bind:aria-label="getCarouselItem('featured')?.title || 'Событие месяца'"
+                    x-bind:aria-label={`getCarouselItem('featured')?.title || ${alpineString(text.eventOfMonth)}`}
                   >
                     <img
                       x-bind:src="getCarouselItem('featured')?.imageUrl || ''"
-                      x-bind:alt="getCarouselItem('featured')?.title || 'Событие месяца'"
+                      x-bind:alt={`getCarouselItem('featured')?.title || ${alpineString(text.eventOfMonth)}`}
                       class="linked-image-hover__media block h-full w-full object-cover"
                     />
                   </a>
@@ -394,7 +403,7 @@ const calendarState = JSON.stringify({
 
                     {/* <div class="mt-[0.4rem] flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
                       <EventMetaIcon type="location" class="h-4 w-4 shrink-0 text-accent" />
-                      <span x-text="getCarouselItem('featured')?.address || 'Место'"></span>
+                      <span x-text={`getCarouselItem('featured')?.address || ${alpineString(text.place)}`}></span>
                     </div> */}
                   </div>
                 </article>
@@ -406,7 +415,7 @@ const calendarState = JSON.stringify({
               >
                 <button
                   type="button"
-                  aria-label="Предыдущее"
+                  aria-label={text.previous}
                   class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
                   x-on:click.prevent="prevCarouselItem('featured')"
                 >
@@ -414,7 +423,7 @@ const calendarState = JSON.stringify({
                 </button>
                 <button
                   type="button"
-                  aria-label="Следующее"
+                  aria-label={text.next}
                   class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
                   x-on:click.prevent="nextCarouselItem('featured')"
                 >
@@ -430,7 +439,7 @@ const calendarState = JSON.stringify({
         topCards.length > 0 && (
           <section class="mt-10">
             <h2 class="m-0 font-old_standard text-[1.05rem] font-semibold uppercase tracking-[0.5em] text-black !leading-8 !lg:leading-none">
-              Обязательная программа
+              {text.mustSee}
             </h2>
 
             <div class="mt-8 hidden md:grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
@@ -515,7 +524,7 @@ const calendarState = JSON.stringify({
 
                     {/* <div class="flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
                       <EventMetaIcon type="location" class="h-4 w-4 shrink-0 text-accent" />
-                      <span>{event.address || "Место"}</span>
+                      <span>{event.address || text.place}</span>
                     </div> */}
                   </div>
                 </article>
@@ -537,11 +546,11 @@ const calendarState = JSON.stringify({
                 <a
                   x-bind:href="getCarouselItem('topCards')?.url || '#'"
                   class="linked-image-hover aspect-[1.12/1]"
-                  x-bind:aria-label="getCarouselItem('topCards')?.title || 'Событие'"
+                  x-bind:aria-label={`getCarouselItem('topCards')?.title || ${alpineString(text.event)}`}
                 >
                   <img
                     x-bind:src="getCarouselItem('topCards')?.imageUrl || ''"
-                    x-bind:alt="getCarouselItem('topCards')?.title || 'Событие'"
+                    x-bind:alt={`getCarouselItem('topCards')?.title || ${alpineString(text.event)}`}
                     class="linked-image-hover__media block h-full w-full object-cover"
                   />
                 </a>
@@ -597,7 +606,7 @@ const calendarState = JSON.stringify({
               >
                 <button
                   type="button"
-                  aria-label="Предыдущее"
+                  aria-label={text.previous}
                   class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
                   x-on:click.prevent="prevCarouselItem('topCards')"
                 >
@@ -605,7 +614,7 @@ const calendarState = JSON.stringify({
                 </button>
                 <button
                   type="button"
-                  aria-label="Следующее"
+                  aria-label={text.next}
                   class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
                   x-on:click.prevent="nextCarouselItem('topCards')"
                 >
@@ -621,7 +630,7 @@ const calendarState = JSON.stringify({
         lastChanceCards.length > 0 && (
           <section class="mt-10">
             <h2 class="m-0 font-old_standard text-[1.05rem] font-semibold uppercase tracking-[0.5em] text-black !leading-8 !lg:leading-none">
-              Последний шанс
+              {text.lastChance}
             </h2>
 
             <div class="mt-8 hidden md:grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-[1.9rem]">
@@ -642,7 +651,7 @@ const calendarState = JSON.stringify({
                   <div class="grid h-full grid-rows-[auto_auto_1fr_auto] gap-[0.55rem] content-start p-4 lg:p-[1.15rem]">
                     <div class="mb-2 flex flex-row items-center justify-start gap-4">
                       <div class="flex flex-col items-center justify-center gap-0">
-                        <p class="m-0 font-old_standard text-lg italic text-base-content lg:text-3xl">до</p>
+                        <p class="m-0 font-old_standard text-lg italic text-base-content lg:text-3xl">{text.rangeTo}</p>
                         <p class="m-0 font-inter text-xl font-bold uppercase tracking-[0.18em] text-black/80 lg:text-4xl">
                           →
                         </p>
@@ -676,7 +685,7 @@ const calendarState = JSON.stringify({
 
                     {/* <div class="flex items-center gap-2 font-inter text-[0.95rem] text-[#302821bd]">
                       <EventMetaIcon type="location" class="h-4 w-4 shrink-0 text-accent" />
-                      <span>{event.address || "Место"}</span>
+                      <span>{event.address || text.place}</span>
                     </div> */}
                   </div>
                 </article>
@@ -698,11 +707,11 @@ const calendarState = JSON.stringify({
                 <a
                   x-bind:href="getCarouselItem('lastChance')?.url || '#'"
                   class="linked-image-hover aspect-[1.12/1]"
-                  x-bind:aria-label="getCarouselItem('lastChance')?.title || 'Событие'"
+                  x-bind:aria-label={`getCarouselItem('lastChance')?.title || ${alpineString(text.event)}`}
                 >
                   <img
                     x-bind:src="getCarouselItem('lastChance')?.imageUrl || ''"
-                    x-bind:alt="getCarouselItem('lastChance')?.title || 'Событие'"
+                    x-bind:alt={`getCarouselItem('lastChance')?.title || ${alpineString(text.event)}`}
                     class="linked-image-hover__media block h-full w-full object-cover"
                   />
                 </a>
@@ -710,7 +719,7 @@ const calendarState = JSON.stringify({
                 <div class="grid h-full grid-rows-[auto_auto_1fr_auto] gap-[0.55rem] content-start p-4">
                   <div class="mb-2 flex flex-row items-center justify-start gap-4">
                     <div class="flex flex-col items-center justify-center gap-0">
-                      <p class="m-0 font-old_standard text-lg italic text-base-content">до</p>
+                      <p class="m-0 font-old_standard text-lg italic text-base-content">{text.rangeTo}</p>
                       <p class="m-0 font-inter text-xl font-bold uppercase tracking-[0.18em] text-black/80">→</p>
                     </div>
                     <div>
@@ -749,7 +758,7 @@ const calendarState = JSON.stringify({
               >
                 <button
                   type="button"
-                  aria-label="Предыдущее"
+                  aria-label={text.previous}
                   class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
                   x-on:click.prevent="prevCarouselItem('lastChance')"
                 >
@@ -757,7 +766,7 @@ const calendarState = JSON.stringify({
                 </button>
                 <button
                   type="button"
-                  aria-label="Следующее"
+                  aria-label={text.next}
                   class="flex h-10 w-10 items-center justify-center bg-white text-[#7d726a] cursor-pointer"
                   x-on:click.prevent="nextCarouselItem('lastChance')"
                 >
@@ -773,7 +782,7 @@ const calendarState = JSON.stringify({
         <h2
           class="m-0 font-old_standard text-[1.05rem] font-semibold uppercase tracking-[0.5em] text-[#15110e]"
         >
-          Афиша
+          {text.poster}
         </h2>
 
         <div class="mt-8 bg-white p-4 sm:p-6 lg:px-8 lg:py-10">

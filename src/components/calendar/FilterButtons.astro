@@ -1,5 +1,9 @@
 ---
 // This component is controlled by Alpine.js from the parent page
+import { getRequestLocale } from "@/lib/i18n/request";
+import { CALENDAR_TEXT } from "@/lib/i18n/calendar";
+
+const text = CALENDAR_TEXT[getRequestLocale(Astro)];
 ---
 
 <div class="flex w-full flex-col gap-4">
@@ -14,7 +18,7 @@
       <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M9 1.5H1M7.6 4.5H2.4M6 7.5H4" stroke="currentColor" stroke-linecap="round"></path>
       </svg>
-      <span x-text="activeFilters.length === 0 ? `${availableEventsCount} событий` : `${filteredEventsCount} из ${availableEventsCount}`"></span>
+      <span x-text={`activeFilters.length === 0 ? \`\${availableEventsCount} ${text.eventsWord}\` : \`\${filteredEventsCount} ${text.outOf} \${availableEventsCount}\``}></span>
     </button>
 
     <template x-for="filter in filters">

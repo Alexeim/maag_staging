@@ -6,29 +6,22 @@ import mariaSidelnikovaImage from "@/assets/team/MS.webp";
 import alexeyMakarovImage from "@/assets/team/AM.jpeg";
 import dmitryMakarovImage from "@/assets/team/DM.webp";
 import denisLandinImage from "@/assets/team/DL.png";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { ABOUT_TEXT } from "@/lib/i18n/about";
 
-const teamMembers = [
-  {
-    role: "Редакция",
-    name: "Мария Сидельникова",
-    photo: mariaSidelnikovaImage,
-  },
-  {
-    role: "CEO",
-    name: "Алексей Макаров",
-    photo: alexeyMakarovImage,
-  },
-  {
-    role: "Дизайн",
-    name: "Денис Ландин",
-    photo: denisLandinImage,
-  },
-  {
-    role: "CTO",
-    name: "Дмитрий Макаров",
-    photo: dmitryMakarovImage,
-  },
+const text = ABOUT_TEXT[getRequestLocale(Astro)];
+
+// Same order as text.team.
+const teamPhotos = [
+  mariaSidelnikovaImage,
+  alexeyMakarovImage,
+  denisLandinImage,
+  dmitryMakarovImage,
 ];
+const teamMembers = text.team.map((member, index) => ({
+  ...member,
+  photo: teamPhotos[index],
+}));
 
 const sectionLabel =
   "font-old_standard text-sm uppercase tracking-[0.42em] text-base-content/70";
@@ -40,13 +33,13 @@ const sectionLabel =
       <h1
         class="m-0 text-3xl lg:text-[28px] font-old_standard font-base uppercase tracking-[0.46em] text-base-content"
       >
-        О нас
+        {text.title}
       </h1>
     </div>
 
     <section class="mt-10 py-2 lg:mt-14">
       <div class="mb-8">
-        <span class={sectionLabel}>О проекте</span>
+        <span class={sectionLabel}>{text.projectLabel}</span>
       </div>
 
       <div
@@ -55,7 +48,7 @@ const sectionLabel =
         <div class="bg-base-100 border-[13px] border-white">
           <Image
             src={maagArtwork}
-            alt="Логотип Maag на фоне рисунка Гранд-Опера"
+            alt={text.artworkAlt}
             class="h-auto w-full object-cover"
           />
         </div>
@@ -65,8 +58,7 @@ const sectionLabel =
             <h2
               class="font-old_standard text-[2rem] leading-[1.15] text-base-content lg:text-[2.4rem] mb-12 lg:mb-0"
             >
-              Maag France - ключ к Парижу, к истории и культуре великого,
-              вечного, свободного, веселого и вкусного города.
+              {text.lead}
             </h2>
           </div>
 
@@ -74,18 +66,11 @@ const sectionLabel =
             class="font-inter space-y-5 text-base-content/80 lg:text-[0.95rem]"
           >
             <p>
-              В Maag France о Париже говорят те, кто в нем живет и те, кто его
-              любит. Лучшие из лучших, знатоки и профессионалы. У каждого — своя
-              экспертиза, свой взгляд и свой Париж.
+              {text.intro[0]}
             </p>
 
             <p>
-              В Maag France французская культура звучит на русском языке.
-              Новости художественной жизни Парижа, репортажи, рецензии на
-              театральные, балетные и оперные премьеры, интервью с художниками,
-              артистами, режиссёрами, хореографами. Самое интересное в его
-              истории и самое важное в сегодняшней моде и дизайне, ведь
-              парижские магазины — те же музеи и галереи.
+              {text.intro[1]}
             </p>
           </div>
         </div>
@@ -93,20 +78,12 @@ const sectionLabel =
         <div
           class="space-y-5 h-full font-inter text-base-content/80 lg:text-[0.95rem]"
         >
-          <p>В Maag France — есть ответы на любые вопросы о Париже.</p>
+          <p>{text.questionsLead}</p>
           <p>
-            Что смотреть прямо сейчас? На какую выставку идти, а какую можно
-            смело пропустить — и почему? На какой спектакль нужно попасть любой
-            ценой, кого увидеть на сцене и где поймать билет даже в последний
-            момент? Что с наслаждением съесть и где с радостью купить. Как не
-            потеряться с детьми и каксоставить маршрут так, чтобы не упустить
-            ничего интересного — вне зависимости от того, есть ли у вас на Париж
-            два дня или целая жизнь.
+            {text.questions}
           </p>
           <p>
-            Всё главное, что происходит в парижской культуре, коротко или
-            подробно, но так, чтобы у вас всегда был выбор. Всё самое важное и
-            интересное. И всё из первых рук.
+            {text.closing}
           </p>
           <!-- <p>
             Maag France — независимое издание, поэтому часть материалов доступна
@@ -193,7 +170,7 @@ const sectionLabel =
 
     <section class="mt-12 py-2 lg:mt-16">
       <div class="mb-12">
-        <span class={sectionLabel}>Команда</span>
+        <span class={sectionLabel}>{text.teamLabel}</span>
       </div>
 
       <div class="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">

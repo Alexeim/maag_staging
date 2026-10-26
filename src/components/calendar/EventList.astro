@@ -1,5 +1,12 @@
 ---
 import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { INTL_LOCALE } from "@/lib/i18n/locales";
+import { CALENDAR_TEXT } from "@/lib/i18n/calendar";
+import { alpineString } from "@/lib/i18n/alpine";
+
+const locale = getRequestLocale(Astro);
+const text = CALENDAR_TEXT[locale];
 ---
 
 <div>
@@ -7,7 +14,7 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
     x-show="isLazyLoading"
     class="text-center font-inter text-[0.9rem] text-[#7d726a]"
   >
-    Загрузка событий...
+    {text.loadingEvents}
   </div>
 
   <div x-show="!isLazyLoading">
@@ -25,7 +32,7 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
           <div class="space-y-10">
             <template x-if="filteredEvents.length === 0">
               <p class="py-8 font-inter text-[0.9rem] text-[#7d726a]">
-                На эти даты событий не найдено.
+                {text.noEventsForDates}
               </p>
             </template>
 
@@ -34,7 +41,7 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                 <h3
                   class="m-0 font-old_standard text-[1rem] font-normal uppercase tracking-[0.24em] text-[#15110e]"
                 >
-                  Только в эти даты
+                  {text.onlyTheseDates}
                 </h3>
 
                 <div class="mt-6 divide-y divide-[#30282115]">
@@ -129,7 +136,7 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                 <h3
                   class="m-0 font-old_standard text-[1rem] font-normal uppercase tracking-[0.24em] text-[#15110e]"
                 >
-                  Можно в любой день
+                  {text.anyDay}
                 </h3>
 
                 <div class="mt-6 divide-y divide-[#30282115]">
@@ -226,9 +233,9 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
             <template x-if="filteredEvents.length === 0">
               <p
                 class="py-8 font-inter text-[0.9rem] leading-[1.6] text-[#7d726a]"
-                x-text="smallEvents.length > 0
-                  ? 'На выбранный день отдельных событий не найдено. Ниже показаны события, которые продолжаются в эту дату. Можно также изменить дату или фильтры.'
-                  : 'На выбранный день событий не найдено. Попробуйте выбрать другую дату или изменить фильтры.'"
+                x-text={`smallEvents.length > 0
+                  ? ${alpineString(text.noneThatDayOngoing)}
+                  : ${alpineString(text.noneThatDay)}`}
               >
               </p>
             </template>
@@ -311,7 +318,7 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
                             class="h-4 w-4 shrink-0 text-accent"
                           />
                           <span
-                            x-text="'до ' + event.endDate.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', timeZone: 'UTC'})"
+                            x-text={`${alpineString(`${text.until} `)} + event.endDate.toLocaleDateString(${alpineString(INTL_LOCALE[locale])}, {day: 'numeric', month: 'long', timeZone: 'UTC'})`}
                           ></span>
                         </p>
                       </div>
@@ -331,7 +338,7 @@ import EventMetaIcon from "@/components/common/EventMetaIcon.astro";
         <h3
           class="m-0 font-old_standard text-lg font-normal uppercase tracking-[0.3em] text-base-content"
         >
-          Ещё в этот день
+          {text.alsoThatDay}
         </h3>
 
         <div
