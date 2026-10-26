@@ -4,6 +4,7 @@ import { describe, expect, test } from 'vitest';
 import {
   buildTranslatedArticleText,
   computeSourceRevision,
+  convertProviderEmphasis,
   extractArticleSegments,
 } from '../src/services/articleTranslation';
 import {
@@ -165,6 +166,32 @@ describe('buildTranslatedArticleText', () => {
     expect(() => buildTranslatedArticleText(article, incomplete)).toThrow(
       'Missing translation for "content.3"',
     );
+  });
+});
+
+describe('convertProviderEmphasis', () => {
+  test('turns the model’s Markdown italics into <em> in html, drops them in text', () => {
+    expect(
+      convertProviderEmphasis('<p>Si *Tapiola* y gagne, le *Poème de l’extase*…</p>', '<p>…</p>', 'html'),
+    ).toBe('<p>Si <em>Tapiola</em> y gagne, le <em>Poème de l’extase</em>…</p>');
+    expect(convertProviderEmphasis('Le *Larghetto*', 'Larghetto', 'text')).toBe('Le Larghetto');
+  });
+
+  test('leaves asterisks alone when the source had some', () => {
+    expect(convertProviderEmphasis('*note*', '*сноска*', 'text')).toBe('*note*');
+  });
+
+  test('ends up as real italics in a built article', () => {
+    const source = { title: 'T', content: [{ type: 'paragraph', text: 'Абзац', html: '<p>Абзац</p>' }] };
+    const built = buildTranslatedArticleText(source, {
+      title: '*T*',
+      'content.0': '<p>Le *Larghetto*</p>',
+    });
+    expect(built.title).toBe('T');
+    expect((built.content as Record<string, string>[])[0]).toMatchObject({
+      html: '<p>Le <em>Larghetto</em></p>',
+      text: 'Le Larghetto',
+    });
   });
 });
 

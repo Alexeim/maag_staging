@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import type { Article } from '../controllers/articleController';
 import {
   richTextHtmlToPlainText,
@@ -198,7 +198,7 @@ const mapArticleText = (
       case 'tweet':
         return block;
       default:
-        onUnknownBlockType(String(block.type));
+        onUnknownBlockType(typeof block.type === 'string' ? block.type : 'unknown');
         return block;
     }
   };
@@ -219,7 +219,9 @@ const mapArticleText = (
     cardLead: plain('cardLead', article.cardLead),
     imageCaption: plain('imageCaption', article.imageCaption),
     secondImageCaption: plain('secondImageCaption', article.secondImageCaption),
-    content: Array.isArray(article.content) ? article.content.map(mapBlock) : [],
+    content: Array.isArray(article.content)
+      ? article.content.map((block, index) => mapBlock(block, index))
+      : [],
   };
 };
 
@@ -239,17 +241,32 @@ export const extractArticleSegments = (
   return { segments, unknownBlockTypes: [...unknownBlockTypes] };
 };
 
+// Translation LLM marks titles and terms as Markdown italics (*Tapiola*,
+// *forte*), which would show up as literal asterisks. Unless the source
+// segment had asterisks of its own, they become real italics in html and are
+// dropped in plain text.
+const MARKDOWN_EMPHASIS_RE = /\*([^*\n]+?)\*/g;
+
+export const convertProviderEmphasis = (
+  translated: string,
+  source: string,
+  format: TranslationFormat,
+): string => {
+  if (source.includes('*')) return translated;
+  return translated.replace(MARKDOWN_EMPHASIS_RE, format === 'html' ? '<em>$1</em>' : '$1');
+};
+
 // Throws on any missing segment: a partly translated article is never built.
 export const buildTranslatedArticleText = (
   article: ArticleTextSource,
   translations: Record<string, string>,
 ): TranslatedArticleText =>
-  mapArticleText(article, (key) => {
+  mapArticleText(article, (key, source, format) => {
     const translated = translations[key];
     if (typeof translated !== 'string' || !translated.trim()) {
       throw new Error(`Missing translation for "${key}"`);
     }
-    return translated;
+    return convertProviderEmphasis(translated, source, format);
   });
 
 // Fingerprint of the translatable text only. A translation whose
