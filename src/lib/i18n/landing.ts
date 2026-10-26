@@ -9,7 +9,6 @@ export interface LandingText {
   eventBlockEmpty: string;
   eventImageAlt: string;
   noArticlesInCategory: string;
-  cultureEmptyBadge: string;
   maagChoice: string;
   maagChoiceBadge: string;
   comingSoon: string;
@@ -25,7 +24,6 @@ export const LANDING_TEXT: Record<Locale, LandingText> = {
     eventBlockEmpty: "Блок события сейчас пуст.",
     eventImageAlt: "Событие",
     noArticlesInCategory: "Нет статей в категории",
-    cultureEmptyBadge: "Балет",
     maagChoice: "Выбор Maag",
     maagChoiceBadge: "Выбор MAAG",
     comingSoon: "Скоро появится материал",
@@ -39,7 +37,6 @@ export const LANDING_TEXT: Record<Locale, LandingText> = {
     eventBlockEmpty: "Aucun événement pour le moment.",
     eventImageAlt: "Événement",
     noArticlesInCategory: "Aucun article dans cette rubrique",
-    cultureEmptyBadge: "Ballet",
     maagChoice: "Le choix de Maag",
     maagChoiceBadge: "Le choix de MAAG",
     comingSoon: "Bientôt un nouvel article",

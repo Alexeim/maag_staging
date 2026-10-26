@@ -228,13 +228,13 @@ const calendarState = JSON.stringify({
     x-on:date-selected.window="selectDate($event.detail)"
     x-on:filter-changed.window="setFilter($event.detail.filter)"
   >
-    <!--
+    {/*
       TODO(subscription): Subscription gate is disabled for now (payed-features
       policy not decided yet). Only login is required to view the calendar.
       To restore the subscription paywall, bring back the stripeSubscriptionStatus
       checks that used to be ANDed into these x-show/:class expressions
       (see git history on this file).
-    -->
+    */}
     <div
       x-cloak
       x-show="!$store.auth.isLoading && !$store.auth.isLoggedIn"
@@ -260,7 +260,7 @@ const calendarState = JSON.stringify({
         </button>
       </div>
     </div>
-    <!-- TODO(subscription): re-add the stripeSubscriptionStatus check dropped above -->
+    {/* TODO(subscription): re-add the stripeSubscriptionStatus check dropped above */}
     <div
       x-bind:class="!$store.auth.isLoading && !$store.auth.isLoggedIn ? 'blur-sm pointer-events-none select-none' : ''"
       class="mx-auto max-w-[1440px] px-4 pt-8 pb-20 sm:px-6 lg:px-8 lg:pt-10 lg:pb-[6.5rem]"
