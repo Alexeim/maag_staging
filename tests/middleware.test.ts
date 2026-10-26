@@ -50,8 +50,18 @@ test("a reader is not rewritten and falls through to the 404", async () => {
   expect(next).toHaveBeenCalled();
 });
 
-test("only section pages are rewritten, not materials", async () => {
+test("an article is rewritten (it loads its own French version)", async () => {
   session.role = "admin";
+  expect((await run("/fr/article/abc")).rewrite).toHaveBeenCalledWith("/article/abc");
+});
+
+test("materials without French support are not rewritten", async () => {
+  session.role = "admin";
+  expect((await run("/fr/news/abc")).rewrite).not.toHaveBeenCalled();
+  expect((await run("/fr/article/abc/extra")).rewrite).not.toHaveBeenCalled();
+});
+
+test("a reader never gets a French article", async () => {
   expect((await run("/fr/article/abc")).rewrite).not.toHaveBeenCalled();
 });
 

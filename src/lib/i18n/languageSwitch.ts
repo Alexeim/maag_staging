@@ -30,6 +30,14 @@ export const splitLocalePath = (pathname: string): { locale: Locale; path: strin
 export const isSharedSectionPath = (path: string): boolean =>
   SHARED_SECTION_PATHS.has(withoutTrailingSlash(path));
 
+// Material pages that render a French version when one exists: the address
+// carries the Russian id (/fr/article/<id of the original>), the page loads
+// its translation. Only articles so far.
+const TRANSLATED_MATERIAL_PATH_RE = /^\/article\/[^/]+$/;
+
+export const isTranslatedMaterialPath = (path: string): boolean =>
+  TRANSLATED_MATERIAL_PATH_RE.test(withoutTrailingSlash(path));
+
 // The current address in every language: just the prefix swapped.
 export const buildLanguageLinks = (pathname: string): Record<Locale, string> => {
   const { path } = splitLocalePath(pathname);

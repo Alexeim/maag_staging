@@ -15,8 +15,11 @@ import {
   articlesApi,
   publicRelatedApi,
   type ArticleResponse,
+  type FrenchArticleResponse,
   type PublicRelatedCard,
 } from "@/lib/api/api";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import {
@@ -57,6 +60,41 @@ try {
         : `Error fetching article: ${e.message}`;
   } else {
     error = `Error fetching article: ${e instanceof Error ? e.message : String(e)}`;
+  }
+}
+
+// /fr/article/<Russian id> (admins only, see src/middleware.ts): overlay the
+// French version's text and publication state on the original. Author,
+// images and tags stay the original's. No French version → 404, never the
+// Russian text under a French address.
+const locale = getRequestLocale(Astro);
+if (!error && articleData && locale !== DEFAULT_LOCALE) {
+  try {
+    const french: FrenchArticleResponse = await articlesApi.getFrench(id, {
+      sessionCookie: Astro.cookies.get("__session")?.value,
+    });
+    articleData = {
+      ...articleData,
+      title: french.title,
+      lead: french.lead,
+      leadHtml: french.leadHtml,
+      subtitle: french.subtitle,
+      subtitleHtml: french.subtitleHtml,
+      intro: french.intro,
+      introHtml: french.introHtml,
+      cardTitle: french.cardTitle,
+      cardLead: french.cardLead,
+      imageCaption: french.imageCaption,
+      secondImageCaption: french.secondImageCaption,
+      content: french.content,
+      published: french.published,
+      publishedAt: french.publishedAt ?? undefined,
+    };
+  } catch (e) {
+    console.error(e);
+    Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
+    error = "Article not found.";
+    articleData = null;
   }
 }
 
@@ -136,7 +174,7 @@ const articleStructuredData = articleData
         "@type": "WebPage",
         "@id": canonicalUrl,
       },
-      inLanguage: "ru",
+      inLanguage: locale,
     }
   : [];
 

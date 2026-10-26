@@ -8,14 +8,11 @@ import {
   type TranslationSegment,
 } from './articleTranslation';
 import { translateSegments } from './googleTranslate';
+import { FR_BY_SOURCE_COLLECTION, FR_COLLECTION } from './articlesFr';
 
-// French versions of articles live in `articles_fr`, each with its own id and
-// `sourceId` → the Russian article. `articles_fr_by_source/{sourceId}` is the
-// lock that guarantees one translation per article (transaction.create fails
-// if it already exists) and the fast lookup from an article to its French
-// version.
-export const FR_COLLECTION = 'articles_fr';
-export const FR_BY_SOURCE_COLLECTION = 'articles_fr_by_source';
+// The lock document articles_fr_by_source/{sourceId} is created with
+// transaction.create, which fails if it already exists: one translation per
+// article.
 
 export interface TranslationPlan {
   sourceId: string;

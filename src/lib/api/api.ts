@@ -844,6 +844,38 @@ export const articlesApi = {
       token,
     });
   },
+  // French version of the article with this (Russian) id. Admin only: SSR
+  // passes the __session cookie.
+  getFrench(id: string, auth: { token?: string; sessionCookie?: string } = {}) {
+    return request<FrenchArticleResponse>(`/api/articles/${id}/fr`, {
+      token: auth.token,
+      sessionCookie: auth.sessionCookie,
+    });
+  },
+};
+
+// articles_fr document: the translated text of an article. Author, images,
+// tags and everything else come from the Russian source (sourceId).
+export type FrenchArticleResponse = Pick<
+  ArticlePayload,
+  | "title"
+  | "lead"
+  | "leadHtml"
+  | "subtitle"
+  | "subtitleHtml"
+  | "intro"
+  | "introHtml"
+  | "cardTitle"
+  | "cardLead"
+  | "imageCaption"
+  | "secondImageCaption"
+  | "content"
+> & {
+  id: string;
+  sourceId: string;
+  published: boolean;
+  publishedAt: ApiTimestamp | null;
+  updatedAt?: ApiTimestamp;
 };
 
 export const newsApi = {
