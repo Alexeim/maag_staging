@@ -89,7 +89,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // from Astro.originPathname. Sections (/fr/, /fr/culture, …) reuse the
   // mixed trial content; articles and tips load their French text themselves.
   // Admins only until the French site goes public — anyone
-  // else falls through to the 404 (no such file under src/pages/fr). A
+  // else reaches the French catch-all's 404. A
   // rewrite re-runs this middleware on the Russian path, which has no
   // prefix, so it cannot loop.
   const { locale: pathLocale, path: unprefixedPath } = splitLocalePath(
@@ -119,7 +119,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const response = await next();
 
   // A French 404 before sign-in must not be reused after the admin signs in.
-  if (pathLocale !== DEFAULT_LOCALE) {
+  if (pathLocale !== DEFAULT_LOCALE || locals.user?.role === "admin") {
     response.headers.set("Cache-Control", "private, no-store");
   }
 

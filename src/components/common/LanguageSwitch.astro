@@ -16,6 +16,9 @@ const GROUP_LABEL: Record<Locale, string> = { ru: "Язык", fr: "Langue" };
 ---
 
 <div
+  x-data="{}"
+  x-cloak
+  x-show="$store.auth.profile?.role === 'admin'"
   role="group"
   aria-label={GROUP_LABEL[locale]}
   class:list={["flex items-center gap-2 font-inter text-sm", className]}

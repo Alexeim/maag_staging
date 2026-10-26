@@ -8,6 +8,9 @@ export default () => ({
   async handleSignOut() {
     try {
       await signOut(auth);
+      // Finish clearing the server session before the next SSR request.
+      const response = await fetch("/api/session", { method: "DELETE" });
+      if (!response.ok) throw new Error("Failed to clear server session");
       // Back to the homepage, in the language of the page the user was on
       globalThis.location.href = localizePath('/', documentLocale());
     } catch (error) {

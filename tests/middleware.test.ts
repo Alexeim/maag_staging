@@ -109,3 +109,16 @@ test("an invalid session is still cleared and cannot access French pages", async
   expect(deleteCookie).toHaveBeenCalledWith("__session", { path: "/" });
   expect(rewrite).not.toHaveBeenCalled();
 });
+
+for (const path of ['/', '/culture', '/article/abc']) {
+  test(`admin HTML is private and never cached: ${path}`, async () => {
+    session.role = 'admin';
+    const { response } = await run(path);
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+  });
+}
+
+test('anonymous Russian pages retain public caching', async () => {
+  const { response } = await run('/culture');
+  expect(response.headers.get('Cache-Control')).toContain('public, s-maxage=30');
+});

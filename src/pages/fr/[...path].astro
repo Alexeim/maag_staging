@@ -1,0 +1,9 @@
+---
+import NotFound from "../404.astro";
+
+// The production Node adapter needs a matching route before it runs middleware.
+// Authorized French paths are rewritten there; every other request ends here.
+Astro.response.status = 404;
+---
+
+<NotFound />
