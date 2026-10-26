@@ -10,6 +10,7 @@ import {
   buildPublicationFieldsForUpdate,
 } from '../utils/publication';
 import { normalizeStoredRichTextHtml } from '../utils/richText';
+import { FR_BY_SOURCE_COLLECTION, FR_COLLECTION } from '../services/articlesFr';
 
 // Interface for our Article structure
 export interface Article {
@@ -400,6 +401,14 @@ export const deleteArticle = async (req: Request, res: Response) => {
     }
 
     await db.runTransaction(async (transaction) => {
+      // The French version goes with the original, in the same transaction.
+      // Read first: Firestore wants every read before any write, and the
+      // collection sync below writes. Its images are the original's, deleted
+      // above.
+      const frLockRef = db.collection(FR_BY_SOURCE_COLLECTION).doc(id);
+      const frLock = await transaction.get(frLockRef);
+      const frTranslationId = frLock.exists ? frLock.data()?.translationId : null;
+
       await syncSingleContentCollectionMembershipInTransaction({
         transaction,
         collectionsCollection: contentCollectionsCollection,
@@ -410,6 +419,13 @@ export const deleteArticle = async (req: Request, res: Response) => {
         now: new Date(),
       });
       transaction.delete(articlesCollection.doc(id));
+
+      if (frLock.exists) {
+        if (typeof frTranslationId === 'string' && frTranslationId) {
+          transaction.delete(db.collection(FR_COLLECTION).doc(frTranslationId));
+        }
+        transaction.delete(frLockRef);
+      }
     });
 
     res.status(204).send();
