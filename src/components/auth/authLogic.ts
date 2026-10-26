@@ -6,6 +6,8 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 
 interface AuthFormData {
@@ -71,6 +73,30 @@ export default function authModalLogic() {
       }
     },
 
+    async signInWithGoogle() {
+      if (this.isLoading) return;
+
+      this.isLoading = true;
+      this.error = "";
+
+      try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        if (
+          error instanceof FirebaseError &&
+          error.code === "auth/popup-closed-by-user"
+        ) {
+          return;
+        }
+
+        this.error = "Не удалось войти через Google. Попробуйте ещё раз.";
+        console.error("Google sign-in failed:", error);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     async handleSubmit() {
       this.isLoading = true;
       this.error = "";
@@ -130,9 +156,7 @@ export default function authModalLogic() {
             token,
           );
 
-          getAlpineStore("ui").showToast(
-            "Регистрация прошла успешно!",
-          );
+          getAlpineStore("ui").showToast("Регистрация прошла успешно!");
           getAlpineStore("auth").setUser(user, createdProfile);
           getAlpineStore("auth").closeAuthModal();
         } catch (err) {
