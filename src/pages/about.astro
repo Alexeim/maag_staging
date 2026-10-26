@@ -1,12 +1,12 @@
 ---
 import Layout from "../Layouts/Layout.astro";
+import { getSectionMeta } from "@/lib/i18n/pageMeta";
 import AboutProjectContent from "../components/about/AboutProjectContent.astro";
 ---
 
 <Layout
   navbarVariant="default"
-  title="О проекте — MAAG France"
-  description="MAAG France — русскоязычное медиа о культуре, Париже и жизни во Франции. Рассказываем о событиях, людях, местах и идеях."
+  {...getSectionMeta("about", Astro.originPathname)}
   useClientRouter={true}
 >
   <AboutProjectContent />

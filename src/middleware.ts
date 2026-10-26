@@ -1,5 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { authSessionApi } from "@/lib/api/api";
+import { DEFAULT_LOCALE } from "@/lib/i18n/locales";
+import { isSharedSectionPath, splitLocalePath } from "@/lib/i18n/languageSwitch";
 
 // Must match src/pages/api/session.ts. "__session" is the only cookie name
 // Firebase Hosting forwards through its rewrite to Cloud Run.
@@ -66,6 +68,23 @@ export const onRequest = defineMiddleware(async (context, next) => {
       context.cookies.delete(SESSION_COOKIE_NAME, { path: "/" });
       cookiesTouched = true;
     }
+  }
+
+  // French section pages (/fr/, /fr/culture, …) are the Russian pages with a
+  // French shell: render the Russian route while the address stays /fr/…;
+  // Layout reads the language from Astro.originPathname. Admins only until
+  // the French site goes public — anyone else falls through to the 404 (no
+  // such file under src/pages/fr). A rewrite re-runs this middleware on the
+  // Russian path, which has no prefix, so it cannot loop.
+  const { locale: pathLocale, path: unprefixedPath } = splitLocalePath(
+    context.url.pathname,
+  );
+  if (
+    pathLocale !== DEFAULT_LOCALE &&
+    locals.user?.role === "admin" &&
+    isSharedSectionPath(unprefixedPath)
+  ) {
+    return context.rewrite(unprefixedPath);
   }
 
   // Dashboard is admin-only. Covers both "not logged in" (user is null) and

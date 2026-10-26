@@ -6,6 +6,10 @@ import {
   getPrimaryBadgeLabel,
 } from "@/lib/utils/contentBadge";
 import type { PublicCardItem, PublicLandingResponse } from "@/lib/api/api";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { INTL_LOCALE } from "@/lib/i18n/locales";
+import { LANDING_TEXT } from "@/lib/i18n/landing";
+import { NAVBAR_TEXT } from "@/lib/i18n/navbar";
 
 import NetlenkaCardOne from "./NetlenkaCardOne.astro";
 import FirstPersonCard from "./FirstPersonCard.astro";
@@ -27,9 +31,12 @@ type LandingCard = Omit<PublicCardItem, "lead">;
 
 const { data: publicLandingData } = Astro.props as LandingBodyProps;
 
+const locale = getRequestLocale(Astro);
+const text = LANDING_TEXT[locale];
+
 // Section heading labels (not material badges) used for the culture/paris blocks below.
-const CULTURE_CATEGORY_LABEL = "Культура";
-const PARIS_CATEGORY_LABEL = "Париж";
+const CULTURE_CATEGORY_LABEL = NAVBAR_TEXT[locale].culture;
+const PARIS_CATEGORY_LABEL = NAVBAR_TEXT[locale].paris;
 
 // Strips legacy "Le Saviez-Vous" tag values before picking the primary
 // badge, then defers to the shared news/interview/tag rules.
@@ -45,7 +52,7 @@ const getPrimaryTag = (item: LandingCard) => {
       tag.trim().length > 0 &&
       !isLegacyParisTag(tag),
   );
-  return getPrimaryBadgeLabel({ ...item, tags });
+  return getPrimaryBadgeLabel({ ...item, tags }, locale);
 };
 
 const getPrimaryTagHref = (item: LandingCard) => {
@@ -96,7 +103,7 @@ const formatArticleDate = (timestamp: unknown) => {
     return "";
   }
   return date
-    .toLocaleDateString("ru-RU", {
+    .toLocaleDateString(INTL_LOCALE[locale], {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -247,10 +254,10 @@ const splitTitle = (t: string) => {
                   </div>
                   <div class="grid content-start gap-[0.55rem] bg-white p-[1.2rem] lg:px-[1.3rem] lg:pt-[1.35rem] lg:pb-[1.1rem]">
                     <p class="text-accent uppercase font-inter text-sm tracking-[.46em]">
-                      Балет
+                      {text.cultureEmptyBadge}
                     </p>
                     <h3 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
-                      Нет статей в категории
+                      {text.noArticlesInCategory}
                     </h3>
                   </div>
                 </>
@@ -308,7 +315,7 @@ const splitTitle = (t: string) => {
       <div id="netlenka-container" class="flex flex-col">
         <div class="flex flex-col gap-1 items-center justify-center mb-6">
           <NetlenkaLogo />
-          <p class="font-old_standard italic text-[28px]">Выбор Maag</p>
+          <p class="font-old_standard italic text-[28px]">{text.maagChoice}</p>
         </div>
         {
           maagChoiceItems.length > 0 ? (
@@ -388,7 +395,7 @@ const splitTitle = (t: string) => {
                         class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
                         data-netlenka-carousel-dot
                         data-page-index={index}
-                        aria-label={`Показать карточку ${index + 1}`}
+                        aria-label={text.showCard(index + 1)}
                         aria-pressed={index === 0 ? "true" : "false"}
                       />
                     ))}
@@ -399,8 +406,8 @@ const splitTitle = (t: string) => {
           ) : (
             <div class="flex flex-col gap-6">
               <NetlenkaCardOne
-                title="Скоро появится материал"
-                category="Выбор MAAG"
+                title={text.comingSoon}
+                category={text.maagChoiceBadge}
               />
             </div>
           )
@@ -492,7 +499,7 @@ const splitTitle = (t: string) => {
                       {PARIS_CATEGORY_LABEL}
                     </p>
                     <h3 class="text-2xl lg:text-3xl leading-tight font-normal font-old_standard">
-                      Нет статей в категории
+                      {text.noArticlesInCategory}
                     </h3>
                   </div>
                   <div class="aspect-[3/2] overflow-hidden lg:order-2">
@@ -534,7 +541,7 @@ const splitTitle = (t: string) => {
                 class="w-full py-4 px-0 min-h-[100px]"
               >
                 <p class="text-sm text-base-content/70">
-                  Пока нет дополнительных материалов в разделе «Париж».
+                  {text.noMoreParis}
                 </p>
               </div>
             )

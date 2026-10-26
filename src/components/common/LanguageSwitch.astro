@@ -1,0 +1,52 @@
+---
+// RU / FR switcher. Labels are language names, never flags: a language is not
+// a country.
+import { LOCALES, type Locale } from "@/lib/i18n/locales";
+import { LOCALE_LABELS } from "@/lib/i18n/languageSwitch";
+
+interface Props {
+  locale: Locale;
+  links: Record<Locale, string>;
+  class?: string;
+}
+
+const { locale, links, class: className } = Astro.props;
+
+const GROUP_LABEL: Record<Locale, string> = { ru: "Язык", fr: "Langue" };
+---
+
+<div
+  role="group"
+  aria-label={GROUP_LABEL[locale]}
+  class:list={["flex items-center gap-2 font-inter text-sm", className]}
+>
+  {
+    LOCALES.map((option, index) => {
+      const { short, name } = LOCALE_LABELS[option];
+      return (
+        <>
+          {index > 0 && <span aria-hidden="true" class="text-base-content/30">/</span>}
+          {option === locale ? (
+            <span aria-current="true" title={name} class="font-semibold">
+              {short}
+            </span>
+          ) : (
+            // Full reload: a language change swaps <html lang>, the meta tags
+            // and the cookie banner's language.
+            <a
+              href={links[option]}
+              hreflang={option}
+              lang={option}
+              title={name}
+              aria-label={name}
+              data-astro-reload
+              class="transition-opacity hover:opacity-70"
+            >
+              {short}
+            </a>
+          )}
+        </>
+      );
+    })
+  }
+</div>

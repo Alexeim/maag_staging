@@ -1,6 +1,15 @@
 ---
 import Button from "@/components/common/Button.astro";
 import Input from "@/components/common/Input.astro";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
+import { AUTH_TEXT } from "@/lib/i18n/auth";
+
+interface Props {
+  locale?: Locale;
+}
+
+const { locale = DEFAULT_LOCALE } = Astro.props;
+const text = AUTH_TEXT[locale];
 ---
 
 <div
@@ -34,22 +43,22 @@ import Input from "@/components/common/Input.astro";
     <!-- Login Form -->
     <template x-if="$store.auth.formType === 'login'">
       <form x-on:submit.prevent="handleSubmit">
-        <h2 class="text-2xl font-bold mb-6 text-center">Войти</h2>
+        <h2 class="text-2xl font-bold mb-6 text-center">{text.loginTitle}</h2>
         <div class="space-y-4">
-          <Input type="email" name="email" placeholder="Почта" autocomplete="email" x-bind:value="formData.email" required />
-          <Input type="password" name="password" placeholder="Пароль" autocomplete="current-password" x-bind:value="formData.password" required />
+          <Input type="email" name="email" placeholder={text.email} autocomplete="email" x-bind:value="formData.email" required />
+          <Input type="password" name="password" placeholder={text.password} autocomplete="current-password" x-bind:value="formData.password" required />
         </div>
         <div class="mt-6">
           <Button type="submit" class="w-full" x-bind:disabled="isLoading">
-            <span x-show="!isLoading">Войти</span>
-            <span x-show="isLoading">Загрузка...</span>
+            <span x-show="!isLoading">{text.loginSubmit}</span>
+            <span x-show="isLoading">{text.loading}</span>
           </Button>
         </div>
         <p class="text-sm text-center mt-4">
-          Не зарегистрирован? <button type="button" x-on:click="$store.auth.switchTo('signup')" class="text-primary hover:underline cursor-pointer">Тебе сюда</button>
+          {text.noAccount} <button type="button" x-on:click="$store.auth.switchTo('signup')" class="text-primary hover:underline cursor-pointer">{text.toSignup}</button>
         </p>
         <p class="text-sm text-center mt-2">
-          <button type="button" x-on:click="forgotPassword()" class="text-base-content/50 hover:text-primary hover:underline cursor-pointer">Забыл пароль?</button>
+          <button type="button" x-on:click="forgotPassword()" class="text-base-content/50 hover:text-primary hover:underline cursor-pointer">{text.forgotPassword}</button>
         </p>
       </form>
     </template>
@@ -57,22 +66,22 @@ import Input from "@/components/common/Input.astro";
     <!-- Signup Form -->
     <template x-if="$store.auth.formType === 'signup'">
       <form x-on:submit.prevent="handleSubmit">
-        <h2 class="text-2xl font-bold mb-6 text-center">Зарегистрируйся</h2>
+        <h2 class="text-2xl font-bold mb-6 text-center">{text.signupTitle}</h2>
         <div class="space-y-4">
-          <Input type="text" name="firstName" placeholder="Имя" autocomplete="given-name" x-bind:value="formData.firstName" required />
-          <Input type="text" name="lastName" placeholder="Фамилия" autocomplete="family-name" x-bind:value="formData.lastName" required />
-          <Input type="email" name="email" placeholder="Почта" autocomplete="email" x-bind:value="formData.email" required />
-          <Input type="password" name="password" placeholder="Пароль" autocomplete="new-password" x-bind:value="formData.password" required />
-          <Input type="password" name="confirmPassword" placeholder="Подтвердить пароль" autocomplete="new-password" x-bind:value="formData.confirmPassword" required />
+          <Input type="text" name="firstName" placeholder={text.firstName} autocomplete="given-name" x-bind:value="formData.firstName" required />
+          <Input type="text" name="lastName" placeholder={text.lastName} autocomplete="family-name" x-bind:value="formData.lastName" required />
+          <Input type="email" name="email" placeholder={text.email} autocomplete="email" x-bind:value="formData.email" required />
+          <Input type="password" name="password" placeholder={text.password} autocomplete="new-password" x-bind:value="formData.password" required />
+          <Input type="password" name="confirmPassword" placeholder={text.confirmPassword} autocomplete="new-password" x-bind:value="formData.confirmPassword" required />
         </div>
         <div class="mt-6">
           <Button type="submit" class="w-full" x-bind:disabled="isLoading">
-            <span x-show="!isLoading">Регистрация</span>
-            <span x-show="isLoading">Загрузка...</span>
+            <span x-show="!isLoading">{text.signupSubmit}</span>
+            <span x-show="isLoading">{text.loading}</span>
           </Button>
         </div>
         <p class="text-sm text-center mt-4">
-          Уже как дома? <button type="button" x-on:click="$store.auth.switchTo('login')" class="text-primary hover:underline cursor-pointer">Заходи</button>
+          {text.haveAccount} <button type="button" x-on:click="$store.auth.switchTo('login')" class="text-primary hover:underline cursor-pointer">{text.toLogin}</button>
         </p>
       </form>
     </template>

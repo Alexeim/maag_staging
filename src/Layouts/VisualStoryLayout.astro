@@ -9,7 +9,6 @@ import StructuredData from "../components/seo/StructuredData.astro";
 import GoogleTagManager from "../components/seo/GoogleTagManager.astro";
 import YandexMetrika from "../components/seo/YandexMetrika.astro";
 import CookieConsent from "../components/seo/CookieConsent.astro";
-import { navbarContent } from "../content/navbar/RU/Navbar.json";
 import {
   buildGlobalStructuredData,
   toStructuredDataArray,
@@ -104,16 +103,7 @@ const allStructuredData = [
     <title>{title}</title>
   </head>
   <body class="bg-base-100 text-base-content">
-    <Header
-      variant="default"
-      hoverReveal
-      cultureText={navbarContent.items[0].label}
-      guideText={navbarContent.items[1].label}
-      childrenText={navbarContent.items[2].label}
-      calendarText={navbarContent.items[3].label}
-      aboutText={navbarContent.items[4].label}
-      buttonText={navbarContent.button.label}
-    />
+    <Header variant="default" hoverReveal />
     <slot />
 
     <AuthModal />

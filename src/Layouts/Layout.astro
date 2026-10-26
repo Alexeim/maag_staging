@@ -13,12 +13,22 @@ import GoogleTagManager from "../components/seo/GoogleTagManager.astro";
 import YandexMetrika from "../components/seo/YandexMetrika.astro";
 import TwitterWidgets from "../components/seo/TwitterWidgets.astro";
 import CookieConsent from "../components/seo/CookieConsent.astro";
-import { navbarContent } from "../content/navbar/RU/Navbar.json";
 import {
   buildGlobalStructuredData,
   toStructuredDataArray,
   type JsonLdObject,
 } from "../lib/seo/structuredData";
+import {
+  DEFAULT_LOCALE,
+  OG_LOCALE,
+  SITE_FALLBACK_DESCRIPTION,
+  localizePath,
+  type Locale,
+} from "../lib/i18n/locales";
+import { NAVBAR_TEXT } from "../lib/i18n/navbar";
+import { buildLanguageLinks, splitLocalePath } from "../lib/i18n/languageSwitch";
+import { canPreviewUnpublished } from "../lib/utils/preview";
+import LanguageSwitch from "../components/common/LanguageSwitch.astro";
 
 interface LayoutProps {
   title?: string;
@@ -29,11 +39,18 @@ interface LayoutProps {
   structuredData?: JsonLdObject | JsonLdObject[];
   useClientRouter?: boolean;
   navbarVariant?: "default" | "transparent";
+  locale?: Locale;
+  // Published versions of this same page in other languages, for hreflang.
+  // Only ever pass versions a reader can actually open: an alternate that
+  // 404s for Googlebot is a Search Console error, not a hint.
+  alternates?: { locale: Locale; path: string }[];
 }
 
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
-const fallbackDescription =
-  "MAAG France — медиа о культуре, Париже и жизни во Франции.";
+// French section pages are the Russian pages reached through a rewrite
+// (src/middleware.ts): Astro.url is the Russian path, the language lives only
+// in the original address.
+const requestLocale = splitLocalePath(Astro.originPathname).locale;
 
 const toAbsoluteUrl = (value?: string) => {
   if (!value) {
@@ -45,17 +62,42 @@ const toAbsoluteUrl = (value?: string) => {
 
 const {
   title = "MAAG France",
-  description: rawDescription = fallbackDescription,
+  description: rawDescription,
   image,
   canonicalPath = Astro.url.pathname,
   type = "website",
   structuredData = [],
   useClientRouter = false,
   navbarVariant = "default",
+  locale = requestLocale,
+  alternates = [],
 } = Astro.props as LayoutProps;
 
-const description = rawDescription.trim() || fallbackDescription;
-const canonicalUrl = toAbsoluteUrl(canonicalPath);
+const description =
+  rawDescription?.trim() || SITE_FALLBACK_DESCRIPTION[locale];
+const navbarText = NAVBAR_TEXT[locale];
+const navHref = (path: string) => localizePath(path, locale);
+// Admins only while the French site is not public: a reader clicking "FR"
+// would get a 404. Safe for the CDN — admin responses are never cached
+// (src/middleware.ts).
+const languageSwitch = canPreviewUnpublished(Astro.locals)
+  ? { locale, links: buildLanguageLinks(Astro.originPathname) }
+  : null;
+// Russian canonicals stay exactly as before (trailing-slash work is on hold,
+// see docs/trailing-slash-canonical-2026-09-29.md); another language gets the
+// page's path under its own prefix.
+const canonicalUrl = toAbsoluteUrl(
+  locale === DEFAULT_LOCALE
+    ? canonicalPath
+    : localizePath(splitLocalePath(canonicalPath).path, locale),
+);
+const alternateLinks =
+  alternates.length > 0
+    ? [{ locale, path: canonicalPath }, ...alternates].map((alternate) => ({
+        hreflang: alternate.locale,
+        href: toAbsoluteUrl(alternate.path),
+      }))
+    : [];
 const imageUrl = toAbsoluteUrl(image);
 const globalStructuredData = buildGlobalStructuredData(
   siteOrigin,
@@ -68,7 +110,7 @@ const allStructuredData = [
 ---
 
 <!doctype html>
-<html lang="ru" data-theme="maag">
+<html lang={locale} data-theme="maag">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -80,7 +122,13 @@ const allStructuredData = [
       content="a1g4Q9POWbQ8LXHxizcXDOD5DiG_5gMiXcMMCIa0XQw"
     />
     {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    {
+      alternateLinks.map((alternate) => (
+        <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />
+      ))
+    }
     <meta property="og:site_name" content="MAAG France" />
+    <meta property="og:locale" content={OG_LOCALE[locale]} />
     <meta property="og:type" content={type} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -142,15 +190,11 @@ const allStructuredData = [
   <body class="bg-base-200">
     <Header
       variant={navbarVariant}
-      cultureText={navbarContent.items[0].label}
-      guideText={navbarContent.items[1].label}
-      childrenText={navbarContent.items[2].label}
-      calendarText={navbarContent.items[3].label}
-      aboutText={navbarContent.items[4].label}
-      buttonText={navbarContent.button.label}
+      locale={locale}
+      languageSwitch={languageSwitch}
     />
     <slot />
-    <Footer />
+    <Footer locale={locale} />
 
     <!-- Mobile Menu -->
     <!-- Overlay -->
@@ -191,22 +235,22 @@ const allStructuredData = [
         <li
           class="font-navbar uppercase text-[18px] tracking-[4px] font-normal"
         >
-          <a href="/culture">Культура</a>
+          <a href={navHref("/culture")}>{navbarText.culture}</a>
         </li>
         <li
           class="font-navbar uppercase text-[18px] tracking-[4px] font-normal"
         >
-          <a href="/paris">Париж</a>
+          <a href={navHref("/paris")}>{navbarText.paris}</a>
         </li>
         <li
           class="font-navbar uppercase text-[18px] tracking-[4px] font-normal"
         >
-          <a href="/calendar">Календарь</a>
+          <a href={navHref("/calendar")}>{navbarText.calendar}</a>
         </li>
         <li
           class="font-navbar uppercase text-[18px] tracking-[4px] font-normal"
         >
-          <a href="/about">О проекте</a>
+          <a href={navHref("/about")}>{navbarText.about}</a>
         </li>
       </ul>
 
@@ -224,7 +268,7 @@ const allStructuredData = [
           <button
             x-on:click.prevent="$store.auth.openAuthModal(); $store.navbar.close()"
             class="bg-primary text-primary-content rounded-[9px] py-1.5 text-center font-oswald text-[14px] w-full"
-            >Войти</button
+            >{navbarText.signIn}</button
           >
         </template>
         <!-- Logged In State -->
@@ -239,11 +283,16 @@ const allStructuredData = [
             <button
               x-on:click.prevent="handleSignOut(); $store.navbar.close()"
               class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
-              >Выйти</button
+              >{navbarText.signOut}</button
             >
           </div>
         </template>
 
+        {
+          languageSwitch && (
+            <LanguageSwitch {...languageSwitch} class="justify-center" />
+          )
+        }
         <div class="flex items-center justify-center gap-5">
           <a
             href="https://www.instagram.com/stories/maag_france/"
@@ -257,7 +306,7 @@ const allStructuredData = [
     </div>
 
     <!-- Global Modals and Toasts -->
-    <AuthModal />
+    <AuthModal locale={locale} />
     <Toast />
     <ConfirmationModal />
     <CookieConsent />

@@ -3,9 +3,15 @@ import logo from "../../assets/logo/logo.svg";
 import { Search } from "@lucide/astro";
 import InstagramLogo from "@/assets/social/new/instagram-svgrepo-com.svg";
 import burgerIcon from "../../assets/icons/burger-mobile.svg";
+import { DEFAULT_LOCALE, localizePath, type Locale } from "@/lib/i18n/locales";
+import { NAVBAR_TEXT } from "@/lib/i18n/navbar";
+import LanguageSwitch from "./LanguageSwitch.astro";
 
 interface NavbarProps {
   variant: "default" | "transparent";
+  locale?: Locale;
+  // null/absent = not shown (only admins get one for now, see Layout).
+  languageSwitch?: { locale: Locale; links: Record<Locale, string> } | null;
   showLogoInNav?: boolean;
   // Desktop-only "peekaboo" mode: header stays hidden above an invisible
   // fixed strip until hovered/focused, then slides down. Opt-in per usage
@@ -17,7 +23,12 @@ const {
   variant,
   showLogoInNav = true,
   hoverReveal = false,
+  locale = DEFAULT_LOCALE,
+  languageSwitch = null,
 } = Astro.props as NavbarProps;
+
+const text = NAVBAR_TEXT[locale];
+const href = (path: string) => localizePath(path, locale);
 
 const isDefaultVariant = variant === "default";
 
@@ -39,7 +50,8 @@ const headerScrollClasses = isDefaultVariant
   ? "$store.navbar.isScrolled ? 'shadow-[0_10px_30px_rgba(0,0,0,0.08)]' : 'shadow-none'"
   : "";
 
-const currentPath = Astro.url.pathname;
+// The original address: on French pages Astro.url is the rewritten Russian path.
+const currentPath = Astro.originPathname;
 ---
 
 <div
@@ -74,7 +86,7 @@ const currentPath = Astro.url.pathname;
           showLogoInNav && (
             <a
               class="cursor-pointer transition-transform duration-200 ease-out hover:scale-105 inline-block"
-              href="/"
+              href={href("/")}
             >
               <img src={logo.src} alt="MAAG France" class="w-12 lg:w-16" />
             </a>
@@ -90,12 +102,12 @@ const currentPath = Astro.url.pathname;
                 "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
                 "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
                 "hover:after:scale-x-100",
-                currentPath.startsWith("/culture")
+                currentPath.startsWith(href("/culture"))
                   ? "after:scale-x-100"
                   : "after:scale-x-0",
               ]}
             >
-              <a href="/culture">Культура</a>
+              <a href={href("/culture")}>{text.culture}</a>
             </li>
             <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
             <li
@@ -103,12 +115,12 @@ const currentPath = Astro.url.pathname;
                 "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
                 "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
                 "hover:after:scale-x-100",
-                currentPath.startsWith("/paris")
+                currentPath.startsWith(href("/paris"))
                   ? "after:scale-x-100"
                   : "after:scale-x-0",
               ]}
             >
-              <a href="/paris">Париж</a>
+              <a href={href("/paris")}>{text.paris}</a>
             </li>
             <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
             <li
@@ -116,12 +128,12 @@ const currentPath = Astro.url.pathname;
                 "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
                 "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
                 "hover:after:scale-x-100",
-                currentPath.startsWith("/calendar")
+                currentPath.startsWith(href("/calendar"))
                   ? "after:scale-x-100"
                   : "after:scale-x-0",
               ]}
             >
-              <a href="/calendar">Календарь</a>
+              <a href={href("/calendar")}>{text.calendar}</a>
             </li>
             <div class="w-[1px] h-[18px] bg-neutral-200 mx-6"></div>
             <li
@@ -129,12 +141,12 @@ const currentPath = Astro.url.pathname;
                 "relative pb-0.5 font-navbar uppercase text-[18px] tracking-[4px] font-normal",
                 "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-current after:origin-center after:transition-transform after:duration-[250ms] after:ease-in-out",
                 "hover:after:scale-x-100",
-                currentPath.startsWith("/about")
+                currentPath.startsWith(href("/about"))
                   ? "after:scale-x-100"
                   : "after:scale-x-0",
               ]}
             >
-              <a href="/about">О проекте</a>
+              <a href={href("/about")}>{text.about}</a>
             </li>
           </ul>
         </div>
@@ -152,7 +164,7 @@ const currentPath = Astro.url.pathname;
           aria-controls="mobile-menu"
           x-bind:aria-expanded="$store.navbar.isOpen"
         >
-          <img src={burgerIcon.src} alt="Открыть меню" class="h-5 w-5" />
+          <img src={burgerIcon.src} alt={text.openMenu} class="h-5 w-5" />
         </button>
       </div>
 
@@ -162,6 +174,7 @@ const currentPath = Astro.url.pathname;
         <button class="p-2 hidden">
           <Search />
         </button>
+        {languageSwitch && <LanguageSwitch {...languageSwitch} />}
         <a
           href="https://www.instagram.com/stories/maag_france/"
           target="_blank"
@@ -181,7 +194,7 @@ const currentPath = Astro.url.pathname;
               x-on:click.prevent="$store.auth.openAuthModal()"
               class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
             >
-              Войти
+              {text.signIn}
             </button>
           </template>
           <!-- Logged In State -->
@@ -201,7 +214,7 @@ const currentPath = Astro.url.pathname;
                 x-on:click.prevent="handleSignOut()"
                 class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
               >
-                Выйти
+                {text.signOut}
               </button>
             </div>
           </template>

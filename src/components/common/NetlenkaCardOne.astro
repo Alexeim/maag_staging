@@ -2,6 +2,10 @@
 // Variant A — Magazine Cover: portrait image, gradient overlay, title on photo
 import picture3 from "../../assets/images/article_content/par.jpeg";
 import LazyImage from "./LazyImage.astro";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { CARD_TEXT } from "@/lib/i18n/cards";
+
+const text = CARD_TEXT[getRequestLocale(Astro)];
 
 interface NetlenkaCardOneProps {
   title?: string;
@@ -15,8 +19,8 @@ interface NetlenkaCardOneProps {
 }
 
 const {
-  title = "Без названия",
-  category = "Самое Читаемое",
+  title = text.untitled,
+  category = text.mostRead,
   categoryHref = null,
   lead = "",
   imageUrl,

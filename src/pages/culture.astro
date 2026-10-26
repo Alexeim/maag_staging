@@ -1,5 +1,6 @@
 ---
 import Layout from "../Layouts/Layout.astro";
+import { getSectionMeta } from "@/lib/i18n/pageMeta";
 import LatestInterview from "../components/HomePage/LatestInterview.astro";
 import NetlenkaCardOne from "@/components/common/NetlenkaCardOne.astro";
 import CardByline from "@/components/common/CardByline.astro";
@@ -10,6 +11,14 @@ import {
 } from "@/lib/utils/contentBadge";
 import picture1 from "../assets/images/culture.jpg";
 import { publicCultureApi, type PublicCardItem } from "@/lib/api/api";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { INTL_LOCALE } from "@/lib/i18n/locales";
+import { NAVBAR_TEXT } from "@/lib/i18n/navbar";
+import { CARD_TEXT } from "@/lib/i18n/cards";
+import { SECTION_TEXT } from "@/lib/i18n/sections";
+
+const locale = getRequestLocale(Astro);
+const text = SECTION_TEXT[locale];
 
 const MAX_EDITORIAL_GRID_ITEMS = 12;
 
@@ -29,7 +38,7 @@ const formatDate = (value: unknown) => {
     return "";
   }
   return date
-    .toLocaleDateString("ru-RU", {
+    .toLocaleDateString(INTL_LOCALE[locale], {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -107,8 +116,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
 
 <Layout
   navbarVariant="default"
-  title="Культура в Париже — MAAG France"
-  description="Выставки, театр, музыка, книги, кино и культурные события Парижа на русском языке. Редакционные подборки, интервью и гиды MAAG France."
+  {...getSectionMeta("culture", Astro.originPathname)}
   useClientRouter={true}
 >
   <main class="min-h-screen bg-base-200 text-black">
@@ -118,7 +126,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
       <h1
         class="text-3xl lg:text-[28px] font-old_standard font-base uppercase tracking-[0.46em] text-base-content w-full mb-10"
       >
-        Культура
+        {NAVBAR_TEXT[locale].culture}
       </h1>
 
       <section class="grid gap-10 lg:grid-cols-12 lg:gap-4 lg:items-start">
@@ -146,11 +154,11 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                         href={getPrimaryBadgeHref(primaryCultureArticle)}
                         class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
                       >
-                        {getPrimaryBadgeLabel(primaryCultureArticle)}
+                        {getPrimaryBadgeLabel(primaryCultureArticle, locale)}
                       </a>
                     ) : (
                       <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                        {getPrimaryBadgeLabel(primaryCultureArticle)}
+                        {getPrimaryBadgeLabel(primaryCultureArticle, locale)}
                       </span>
                     )}
                   </p>
@@ -192,7 +200,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
               </article>
             ) : (
               <article class="border border-base-content/15 bg-white p-5 text-[1.05rem] font-light leading-[1.5]">
-                Пока нет материалов категории «Культура».
+                {text.noCultureMaterials}
               </article>
             )
           }
@@ -222,11 +230,11 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                             href={getPrimaryBadgeHref(item)}
                             class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
                           >
-                            {getPrimaryBadgeLabel(item)}
+                            {getPrimaryBadgeLabel(item, locale)}
                           </a>
                         ) : (
                           <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                            {getPrimaryBadgeLabel(item)}
+                            {getPrimaryBadgeLabel(item, locale)}
                           </span>
                         )}
                       </p>
@@ -272,7 +280,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
             <p
               class="m-0 mb-6 text-lg font-semibold uppercase tracking-[0.3em] font-old_standard"
             >
-              самое читаемое
+              {text.mostRead}
             </p>
 
             {
@@ -282,7 +290,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                     {editorialSidebarItems.map((item) => (
                       <NetlenkaCardOne
                         title={getCardTitle(item)}
-                        category={getPrimaryBadgeLabel(item)}
+                        category={getPrimaryBadgeLabel(item, locale)}
                         categoryHref={getPrimaryBadgeHref(item)}
                         imageUrl={item.imageUrl}
                         href={item.href}
@@ -310,7 +318,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                           >
                             <NetlenkaCardOne
                               title={getCardTitle(item)}
-                              category={getPrimaryBadgeLabel(item)}
+                              category={getPrimaryBadgeLabel(item, locale)}
                               categoryHref={getPrimaryBadgeHref(item)}
                               imageUrl={item.imageUrl}
                               href={item.href}
@@ -329,7 +337,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                             class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
                             data-hot-content-carousel-dot
                             data-page-index={index}
-                            aria-label={`Показать карточку ${index + 1}`}
+                            aria-label={text.showCard(index + 1)}
                             aria-pressed={index === 0 ? "true" : "false"}
                           />
                         ))}
@@ -339,7 +347,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                 </>
               ) : (
                 <p class="m-0 font-inter text-[0.88rem] leading-[1.5] text-[#3028219e]">
-                  Пока нет материалов для боковой колонки.
+                  {text.noSidebarMaterials}
                 </p>
               )
             }
@@ -487,7 +495,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
         featuredInterview && (
           <section class="mt-[2.2rem]">
             <LatestInterview
-              tag="Интервью"
+              tag={CARD_TEXT[locale].interview}
               interviewee={featuredInterviewName}
               quote={
                 interviewQuote ? truncateText(interviewQuote, 130) : undefined
@@ -543,11 +551,11 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                             href={getPrimaryBadgeHref(item)}
                             class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
                           >
-                            {getPrimaryBadgeLabel(item)}
+                            {getPrimaryBadgeLabel(item, locale)}
                           </a>
                         ) : (
                           <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                            {getPrimaryBadgeLabel(item)}
+                            {getPrimaryBadgeLabel(item, locale)}
                           </span>
                         )}
                       </p>
@@ -633,11 +641,11 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
                                     href={getPrimaryBadgeHref(item)}
                                     class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
                                   >
-                                    {getPrimaryBadgeLabel(item)}
+                                    {getPrimaryBadgeLabel(item, locale)}
                                   </a>
                                 ) : (
                                   <span class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                                    {getPrimaryBadgeLabel(item)}
+                                    {getPrimaryBadgeLabel(item, locale)}
                                   </span>
                                 )}
                               </p>
@@ -668,7 +676,7 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
             </>
           ) : (
             <article class="bg-white p-5 text-[1.05rem] font-light leading-[1.5]">
-              Больше материалов пока нет.
+              {text.noMoreMaterials}
             </article>
           )
         }

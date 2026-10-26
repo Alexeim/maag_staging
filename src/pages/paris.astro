@@ -1,5 +1,6 @@
 ---
 import Layout from "../Layouts/Layout.astro";
+import { getSectionMeta } from "@/lib/i18n/pageMeta";
 import LatestInterview from "@/components/HomePage/LatestInterview.astro";
 import ZapisnayaKnijkaCard from "@/components/common/ZapisnayaKnijkaCard.astro";
 import CardByline from "@/components/common/CardByline.astro";
@@ -13,6 +14,14 @@ import picture1 from "../assets/images/culture.jpg";
 import { publicParisApi, type PublicCardItem } from "@/lib/api/api";
 import parisTagsData from "@/content/tags/ParisTags.json";
 import { Eye, Footprints, Bookmark, BookOpen } from "@lucide/astro";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { INTL_LOCALE } from "@/lib/i18n/locales";
+import { NAVBAR_TEXT } from "@/lib/i18n/navbar";
+import { CARD_TEXT } from "@/lib/i18n/cards";
+import { SECTION_TEXT } from "@/lib/i18n/sections";
+
+const locale = getRequestLocale(Astro);
+const text = SECTION_TEXT[locale];
 
 const MAX_EDITORIAL_GRID_ITEMS = 12;
 
@@ -68,7 +77,7 @@ const formatDate = (value: unknown) => {
     return "";
   }
   return date
-    .toLocaleDateString("ru-RU", {
+    .toLocaleDateString(INTL_LOCALE[locale], {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -88,7 +97,7 @@ const normalizeTags = (value: unknown): string[] => {
 // Paris-specific: strips legacy "Le Saviez-Vous" tag values before picking
 // the primary badge, then defers to the shared news/interview/tag rules.
 const getPrimaryTag = (item: PublicCardItem): string =>
-  getPrimaryBadgeLabel({ ...item, tags: normalizeTags(item?.tags) });
+  getPrimaryBadgeLabel({ ...item, tags: normalizeTags(item?.tags) }, locale);
 
 const getPrimaryTagHref = (item: PublicCardItem): string | null =>
   getPrimaryBadgeHref({ ...item, tags: normalizeTags(item?.tags) });
@@ -183,8 +192,7 @@ const interviewName =
 
 <Layout
   navbarVariant="default"
-  title="Париж — гиды, места и жизнь в городе | MAAG France"
-  description="Авторские материалы о Париже: районы, маршруты, места, события, городская жизнь и практические гиды для русскоязычных жителей и гостей Франции."
+  {...getSectionMeta("paris", Astro.originPathname)}
   useClientRouter={true}
 >
   <main class="min-h-screen bg-base-200 text-black">
@@ -193,7 +201,7 @@ const interviewName =
         <h1
           class="m-0 text-3xl lg:text-[28px] font-old_standard font-base uppercase tracking-[0.46em] text-base-content"
         >
-          Париж
+          {NAVBAR_TEXT[locale].paris}
         </h1>
 
         <!-- {
@@ -323,7 +331,7 @@ const interviewName =
                       href={primaryParisArticle.href}
                       class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
                     >
-                      Читать дальше
+                      {text.readMore}
                     </a>
                   </div>
 
@@ -352,7 +360,7 @@ const interviewName =
             </article>
           ) : (
             <article class="mx-4 border border-base-content/15 bg-white p-5 text-[1.05rem] font-light leading-[1.5] sm:mx-6 lg:mx-0">
-              Пока нет материалов категории «Париж».
+              {text.noParisMaterials}
             </article>
           )
         }
@@ -436,7 +444,7 @@ const interviewName =
           editorialSidebarItems.length > 0 && (
             <section class="mb-10 lg:mb-14">
               <p class="m-0 mb-[35px] text-lg font-normal uppercase tracking-[0.3em] font-old_standard">
-                записная книжка
+                {text.notebook}
               </p>
 
               <div class="hidden gap-4 lg:flex lg:flex-wrap lg:gap-6">
@@ -496,7 +504,7 @@ const interviewName =
                         class="h-2.5 w-2.5 cursor-pointer rounded-full border border-base-content/30 bg-transparent transition-all duration-300 aria-[pressed=true]:border-base-content aria-[pressed=true]:bg-base-content"
                         data-zapisnaya-carousel-dot
                         data-page-index={index}
-                        aria-label={`Показать карточку ${index + 1}`}
+                        aria-label={text.showCard(index + 1)}
                         aria-pressed={index === 0 ? "true" : "false"}
                       />
                     ))}
@@ -723,7 +731,7 @@ const interviewName =
                           href={twoImageArticle.href}
                           class="inline-flex h-11 items-center gap-2 rounded-lg border border-base-300 px-4 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
                         >
-                          Читать дальше
+                          {text.readMore}
                         </a>
                       </div>
                     </div>
@@ -736,7 +744,7 @@ const interviewName =
           {
             interviewFeature && (
               <LatestInterview
-                tag="Интервью"
+                tag={CARD_TEXT[locale].interview}
                 interviewee={interviewName}
                 quote={
                   interviewQuote ? truncateText(interviewQuote, 130) : undefined
@@ -753,7 +761,7 @@ const interviewName =
               <article class="grid overflow-hidden bg-white lg:grid-cols-[12rem_minmax(0,1fr)] mb-6">
                 <div class="grid content-center gap-3 p-6">
                   <p class="m-0 text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                    Фото дня
+                    {text.photoOfTheDay}
                   </p>
                   <a
                     href={`/photo-of-the-day/${photoOfTheDay.id}`}
@@ -924,7 +932,7 @@ const interviewName =
                 </>
               ) : (
                 <article class="bg-white p-5 text-[1.05rem] font-light leading-[1.5]">
-                  Больше материалов пока нет.
+                  {text.noMoreMaterials}
                 </article>
               )
             }

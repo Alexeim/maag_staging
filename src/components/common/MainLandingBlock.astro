@@ -8,6 +8,10 @@ import {
   getPrimaryBadgeLabel,
 } from "@/lib/utils/contentBadge";
 import { getCalendarToday } from "@/lib/utils/calendarDate";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { INTL_LOCALE } from "@/lib/i18n/locales";
+import { LANDING_TEXT } from "@/lib/i18n/landing";
+import { NAVBAR_TEXT } from "@/lib/i18n/navbar";
 import type {
   PublicCardItem,
   PublicLandingEvent,
@@ -20,7 +24,11 @@ interface MainLandingBlockProps {
 
 const { data: publicLandingData } = Astro.props as MainLandingBlockProps;
 
-const getPrimaryTag = (article: PublicCardItem) => getPrimaryBadgeLabel(article);
+const locale = getRequestLocale(Astro);
+const text = LANDING_TEXT[locale];
+const dateLocale = INTL_LOCALE[locale];
+
+const getPrimaryTag = (article: PublicCardItem) => getPrimaryBadgeLabel(article, locale);
 const getPrimaryTagHref = (article: PublicCardItem) => getPrimaryBadgeHref(article);
 
 const splitTitle = (t: string) => {
@@ -79,12 +87,12 @@ const formatEventDate = (value: unknown) => {
   if (!date) {
     return null;
   }
-  const dayMonth = date.toLocaleDateString("ru-RU", {
+  const dayMonth = date.toLocaleDateString(dateLocale, {
     day: "numeric",
     month: "long",
   });
   const monthGenitive = dayMonth.replace(/^\d+\s+/, "");
-  const weekday = date.toLocaleDateString("ru-RU", { weekday: "long" });
+  const weekday = date.toLocaleDateString(dateLocale, { weekday: "long" });
   return {
     day: date.getDate().toString().padStart(2, "0"),
     month: monthGenitive,
@@ -98,7 +106,7 @@ const formatArticleDate = (value: unknown) => {
     return "";
   }
   return date
-    .toLocaleDateString("ru-RU", {
+    .toLocaleDateString(dateLocale, {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -144,7 +152,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
       <h2
         class="text-lg font-semibold mb-6 uppercase tracking-[0.3em] font-old_standard"
       >
-        Новости
+        {text.news}
       </h2>
       <div
         class="flex gap-6 overflow-x-auto pb-2 -mx-2 px-2 lg:flex-col lg:gap-0 lg:mx-0 lg:-mt-2 lg:px-0 lg:overflow-x-visible lg:overflow-y-hidden"
@@ -160,7 +168,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
                   >
                     <Image
                       src={newsItem.imageUrl}
-                      alt={`News image for ${newsItem.title}`}
+                      alt={newsItem.title}
                       class="linked-image-hover__media w-20 h-20 object-cover flex-shrink-0"
                       width={80}
                       height={80}
@@ -203,7 +211,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
       <h2
         class="text-lg font-semibold mb-6 uppercase tracking-[0.3em] font-old_standard"
       >
-        Главное
+        {text.main}
       </h2>
       {
         mainArticle ? (
@@ -271,7 +279,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
         ) : (
           <div>
             <div class="p-4 lg:p-6">
-              <p>Главных статей для отображения нет.</p>
+              <p>{text.noMainArticles}</p>
             </div>
           </div>
         )
@@ -285,7 +293,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
       <h2
         class="text-lg font-semibold mb-6 uppercase tracking-[0.3em] font-old_standard"
       >
-        Календарь
+        {NAVBAR_TEXT[locale].calendar}
       </h2>
       {
         landingEvent ? (
@@ -324,7 +332,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
             ) : (
               <Image
                 src={picture2}
-                alt="Event"
+                alt={text.eventImageAlt}
                 class="linked-image-hover__media w-full h-[240px] object-cover"
               />
             )}
@@ -334,11 +342,11 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
                   href={getPrimaryBadgeHref(landingEvent)}
                   class="relative z-[2] text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] hover:underline"
                 >
-                  {getPrimaryBadgeLabel(landingEvent)}
+                  {getPrimaryBadgeLabel(landingEvent, locale)}
                 </a>
               ) : (
                 <p class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter']">
-                  {getPrimaryBadgeLabel(landingEvent)}
+                  {getPrimaryBadgeLabel(landingEvent, locale)}
                 </p>
               )}
               <h2 class="text-2xl font-normal font-old_standard tracking-[-0.02em] hover:underline transition-opacity duration-200 hover:opacity-90 mt-2">
@@ -354,7 +362,7 @@ const landingEventDisplayDate = getLandingEventDisplayDate(landingEvent);
         ) : (
           <div class="bg-white p-4 lg:p-6">
             <p class="text-sm text-base-content/70">
-              Блок события сейчас пуст.
+              {text.eventBlockEmpty}
             </p>
           </div>
         )

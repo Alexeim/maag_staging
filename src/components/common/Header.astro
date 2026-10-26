@@ -1,34 +1,20 @@
 ---
 import Navbar from "./Navbar.astro";
+import type { Locale } from "@/lib/i18n/locales";
 
 interface HeaderProps {
   variant?: "default" | "transparent";
-  cultureText?: string;
-  guideText?: string;
-  childrenText?: string;
-  calendarText?: string;
-  aboutText?: string;
-  buttonText?: string;
   hoverReveal?: boolean;
+  locale?: Locale;
+  languageSwitch?: { locale: Locale; links: Record<Locale, string> } | null;
 }
-const {
-  variant,
-  cultureText,
-  guideText,
-  childrenText,
-  calendarText,
-  aboutText,
-  buttonText,
-  hoverReveal,
-} = Astro.props as HeaderProps;
+const { variant, hoverReveal, locale, languageSwitch } = Astro.props as HeaderProps;
 
 ---
 
-<Navbar variant={variant} hoverReveal={hoverReveal}>
-  <span slot="culture">{cultureText}</span>
-  <span slot="guide">{guideText}</span>
-  <span slot="children">{childrenText}</span>
-  <span slot="calendar">{calendarText}</span>
-  <span slot="about">{aboutText}</span>
-  <span slot="button">{buttonText}</span>
-</Navbar>
+<Navbar
+  variant={variant}
+  hoverReveal={hoverReveal}
+  locale={locale}
+  languageSwitch={languageSwitch}
+/>

@@ -1,5 +1,9 @@
 ---
 import picture1 from "../../assets/images/culture.jpg"; // Placeholder
+import { getRequestLocale } from "@/lib/i18n/request";
+import { CARD_TEXT } from "@/lib/i18n/cards";
+
+const text = CARD_TEXT[getRequestLocale(Astro)];
 
 interface Props {
   tag?: string;
@@ -11,9 +15,9 @@ interface Props {
 }
 
 const {
-  tag = "Интервью",
-  interviewee = "Скоро здесь будет имя",
-  quote = "Скоро здесь будет интересная цитата...",
+  tag = text.interview,
+  interviewee = text.intervieweeSoon,
+  quote = text.quoteSoon,
   imageUrl = picture1,
   href = "#",
   inversed = false,
@@ -33,7 +37,7 @@ const {
   >
     <img
       src={typeof imageUrl === "string" ? imageUrl : imageUrl.src}
-      alt={`Фотография ${interviewee}`}
+      alt={text.photoOf(interviewee)}
       class="linked-image-hover__media w-full h-full object-cover object-center"
       loading="lazy"
     />

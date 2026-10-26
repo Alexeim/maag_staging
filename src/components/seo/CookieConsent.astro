@@ -66,6 +66,9 @@ import "vanilla-cookieconsent/dist/cookieconsent.css";
 
     language: {
       default: "ru",
+      // Pick the translation from <html lang>, which Layout sets from the
+      // page's locale. Re-read on every mount, i.e. after each page swap.
+      autoDetect: "document",
       translations: {
         ru: {
           consentModal: {
@@ -112,6 +115,57 @@ import "vanilla-cookieconsent/dist/cookieconsent.css";
                 title: "Ещё вопросы?",
                 description:
                   'Подробнее — в <a href="/cookies">описании использования cookie</a> и <a href="/privacy">политике конфиденциальности</a>.',
+              },
+            ],
+          },
+        },
+        // Consent text: keep it a faithful rendering of the Russian one. The
+        // legal pages it links to exist in Russian only for now.
+        fr: {
+          consentModal: {
+            title: "Nous utilisons des cookies",
+            description:
+              "Les cookies obligatoires sont nécessaires au fonctionnement du site. Google Analytics et Yandex Metrica (y compris Webvisor, qui enregistre les interactions avec le site) nous aident à comprendre comment les lecteurs utilisent notre média ; ils ne sont activés qu'avec votre consentement.",
+            acceptAllBtn: "Tout accepter",
+            acceptNecessaryBtn: "Tout refuser",
+            showPreferencesBtn: "Personnaliser",
+            footer:
+              '<a href="/privacy">Politique de confidentialité</a>\n<a href="/cookies">Utilisation des cookies</a>',
+          },
+          preferencesModal: {
+            title: "Paramètres des cookies",
+            acceptAllBtn: "Tout accepter",
+            acceptNecessaryBtn: "Tout refuser",
+            savePreferencesBtn: "Enregistrer mes choix",
+            closeIconLabel: "Fermer",
+            sections: [
+              {
+                title: "Utilisation des cookies",
+                description:
+                  "Vous pouvez choisir ici les catégories de cookies que vous autorisez. Les cookies obligatoires ne peuvent pas être désactivés : sans eux, le site ne fonctionne pas.",
+              },
+              {
+                title: "Cookies obligatoires",
+                description:
+                  "Nécessaires au fonctionnement de base du site : session, authentification et enregistrement de votre choix concernant les cookies.",
+                linkedCategory: "necessary",
+              },
+              {
+                title: "Cookies analytiques",
+                description:
+                  "Google Analytics 4 et Yandex Metrica : statistiques de fréquentation et de comportement sur le site. Dans Metrica, la carte des clics et Webvisor (enregistrement des interactions avec le site) sont activés. Ces outils ne sont activés qu'avec votre consentement.",
+                linkedCategory: "analytics",
+              },
+              {
+                title: "Cookies des réseaux sociaux",
+                description:
+                  "Publications intégrées des réseaux sociaux (X/Twitter). Leurs fournisseurs déposent leurs propres cookies lorsque la publication se charge. Sans votre consentement, une citation avec un lien s'affiche à la place de la publication intégrée.",
+                linkedCategory: "social",
+              },
+              {
+                title: "D'autres questions ?",
+                description:
+                  'Pour en savoir plus, consultez notre <a href="/cookies">page sur l\'utilisation des cookies</a> et notre <a href="/privacy">politique de confidentialité</a>.',
               },
             ],
           },

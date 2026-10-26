@@ -2,6 +2,20 @@
 // Footer for cultural media website about Paris
 import InstagramLogo from "@/assets/social/new/instagram-svgrepo-com.svg";
 import logoFull from "@/assets/logo/logoFull.svg";
+import { DEFAULT_LOCALE, localizePath, type Locale } from "@/lib/i18n/locales";
+import { NAVBAR_TEXT } from "@/lib/i18n/navbar";
+import { FOOTER_TEXT } from "@/lib/i18n/footer";
+
+interface Props {
+  locale?: Locale;
+}
+
+const { locale = DEFAULT_LOCALE } = Astro.props;
+const text = FOOTER_TEXT[locale];
+const sectionText = NAVBAR_TEXT[locale];
+// Legal pages, /profile and /dashboard exist in Russian only: their links
+// are not localized.
+const href = (path: string) => localizePath(path, locale);
 
 const currentYear = new Date().getFullYear();
 ---
@@ -18,7 +32,7 @@ const currentYear = new Date().getFullYear();
         <p
           class="font-old_standard text-lg lg:text-[0.95rem] leading-snug text-white"
         >
-          Независимое издание<br />о культуре и Париже
+          {text.taglineLines[0]}<br />{text.taglineLines[1]}
         </p>
 
         {/* Login / account button */}
@@ -28,7 +42,7 @@ const currentYear = new Date().getFullYear();
               href="/profile"
               class="inline-flex items-center justify-center rounded-md bg-maag-beige px-5 py-2.5 lg:py-2 font-inter text-sm text-maag-gray transition-colors hover:bg-maag-beige/85"
             >
-              Личный кабинет
+              {text.myAccount}
             </a>
           </template>
           <template x-if="!$store.auth.isLoggedIn">
@@ -36,7 +50,7 @@ const currentYear = new Date().getFullYear();
               x-on:click.prevent="$store.auth.openAuthModal()"
               class="inline-flex items-center justify-center rounded-md bg-maag-beige px-5 py-2.5 lg:py-2 font-inter text-sm text-maag-gray transition-colors hover:bg-maag-beige/85 cursor-pointer"
             >
-              Войти в личный кабинет
+              {text.signInToAccount}
             </button>
           </template>
         </div>
@@ -47,28 +61,28 @@ const currentYear = new Date().getFullYear();
         <h3
           class="mb-6 lg:mb-4 font-inter text-xs font-medium uppercase tracking-[0.18em] text-white pt-8"
         >
-          Рубрики
+          {text.sections}
         </h3>
         <ul class="space-y-1 lg:space-y-2.5">
           <li>
             <a
-              href="/culture"
+              href={href("/culture")}
               class="font-old_standard text-sm uppercase tracking-[0.12em] text-white transition-opacity hover:opacity-70"
-              >Культура</a
+              >{sectionText.culture}</a
             >
           </li>
           <li>
             <a
-              href="/paris"
+              href={href("/paris")}
               class="font-old_standard text-sm uppercase tracking-[0.12em] text-white transition-opacity hover:opacity-70"
-              >Париж</a
+              >{sectionText.paris}</a
             >
           </li>
           <li>
             <a
-              href="/calendar"
+              href={href("/calendar")}
               class="font-old_standard text-sm uppercase tracking-[0.12em] text-white transition-opacity hover:opacity-70"
-              >Календарь</a
+              >{sectionText.calendar}</a
             >
           </li>
         </ul>
@@ -79,7 +93,7 @@ const currentYear = new Date().getFullYear();
         <h3
           class="mb-6 lg:mb-4 font-inter text-xs font-medium uppercase tracking-[0.18em] text-white pt-8"
         >
-          Контакты
+          {text.contacts}
         </h3>
         <div class="flex gap-4 justify-center sm:justify-start mb-6 lg:mb-0">
           <a
@@ -93,7 +107,7 @@ const currentYear = new Date().getFullYear();
           <a
             href="mailto:contact@maagfrance.fr"
             class="flex h-12 w-12 lg:h-11 lg:w-11 items-center justify-center rounded-full bg-white text-maag-gray transition-colors hover:bg-white/80"
-            aria-label="Написать нам"
+            aria-label={text.writeToUs}
           >
             <svg
               class="w-6 h-6 lg:w-5 lg:h-5"
@@ -118,12 +132,12 @@ const currentYear = new Date().getFullYear();
       class="flex flex-col items-center gap-4 text-center lg:flex-row lg:justify-between lg:text-left"
     >
       <div class="flex flex-col sm:flex-row items-center gap-3 text-sm text-white font-inter font-normal">
-        &copy; {currentYear} MAAG France. Все права защищены.
+        &copy; {currentYear} MAAG France. {text.allRightsReserved}
       </div>
       <a
-        href="/about"
+        href={href("/about")}
         class="text-sm text-white font-inter font-normal transition-opacity hover:opacity-70"
-        >О проекте</a
+        >{sectionText.about}</a
       >
       <div
         class="flex flex-col items-center lg:items-end lg:flex-row gap-4 sm:gap-6 text-sm text-white font-inter font-normal"
@@ -134,19 +148,19 @@ const currentYear = new Date().getFullYear();
           </a>
         </template>
         <a href="/privacy" class="transition-opacity hover:opacity-70"
-          >Политика конфиденциальности</a
+          >{text.privacyPolicy}</a
         >
         <a href="/terms" class="transition-opacity hover:opacity-70"
-          >Пользовательское соглашение</a
+          >{text.termsOfUse}</a
         >
         <a href="/cookies" class="transition-opacity hover:opacity-70"
-          >Использование файлов cookie</a
+          >{text.cookieUsage}</a
         >
         <button
           type="button"
           data-cc="show-preferencesModal"
           class="cursor-pointer border-0 bg-transparent p-0 font-inter text-sm text-white transition-opacity hover:opacity-70"
-          >Настройки cookie</button
+          >{text.cookieSettings}</button
         >
       </div>
     </div>

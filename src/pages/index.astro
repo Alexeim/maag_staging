@@ -1,5 +1,6 @@
 ---
 import Layout from "../Layouts/Layout.astro";
+import { getSectionMeta } from "@/lib/i18n/pageMeta";
 import Hero from "../components/HomePage/Hero.astro";
 import MainLandingBlock from "../components/common/MainLandingBlock.astro";
 import LandingBody from "../components/common/LandingBody.astro";
@@ -32,8 +33,7 @@ const publicLanding = await publicLandingApi.get().catch((error) => {
 
 <Layout
   navbarVariant="default"
-  title="MAAG France — медиа о культуре, искусстве и жизни Парижа"
-  description="Авторитетный русскоязычный источник информации о французской культуре и актуальных событиях во Франции. Интервью, рецензии, обзоры выставок, путеводители, афиша и авторские материалы о городе — всё необходимое, чтобы понимать Париж, открывать его новые стороны и чувствовать себя частью его культурной жизни."
+  {...getSectionMeta("home", Astro.originPathname)}
   useClientRouter={true}
 >
   <main>

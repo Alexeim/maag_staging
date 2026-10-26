@@ -2,6 +2,11 @@
 import picture1 from "../../assets/images/culture.jpg";
 import MaagLogoPaid from "../../assets/logo/maaglogo.svg";
 import LazyImage from "./LazyImage.astro";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { CARD_TEXT } from "@/lib/i18n/cards";
+import { NAVBAR_TEXT } from "@/lib/i18n/navbar";
+
+const locale = getRequestLocale(Astro);
 
 interface ArticleCardProps {
   title?: string;
@@ -16,8 +21,8 @@ interface ArticleCardProps {
 }
 
 const {
-  title = "Без названия",
-  category = "Культура",
+  title = CARD_TEXT[locale].untitled,
+  category = NAVBAR_TEXT[locale].culture,
   categoryHref = null,
   date = "",
   hideDate = false,

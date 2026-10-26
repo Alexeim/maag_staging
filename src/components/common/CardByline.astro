@@ -4,6 +4,8 @@
 // `variant="photo"` swaps the pen icon for a camera (photo-of-the-day card).
 import { Camera } from "@lucide/astro";
 import AuthorIcon from "@/assets/icons/ix_pen-filled.svg";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { INTL_LOCALE } from "@/lib/i18n/locales";
 
 type Timestamp =
   | string
@@ -48,7 +50,7 @@ const toDate = (value: Timestamp): Date | null => {
 const parsedDate = toDate(date);
 const formattedDate = parsedDate
   ? parsedDate
-      .toLocaleDateString("ru-RU", {
+      .toLocaleDateString(INTL_LOCALE[getRequestLocale(Astro)], {
         day: "numeric",
         month: "long",
         year: "numeric",

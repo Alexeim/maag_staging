@@ -1,5 +1,12 @@
 import { getKnownTagLabel } from "@/content/tags/tags";
 import { normalizeTags } from "@/lib/utils/contentCollectionMarquee";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locales";
+import {
+  FR_CONTENT_TYPE_LABELS,
+  FR_FIXED_BADGES,
+  FR_TAG_LABELS,
+  frenchDistrictLabel,
+} from "@/lib/i18n/tagLabels";
 
 // Aliases for tag values not covered by the Paris/Culture tag dictionaries
 // (legacy content-type-style tag values, English synonyms, district codes).
@@ -56,8 +63,25 @@ const CONTENT_TYPE_FALLBACK_LABELS: Record<string, string> = {
   photoOfTheDay: "Фото дня",
 };
 
-export const getTagLabel = (value: string): string =>
-  TAG_LABEL_ALIASES[value.trim().toLowerCase()] ?? getKnownTagLabel(value);
+// Every function below defaults to Russian, so existing callers are
+// unchanged; French pages pass their locale. A French label falls back to the
+// Russian one when the tag has no translation yet.
+export const getTagLabel = (value: string, locale: Locale = DEFAULT_LOCALE): string => {
+  const key = value.trim().toLowerCase();
+  const russianLabel = TAG_LABEL_ALIASES[key] ?? getKnownTagLabel(value);
+  if (locale === DEFAULT_LOCALE) return russianLabel;
+  return (
+    frenchDistrictLabel(key) ??
+    FR_TAG_LABELS[russianLabel.toLowerCase()] ??
+    russianLabel
+  );
+};
+
+const fixedBadge = (
+  locale: Locale,
+  russian: string,
+  french: keyof typeof FR_FIXED_BADGES,
+): string => (locale === DEFAULT_LOCALE ? russian : FR_FIXED_BADGES[french]);
 
 interface BadgeSourceItem {
   contentType?: string;
@@ -73,27 +97,38 @@ interface BadgeSourceItem {
 //   including on their own detail page.
 // Everything else (article, guide, tips, flipper, event, ...) shows its
 // first tag, on every page including its own.
-export const getPrimaryBadgeLabel = (item: BadgeSourceItem): string => {
+export const getPrimaryBadgeLabel = (
+  item: BadgeSourceItem,
+  locale: Locale = DEFAULT_LOCALE,
+): string => {
   if (item?.contentType === "news" || item?.isNews) {
-    return "Новости";
+    return fixedBadge(locale, "Новости", "news");
   }
   if (item?.contentType === "interview") {
-    return "Интервью";
+    return fixedBadge(locale, "Интервью", "interview");
   }
 
   const tags = normalizeTags(item?.tags);
   if (tags.length > 0) {
-    return getTagLabel(tags[0]);
+    return getTagLabel(tags[0], locale);
   }
 
-  return CONTENT_TYPE_FALLBACK_LABELS[item?.contentType ?? ""] ?? "Материал";
+  const contentType = item?.contentType ?? "";
+  const typeLabels =
+    locale === DEFAULT_LOCALE ? CONTENT_TYPE_FALLBACK_LABELS : FR_CONTENT_TYPE_LABELS;
+  return typeLabels[contentType] ?? fixedBadge(locale, "Материал", "material");
 };
 
 // News detail page exception: shows the news item's own tag instead of the
 // hardcoded "Новости" used everywhere else.
-export const getNewsDetailBadgeLabel = (tags?: unknown): string => {
+export const getNewsDetailBadgeLabel = (
+  tags?: unknown,
+  locale: Locale = DEFAULT_LOCALE,
+): string => {
   const normalized = normalizeTags(tags);
-  return normalized.length > 0 ? getTagLabel(normalized[0]) : "Новость";
+  return normalized.length > 0
+    ? getTagLabel(normalized[0], locale)
+    : fixedBadge(locale, "Новость", "newsItem");
 };
 
 // Href counterpart to getNewsDetailBadgeLabel above.
