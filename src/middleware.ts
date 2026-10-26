@@ -1,5 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
-import { authSessionApi } from "@/lib/api/api";
+import { ApiError, authSessionApi } from "@/lib/api/api";
 import { DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import {
   isSharedSectionPath,
@@ -67,8 +67,18 @@ export const onRequest = defineMiddleware(async (context, next) => {
     try {
       locals.user = await authSessionApi.verify(sessionCookie);
     } catch (error) {
-      // Cookie is invalid/expired, or the Express call itself failed — clear it either way.
       console.error("[middleware] session verify failed:", error);
+      // A backend restart or transport failure does not invalidate the cookie.
+      // Keep it for the next request and fail closed without a misleading 404.
+      if (!(error instanceof ApiError) || (error.status !== 401 && error.status !== 400)) {
+        const message = splitLocalePath(context.url.pathname).locale === "fr"
+          ? "Service temporairement indisponible. Veuillez actualiser la page."
+          : "Сервис временно недоступен. Обновите страницу.";
+        return new Response(message, {
+          status: 503,
+          headers: { "Cache-Control": "private, no-store", "Retry-After": "2" },
+        });
+      }
       context.cookies.delete(SESSION_COOKIE_NAME, { path: "/" });
       cookiesTouched = true;
     }
@@ -77,8 +87,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // French pages are the Russian pages with a French shell: render the
   // Russian route while the address stays /fr/…; Layout reads the language
   // from Astro.originPathname. Sections (/fr/, /fr/culture, …) reuse the
-  // Russian content; an article (/fr/article/<Russian id>) loads its French
-  // version itself. Admins only until the French site goes public — anyone
+  // mixed trial content; articles and tips load their French text themselves.
+  // Admins only until the French site goes public — anyone
   // else falls through to the 404 (no such file under src/pages/fr). A
   // rewrite re-runs this middleware on the Russian path, which has no
   // prefix, so it cannot loop.
@@ -90,7 +100,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     locals.user?.role === "admin" &&
     (isSharedSectionPath(unprefixedPath) || isTranslatedMaterialPath(unprefixedPath))
   ) {
-    return context.rewrite(unprefixedPath);
+    const response = await context.rewrite(unprefixedPath);
+    response.headers.set("Cache-Control", "private, no-store");
+    return response;
   }
 
   // Dashboard is admin-only. Covers both "not logged in" (user is null) and
@@ -105,6 +117,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // /calendar, /paris gating — decide later.
 
   const response = await next();
+
+  // A French 404 before sign-in must not be reused after the admin signs in.
+  if (pathLocale !== DEFAULT_LOCALE) {
+    response.headers.set("Cache-Control", "private, no-store");
+  }
 
   // Opt public content pages into CDN caching. Every guard has to hold, or the
   // response stays uncached exactly as it is today:

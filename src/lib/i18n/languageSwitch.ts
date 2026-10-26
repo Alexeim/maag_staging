@@ -33,7 +33,7 @@ export const isSharedSectionPath = (path: string): boolean =>
 // Material pages that render a French version when one exists: the address
 // carries the Russian id (/fr/article/<id of the original>), the page loads
 // its translation. Only articles so far.
-const TRANSLATED_MATERIAL_PATH_RE = /^\/article\/[^/]+$/;
+const TRANSLATED_MATERIAL_PATH_RE = /^\/(?:article|tips)\/[^/]+$/;
 
 export const isTranslatedMaterialPath = (path: string): boolean =>
   TRANSLATED_MATERIAL_PATH_RE.test(withoutTrailingSlash(path));

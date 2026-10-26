@@ -83,7 +83,10 @@ let cultureFeed: PublicCardItem[] = [];
 let featuredInterview: PublicCardItem | null = null;
 
 try {
-  const culturePage = await publicCultureApi.get();
+  const culturePage = await publicCultureApi.get({
+    locale,
+    sessionCookie: Astro.cookies.get("__session")?.value,
+  });
   primaryCultureArticle = culturePage.primaryCultureArticle;
   secondaryStories = culturePage.secondaryStories;
   editorialSidebarItems = culturePage.editorialSidebarItems;

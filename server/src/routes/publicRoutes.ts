@@ -1,5 +1,8 @@
 import { Router } from 'express';
 import {
+  getFrenchLanding,
+  getFrenchCulture,
+  getFrenchParis,
   getPublicCalendar,
   getPublicCulture,
   getPublicLanding,
@@ -13,7 +16,13 @@ import {
 } from '../controllers/publicMaterialsController';
 import { getPublicRelated } from '../controllers/publicRelatedController';
 
+import { requireAdmin } from '../middleware/auth';
+
 const router = Router();
+
+router.get('/fr/landing', requireAdmin, getFrenchLanding);
+router.get('/fr/culture', requireAdmin, getFrenchCulture);
+router.get('/fr/paris', requireAdmin, getFrenchParis);
 
 router.get('/landing', getPublicLanding);
 router.get('/culture', getPublicCulture);

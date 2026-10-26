@@ -1,4 +1,5 @@
 ---
+import AutomaticTranslationBadge from "@/components/article/AutomaticTranslationBadge.astro";
 import ArticleHeader from "@/components/article/ArticleHeader.astro";
 import ArticleMetaRow from "@/components/article/ArticleMetaRow.astro";
 import ArticleImage from "@/components/article/ArticleImage.astro";
@@ -66,6 +67,7 @@ const isLongLead = richTextHtmlToText(resolvedLeadHtml).length > 320;
     <section class="w-full px-4 pt-8 sm:px-6 lg:px-0">
       <div class="mx-auto flex w-full max-w-[825px] flex-col items-center gap-[50px]">
         <div class="flex w-full flex-col gap-4">
+          <AutomaticTranslationBadge />
           <ArticleHeader
             category={category}
             categoryHref={categoryHref}
@@ -126,6 +128,7 @@ const isLongLead = richTextHtmlToText(resolvedLeadHtml).length > 320;
           imageOnLeft ? "order-1 lg:order-2" : "order-1 lg:order-1",
         ]}
       >
+        <AutomaticTranslationBadge />
         {categoryHref ? (
           <a
             href={categoryHref}

@@ -1,6 +1,13 @@
 import { Request, Response } from 'express';
 import { getDb } from '../services/firebase';
+import { FR_COLLECTION } from '../services/articlesFr';
 import { getCalendarToday } from '../utils/calendarDate';
+
+type PageLocale = 'ru' | 'fr';
+interface PageContent {
+  locale: PageLocale;
+  frenchArticles?: Promise<Map<string, FirebaseFirestore.DocumentData>>;
+}
 
 type LandingContentType =
   | 'article'
@@ -257,26 +264,63 @@ const attachAuthorNames = async (payload: unknown): Promise<void> => {
   });
 };
 
-const fetchByTarget = async (target: LandingTarget | null) => {
-  if (!target?.id || !COLLECTION_BY_TYPE[target.type]) return null;
-  const doc = await db.collection(COLLECTION_BY_TYPE[target.type]).doc(target.id).get();
-  return toLandingItem(doc, target.type);
+// Both the source and its French version must be published. No Russian
+// article fallback, including when a translation has been unpublished.
+const readPageItem = async (
+  context: PageContent,
+  doc: FirebaseFirestore.DocumentSnapshot,
+  type: LandingContentType,
+) => {
+  const original = toLandingItem(doc, type);
+  if (!original || context.locale === 'ru' || type !== 'article') return original;
+  // One projected query per request, shared by all manual and automatic slots.
+  context.frenchArticles ??= db.collection(FR_COLLECTION)
+    .select('sourceId', 'title', 'lead', 'subtitle', 'subtitleHtml', 'cardLead', 'cardTitle', 'published', 'publishedAt')
+    .get()
+    .then((snapshot) => {
+      const bySource = new Map<string, FirebaseFirestore.DocumentData>();
+      for (const translation of snapshot.docs) {
+        const data = translation.data();
+        if (typeof data.sourceId === 'string') bySource.set(data.sourceId, data);
+      }
+      return bySource;
+    });
+  const french = (await context.frenchArticles).get(doc.id);
+  if (!french || french.published !== true) return null;
+  return {
+    ...original,
+    title: french.title ?? '',
+    lead: french.lead ?? '',
+    subtitle: french.subtitle ?? '',
+    subtitleHtml: french.subtitleHtml ?? '',
+    cardLead: french.cardLead ?? '',
+    cardTitle: french.cardTitle ?? '',
+    published: true,
+    publishedAt: french.publishedAt ?? null,
+    href: `/fr${getHref(type, doc.id, doc.data())}`,
+  };
 };
 
-const fetchByTargets = async (targets: LandingTarget[]) => {
-  const items = await Promise.all(targets.map(fetchByTarget));
+const fetchByTarget = async (context: PageContent, target: LandingTarget | null) => {
+  if (!target?.id || !COLLECTION_BY_TYPE[target.type]) return null;
+  const doc = await db.collection(COLLECTION_BY_TYPE[target.type]).doc(target.id).get();
+  return readPageItem(context, doc, target.type);
+};
+
+const fetchByTargets = async (context: PageContent, targets: LandingTarget[]) => {
+  const items = await Promise.all(targets.map((target) => fetchByTarget(context, target)));
   return items.filter(Boolean);
 };
 
-const fetchLatest = async (type: LandingContentType, limit: number) => {
+const fetchLatest = async (context: PageContent, type: LandingContentType, limit: number) => {
   const snapshot = await db
     .collection(COLLECTION_BY_TYPE[type])
     .orderBy('publishedAt', 'desc')
     .limit(Math.max(limit * 3, 10))
     .get();
 
-  return snapshot.docs
-    .map((doc) => toLandingItem(doc, type))
+  const items = await Promise.all(snapshot.docs.map((doc) => readPageItem(context, doc, type)));
+  return items
     // A draft can still carry a publishedAt (published once, then unpublished),
     // so ordering by it is not enough — keep only what is actually published.
     .filter((item) => Boolean(item) && isPublished(item))
@@ -284,57 +328,60 @@ const fetchLatest = async (type: LandingContentType, limit: number) => {
 };
 
 const fetchLatestFromTypes = async (
+  context: PageContent,
   types: LandingContentType[],
   perTypeLimit: number,
 ) => {
-  const groups = await Promise.all(types.map((type) => fetchLatest(type, perTypeLimit)));
+  const groups = await Promise.all(types.map((type) => fetchLatest(context, type, perTypeLimit)));
   return groups
     .flat()
     .sort((left, right) => getTime(right?.publishedAt) - getTime(left?.publishedAt));
 };
 
-const selectNewsRail = async (selection: any) => {
+const selectNewsRail = async (context: PageContent, selection: any) => {
   if (!selection) return [];
   if (selection.mode === 'manual') {
     return fetchByTargets(
+    context,
       (Array.isArray(selection.ids) ? selection.ids : []).map((id: string) => ({
         type: 'news',
         id,
       })),
     );
   }
-  return fetchLatest('news', selection.limit ?? 4);
+  return fetchLatest(context, 'news', selection.limit ?? 4);
 };
 
 const selectCategoryItems = async (
+  context: PageContent,
   category: 'culture' | 'paris',
   selection: any,
   excludedIds: Set<string>,
 ) => {
   if (!selection) return [];
   if (selection.mode === 'manual') {
-    return (await fetchByTargets(Array.isArray(selection.items) ? selection.items : []))
+    return (await fetchByTargets(context, Array.isArray(selection.items) ? selection.items : []))
       .filter((item: any) => !item.isMaagChoice);
   }
 
   const limit = selection.limit ?? 3;
-  const candidates = await fetchLatestFromTypes(CATEGORY_CONTENT_TYPES, 24);
+  const candidates = await fetchLatestFromTypes(context, CATEGORY_CONTENT_TYPES, 24);
   return candidates
     .filter((item: any) => normalizeCategory(item?.category) === category)
     .filter((item: any) => !item.isMaagChoice && !isLeSaviezVousItem(item) && !excludedIds.has(item.id))
     .slice(0, limit);
 };
 
-const selectNetlenkaItems = async (selection: any, excludedKeys: Set<string>) => {
+const selectNetlenkaItems = async (context: PageContent, selection: any, excludedKeys: Set<string>) => {
   if (!selection) return [];
   if (selection.mode === 'manual') {
-    return (await fetchByTargets(Array.isArray(selection.items) ? selection.items : []))
+    return (await fetchByTargets(context, Array.isArray(selection.items) ? selection.items : []))
       .filter((item: any) => item.isMaagChoice)
       .filter((item: any) => !excludedKeys.has(`${item.type}:${item.id}`));
   }
 
   const limit = selection.limit ?? 4;
-  const candidates = await fetchLatestFromTypes(LANDING_CONTENT_TYPES, 24);
+  const candidates = await fetchLatestFromTypes(context, LANDING_CONTENT_TYPES, 24);
   return candidates
     .filter((item: any) => item.isMaagChoice)
     .filter((item: any) => !excludedKeys.has(`${item.type}:${item.id}`))
@@ -374,8 +421,8 @@ const isSingleDayEvent = (event: any) =>
 const sortByPublishedAtDesc = (left: any, right: any) =>
   getTime(right?.publishedAt) - getTime(left?.publishedAt);
 
-const selectAutoLandingEvent = async () => {
-  const events = await fetchLatest('event', 100);
+const selectAutoLandingEvent = async (context: PageContent) => {
+  const events = await fetchLatest(context, 'event', 100);
   const today = getCalendarToday();
   const normalizedEvents = normalizeEvents(events);
 
@@ -407,12 +454,12 @@ const selectAutoLandingEvent = async () => {
   );
 };
 
-const selectEventCard = async (selection: any) => {
+const selectEventCard = async (context: PageContent, selection: any) => {
   if (!selection) return null;
   if (selection.mode === 'manual') {
-    return fetchByTarget({ type: 'event', id: selection.id });
+    return fetchByTarget(context, { type: 'event', id: selection.id });
   }
-  return selectAutoLandingEvent();
+  return selectAutoLandingEvent(context);
 };
 
 // On the landing, the only disqualifying editorial flag is "Выбор Maag".
@@ -420,30 +467,30 @@ const selectEventCard = async (selection: any) => {
 // respectively and must not suppress a material anywhere on the landing.
 const isLandingPrimaryExcluded = (item: any) => Boolean(item?.isMaagChoice);
 
-const fetchLandingPrimaryTarget = async (target: LandingTarget | null) => {
-  const item = await fetchByTarget(target);
+const fetchLandingPrimaryTarget = async (context: PageContent, target: LandingTarget | null) => {
+  const item = await fetchByTarget(context, target);
   return item && !isLandingPrimaryExcluded(item) ? item : null;
 };
 
-const selectLatestInterview = async (selection: any) => {
+const selectLatestInterview = async (context: PageContent, selection: any) => {
   if (!selection) return null;
   if (selection.mode === 'manual') {
-    return fetchLandingPrimaryTarget({ type: 'interview', id: selection.id });
+    return fetchLandingPrimaryTarget(context, { type: 'interview', id: selection.id });
   }
-  const candidates = await fetchLatest('interview', 24);
+  const candidates = await fetchLatest(context, 'interview', 24);
   return candidates.find((item: any) => !isLandingPrimaryExcluded(item)) ?? null;
 };
 
-const selectLeSaviezVous = async (selection: any) => {
+const selectLeSaviezVous = async (context: PageContent, selection: any) => {
   if (!selection) return null;
   if (selection.mode === 'manual') {
-    const article = await fetchByTarget({ type: 'article', id: selection.id });
+    const article = await fetchByTarget(context, { type: 'article', id: selection.id });
     return article && !isLandingPrimaryExcluded(article)
       ? { ...article, articleType: 'le_saviez_vous' }
       : null;
   }
 
-  const candidates = await fetchLatest('article', 50);
+  const candidates = await fetchLatest(context, 'article', 50);
   return (
     candidates.find(
       (item: any) =>
@@ -457,12 +504,12 @@ const selectLeSaviezVous = async (selection: any) => {
   );
 };
 
-const selectPhotoOfTheDay = async (selection: any) => {
+const selectPhotoOfTheDay = async (context: PageContent, selection: any) => {
   if (!selection) return null;
   if (selection.mode === 'manual') {
-    return fetchByTarget({ type: 'photo-of-the-day', id: selection.id });
+    return fetchByTarget(context, { type: 'photo-of-the-day', id: selection.id });
   }
-  const [latest] = await fetchLatest('photo-of-the-day', 1);
+  const [latest] = await fetchLatest(context, 'photo-of-the-day', 1);
   return latest ?? null;
 };
 
@@ -544,14 +591,14 @@ const isMainInCategoryItem = (item: any) =>
   item?.isMainInCategory === 1 ||
   item?.isMainInCategory === '1';
 
-const fetchSectionCandidates = async (category: 'culture' | 'paris') => {
+const fetchSectionCandidates = async (context: PageContent, category: 'culture' | 'paris') => {
   const types =
     category === 'culture'
       ? [...SECTION_CONTENT_TYPES, 'interview' as LandingContentType]
       : SECTION_CONTENT_TYPES;
 
   const groups = await Promise.all(
-    types.map((type) => fetchLatest(type, SECTION_FETCH_LIMIT_PER_TYPE)),
+    types.map((type) => fetchLatest(context, type, SECTION_FETCH_LIMIT_PER_TYPE)),
   );
 
   return normalizeSectionCandidates(groups.flat(), category);
@@ -561,12 +608,13 @@ const hasAnyFlag = (item: any, flags: string[]) =>
   flags.some((flag) => Boolean(item?.[flag]));
 
 const fetchSectionHero = async (
+  context: PageContent,
   selection: any,
   candidates: any[],
   excludedFlags: string[],
 ) => {
   if (selection?.mode === 'manual') {
-    const item = await fetchByTarget({ type: selection.type, id: selection.id });
+    const item = await fetchByTarget(context, { type: selection.type, id: selection.id });
     return item && !hasAnyFlag(item, excludedFlags) ? item : null;
   }
 
@@ -577,6 +625,7 @@ const fetchSectionHero = async (
 };
 
 const selectSectionSecondaryStories = async (
+  context: PageContent,
   selection: any,
   candidates: any[],
   primaryItem: any,
@@ -591,7 +640,7 @@ const selectSectionSecondaryStories = async (
 
   if (selection === null) return [];
   if (selection?.mode === 'manual') {
-    return (await fetchByTargets(Array.isArray(selection.items) ? selection.items : []))
+    return (await fetchByTargets(context, Array.isArray(selection.items) ? selection.items : []))
       .filter((item: any) => item && !hasAnyFlag(item, excludedFlags) && item.contentType !== 'interview');
   }
 
@@ -599,6 +648,7 @@ const selectSectionSecondaryStories = async (
 };
 
 const selectSectionSidebarItems = async (
+  context: PageContent,
   selection: any,
   candidates: any[],
   excludedIds: Set<string>,
@@ -606,6 +656,7 @@ const selectSectionSidebarItems = async (
 ) => {
   if (selection?.mode === 'manual') {
     const items = await fetchByTargets(
+    context,
       Array.isArray(selection.items) ? selection.items : [],
     );
     return items.filter((item: any) => item[flag]);
@@ -617,13 +668,14 @@ const selectSectionSidebarItems = async (
 };
 
 const selectSectionFeaturedInterview = async (
+  context: PageContent,
   selection: any,
   candidates: any[],
   excludedIds: Set<string>,
   excludedFlags: string[],
 ) => {
   if (selection?.mode === 'manual') {
-    const item = await fetchByTarget({ type: 'interview', id: selection.id });
+    const item = await fetchByTarget(context, { type: 'interview', id: selection.id });
     return item && !hasAnyFlag(item, excludedFlags) ? item : null;
   }
 
@@ -646,10 +698,10 @@ const selectSectionFeaturedInterview = async (
   return null;
 };
 
-const buildCulturePagePayload = async () => {
+const buildCulturePagePayload = async (context: PageContent) => {
   const [placementsDoc, candidates] = await Promise.all([
     culturePagePlacementsRef.get(),
-    fetchSectionCandidates('culture'),
+    fetchSectionCandidates(context, 'culture'),
   ]);
   const culturePagePlacements = {
     ...DEFAULT_CULTURE_PAGE_PLACEMENTS,
@@ -657,11 +709,13 @@ const buildCulturePagePayload = async () => {
   };
 
   const primaryCultureArticle = await fetchSectionHero(
+    context,
     culturePagePlacements.hero,
     candidates,
     ['isHotContent'],
   );
   const secondaryStories = await selectSectionSecondaryStories(
+    context,
     culturePagePlacements.secondaryStories,
     candidates,
     primaryCultureArticle,
@@ -671,6 +725,7 @@ const buildCulturePagePayload = async () => {
     [primaryCultureArticle?.id, ...secondaryStories.map((item: any) => item?.id)].filter(Boolean),
   );
   const featuredInterview = await selectSectionFeaturedInterview(
+    context,
     culturePagePlacements.featuredInterview,
     candidates,
     topIds,
@@ -678,6 +733,7 @@ const buildCulturePagePayload = async () => {
   );
   const excludedIds = new Set([...topIds, featuredInterview?.id].filter(Boolean));
   const editorialSidebarItems = await selectSectionSidebarItems(
+    context,
     culturePagePlacements.sidebarRail,
     candidates,
     excludedIds,
@@ -700,10 +756,10 @@ const buildCulturePagePayload = async () => {
   };
 };
 
-const buildParisPagePayload = async () => {
+const buildParisPagePayload = async (context: PageContent) => {
   const [placementsDoc, allCandidates] = await Promise.all([
     parisPagePlacementsRef.get(),
-    fetchLatestFromTypes(PARIS_PAGE_CONTENT_TYPES, SECTION_FETCH_LIMIT_PER_TYPE),
+    fetchLatestFromTypes(context, PARIS_PAGE_CONTENT_TYPES, SECTION_FETCH_LIMIT_PER_TYPE),
   ]);
   const candidates = normalizeSectionCandidates(allCandidates, 'paris');
   const notebookCandidates = allCandidates.filter(
@@ -720,18 +776,21 @@ const buildParisPagePayload = async () => {
   };
 
   const primaryParisArticle = await fetchSectionHero(
+    context,
     parisPagePlacements.hero,
     candidates,
     ['isNotebookContent'],
   );
 
   const twoImageArticle = await fetchSectionHero(
+    context,
     parisPagePlacements.twoImageArticle,
     candidates.filter((item: any) => item.id !== primaryParisArticle?.id),
     ['isNotebookContent'],
   );
 
   const secondaryStories = await selectSectionSecondaryStories(
+    context,
     parisPagePlacements.secondaryStories,
     candidates.filter((item: any) => item.id !== twoImageArticle?.id),
     primaryParisArticle,
@@ -747,6 +806,7 @@ const buildParisPagePayload = async () => {
   );
 
   const interviewFeature = await selectSectionFeaturedInterview(
+    context,
     parisPagePlacements.interviewFeature,
     interviewCandidates,
     topIds,
@@ -755,6 +815,7 @@ const buildParisPagePayload = async () => {
 
   const excludedIds = new Set([...topIds, interviewFeature?.id].filter(Boolean));
   const editorialSidebarItems = await selectSectionSidebarItems(
+    context,
     parisPagePlacements.sidebarRail,
     notebookCandidates,
     excludedIds,
@@ -767,7 +828,7 @@ const buildParisPagePayload = async () => {
       !sidebarIds.has(item.id) &&
       !item.isNotebookContent,
   );
-  const photoOfTheDay = await selectPhotoOfTheDay(parisPagePlacements.photoOfTheDayFeature);
+  const photoOfTheDay = await selectPhotoOfTheDay(context, parisPagePlacements.photoOfTheDayFeature);
 
   return {
     parisPagePlacements,
@@ -979,21 +1040,23 @@ const buildCalendarPagePayload = async () => {
   };
 };
 
-export const getPublicLanding = async (_req: Request, res: Response) => {
+const landingHandler = (locale: PageLocale) => async (_req: Request, res: Response) => {
   try {
+    const context: PageContent = { locale };
+    if (locale === 'fr') res.setHeader('Cache-Control', 'private, no-store');
     const landingPlacements: any = await getLandingPlacements();
     const mainHeroSelection = landingPlacements.mainHero;
     const mainArticle = mainHeroSelection
-      ? await fetchLandingPrimaryTarget({
+      ? await fetchLandingPrimaryTarget(context, {
           type: mainHeroSelection.type,
           id: mainHeroSelection.id,
         })
       : null;
 
     const [newsArticles, landingEvent, latestInterview] = await Promise.all([
-      selectNewsRail(landingPlacements.newsRail),
-      selectEventCard(landingPlacements.eventCard),
-      selectLatestInterview(landingPlacements.cultureInterviewBlock),
+      selectNewsRail(context, landingPlacements.newsRail),
+      selectEventCard(context, landingPlacements.eventCard),
+      selectLatestInterview(context, landingPlacements.cultureInterviewBlock),
     ]);
 
     const mainHeroKey = mainArticle ? `${mainArticle.type}:${mainArticle.id}` : null;
@@ -1003,13 +1066,13 @@ export const getPublicLanding = async (_req: Request, res: Response) => {
 
     const [cultureHero, parisHero] = await Promise.all([
       landingPlacements.cultureHero
-        ? fetchLandingPrimaryTarget({
+        ? fetchLandingPrimaryTarget(context, {
             type: landingPlacements.cultureHero.type,
             id: landingPlacements.cultureHero.id,
           })
         : null,
       landingPlacements.parisHero
-        ? fetchLandingPrimaryTarget({
+        ? fetchLandingPrimaryTarget(context, {
             type: landingPlacements.parisHero.type,
             id: landingPlacements.parisHero.id,
           })
@@ -1019,21 +1082,24 @@ export const getPublicLanding = async (_req: Request, res: Response) => {
     const [cultureCardItems, parisCardItems, maagChoiceItems, leSaviezVousArticle, photoOfTheDay] =
       await Promise.all([
         selectCategoryItems(
+          context,
           'culture',
           landingPlacements.cultureCards,
           new Set([mainArticle?.id, cultureHero?.id].filter(Boolean) as string[]),
         ),
         selectCategoryItems(
+          context,
           'paris',
           landingPlacements.parisCards,
           new Set([mainArticle?.id, parisHero?.id].filter(Boolean) as string[]),
         ),
         selectNetlenkaItems(
+          context,
           landingPlacements.netlenkaRail,
           new Set([mainHeroKey, latestInterviewKey].filter(Boolean) as string[]),
         ),
-        selectLeSaviezVous(landingPlacements.leSaviezVousFeature),
-        selectPhotoOfTheDay(landingPlacements.photoOfTheDayFeature),
+        selectLeSaviezVous(context, landingPlacements.leSaviezVousFeature),
+        selectPhotoOfTheDay(context, landingPlacements.photoOfTheDayFeature),
       ]);
 
     const displayedIds = new Set(
@@ -1049,7 +1115,7 @@ export const getPublicLanding = async (_req: Request, res: Response) => {
       ].filter(Boolean),
     );
 
-    const carouselItems = (await fetchLatestFromTypes(CATEGORY_CONTENT_TYPES, 24))
+    const carouselItems = (await fetchLatestFromTypes(context, CATEGORY_CONTENT_TYPES, 24))
       .filter(
         (item: any) =>
           !item.isMaagChoice &&
@@ -1089,9 +1155,11 @@ export const getPublicLanding = async (_req: Request, res: Response) => {
   }
 };
 
-export const getPublicCulture = async (_req: Request, res: Response) => {
+const cultureHandler = (locale: PageLocale) => async (_req: Request, res: Response) => {
   try {
-    const payload = await buildCulturePagePayload();
+    const context: PageContent = { locale };
+    if (locale === 'fr') res.setHeader('Cache-Control', 'private, no-store');
+    const payload = await buildCulturePagePayload(context);
     await attachAuthorNames(payload);
     res.status(200).json(payload);
   } catch (error) {
@@ -1100,9 +1168,11 @@ export const getPublicCulture = async (_req: Request, res: Response) => {
   }
 };
 
-export const getPublicParis = async (_req: Request, res: Response) => {
+const parisHandler = (locale: PageLocale) => async (_req: Request, res: Response) => {
   try {
-    const payload = await buildParisPagePayload();
+    const context: PageContent = { locale };
+    if (locale === 'fr') res.setHeader('Cache-Control', 'private, no-store');
+    const payload = await buildParisPagePayload(context);
     await attachAuthorNames(payload);
     res.status(200).json(payload);
   } catch (error) {
@@ -1119,3 +1189,10 @@ export const getPublicCalendar = async (_req: Request, res: Response) => {
     res.status(500).json({ message: 'Server error while getting public calendar page' });
   }
 };
+
+export const getPublicLanding = landingHandler('ru');
+export const getFrenchLanding = landingHandler('fr');
+export const getPublicCulture = cultureHandler('ru');
+export const getFrenchCulture = cultureHandler('fr');
+export const getPublicParis = parisHandler('ru');
+export const getFrenchParis = parisHandler('fr');

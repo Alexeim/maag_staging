@@ -133,7 +133,10 @@ let parisFeed: PublicCardItem[] = [];
 let photoOfTheDay: PublicCardItem | null = null;
 
 try {
-  const parisPage = await publicParisApi.get();
+  const parisPage = await publicParisApi.get({
+    locale,
+    sessionCookie: Astro.cookies.get("__session")?.value,
+  });
   primaryParisArticle = parisPage.primaryParisArticle;
   twoImageArticle = parisPage.twoImageArticle;
   interviewFeature = parisPage.interviewFeature;

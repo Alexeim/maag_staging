@@ -133,6 +133,23 @@ describe('extractArticleSegments', () => {
 });
 
 describe('buildTranslatedArticleText', () => {
+  test('builds Firestore-safe blocks when optional lists or columns are absent', () => {
+    const source = {
+      title: 'Тест',
+      content: [
+        { type: 'tips-item', text: 'Совет' },
+        { type: 'tips' },
+        { type: 'flipper' },
+        { type: 'two-columns' },
+        { type: 'three-columns' },
+      ],
+    };
+    const result = buildTranslatedArticleText(source, { title: 'Test', 'content.0': 'Conseil' });
+    // JSON drops undefined object fields; round-tripping must lose nothing.
+    expect(JSON.parse(JSON.stringify(result))).toEqual(result);
+    expect(result.content?.[0]).toMatchObject({ metaItems: [], text: 'Conseil' });
+  });
+
   const { segments } = extractArticleSegments(article);
   const translations = Object.fromEntries(
     segments.map(({ key, format, source }) => [

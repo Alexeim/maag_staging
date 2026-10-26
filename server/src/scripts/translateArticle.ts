@@ -1,6 +1,6 @@
 /**
  * Translate one article into French and store it in `articles_fr`
- * (unpublished, with sourceId → the Russian article).
+ * (published, with sourceId → the Russian article).
  *
  * Usage (run from server/):
  *   npm run translate:article:dry -- <articleId>    # show what would be sent, call nothing

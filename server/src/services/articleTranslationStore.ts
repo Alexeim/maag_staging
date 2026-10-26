@@ -55,7 +55,7 @@ export interface CreatedTranslation {
   characters: number;
 }
 
-// Translates the article and stores the French version, unpublished. Refuses
+// Translates the article and stores the French version, published. Refuses
 // if the article already has one (re-translation is a separate flow).
 export const createFrenchTranslation = async (sourceId: string): Promise<CreatedTranslation> => {
   const plan = await planArticleTranslation(sourceId);
@@ -87,8 +87,8 @@ export const createFrenchTranslation = async (sourceId: string): Promise<Created
       sourceLocale: 'ru',
       locale: 'fr',
       sourceRevision: plan.sourceRevision,
-      published: false,
-      publishedAt: null,
+      published: true,
+      publishedAt: article.publishedAt ?? FieldValue.serverTimestamp(),
       reviewStatus: 'machine',
       provider: run.provider,
       model: run.model,

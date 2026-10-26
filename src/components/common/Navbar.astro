@@ -87,6 +87,8 @@ const currentPath = Astro.originPathname;
             <a
               class="cursor-pointer transition-transform duration-200 ease-out hover:scale-105 inline-block"
               href={href("/")}
+              data-astro-reload={locale !== DEFAULT_LOCALE ? true : undefined}
+              data-astro-prefetch={locale !== DEFAULT_LOCALE ? "false" : undefined}
             >
               <img src={logo.src} alt="MAAG France" class="w-12 lg:w-16" />
             </a>

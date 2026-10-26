@@ -19,6 +19,7 @@ import {
   type PublicRelatedCard,
 } from "@/lib/api/api";
 import { getRequestLocale } from "@/lib/i18n/request";
+import { overlayFrenchArticle } from "@/lib/utils/frenchArticle";
 import { DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
@@ -73,23 +74,7 @@ if (!error && articleData && locale !== DEFAULT_LOCALE) {
     const french: FrenchArticleResponse = await articlesApi.getFrench(id, {
       sessionCookie: Astro.cookies.get("__session")?.value,
     });
-    articleData = {
-      ...articleData,
-      title: french.title,
-      lead: french.lead,
-      leadHtml: french.leadHtml,
-      subtitle: french.subtitle,
-      subtitleHtml: french.subtitleHtml,
-      intro: french.intro,
-      introHtml: french.introHtml,
-      cardTitle: french.cardTitle,
-      cardLead: french.cardLead,
-      imageCaption: french.imageCaption,
-      secondImageCaption: french.secondImageCaption,
-      content: french.content,
-      published: french.published,
-      publishedAt: french.publishedAt ?? undefined,
-    };
+    articleData = overlayFrenchArticle(articleData, french);
   } catch (e) {
     console.error(e);
     Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
@@ -112,7 +97,7 @@ if (!error && articleData?.published !== true && !isDraftPreview) {
 
 // Redirect tips articles to their dedicated page
 if (articleData?.articleType === 'tips') {
-  return Astro.redirect(`/tips/${id}`);
+  return Astro.redirect(`${locale === "fr" ? "/fr" : ""}/tips/${id}`);
 }
 
 // Normalize data for the template

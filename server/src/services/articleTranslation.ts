@@ -83,6 +83,7 @@ const mapArticleText = (
   };
 
   const mapColumn = (column: unknown, key: string): unknown => {
+    if (column === undefined) return null;
     if (!isRecord(column)) return column;
     switch (column.type) {
       case 'text': {
@@ -166,7 +167,7 @@ const mapArticleText = (
                   ? withCaptions(slide, `${key}.slides.${slideIndex}`, ['caption'])
                   : slide,
               )
-            : block.slides,
+            : (block.slides ?? []),
         };
       case 'tips':
         return {
@@ -175,7 +176,7 @@ const mapArticleText = (
             ? block.tips.map((tip, tipIndex) =>
                 isRecord(tip) ? { ...tip, text: plain(`${key}.tips.${tipIndex}`, tip.text) } : tip,
               )
-            : block.tips,
+            : (block.tips ?? []),
         };
       case 'tips-item':
         // meta1/meta2 are a legacy shape nothing renders any more
@@ -191,7 +192,7 @@ const mapArticleText = (
                   ? { ...item, text: plain(`${key}.metaItems.${itemIndex}`, item.text) }
                   : item,
               )
-            : block.metaItems,
+            : (block.metaItems ?? []),
         };
       // Cards rendered from the linked material / an embed: no own text.
       case 'link':

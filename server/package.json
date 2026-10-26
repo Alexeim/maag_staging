@@ -23,6 +23,10 @@
     "purge:events:apply": "ts-node src/scripts/purgeOldEvents.ts --apply",
     "translate:article:dry": "ts-node src/scripts/translateArticle.ts",
     "translate:article:apply": "ts-node src/scripts/translateArticle.ts --apply",
+    "translate:articles:dry": "ts-node src/scripts/translateArticles.ts",
+    "translate:articles:apply": "ts-node src/scripts/translateArticles.ts --apply",
+    "publish:articles-fr:dry": "ts-node src/scripts/publishFrenchArticles.ts",
+    "publish:articles-fr:apply": "ts-node src/scripts/publishFrenchArticles.ts --apply",
     "deploy:prod": "bash deploy.sh",
     "images:compress:dry": "node scripts/compressStorageImages.js --dry-run",
     "images:compress:live": "node scripts/compressStorageImages.js"

@@ -18,6 +18,8 @@ import {
   type ArticleResponse,
   type PublicRelatedCard,
 } from "@/lib/api/api";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { overlayFrenchArticle } from "@/lib/utils/frenchArticle";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { normalizeTags } from "@/lib/utils/contentCollectionMarquee";
@@ -34,6 +36,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   hotContent: "Самое Читаемое",
 };
 
+const locale = getRequestLocale(Astro);
+const pagePath = `${locale === "fr" ? "/fr" : ""}/tips/${id}`;
+
 let articleData: ArticleResponse | null = null;
 let error: string | null = null;
 
@@ -49,6 +54,20 @@ try {
         : `Ошибка загрузки: ${e.message}`;
   } else {
     error = `Ошибка загрузки: ${e instanceof Error ? e.message : String(e)}`;
+  }
+}
+
+if (!error && articleData && locale === "fr") {
+  try {
+    const french = await articlesApi.getFrench(id, {
+      sessionCookie: Astro.cookies.get("__session")?.value,
+    });
+    articleData = overlayFrenchArticle(articleData, french);
+  } catch (e) {
+    console.error(e);
+    Astro.response.status = e instanceof ApiError && e.status === 404 ? 404 : 503;
+    error = "Article introuvable.";
+    articleData = null;
   }
 }
 
@@ -71,7 +90,7 @@ const displayArticle = {
   lead: articleData?.lead || "",
   leadHtml: articleData?.leadHtml || "",
   introHtml: articleData?.introHtml || "",
-  category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }),
+  category: getPrimaryBadgeLabel({ contentType: "article", tags: articleData?.tags }, locale),
   categoryHref: getPrimaryBadgeHref({ contentType: "article", tags: articleData?.tags }),
   authorName: articleData?.author
     ? `${articleData.author.firstName} ${articleData.author.lastName}`
@@ -94,8 +113,9 @@ const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
 const articleStructuredData = articleData
   ? buildArticleStructuredData({
       siteOrigin,
-      path: `/tips/${id}`,
+      path: pagePath,
       headline: displayArticle.title,
+      inLanguage: locale,
       description: displayArticle.lead,
       image: displayArticle.imageUrl,
       datePublished: articleData.publishedAt,
@@ -127,7 +147,7 @@ if (!error && articleData) {
   title={`${displayArticle.title} - Maag`}
   description={displayArticle.lead}
   image={displayArticle.imageUrl}
-  canonicalPath={`/tips/${id}`}
+  canonicalPath={pagePath}
   type="article"
   structuredData={articleStructuredData}
   useClientRouter={true}
@@ -157,7 +177,7 @@ if (!error && articleData) {
             actions={{
               contentType: "tips",
               contentId: id!,
-              href: `/tips/${id}`,
+              href: pagePath,
               category: bookmarkCategory,
               tag: firstBookmarkTag,
             }}

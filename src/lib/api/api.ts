@@ -1353,9 +1353,11 @@ export interface PublicLandingResponse {
 }
 
 export const publicLandingApi = {
-  get() {
-    return request<PublicLandingResponse>("/api/public/landing", {
-      public: true,
+  get(options: { locale?: "ru" | "fr"; sessionCookie?: string } = {}) {
+    const french = options.locale === "fr";
+    return request<PublicLandingResponse>(`/api/public/${french ? "fr/" : ""}landing`, {
+      public: !french,
+      sessionCookie: french ? options.sessionCookie : undefined,
     });
   },
 };
@@ -1466,9 +1468,11 @@ export interface PublicCalendarResponse {
 }
 
 export const publicCultureApi = {
-  get() {
-    return request<PublicCultureResponse>("/api/public/culture", {
-      public: true,
+  get(options: { locale?: "ru" | "fr"; sessionCookie?: string } = {}) {
+    const french = options.locale === "fr";
+    return request<PublicCultureResponse>(`/api/public/${french ? "fr/" : ""}culture`, {
+      public: !french,
+      sessionCookie: french ? options.sessionCookie : undefined,
     });
   },
 };
@@ -1496,9 +1500,11 @@ export const authSessionApi = {
 };
 
 export const publicParisApi = {
-  get() {
-    return request<PublicParisResponse>("/api/public/paris", {
-      public: true,
+  get(options: { locale?: "ru" | "fr"; sessionCookie?: string } = {}) {
+    const french = options.locale === "fr";
+    return request<PublicParisResponse>(`/api/public/${french ? "fr/" : ""}paris`, {
+      public: !french,
+      sessionCookie: french ? options.sessionCookie : undefined,
     });
   },
 };

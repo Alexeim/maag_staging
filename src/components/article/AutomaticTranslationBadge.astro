@@ -1,0 +1,13 @@
+---
+import { getRequestLocale } from "@/lib/i18n/request";
+
+const isFrench = getRequestLocale(Astro) === "fr";
+---
+
+{isFrench && (
+  <div class="mb-3">
+    <span class="inline-block rounded-full border border-accent/25 bg-accent/5 px-3 py-1 font-inter text-xs leading-relaxed text-base-content/70">
+      Traduction automatique du russe
+    </span>
+  </div>
+)}

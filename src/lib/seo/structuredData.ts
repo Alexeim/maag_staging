@@ -18,6 +18,7 @@ interface ArticleStructuredDataInput {
   dateModified?: unknown;
   authorName?: string;
   schemaType?: "Article" | "NewsArticle";
+  inLanguage?: string;
 }
 
 interface ImageStructuredDataInput {
@@ -124,6 +125,7 @@ export const buildArticleStructuredData = ({
   dateModified,
   authorName,
   schemaType = "Article",
+  inLanguage = "ru",
 }: ArticleStructuredDataInput): JsonLdObject => ({
   "@context": "https://schema.org",
   "@type": schemaType,
@@ -138,7 +140,7 @@ export const buildArticleStructuredData = ({
     "@type": "WebPage",
     "@id": toAbsoluteUrl(siteOrigin, path),
   },
-  inLanguage: "ru",
+  inLanguage,
 });
 
 export const buildImageStructuredData = ({
