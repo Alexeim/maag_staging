@@ -63,7 +63,13 @@ const normalizeBookmark = (value: unknown): UserBookmark | null => {
       ? raw.imageUrl.trim()
       : undefined;
 
-  if (!contentType || !id || !title || !href || !BOOKMARK_CONTENT_TYPES.has(contentType)) {
+  if (
+    !contentType ||
+    !id ||
+    !title ||
+    !href ||
+    !BOOKMARK_CONTENT_TYPES.has(contentType)
+  ) {
     return null;
   }
 
@@ -126,9 +132,33 @@ export const createUserProfile = async (req: Request, res: Response) => {
     };
 
     // Use the Firebase Auth UID as the document ID in Firestore
-    await usersCollection.doc(uid).set(newUserProfile);
+    const userRef = usersCollection.doc(uid);
 
-    res.status(201).json({ uid, ...newUserProfile });
+    const result = await db.runTransaction(async (transaction) => {
+      const existingProfile = await transaction.get(userRef);
+
+      if (existingProfile.exists) {
+        const profileData = existingProfile.data();
+
+        return {
+          created: false,
+          profile: {
+            ...profileData,
+            uid: existingProfile.id,
+            bookmarks: normalizeStoredBookmarks(profileData?.bookmarks),
+          },
+        };
+      }
+
+      transaction.create(userRef, newUserProfile);
+
+      return {
+        created: true,
+        profile: { uid, ...newUserProfile },
+      };
+    });
+
+    res.status(result.created ? 201 : 200).json(result.profile);
   } catch (error) {
     console.error("Error creating user profile:", error);
     res
@@ -267,7 +297,9 @@ export const addUserBookmark = async (req: Request, res: Response) => {
       const existingBookmarks = normalizeStoredBookmarks(doc.data()?.bookmarks);
       const filteredBookmarks = existingBookmarks.filter(
         (item) =>
-          !(item.contentType === bookmark.contentType && item.id === bookmark.id),
+          !(
+            item.contentType === bookmark.contentType && item.id === bookmark.id
+          ),
       );
 
       transaction.update(userRef, {
@@ -276,7 +308,9 @@ export const addUserBookmark = async (req: Request, res: Response) => {
     });
 
     const updatedDoc = await userRef.get();
-    res.status(200).json(normalizeStoredBookmarks(updatedDoc.data()?.bookmarks));
+    res
+      .status(200)
+      .json(normalizeStoredBookmarks(updatedDoc.data()?.bookmarks));
   } catch (error) {
     if ((error as Error).message === "USER_PROFILE_NOT_FOUND") {
       return res.status(404).json({ message: "User profile not found" });
@@ -312,7 +346,9 @@ export const removeUserBookmark = async (req: Request, res: Response) => {
         throw new Error("USER_PROFILE_NOT_FOUND");
       }
 
-      const nextBookmarks = normalizeStoredBookmarks(doc.data()?.bookmarks).filter(
+      const nextBookmarks = normalizeStoredBookmarks(
+        doc.data()?.bookmarks,
+      ).filter(
         (item) => !(item.contentType === contentType && item.id === contentId),
       );
 
@@ -322,7 +358,9 @@ export const removeUserBookmark = async (req: Request, res: Response) => {
     });
 
     const updatedDoc = await userRef.get();
-    res.status(200).json(normalizeStoredBookmarks(updatedDoc.data()?.bookmarks));
+    res
+      .status(200)
+      .json(normalizeStoredBookmarks(updatedDoc.data()?.bookmarks));
   } catch (error) {
     if ((error as Error).message === "USER_PROFILE_NOT_FOUND") {
       return res.status(404).json({ message: "User profile not found" });
