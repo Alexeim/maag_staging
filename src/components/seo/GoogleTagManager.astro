@@ -14,9 +14,19 @@
 //
 // There is deliberately no <noscript> fallback: without JS the consent banner
 // cannot run, so consent can never be given, so no tracking may fire.
+//
+// Admin page views are tagged `traffic_type: "internal"` so GA4's internal
+// traffic filter drops them, from any device or network (an IP rule alone
+// misses mobile data and changing IPs). Safe to render per user: middleware
+// marks every admin response `private, no-store`, so this HTML never reaches
+// a shared cache. Admin visits before sign-in are still counted.
+
+// Middleware puts the verified session user on locals (see src/middleware.ts).
+const { user } = Astro.locals as { user?: { role?: string | null } | null };
+const isInternalTraffic = user?.role === "admin";
 ---
 
-<script is:inline>
+<script is:inline define:vars={{ isInternalTraffic }}>
   (function () {
     var GTM_ID = "GTM-5HL5M45V";
     var CONSENT_CATEGORY = "analytics";
@@ -27,6 +37,8 @@
       loaded = true;
       (function (w, d, s, l, i) {
         w[l] = w[l] || [];
+        // Must precede gtm.js so the GA4 tag reads it on its first hit.
+        if (isInternalTraffic) w[l].push({ traffic_type: "internal" });
         w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
         var f = d.getElementsByTagName(s)[0],
           j = d.createElement(s),
