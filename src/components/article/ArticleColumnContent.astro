@@ -29,13 +29,16 @@ const textAlignmentClass =
     : desktopTextAlign === "start"
       ? "text-center lg:text-start"
       : "text-justify";
+// "fixed-height" only applies from lg: up, where the three columns sit side by
+// side and need equal heights. Below lg the columns stack full-width, so a fixed
+// 620px box would crop about a third of a portrait photo's width.
 const imageWrapperClass =
   imageLayout === "fixed-height"
-    ? "flex h-[620px] w-full items-center justify-center overflow-hidden"
+    ? "flex w-full items-center justify-center overflow-hidden lg:h-[620px]"
     : "flex w-full items-center justify-center";
 const imageClass =
   imageLayout === "fixed-height"
-    ? "w-full h-full object-cover object-center"
+    ? "block h-auto w-full lg:h-full lg:object-cover lg:object-center"
     : "h-auto w-full object-contain";
 const columnRichTextHtml = getInitialRichTextHtml({
   html: column.html,

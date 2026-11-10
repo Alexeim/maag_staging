@@ -38,7 +38,7 @@ const {
         <LazyImage
           src={leftPortraitImageUrl}
           alt={leftPortraitImageCaption || "Left portrait collage image"}
-          class="block w-full aspect-[3/4] object-cover"
+          class="block w-full aspect-auto lg:aspect-[3/4] lg:object-cover"
           loading="lazy"
         />
         {leftPortraitImageCaption && (
@@ -65,7 +65,7 @@ const {
         <LazyImage
           src={topLandscapeImageUrl}
           alt={topLandscapeImageCaption || "Top landscape collage image"}
-          class="block w-full aspect-[5/3] object-cover"
+          class="block w-full aspect-auto lg:aspect-[5/3] lg:object-cover"
           loading="lazy"
         />
         {topLandscapeImageCaption && (
@@ -92,7 +92,7 @@ const {
         <LazyImage
           src={mainLandscapeImageUrl}
           alt={mainLandscapeImageCaption || "Main landscape collage image"}
-          class="block w-full aspect-[16/9] object-cover"
+          class="block w-full aspect-auto lg:aspect-[16/9] lg:object-cover"
           loading="lazy"
         />
         {mainLandscapeImageCaption && (
@@ -119,7 +119,7 @@ const {
         <LazyImage
           src={rightPortraitImageUrl}
           alt={rightPortraitImageCaption || "Right portrait collage image"}
-          class="block w-full aspect-[3/4] object-cover"
+          class="block w-full aspect-auto lg:aspect-[3/4] lg:object-cover"
           loading="lazy"
         />
         {rightPortraitImageCaption && (

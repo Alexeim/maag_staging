@@ -28,7 +28,7 @@ const {
         <LazyImage
           src={portraitImageUrl}
           alt={portraitImageCaption || "Portrait article image"}
-          class="block w-full aspect-[2/3] object-cover"
+          class="block w-full aspect-auto lg:aspect-[2/3] lg:object-cover"
           loading="lazy"
         />
         {portraitImageCaption && (
@@ -46,7 +46,7 @@ const {
         <LazyImage
           src={landscapeImageUrl}
           alt={landscapeImageCaption || "Landscape article image"}
-          class="block w-full aspect-[16/9] object-cover"
+          class="block w-full aspect-auto lg:aspect-[16/9] lg:object-cover"
           loading="lazy"
         />
         {landscapeImageCaption && (
