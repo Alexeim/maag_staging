@@ -88,11 +88,11 @@ const wideBreakoutRailClass = "w-full lg:max-w-[1356px] my-12 px-4 lg:px-0";
                 x-text="block.question"
                 class="text-xl font-article-body font-bold! italic"
               ></p>
-              <p
-                x-show="block.answer"
-                x-text="block.answer"
-                class="text-lg font-article-body text-justify"
-              ></p>
+              <div
+                x-show="block.answerHtml || block.answer"
+                x-html="block.answerHtml || block.answer"
+                class="article-rich-text text-lg font-article-body text-justify"
+              ></div>
             </div>
           </div>
           <div

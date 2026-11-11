@@ -847,7 +847,7 @@ export default function interviewCreatorLogic(initialState = {}) {
           };
           break;
         case "qa":
-          newBlockData = { question: "", answer: "" };
+          newBlockData = { question: "", answer: "", answerHtml: "" };
           break;
         case "link":
           newBlockData = {

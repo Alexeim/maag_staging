@@ -604,7 +604,13 @@ const {
                   <label class="block text-sm font-medium">Вопрос</label>
                   <textarea x-model="editingBlock.question" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" rows="3"></textarea>
                   <label class="block text-sm font-medium">Ответ</label>
-                  <textarea x-model="editingBlock.answer" class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5" rows="5"></textarea>
+                  <div
+                    class="rich-text-editor"
+                    x-data="blockRichTextEditor({ initialHtml: getRichTextInitialHtml({ html: editingBlock.answerHtml, text: editingBlock.answer }), placeholder: 'Введите ответ...' })"
+                    x-on:rich-text-change="editingBlock.answerHtml = $event.detail.html; editingBlock.answer = $event.detail.text"
+                  >
+                    <div x-ref="editor"></div>
+                  </div>
                 </div>
               </template>
 

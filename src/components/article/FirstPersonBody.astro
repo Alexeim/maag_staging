@@ -30,6 +30,7 @@ interface Block {
   quoteAuthor?: string;
   question?: string;
   answer?: string;
+  answerHtml?: string;
   sourceType?: string;
   provider?: string;
   linkedContentType?:
@@ -386,7 +387,13 @@ if (currentProseGroup.length > 0) {
                           />
                         </a>
                       ) : null;
-                    case "qa":
+                    case "qa": {
+                      // Answers written before the rich text editor have only
+                      // plain `answer`; getInitialRichTextHtml falls back to it.
+                      const answerHtml = getInitialRichTextHtml({
+                        html: block.answerHtml,
+                        text: block.answer,
+                      });
                       return (
                         <div class="space-y-4">
                           {block.question && (
@@ -394,13 +401,15 @@ if (currentProseGroup.length > 0) {
                               {block.question}
                             </p>
                           )}
-                          {block.answer && (
-                            <p class="text-base font-article-body text-justify">
-                              {block.answer}
-                            </p>
+                          {answerHtml && (
+                            <div
+                              class="article-rich-text text-base font-article-body text-justify"
+                              set:html={answerHtml}
+                            />
                           )}
                         </div>
                       );
+                    }
                     default:
                       return null;
                   }
