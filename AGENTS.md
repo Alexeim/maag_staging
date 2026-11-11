@@ -220,6 +220,28 @@ publication date.
   `linkedContentLookup`, and `GET /api/public/related/:type/:id` has no
   first-person type (`PageType` in `publicRelatedController.ts` → 400).
 
+## Sign-in and user profiles (2026-11-11)
+
+- Two ways in: email/password and Google (`signInWithGoogle()` in
+  `src/components/auth/authLogic.ts`, Firebase popup). The Google provider
+  and the authorized domains are set in the Firebase Console, not in code.
+- The Firestore profile (`users/{uid}`) is created by the **client** after
+  Firebase sign-in, via `POST /api/users`. Google calls it on **every**
+  sign-in: `createUserProfile` is idempotent (transaction; an existing
+  profile comes back with 200, never overwritten), so names a user edited
+  survive and a failed first create heals itself.
+- Any flow that creates a profile must wrap it in the
+  `auth-profile-create-start` / `-end` events. `onAuthStateChanged` in
+  `src/alpine-entrypoint.ts` fires before the sign-in promise resolves and
+  would otherwise `GET` the profile, get a 404 and leave the user without
+  one. Dispatch `-end` in `finally`, or the listener waits out its 3 s timeout.
+- `userController.ts`: the uid is always the token's. `createUserProfile`
+  ignores the body uid (a different one → 403); `GET`/`PUT /api/users/:uid`
+  and the bookmark routes 403 a `:uid` that is not the caller.
+- `lastName` is optional (Google accounts may have no family name);
+  `firstName` is required. The email sign-up form still requires both.
+- `modifyUserRole` in `userController.ts` is not mounted on any route.
+
 ## Documents in this repo
 
 Nothing reads these automatically. Status is unverified unless noted.
@@ -228,8 +250,8 @@ Nothing reads these automatically. Status is unverified unless noted.
 - `docs/audit-2026-09-18.md` — **read this first.** Whole-project audit of
   2026-09-18: what was fixed that day (commits), owner decisions (editorial
   GET routes stay open, publication date only, delete nothing unasked), and
-  the open items with file:line — profile overwrite/read, Stripe trusting
-  body ids, and more (fixed 2026-09-28: the broken `articlesApi.del`, and
+  the open items with file:line — Stripe trusting body ids, and more
+  (fixed 2026-09-28: the broken `articlesApi.del`, and
   Quill in every reader's bundle — `blockRichTextEditor.ts` now imports it
   in `init()`; never import `quill` statically from anything the Alpine
   entrypoint reaches).
