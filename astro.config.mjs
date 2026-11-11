@@ -14,6 +14,7 @@ const sitemapExcludedPaths = new Set([
   "/profile/",
   "/sitemap-content.xml",
   "/success/",
+  "/testpage/",
 ]);
 
 const sitemapExcludedPathPrefixes = ["/dashboard/"];
@@ -26,6 +27,19 @@ const shouldIncludeInSitemap = (page) => {
     !sitemapExcludedPaths.has(pathname) &&
     !sitemapExcludedPathPrefixes.some((prefix) => pathname.startsWith(prefix))
   );
+};
+
+// @astrojs/sitemap writes static pages as "/news/" (directory style), while
+// every link on the site and sitemap-content.xml use "/news". Google saw both
+// and reported the slash versions as duplicates. Emit the slash-less form,
+// the one Google already picked. The root "/" is left as is.
+/** @param {import("@astrojs/sitemap").SitemapItem} item */
+const withoutTrailingSlash = (item) => {
+  const url = new URL(item.url);
+  if (url.pathname !== "/" && url.pathname.endsWith("/")) {
+    url.pathname = url.pathname.slice(0, -1);
+  }
+  return { ...item, url: url.toString() };
 };
 
 // https://astro.build/config
@@ -49,6 +63,7 @@ export default defineConfig({
     compressor({ gzip: true, brotli: true }),
     sitemap({
       filter: shouldIncludeInSitemap,
+      serialize: withoutTrailingSlash,
       customSitemaps: ["https://maagfrance.fr/sitemap-content.xml"],
     }),
   ],
