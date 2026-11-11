@@ -42,6 +42,9 @@ const usersCollection = db.collection("users");
 const isOwnProfileRequest = (req: Request, uid: string) =>
   (req as any).user?.uid === uid;
 
+const normalizeName = (value: unknown): string =>
+  typeof value === "string" ? value.trim() : "";
+
 const normalizeBookmark = (value: unknown): UserBookmark | null => {
   if (!value || typeof value !== "object") {
     return null;
@@ -115,12 +118,22 @@ const normalizeStoredBookmarks = (bookmarks: unknown): UserBookmark[] => {
  */
 export const createUserProfile = async (req: Request, res: Response) => {
   try {
-    const { uid, firstName, lastName } = req.body;
+    // The uid comes from the verified ID token, never from the body: a body uid
+    // would let any signed-in user create or read someone else's profile.
+    const uid: string | undefined = (req as any).user?.uid;
+    if (!uid) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    if (req.body?.uid !== undefined && req.body.uid !== uid) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
 
-    if (!uid || !firstName || !lastName) {
-      return res
-        .status(400)
-        .json({ message: "UID, firstName, and lastName are required" });
+    const firstName = normalizeName(req.body?.firstName);
+    // Optional: Google accounts may have no family name.
+    const lastName = normalizeName(req.body?.lastName);
+
+    if (!firstName) {
+      return res.status(400).json({ message: "firstName is required" });
     }
 
     const newUserProfile: Omit<UserProfile, "uid"> = {
@@ -174,6 +187,11 @@ export const createUserProfile = async (req: Request, res: Response) => {
 export const getUserProfile = async (req: Request, res: Response) => {
   try {
     const { uid } = req.params;
+
+    if (!isOwnProfileRequest(req, uid)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
     const doc = await usersCollection.doc(uid).get();
 
     if (!doc.exists) {
@@ -202,12 +220,17 @@ export const getUserProfile = async (req: Request, res: Response) => {
 export const updateUserProfile = async (req: Request, res: Response) => {
   try {
     const { uid } = req.params;
-    const { firstName, lastName } = req.body;
 
-    if (!firstName || !lastName) {
-      return res
-        .status(400)
-        .json({ message: "First name and last name are required" });
+    if (!isOwnProfileRequest(req, uid)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const firstName = normalizeName(req.body?.firstName);
+    // Optional: Google accounts may have no family name.
+    const lastName = normalizeName(req.body?.lastName);
+
+    if (!firstName) {
+      return res.status(400).json({ message: "First name is required" });
     }
 
     const userRef = usersCollection.doc(uid);
