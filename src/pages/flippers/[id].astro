@@ -1,4 +1,5 @@
 ---
+import { buildMetaDescription } from "@/lib/seo/metaDescription";
 import Layout from "../../Layouts/Layout.astro";
 import ArticleHeader from "../../components/article/ArticleHeader.astro";
 import ArticleMetaRow from "@/components/article/ArticleMetaRow.astro";
@@ -101,7 +102,10 @@ try {
 
 <Layout
   title={flipper.title}
-  description={flipper.lead}
+  description={buildMetaDescription({
+    lead: flipper.lead,
+    fallbacks: (flipper.carouselContent ?? []).map((slide) => slide.caption),
+  })}
   image={flipper.carouselContent?.[0]?.imageUrl}
   canonicalPath={`/flippers/${id}`}
   type="article"

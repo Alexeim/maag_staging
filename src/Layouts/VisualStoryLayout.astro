@@ -10,6 +10,7 @@ import GoogleTagManager from "../components/seo/GoogleTagManager.astro";
 import YandexMetrika from "../components/seo/YandexMetrika.astro";
 import CookieConsent from "../components/seo/CookieConsent.astro";
 import { buildDocumentTitle } from "@/lib/seo/documentTitle";
+import { truncateDescription } from "@/lib/seo/metaDescription";
 import {
   buildGlobalStructuredData,
   toStructuredDataArray,
@@ -46,7 +47,7 @@ const {
   structuredData = [],
 } = Astro.props as VisualStoryLayoutProps;
 
-const description = rawDescription.trim() || fallbackDescription;
+const description = truncateDescription(rawDescription) || fallbackDescription;
 const documentTitle = buildDocumentTitle(title);
 // "/news/" → "/news": one canonical per page, as in Layout.astro.
 const normalizedCanonicalPath =

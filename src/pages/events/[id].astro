@@ -1,4 +1,5 @@
 ---
+import { buildMetaDescription } from "@/lib/seo/metaDescription";
 import type { ComponentProps } from "astro/types";
 import Layout from "../../Layouts/Layout.astro";
 import ArticleBody from "../../components/article/ArticleBody.astro";
@@ -470,7 +471,10 @@ const eventStructuredData = eventData
 <Layout
   navbarVariant="default"
   title={displayEvent.title}
-  description={displayEvent.lead}
+  description={buildMetaDescription({
+    lead: displayEvent.lead,
+    blocks: displayEvent.contentBlocks,
+  })}
   image={displayEvent.imageUrl}
   canonicalPath={`/events/${id}`}
   type="article"

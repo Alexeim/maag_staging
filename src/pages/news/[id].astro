@@ -1,4 +1,5 @@
 ---
+import { buildMetaDescription } from "@/lib/seo/metaDescription";
 import { Image } from "astro:assets";
 import type { ComponentProps } from "astro/types";
 import Layout from "@/Layouts/Layout.astro";
@@ -177,7 +178,10 @@ if (!error && articleData) {
 
 <Layout
   title={displayArticle.title}
-  description={displayArticle.lead}
+  description={buildMetaDescription({
+    lead: displayArticle.lead,
+    blocks: displayArticle.contentBlocks,
+  })}
   image={displayArticle.imageUrl}
   canonicalPath={`/news/${id}`}
   type="article"

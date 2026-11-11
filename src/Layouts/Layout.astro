@@ -29,6 +29,7 @@ import { NAVBAR_TEXT } from "../lib/i18n/navbar";
 import { buildLanguageLinks, splitLocalePath } from "../lib/i18n/languageSwitch";
 import LanguageSwitch from "../components/common/LanguageSwitch.astro";
 import { buildDocumentTitle } from "@/lib/seo/documentTitle";
+import { truncateDescription } from "@/lib/seo/metaDescription";
 
 interface LayoutProps {
   title?: string;
@@ -74,7 +75,7 @@ const {
 } = Astro.props as LayoutProps;
 
 const description =
-  rawDescription?.trim() || SITE_FALLBACK_DESCRIPTION[locale];
+  truncateDescription(rawDescription ?? "") || SITE_FALLBACK_DESCRIPTION[locale];
 const documentTitle = buildDocumentTitle(title);
 const navbarText = NAVBAR_TEXT[locale];
 const navHref = (path: string) => localizePath(path, locale);
