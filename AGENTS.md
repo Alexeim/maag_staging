@@ -235,6 +235,13 @@ publication date.
   `src/alpine-entrypoint.ts` fires before the sign-in promise resolves and
   would otherwise `GET` the profile, get a 404 and leave the user without
   one. Dispatch `-end` in `finally`, or the listener waits out its 3 s timeout.
+- A missing profile is created on sign-in: `onAuthStateChanged` calls
+  `loadOrCreateProfile()` (`src/lib/utils/userProfile.ts`), which `POST`s
+  the profile **only on a 404** — never on a 500 or a network error, where
+  the profile may exist. This heals a sign-up whose Firebase account was
+  created but whose `POST /api/users` failed (the two are separate requests,
+  nothing rolls the first back). It cannot duplicate: the profile document
+  id is the uid and the `POST` is idempotent.
 - `userController.ts`: the uid is always the token's. `createUserProfile`
   ignores the body uid (a different one → 403); `GET`/`PUT /api/users/:uid`
   and the bookmark routes 403 a `:uid` that is not the caller.
