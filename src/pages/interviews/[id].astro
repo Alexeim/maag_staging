@@ -1,6 +1,7 @@
 ---
 import Layout from "../../Layouts/Layout.astro";
 import {
+  ApiError,
   interviewsApi,
   publicRelatedApi,
   type PublicRelatedCard,
@@ -23,26 +24,32 @@ type ArticleBodyProps = ComponentProps<typeof RegisteredArticleBody>;
 
 const { id } = Astro.params;
 
-let interview = null;
+if (!id) return Astro.rewrite("/404");
+
+// A missing interview answers 404 at its own URL instead of redirecting to
+// /404 (Search Console: "Page with redirect"). Any other API failure is a real
+// server error and is no longer disguised as "not found".
+let interview: Awaited<ReturnType<typeof interviewsApi.getById>>;
 try {
-  if (id) {
-    interview = await interviewsApi.getById(id);
-  }
+  interview = await interviewsApi.getById(id);
 } catch (error) {
-  console.error("Failed to fetch interview:", error);
+  if (error instanceof ApiError && error.status === 404) {
+    return Astro.rewrite("/404");
+  }
+  throw error;
 }
 
 if (!interview) {
-  return Astro.redirect("/404");
+  return Astro.rewrite("/404");
 }
 
 // Admins may preview an unpublished interview on its real page; everyone else
-// gets redirected to /404.
+// gets the 404 page.
 const isDraftPreview =
   interview.published !== true && canPreviewUnpublished(Astro.locals);
 
 if (interview.published !== true && !isDraftPreview) {
-  return Astro.redirect("/404");
+  return Astro.rewrite("/404");
 }
 
 console.log("here --------------------->>>>>>>>>", Object.keys(interview));

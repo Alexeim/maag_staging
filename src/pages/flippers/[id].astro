@@ -10,6 +10,7 @@ import {
   getTagLabel,
 } from "@/lib/utils/contentBadge";
 import {
+  ApiError,
   flippersApi,
   publicRelatedApi,
   type PublicRelatedCard,
@@ -23,20 +24,30 @@ import { normalizeTags } from "@/lib/utils/contentCollectionMarquee";
 import { buildArticleStructuredData } from "@/lib/seo/structuredData";
 
 const { id } = Astro.params;
-if (!id) return Astro.redirect("/404");
-const flipper = await flippersApi.getById(id);
+if (!id) return Astro.rewrite("/404");
+
+// A missing flipper must answer 404 at its own URL: an uncaught ApiError(404)
+// used to surface as a 500, and a redirect to /404 shows up in Search Console
+// as "Page with redirect". Any other API failure is a real server error.
+let flipper: Awaited<ReturnType<typeof flippersApi.getById>>;
+try {
+  flipper = await flippersApi.getById(id);
+} catch (e) {
+  if (e instanceof ApiError && e.status === 404) return Astro.rewrite("/404");
+  throw e;
+}
 
 if (!flipper) {
-  return Astro.redirect("/404");
+  return Astro.rewrite("/404");
 }
 
 // Admins may preview an unpublished flipper on its real page; everyone else
-// gets redirected to /404.
+// gets the 404 page.
 const isDraftPreview =
   flipper.published !== true && canPreviewUnpublished(Astro.locals);
 
 if (flipper.published !== true && !isDraftPreview) {
-  return Astro.redirect("/404");
+  return Astro.rewrite("/404");
 }
 
 const getFlipperCategory = () =>

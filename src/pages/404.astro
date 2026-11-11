@@ -7,6 +7,10 @@ import { getRequestLocale } from "@/lib/i18n/request";
 import { localizePath } from "@/lib/i18n/locales";
 import { NOT_FOUND_TEXT } from "@/lib/i18n/notFound";
 
+// Set here, not by callers: material pages reach this page through
+// `Astro.rewrite("/404")`, which keeps the original route's 200 otherwise.
+Astro.response.status = 404;
+
 const locale = getRequestLocale(Astro);
 const text = NOT_FOUND_TEXT[locale];
 ---
