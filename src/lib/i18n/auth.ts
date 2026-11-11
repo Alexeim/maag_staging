@@ -73,6 +73,8 @@ export interface AuthMessages {
   accountExistsWithDifferentCredential: string;
   wrongCredentials: string;
   unexpectedError: string;
+  networkError: string;
+  tooManyRequests: string;
   passwordsMismatch: string;
   signupSucceeded: string;
   emailAlreadyUsed: string;
@@ -91,6 +93,10 @@ export const AUTH_MESSAGES: Record<Locale, AuthMessages> = {
       "Этот email уже зарегистрирован с паролем. Войдите по email и паролю.",
     wrongCredentials: "Неверный email или пароль.",
     unexpectedError: "Произошла непредвиденная ошибка.",
+    networkError:
+      "Нет связи с сервером. Проверьте интернет или VPN и попробуйте ещё раз.",
+    tooManyRequests:
+      "Слишком много попыток. Подождите немного и попробуйте снова.",
     passwordsMismatch: "Пароли не совпадают",
     signupSucceeded: "Регистрация прошла успешно!",
     emailAlreadyUsed: "Этот email уже зарегистрирован.",
@@ -99,19 +105,25 @@ export const AUTH_MESSAGES: Record<Locale, AuthMessages> = {
     signOutFailed: "Не удалось выйти. Пожалуйста, попробуйте еще раз.",
   },
   fr: {
-    enterEmailToReset: "Saisissez votre e-mail pour réinitialiser le mot de passe.",
+    enterEmailToReset:
+      "Saisissez votre e-mail pour réinitialiser le mot de passe.",
     resetEmailSentTo: "E-mail envoyé à ",
     resetEmailFailed: "Impossible d'envoyer l'e-mail. Vérifiez l'adresse.",
-    googleSignInFailed: "Échec de la connexion avec Google. Veuillez réessayer.",
+    googleSignInFailed:
+      "Échec de la connexion avec Google. Veuillez réessayer.",
     accountExistsWithDifferentCredential:
       "Cet e-mail est déjà inscrit avec un mot de passe. Connectez-vous avec votre e-mail et votre mot de passe.",
     wrongCredentials: "E-mail ou mot de passe incorrect.",
     unexpectedError: "Une erreur inattendue s'est produite.",
+    networkError:
+      "Impossible de joindre le serveur. Vérifiez votre connexion ou votre VPN et réessayez.",
+    tooManyRequests: "Trop de tentatives. Patientez un peu et réessayez.",
     passwordsMismatch: "Les mots de passe ne correspondent pas",
     signupSucceeded: "Inscription réussie !",
     emailAlreadyUsed: "Cet e-mail est déjà utilisé.",
     weakPassword: "Le mot de passe doit contenir au moins 6 caractères",
-    unexpectedSignupError: "Une erreur inattendue s'est produite lors de l'inscription.",
+    unexpectedSignupError:
+      "Une erreur inattendue s'est produite lors de l'inscription.",
     signOutFailed: "Impossible de se déconnecter. Veuillez réessayer.",
   },
 };

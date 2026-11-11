@@ -16,6 +16,24 @@ import { documentLocale } from "@/lib/i18n/document";
 
 const messages = () => AUTH_MESSAGES[documentLocale()];
 
+// Firebase errors that mean the same thing for sign-in and sign-up, so they
+// get a specific message instead of falling into "unexpected error".
+const commonAuthErrorMessage = (err: unknown): string | null => {
+  if (!(err instanceof FirebaseError)) return null;
+  if (err.code === "auth/network-request-failed")
+    return messages().networkError;
+  if (err.code === "auth/too-many-requests") return messages().tooManyRequests;
+  return null;
+};
+
+// With email enumeration protection on, Firebase answers both a wrong password
+// and an unknown email with auth/invalid-credential instead of the older codes.
+const WRONG_CREDENTIAL_ERRORS = new Set([
+  "auth/invalid-credential",
+  "auth/wrong-password",
+  "auth/user-not-found",
+]);
+
 interface AuthFormData {
   email: string;
   password: string;
@@ -148,7 +166,10 @@ export default function authModalLogic() {
         getAlpineStore("auth").setUser(user, profile);
         getAlpineStore("auth").closeAuthModal();
       } catch (error) {
-        if (error instanceof FirebaseError && SILENT_GOOGLE_ERRORS.has(error.code)) {
+        if (
+          error instanceof FirebaseError &&
+          SILENT_GOOGLE_ERRORS.has(error.code)
+        ) {
           return;
         }
 
@@ -177,10 +198,12 @@ export default function authModalLogic() {
           );
           getAlpineStore("auth").closeAuthModal();
         } catch (err) {
-          if (
+          const commonMessage = commonAuthErrorMessage(err);
+          if (commonMessage) {
+            this.error = commonMessage;
+          } else if (
             err instanceof FirebaseError &&
-            (err.code === "auth/wrong-password" ||
-              err.code === "auth/user-not-found")
+            WRONG_CREDENTIAL_ERRORS.has(err.code)
           ) {
             this.error = messages().wrongCredentials;
           } else {
@@ -227,7 +250,10 @@ export default function authModalLogic() {
           getAlpineStore("auth").setUser(user, createdProfile);
           getAlpineStore("auth").closeAuthModal();
         } catch (err) {
-          if (
+          const commonMessage = commonAuthErrorMessage(err);
+          if (commonMessage) {
+            this.error = commonMessage;
+          } else if (
             err instanceof FirebaseError &&
             err.code === "auth/email-already-in-use"
           ) {
