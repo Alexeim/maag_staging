@@ -28,6 +28,7 @@ import {
 import { NAVBAR_TEXT } from "../lib/i18n/navbar";
 import { buildLanguageLinks, splitLocalePath } from "../lib/i18n/languageSwitch";
 import LanguageSwitch from "../components/common/LanguageSwitch.astro";
+import { buildDocumentTitle } from "@/lib/seo/documentTitle";
 
 interface LayoutProps {
   title?: string;
@@ -60,7 +61,7 @@ const toAbsoluteUrl = (value?: string) => {
 };
 
 const {
-  title = "MAAG France",
+  title,
   description: rawDescription,
   image,
   canonicalPath = Astro.url.pathname,
@@ -74,6 +75,7 @@ const {
 
 const description =
   rawDescription?.trim() || SITE_FALLBACK_DESCRIPTION[locale];
+const documentTitle = buildDocumentTitle(title);
 const navbarText = NAVBAR_TEXT[locale];
 const navHref = (path: string) => localizePath(path, locale);
 // Alpine controls visibility from the current profile, including after login.
@@ -131,16 +133,16 @@ const allStructuredData = [
     <meta property="og:site_name" content="MAAG France" />
     <meta property="og:locale" content={OG_LOCALE[locale]} />
     <meta property="og:type" content={type} />
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={documentTitle} />
     <meta property="og:description" content={description} />
     {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
     {imageUrl && <meta property="og:image" content={imageUrl} />}
-    {imageUrl && <meta property="og:image:alt" content={title} />}
+    {imageUrl && <meta property="og:image:alt" content={documentTitle} />}
     <meta
       name="twitter:card"
       content={imageUrl ? "summary_large_image" : "summary"}
     />
-    <meta name="twitter:title" content={title} />
+    <meta name="twitter:title" content={documentTitle} />
     <meta name="twitter:description" content={description} />
     {imageUrl && <meta name="twitter:image" content={imageUrl} />}
     <StructuredData data={allStructuredData} />
@@ -186,7 +188,7 @@ const allStructuredData = [
       });
     </script>
     {useClientRouter && <ClientRouter />}
-    <title>{title}</title>
+    <title>{documentTitle}</title>
   </head>
   <body class="bg-base-200">
     <Header

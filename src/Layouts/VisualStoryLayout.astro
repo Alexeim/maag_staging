@@ -9,6 +9,7 @@ import StructuredData from "../components/seo/StructuredData.astro";
 import GoogleTagManager from "../components/seo/GoogleTagManager.astro";
 import YandexMetrika from "../components/seo/YandexMetrika.astro";
 import CookieConsent from "../components/seo/CookieConsent.astro";
+import { buildDocumentTitle } from "@/lib/seo/documentTitle";
 import {
   buildGlobalStructuredData,
   toStructuredDataArray,
@@ -37,7 +38,7 @@ const toAbsoluteUrl = (value?: string) => {
 };
 
 const {
-  title = "Maag",
+  title,
   description: rawDescription = fallbackDescription,
   image,
   canonicalPath = Astro.url.pathname,
@@ -46,6 +47,7 @@ const {
 } = Astro.props as VisualStoryLayoutProps;
 
 const description = rawDescription.trim() || fallbackDescription;
+const documentTitle = buildDocumentTitle(title);
 // "/news/" → "/news": one canonical per page, as in Layout.astro.
 const normalizedCanonicalPath =
   canonicalPath !== "/" && canonicalPath.endsWith("/")
@@ -75,16 +77,16 @@ const allStructuredData = [
     {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
     <meta property="og:site_name" content="MAAG France" />
     <meta property="og:type" content={type} />
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={documentTitle} />
     <meta property="og:description" content={description} />
     {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
     {imageUrl && <meta property="og:image" content={imageUrl} />}
-    {imageUrl && <meta property="og:image:alt" content={title} />}
+    {imageUrl && <meta property="og:image:alt" content={documentTitle} />}
     <meta
       name="twitter:card"
       content={imageUrl ? "summary_large_image" : "summary"}
     />
-    <meta name="twitter:title" content={title} />
+    <meta name="twitter:title" content={documentTitle} />
     <meta name="twitter:description" content={description} />
     {imageUrl && <meta name="twitter:image" content={imageUrl} />}
     <StructuredData data={allStructuredData} />
@@ -105,7 +107,7 @@ const allStructuredData = [
     </noscript>
     <GoogleTagManager />
     <YandexMetrika />
-    <title>{title}</title>
+    <title>{documentTitle}</title>
   </head>
   <body class="bg-base-100 text-base-content">
     <Header variant="default" hoverReveal />
