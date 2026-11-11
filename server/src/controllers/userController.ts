@@ -393,36 +393,3 @@ export const removeUserBookmark = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error while removing bookmark" });
   }
 };
-
-/**
- * @description Modify a user role
- * route PUT /api/users/:uid
- */
-export const modifyUserRole = async (req: Request, res: Response) => {
-  try {
-    const { uid } = req.params;
-    const { role } = req.body;
-
-    if (!uid) {
-      return res.status(400).json({ message: "Uid is required" });
-    }
-
-    const userRef = usersCollection.doc(uid);
-    const doc = await userRef.get();
-
-    if (!doc.exists) {
-      return res.status(404).json({ message: "User profile not found" });
-    }
-
-    await userRef.update(role);
-
-    const updatedDoc = await userRef.get();
-    res.status(200).json({ uid: updatedDoc.id, ...updatedDoc.data() });
-  } catch (error) {
-    console.error("Error updaring user role:", error);
-
-    res
-      .status(500)
-      .json({ messaga: "Server error while updating user profile" });
-  }
-};

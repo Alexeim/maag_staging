@@ -240,7 +240,6 @@ publication date.
   and the bookmark routes 403 a `:uid` that is not the caller.
 - `lastName` is optional (Google accounts may have no family name);
   `firstName` is required. The email sign-up form still requires both.
-- `modifyUserRole` in `userController.ts` is not mounted on any route.
 
 ## Documents in this repo
 
