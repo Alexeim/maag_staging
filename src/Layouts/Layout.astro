@@ -78,17 +78,23 @@ const navbarText = NAVBAR_TEXT[locale];
 const navHref = (path: string) => localizePath(path, locale);
 // Alpine controls visibility from the current profile, including after login.
 const languageSwitch = { locale, links: buildLanguageLinks(Astro.originPathname) };
-// Russian canonicals stay exactly as before (trailing-slash work is on hold,
-// see docs/trailing-slash-canonical-2026-09-29.md); another language gets the
-// page's path under its own prefix.
+// "/news/" → "/news". The site answers both forms (Astro's default
+// trailingSlash: "ignore"); the canonical must always name the one used in
+// links and sitemaps, or Google sees two "main" addresses for one page
+// (see docs/trailing-slash-canonical-2026-09-29.md). The root "/" stays.
+const normalizedCanonicalPath =
+  canonicalPath !== "/" && canonicalPath.endsWith("/")
+    ? canonicalPath.slice(0, -1)
+    : canonicalPath;
+// Another language gets the page's path under its own prefix.
 const canonicalUrl = toAbsoluteUrl(
   locale === DEFAULT_LOCALE
-    ? canonicalPath
-    : localizePath(splitLocalePath(canonicalPath).path, locale),
+    ? normalizedCanonicalPath
+    : localizePath(splitLocalePath(normalizedCanonicalPath).path, locale),
 );
 const alternateLinks =
   alternates.length > 0
-    ? [{ locale, path: canonicalPath }, ...alternates].map((alternate) => ({
+    ? [{ locale, path: normalizedCanonicalPath }, ...alternates].map((alternate) => ({
         hreflang: alternate.locale,
         href: toAbsoluteUrl(alternate.path),
       }))

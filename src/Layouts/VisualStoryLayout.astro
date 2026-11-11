@@ -46,7 +46,12 @@ const {
 } = Astro.props as VisualStoryLayoutProps;
 
 const description = rawDescription.trim() || fallbackDescription;
-const canonicalUrl = toAbsoluteUrl(canonicalPath);
+// "/news/" → "/news": one canonical per page, as in Layout.astro.
+const normalizedCanonicalPath =
+  canonicalPath !== "/" && canonicalPath.endsWith("/")
+    ? canonicalPath.slice(0, -1)
+    : canonicalPath;
+const canonicalUrl = toAbsoluteUrl(normalizedCanonicalPath);
 const imageUrl = toAbsoluteUrl(image);
 const globalStructuredData = buildGlobalStructuredData(siteOrigin, toAbsoluteUrl);
 const allStructuredData = [
