@@ -8,6 +8,8 @@ import {
   sendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithPopup,
+  getAdditionalUserInfo,
+  type UserCredential,
 } from "firebase/auth";
 import { AUTH_MESSAGES } from "@/lib/i18n/auth";
 import { documentLocale } from "@/lib/i18n/document";
@@ -28,6 +30,44 @@ interface AuthInputChange {
 }
 
 const getAlpineStore = (name: string) => (globalThis as any).Alpine.store(name);
+
+// Popup outcomes that mean "the user changed their mind", not an error.
+const SILENT_GOOGLE_ERRORS = new Set([
+  "auth/popup-closed-by-user",
+  "auth/cancelled-popup-request",
+]);
+
+// Names for the Firestore profile of a Google user. Google's own profile has
+// given_name / family_name; family_name can be missing, and the backend
+// accepts an empty last name.
+const namesFromGoogle = (
+  credential: UserCredential,
+): { firstName: string; lastName: string } => {
+  const profile = (getAdditionalUserInfo(credential)?.profile ?? {}) as {
+    given_name?: unknown;
+    family_name?: unknown;
+  };
+  const given =
+    typeof profile.given_name === "string" ? profile.given_name.trim() : "";
+  const family =
+    typeof profile.family_name === "string" ? profile.family_name.trim() : "";
+
+  if (given) {
+    return { firstName: given, lastName: family };
+  }
+
+  const [first = "", ...rest] = (credential.user.displayName ?? "")
+    .trim()
+    .split(/\s+/);
+  if (first) {
+    return { firstName: first, lastName: rest.join(" ") };
+  }
+
+  return {
+    firstName: (credential.user.email ?? "").split("@")[0] || "User",
+    lastName: "",
+  };
+};
 
 export default function authModalLogic() {
   return {
@@ -83,20 +123,43 @@ export default function authModalLogic() {
       this.isLoading = true;
       this.error = "";
 
+      // onAuthStateChanged (alpine-entrypoint.ts) fires before signInWithPopup
+      // resolves; this makes it wait for the profile instead of getting a 404.
+      document.dispatchEvent(new CustomEvent("auth-profile-create-start"));
+
       try {
-        const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
+        const credential = await signInWithPopup(
+          auth,
+          new GoogleAuthProvider(),
+        );
+        const { user } = credential;
+        const token = await user.getIdToken();
+
+        // Idempotent on the backend: a returning user gets their existing
+        // profile back, nothing is overwritten.
+        const profile = await usersApi.create(
+          { uid: user.uid, ...namesFromGoogle(credential) },
+          token,
+        );
+
+        if (getAdditionalUserInfo(credential)?.isNewUser) {
+          getAlpineStore("ui").showToast(messages().signupSucceeded);
+        }
+        getAlpineStore("auth").setUser(user, profile);
+        getAlpineStore("auth").closeAuthModal();
       } catch (error) {
-        if (
-          error instanceof FirebaseError &&
-          error.code === "auth/popup-closed-by-user"
-        ) {
+        if (error instanceof FirebaseError && SILENT_GOOGLE_ERRORS.has(error.code)) {
           return;
         }
 
-        this.error = messages().googleSignInFailed;
+        this.error =
+          error instanceof FirebaseError &&
+          error.code === "auth/account-exists-with-different-credential"
+            ? messages().accountExistsWithDifferentCredential
+            : messages().googleSignInFailed;
         console.error("Google sign-in failed:", error);
       } finally {
+        document.dispatchEvent(new CustomEvent("auth-profile-create-end"));
         this.isLoading = false;
       }
     },
@@ -176,7 +239,6 @@ export default function authModalLogic() {
             this.error = messages().weakPassword;
           } else {
             this.error = messages().unexpectedSignupError;
-            // TODO remove the console log
             console.error(err);
           }
         } finally {

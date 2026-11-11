@@ -18,6 +18,8 @@ export interface AuthText {
   signupSubmit: string;
   haveAccount: string;
   toLogin: string;
+  orDivider: string;
+  continueWithGoogle: string;
 }
 
 export const AUTH_TEXT: Record<Locale, AuthText> = {
@@ -37,6 +39,8 @@ export const AUTH_TEXT: Record<Locale, AuthText> = {
     signupSubmit: "Регистрация",
     haveAccount: "Уже как дома?",
     toLogin: "Заходи",
+    orDivider: "или",
+    continueWithGoogle: "Войти через Google",
   },
   fr: {
     loginTitle: "Se connecter",
@@ -54,6 +58,8 @@ export const AUTH_TEXT: Record<Locale, AuthText> = {
     signupSubmit: "S'inscrire",
     haveAccount: "Déjà des nôtres ?",
     toLogin: "Entrez",
+    orDivider: "ou",
+    continueWithGoogle: "Continuer avec Google",
   },
 };
 
@@ -64,6 +70,7 @@ export interface AuthMessages {
   resetEmailSentTo: string;
   resetEmailFailed: string;
   googleSignInFailed: string;
+  accountExistsWithDifferentCredential: string;
   wrongCredentials: string;
   unexpectedError: string;
   passwordsMismatch: string;
@@ -80,6 +87,8 @@ export const AUTH_MESSAGES: Record<Locale, AuthMessages> = {
     resetEmailSentTo: "Письмо отправлено на ",
     resetEmailFailed: "Не удалось отправить письмо. Проверьте email.",
     googleSignInFailed: "Не удалось войти через Google. Попробуйте ещё раз.",
+    accountExistsWithDifferentCredential:
+      "Этот email уже зарегистрирован с паролем. Войдите по email и паролю.",
     wrongCredentials: "Неверный email или пароль.",
     unexpectedError: "Произошла непредвиденная ошибка.",
     passwordsMismatch: "Пароли не совпадают",
@@ -94,6 +103,8 @@ export const AUTH_MESSAGES: Record<Locale, AuthMessages> = {
     resetEmailSentTo: "E-mail envoyé à ",
     resetEmailFailed: "Impossible d'envoyer l'e-mail. Vérifiez l'adresse.",
     googleSignInFailed: "Échec de la connexion avec Google. Veuillez réessayer.",
+    accountExistsWithDifferentCredential:
+      "Cet e-mail est déjà inscrit avec un mot de passe. Connectez-vous avec votre e-mail et votre mot de passe.",
     wrongCredentials: "E-mail ou mot de passe incorrect.",
     unexpectedError: "Une erreur inattendue s'est produite.",
     passwordsMismatch: "Les mots de passe ne correspondent pas",
