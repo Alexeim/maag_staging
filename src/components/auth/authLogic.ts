@@ -12,6 +12,7 @@ import {
   type UserCredential,
 } from "firebase/auth";
 import { AUTH_MESSAGES } from "@/lib/i18n/auth";
+import { namesFromUser } from "@/lib/utils/userProfile";
 import { documentLocale } from "@/lib/i18n/document";
 
 const messages = () => AUTH_MESSAGES[documentLocale()];
@@ -74,17 +75,7 @@ const namesFromGoogle = (
     return { firstName: given, lastName: family };
   }
 
-  const [first = "", ...rest] = (credential.user.displayName ?? "")
-    .trim()
-    .split(/\s+/);
-  if (first) {
-    return { firstName: first, lastName: rest.join(" ") };
-  }
-
-  return {
-    firstName: (credential.user.email ?? "").split("@")[0] || "User",
-    lastName: "",
-  };
+  return namesFromUser(credential.user);
 };
 
 export default function authModalLogic() {

@@ -6,7 +6,8 @@ import lazyLoadPlugin from '@/lib/alpine/plugins/lazyLoadPlugin';
 import blockRichTextEditor from '@/lib/alpine/blockRichTextEditor';
 import { auth, getIdToken } from '@/lib/firebase/client';
 import { onAuthStateChanged } from 'firebase/auth';
-import { setAuthTokenProvider, usersApi } from "@/lib/api/api";
+import { setAuthTokenProvider } from "@/lib/api/api";
+import { loadOrCreateProfile } from "@/lib/utils/userProfile";
 
 // Let every api.ts write call pick up the signed-in user's token automatically.
 setAuthTokenProvider(getIdToken);
@@ -62,7 +63,7 @@ onAuthStateChanged(auth, async (user) => {
         store.setUser(user, store.profile);
       } else {
         const token = await user.getIdToken();
-        const profileData = await usersApi.get(user.uid, token);
+        const profileData = await loadOrCreateProfile(user, token);
         store?.setUser(user, profileData);
       }
     } catch (error) {
