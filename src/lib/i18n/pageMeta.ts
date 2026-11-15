@@ -13,7 +13,7 @@ interface PageMeta {
 const SECTION_META: Record<SectionPage, Record<Locale, PageMeta>> = {
   home: {
     ru: {
-      title: "MAAG France — медиа о культуре, искусстве и жизни Парижа",
+      title: "Maag France - независимое издание о культуре, искусстве и Париже",
       description:
         "Авторитетный русскоязычный источник информации о французской культуре и актуальных событиях во Франции. Интервью, рецензии, обзоры выставок, путеводители, афиша и авторские материалы о городе — всё необходимое, чтобы понимать Париж, открывать его новые стороны и чувствовать себя частью его культурной жизни.",
     },
@@ -75,5 +75,7 @@ const SECTION_META: Record<SectionPage, Record<Locale, PageMeta>> = {
 
 // Pass Astro.originPathname: under the French site the page is reached
 // through a rewrite, and only the original address carries the language.
-export const getSectionMeta = (page: SectionPage, originPathname: string): PageMeta =>
-  SECTION_META[page][splitLocalePath(originPathname).locale];
+export const getSectionMeta = (
+  page: SectionPage,
+  originPathname: string,
+): PageMeta => SECTION_META[page][splitLocalePath(originPathname).locale];
