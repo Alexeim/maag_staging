@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { getDb } from '../services/firebase';
 import { FR_COLLECTION } from '../services/articlesFr';
 import { getCalendarToday } from '../utils/calendarDate';
+import { normalizeFirstPersonVariant } from '../utils/firstPersonVariant';
 
 type PageLocale = 'ru' | 'fr';
 interface PageContent {
@@ -137,9 +138,9 @@ const getHref = (type: LandingContentType, id: string, data: any): string => {
 const getImageUrl = (type: LandingContentType, data: any): string | null => {
   if (type === 'flipper') return data.carouselContent?.[0]?.imageUrl ?? data.imageUrl ?? null;
   if (type === 'visual-story') return data.imageUrl ?? data.slides?.[0]?.imageUrl ?? null;
-  // "от первого лица" has no imageUrl of its own — the card shows the
-  // linked author's cutout portrait instead, filled in by attachAuthorNames().
-  if (type === 'first-person') return null;
+  // "от первого лица": the main image. attachAuthorNames() replaces it with
+  // the author's cutout portrait for the "first-person" variant; "opinion"
+  // keeps it.
   return data.imageUrl ?? null;
 };
 
@@ -180,6 +181,8 @@ const toLandingItem = (
     cardTitle: data.cardTitle ?? '',
     imageUrl: getImageUrl(type, data),
     secondImageUrl: getSecondImageUrl(data),
+    // "от первого лица" only: picks the card (portrait vs main image).
+    variant: type === 'first-person' ? normalizeFirstPersonVariant(data.variant) : null,
     category: data.category ?? '',
     tags: Array.isArray(data.tags) ? data.tags : [],
     createdAt: data.createdAt ?? null,
@@ -220,6 +223,7 @@ const attachAuthorNames = async (payload: unknown): Promise<void> => {
     authorName?: unknown;
     contentType?: unknown;
     imageUrl?: unknown;
+    variant?: unknown;
   }> = [];
   const visit = (node: any) => {
     if (!node || typeof node !== 'object') return;
@@ -254,9 +258,9 @@ const attachAuthorNames = async (payload: unknown): Promise<void> => {
 
   cards.forEach((card) => {
     card.authorName = card.authorId ? (nameById.get(card.authorId as string) ?? '') : '';
-    // "от первого лица" has no image of its own — the card/page shows the
-    // linked author's cutout portrait instead (getImageUrl() left this null).
-    if (card.contentType === 'first-person') {
+    // "от первого лица": the card shows the linked author's cutout portrait
+    // instead of the main image. «Мнение» keeps its main image.
+    if (card.contentType === 'first-person' && card.variant !== 'opinion') {
       card.imageUrl = card.authorId
         ? (noBgAvatarById.get(card.authorId as string) ?? null)
         : null;

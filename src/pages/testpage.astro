@@ -7,23 +7,26 @@ import Layout from "@/Layouts/Layout.astro";
 import { ShieldAlert } from "@lucide/astro";
 // Import stuff to test
 import FirstPersonCard from "@/components/common/FirstPersonCard.astro";
+import OpinionCard from "@/components/common/OpinionCard.astro";
 ---
 
 <Layout>
-  <div
-    class="bg-amber-500 w-full flex flex-row items-center justify-center p-2"
-  >
+  <div class="bg-amber-500 w-full flex flex-row items-center justify-center p-2">
     <ShieldAlert />
     <h1 class="font-bold px-2">Testing Page (admins only)</h1>
     <ShieldAlert />
   </div>
   <div class="min-h-screen flex items-center justify-center">
     <div class="w-[320px]">
-      <FirstPersonCard
-        key={"one"}
-        authorName={"Роман Должанский"}
-        title={"о том, как он попал в DAU Ильи Хржановского и сыграл самого себя."}
-        imageUrl={"https://firebasestorage.googleapis.com/v0/b/maag-60419.firebasestorage.app/o/authorsAvatars%2FnoBackground%2F1789590237443-RD_void.png?alt=media&token=172e7d13-115a-4650-bdea-466c3510836e"}
+      <OpinionCard
+        category="мнение"
+        authorName="Роман Должанский"
+        title={
+          "о том, как он попал в DAU Ильи Хржановского и сыграл самого себя."
+        }
+        imageUrl={
+          "https://firebasestorage.googleapis.com/v0/b/maag-60419.firebasestorage.app/o/authorsAvatars%2FnoBackground%2F1789590237443-RD_void.png?alt=media&token=172e7d13-115a-4650-bdea-466c3510836e"
+        }
         href={"/"}
       />
     </div>

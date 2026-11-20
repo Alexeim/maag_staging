@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDb } from '../services/firebase';
+import { normalizeFirstPersonVariant } from '../utils/firstPersonVariant';
 
 const db = getDb();
 
@@ -30,7 +31,9 @@ export type DashboardMaterialType =
   | 'interview'
   | 'photo-of-the-day'
   | 'event'
-  | 'first-person';
+  | 'first-person'
+  // A firstPerson document with variant "opinion" («мнение»).
+  | 'opinion';
 
 export type DashboardBucket = 'culture' | 'paris' | 'events' | 'none';
 
@@ -57,6 +60,7 @@ const SELECT_FIELDS = [
   'articleType',
   'isNews',
   'startDate',
+  'variant',
 ] as const;
 
 interface SourceConfig {
@@ -88,7 +92,12 @@ const SOURCES: SourceConfig[] = [
     forcedCategory: 'culture',
     resolveType: () => 'interview',
   },
-  { collection: 'firstPerson', categoryApplies: true, resolveType: () => 'first-person' },
+  {
+    collection: 'firstPerson',
+    categoryApplies: true,
+    resolveType: (data) =>
+      normalizeFirstPersonVariant(data.variant) === 'opinion' ? 'opinion' : 'first-person',
+  },
   {
     collection: 'events',
     categoryApplies: false,

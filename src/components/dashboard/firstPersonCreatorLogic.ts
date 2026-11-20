@@ -1,4 +1,4 @@
-import { firstPersonApi } from "@/lib/api/api";
+import { firstPersonApi, type FirstPersonVariant } from "@/lib/api/api";
 import articleCreatorLogic from "@/components/article/creatorLogic";
 import { reindexContentBlocks } from "@/lib/utils/contentBlocks";
 import {
@@ -14,9 +14,10 @@ import {
 const PREVIEW_KEY = "firstPersonPreview";
 
 // "От первого лица" reuses the article block editor/category/tags/author
-// machinery wholesale (via articleCreatorLogic), but has no hero image and
-// is never eligible to become a landing main/category hero — only the
-// isMaagChoice flag controls where it surfaces (the "Выбор Maag" rail).
+// machinery wholesale (via articleCreatorLogic), including the main image
+// upload (article.imageUrl). It is never eligible to become a landing
+// main/category hero. article.variant switches it between "first-person"
+// (portrait card) and "opinion" («мнение», main-image card).
 export default function firstPersonCreatorLogic(initialState = {}) {
   // First-person reads its own preview snapshot in init(). The article base
   // must not act as an article preview, or it would load the article's snapshot.
@@ -33,6 +34,14 @@ export default function firstPersonCreatorLogic(initialState = {}) {
   return {
     ...baseLogic,
 
+    // Kept inside `article` on purpose: the preview snapshot and the
+    // unsaved-changes guard both take `article` whole, so the switch reaches
+    // them without extra wiring.
+    article: {
+      ...baseLogic.article,
+      variant: "first-person" as FirstPersonVariant,
+    },
+
     // Widens previewAuthorDisplay beyond baseLogic's {name, avatarUrl} shape
     // so assigning the extra noBgAvatarUrl field below type-checks.
     previewAuthorDisplay: { name: "", avatarUrl: "", noBgAvatarUrl: "" },
@@ -47,6 +56,12 @@ export default function firstPersonCreatorLogic(initialState = {}) {
 
     init() {
       baseLogic.init.call(this);
+
+      // Documents saved before the switch have no variant. Normalize before
+      // the unsaved-changes guard takes its baseline, or opening an old
+      // material would already count as an edit.
+      this.article.variant =
+        this.article.variant === "opinion" ? "opinion" : "first-person";
 
       if (!isPreview) {
         // Opening the editor drops any leftover snapshot so it can't go stale.
@@ -180,6 +195,14 @@ export default function firstPersonCreatorLogic(initialState = {}) {
         return;
       }
 
+      if (!this.article.imageUrl) {
+        toast(
+          "Теперь у каждого материала «от первого лица» должна быть главная картинка — загрузи её, чтобы сохранить.",
+        );
+        this.isSaving = false;
+        return;
+      }
+
       if (!this.article.category) {
         toast("Выбери категорию — без неё материал не сохранится.");
         this.isSaving = false;
@@ -202,6 +225,8 @@ export default function firstPersonCreatorLogic(initialState = {}) {
         const payload = {
           title: this.article.title,
           authorId: resolvedAuthorId,
+          imageUrl: this.article.imageUrl,
+          variant: this.article.variant,
           content: this.article.contentBlocks,
           category: this.article.category,
           tags: selectedCategoryTags,

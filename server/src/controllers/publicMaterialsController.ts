@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getDb } from '../services/firebase';
+import { normalizeFirstPersonVariant } from '../utils/firstPersonVariant';
 
 const db = getDb();
 
@@ -10,7 +11,11 @@ type MaterialContentType =
   | 'event'
   | 'flipper'
   | 'interview'
-  | 'visual-story';
+  | 'visual-story'
+  // Both read the firstPerson collection, split by its `variant` field
+  // (belongsToType below) so each gets its own section and pagination.
+  | 'first-person'
+  | 'opinion';
 
 const COLLECTION_BY_TYPE: Record<MaterialContentType, string> = {
   article: 'articles',
@@ -20,6 +25,8 @@ const COLLECTION_BY_TYPE: Record<MaterialContentType, string> = {
   flipper: 'flippers',
   interview: 'interviews',
   'visual-story': 'visual-stories',
+  'first-person': 'firstPerson',
+  opinion: 'firstPerson',
 };
 
 const TYPE_LABELS: Record<MaterialContentType, string> = {
@@ -30,6 +37,8 @@ const TYPE_LABELS: Record<MaterialContentType, string> = {
   flipper: 'Листалки',
   interview: 'Интервью',
   'visual-story': 'Крупным планом',
+  'first-person': 'От первого лица',
+  opinion: 'Мнения',
 };
 
 // Order in which sections appear on the /tag/[tag] page. Events lead the
@@ -43,6 +52,8 @@ const TYPE_ORDER: MaterialContentType[] = [
   'flipper',
   'interview',
   'visual-story',
+  'first-person',
+  'opinion',
 ];
 
 // Order in which sections appear on the /author/[id] page — articles lead,
@@ -55,6 +66,8 @@ const AUTHOR_TYPE_ORDER: MaterialContentType[] = [
   'flipper',
   'interview',
   'visual-story',
+  'first-person',
+  'opinion',
 ];
 
 // Each section paginates independently, so every type needs its own query param.
@@ -66,6 +79,8 @@ const PAGE_PARAM_BY_TYPE: Record<MaterialContentType, string> = {
   flipper: 'flipperPage',
   interview: 'interviewPage',
   'visual-story': 'visualStoryPage',
+  'first-person': 'firstPersonPage',
+  opinion: 'opinionPage',
 };
 
 const PAGE_SIZE = 10;
@@ -80,6 +95,7 @@ const getHref = (type: MaterialContentType, id: string, data: any): string => {
   if (type === 'visual-story') return `/visual-story/${id}`;
   if (type === 'news') return `/news/${id}`;
   if (type === 'event') return `/events/${id}`;
+  if (type === 'first-person' || type === 'opinion') return `/first-person/${id}`;
   return `/article/${id}`;
 };
 
@@ -118,6 +134,10 @@ const parsePage = (value: unknown): number => {
 // Content types that can carry the "самое читаемое" / "записная книжка" /
 // "Нетленка" editorial flags — mirrors EDITORIAL_FLAG_CONTENT_TYPE_SET in
 // publicLandingController.ts so a flag means the same thing everywhere.
+// One deliberate exception: "first-person"/"opinion" are flagged on the
+// landing but not here. Nearly all of them carry isMaagChoice (it is how they
+// reach the landing), and on /tag/[tag] a flag moves the item out of its
+// section into the aside — they would never show up as rows.
 const EDITORIAL_FLAG_TYPES = new Set<MaterialContentType>([
   'article',
   'guide',
@@ -185,17 +205,31 @@ const attachAuthorNames = async (items: MaterialItem[]): Promise<MaterialItem[]>
     authorIds.map((authorId) => db.collection('authors').doc(authorId).get()),
   );
   const nameById = new Map<string, string>();
+  const noBgAvatarById = new Map<string, string>();
   authorDocs.forEach((doc) => {
     if (!doc.exists) return;
-    const data = doc.data() as { firstName?: string; lastName?: string } | undefined;
+    const data = doc.data() as
+      | { firstName?: string; lastName?: string; noBgAvatar?: string }
+      | undefined;
     const name = [data?.firstName, data?.lastName].filter(Boolean).join(' ').trim();
     if (name) nameById.set(doc.id, name);
+    if (data?.noBgAvatar) noBgAvatarById.set(doc.id, data.noBgAvatar);
   });
 
-  return items.map((item) => ({
-    ...item,
-    authorName: item.authorId ? (nameById.get(item.authorId) ?? '') : '',
-  }));
+  return items.map((item) => {
+    const isFirstPersonType = item.contentType === 'first-person' || item.contentType === 'opinion';
+    // firstPerson documents saved before the main image became required have
+    // none: fall back to the author's cutout portrait until they are re-saved.
+    const imageUrl =
+      isFirstPersonType && !item.imageUrl && item.authorId
+        ? (noBgAvatarById.get(item.authorId) ?? null)
+        : item.imageUrl;
+    return {
+      ...item,
+      imageUrl,
+      authorName: item.authorId ? (nameById.get(item.authorId) ?? '') : '',
+    };
+  });
 };
 
 const sortByPublishedAtDesc = (left: MaterialItem, right: MaterialItem) =>
@@ -235,6 +269,15 @@ const pickFeaturedEvent = (events: MaterialItem[]): MaterialItem | null => {
 const isSidebarCard = (item: MaterialItem): boolean =>
   item.isHotContent || item.isNotebookContent || item.isMaagChoice;
 
+// The two firstPerson sections share one collection: split by variant in
+// code, because older documents have no `variant` field at all and a
+// Firestore equality filter cannot match a missing field.
+const belongsToType = (type: MaterialContentType, data: FirebaseFirestore.DocumentData): boolean => {
+  if (type === 'first-person') return normalizeFirstPersonVariant(data.variant) === 'first-person';
+  if (type === 'opinion') return normalizeFirstPersonVariant(data.variant) === 'opinion';
+  return true;
+};
+
 const fetchTaggedItems = async (
   type: MaterialContentType,
   tag: string,
@@ -246,7 +289,9 @@ const fetchTaggedItems = async (
     .where('published', '==', true)
     .get();
 
-  return snapshot.docs.map((doc) => toMaterialItem(doc, type));
+  return snapshot.docs
+    .filter((doc) => belongsToType(type, doc.data()))
+    .map((doc) => toMaterialItem(doc, type));
 };
 
 const fetchAuthoredItems = async (
@@ -259,7 +304,9 @@ const fetchAuthoredItems = async (
     .where('published', '==', true)
     .get();
 
-  return snapshot.docs.map((doc) => toMaterialItem(doc, type));
+  return snapshot.docs
+    .filter((doc) => belongsToType(type, doc.data()))
+    .map((doc) => toMaterialItem(doc, type));
 };
 
 /**

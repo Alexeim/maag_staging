@@ -52,20 +52,35 @@ const authorName = author ? `${author.firstName} ${author.lastName}`.trim() : ""
 const authorPortrait = author?.noBgAvatar || "";
 const authorHref = materialData?.authorId ? `/author/${materialData.authorId}` : undefined;
 
-// materialData.title only holds the headline's tail ("о том, как...") — the
-// author's full name is composed in front of it for anything rendered as a
-// flat string (tab title, structured data, share text).
+// «Мнение»: the left column shows the material's main image instead of the
+// author's portrait, and the title is shown as-is (no author name).
+const isOpinion = materialData?.variant === "opinion";
+const opinionImage = isOpinion ? materialData?.imageUrl || "" : "";
+const materialLabel = isOpinion ? "Мнение" : "От первого лица";
+
+// "first-person": materialData.title only holds the headline's tail
+// ("о том, как...") — the author's full name is composed in front of it for
+// anything rendered as a flat string (tab title, structured data, share text).
 const displayMaterial = {
   title: materialData?.title || "",
   // Stored blocks are unvalidated JSON; FirstPersonBody renders them by `type`.
   contentBlocks: (materialData?.content || []) as FirstPersonBodyProps["contentBlocks"],
 };
 const composedTitle =
-  composeFirstPersonTitle(authorName, displayMaterial.title) || "Материал";
+  (isOpinion
+    ? displayMaterial.title.trim()
+    : composeFirstPersonTitle(authorName, displayMaterial.title)) || "Материал";
 
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
 const canonicalUrl = new URL(`/first-person/${id}`, siteOrigin).toString();
 const organizationId = new URL("/#organization", siteOrigin).toString();
+// Main image for link previews (og:image / twitter:image via Layout) and
+// Article.image, as on article pages. Both variants have one; documents
+// saved before it became required get no image — the cutout portrait makes
+// a poor preview.
+const mainImageUrl = materialData?.imageUrl
+  ? new URL(materialData.imageUrl, siteOrigin).toString()
+  : undefined;
 const toIsoDate = (value: unknown) => {
   if (!value) return undefined;
   const date = new Date(value as string);
@@ -76,6 +91,7 @@ const materialStructuredData = materialData
       "@context": "https://schema.org",
       "@type": "Article",
       headline: composedTitle,
+      image: mainImageUrl ? [mainImageUrl] : undefined,
       datePublished: toIsoDate(materialData.publishedAt),
       dateModified: toIsoDate(materialData.updatedAt ?? materialData.publishedAt),
       author: authorName ? { "@type": "Person", name: authorName } : { "@id": organizationId },
@@ -89,7 +105,8 @@ const materialStructuredData = materialData
 <Layout
   navbarVariant="default"
   title={composedTitle}
-  description="От первого лица"
+  description={materialLabel}
+  image={mainImageUrl}
   canonicalPath={`/first-person/${id}`}
   type="article"
   structuredData={materialStructuredData}
@@ -111,7 +128,18 @@ const materialStructuredData = materialData
                    FirstPersonBody can pull quotes out to its left edge. -->
               <div class="mb-8 flex flex-col gap-4 items-center lg:items-start lg:float-left lg:w-[calc((100%-2rem)/3)]">
                 <div class="w-80 max-w-full sm:w-49.75 sm:max-w-70 lg:w-full">
-                  {authorPortrait ? (
+                  {isOpinion ? (
+                    opinionImage ? (
+                      <img
+                        src={opinionImage}
+                        alt={composedTitle}
+                        class="h-auto w-full"
+                        transition:name={`main-article-image-${id}`}
+                      />
+                    ) : (
+                      <div class="aspect-239/278 w-full bg-base-300" />
+                    )
+                  ) : authorPortrait ? (
                     <a href={authorHref} class:list={[authorHref && "hover:opacity-90"]}>
                       <img
                         src={authorPortrait}
@@ -136,10 +164,10 @@ const materialStructuredData = materialData
               <div class="mb-8 lg:ml-auto lg:w-[calc((100%-2rem)*2/3)]">
                 <div class="flex flex-col gap-4">
                   <p class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
-                    От первого лица
+                    {materialLabel}
                   </p>
                   <h1 class="font-old_standard text-3xl leading-tight text-base-content lg:text-[44px]">
-                    {authorName && <span class="font-bold">{authorName}<br /></span>}{authorName && " "}<span class="italic">{displayMaterial.title}</span>
+                    {!isOpinion && authorName && <span class="font-bold">{authorName}<br /></span>}{!isOpinion && authorName && " "}<span class="italic">{displayMaterial.title}</span>
                   </h1>
                   <ContentActions
                     contentType="firstPerson"

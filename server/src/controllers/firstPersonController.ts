@@ -4,17 +4,25 @@ import {
   buildPublicationFieldsForCreate,
   buildPublicationFieldsForUpdate,
 } from '../utils/publication';
+import {
+  normalizeFirstPersonVariant,
+  type FirstPersonVariant,
+} from '../utils/firstPersonVariant';
 
 // "От первого лица": same category/tags/blocks shape as an article, but no
-// hero image (the card/page portrait comes from the linked author's
-// noBgAvatar) and no related-content/content-collection editor yet.
+// related-content/content-collection editor yet. imageUrl is the main image:
+// author/tag page rows always use it; the landing card and the page use it
+// only for the "opinion" variant.
 export interface FirstPerson {
   id?: string;
-  // Only the headline's tail ("о том, как он попал..."). The author's full
-  // name is prepended at render time (composeFirstPersonTitle on the client)
-  // — never stored here, so it stays in sync if the author is renamed.
+  // "first-person": only the headline's tail ("о том, как он попал...") —
+  // the author's full name is prepended at render time
+  // (composeFirstPersonTitle on the client), never stored here, so it stays
+  // in sync if the author is renamed. "opinion": the whole headline.
   title: string;
   authorId: string;
+  imageUrl: string;
+  variant: FirstPersonVariant;
   content: any[];
   category?: string;
   tags?: string[];
@@ -35,6 +43,9 @@ const normalizeTags = (tags: unknown): string[] =>
     ? tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
     : [];
 
+const normalizeImageUrl = (value: unknown): string =>
+  typeof value === 'string' ? value.trim() : '';
+
 /**
  * @description Create a new "от первого лица" material
  * @route POST /api/first-person
@@ -45,6 +56,8 @@ export const createFirstPerson = async (req: Request, res: Response) => {
       title,
       content,
       authorId,
+      imageUrl,
+      variant,
       category,
       tags = [],
       parisSubCategories = [],
@@ -56,11 +69,18 @@ export const createFirstPerson = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Title, content, and authorId are required' });
     }
 
+    const normalizedImageUrl = normalizeImageUrl(imageUrl);
+    if (!normalizedImageUrl) {
+      return res.status(400).json({ message: 'imageUrl is required' });
+    }
+
     const now = new Date();
     const docRef = firstPersonCollection.doc();
     const newFirstPerson: Omit<FirstPerson, 'id'> = {
       title,
       authorId,
+      imageUrl: normalizedImageUrl,
+      variant: normalizeFirstPersonVariant(variant),
       content,
       category: category || '',
       tags: normalizeTags(tags),
@@ -150,6 +170,8 @@ export const updateFirstPerson = async (req: Request, res: Response) => {
       title,
       content,
       authorId,
+      imageUrl,
+      variant,
       category,
       tags = [],
       parisSubCategories = [],
@@ -161,10 +183,17 @@ export const updateFirstPerson = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Title, content, and authorId are required' });
     }
 
+    const normalizedImageUrl = normalizeImageUrl(imageUrl);
+    if (!normalizedImageUrl) {
+      return res.status(400).json({ message: 'imageUrl is required' });
+    }
+
     const now = new Date();
     const updatedFirstPerson: Partial<FirstPerson> = {
       title,
       authorId,
+      imageUrl: normalizedImageUrl,
+      variant: normalizeFirstPersonVariant(variant),
       content,
       category: category || '',
       tags: normalizeTags(tags),
@@ -198,6 +227,10 @@ export const deleteFirstPerson = async (req: Request, res: Response) => {
 
     const data = doc.data() as FirstPerson;
     const imageUrlsToDelete: string[] = [];
+
+    if (data.imageUrl) {
+      imageUrlsToDelete.push(data.imageUrl);
+    }
 
     if (Array.isArray(data.content)) {
       for (const block of data.content) {

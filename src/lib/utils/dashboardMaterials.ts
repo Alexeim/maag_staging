@@ -123,6 +123,16 @@ export const MATERIAL_TYPES: Record<DashboardMaterialType, MaterialTypeMeta> = {
     viewHref: (id) => `/first-person/${id}`,
     deletePath: (id) => `/api/first-person/${id}`,
   },
+  // Same document type, editor and API as "first-person" — only the badge differs.
+  opinion: {
+    label: "Мнение",
+    badge: "Мнение",
+    icon: "UserRound",
+    badgeClass: "bg-pink-100 text-pink-700",
+    editHref: (id) => `/dashboard/first-person/${id}/edit`,
+    viewHref: (id) => `/first-person/${id}`,
+    deletePath: (id) => `/api/first-person/${id}`,
+  },
 };
 
 // Order for the type filter dropdown.
@@ -138,6 +148,7 @@ export const MATERIAL_TYPE_ORDER: DashboardMaterialType[] = [
   "photo-of-the-day",
   "event",
   "first-person",
+  "opinion",
 ];
 
 export interface BucketMeta {

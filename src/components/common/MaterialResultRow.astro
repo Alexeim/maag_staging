@@ -7,6 +7,7 @@ import {
   getPrimaryBadgeLabel,
 } from "@/lib/utils/contentBadge";
 import type { PublicMaterialItem } from "@/lib/api/api";
+import { composeFirstPersonTitle } from "@/lib/utils/firstPerson";
 
 interface Props {
   item: PublicMaterialItem;
@@ -16,6 +17,12 @@ const { item } = Astro.props;
 
 const badgeLabel = getPrimaryBadgeLabel(item);
 const badgeHref = getPrimaryBadgeHref(item);
+// "От первого лица" stores only the headline's tail; the author's name is
+// prepended at render time. «Мнение» ("opinion") shows its title as-is.
+const displayTitle =
+  item.contentType === "first-person"
+    ? composeFirstPersonTitle(item.authorName, item.title)
+    : item.title;
 ---
 
 <article
@@ -24,13 +31,13 @@ const badgeHref = getPrimaryBadgeHref(item);
   <a
     href={item.href}
     class="linked-image-hover block aspect-[3/2] w-28 flex-shrink-0 overflow-hidden bg-base-200 sm:w-full sm:flex-shrink"
-    aria-label={item.title}
+    aria-label={displayTitle}
   >
     {
       item.imageUrl && (
         <img
           src={item.imageUrl}
-          alt={item.title}
+          alt={displayTitle}
           class="linked-image-hover__media h-full w-full object-cover"
           loading="lazy"
         />
@@ -59,7 +66,7 @@ const badgeHref = getPrimaryBadgeHref(item);
       <h3
         class="m-0 font-old_standard text-base sm:text-2xl lg:text-3xl font-normal leading-tight"
       >
-        {item.title}
+        {displayTitle}
       </h3>
     </a>
 

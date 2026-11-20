@@ -1,0 +1,52 @@
+---
+import LazyImage from "./LazyImage.astro";
+import { getRequestLocale } from "@/lib/i18n/request";
+import { CARD_TEXT } from "@/lib/i18n/cards";
+
+const text = CARD_TEXT[getRequestLocale(Astro)];
+
+// «Мнение»: an "от первого лица" material with variant "opinion". Unlike
+// FirstPersonCard, the title is shown as-is (no author name prepended) and
+// the image is the material's main image, not the author's portrait.
+interface OpinionCardProps {
+  title?: string;
+  imageUrl?: string | null;
+  href?: string;
+}
+
+const { title = "", imageUrl, href = "#" } = Astro.props as OpinionCardProps;
+
+const imageLoading: "lazy" | "eager" = imageUrl ? "lazy" : "eager";
+const accessibleTitle = title.trim() || text.untitled;
+---
+
+<div class="linked-image-hover w-full">
+  <div class="relative aspect-2/3 w-full grid grid-rows-[5fr_7fr] overflow-hidden bg-base-100 border-[10px] border-gray-400">
+    <div class="flex flex-row items-center justify-center">
+      <div class="flex w-1/6 items-start justify-center">
+        <span class="[writing-mode:vertical-rl] rotate-180 whitespace-nowrap text-xs text-accent font-semibold uppercase tracking-[0.25em] px-4 font-['Inter']">
+          мнение
+        </span>
+      </div>
+      <div class="w-5/6 pt-4 pr-2">
+        <h2 class="font-old_standard font-normal leading-[1.15] text-base-content text-[22px]">
+          <span class="italic">{title}</span>
+        </h2>
+      </div>
+    </div>
+    <div>
+      {imageUrl ? (
+        <LazyImage
+          src={imageUrl}
+          alt=""
+          class="linked-image-hover__media h-full w-full object-contain object-bottom"
+          loading={imageLoading}
+        />
+      ) : (
+        <div class="h-full w-full bg-base-300" />
+      )}
+    </div>
+
+    <a href={href} class="absolute inset-0 z-1" aria-label={accessibleTitle}></a>
+  </div>
+</div>

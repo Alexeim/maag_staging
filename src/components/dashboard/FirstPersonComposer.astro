@@ -37,11 +37,39 @@ const {
   >
     <h2 class="text-xl font-semibold mb-4">Основная информация</h2>
 
+    <div class="mb-6 space-y-2">
+      <label class="block text-sm font-medium text-base-content">Тип материала</label>
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          x-on:click="article.variant = 'first-person'"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          x-bind:class="article.variant !== 'opinion' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          От первого лица
+        </button>
+        <button
+          type="button"
+          x-on:click="article.variant = 'opinion'"
+          class="px-3 py-2 border text-sm cursor-pointer"
+          x-bind:class="article.variant === 'opinion' ? 'bg-primary text-primary-content border-primary' : 'bg-base-100 border-base-300 text-base-content'"
+        >
+          Мнение
+        </button>
+      </div>
+      <p class="text-xs text-base-content/60">
+        «От первого лица» — на карточке и странице портрет автора без фона. «Мнение» — главная картинка вместо портрета.
+      </p>
+    </div>
+
     <label class="block text-sm font-medium text-base-content mb-2"
       >Заголовок материала</label
     >
-    <p class="text-xs text-base-content/60 mb-2">
+    <p x-show="article.variant !== 'opinion'" class="text-xs text-base-content/60 mb-2">
       На публичной странице и в карточке имя автора добавится перед этим текстом автоматически — здесь нужно ввести только продолжение, например «о том, как он попал в DAU Ильи Хржановского и сыграл самого себя».
+    </p>
+    <p x-show="article.variant === 'opinion'" class="text-xs text-base-content/60 mb-2">
+      У «мнения» имя автора к заголовку не добавляется — введи заголовок целиком.
     </p>
     <template x-if="isEditingTitle">
       <div>
@@ -110,7 +138,7 @@ const {
         </select>
         <p x-show="authorsLoading" class="text-xs text-base-content/60 mt-1">Загружаем авторов...</p>
         <p
-          x-show="selectedAuthorId && !getSelectedAuthorNoBgAvatar()"
+          x-show="article.variant !== 'opinion' && selectedAuthorId && !getSelectedAuthorNoBgAvatar()"
           class="text-xs text-warning mt-1"
         >
           У этого автора нет портрета без фона — добавь его в карточке автора, иначе карточка «от первого лица» будет без фото.
@@ -130,11 +158,57 @@ const {
           class="bg-base-100 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-2.5"
           placeholder="Фамилия автора"
         />
-        <p class="sm:col-span-2 text-xs text-base-content/60">
+        <p x-show="article.variant !== 'opinion'" class="sm:col-span-2 text-xs text-base-content/60">
           У нового автора ещё не будет портрета без фона — добавь его потом в карточке автора, иначе карточка «от первого лица» будет без фото.
         </p>
       </div>
     </div>
+
+    <hr class="my-6" />
+
+    <!-- Main image: author/tag page rows always; card and page for «мнение» -->
+    <label class="block text-sm font-medium text-base-content mb-2"
+      >Главная картинка</label
+    >
+    <p class="text-xs text-base-content/60 mb-2">
+      Обязательна. Показывается в списках на страницах автора и тега, а у «мнения» — ещё и на карточке и странице материала.
+    </p>
+    <div class="flex items-center" x-data="{ fileName: '' }">
+      <label
+        for="first-person-main-image-upload"
+        class="cursor-pointer text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 rounded-2xl flex flex-row gap-2 items-center justify-center py-2 px-4"
+      >
+        <CloudUpload />
+        Загрузить файл
+      </label>
+      <input
+        id="first-person-main-image-upload"
+        type="file"
+        class="hidden"
+        x-on:change="handleImageUpload($event, true); fileName = $event.target.files[0]?.name || ''"
+        accept="image/png, image/jpeg, image/webp"
+      />
+      <span
+        x-text="fileName ? fileName : (article.imageUrl ? 'Изображение загружено' : 'Файл не выбран')"
+        class="ml-4 text-sm text-base-content/70"></span>
+    </div>
+    <div x-show="uploading && editingIndex === null" class="mt-4">
+      <p>Загрузка: <span x-text="uploadProgress.toFixed(2) + '%'"></span></p>
+      <div class="w-full bg-base-200 rounded-full h-2">
+        <div
+          class="bg-primary h-2 rounded-full"
+          x-bind:style="{ width: uploadProgress + '%' }"
+        >
+        </div>
+      </div>
+    </div>
+    <template x-if="article.imageUrl && !uploading">
+      <img
+        x-bind:src="article.imageUrl"
+        alt="Главная картинка"
+        class="mt-4 max-h-60 w-auto border border-base-300"
+      />
+    </template>
 
     <hr class="my-6" />
 
@@ -165,7 +239,7 @@ const {
       </label>
     </div>
     <p class="mt-1 text-xs text-base-content/60">
-      Сейчас это единственное место на сайте, где появляются материалы «от первого лица» — без этой галочки материал останется недоступен читателям.
+      Галочка ставит материал в Нетленку на главной. Без неё материал всё равно виден читателям — в разделах «От первого лица» и «Мнения» на страницах автора и тега.
     </p>
 
     <div class="mt-6">

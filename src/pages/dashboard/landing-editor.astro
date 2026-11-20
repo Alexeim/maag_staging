@@ -252,8 +252,15 @@ const mainHeroArticleMeta = new Map<
 // "article" (that is what the backend accepts for a slot). These keys only let
 // the lists show the "Tips" badge and chip instead of "Статья".
 const tipsArticleKeys = new Set<string>();
-const displayType = (item: { id: string; type: string }) =>
-  tipsArticleKeys.has(item.id) ? "tips" : item.type;
+// Same for «мнение»: a firstPerson document with variant "opinion" is placed
+// as "first-person" (the only type the Нетленка slot accepts), but shown with
+// its own "Мнение" badge and chip.
+const opinionKeys = new Set<string>();
+const displayType = (item: { id: string; type: string }) => {
+  if (tipsArticleKeys.has(item.id)) return "tips";
+  if (opinionKeys.has(item.id)) return "opinion";
+  return item.type;
+};
 // Badge for a saved placement ({ type, id } as stored by the backend).
 const placedBadge = (type: string, id: string) =>
   materialTypeBadge(displayType({ id: `${type}:${id}`, type }));
@@ -393,12 +400,14 @@ try {
     // unlike the other types above, only the netlenka (Выбор MAAG) branch applies.
     if (isMaagChoiceItem(item) && isPublishedItem(item)) {
       const key = `first-person:${item.id}`;
+      const isOpinion = item.variant === "opinion";
+      if (isOpinion) opinionKeys.add(key);
       contentTitleMaps.netlenka.set(key, item.title);
       netlenkaOptionItems.push({
         id: key,
         title: item.title,
         type: "first-person",
-        typeLabel: NETLENKA_TYPE_LABELS["first-person"],
+        typeLabel: isOpinion ? "Мнение" : NETLENKA_TYPE_LABELS["first-person"],
         createdAt: item.createdAt,
         createdAtMs: toMs(item.createdAt),
         publishedAtMs: toMs(item.publishedAt),

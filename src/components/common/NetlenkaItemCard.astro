@@ -1,0 +1,45 @@
+---
+// One item of the landing's Нетленка rail. LandingBody renders the rail twice
+// (desktop column and mobile carousel); the card choice lives here so the two
+// can't drift apart. Title/tag/date come in already computed — LandingBody's
+// helpers for them are shared with its other blocks.
+import NetlenkaCardOne from "./NetlenkaCardOne.astro";
+import FirstPersonCard from "./FirstPersonCard.astro";
+import OpinionCard from "./OpinionCard.astro";
+import type { PublicCardItem } from "@/lib/api/api";
+
+interface Props {
+  item: Omit<PublicCardItem, "lead">;
+  title: string;
+  category: string;
+  categoryHref: string | null;
+  date: string;
+}
+
+const { item, title, category, categoryHref, date } = Astro.props;
+const isFirstPerson = item.contentType === "first-person";
+const isOpinion = isFirstPerson && item.variant === "opinion";
+---
+
+{
+  isOpinion ? (
+    <OpinionCard title={title} imageUrl={item.imageUrl} href={item.href} />
+  ) : isFirstPerson ? (
+    <FirstPersonCard
+      authorName={item.authorName}
+      title={title}
+      imageUrl={item.imageUrl}
+      href={item.href}
+    />
+  ) : (
+    <NetlenkaCardOne
+      title={title}
+      category={category}
+      categoryHref={categoryHref}
+      date={date}
+      hideDate={true}
+      imageUrl={item.imageUrl ?? undefined}
+      href={item.href}
+    />
+  )
+}

@@ -26,7 +26,22 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
       <main class="bg-base-100">
         <div class="pt-16 pb-20 flex flex-col items-center gap-16">
           <div class="flex flex-col sm:flex-row gap-8 max-w-[825px] w-full px-6">
-            <div class="shrink-0">
+            <!-- «Мнение»: main image instead of the portrait -->
+            <div class="shrink-0" x-show="article.variant === 'opinion'">
+              <template x-if="article.imageUrl">
+                <img
+                  x-bind:src="article.imageUrl"
+                  alt=""
+                  class="w-29.75 h-auto"
+                />
+              </template>
+              <template x-if="!article.imageUrl">
+                <div class="w-29.75 aspect-239/278 bg-base-200 rounded flex items-center justify-center text-xs text-base-content/50 text-center p-2">
+                  Нет главной картинки
+                </div>
+              </template>
+            </div>
+            <div class="shrink-0" x-show="article.variant !== 'opinion'">
               <template x-if="previewAuthorDisplay.noBgAvatarUrl">
                 <img
                   x-bind:src="previewAuthorDisplay.noBgAvatarUrl"
@@ -43,13 +58,14 @@ import DashboardArticleBodyPreview from "@/components/dashboard/DashboardArticle
             <div>
               <p
                 class="text-xs font-bold uppercase tracking-[0.25em] text-accent font-['Inter'] mb-2"
+                x-text="article.variant === 'opinion' ? 'Мнение' : 'От первого лица'"
               >
                 От первого лица
               </p>
               <h1
                 class="text-3xl lg:text-[44px] leading-tight font-old_standard text-base-content w-full"
               >
-                <span class="font-bold" x-text="getPreviewAuthorName()"></span> <span x-text="article.title"></span>
+                <span class="font-bold" x-show="article.variant !== 'opinion'" x-text="getPreviewAuthorName() + ' '"></span><span x-text="article.title"></span>
               </h1>
             </div>
           </div>

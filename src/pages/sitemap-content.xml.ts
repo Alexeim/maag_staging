@@ -3,6 +3,7 @@ import {
   articlesApi,
   authorsApi,
   eventsApi,
+  firstPersonApi,
   flippersApi,
   guidesApi,
   interviewsApi,
@@ -141,6 +142,8 @@ export const GET: APIRoute = async ({ site }) => {
       entriesFor(() => eventsApi.list(), (item) => `/events/${item.id}`),
       entriesFor(() => visualStoriesApi.list(), (item) => `/visual-story/${item.id}`),
       entriesFor(() => flippersApi.list(), (item) => `/flippers/${item.id}`),
+      // Both variants («от первого лица» and «мнение») live at /first-person/:id.
+      entriesFor(() => firstPersonApi.list(), (item) => `/first-person/${item.id}`),
       entriesFor(() => photosOfTheDayApi.list(), (item) => `/photo-of-the-day/${item.id}`, false),
     ]);
 

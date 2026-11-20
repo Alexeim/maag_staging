@@ -727,9 +727,16 @@ export interface InterviewResponse extends InterviewPayload {
   author?: AuthorPayload | null;
 }
 
+// Mirrors FirstPersonVariant in server/src/controllers/firstPersonController.ts.
+// Absent on documents created before the switch — read that as "first-person".
+export type FirstPersonVariant = "first-person" | "opinion";
+
 export interface FirstPersonPayload {
   title: string;
   authorId: string;
+  // Main image. Required by the backend on create and update.
+  imageUrl: string;
+  variant: FirstPersonVariant;
   content: unknown[];
   category?: string;
   tags?: string[];
@@ -1389,6 +1396,8 @@ export interface PublicCardItem {
   cardTitle: string;
   imageUrl: string | null;
   secondImageUrl: string | null;
+  // "first-person" items only (null for every other type): which card to use.
+  variant: FirstPersonVariant | null;
   category: string;
   // The server checks only that it is an array.
   tags: unknown[];
@@ -1525,7 +1534,9 @@ export type MaterialContentType =
   | "flipper"
   | "interview"
   | "visual-story"
-  | "first-person";
+  // Both are firstPerson documents, split by variant into two sections.
+  | "first-person"
+  | "opinion";
 
 export interface PublicMaterialItem {
   id: string;
@@ -1688,7 +1699,9 @@ export type DashboardMaterialType =
   | "interview"
   | "photo-of-the-day"
   | "event"
-  | "first-person";
+  | "first-person"
+  // A firstPerson document with variant "opinion" («мнение»).
+  | "opinion";
 
 export type DashboardBucket = "culture" | "paris" | "events" | "none";
 
