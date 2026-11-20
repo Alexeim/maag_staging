@@ -21,7 +21,9 @@ const accessibleTitle = title.trim() || text.untitled;
 ---
 
 <div class="linked-image-hover w-full">
-  <div class="relative aspect-2/3 w-full grid grid-rows-[5fr_7fr] overflow-hidden bg-base-100 border-[10px] border-gray-400">
+  <!-- minmax(0, …): plain `8fr` means "at least the content's height", so a
+       tall image used to stretch its row past the card and get cut off. -->
+  <div class="relative aspect-2/3 w-full grid grid-rows-[minmax(0,4fr)_minmax(0,8fr)] overflow-hidden bg-base-100 border-[10px] border-gray-400">
     <div class="flex flex-row items-center justify-center">
       <div class="flex w-1/6 items-start justify-center">
         <span class="[writing-mode:vertical-rl] rotate-180 whitespace-nowrap text-xs text-accent font-semibold uppercase tracking-[0.25em] px-4 font-['Inter']">
@@ -34,12 +36,12 @@ const accessibleTitle = title.trim() || text.untitled;
         </h2>
       </div>
     </div>
-    <div>
+    <div class="min-h-0 overflow-hidden">
       {imageUrl ? (
         <LazyImage
           src={imageUrl}
           alt=""
-          class="linked-image-hover__media h-full w-full object-contain object-bottom"
+          class="linked-image-hover__media h-full w-full object-cover"
           loading={imageLoading}
         />
       ) : (
@@ -47,6 +49,10 @@ const accessibleTitle = title.trim() || text.untitled;
       )}
     </div>
 
-    <a href={href} class="absolute inset-0 z-1" aria-label={accessibleTitle}></a>
+    <a
+      href={href}
+      class="absolute inset-0 z-1"
+      aria-label={accessibleTitle}
+    ></a>
   </div>
 </div>
