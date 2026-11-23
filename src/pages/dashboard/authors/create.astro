@@ -1,10 +1,24 @@
 ---
 import DashboardLayout from "@/Layouts/DashboardLayout.astro";
 import AuthorComposer from "@/components/dashboard/AuthorComposer.astro";
+import { authorsApi } from "@/lib/api/api";
 
 const authorCreatorState = JSON.stringify({
   isEditMode: false,
 });
+
+// Used only to warn about creating a namesake of an existing author. A failed
+// fetch just disables the warning; it must not block creating an author.
+let existingAuthors: { id: string; name: string }[] = [];
+try {
+  const authors = await authorsApi.list();
+  existingAuthors = authors.map((author) => ({
+    id: author.id,
+    name: `${author.firstName ?? ""} ${author.lastName ?? ""}`.trim(),
+  }));
+} catch (error) {
+  console.error("Failed to fetch authors for duplicate check", error);
+}
 ---
 
 <DashboardLayout title="Создать автора" active="create-author">
@@ -13,5 +27,6 @@ const authorCreatorState = JSON.stringify({
     submitLabel="Сохранить автора"
     authorCreatorState={authorCreatorState}
     cancelHref="/dashboard/authors"
+    existingAuthors={existingAuthors}
   />
 </DashboardLayout>

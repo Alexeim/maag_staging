@@ -9,6 +9,9 @@ interface Props {
   cancelHref?: string;
   deleteAuthorId?: string | null;
   deleteRedirect?: string;
+  // Passed only by the create page: warns when the typed name matches an
+  // existing author, so a namesake duplicate isn't created by accident.
+  existingAuthors?: { id: string; name: string }[];
 }
 
 const {
@@ -18,7 +21,31 @@ const {
   cancelHref = "/dashboard/authors",
   deleteAuthorId,
   deleteRedirect = "/dashboard/authors",
+  existingAuthors = [],
 } = Astro.props as Props;
+
+// Local view state for the duplicate warning. Kept out of authorCreatorLogic
+// so nothing is added to the lazy-load skeleton every reader downloads.
+// Like CustomSelect, the parent's `author` is read only in a directive
+// (x-effect below), never inside these methods, so the value is always live.
+// Names are compared case-insensitively, with ё folded to е and whitespace
+// collapsed (no regex here: backslashes would be eaten by the template
+// literal).
+const duplicateCheckState = `{
+  existingAuthors: ${JSON.stringify(existingAuthors)},
+  match: null,
+  normalizeName(value) {
+    return String(value ?? '').toLowerCase().replaceAll('ё', 'е')
+      .split(' ').filter(Boolean).join(' ');
+  },
+  findDuplicate(firstName, lastName) {
+    const typed = this.normalizeName(firstName + ' ' + lastName);
+    if (!typed) return null;
+    return this.existingAuthors.find(
+      (item) => this.normalizeName(item.name) === typed,
+    ) ?? null;
+  },
+}`;
 ---
 
 <div
@@ -57,6 +84,28 @@ const {
         />
       </div>
     </div>
+
+    {
+      existingAuthors.length > 0 && (
+        <div
+          x-data={duplicateCheckState}
+          x-effect="match = findDuplicate(author.firstName, author.lastName)"
+        >
+          <template x-if="match">
+            <p class="mt-3 text-sm text-warning">
+              Автор «<span x-text="match.name" />» уже есть —{" "}
+              <a
+                x-bind:href="`/dashboard/authors/${match.id}/edit`"
+                class="underline"
+              >
+                открыть его?
+              </a>{" "}
+              Если это другой человек с тем же именем, просто сохрани.
+            </p>
+          </template>
+        </div>
+      )
+    }
 
     <template x-if="isEditMode && authorRole">
       <div class="mt-4">
@@ -175,6 +224,15 @@ const {
       class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
       placeholder="Пара абзацев об авторе..."
     ></textarea>
+    <!-- Empty bio is easy to miss: the first-person page just shows nothing
+         under the portrait. -->
+    <p
+      x-show="!author.bio.trim()"
+      class="mt-2 text-sm text-warning"
+    >
+      Биография не заполнена — на странице материала «от первого лица» под
+      портретом будет пусто.
+    </p>
   </section>
 
   <!-- Social links -->
