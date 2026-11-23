@@ -11,6 +11,8 @@ import {
 import { canPreviewUnpublished } from "@/lib/utils/preview";
 import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { composeFirstPersonTitle } from "@/lib/utils/firstPerson";
+import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
+import ArticleDate from "@/components/article/ArticleDate.astro";
 
 type FirstPersonBodyProps = ComponentProps<typeof FirstPersonBody>;
 
@@ -54,6 +56,7 @@ const authorName = author
   ? `${author.firstName} ${author.lastName}`.trim()
   : "";
 const authorPortrait = author?.noBgAvatar || "";
+const authorBio = author?.bio || "";
 const authorHref = materialData?.authorId
   ? `/author/${materialData.authorId}`
   : undefined;
@@ -132,11 +135,11 @@ const materialStructuredData = materialData
       {!error && materialData && (
         <>
           <section class="w-full px-4 pt-16 pb-[100px] sm:px-6 lg:px-14">
-            <!-- flow-root contains the author float, so the section always
-                 grows to fit it even when the body is shorter -->
+            {/** flow-root contains the author float, so the section always
+                 grows to fit it even when the body is shorter */}
             <div class="w-full flow-root">
-              <!-- Left column: portrait + about the author. Floated so that
-                   FirstPersonBody can pull quotes out to its left edge. -->
+              {/** Left column: portrait + about the author. Floated so that
+                   FirstPersonBody can pull quotes out to its left edge. */}
               <div class="mb-8 flex flex-col gap-4 items-center lg:items-start lg:float-left lg:w-[calc((100%-2rem)/3)]">
                 <div class="w-80 max-w-full sm:w-49.75 sm:max-w-70 lg:w-full">
                   {authorPortrait ? (
@@ -155,15 +158,20 @@ const materialStructuredData = materialData
                     <div class="aspect-239/278 w-full bg-base-300" />
                   )}
                 </div>
-                {author?.bio && (
+                {authorName && (
+                  <p class="text-base lg:text-xl font-thin font-old_standard italic text-base-content mt-2">
+                    {authorName}
+                  </p>
+                )}
+                {authorBio && (
                   <p class="max-w-70 font-inter text-sm text-base-content/70">
-                    {author.bio}
+                    {authorBio}
                   </p>
                 )}
               </div>
 
-              <!-- Right column: label, title, actions. Same width FirstPersonBody
-                   gives its groups. -->
+              {/** Right column: label, title, actions. Same width FirstPersonBody
+                   gives its groups. */}
               <div class="mb-8 lg:ml-auto lg:w-[calc((100%-2rem)*2/3)]">
                 <div class="flex flex-col gap-4">
                   <p class="font-['Inter'] text-xs font-bold uppercase tracking-[0.25em] text-accent">
@@ -179,6 +187,9 @@ const materialStructuredData = materialData
                     {!isOpinion && authorName && " "}
                     <span class="italic">{displayMaterial.title}</span>
                   </h1>
+                  {isOpinion && materialData.publishedAt && (
+                    <ArticleDate createdAt={materialData.publishedAt} />
+                  )}
                   <ContentActions
                     contentType="firstPerson"
                     contentId={id}
