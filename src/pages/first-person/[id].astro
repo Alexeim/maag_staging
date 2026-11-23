@@ -38,7 +38,9 @@ try {
 // Admins may preview an unpublished material on its real page; everyone else
 // gets the usual "not found".
 const isDraftPreview =
-  !error && Boolean(materialData) && materialData?.published !== true &&
+  !error &&
+  Boolean(materialData) &&
+  materialData?.published !== true &&
   canPreviewUnpublished(Astro.locals);
 
 if (!error && materialData?.published !== true && !isDraftPreview) {
@@ -48,9 +50,13 @@ if (!error && materialData?.published !== true && !isDraftPreview) {
 }
 
 const author = materialData?.author ?? null;
-const authorName = author ? `${author.firstName} ${author.lastName}`.trim() : "";
+const authorName = author
+  ? `${author.firstName} ${author.lastName}`.trim()
+  : "";
 const authorPortrait = author?.noBgAvatar || "";
-const authorHref = materialData?.authorId ? `/author/${materialData.authorId}` : undefined;
+const authorHref = materialData?.authorId
+  ? `/author/${materialData.authorId}`
+  : undefined;
 
 // «Мнение»: the left column shows the material's main image instead of the
 // author's portrait, and the title is shown as-is (no author name).
@@ -64,7 +70,8 @@ const materialLabel = isOpinion ? "Мнение" : "От первого лица
 const displayMaterial = {
   title: materialData?.title || "",
   // Stored blocks are unvalidated JSON; FirstPersonBody renders them by `type`.
-  contentBlocks: (materialData?.content || []) as FirstPersonBodyProps["contentBlocks"],
+  contentBlocks: (materialData?.content ||
+    []) as FirstPersonBodyProps["contentBlocks"],
 };
 const composedTitle =
   (isOpinion
@@ -93,8 +100,12 @@ const materialStructuredData = materialData
       headline: composedTitle,
       image: mainImageUrl ? [mainImageUrl] : undefined,
       datePublished: toIsoDate(materialData.publishedAt),
-      dateModified: toIsoDate(materialData.updatedAt ?? materialData.publishedAt),
-      author: authorName ? { "@type": "Person", name: authorName } : { "@id": organizationId },
+      dateModified: toIsoDate(
+        materialData.updatedAt ?? materialData.publishedAt,
+      ),
+      author: authorName
+        ? { "@type": "Person", name: authorName }
+        : { "@id": organizationId },
       publisher: { "@id": organizationId },
       mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
       inLanguage: "ru",
@@ -128,19 +139,11 @@ const materialStructuredData = materialData
                    FirstPersonBody can pull quotes out to its left edge. -->
               <div class="mb-8 flex flex-col gap-4 items-center lg:items-start lg:float-left lg:w-[calc((100%-2rem)/3)]">
                 <div class="w-80 max-w-full sm:w-49.75 sm:max-w-70 lg:w-full">
-                  {isOpinion ? (
-                    opinionImage ? (
-                      <img
-                        src={opinionImage}
-                        alt={composedTitle}
-                        class="h-auto w-full"
-                        transition:name={`main-article-image-${id}`}
-                      />
-                    ) : (
-                      <div class="aspect-239/278 w-full bg-base-300" />
-                    )
-                  ) : authorPortrait ? (
-                    <a href={authorHref} class:list={[authorHref && "hover:opacity-90"]}>
+                  {authorPortrait ? (
+                    <a
+                      href={authorHref}
+                      class:list={[authorHref && "hover:opacity-90"]}
+                    >
                       <img
                         src={authorPortrait}
                         alt={authorName}
@@ -167,7 +170,14 @@ const materialStructuredData = materialData
                     {materialLabel}
                   </p>
                   <h1 class="font-old_standard text-3xl leading-tight text-base-content lg:text-[44px]">
-                    {!isOpinion && authorName && <span class="font-bold">{authorName}<br /></span>}{!isOpinion && authorName && " "}<span class="italic">{displayMaterial.title}</span>
+                    {!isOpinion && authorName && (
+                      <span class="font-bold">
+                        {authorName}
+                        <br />
+                      </span>
+                    )}
+                    {!isOpinion && authorName && " "}
+                    <span class="italic">{displayMaterial.title}</span>
                   </h1>
                   <ContentActions
                     contentType="firstPerson"
