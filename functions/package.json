@@ -4,11 +4,11 @@
   "description": "Firestore triggers that keep the Algolia search index in sync. Logic lives in ../server/src; this package only wires it and is bundled with esbuild.",
   "main": "lib/index.js",
   "engines": {
-    "node": "22"
+    "node": "24"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build": "npm run typecheck && esbuild src/index.ts --bundle --platform=node --target=node22 --format=cjs --outfile=lib/index.js --external:firebase-functions --external:firebase-admin --external:algoliasearch"
+    "build": "npm run typecheck && esbuild src/index.ts --bundle --platform=node --target=node24 --format=cjs --outfile=lib/index.js --external:firebase-functions --external:firebase-admin --external:algoliasearch"
   },
   "dependencies": {
     "algoliasearch": "5.63.0",
