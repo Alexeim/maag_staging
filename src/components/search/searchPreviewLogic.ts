@@ -1,4 +1,4 @@
-// Logic for the admin search prototype (/dashboard/search-preview), loaded
+// Logic for the search page (/search), loaded
 // through $lazy('searchPreview'). The page renders its markup only after
 // load (x-if="!isLazyLoading"), so nothing here is mirrored in the shared
 // skeleton in lazyLoadPlugin.ts.

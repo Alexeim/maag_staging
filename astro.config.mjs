@@ -12,6 +12,7 @@ const sitemapExcludedPaths = new Set([
   "/cancel/",
   "/dashboard/",
   "/profile/",
+  "/search/",
   "/sitemap-content.xml",
   "/success/",
   "/testpage/",

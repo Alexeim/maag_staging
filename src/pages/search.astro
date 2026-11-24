@@ -1,12 +1,12 @@
 ---
-// Admin-only search prototype. Lives under /dashboard so the existing
-// middleware gate, robots Disallow and sitemap exclusion already apply.
+// Public search page. noindex: without a query it is empty, so it is kept out
+// of Google; it is also excluded from the sitemap (astro.config.mjs).
 // Logic: src/components/search/searchPreviewLogic.ts, via $lazy('searchPreview').
 import Layout from "@/Layouts/Layout.astro";
 import SearchResultRow from "@/components/search/SearchResultRow.astro";
 ---
 
-<Layout title="Поиск (прототип)">
+<Layout title="Поиск" noindex>
   <!-- Layout has no main element of its own, so the page sets its own height.
        Desktop: viewport minus navbar (lg:h-[90px], Navbar.astro) and footer
        (lg:h-85.75 = 343px, Footer.astro), so the footer sits at the bottom edge.

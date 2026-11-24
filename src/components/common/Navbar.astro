@@ -52,6 +52,8 @@ const headerScrollClasses = isDefaultVariant
 
 // The original address: on French pages Astro.url is the rewritten Russian path.
 const currentPath = Astro.originPathname;
+
+const SEARCH_PAGE_PATH = "/search";
 ---
 
 <div
@@ -156,9 +158,13 @@ const currentPath = Astro.originPathname;
 
       <!-- Mobile Controls -->
       <div x-data="{}" class="flex items-center gap-4 lg:hidden">
-        <button type="button" class="p-2">
+        <a
+          href={SEARCH_PAGE_PATH}
+          class="p-2"
+          aria-label={text.search}
+        >
           <Search />
-        </button>
+        </a>
         <button
           type="button"
           class="p-2"
@@ -172,10 +178,13 @@ const currentPath = Astro.originPathname;
 
       <!-- Right Side -->
       <div class="hidden lg:flex items-center gap-[19px]">
-        <!-- TODO remove 'hidden' -->
-        <button class="p-2 hidden">
+        <a
+          href={SEARCH_PAGE_PATH}
+          class="p-2"
+          aria-label={text.search}
+        >
           <Search />
-        </button>
+        </a>
         {languageSwitch && <LanguageSwitch {...languageSwitch} />}
         <a
           href="https://www.instagram.com/stories/maag_france/"

@@ -10,6 +10,7 @@ export interface NavbarText {
   signIn: string;
   signOut: string;
   openMenu: string;
+  search: string;
 }
 
 export const NAVBAR_TEXT: Record<Locale, NavbarText> = {
@@ -21,6 +22,7 @@ export const NAVBAR_TEXT: Record<Locale, NavbarText> = {
     signIn: "Войти",
     signOut: "Выйти",
     openMenu: "Открыть меню",
+    search: "Поиск",
   },
   fr: {
     culture: "Culture",
@@ -30,5 +32,6 @@ export const NAVBAR_TEXT: Record<Locale, NavbarText> = {
     signIn: "Se connecter",
     signOut: "Se déconnecter",
     openMenu: "Ouvrir le menu",
+    search: "Rechercher",
   },
 };

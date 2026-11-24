@@ -45,6 +45,8 @@ interface LayoutProps {
   // Only ever pass versions a reader can actually open: an alternate that
   // 404s for Googlebot is a Search Console error, not a hint.
   alternates?: { locale: Locale; path: string }[];
+  // Keep the page out of search engines (e.g. /search: empty without a query).
+  noindex?: boolean;
 }
 
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
@@ -72,6 +74,7 @@ const {
   navbarVariant = "default",
   locale = requestLocale,
   alternates = [],
+  noindex = false,
 } = Astro.props as LayoutProps;
 
 const description =
@@ -122,7 +125,7 @@ const allStructuredData = [
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     {/* Lets Google show large image previews (needed for Google Discover). */}
-    <meta name="robots" content="max-image-preview:large" />
+    <meta name="robots" content={noindex ? "noindex" : "max-image-preview:large"} />
     <meta
       name="google-site-verification"
       content="a1g4Q9POWbQ8LXHxizcXDOD5DiG_5gMiXcMMCIa0XQw"
