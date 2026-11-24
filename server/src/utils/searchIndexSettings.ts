@@ -27,7 +27,9 @@ export const SEARCH_INDEX_SETTINGS = {
   distinct: true,
   // Card fields only; the body is returned as a short snippet. This saves
   // bandwidth, it is not access control: restricted records have no body.
-  attributesToRetrieve: ['publicationId', 'type', 'href', 'title', 'tags', 'interviewee', 'access'],
+  attributesToRetrieve: [
+    'publicationId', 'type', 'href', 'title', 'displayTitle', 'imageUrl', 'tags', 'interviewee', 'access',
+  ],
   attributesToSnippet: ['introduction:20', 'content:20'],
   attributesToHighlight: ['title', 'interviewee'],
 } satisfies IndexSettings;

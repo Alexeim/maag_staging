@@ -136,12 +136,17 @@ describe('restricted (paid) materials', () => {
     (collection) => {
       const { records } = buildSearchRecords({
         collection, id: 'p1',
-        data: { ...published, ...gatedFields, paid: true, title: 'Открытый заголовок', tags: ['театр'], interviewee: 'Герой' },
+        data: {
+          ...published, ...gatedFields, paid: true, title: 'Открытый заголовок', tags: ['театр'], interviewee: 'Герой',
+          imageUrl: 'https://cover.example/cover.jpg',
+        },
       });
       expect(records).toHaveLength(1);
-      const serialized = JSON.stringify(records);
-      expect(serialized).not.toMatch(/SECRET|https:/);
-      const expectedKeys = ['access', 'chunkCount', 'chunkIndex', 'collection', 'href', 'objectID',
+      // The public card cover is the only URL allowed; flippers use their first slide.
+      const { imageUrl, ...rest } = records[0];
+      expect(imageUrl).toBe(collection === 'flippers' ? 'https://img.example/1' : 'https://cover.example/cover.jpg');
+      expect(JSON.stringify(rest)).not.toMatch(/SECRET|https:/);
+      const expectedKeys = ['access', 'chunkCount', 'chunkIndex', 'collection', 'href', 'imageUrl', 'objectID',
         'publicationId', 'sourceId', 'tags', 'title', 'type'];
       if (collection === 'interviews') expectedKeys.push('interviewee');
       expect(Object.keys(records[0]).sort()).toEqual(expectedKeys.sort());
@@ -184,12 +189,14 @@ describe('restricted (paid) materials', () => {
     '%s has no gate: open by default, an unexpected paid closes and warns',
     (collection) => {
       const base = { ...published, title: 'Без гейта', content: [{ type: 'paragraph', text: 'Открытый текст' }] };
+      // firstPerson defaults to the "first-person" variant, which needs a name.
+      const author = { firstName: 'Анна', lastName: 'Автор' };
       for (const paid of [undefined, false]) {
-        const open = buildSearchRecords({ collection, id: 'x', data: { ...base, paid } });
+        const open = buildSearchRecords({ collection, id: 'x', data: { ...base, paid }, author });
         expect(open.warnings).toEqual([]);
         expect(open.records[0]).toMatchObject({ access: 'open', content: 'Открытый текст' });
       }
-      const odd = buildSearchRecords({ collection, id: 'x', data: { ...base, paid: true } });
+      const odd = buildSearchRecords({ collection, id: 'x', data: { ...base, paid: true }, author });
       expect(odd.records[0].access).toBe('restricted');
       expect(JSON.stringify(odd.records)).not.toContain('Открытый текст');
       expect(odd.warnings).toEqual(['paid set on a collection without a gate true; gated text excluded']);
@@ -202,6 +209,77 @@ describe('restricted (paid) materials', () => {
       data: { ...published, paid: true, title: 'Длинная', content: [{ type: 'paragraph', text: 'SECRET '.repeat(10_000) }] },
     });
     expect(records).toHaveLength(1);
+    expect(JSON.stringify(records)).not.toContain('SECRET');
+  });
+});
+
+describe('card fields: imageUrl and displayTitle', () => {
+  const cover = 'https://cover.example/cover.jpg';
+  const slide = 'https://slide.example/1.jpg';
+  const portrait = 'https://portrait.example/author.png';
+  const author = { firstName: ' Иван ', lastName: 'Петров', noBgAvatar: portrait };
+  const card = (collection: string, data: Record<string, unknown>, withAuthor: typeof author | null = author) =>
+    buildSearchRecords({ collection, id: 'c1', data: { ...published, title: 'Заголовок', ...data }, author: withAuthor });
+
+  test.each([
+    ['articles', { imageUrl: cover }, cover],
+    ['news', { imageUrl: cover }, cover],
+    ['events', { imageUrl: cover }, cover],
+    ['guides', { imageUrl: cover }, cover],
+    ['interviews', { imageUrl: cover, interviewee: 'Герой' }, cover],
+    ['photosOfTheDay', { imageUrl: cover, caption: 'Подпись' }, cover],
+    ['flippers', { imageUrl: cover, carouselContent: [{ imageUrl: slide }] }, slide],
+    ['flippers', { imageUrl: cover, carouselContent: [] }, cover],
+    ['visual-stories', { imageUrl: cover, slides: [{ imageUrl: slide }] }, cover],
+    ['visual-stories', { imageUrl: '', slides: [{ imageUrl: slide }] }, slide],
+    ['firstPerson', { variant: 'opinion', imageUrl: cover }, cover],
+    ['firstPerson', { variant: 'opinion' }, portrait],
+    ['firstPerson', {}, portrait],
+    ['articles', { imageUrl: '  ' }, undefined],
+  ])('%s %j → imageUrl %s (publicMaterialsController rules)', (collection, data, expected) => {
+    const { records } = card(collection, data);
+    records.forEach((record) => expect(record.imageUrl).toBe(expected));
+  });
+
+  test('first-person: displayTitle = author name + stored tail, in every chunk', () => {
+    const { records, warnings } = card('firstPerson', {
+      title: 'о том, как он попал в кино',
+      content: Array.from({ length: 3 }, () => ({ type: 'paragraph', text: 'текст '.repeat(1000) })),
+    });
+    expect(warnings).toEqual([]);
+    expect(records.length).toBeGreaterThan(1);
+    records.forEach((record) => expect(record).toMatchObject({
+      type: 'first-person', title: 'о том, как он попал в кино', displayTitle: 'Иван Петров о том, как он попал в кино',
+    }));
+  });
+
+  test('first-person without an author name: the tail is shown, with a warning', () => {
+    for (const withAuthor of [null, { firstName: '', lastName: '  ', noBgAvatar: portrait }]) {
+      const { records, warnings } = card('firstPerson', { title: ' о сгоревшем рынке ' }, withAuthor);
+      expect(records[0].displayTitle).toBe('о сгоревшем рынке');
+      expect(warnings).toEqual(['author name missing; displayTitle is the stored title tail']);
+    }
+  });
+
+  test('opinion keeps its own title and gets no displayTitle, author or not', () => {
+    for (const withAuthor of [author, null]) {
+      const { records, warnings } = card('firstPerson', { variant: 'opinion', title: 'Почему молодежь бурлит?', imageUrl: cover }, withAuthor);
+      expect(records[0].type).toBe('opinion');
+      expect(records[0]).not.toHaveProperty('displayTitle');
+      expect(warnings).toEqual([]);
+    }
+  });
+
+  test('only first-person gets a displayTitle; the author is ignored elsewhere', () => {
+    const { records } = card('articles', { imageUrl: cover });
+    expect(records[0]).not.toHaveProperty('displayTitle');
+    expect(JSON.stringify(records)).not.toContain('Петров');
+  });
+
+  test('a paid interview gets its public cover but still no text', () => {
+    const { records } = card('interviews', { ...gatedFields, paid: true, imageUrl: cover, interviewee: 'Герой' });
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({ access: 'restricted', imageUrl: cover, interviewee: 'Герой' });
     expect(JSON.stringify(records)).not.toContain('SECRET');
   });
 });

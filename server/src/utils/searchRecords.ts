@@ -19,6 +19,10 @@ export interface SearchRecord {
   type: string;
   href: string;
   title: string;
+  // Only for type 'first-person': author name + stored title tail.
+  displayTitle?: string;
+  // The public card cover; also set on restricted records.
+  imageUrl?: string;
   tags: string[];
   access: SearchAccess;
   interviewee?: string;
@@ -42,7 +46,16 @@ export interface BuildSearchRecordsInput {
   id: string;
   // `snapshot.data()`; undefined for a deleted document.
   data: unknown;
+  // `authors/{data.authorId}`, read by the caller (sync handler, backfill);
+  // this function never does I/O. Used by firstPerson only.
+  author?: SearchRecordAuthor | null;
   maxRecordBytes?: number;
+}
+
+export interface SearchRecordAuthor {
+  firstName?: unknown;
+  lastName?: unknown;
+  noBgAvatar?: unknown;
 }
 
 export class SearchRecordTooLargeError extends Error {
@@ -75,6 +88,66 @@ const resolveAccess = (collection: string, value: unknown, warnings: string[]): 
   const reason = GATED_COLLECTIONS.has(collection) ? 'unexpected paid value' : 'paid set on a collection without a gate';
   warnings.push(`${reason} ${shown}; gated text excluded`);
   return 'restricted';
+};
+
+const nonEmpty = (value: unknown): string | null =>
+  typeof value === 'string' && value.trim() ? value.trim() : null;
+
+// Same join as attachAuthorNames() in the public controllers.
+export const authorDisplayName = (author: SearchRecordAuthor | null | undefined): string =>
+  [nonEmpty(author?.firstName), nonEmpty(author?.lastName)].filter(Boolean).join(' ');
+
+// Mirrors composeFirstPersonTitle in src/lib/utils/firstPerson.ts (the server
+// can't import the frontend `@/` alias): name + single space + tail.
+export const composeFirstPersonTitle = (authorName: string, title: string): string => {
+  const name = authorName.trim();
+  const text = title.trim();
+  if (!name) return text;
+  if (!text) return name;
+  return `${name} ${text}`;
+};
+
+/**
+ * The card cover, by the rules of publicMaterialsController (getImageUrl and
+ * the firstPerson portrait fallback in attachAuthorNames), which feed the
+ * MaterialResultRow listings. Empty strings count as no image.
+ */
+export const cardImageUrl = (
+  collection: string,
+  data: Record<string, unknown>,
+  author: SearchRecordAuthor | null | undefined,
+): string | null => {
+  const firstOf = (list: unknown): string | null =>
+    Array.isArray(list) ? nonEmpty(asRecord(list[0])?.imageUrl) : null;
+  const own = nonEmpty(data.imageUrl);
+  if (collection === 'flippers') return firstOf(data.carouselContent) ?? own;
+  if (collection === 'visual-stories') return own ?? firstOf(data.slides);
+  // firstPerson documents saved before the main image became required.
+  if (collection === 'firstPerson') return own ?? nonEmpty(author?.noBgAvatar);
+  return own;
+};
+
+/**
+ * Display-only card fields. "first-person" stores only the headline's tail,
+ * so its displayTitle prepends the author's name; "opinion" keeps `title`
+ * and gets no displayTitle. Without a name the tail is shown, as on the site.
+ */
+const cardFields = (
+  collection: string,
+  data: Record<string, unknown>,
+  extracted: { type: string; title: string },
+  author: SearchRecordAuthor | null | undefined,
+  warnings: string[],
+): Pick<SearchRecord, 'displayTitle' | 'imageUrl'> => {
+  const fields: Pick<SearchRecord, 'displayTitle' | 'imageUrl'> = {};
+  if (extracted.type === 'first-person') {
+    const authorName = authorDisplayName(author);
+    if (!authorName) warnings.push('author name missing; displayTitle is the stored title tail');
+    fields.displayTitle = composeFirstPersonTitle(authorName, extracted.title);
+  }
+  const imageUrl = cardImageUrl(collection, data, author);
+  if (imageUrl) fields.imageUrl = imageUrl;
+  return fields;
 };
 
 export const toPublicationId = (collection: string, id: string): string => `${collection}/${id}`;
@@ -157,6 +230,7 @@ export const buildSearchRecords = ({
   collection,
   id,
   data,
+  author,
   maxRecordBytes = ALGOLIA_FREE_PLAN_MAX_RECORD_BYTES,
 }: BuildSearchRecordsInput): SearchRecordsResult => {
   const source = SOURCE_BY_COLLECTION.get(collection);
@@ -180,6 +254,7 @@ export const buildSearchRecords = ({
     type: extracted.type,
     href: extracted.href,
     title: extracted.title,
+    ...cardFields(collection, document, extracted, author, warnings),
     tags: extracted.tags,
     access,
     ...(interviewee ? { interviewee } : {}),
