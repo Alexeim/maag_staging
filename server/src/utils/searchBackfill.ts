@@ -1,6 +1,6 @@
 import { SEARCH_SOURCES } from './searchCorpus';
 import { recordBytes, toPublicationId, type SearchRecordAuthor } from './searchRecords';
-import { buildPublicationRecords, type PublicationSource } from './searchPublicationSync';
+import { buildPublicationRecords, type PublicationSource, type SyncOutcome } from './searchPublicationSync';
 
 /**
  * Backfill dry run: reads every search collection page by page in document
@@ -69,6 +69,24 @@ export const createCachedAuthorReader = (reader: BackfillAuthorReader) => {
   };
 };
 
+const errorText = (error: unknown): string =>
+  error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+
+/** Pages of one collection in id order; each starts strictly after the previous page's last id. */
+async function* iteratePages(
+  pages: BackfillPageReader, collection: string, pageSize: number,
+): AsyncGenerator<BackfillDocument[]> {
+  let afterId: string | null = null;
+  for (;;) {
+    const page = await pages.readPage(collection, afterId, pageSize);
+    if (page.length === 0) return;
+    yield page;
+    if (page.length < pageSize) return;
+    // The page is non-empty here.
+    afterId = page.at(-1)!.id;
+  }
+}
+
 const scanCollection = async (
   collection: string,
   pages: BackfillPageReader,
@@ -78,11 +96,7 @@ const scanCollection = async (
   const stats: BackfillCollectionStats = {
     collection, pages: 0, documentsRead: 0, indexable: 0, restricted: 0, records: 0, maxRecordBytes: 0, warnings: [], errors: [],
   };
-  let afterId: string | null = null;
-  // Each page starts strictly after the last id of the previous one.
-  for (;;) {
-    const page = await pages.readPage(collection, afterId, pageSize);
-    if (page.length === 0) break;
+  for await (const page of iteratePages(pages, collection, pageSize)) {
     stats.pages += 1;
     for (const doc of page) {
       stats.documentsRead += 1;
@@ -99,11 +113,9 @@ const scanCollection = async (
           stats.maxRecordBytes = Math.max(stats.maxRecordBytes, ...built.records.map(recordBytes));
         }
       } catch (error) {
-        stats.errors.push({ publicationId, message: error instanceof Error ? `${error.name}: ${error.message}` : String(error) });
+        stats.errors.push({ publicationId, message: errorText(error) });
       }
     }
-    if (page.length < pageSize) break;
-    afterId = page[page.length - 1].id;
   }
   return stats;
 };
@@ -142,3 +154,109 @@ export const dryRunBackfill = async ({ pages, authors, pageSize = BACKFILL_PAGE_
     authorReads: cachedAuthors.reads(),
   };
 };
+
+// --- Apply ---------------------------------------------------------------
+
+/** The only target the first import may write to. */
+export const FIRST_IMPORT_TARGET = {
+  projectId: 'maag-60419',
+  appId: 'IS5SOWASMH',
+  indexName: 'maag_materials_dev',
+} as const;
+
+export interface ImportTarget {
+  projectId: string;
+  appId: string;
+  indexName: string;
+}
+
+/** Throws, naming every mismatch, unless the target is exactly FIRST_IMPORT_TARGET. */
+export const assertFirstImportTarget = (target: ImportTarget): void => {
+  const mismatches = (Object.keys(FIRST_IMPORT_TARGET) as Array<keyof ImportTarget>)
+    .filter((key) => target[key] !== FIRST_IMPORT_TARGET[key])
+    .map((key) => `${key} is "${target[key]}", expected "${FIRST_IMPORT_TARGET[key]}"`);
+  if (mismatches.length > 0) throw new Error(`--apply refused: ${mismatches.join('; ')}`);
+};
+
+export interface BackfillFailure {
+  publicationId: string;
+  error: string;
+}
+
+export interface ApplyCollectionStats {
+  collection: string;
+  pages: number;
+  // Every document id found, drafts included.
+  listed: number;
+  synced: number;
+  // Publications that now have records in the index.
+  withRecords: number;
+  records: number;
+  // Not indexable (e.g. too large): removed, reason kept in the ledger.
+  notIndexable: BackfillIssue[];
+  failures: BackfillFailure[];
+}
+
+export interface ApplyReport {
+  collections: ApplyCollectionStats[];
+  totals: { pages: number; listed: number; synced: number; withRecords: number; records: number; notIndexable: number; failures: number };
+}
+
+/** One publication through the lease-guarded sync; see syncPublicationFromSource. */
+export type SyncOne = (collection: string, id: string) => Promise<SyncOutcome>;
+
+/**
+ * Lists every document id page by page and hands each one, drafts included,
+ * to `syncOne`. The page data is not used: the sync re-reads the current
+ * version under its lease, so an edit made after the page was read wins.
+ * A failure is recorded and the run goes on.
+ */
+export const applyBackfill = async ({ pages, syncOne, pageSize = BACKFILL_PAGE_SIZE, collections }: {
+  pages: BackfillPageReader;
+  syncOne: SyncOne;
+  pageSize?: number;
+  collections?: string[];
+}): Promise<ApplyReport> => {
+  const targets = collections ?? SEARCH_SOURCES.map((s) => s.collection);
+  const results: ApplyCollectionStats[] = [];
+  for (const collection of targets) {
+    const stats: ApplyCollectionStats = {
+      collection, pages: 0, listed: 0, synced: 0, withRecords: 0, records: 0, notIndexable: [], failures: [],
+    };
+    for await (const page of iteratePages(pages, collection, pageSize)) {
+      stats.pages += 1;
+      for (const { id } of page) {
+        stats.listed += 1;
+        const publicationId = toPublicationId(collection, id);
+        try {
+          // Sequential on purpose: one publication at a time against Algolia and the ledger.
+          const outcome = await syncOne(collection, id);
+          stats.synced += 1;
+          stats.records += outcome.records;
+          if (outcome.records > 0) stats.withRecords += 1;
+          if (outcome.permanentError) stats.notIndexable.push({ publicationId, message: outcome.permanentError });
+        } catch (error) {
+          stats.failures.push({ publicationId, error: errorText(error) });
+        }
+      }
+    }
+    results.push(stats);
+  }
+  const sum = (pick: (stats: ApplyCollectionStats) => number) => results.reduce((total, stats) => total + pick(stats), 0);
+  return {
+    collections: results,
+    totals: {
+      pages: sum((s) => s.pages),
+      listed: sum((s) => s.listed),
+      synced: sum((s) => s.synced),
+      withRecords: sum((s) => s.withRecords),
+      records: sum((s) => s.records),
+      notIndexable: sum((s) => s.notIndexable.length),
+      failures: sum((s) => s.failures.length),
+    },
+  };
+};
+
+/** The existing command that retries one publication. */
+export const retryCommandFor = (publicationId: string): string =>
+  `npm run search:sync -- --publication ${publicationId} --apply`;

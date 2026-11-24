@@ -2,48 +2,54 @@
  * First load of the search index from the Firestore archive.
  *
  * Usage (run from server/):
- *   npm run search:backfill            # dry run: reads Firestore, builds records in memory
+ *   npm run search:backfill            # dry run (default): reads, builds records in memory
+ *   npm run search:backfill -- --apply # writes: every publication through the lease-guarded sync
  *
- * The dry run reads the nine search collections page by page in document id
- * order (plus authors/{id} once per firstPerson author) and reports what the
- * index should hold. It creates no Algolia client, takes no lease and writes
- * nothing. Writing (--apply) is a separate, later step.
+ * Dry run: reads the nine search collections page by page in document id
+ * order (plus each firstPerson author once) and reports what the index
+ * should hold. No Algolia client, no lease, nothing written.
+ *
+ * --apply: allowed only for project maag-60419, app IS5SOWASMH and index
+ * maag_materials_dev; the target and the index settings are checked before
+ * the first write. Pages only list ids; each id, drafts included, goes to
+ * syncPublicationFromSource, which re-reads the document under its lease.
+ * Material documents are only read; Firestore writes go to searchIndexSync
+ * only. Any failed publication is reported with its retry command and the
+ * exit code is 1.
  */
 import 'dotenv/config';
+import { randomUUID } from 'node:crypto';
 import { parseArgs } from 'node:util';
 import { getDb } from '../services/firebase';
-import { readAlgoliaWriteConfig } from '../services/algoliaClient';
+import { createAlgoliaSearchIndex, readAlgoliaWriteConfig } from '../services/algoliaClient';
 import { createFirestoreBackfillReader } from '../services/firestoreBackfillReader';
 import { createFirestorePublicationSource } from '../services/firestorePublicationSource';
-import { BACKFILL_PAGE_SIZE, dryRunBackfill } from '../utils/searchBackfill';
+import { createFirestoreSyncLedger } from '../services/firestoreSyncLedger';
+import {
+  applyBackfill, assertFirstImportTarget, BACKFILL_PAGE_SIZE, dryRunBackfill, retryCommandFor,
+} from '../utils/searchBackfill';
+import { syncPublicationFromSource, type SyncDeps } from '../utils/searchPublicationSync';
 
-const run = async (): Promise<void> => {
-  const { values } = parseArgs({ options: { apply: { type: 'boolean' } } });
-  if (values.apply) throw new Error('--apply is not implemented yet: this step is a dry run only.');
-
-  // Only the target name is read and validated; no Algolia client is created.
-  const { indexName } = readAlgoliaWriteConfig();
-  let projectId = 'unknown';
+const serviceAccountProjectId = (): string => {
   try {
-    projectId = String((JSON.parse(process.env.FIREBASE_CONFIG_JSON ?? '{}') as { project_id?: unknown }).project_id);
-  } catch { /* reported as unknown */ }
-  console.log(`Firebase project: ${projectId}`);
-  console.log('Firestore database: (default)');
-  console.log(`Target Algolia index: ${indexName} (not contacted)`);
-  console.log(`Mode: dry run, page size ${BACKFILL_PAGE_SIZE}, document id order`);
+    const projectId = (JSON.parse(process.env.FIREBASE_CONFIG_JSON ?? '{}') as { project_id?: unknown }).project_id;
+    return typeof projectId === 'string' ? projectId : 'unknown';
+  } catch {
+    return 'unknown';
+  }
+};
 
+const runDryRun = async (): Promise<void> => {
   const db = getDb();
   const report = await dryRunBackfill({
     pages: createFirestoreBackfillReader(db),
     authors: createFirestorePublicationSource(db),
   });
-
   console.table([
     ...report.collections.map(({ warnings, errors, ...stats }) => ({ ...stats, warnings: warnings.length, errors: errors.length })),
     { collection: 'TOTAL', ...report.totals },
   ]);
   console.log(`Author documents read: ${report.authorReads}`);
-
   const problems = report.collections.flatMap((stats) => [
     ...stats.errors.map((issue) => ({ kind: 'error', ...issue })),
     ...stats.warnings.map((issue) => ({ kind: 'warning', ...issue })),
@@ -53,6 +59,63 @@ const run = async (): Promise<void> => {
     problems.forEach(({ kind, publicationId, message }) => console.log(`  [${kind}] ${publicationId}: ${message}`));
   }
   console.log('Dry run: read-only. No Algolia client, no lease, no ledger entry, no batch.');
+};
+
+const runApply = async (target: { projectId: string; appId: string; indexName: string }): Promise<void> => {
+  // Nothing is written before both checks pass.
+  assertFirstImportTarget(target);
+  const config = readAlgoliaWriteConfig();
+  const index = createAlgoliaSearchIndex(config);
+  await index.assertSettings();
+  console.log('Target and index settings verified.');
+
+  const db = getDb();
+  const deps: SyncDeps = {
+    // Material documents: read only.
+    source: createFirestorePublicationSource(db),
+    // The only Firestore writes: searchIndexSync.
+    ledger: createFirestoreSyncLedger(db, Date.now),
+    index,
+    now: Date.now,
+  };
+  const runId = randomUUID();
+  const report = await applyBackfill({
+    pages: createFirestoreBackfillReader(db),
+    syncOne: (collection, id) =>
+      syncPublicationFromSource(deps, { collection, id, owner: `backfill:${runId}:${randomUUID()}` }),
+  });
+
+  console.table([
+    ...report.collections.map(({ notIndexable, failures, ...stats }) => ({
+      ...stats, notIndexable: notIndexable.length, failures: failures.length,
+    })),
+    { collection: 'TOTAL', ...report.totals },
+  ]);
+  report.collections.flatMap((stats) => stats.notIndexable).forEach(({ publicationId, message }) =>
+    console.log(`  [not indexable, removed] ${publicationId}: ${message}`));
+  const failures = report.collections.flatMap((stats) => stats.failures);
+  if (failures.length > 0) {
+    console.log(`Failed publications (${failures.length}):`);
+    failures.forEach(({ publicationId, error }) =>
+      console.log(`  ${publicationId}: ${error}\n    retry: ${retryCommandFor(publicationId)}`));
+    process.exitCode = 1;
+  }
+  console.log(`Backfill run ${runId}: ${report.totals.synced}/${report.totals.listed} publications synced.`);
+};
+
+const run = async (): Promise<void> => {
+  const { values } = parseArgs({ options: { apply: { type: 'boolean' } } });
+  const apply = values.apply === true;
+  // Only the target is read and validated here; the client exists only for --apply.
+  const { appId, indexName } = readAlgoliaWriteConfig();
+  const projectId = serviceAccountProjectId();
+  console.log(`Firebase project: ${projectId}`);
+  console.log('Firestore database: (default)');
+  console.log(`Algolia app: ${appId}`);
+  console.log(`Algolia index: ${indexName}${apply ? '' : ' (not contacted)'}`);
+  console.log(`Mode: ${apply ? 'APPLY' : 'dry run'}, page size ${BACKFILL_PAGE_SIZE}, document id order`);
+  if (apply) await runApply({ projectId, appId, indexName });
+  else await runDryRun();
 };
 
 run().catch((error: unknown) => {
