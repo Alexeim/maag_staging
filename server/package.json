@@ -38,6 +38,7 @@
   "type": "commonjs",
   "dependencies": {
     "@google-cloud/translate": "^10.3.0",
+    "algoliasearch": "5.63.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
