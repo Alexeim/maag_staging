@@ -263,19 +263,44 @@ export const verifyPublication = async (
   }
 };
 
+export interface VerifyBatchLimits {
+  // Stop after this many publications; the rest stay due for the next run.
+  maxPublications?: number;
+  // Start no new publication at or after this time (deps.now() clock); one
+  // already started finishes within its own handler budget.
+  deadlineMs?: number;
+}
+
+export interface VerifyBatchResult {
+  due: number;
+  results: VerifyResult[];
+  // Due publications left for the next run because of the limits.
+  deferred: number;
+}
+
 /**
- * The scheduled check: every publication whose verifyAfter has passed.
- * One failure does not stop the others; it stays due and is tried next run.
+ * The scheduled check: publications whose verifyAfter has passed, within
+ * the run's limits. One failure does not stop the others; failed and
+ * deferred publications stay due and are tried in the next run.
  */
-export const verifyDuePublications = async (deps: SyncDeps, owner: string): Promise<VerifyResult[]> => {
+export const verifyDuePublicationsBatch = async (
+  deps: SyncDeps, owner: string, limits: VerifyBatchLimits = {},
+): Promise<VerifyBatchResult> => {
+  const due = await deps.ledger.listDueForVerification(deps.now());
   const results: VerifyResult[] = [];
   // Sequential on purpose: a handful of publications, no burst against Algolia.
-  for (const publicationId of await deps.ledger.listDueForVerification(deps.now())) {
+  for (const publicationId of due) {
+    if (limits.maxPublications !== undefined && results.length >= limits.maxPublications) break;
+    if (limits.deadlineMs !== undefined && deps.now() >= limits.deadlineMs) break;
     try {
       results.push(await verifyPublication(deps, { publicationId, owner }));
     } catch (error) {
       results.push({ publicationId, status: 'failed', error: errorText(error) });
     }
   }
-  return results;
+  return { due: due.length, results, deferred: due.length - results.length };
 };
+
+/** Every due publication, no limits. */
+export const verifyDuePublications = async (deps: SyncDeps, owner: string): Promise<VerifyResult[]> =>
+  (await verifyDuePublicationsBatch(deps, owner)).results;

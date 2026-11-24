@@ -4,7 +4,7 @@ import { createSearchIndexAdapter, type SearchIndexClient } from '../src/utils/s
 import type { SearchRecordAuthor } from '../src/utils/searchRecords';
 import {
   DELETED_VERSION, LeaseLostError, PublicationBusyError, PublicationUnstableError, HandlerDeadlineError,
-  syncPublicationFromSource, verifyDuePublications, verifyPublication,
+  syncPublicationFromSource, verifyDuePublications, verifyDuePublicationsBatch, verifyPublication,
   type LedgerEntry, type LedgerPatch, type PublicationSource, type SourceDocument, type SyncDeps, type SyncLedger,
 } from '../src/utils/searchPublicationSync';
 
@@ -414,5 +414,43 @@ describe('rounds, deletion, leases', () => {
     await syncPublicationFromSource(deps, { collection: 'articles', id: 'a1', owner: 'E2' });
     expect(store.reads.filter((read) => read.startsWith('authors/'))).toEqual(['authors/au1']);
     expect(algolia.records.get('firstPerson/f1#0')?.displayTitle).toBe('Иван Петров о кино');
+  });
+});
+
+describe('scheduled run limits', () => {
+  // Three published articles synced at t0: all three become due 10 minutes later.
+  const threeDue = async () => {
+    const ctx = setup();
+    for (const id of ['a1', 'a2', 'a3']) {
+      ctx.store.write('articles', id, openArticle);
+      await syncPublicationFromSource(ctx.deps, { collection: 'articles', id, owner: `E-${id}` });
+    }
+    ctx.clock.advance(11 * MIN);
+    return ctx;
+  };
+
+  test('maxPublications: the rest stay due for the next run', async () => {
+    const { deps, entries } = await threeDue();
+    const first = await verifyDuePublicationsBatch(deps, 'run-1', { maxPublications: 2 });
+    expect(first).toMatchObject({ due: 3, deferred: 1 });
+    expect(first.results.map((result) => result.status)).toEqual(['verified', 'verified']);
+    const next = await verifyDuePublicationsBatch(deps, 'run-2', { maxPublications: 2 });
+    expect(next).toMatchObject({ due: 1, deferred: 0, results: [{ status: 'verified' }] });
+    expect([...entries.values()].every((entry) => entry.verifyAfter === null)).toBe(true);
+  });
+
+  test('deadline: no new publication is started once it has passed', async () => {
+    const { deps, clock, store } = await threeDue();
+    // Each publication's check takes 100 s; the run may start new ones for 150 s.
+    store.onEveryRead(() => clock.advance(100_000));
+    const batch = await verifyDuePublicationsBatch(deps, 'run-1', { deadlineMs: clock.now() + 150_000 });
+    expect(batch).toMatchObject({ due: 3, deferred: 1 });
+    expect(batch.results).toHaveLength(2);
+  });
+
+  test('a deadline already passed starts nothing and defers everything', async () => {
+    const { deps, clock } = await threeDue();
+    expect(await verifyDuePublicationsBatch(deps, 'run-1', { deadlineMs: clock.now() }))
+      .toEqual({ due: 3, results: [], deferred: 3 });
   });
 });

@@ -2,7 +2,7 @@
  * Firestore write triggers for the nine search sources. All logic is in
  * ../server/src (tested there); this file only wires it to Cloud Functions.
  *
- * Deployed names: searchSync-<key>, e.g. searchSync-articles. No deploy
+ * Deployed names: searchSync-<key> (e.g. searchSync-articles) and searchVerify. No deploy
  * config is in firebase.json yet.
  */
 import { initializeApp } from 'firebase-admin/app';
@@ -10,11 +10,15 @@ import { getFirestore } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { defineSecret, defineString } from 'firebase-functions/params';
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { createAlgoliaSearchIndex, readAlgoliaWriteConfig } from '../../server/src/services/algoliaClient';
 import { createFirestorePublicationSource } from '../../server/src/services/firestorePublicationSource';
 import { createFirestoreSyncLedger } from '../../server/src/services/firestoreSyncLedger';
 import type { SyncDeps } from '../../server/src/utils/searchPublicationSync';
 import { handleSearchDocumentWritten, SEARCH_SYNC_TRIGGERS, type TriggerLogger } from '../../server/src/utils/searchSyncTrigger';
+import {
+  runScheduledVerification, SEARCH_VERIFY_SCHEDULE, SEARCH_VERIFY_TIMEOUT_SECONDS,
+} from '../../server/src/utils/searchVerifySchedule';
 
 // The write key comes from Secret Manager; app id and index name are plain
 // params (readAlgoliaWriteConfig still refuses any index but dev and prod).
@@ -62,3 +66,22 @@ export const searchSync = Object.fromEntries(SEARCH_SYNC_TRIGGERS.map(({ key, co
     (event) => handleSearchDocumentWritten(collection, { id: event.id, params: { docId: event.params.docId } }, { getDeps, log }),
   ),
 ]));
+
+// The ledger check: compares the index with Firestore for publications
+// whose verifyAfter has passed (late or partial writes), repairs them.
+// Deployed name: searchVerify.
+export const searchVerify = onSchedule(
+  {
+    schedule: SEARCH_VERIFY_SCHEDULE,
+    timeZone: 'Europe/Paris',
+    region: 'europe-west9',
+    // Whatever is left or failed stays due; the next run picks it up.
+    retryCount: 0,
+    maxInstances: 1,
+    timeoutSeconds: SEARCH_VERIFY_TIMEOUT_SECONDS,
+    secrets: [ALGOLIA_WRITE_API_KEY],
+  },
+  async () => {
+    await runScheduledVerification({ getDeps, log });
+  },
+);
