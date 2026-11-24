@@ -9,5 +9,5 @@
     "module": "preserve",
     "moduleResolution": "bundler"
   },
-  "include": ["tests", "vitest.config.mts", "vitest.emulator.config.mts"]
+  "include": ["tests", "vitest.config.mts", "vitest.emulator.config.mts", "vitest.integration.config.mts"]
 }
