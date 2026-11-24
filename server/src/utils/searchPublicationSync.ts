@@ -134,24 +134,32 @@ export const parsePublicationId = (publicationId: string): { collection: string;
   return { collection: publicationId.slice(0, slash), id: publicationId.slice(slash + 1) };
 };
 
-const recordsFor = async (
-  deps: SyncDeps, collection: string, id: string, doc: SourceDocument,
-): Promise<{ records: SearchRecord[]; permanentError: string | null }> => {
+/**
+ * Records for one read document: reads the author for firstPerson only,
+ * stamps the document version. An oversized document yields no records and
+ * a permanentError. Shared by the sync and the read-only dry run.
+ */
+export const buildPublicationRecords = async (
+  source: PublicationSource, collection: string, id: string, doc: SourceDocument,
+): Promise<{ records: SearchRecord[]; warnings: string[]; permanentError: string | null }> => {
   const authorId = doc.data?.authorId;
   const author = collection === 'firstPerson' && typeof authorId === 'string' && authorId
-    ? await deps.source.readAuthor(authorId)
+    ? await source.readAuthor(authorId)
     : undefined;
   try {
-    const { records } = buildSearchRecords({
+    const { records, warnings } = buildSearchRecords({
       collection, id, data: doc.exists ? doc.data : undefined, author, sourceVersion: doc.version,
     });
-    return { records, permanentError: null };
+    return { records, warnings, permanentError: null };
   } catch (error) {
     // Retrying cannot fix an oversized document: fail closed, remove it.
-    if (error instanceof SearchRecordTooLargeError) return { records: [], permanentError: error.message };
+    if (error instanceof SearchRecordTooLargeError) return { records: [], warnings: [], permanentError: error.message };
     throw error;
   }
 };
+
+const recordsFor = (deps: SyncDeps, collection: string, id: string, doc: SourceDocument) =>
+  buildPublicationRecords(deps.source, collection, id, doc);
 
 const releaseQuietly = async (deps: SyncDeps, publicationId: string, owner: string, patch: LedgerPatch) => {
   try {
