@@ -595,14 +595,19 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
               </div>
 
               {editorialCarouselItems.length > 0 && (
-                <div class="mt-[2rem] overflow-hidden">
+                <div
+                  class="mt-8 overflow-x-auto overscroll-x-contain scrollbar-none [&::-webkit-scrollbar]:hidden cursor-grab data-[dragging=true]:cursor-grabbing data-[dragging=true]:select-none"
+                  data-marquee
+                  data-marquee-duration="240"
+                >
                   <div
-                    class="rubric-marquee-track flex items-start gap-6 py-2"
+                    class="flex items-start gap-6 py-2"
                     style="width: max-content;"
+                    data-marquee-track
                   >
                     {[...editorialCarouselItems, ...editorialCarouselItems].map(
                       (item) => (
-                        <div class="w-[240px] sm:w-[260px] lg:w-[280px] flex-shrink-0">
+                        <div class="w-60 sm:w-65 lg:w-70 shrink-0">
                           <article
                             class:list={[
                               "grid h-full grid-rows-[auto_1fr] gap-[0.8rem]",
@@ -686,23 +691,11 @@ const primaryCultureSplit = splitTitle(primaryCultureTrunc);
       </section>
     </div>
   </main>
+
+  <script>
+    import { initMarquees } from "@/lib/utils/marqueeScroller";
+
+    initMarquees();
+    document.addEventListener("astro:page-load", initMarquees);
+  </script>
 </Layout>
-
-<style is:global>
-  @keyframes rubric-marquee-scroll {
-    from {
-      transform: translateX(-50%);
-    }
-    to {
-      transform: translateX(0);
-    }
-  }
-
-  .rubric-marquee-track {
-    animation: rubric-marquee-scroll 240s linear infinite;
-  }
-
-  .rubric-marquee-track:hover {
-    animation-play-state: paused;
-  }
-</style>

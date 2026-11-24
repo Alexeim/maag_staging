@@ -651,13 +651,18 @@ const splitTitle = (t: string) => {
   </div>
   {
     carouselItems.length > 0 && (
-      <div class="w-full overflow-hidden">
+      <div
+        class="w-full overflow-x-auto overscroll-x-contain scrollbar-none [&::-webkit-scrollbar]:hidden cursor-grab data-[dragging=true]:cursor-grabbing data-[dragging=true]:select-none"
+        data-marquee
+        data-marquee-duration="270"
+      >
         <div
-          class="articles-marquee-track flex gap-8 items-stretch py-8"
+          class="flex gap-8 items-stretch py-8"
           style="width: max-content;"
+          data-marquee-track
         >
           {[...carouselItems, ...carouselItems].map((item) => (
-            <div class="w-[320px] flex-shrink-0">
+            <div class="w-[320px] shrink-0">
               <ArticleCard
                 title={getCardTitle(item)}
                 category={getPrimaryTag(item)}
@@ -676,21 +681,9 @@ const splitTitle = (t: string) => {
   }
 </section>
 
-<style is:global>
-  @keyframes articles-marquee-scroll {
-    from {
-      transform: translateX(-50%);
-    }
-    to {
-      transform: translateX(0);
-    }
-  }
+<script>
+  import { initMarquees } from "@/lib/utils/marqueeScroller";
 
-  .articles-marquee-track {
-    animation: articles-marquee-scroll 270s linear infinite;
-  }
-
-  .articles-marquee-track:hover {
-    animation-play-state: paused;
-  }
-</style>
+  initMarquees();
+  document.addEventListener("astro:page-load", initMarquees);
+</script>
