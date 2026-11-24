@@ -1,0 +1,16 @@
+{
+  // Type-checks the trigger wiring together with the server modules it
+  // bundles. esbuild produces lib/index.js; tsc only checks.
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["es2022"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "types": ["node"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["src"]
+}

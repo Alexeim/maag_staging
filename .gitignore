@@ -32,3 +32,6 @@ pnpm-debug.log*
 # local references
 ref/
 config.bat
+
+# Bundled Cloud Functions output (built from functions/src)
+functions/lib/

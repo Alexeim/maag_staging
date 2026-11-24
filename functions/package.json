@@ -1,0 +1,22 @@
+{
+  "name": "maag-search-functions",
+  "private": true,
+  "description": "Firestore triggers that keep the Algolia search index in sync. Logic lives in ../server/src; this package only wires it and is bundled with esbuild.",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "npm run typecheck && esbuild src/index.ts --bundle --platform=node --target=node22 --format=cjs --outfile=lib/index.js --external:firebase-functions --external:firebase-admin --external:algoliasearch"
+  },
+  "dependencies": {
+    "algoliasearch": "5.63.0",
+    "firebase-admin": "13.5.0",
+    "firebase-functions": "7.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}
