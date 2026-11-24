@@ -72,6 +72,8 @@ const components: Record<string, () => Promise<any>> = {
   authorCreator: () => import('@/components/dashboard/authorCreatorLogic'),
   authorList: () => import('@/components/dashboard/authorListLogic'),
   firstPersonCreator: withQuill(() => import('@/components/dashboard/firstPersonCreatorLogic')),
+  // No skeleton fields: its page renders only after load (x-if="!isLazyLoading").
+  searchPreview: () => import('@/components/search/searchPreviewLogic'),
 };
 
 export default function(Alpine: Alpine) {

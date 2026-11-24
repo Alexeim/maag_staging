@@ -1,0 +1,113 @@
+---
+// Admin-only search prototype. Lives under /dashboard so the existing
+// middleware gate, robots Disallow and sitemap exclusion already apply.
+// Logic: src/components/search/searchPreviewLogic.ts, via $lazy('searchPreview').
+import Layout from "@/Layouts/Layout.astro";
+import SearchResultRow from "@/components/search/SearchResultRow.astro";
+---
+
+<Layout title="Поиск (прототип)">
+  <!-- Layout has no main element of its own, so the page sets its own height.
+       Desktop: viewport minus navbar (lg:h-[90px], Navbar.astro) and footer
+       (lg:h-85.75 = 343px, Footer.astro), so the footer sits at the bottom edge.
+       Mobile: the footer has no fixed height, so only the navbar (h-[80px])
+       is subtracted. Update these numbers if either height changes. -->
+  <main
+    class="mx-auto min-h-[calc(100dvh-80px)] w-full max-w-[1200px] px-4 py-16 sm:px-6 lg:min-h-[calc(100dvh-90px-343px)] lg:px-10"
+  >
+    <div x-data="$lazy('searchPreview')">
+      <!-- Rendered only once the logic has loaded, so the skeleton stays untouched. -->
+      <template x-if="!isLazyLoading">
+        <div class="grid gap-6">
+          <label class="grid gap-2">
+            <span class="font-inter text-sm text-base-content/60">Поиск по материалам</span>
+            <input
+              type="search"
+              x-model="query"
+              x-on:input="onQueryInput()"
+              x-on:keydown.enter.prevent="submitSearch(); $event.target.blur()"
+              placeholder="Например, балет"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              enterkeyhint="search"
+              class="h-12 w-full rounded-lg border border-base-300 bg-base-100 px-4 font-inter text-base outline-none focus:border-base-content/40"
+            />
+          </label>
+
+          <p class="font-inter text-base-content/60" x-show="query.trim() === ''">
+            Начните вводить запрос
+          </p>
+
+          <p class="font-inter text-base-content/60" x-show="isLoading">Ищем…</p>
+
+          <p class="font-inter" x-show="nbHits !== null && nbHits > 0 && errorMessage === ''">
+            Найдено: <span x-text="nbHits"></span>
+          </p>
+
+          <p class="font-inter" x-show="nbHits === 0 && errorMessage === ''">
+            Ничего не найдено
+          </p>
+
+          <p class="font-inter text-error" x-show="errorMessage !== ''" x-text="errorMessage"></p>
+
+          <!-- x-text only: titles and snippets come from the index and are
+               never parsed as HTML (snippet parts: highlight.ts). -->
+          <ol class="border-t border-base-content/30" x-show="errorMessage === '' && hits.length > 0">
+            <template x-for="hit in hits" x-bind:key="hit.objectID">
+              <li>
+                <SearchResultRow>
+                  <img
+                    slot="image"
+                    x-show="hit.imageUrl"
+                    x-bind:src="hit.imageUrl"
+                    x-bind:alt="hitTitle(hit)"
+                    x-bind:class="hit.type === 'interview' ? 'rounded-full' : ''"
+                    loading="lazy"
+                    class="h-36 w-36 object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                  />
+                  <span slot="badge" x-text="hitBadgeLabel(hit)"></span>
+                  <span slot="title">
+                    <template x-for="(part, index) in hitTitleParts(hit)" x-bind:key="index">
+                      <span
+                        x-bind:class="part.highlighted ? 'bg-maag-beige' : ''"
+                        x-text="part.text"
+                      ></span>
+                    </template>
+                  </span>
+                  <p
+                    slot="snippet"
+                    x-show="hitSnippetParts(hit).length > 0"
+                    class="mt-2 line-clamp-3 font-inter text-sm leading-snug text-base-content/65"
+                  >
+                    <template x-for="(part, index) in hitSnippetParts(hit)" x-bind:key="index">
+                      <span
+                        x-bind:class="part.highlighted ? 'bg-maag-beige text-base-content' : ''"
+                        x-text="part.text"
+                      ></span>
+                    </template>
+                  </p>
+                  <a
+                    slot="link"
+                    x-bind:href="hit.href"
+                    x-bind:aria-label="hitTitle(hit)"
+                    class="absolute inset-0 z-1"
+                  ></a>
+                </SearchResultRow>
+              </li>
+            </template>
+          </ol>
+
+          <button
+            type="button"
+            x-show="errorMessage === '' && hasMore()"
+            x-on:click="loadMore()"
+            x-bind:disabled="isLoading"
+            class="mx-auto inline-flex h-11 items-center rounded-lg border border-base-300 px-6 font-inter text-sm text-base-content transition hover:border-base-content/30 hover:bg-maag-beige disabled:cursor-wait disabled:opacity-60 cursor-pointer"
+            x-text="isLoading ? 'Загружаем…' : 'Показать ещё'"
+          ></button>
+        </div>
+      </template>
+    </div>
+  </main>
+</Layout>

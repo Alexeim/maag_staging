@@ -1,0 +1,51 @@
+---
+// Search result row, for every material type. Copy of the layout of
+// article/LinkToContent.astro (in-body "link to material" block), with the
+// lead it has commented out replaced by the highlighted search snippet.
+// Unlike the original, "Читать далее" sits in the text column's flow, not
+// absolutely in the corner: a 3-line snippet ran under the absolute button.
+// Keep the two in sync by hand. Data comes from Alpine through the slots.
+//
+// Slots:
+//   image   — an <img class="h-36 w-36 object-cover ..."> (round for interviews)
+//   badge   — the tag or type label
+//   title   — the headline
+//   snippet — text around the match (optional)
+//   link    — an <a class="absolute inset-0 z-1"> covering the row
+import { getRequestLocale } from "@/lib/i18n/request";
+import { SECTION_TEXT } from "@/lib/i18n/sections";
+
+const locale = getRequestLocale(Astro);
+---
+
+<article class="group relative flex items-start gap-4 border-b border-base-content/30 py-4">
+  <div class="flex-shrink-0 overflow-hidden">
+    <slot name="image" />
+  </div>
+
+  <div class="min-w-0 flex-1">
+    <p class="mb-1">
+      <span
+        class="font-['Inter'] text-[.6rem] lg:text-xs font-bold uppercase tracking-[0.25em] text-accent"
+      >
+        <slot name="badge" />
+      </span>
+    </p>
+
+    <h3
+      class="font-old_standard text-[1.3rem] lg:text-3xl leading-[1.05] font-normal tracking-[-0.02em] break-words transition-opacity duration-200 group-hover:underline"
+    >
+      <slot name="title" />
+    </h3>
+
+    <slot name="snippet" />
+
+    <div
+      class="mt-3 inline-flex h-8 lg:h-11 items-center gap-2 rounded-lg border border-base-300 px-3 lg:px-4 font-inter text-xs lg:text-sm text-base-content transition group-hover:border-base-content/30 group-hover:bg-maag-beige"
+    >
+      <span>{SECTION_TEXT[locale].readMore}</span>
+    </div>
+  </div>
+
+  <slot name="link" />
+</article>
