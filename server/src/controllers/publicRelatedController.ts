@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getDb } from '../services/firebase';
 import { getCalendarToday } from '../utils/calendarDate';
+import { normalizeFirstPersonVariant } from '../utils/firstPersonVariant';
 
 const db = getDb();
 
@@ -13,7 +14,7 @@ const db = getDb();
 // Rules are carried over from the material pages unchanged; the only
 // behavioural change is that unpublished materials never become cards.
 
-type PageType = 'article' | 'tips' | 'news' | 'guide' | 'flipper' | 'interview' | 'event';
+type PageType = 'article' | 'tips' | 'news' | 'guide' | 'flipper' | 'interview' | 'event' | 'first-person';
 
 // Card `contentType` values, as the frontend components expect them.
 type CardType =
@@ -24,7 +25,9 @@ type CardType =
   | 'flipper'
   | 'guide'
   | 'visual-story'
-  | 'photoOfTheDay';
+  | 'photoOfTheDay'
+  | 'first-person'
+  | 'opinion';
 
 const COLLECTION_BY_CARD_TYPE: Record<CardType, string> = {
   article: 'articles',
@@ -35,6 +38,8 @@ const COLLECTION_BY_CARD_TYPE: Record<CardType, string> = {
   guide: 'guides',
   'visual-story': 'visual-stories',
   photoOfTheDay: 'photosOfTheDay',
+  'first-person': 'firstPerson',
+  opinion: 'firstPerson',
 };
 
 const PAGE_TYPES: Record<PageType, { collection: string; cardType: CardType }> = {
@@ -45,6 +50,7 @@ const PAGE_TYPES: Record<PageType, { collection: string; cardType: CardType }> =
   flipper: { collection: 'flippers', cardType: 'flipper' },
   interview: { collection: 'interviews', cardType: 'interview' },
   event: { collection: 'events', cardType: 'event' },
+  'first-person': { collection: 'firstPerson', cardType: 'first-person' },
 };
 
 // Keys used in `relatedContent`, in content collections and in link blocks.
@@ -59,6 +65,8 @@ const CARD_TYPE_BY_REFERENCE: Record<string, CardType> = {
   visualStory: 'visual-story',
   'visual-story': 'visual-story',
   photoOfTheDay: 'photoOfTheDay',
+  'first-person': 'first-person',
+  opinion: 'opinion',
 };
 
 // Order in which a content collection's materials are listed on the page.
@@ -90,6 +98,9 @@ const CARD_FIELDS = [
   'isNews',
   'tags',
   'published',
+  // First-person and opinion cards.
+  'variant',
+  'authorId',
   // Events only.
   'startDate',
   'endDate',
@@ -143,6 +154,7 @@ const normalizeTags = (value: unknown): string[] =>
     : [];
 
 const toHref = (type: CardType, id: string, data: any): string => {
+  if (type === 'first-person' || type === 'opinion') return `/first-person/${id}`;
   if (type === 'event') return `/events/${id}`;
   if (type === 'interview') return `/interviews/${id}`;
   if (type === 'flipper') return `/flippers/${id}`;
@@ -160,18 +172,31 @@ const toImageUrl = (type: CardType, data: any): string | null => {
   return data.imageUrl || null;
 };
 
-const toCard = (type: CardType, doc: Snapshot): Card => {
+const toCard = async (type: CardType, doc: Snapshot): Promise<Card> => {
   const data = doc.data() ?? {};
+  let title = data.title;
+  let imageUrl = toImageUrl(type, data);
+  if (type === 'first-person' || type === 'opinion') {
+    // Resolve the current variant so old links survive a variant switch.
+    type = normalizeFirstPersonVariant(data.variant);
+    if (type === 'first-person' && typeof data.authorId === 'string' && data.authorId) {
+      const authorDoc = await db.collection('authors').doc(data.authorId).get();
+      const author = authorDoc.data();
+      const name = [author?.firstName, author?.lastName].filter(Boolean).join(' ').trim();
+      title = [name, data.title].filter(Boolean).join(' ').trim();
+      imageUrl ||= author?.noBgAvatar || null;
+    }
+  }
   return {
     id: doc.id,
     contentType: type,
     href: toHref(type, doc.id, data),
-    title: data.title,
+    title,
     cardTitle: data.cardTitle,
     cardLead: type === 'photoOfTheDay' ? data.caption || '' : data.cardLead,
     lead: data.lead,
     mainQuote: data.mainQuote,
-    imageUrl: toImageUrl(type, data),
+    imageUrl,
     publishedAt: data.publishedAt,
     category: data.category,
     articleType: data.articleType,
@@ -195,9 +220,10 @@ const fetchCardsByReference = async (
   if (refs.length === 0) return [];
   const docRefs = refs.map((ref) => db.collection(COLLECTION_BY_CARD_TYPE[ref.type]).doc(ref.id));
   const docs = await db.getAll(...docRefs, { fieldMask: CARD_FIELDS });
-  return docs
+  const cards = await Promise.all(docs
     .map((doc, index) => (isPublishedDoc(doc) ? toCard(refs[index].type, doc) : null))
-    .filter((card): card is Card => card !== null);
+  );
+  return cards.filter((card): card is Card => card !== null);
 };
 
 const toIdList = (value: unknown): string[] =>
@@ -356,11 +382,11 @@ export const getPublicRelated = async (req: Request, res: Response) => {
         .where('published', '==', true)
         .select(...CARD_FIELDS)
         .get();
-      autofill = snapshot.docs
+      autofill = await Promise.all(snapshot.docs
         .filter((doc) => !seenKeys.has(`${page.cardType}:${doc.id}`) && matchesRule(doc.data()))
         .sort((left, right) => toTime(right.data().publishedAt) - toTime(left.data().publishedAt))
         .slice(0, AUTOFILL_LIMIT)
-        .map((doc) => toCard(page.cardType, doc));
+        .map((doc) => toCard(page.cardType, doc)));
     }
 
     // Events: the next events still running today (Paris calendar day) or
@@ -378,7 +404,7 @@ export const getPublicRelated = async (req: Request, res: Response) => {
         .where('published', '==', true)
         .select(...CARD_FIELDS)
         .get();
-      autofill = snapshot.docs
+      autofill = await Promise.all(snapshot.docs
         .filter((doc) => doc.id !== currentDoc.id)
         .map((doc) => ({
           doc,
@@ -388,7 +414,7 @@ export const getPublicRelated = async (req: Request, res: Response) => {
         .filter(({ start, end }) => start > 0 && toUtcDayStart(end || start) >= today)
         .sort((left, right) => left.start - right.start)
         .slice(0, EVENT_AUTOFILL_LIMIT)
-        .map(({ doc }) => toCard('event', doc));
+        .map(({ doc }) => toCard('event', doc)));
     }
 
     // 4. Cards for link blocks inside the material's body, keyed the way
@@ -406,11 +432,11 @@ export const getPublicRelated = async (req: Request, res: Response) => {
           )
         : [];
     const linked: Record<string, Card> = {};
-    linkDocs.forEach((doc, index) => {
+    await Promise.all(linkDocs.map(async (doc, index) => {
       if (isPublishedDoc(doc)) {
-        linked[linkEntries[index].key] = toCard(linkEntries[index].type, doc);
+        linked[linkEntries[index].key] = await toCard(linkEntries[index].type, doc);
       }
-    });
+    }));
 
     res.status(200).json({ collection, related, autofill, linked });
   } catch (error) {

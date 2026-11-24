@@ -6,6 +6,7 @@ import ContentActions from "@/components/common/ContentActions.astro";
 import {
   ApiError,
   firstPersonApi,
+  publicRelatedApi,
   type FirstPersonResponse,
 } from "@/lib/api/api";
 import { canPreviewUnpublished } from "@/lib/utils/preview";
@@ -13,6 +14,10 @@ import DraftPreviewBanner from "@/components/common/DraftPreviewBanner.astro";
 import { composeFirstPersonTitle } from "@/lib/utils/firstPerson";
 import ArticleAuthor from "@/components/article/ArticleAuthor.astro";
 import ArticleDate from "@/components/article/ArticleDate.astro";
+import {
+  hasLinkedContentBlocks,
+  type LinkedContentLookup,
+} from "@/lib/utils/contentCollectionMarquee";
 
 type FirstPersonBodyProps = ComponentProps<typeof FirstPersonBody>;
 
@@ -80,6 +85,16 @@ const composedTitle =
   (isOpinion
     ? displayMaterial.title.trim()
     : composeFirstPersonTitle(authorName, displayMaterial.title)) || "Материал";
+
+let linkedContentLookup: LinkedContentLookup = {};
+if (!error && materialData && hasLinkedContentBlocks(displayMaterial.contentBlocks)) {
+  try {
+    const cards = await publicRelatedApi.get("first-person", id);
+    linkedContentLookup = cards.linked;
+  } catch (relatedError) {
+    console.error("Failed to fetch linked content for first-person page:", relatedError);
+  }
+}
 
 const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
 const canonicalUrl = new URL(`/first-person/${id}`, siteOrigin).toString();
@@ -199,7 +214,10 @@ const materialStructuredData = materialData
                   />
                 </div>
               </div>
-              <FirstPersonBody contentBlocks={displayMaterial.contentBlocks} />
+              <FirstPersonBody
+                contentBlocks={displayMaterial.contentBlocks}
+                linkedContentLookup={linkedContentLookup}
+              />
             </div>
           </section>
         </>

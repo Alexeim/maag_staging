@@ -1,6 +1,7 @@
 import {
   articlesApi,
   eventsApi,
+  firstPersonApi,
   flippersApi,
   guidesApi,
   interviewsApi,
@@ -9,6 +10,7 @@ import {
   visualStoriesApi,
   type ArticleResponse,
   type EventResponse,
+  type FirstPersonResponse,
   type FlipperResponse,
   type GuideResponse,
   type InterviewResponse,
@@ -28,7 +30,11 @@ export const RELATED_CONTENT_TYPES = [
 ] as const;
 
 export type RelatedContentType = (typeof RELATED_CONTENT_TYPES)[number];
-export type MaterialLinkContentType = RelatedContentType | "photoOfTheDay";
+export type MaterialLinkContentType =
+  | RelatedContentType
+  | "photoOfTheDay"
+  | "first-person"
+  | "opinion";
 
 export interface RelatedContent {
   article: string[];
@@ -49,6 +55,8 @@ export interface RelatedContentLists {
   flipper: FlipperResponse[];
   visualStory: VisualStoryResponse[];
   photoOfTheDay: PhotoOfTheDayResponse[];
+  "first-person": FirstPersonResponse[];
+  opinion: FirstPersonResponse[];
 }
 
 export const RELATED_CONTENT_TYPE_OPTIONS: Array<{
@@ -76,6 +84,8 @@ export const MATERIAL_LINK_TYPE_OPTIONS: Array<{
   { value: "flipper", label: "Флиппер" },
   { value: "visualStory", label: "Крупным планом" },
   { value: "photoOfTheDay", label: "Фото дня" },
+  { value: "first-person", label: "От первого лица" },
+  { value: "opinion", label: "Мнение" },
 ];
 
 const normalizeIdList = (value: unknown): string[] => {
@@ -122,6 +132,8 @@ export const createEmptyRelatedContentLists = (): RelatedContentLists => ({
   flipper: [],
   visualStory: [],
   photoOfTheDay: [],
+  "first-person": [],
+  opinion: [],
 });
 
 export const normalizeRelatedContent = (value: unknown): RelatedContent => {
@@ -166,6 +178,7 @@ export const fetchRelatedContentLists = async (): Promise<RelatedContentLists> =
     flippersApi.list(),
     visualStoriesApi.list(),
     photosOfTheDayApi.list(),
+    firstPersonApi.list(),
   ]);
 
   const readList = <T>(index: number, fallback: T[]): T[] => {
@@ -181,6 +194,8 @@ export const fetchRelatedContentLists = async (): Promise<RelatedContentLists> =
     return fallback;
   };
 
+  const firstPersonItems = readList(8, emptyLists["first-person"]);
+
   return {
     article: readList(0, emptyLists.article),
     event: readList(1, emptyLists.event),
@@ -190,5 +205,7 @@ export const fetchRelatedContentLists = async (): Promise<RelatedContentLists> =
     flipper: readList(5, emptyLists.flipper),
     visualStory: readList(6, emptyLists.visualStory),
     photoOfTheDay: readList(7, emptyLists.photoOfTheDay),
+    "first-person": firstPersonItems.filter((item) => item.variant !== "opinion"),
+    opinion: firstPersonItems.filter((item) => item.variant === "opinion"),
   };
 };

@@ -41,6 +41,8 @@ export const LINKED_CONTENT_TYPE_LABELS: Record<string, string> = {
   visualStory: "Крупным планом",
   "visual-story": "Крупным планом",
   photoOfTheDay: "Фото дня",
+  "first-person": "От первого лица",
+  opinion: "Мнение",
 };
 
 export const COLUMN_CONTENT_TYPE_LABELS: Record<string, string> = {

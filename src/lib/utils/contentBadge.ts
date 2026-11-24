@@ -61,6 +61,8 @@ const CONTENT_TYPE_FALLBACK_LABELS: Record<string, string> = {
   event: "Событие",
   "visual-story": "Крупным планом",
   photoOfTheDay: "Фото дня",
+  "first-person": "От первого лица",
+  opinion: "Мнение",
 };
 
 // Every function below defaults to Russian, so existing callers are

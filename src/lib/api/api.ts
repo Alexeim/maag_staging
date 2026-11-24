@@ -1647,7 +1647,8 @@ export type PublicRelatedPageType =
   | "guide"
   | "flipper"
   | "interview"
-  | "event";
+  | "event"
+  | "first-person";
 
 // Card fields only — never the material's body. Published materials only.
 export interface PublicRelatedCard {
