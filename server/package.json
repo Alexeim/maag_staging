@@ -12,6 +12,7 @@
     "test:emulator":"npx --yes firebase-tools@15.35.0 emulators:exec --config tests/emulator/firebase.json --only firestore --project demo-maag-search-test 'vitest run -c vitest.emulator.config.mts'",
     "search:inspect": "ts-node src/scripts/inspectSearchCorpus.ts",
     "search:sync": "ts-node src/scripts/searchSync.ts",
+    "search:backfill": "ts-node src/scripts/searchBackfill.ts",
     "search:settings:dry":"ts-node src/scripts/searchIndexSettings.ts",
     "search:settings:apply": "ts-node src/scripts/searchIndexSettings.ts --apply",
     "migrate:news:dry": "node scripts/migrateArticlesNewsToNewsCollection.js",
