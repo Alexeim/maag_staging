@@ -41,6 +41,18 @@ Algolia не подключена, в Firestore ничего не пишется
 | `news`, `events`, `firstPerson`, `photosOfTheDay` | `false` или поля нет | открытая запись |
 | любые | любое другое значение (`"true"`, `1`, `null`, …) или `true` в коллекции без гейта | закрытая запись + предупреждение |
 
+## Переменные окружения сервера
+
+Нужны для синхронизации индекса (`server/src/services/algoliaClient.ts`).
+Локально лежат в `server/.env`, на Cloud Run — в Secret Manager. В git не
+попадают ни сами значения, ни файлы `.env*`.
+
+| Переменная | Что это |
+| --- | --- |
+| `ALGOLIA_APP_ID` | ID приложения Algolia |
+| `ALGOLIA_WRITE_API_KEY` | Ключ записи, только на сервере, в браузер не отдаётся. Права: `addObject`, `deleteObject`, `browse`, `settings`, `editSettings`, ограничен одним индексом |
+| `ALGOLIA_INDEX_NAME` | `maag_materials_dev` или `maag_materials_prod`; любое другое имя, включая `maag_pilot`, код отвергает |
+
 ## Как проверить
 
 ```sh
