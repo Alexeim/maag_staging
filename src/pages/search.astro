@@ -64,7 +64,7 @@ import SearchResultRow from "@/components/search/SearchResultRow.astro";
                     x-bind:alt="hitTitle(hit)"
                     x-bind:class="hit.type === 'interview' ? 'rounded-full' : ''"
                     loading="lazy"
-                    class="h-36 w-36 object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    class="h-24 w-24 object-cover transition-transform duration-300 group-hover:scale-[1.03] sm:h-36 sm:w-36"
                   />
                   <span slot="badge" x-text="hitBadgeLabel(hit)"></span>
                   <span slot="title">
