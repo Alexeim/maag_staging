@@ -16,6 +16,7 @@ const api = vi.hoisted(() => {
     flippersApi: empty(),
     visualStoriesApi: empty(),
     photosOfTheDayApi: empty(),
+    firstPersonApi: empty(),
     authorsApi: empty(),
   };
 });
