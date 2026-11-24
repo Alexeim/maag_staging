@@ -288,6 +288,35 @@ publication date.
 - `lastName` is optional (Google accounts may have no family name);
   `firstName` is required. The email sign-up form still requires both.
 
+## Site search `/search` (2026-11-24)
+
+- Browser → Algolia directly (`src/lib/search/algoliaSearch.ts`), with the
+  **search-only** key `PUBLIC_ALGOLIA_SEARCH_KEY` (ACL `search`, index
+  `maag_materials_dev` only). The write key lives in `server/.env` and Secret
+  Manager, is read only by the sync functions and the `search:*` scripts, and
+  must never be referenced from `src/`. The API (`maag-api`) reads no Algolia
+  variable. Full state and operations: `docs/search-corpus-prototype.md`.
+- `PUBLIC_*` values are **baked in at build time**: locally from the root
+  `.env`, in production from `--build-arg` in `cloudbuild.yaml` → `ARG`/`ENV`
+  in `Dockerfile` (`.env` is in `.dockerignore`). A new key or index needs a
+  frontend rebuild, not `gcloud run deploy --set-env-vars`.
+- **Never render Algolia highlights with `x-html`.** Algolia does not escape
+  the text around its tags. The request asks for plain-text markers
+  (`highlight.ts`), the parts are rendered with `x-text`.
+- Logic goes through `$lazy('searchPreview')` **with no skeleton fields**: the
+  page renders its markup inside `x-if="!isLazyLoading"`, so nothing has to be
+  mirrored in `lazyLoadPlugin.ts`. Use this pattern for new lazy pages.
+- Result rows are slot-based copies of `LinkToContent.astro`
+  (`SearchResultRow.astro`): Astro components cannot be instantiated per
+  response, so the markup is a template Alpine fills. Put size classes on the
+  slotted element itself — `*:` child variants on the wrapper did not apply.
+- Query-time `queryLanguages: ["ru"]` + `ignorePlurals: true` (not index
+  settings): without them "святой антоний" found nothing. Author names are
+  **not searchable** (only first-person `displayTitle` has one, and it is not
+  in `searchableAttributes`) — deferred by the owner.
+- Requests carry the key in the query string, no custom headers: a "simple"
+  CORS request, no OPTIONS preflight per search.
+
 ## Documents in this repo
 
 Nothing reads these automatically. Status is unverified unless noted.
