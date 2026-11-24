@@ -15,6 +15,8 @@ const createFakeClient = (initial: Stored[] = []) => {
   const records = new Map(initial.map((record) => [record.objectID, record]));
   const batches: BatchWriteParams[] = [];
   let failNextBatch = false;
+  // Applies only the first N actions of the next batch, then fails.
+  let partialNextBatch: number | null = null;
   let settings: IndexSettings = {};
   let taskID = 0;
   const client: SearchIndexClient = {
@@ -34,11 +36,16 @@ const createFakeClient = (initial: Stored[] = []) => {
         throw new Error('fake: network error');
       }
       batches.push(batchWriteParams);
-      for (const { action, body } of batchWriteParams.requests) {
+      const limit = partialNextBatch ?? batchWriteParams.requests.length;
+      for (const { action, body } of batchWriteParams.requests.slice(0, limit)) {
         const objectID = String(body.objectID);
         if (action === 'deleteObject') records.delete(objectID);
         else if (action === 'updateObject') records.set(objectID, { ...body, objectID });
         else throw new Error(`fake: unexpected action ${action}`);
+      }
+      if (partialNextBatch !== null) {
+        partialNextBatch = null;
+        throw new Error('fake: connection lost mid-batch');
       }
       taskID += 1;
       return { taskID };
@@ -54,6 +61,7 @@ const createFakeClient = (initial: Stored[] = []) => {
   return {
     client, records, batches,
     failNextBatch: () => { failNextBatch = true; },
+    applyOnlyFirst: (count: number) => { partialNextBatch = count; },
   };
 };
 
@@ -153,6 +161,31 @@ describe('repeats, neighbours and failures', () => {
     const retry = await adapter.syncPublication('articles/a1', []);
     expect(retry.deleteObjectIDs).toHaveLength(3);
     expect(fake.records.size).toBe(0);
+  });
+
+  // open (3 chunks) → paid sends: delete #1, delete #2, update #0.
+  test.each([
+    { applied: 1, leftAfterFailure: ['articles/a1#0', 'articles/a1#2'] },
+    { applied: 2, leftAfterFailure: ['articles/a1#0'] },
+  ])('open → paid, batch dies after $applied action(s): old text stays until the retry removes it', async ({ applied, leftAfterFailure }) => {
+    const fake = createFakeClient(seed(articleVersions.threeChunks));
+    const adapter = createSearchIndexAdapter(fake.client, 'maag_materials_dev');
+    const paidRecords = recordsFor({ ...articleVersions.threeChunks, paid: true });
+
+    fake.applyOnlyFirst(applied);
+    await expect(adapter.syncPublication('articles/a1', paidRecords)).rejects.toThrow('mid-batch');
+    // The window: #0 is still the old open chunk with its text.
+    expect([...fake.records.keys()].sort()).toEqual(leftAfterFailure);
+    expect(fake.records.get('articles/a1#0')).toMatchObject({ access: 'open' });
+    expect(String(fake.records.get('articles/a1#0')?.content)).toContain('ОДИН');
+
+    // The retry starts from what the index holds now and finishes the job.
+    const retry = await adapter.syncPublication('articles/a1', paidRecords);
+    expect(retry.deleteObjectIDs).toEqual(leftAfterFailure.filter((id) => id !== 'articles/a1#0'));
+    expect(retry.upsertObjectIDs).toEqual(['articles/a1#0']);
+    expect([...fake.records.keys()]).toEqual(['articles/a1#0']);
+    expect(fake.records.get('articles/a1#0')).toMatchObject({ access: 'restricted' });
+    expect(JSON.stringify([...fake.records.values()])).not.toMatch(/ОДИН|ДВА|ТРИ|длинный/);
   });
 
   test('nothing to do means no batch call', async () => {

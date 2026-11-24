@@ -31,8 +31,9 @@ export const readAlgoliaWriteConfig = (env: NodeJS.ProcessEnv = process.env): Al
   };
 };
 
-export const createAlgoliaSearchIndex = (config: AlgoliaWriteConfig = readAlgoliaWriteConfig()): SearchIndexAdapter => {
-  // The annotation makes the compiler check the real client against our interface.
-  const client: SearchIndexClient = algoliasearch(config.appId, config.writeApiKey);
-  return createSearchIndexAdapter(client, config.indexName);
-};
+// The return type makes the compiler check the real client against our interface.
+export const createAlgoliaClient = (config: AlgoliaWriteConfig): SearchIndexClient =>
+  algoliasearch(config.appId, config.writeApiKey);
+
+export const createAlgoliaSearchIndex = (config: AlgoliaWriteConfig = readAlgoliaWriteConfig()): SearchIndexAdapter =>
+  createSearchIndexAdapter(createAlgoliaClient(config), config.indexName);
