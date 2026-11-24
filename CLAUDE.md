@@ -317,6 +317,34 @@ publication date.
 - Requests carry the key in the query string, no custom headers: a "simple"
   CORS request, no OPTIONS preflight per search.
 
+## Bottom card carousels: landing / culture / paris (2026-11-24)
+
+- **Two different assemblies, no shared rule.**
+  - Landing: `carouselItems` in `publicLandingController.ts` (server).
+    Article, guide, flipper, visual story **and news**, latest by
+    `publishedAt`, minus Нетленка, `le_saviez_vous` and everything shown
+    higher on the landing (`displayedIds`, which includes the news rail),
+    then exactly 20. News is added at the call, not to
+    `CATEGORY_CONTENT_TYPES`: the culture/paris card blocks share that
+    constant and must stay without news.
+  - Culture / paris: no carousel of its own. The page takes the server's
+    `cultureFeed` / `parisFeed` (category feed minus the top slots and
+    minus `isHotContent` / `isNotebookContent`, news included) and splits
+    it: the first `MAX_EDITORIAL_GRID_ITEMS` (12) go to the grid, the next
+    `MAX_EDITORIAL_CAROUSEL_ITEMS` (30) to the carousel. Under 13 items in
+    the category means no carousel.
+- **Motion is `src/lib/utils/marqueeScroller.ts`, not CSS.** The viewport
+  is a real `overflow-x-auto` scroller (`data-marquee`); the script moves
+  `scrollLeft`, so trackpad, Shift+wheel, touch and focus scroll it
+  natively, and a mouse drags it. The track holds the cards twice
+  (`data-marquee-track`) and is wrapped by one copy's width — keep the
+  duplicated `[...items, ...items]`. Don't bring back the `translateX`
+  keyframes: a transformed track inside `overflow-hidden` cannot be
+  scrolled, which is why they were removed.
+- `data-marquee-duration` is seconds per copy, so speed grows with the
+  number of cards. Under `prefers-reduced-motion` the rail does not drift
+  but still scrolls.
+
 ## Documents in this repo
 
 Nothing reads these automatically. Status is unverified unless noted.
