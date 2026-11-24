@@ -107,6 +107,9 @@ const createAlgolia = () => {
   const delayed: BatchRequest[][] = [];
   let delayNext = false;
   let taskID = 0;
+  let batchesSent = 0;
+  // Runs during each browse (simulates a slow index read).
+  let duringBrowse: (() => void) | null = null;
   const apply = (requests: BatchRequest[]) => {
     for (const { action, body } of requests) {
       const objectID = String(body.objectID);
@@ -116,11 +119,13 @@ const createAlgolia = () => {
   };
   const client: SearchIndexClient = {
     async browseObjects<T>({ browseParams, aggregator }: { browseParams: { filters?: string }; aggregator: (r: BrowseResponse<T>) => void }) {
+      duringBrowse?.();
       const wanted = /^publicationId:"(.*)"$/.exec(browseParams.filters ?? '')?.[1];
       aggregator({ hits: [...records.values()].filter((record) => record.publicationId === wanted) } as unknown as BrowseResponse<T>);
       return {};
     },
     async batch({ batchWriteParams }) {
+      batchesSent += 1;
       if (delayNext) {
         delayNext = false;
         delayed.push(batchWriteParams.requests);
@@ -138,6 +143,8 @@ const createAlgolia = () => {
     client, records,
     delayNextBatch: () => { delayNext = true; },
     deliverDelayed: () => { delayed.splice(0).forEach(apply); },
+    onBrowse: (hook: (() => void) | null) => { duringBrowse = hook; },
+    batchesSent: () => batchesSent,
     // One line per record: chunk, access, source version.
     state: (publicationId: string) => [...records.values()]
       .filter((record) => record.publicationId === publicationId)
@@ -318,6 +325,34 @@ describe('rounds, deletion, leases', () => {
     await expect(syncPublicationFromSource(deps, { collection: 'articles', id: 'a1', owner: 'E1' }))
       .rejects.toBeInstanceOf(HandlerDeadlineError);
     expect(algolia.state(PUB)).toEqual([]);
+  });
+
+  test('regression: a slow index browse spends the budget, so no batch is sent', async () => {
+    const { store, algolia, deps, clock, entries } = setup();
+    store.write('articles', 'a1', openArticle);
+    // The check before syncPublication passes; the browse then takes 61 s.
+    algolia.onBrowse(() => clock.advance(61_000));
+    await expect(syncPublicationFromSource(deps, { collection: 'articles', id: 'a1', owner: 'E1' }))
+      .rejects.toBeInstanceOf(HandlerDeadlineError);
+    expect(algolia.batchesSent()).toBe(0);
+    expect(algolia.state(PUB)).toEqual([]);
+    // Nothing was sent, so no pending write to verify; the lease is free.
+    expect(entries.get(PUB)).toMatchObject({ verifyAfter: null, leaseOwner: null });
+    expect(entries.get(PUB)?.lastError).toMatch(/HandlerDeadlineError/);
+  });
+
+  test('regression: an oversized publication keeps a clear lastError after a successful check', async () => {
+    const { store, algolia, deps, clock, entries } = setup();
+    store.write('articles', 'a1', openArticle);
+    await syncPublicationFromSource(deps, { collection: 'articles', id: 'a1', owner: 'E1' });
+    store.write('articles', 'a1', { ...openArticle, title: 'Я'.repeat(6_000) });
+    await syncPublicationFromSource(deps, { collection: 'articles', id: 'a1', owner: 'E2' });
+    expect(algolia.state(PUB)).toEqual([]);
+    // The removal was a write, so a check is due; the empty index is then consistent.
+    clock.advance(11 * MIN);
+    expect(await verifyDuePublications(deps, 'checker')).toEqual([{ publicationId: PUB, status: 'verified' }]);
+    expect(entries.get(PUB)?.verifyAfter).toBeNull();
+    expect(entries.get(PUB)?.lastError).toMatch(/articles\/a1: record metadata alone takes \d+ bytes, limit is 10000/);
   });
 
   test('a check does not clear a newer pending write noted after it was listed', async () => {

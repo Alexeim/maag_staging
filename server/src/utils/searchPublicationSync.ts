@@ -173,9 +173,17 @@ const syncHoldingLease = async (
   let doc = await deps.source.readDocument(collection, id);
   for (let round = 1; round <= maxRounds; round += 1) {
     const { records, permanentError } = await recordsFor(deps, collection, id, doc);
-    if (deps.now() >= startedAt + handlerTimeoutMs) throw new HandlerDeadlineError(publicationId);
+    const assertWithinBudget = () => {
+      if (deps.now() >= startedAt + handlerTimeoutMs) throw new HandlerDeadlineError(publicationId);
+    };
+    assertWithinBudget();
     await deps.index.syncPublication(publicationId, records, {
-      beforeBatch: () => deps.ledger.notePendingWrite(publicationId, owner, deps.now() + settleMs),
+      // Checked again after the index browse, right before sending: a slow
+      // browse must not let a batch go out once the time budget is spent.
+      beforeBatch: async () => {
+        assertWithinBudget();
+        await deps.ledger.notePendingWrite(publicationId, owner, deps.now() + settleMs);
+      },
     });
     const after = await deps.source.readDocument(collection, id);
     if (after.version === doc.version) {
@@ -224,14 +232,15 @@ export const verifyPublication = async (
   await deps.ledger.acquire(publicationId, owner, startedAt, optionsOf(deps).leaseMs);
   try {
     const doc = await deps.source.readDocument(collection, id);
-    const { records } = await recordsFor(deps, collection, id, doc);
+    const { records, permanentError } = await recordsFor(deps, collection, id, doc);
     const indexed = await deps.index.listPublicationRecords(publicationId);
     const expected = new Set(records.map((record) => record.objectID));
     const consistent = indexed.length === expected.size
       && indexed.every((record) => expected.has(record.objectID) && record.sourceVersion === doc.version);
     if (consistent) {
+      // An oversized document is "consistent" with an empty index; keep its reason.
       await deps.ledger.release(publicationId, owner, {
-        clearVerifyAfterDueBy: startedAt, syncedVersion: doc.version, lastError: null,
+        clearVerifyAfterDueBy: startedAt, syncedVersion: doc.version, lastError: permanentError,
       });
       return { publicationId, status: 'verified' };
     }
