@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Поиск MAAG — серверная часть готова</title><style>
+/* Layout: single reading column, report sections separated by hairlines, one compact plan table */
+:root {
+  --bg: #fbfaf8; --fg: #1c1b19; --muted: #6b6760; --line: #e3e0da; --accent: #8a3b1f; --chip: #f1ede6;
+  --display: "Old Standard TT", Georgia, serif;
+  --body: "Inter", system-ui, -apple-system, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #161513; --fg: #ece9e4; --muted: #a29d95; --line: #2f2c28; --accent: #e08a62; --chip: #24211e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #161513; --fg: #ece9e4; --muted: #a29d95; --line: #2f2c28; --accent: #e08a62; --chip: #24211e; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 64px; }
+main { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+header { display: flex; flex-direction: column; gap: 8px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 400; font-size: 2.2rem; line-height: 1.15; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-weight: 700; font-size: 1.3rem; margin: 0 0 10px; text-wrap: balance; }
+section { border-top: 1px solid var(--line); padding-top: 20px; min-width: 0; }
+p { margin: 0 0 10px; }
+ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+code { font-family: var(--mono); font-size: .86em; background: var(--chip); padding: 1px 5px; border-radius: 3px; overflow-wrap: anywhere; }
+.lead { color: var(--muted); max-width: 62ch; }
+.status { display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 10px; width: fit-content; }
+.key { border-left: 3px solid var(--accent); padding-left: 14px; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+td:first-child { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; width: 2.5em; }
+.muted { color: var(--muted); }
+</style></head><body><main><header><div class="eyebrow">MAAG · Статус интеграции · 24.11.2026</div>
+<h1>Поиск на Algolia: серверная часть работает</h1>
+<p>Архив загружен в dev-индекс. Девять функций обрабатывают изменения материалов, отдельная функция проверяет журнал каждые 5 минут. Следующий этап — поиск в интерфейсе сайта.</p></header>
+<section><h2>Кто за что отвечает</h2><table><thead><tr><th>Элемент</th><th>Обязанность</th></tr></thead><tbody>
+<tr><td>Firestore</td><td>Единственный источник истины: оригинальные материалы. Существующая страница статьи читает их через backend.</td></tr>
+<tr><td>Algolia</td><td>Производная копия для поиска: текст, заголовок, ссылка и URL обложки. Изображение по URL загружает браузер.</td></tr>
+<tr><td>Импорт</td><td>Один раз обходит архив и записывает поисковые копии. После завершения не следит за правками.</td></tr>
+<tr><td>Триггеры</td><td>После сохранения/удаления документа перечитывают его из Firestore и синхронизируют одну публикацию.</td></tr>
+<tr><td>searchIndexSync</td><td>Журнал без текста статей: версия, аренда, ошибка и срок проверки. Читатель им не пользуется.</td></tr>
+<tr><td>searchVerify</td><td>Проверяет созревшие отметки журнала: до 50 публикаций за запуск, каждые 5 минут.</td></tr>
+</tbody></table></section>
+<section><h2>Среда</h2><p>Firestore: <code>maag-60419 / (default) / europe-west9</code>.<br>Algolia: <code>IS5SOWASMH / maag_materials_dev</code>.<br>Функции: Node 24, 2nd gen, <code>europe-west9</code>, codebase <code>search-sync</code>.</p>
+<p>Одна общая база: имя папки maag_staging не означает отдельную staging-среду. Пилот <code>maag_pilot</code> не трогаем. Production-подключение ещё не выполнено.</p></section>
+<section><h2>Что подтверждено</h2><ul>
+<li>Первый импорт: <strong>339 документов → 320 публикаций → 410 фрагментов</strong>, 8 закрытых публикаций; максимум 9 991 байт. Ошибок и предупреждений нет.</li>
+<li>Полный обход индекса подтвердил прогноз импорта. Это исторический снимок, не постоянные текущие числа.</li>
+<li>Все девять триггеров успешно созданы; проверка по расписанию развёрнута.</li>
+<li>Подтверждён запуск проверки: 320 ожидали, 50 проверены, 0 исправлений, 0 ошибок, 270 отложены; ответ 200. Проверка всего остатка тогда отдельно не выполнялась.</li>
+<li>Живая тестовая статья: черновик — 0 записей; публикация — 1 запись и совпавшие версии; удаление — 0 записей и версия deleted в журнале. Статья удалена.</li>
+<li>Последний полный локальный серверный прогон: 200 тестов и обе проверки tsc прошли. При обновлении отчёта тесты заново не запускались.</li>
+</ul></section>
+<section><h2>Закрытые материалы</h2><p>В индексе только title, tags, href, type, access, публичная imageUrl и технические поля; у интервью ещё interviewee. <strong>Нет content, introduction, лидов, цитат, подписей и первого абзаца.</strong> Ранее предложенный расширенный список «как на сайте» отменён.</p>
+<p>Для first-person displayTitle содержит имя автора и хвост заголовка. Opinion сохраняет исходный title. Переименование автора/смена портрета пока требуют ручной пересинхронизации его материалов.</p></section>
+<section><h2>Гонки: что гарантируется и что нет</h2><p>Аренда координирует одновременные обработки. Перечитывание выявляет новую версию. Отложенная сверка проверяет реальные objectID и sourceVersion в индексе независимо от syncedVersion журнала.</p>
+<p>Таймаут не отменяет отправленный запрос: поздний старый batch может временно вернуть открытый текст после закрытия материала. Проверка исправляет это. Схема предполагает, что поздние записи доходят в пределах 10-минутного окна. После снятия отметки произвольно поздняя запись не гарантированно обнаруживается — полного регулярного обхода архива нет.</p>
+<p>Правка текста, сокращение фрагментов, смена доступа, частичные и поздние batch проверены локально. Отдельный живой цикл этих переходов не проводился. Новые тестовые статьи пользователь создавать не хочет.</p></section>
+<section><h2>Следующий этап: frontend</h2><ul>
+<li>Браузер обращается к Algolia с отдельным search-only ключом, ограниченным dev-индексом. Серверный ключ записи никогда не попадает в браузер.</li>
+<li>Результаты: карточка с обложкой, заголовком и href. Клик открывает существующую страницу, которая по-прежнему читает Firestore через backend.</li>
+<li>Группировка на стороне Algolia: distinct по publicationId. Пустой запрос не показывает архив.</li>
+<li>Debounce, защита от старых ответов, загрузка/ошибка/пустая выдача, клавиатура, мобильный экран и безопасная подсветка.</li>
+<li>Сначала локальный/закрытый маршрут. Проверить «Антоний», «Ferme de Gally», «Блек ле Ра», «балет»/«balet», пагинацию и время до карточек. Синонимы заранее не добавлять.</li>
+</ul></section>
+<section><h2>Как продолжать</h2><p>Очень маленькими согласованными шагами. Объяснять одно действие, зачем оно нужно и что оно меняет. Не вводить новые термины без объяснения. Commit только по команде, прямо в main; никаких .env-файлов в git. Облачные изменения, push и deploy согласуются отдельно.</p>
+<p>Техническая инструкция: <code>docs/search-corpus-prototype.md</code>. Этот HTML — актуальная локальная версия прежнего отчёта. Старая опубликованная ссылка автоматически не обновлена.</p></section></main></body></html>
