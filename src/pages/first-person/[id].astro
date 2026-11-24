@@ -186,7 +186,12 @@ const materialStructuredData = materialData
                   </p>
                 )}
                 {authorBio && (
-                  <p class="max-w-70 font-inter text-sm text-base-content/70">
+                  <p
+                    class:list={[
+                      "max-w-70 font-inter text-sm text-base-content/70",
+                      isOpinion && "-mt-3",
+                    ]}
+                  >
                     {authorBio}
                   </p>
                 )}
