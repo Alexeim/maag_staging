@@ -1116,14 +1116,20 @@ const landingHandler = (locale: PageLocale) => async (_req: Request, res: Respon
         latestInterview?.id,
         ...maagChoiceItems.map((item: any) => item?.id),
         leSaviezVousArticle?.id,
+        // News is in the carousel too; the ones already in the news rail
+        // above must not show up twice.
+        ...newsArticles.map((item: any) => item?.id),
       ].filter(Boolean),
     );
 
-    const carouselItems = (await fetchLatestFromTypes(context, CATEGORY_CONTENT_TYPES, 24))
+    // Bottom carousel: the latest materials not shown higher on the landing,
+    // news mixed in by date like on the culture/paris pages.
+    const carouselItems = (
+      await fetchLatestFromTypes(context, [...CATEGORY_CONTENT_TYPES, 'news'], 24)
+    )
       .filter(
         (item: any) =>
           !item.isMaagChoice &&
-          !item.isNews &&
           !isLeSaviezVousItem(item) &&
           !displayedIds.has(item.id),
       )
