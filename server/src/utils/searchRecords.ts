@@ -28,6 +28,9 @@ export interface SearchRecord {
   interviewee?: string;
   introduction?: string;
   content?: string;
+  // Version of the Firestore document the record was built from; lets a
+  // later check spot records written from an older version (a late write).
+  sourceVersion?: string;
   chunkIndex: number;
   chunkCount: number;
 }
@@ -49,6 +52,8 @@ export interface BuildSearchRecordsInput {
   // `authors/{data.authorId}`, read by the caller (sync handler, backfill);
   // this function never does I/O. Used by firstPerson only.
   author?: SearchRecordAuthor | null;
+  // Document version (see searchPublicationSync.ts), copied into every chunk.
+  sourceVersion?: string;
   maxRecordBytes?: number;
 }
 
@@ -231,6 +236,7 @@ export const buildSearchRecords = ({
   id,
   data,
   author,
+  sourceVersion,
   maxRecordBytes = ALGOLIA_FREE_PLAN_MAX_RECORD_BYTES,
 }: BuildSearchRecordsInput): SearchRecordsResult => {
   const source = SOURCE_BY_COLLECTION.get(collection);
@@ -258,6 +264,7 @@ export const buildSearchRecords = ({
     tags: extracted.tags,
     access,
     ...(interviewee ? { interviewee } : {}),
+    ...(sourceVersion ? { sourceVersion } : {}),
     chunkIndex: 0,
     chunkCount: 1,
   };

@@ -64,26 +64,41 @@ export const planPublicationSync = (
 export const publicationFilter = (publicationId: string): string =>
   `publicationId:"${publicationId.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 
+export interface IndexedRecordVersion {
+  objectID: string;
+  sourceVersion: string | null;
+}
+
+export interface SyncPublicationOptions {
+  // Runs right before the batch is sent, and only if one is sent. If it
+  // throws, nothing is sent. Used to note a pending write in the sync ledger.
+  beforeBatch?: (plan: PublicationSyncPlan) => Promise<void>;
+}
+
 export const createSearchIndexAdapter = (client: SearchIndexClient, indexName: string) => {
-  /** The objectIDs the index holds for one publication right now. */
-  const listPublicationObjectIDs = async (publicationId: string): Promise<string[]> => {
-    const objectIDs: string[] = [];
-    await client.browseObjects<{ publicationId?: string }>({
+  /** What the index holds for one publication right now: ids and source versions. */
+  const listPublicationRecords = async (publicationId: string): Promise<IndexedRecordVersion[]> => {
+    const found: IndexedRecordVersion[] = [];
+    await client.browseObjects<{ publicationId?: string; sourceVersion?: string }>({
       indexName,
       browseParams: {
         filters: publicationFilter(publicationId),
-        attributesToRetrieve: ['publicationId'],
+        attributesToRetrieve: ['publicationId', 'sourceVersion'],
         hitsPerPage: 1000,
       },
       aggregator: (response) => {
         // Defensive: never act on a hit the filter should not have returned.
         response.hits
           .filter((hit) => hit.publicationId === publicationId)
-          .forEach((hit) => objectIDs.push(hit.objectID));
+          .forEach((hit) => found.push({ objectID: hit.objectID, sourceVersion: hit.sourceVersion ?? null }));
       },
     });
-    return objectIDs;
+    return found;
   };
+
+  /** The objectIDs the index holds for one publication right now. */
+  const listPublicationObjectIDs = async (publicationId: string): Promise<string[]> =>
+    (await listPublicationRecords(publicationId)).map((record) => record.objectID);
 
   /**
    * Makes the index hold exactly `records` for the publication (an empty
@@ -95,10 +110,12 @@ export const createSearchIndexAdapter = (client: SearchIndexClient, indexName: s
   const syncPublication = async (
     publicationId: string,
     records: readonly SearchRecord[],
+    options: SyncPublicationOptions = {},
   ): Promise<PublicationSyncResult> => {
     const existing = await listPublicationObjectIDs(publicationId);
     const plan = planPublicationSync(publicationId, existing, records);
     if (plan.requests.length === 0) return { ...plan, taskID: null };
+    await options.beforeBatch?.(plan);
     const { taskID } = await client.batch({ indexName, batchWriteParams: { requests: plan.requests } });
     await client.waitForTask({ indexName, taskID });
     return { ...plan, taskID };
@@ -119,7 +136,9 @@ export const createSearchIndexAdapter = (client: SearchIndexClient, indexName: s
     return taskID;
   };
 
-  return { indexName, listPublicationObjectIDs, syncPublication, assertSettings, applySettings };
+  return {
+    indexName, listPublicationRecords, listPublicationObjectIDs, syncPublication, assertSettings, applySettings,
+  };
 };
 
 export type SearchIndexAdapter = ReturnType<typeof createSearchIndexAdapter>;
