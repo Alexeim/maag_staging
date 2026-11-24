@@ -178,11 +178,14 @@ const syncHoldingLease = async (
     };
     assertWithinBudget();
     await deps.index.syncPublication(publicationId, records, {
-      // Checked again after the index browse, right before sending: a slow
-      // browse must not let a batch go out once the time budget is spent.
+      // Checked again after the index browse and after the ledger write,
+      // right before sending: neither a slow browse nor a slow ledger write
+      // may let a batch go out once the time budget is spent. A mark left
+      // without a batch only costs one extra check later.
       beforeBatch: async () => {
         assertWithinBudget();
         await deps.ledger.notePendingWrite(publicationId, owner, deps.now() + settleMs);
+        assertWithinBudget();
       },
     });
     const after = await deps.source.readDocument(collection, id);

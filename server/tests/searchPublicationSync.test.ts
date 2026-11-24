@@ -341,6 +341,30 @@ describe('rounds, deletion, leases', () => {
     expect(entries.get(PUB)?.lastError).toMatch(/HandlerDeadlineError/);
   });
 
+  test('regression: a slow ledger write spends the budget, so no batch is sent', async () => {
+    const { store, algolia, deps, clock, entries } = setup();
+    store.write('articles', 'a1', openArticle);
+    const startedAt = clock.now();
+    // Fast browse; noting the pending write takes the remaining 61 s.
+    const slowLedger: SyncDeps = {
+      ...deps,
+      ledger: {
+        ...deps.ledger,
+        notePendingWrite: async (publicationId, owner, at) => {
+          await deps.ledger.notePendingWrite(publicationId, owner, at);
+          clock.advance(61_000);
+        },
+      },
+    };
+    await expect(syncPublicationFromSource(slowLedger, { collection: 'articles', id: 'a1', owner: 'E1' }))
+      .rejects.toBeInstanceOf(HandlerDeadlineError);
+    expect(algolia.batchesSent()).toBe(0);
+    expect(algolia.state(PUB)).toEqual([]);
+    // The lease is free and the mark stays: one harmless extra check later.
+    expect(entries.get(PUB)).toMatchObject({ leaseOwner: null, verifyAfter: startedAt + 10 * MIN });
+    expect(entries.get(PUB)?.lastError).toMatch(/HandlerDeadlineError/);
+  });
+
   test('regression: an oversized publication keeps a clear lastError after a successful check', async () => {
     const { store, algolia, deps, clock, entries } = setup();
     store.write('articles', 'a1', openArticle);
