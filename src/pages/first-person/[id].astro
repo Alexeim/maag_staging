@@ -87,12 +87,19 @@ const composedTitle =
     : composeFirstPersonTitle(authorName, displayMaterial.title)) || "Материал";
 
 let linkedContentLookup: LinkedContentLookup = {};
-if (!error && materialData && hasLinkedContentBlocks(displayMaterial.contentBlocks)) {
+if (
+  !error &&
+  materialData &&
+  hasLinkedContentBlocks(displayMaterial.contentBlocks)
+) {
   try {
     const cards = await publicRelatedApi.get("first-person", id);
     linkedContentLookup = cards.linked;
   } catch (relatedError) {
-    console.error("Failed to fetch linked content for first-person page:", relatedError);
+    console.error(
+      "Failed to fetch linked content for first-person page:",
+      relatedError,
+    );
   }
 }
 
@@ -173,8 +180,8 @@ const materialStructuredData = materialData
                     <div class="aspect-239/278 w-full bg-base-300" />
                   )}
                 </div>
-                {authorName && (
-                  <p class="text-base lg:text-xl font-thin font-old_standard italic text-base-content mt-2">
+                {isOpinion && authorName && (
+                  <p class="text-base lg:text-3xl font-old_standard text-base-content mt-2 font-bold">
                     {authorName}
                   </p>
                 )}
@@ -199,7 +206,6 @@ const materialStructuredData = materialData
                         <br />
                       </span>
                     )}
-                    {!isOpinion && authorName && " "}
                     <span class="italic">{displayMaterial.title}</span>
                   </h1>
                   {isOpinion && materialData.publishedAt && (
