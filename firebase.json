@@ -1,4 +1,13 @@
 {
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "search-sync",
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ],
   "hosting": {
     "rewrites": [
       {
