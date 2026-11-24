@@ -221,6 +221,45 @@ publication date.
   documents without `variant` belong to `first-person`. Public cards remain
   published-only.
 
+## «От первого лица» / «Мнение» variants (2026-11-20)
+
+- One collection (`firstPerson`), one editor, one API. `variant` is a field:
+  `"first-person"` (author's `noBgAvatar` portrait, author name prepended to
+  the title) or `"opinion"` (the material's own `imageUrl`, title as-is).
+  **No `variant` field means `"first-person"`** — documents older than the
+  switch were never migrated. Always read it through
+  `normalizeFirstPersonVariant` (`server/src/utils/firstPersonVariant.ts`);
+  never compare `data.variant === "first-person"`.
+- That util has no Firestore import on purpose: the public controllers and
+  the dashboard controller share it without loading `firstPersonController.ts`
+  (which opens a collection and Storage deletion at import time).
+- `imageUrl` (main image) is **required for both variants** on create and
+  update (backend 400 + editor toast). Old documents have none until
+  re-saved, so readers fall back to the author's `noBgAvatar` (author/tag
+  rows). No size restriction, unlike portraits: the opinion page shows it at
+  its natural aspect ratio, not in the 239×278 frame.
+- Field whitelists that must list any new firstPerson field:
+  `createFirstPerson`/`updateFirstPerson`, and `SELECT_FIELDS` in
+  `dashboardController.ts` (the overview reads with `.select()` — without
+  `variant` there every opinion is badged «От первого лица»).
+- Where the variant decides things: landing card (`OpinionCard` vs
+  `FirstPersonCard` in `LandingBody.astro`, portrait override in
+  `publicLandingController.ts` `attachAuthorNames`), the page and its
+  dashboard preview, the title in `MaterialResultRow`, the dashboard badge
+  (`opinion` is its own `DashboardMaterialType`, like `tips`).
+- Author/tag pages show them as two sections, `first-person` and `opinion`
+  (`publicMaterialsController.ts`), both reading `firstPerson`. Split by
+  variant **in code** (`belongsToType`), not with `.where('variant', …)`: a
+  Firestore equality filter cannot match a missing field, so old documents
+  would vanish.
+- They are **deliberately not in `EDITORIAL_FLAG_TYPES`** there, although the
+  landing flags them. Nearly all carry `isMaagChoice` (that's how they reach
+  the Нетленка rail), and on `/tag/[tag]` a flag moves an item out of its
+  section into the aside — the sections would be empty. Don't "fix" the
+  mismatch.
+- `OpinionCard.astro`: the "мнение" label is hardcoded on purpose (owner's
+  call), not taken from `CARD_TEXT`.
+
 ## Sign-in and user profiles (2026-11-11)
 
 - Two ways in: email/password and Google (`signInWithGoogle()` in

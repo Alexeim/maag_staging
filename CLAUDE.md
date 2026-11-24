@@ -215,10 +215,11 @@ publication date.
 - Author portraits (`noBgAvatar`) are exactly 239×278 px — the dashboard
   rejects anything else (`authorCreatorLogic.ts`). On mobile the portrait is
   shown at 320px, so it is upscaled.
-- **Known gap:** "ссылка на материал" (`link`) blocks never render on this
-  page. The composer offers them, but the page passes no
-  `linkedContentLookup`, and `GET /api/public/related/:type/:id` has no
-  first-person type (`PageType` in `publicRelatedController.ts` → 400).
+- **Link blocks** on both variants use `GET /api/public/related/first-person/:id`
+  and pass its `linked` lookup to `FirstPersonBody`. The shared link picker
+  offers `first-person` and `opinion`, both from the `firstPerson` collection;
+  documents without `variant` belong to `first-person`. Public cards remain
+  published-only.
 
 ## «От первого лица» / «Мнение» variants (2026-11-20)
 
