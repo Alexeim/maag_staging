@@ -68,6 +68,18 @@ export default defineConfig({
       customSitemaps: ["https://maagfrance.fr/sitemap-content.xml"],
     }),
   ],
+  // Behind Firebase Hosting → Cloud Run, Astro trusts X-Forwarded-Host/Proto
+  // only for these hosts. Without the list it sees itself as http://localhost,
+  // so its origin check (checkOrigin) rejects same-site requests that carry
+  // no Content-Type. All four hosts currently serve the site.
+  security: {
+    allowedDomains: [
+      { protocol: "https", hostname: "maagfrance.fr" },
+      { protocol: "https", hostname: "www.maagfrance.fr" },
+      { protocol: "https", hostname: "maag-60419.web.app" },
+      { protocol: "https", hostname: "maag-60419.firebaseapp.com" },
+    ],
+  },
   compressHTML: true,
   base: process.env.ASTRO_BASE_PATH || "/",
 
