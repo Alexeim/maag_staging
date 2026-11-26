@@ -91,7 +91,8 @@ export const AUTH_MESSAGES: Record<Locale, AuthMessages> = {
     googleSignInFailed: "Не удалось войти через Google. Попробуйте ещё раз.",
     accountExistsWithDifferentCredential:
       "Этот email уже зарегистрирован с паролем. Войдите по email и паролю.",
-    wrongCredentials: "Неверный email или пароль.",
+    wrongCredentials:
+      "Неверный email или пароль. Если вы входили через Google, нажмите «Войти через Google» или восстановите пароль.",
     unexpectedError: "Произошла непредвиденная ошибка.",
     networkError:
       "Нет связи с сервером. Проверьте интернет или VPN и попробуйте ещё раз.",
@@ -113,7 +114,8 @@ export const AUTH_MESSAGES: Record<Locale, AuthMessages> = {
       "Échec de la connexion avec Google. Veuillez réessayer.",
     accountExistsWithDifferentCredential:
       "Cet e-mail est déjà inscrit avec un mot de passe. Connectez-vous avec votre e-mail et votre mot de passe.",
-    wrongCredentials: "E-mail ou mot de passe incorrect.",
+    wrongCredentials:
+      "E-mail ou mot de passe incorrect. Si vous vous êtes connecté avec Google, cliquez sur « Continuer avec Google » ou réinitialisez votre mot de passe.",
     unexpectedError: "Une erreur inattendue s'est produite.",
     networkError:
       "Impossible de joindre le serveur. Vérifiez votre connexion ou votre VPN et réessayez.",

@@ -83,6 +83,10 @@ onAuthStateChanged(auth, async (user) => {
     }
   } else {
     getStore()?.clearUser();
-    fetch("/api/session", { method: "DELETE" }).catch(() => {});
+    // Content-Type: see handleSignOut in navbarLogic.ts (Astro origin check).
+    fetch("/api/session", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    }).catch(() => {});
   }
 });

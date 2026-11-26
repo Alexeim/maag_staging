@@ -9,7 +9,13 @@ export default () => ({
     try {
       await signOut(auth);
       // Finish clearing the server session before the next SSR request.
-      const response = await fetch("/api/session", { method: "DELETE" });
+      // The Content-Type is required: Astro's origin check rejects a non-GET
+      // request without one unless Origin matches the URL Astro sees, and
+      // behind Firebase Hosting that URL is http://localhost, so it never does.
+      const response = await fetch("/api/session", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
       if (!response.ok) throw new Error("Failed to clear server session");
       // Back to the homepage, in the language of the page the user was on
       globalThis.location.href = localizePath('/', documentLocale());
