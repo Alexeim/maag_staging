@@ -180,7 +180,14 @@ export default function authModalLogic() {
       this.isLoading = true;
       this.error = "";
 
-      if (getAlpineStore("auth").formType === "login") {
+      // The user can switch between login and signup while Firebase is still
+      // answering. A late answer must not put its error under the other form
+      // (a failed login showed "wrong email or password" under signup).
+      const submittedForm = getAlpineStore("auth").formType;
+      const formSwitched = () =>
+        getAlpineStore("auth").formType !== submittedForm;
+
+      if (submittedForm === "login") {
         try {
           await signInWithEmailAndPassword(
             auth,
@@ -190,7 +197,9 @@ export default function authModalLogic() {
           getAlpineStore("auth").closeAuthModal();
         } catch (err) {
           const commonMessage = commonAuthErrorMessage(err);
-          if (commonMessage) {
+          if (formSwitched()) {
+            // Stale answer for a form that is no longer shown.
+          } else if (commonMessage) {
             this.error = commonMessage;
           } else if (
             err instanceof FirebaseError &&
@@ -242,7 +251,9 @@ export default function authModalLogic() {
           getAlpineStore("auth").closeAuthModal();
         } catch (err) {
           const commonMessage = commonAuthErrorMessage(err);
-          if (commonMessage) {
+          if (formSwitched()) {
+            // Stale answer for a form that is no longer shown.
+          } else if (commonMessage) {
             this.error = commonMessage;
           } else if (
             err instanceof FirebaseError &&
